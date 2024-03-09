@@ -9,10 +9,11 @@ on:
 
 jobs:
   shared-ci:
-    uses: zigpy/workflows/.github/workflows/ci.yml@main
+    uses: zigpy/workflows/.github/workflows/ci.yml@dm/update-ci
     with:
       CODE_FOLDER: zha
       CACHE_VERSION: 1
       PYTHON_VERSION_DEFAULT: 3.12
       PRE_COMMIT_CACHE_PATH: ~/.cache/pre-commit
       MINIMUM_COVERAGE_PERCENTAGE: 100
+      PYTHON_MATRIX: "3.12"
