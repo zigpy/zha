@@ -92,7 +92,7 @@ from .registries import GROUP_ENTITY_DOMAINS
 if TYPE_CHECKING:
     from logging import Filter, LogRecord
 
-    from ..entity import ZhaEntity
+    from ..application.entity import ZhaEntity
     from .cluster_handlers import ClusterHandler
 
     _LogFilterType = Filter | Callable[[LogRecord], bool]
@@ -132,9 +132,9 @@ class ZHAGateway:
         self._groups: dict[int, ZHAGroup] = {}
         self.application_controller: ControllerApplication = None
         self.coordinator_zha_device: ZHADevice = None  # type: ignore[assignment]
-        self._device_registry: collections.defaultdict[
-            EUI64, list[EntityReference]
-        ] = collections.defaultdict(list)
+        self._device_registry: collections.defaultdict[EUI64, list[EntityReference]] = (
+            collections.defaultdict(list)
+        )
         self._log_levels: dict[str, dict[str, int]] = {
             DEBUG_LEVEL_ORIGINAL: async_capture_log_levels(),
             DEBUG_LEVEL_CURRENT: async_capture_log_levels(),
