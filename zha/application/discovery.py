@@ -70,7 +70,7 @@ from .cluster_handlers import (  # noqa: F401
 from .helpers import get_zha_data, get_zha_gateway
 
 if TYPE_CHECKING:
-    from ..entity import ZhaEntity
+    from ..application.entity import ZhaEntity
     from .device import ZHADevice
     from .endpoint import Endpoint
     from .group import ZHAGroup
@@ -292,9 +292,9 @@ class ProbeEndpoint:
                     not in cluster_handler.ZCL_INIT_ATTRS
                 ):
                     init_attrs = cluster_handler.ZCL_INIT_ATTRS.copy()
-                    init_attrs[
-                        quirk_metadata.entity_metadata.attribute_name
-                    ] = quirk_metadata.attribute_initialized_from_cache
+                    init_attrs[quirk_metadata.entity_metadata.attribute_name] = (
+                        quirk_metadata.attribute_initialized_from_cache
+                    )
                     cluster_handler.__dict__[zha_const.ZCL_INIT_ATTRS] = init_attrs
 
                 endpoint.async_new_entity(
