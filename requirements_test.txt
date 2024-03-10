@@ -1,0 +1,12 @@
+codecov
+colorlog
+codespell
+mypy
+pre-commit
+pytest-cov
+pytest-sugar
+pytest-timeout
+pytest-asyncio
+pytest
+zigpy>=0.63.5
+ruff
