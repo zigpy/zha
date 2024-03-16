@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 import functools
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelEntity,
@@ -24,6 +25,8 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from zigpy.zcl.clusters.security import IasAce
 
+from zha.application.platforms import PlatformEntity
+
 from .core import discovery
 from .core.cluster_handlers.security import (
     SIGNAL_ALARM_TRIGGERED,
@@ -40,21 +43,46 @@ from .core.const import (
 )
 from .core.helpers import async_get_zha_config_value, get_zha_data
 from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
 
 if TYPE_CHECKING:
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(
     ZHA_ENTITIES.strict_match, Platform.ALARM_CONTROL_PANEL
 )
 
+SUPPORT_ALARM_ARM_HOME: Final[int] = 1
+SUPPORT_ALARM_ARM_AWAY: Final[int] = 2
+SUPPORT_ALARM_ARM_NIGHT: Final[int] = 4
+SUPPORT_ALARM_TRIGGER: Final[int] = 8
+SUPPORT_ALARM_ARM_CUSTOM_BYPASS: Final[int] = 16
+SUPPORT_ALARM_ARM_VACATION: Final[int] = 32
+
+
+class AlarmState(StrEnum):
+    """Alarm state."""
+
+    DISARMED = "disarmed"
+    ARMED_HOME = "armed_home"
+    ARMED_AWAY = "armed_away"
+    ARMED_NIGHT = "armed_night"
+    ARMED_VACATION = "armed_vacation"
+    ARMED_CUSTOM_BYPASS = "armed_custom_bypass"
+    PENDING = "pending"
+    ARMING = "arming"
+    DISARMING = "disarming"
+    TRIGGERED = "triggered"
+    UNKNOWN = "unknown"
+
+
 IAS_ACE_STATE_MAP = {
-    IasAce.PanelStatus.Panel_Disarmed: STATE_ALARM_DISARMED,
-    IasAce.PanelStatus.Armed_Stay: STATE_ALARM_ARMED_HOME,
-    IasAce.PanelStatus.Armed_Night: STATE_ALARM_ARMED_NIGHT,
-    IasAce.PanelStatus.Armed_Away: STATE_ALARM_ARMED_AWAY,
-    IasAce.PanelStatus.In_Alarm: STATE_ALARM_TRIGGERED,
+    IasAce.PanelStatus.Panel_Disarmed: AlarmState.DISARMED,
+    IasAce.PanelStatus.Armed_Stay: AlarmState.ARMED_HOME,
+    IasAce.PanelStatus.Armed_Night: AlarmState.ARMED_NIGHT,
+    IasAce.PanelStatus.Armed_Away: AlarmState.ARMED_AWAY,
+    IasAce.PanelStatus.In_Alarm: AlarmState.TRIGGERED,
 }
 
 
@@ -78,8 +106,10 @@ async def async_setup_entry(
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_ACE)
-class ZHAAlarmControlPanel(ZhaEntity, AlarmControlPanelEntity):
+class ZHAAlarmControlPanel(PlatformEntity):
     """Entity for ZHA alarm control devices."""
+
+    PLATFORM = Platform.ALARM_CONTROL_PANEL
 
     _attr_translation_key: str = "alarm_control_panel"
     _attr_code_format = CodeFormat.TEXT

@@ -4,16 +4,22 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.core import callback
 import zigpy.types as t
 from zigpy.zcl.clusters.closures import ConfigStatus, DoorLock, Shade, WindowCovering
 
-from .. import registries
-from ..const import REPORT_CONFIG_IMMEDIATE, SIGNAL_ATTR_UPDATED
-from . import AttrReportConfig, ClientClusterHandler, ClusterHandler
+from zha.zigbee.cluster_handlers import (
+    AttrReportConfig,
+    ClientClusterHandler,
+    ClusterHandler,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import (
+    REPORT_CONFIG_IMMEDIATE,
+    SIGNAL_ATTR_UPDATED,
+)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(DoorLock.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(DoorLock.cluster_id)
 class DoorLockClusterHandler(ClusterHandler):
     """Door lock cluster handler."""
 
@@ -38,7 +44,6 @@ class DoorLockClusterHandler(ClusterHandler):
                 result,
             )
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle a cluster command received on this cluster."""
 
@@ -60,7 +65,6 @@ class DoorLockClusterHandler(ClusterHandler):
                 },
             )
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute update from lock cluster."""
         attr_name = self._get_attribute_name(attrid)
@@ -120,7 +124,7 @@ class DoorLockClusterHandler(ClusterHandler):
         return result
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Shade.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Shade.cluster_id)
 class ShadeClusterHandler(ClusterHandler):
     """Shade cluster handler."""
 
@@ -131,7 +135,7 @@ class WindowCoveringClientClusterHandler(ClientClusterHandler):
 
 
 @registries.BINDABLE_CLUSTERS.register(WindowCovering.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(WindowCovering.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(WindowCovering.cluster_id)
 class WindowCoveringClusterHandler(ClusterHandler):
     """Window cluster handler."""
 

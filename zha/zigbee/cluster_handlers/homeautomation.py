@@ -13,37 +13,36 @@ from zigpy.zcl.clusters.homeautomation import (
     MeterIdentification,
 )
 
-from .. import registries
-from ..const import (
+from . import AttrReportConfig, ClusterHandler, registries
+from .const import (
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_OP,
     SIGNAL_ATTR_UPDATED,
 )
-from . import AttrReportConfig, ClusterHandler
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(ApplianceEventAlerts.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceEventAlerts.cluster_id)
 class ApplianceEventAlertsClusterHandler(ClusterHandler):
     """Appliance Event Alerts cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(ApplianceIdentification.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceIdentification.cluster_id)
 class ApplianceIdentificationClusterHandler(ClusterHandler):
     """Appliance Identification cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(ApplianceStatistics.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceStatistics.cluster_id)
 class ApplianceStatisticsClusterHandler(ClusterHandler):
     """Appliance Statistics cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Diagnostic.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Diagnostic.cluster_id)
 class DiagnosticClusterHandler(ClusterHandler):
     """Diagnostic cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(ElectricalMeasurement.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementClusterHandler(ClusterHandler):
     """Cluster handler that polls active power level."""
 
@@ -231,6 +230,6 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(MeterIdentification.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(MeterIdentification.cluster_id)
 class MeterIdentificationClusterHandler(ClusterHandler):
     """Metering Identification cluster handler."""

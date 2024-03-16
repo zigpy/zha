@@ -3,37 +3,32 @@
 from __future__ import annotations
 
 import functools
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from homeassistant.components.binary_sensor import (
-    BinarySensorDeviceClass,
-    BinarySensorEntity,
-)
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ON, EntityCategory, Platform
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
 from zigpy.quirks.v2 import BinarySensorMetadata, EntityMetadata
 import zigpy.types as t
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.clusters.security import IasZone
 
-from .core import discovery
-from .core.const import (
+from zha.application.platforms import PlatformEntity
+from zha.application.platforms.registries import PLATFORM_ENTITIES, Platform
+from zha.application.zigbee.cluster_handlers import (
+    CLUSTER_HANDLER_EVENT,
+    ClusterAttributeUpdatedEvent,
+)
+from zha.server.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ACCELEROMETER,
     CLUSTER_HANDLER_BINARY_INPUT,
-    CLUSTER_HANDLER_HUE_OCCUPANCY,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_ZONE,
-    QUIRK_METADATA,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
 )
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
+
+if TYPE_CHECKING:
+    from zha.server.zigbee.cluster import ClusterHandler
+    from zha.server.zigbee.device import Device
+    from zha.server.zigbee.endpoint import Endpoint
 
 # Zigbee Cluster Library Zone Type to Home Assistant device class
 IAS_ZONE_CLASS_MAPPING = {
@@ -50,25 +45,6 @@ MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.BINARY_SE
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     ZHA_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
 )
-
-
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation binary sensor from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.BINARY_SENSOR]
-
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities, async_add_entities, entities_to_create
-        ),
-    )
-    config_entry.async_on_unload(unsub)
 
 
 class BinarySensor(ZhaEntity, BinarySensorEntity):

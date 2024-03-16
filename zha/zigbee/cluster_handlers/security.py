@@ -9,21 +9,21 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.core import callback
-from homeassistant.exceptions import HomeAssistantError
 import zigpy.zcl
-from zigpy.zcl.clusters.security import IasAce as AceCluster, IasWd, IasZone
-
-from .. import registries
-from ..const import (
-    SIGNAL_ATTR_UPDATED,
-    WARNING_DEVICE_MODE_EMERGENCY,
-    WARNING_DEVICE_SOUND_HIGH,
-    WARNING_DEVICE_SQUAWK_MODE_ARMED,
-    WARNING_DEVICE_STROBE_HIGH,
-    WARNING_DEVICE_STROBE_YES,
+from zigpy.zcl.clusters.security import (
+    IasAce as AceCluster,
+    IasWd,
+    IasZone,
+    Squawk,
+    Strobe,
+    StrobeLevel,
+    WarningType,
 )
-from . import ClusterHandler, ClusterHandlerStatus
+
+from zha.exceptions import ZHAException
+
+from . import ClusterHandler, ClusterHandlerStatus, registries
+from .const import SIGNAL_ATTR_UPDATED
 
 if TYPE_CHECKING:
     from ..endpoint import Endpoint
@@ -32,7 +32,7 @@ SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
 class IasAceClusterHandler(ClusterHandler):
     """IAS Ancillary Control Equipment cluster handler."""
 
@@ -68,7 +68,6 @@ class IasAceClusterHandler(ClusterHandler):
         # where do we store this to handle restarts
         self.alarm_status: AceCluster.AlarmStatus = AceCluster.AlarmStatus.No_Alarm
 
-    @callback
     def cluster_command(self, tsn, command_id, args) -> None:
         """Handle commands received to this cluster."""
         self.debug(
@@ -235,8 +234,8 @@ class IasAceClusterHandler(ClusterHandler):
         """Handle the IAS ACE zone status command."""
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IasWd.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(IasWd.cluster_id)
+@registries.HANDLER_ONLY_CLUSTERS.register(IasWd.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(IasWd.cluster_id)
 class IasWdClusterHandler(ClusterHandler):
     """IAS Warning Device cluster handler."""
 
@@ -255,9 +254,9 @@ class IasWdClusterHandler(ClusterHandler):
 
     async def issue_squawk(
         self,
-        mode=WARNING_DEVICE_SQUAWK_MODE_ARMED,
-        strobe=WARNING_DEVICE_STROBE_YES,
-        squawk_level=WARNING_DEVICE_SOUND_HIGH,
+        mode=Squawk.SquawkMode.Armed,
+        strobe=Strobe.Strobe,
+        squawk_level=Squawk.SquawkLevel.High_level_sound,
     ):
         """Issue a squawk command.
 
@@ -280,12 +279,12 @@ class IasWdClusterHandler(ClusterHandler):
 
     async def issue_start_warning(
         self,
-        mode=WARNING_DEVICE_MODE_EMERGENCY,
-        strobe=WARNING_DEVICE_STROBE_YES,
-        siren_level=WARNING_DEVICE_SOUND_HIGH,
+        mode=WarningType.WarningMode.Emergency,
+        strobe=Strobe.Strobe,
+        siren_level=WarningType.SirenLevel.High_level_sound,
         warning_duration=5,  # seconds
         strobe_duty_cycle=0x00,
-        strobe_intensity=WARNING_DEVICE_STROBE_HIGH,
+        strobe_intensity=StrobeLevel.High_level_strobe,
     ):
         """Issue a start warning command.
 
@@ -318,7 +317,7 @@ class IasWdClusterHandler(ClusterHandler):
         )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(IasZone.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(IasZone.cluster_id)
 class IASZoneClusterHandler(ClusterHandler):
     """Cluster handler for the IASZone Zigbee cluster."""
 
@@ -328,7 +327,6 @@ class IASZoneClusterHandler(ClusterHandler):
         IasZone.AttributeDefs.zone_type.name: True,
     }
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle commands received to this cluster."""
         if command_id == IasZone.ClientCommandDefs.status_change_notification.id:
@@ -369,7 +367,7 @@ class IASZoneClusterHandler(ClusterHandler):
                 str(ieee),
                 self._cluster.ep_attribute,
             )
-        except HomeAssistantError as ex:
+        except ZHAException as ex:
             self.debug(
                 "Failed to write cie_addr: %s to '%s' cluster: %s",
                 str(ieee),
@@ -387,7 +385,6 @@ class IASZoneClusterHandler(ClusterHandler):
         self._status = ClusterHandlerStatus.CONFIGURED
         self.debug("finished IASZoneClusterHandler configuration")
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
         if attrid == IasZone.AttributeDefs.zone_status.id:

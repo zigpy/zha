@@ -4,12 +4,11 @@ import zigpy.exceptions
 from zigpy.zcl.clusters.lightlink import LightLink
 from zigpy.zcl.foundation import GENERAL_COMMANDS, GeneralCommand
 
-from .. import registries
-from . import ClusterHandler, ClusterHandlerStatus
+from . import ClusterHandler, ClusterHandlerStatus, registries
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(LightLink.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(LightLink.cluster_id)
+@registries.HANDLER_ONLY_CLUSTERS.register(LightLink.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(LightLink.cluster_id)
 class LightLinkClusterHandler(ClusterHandler):
     """Lightlink cluster handler."""
 
