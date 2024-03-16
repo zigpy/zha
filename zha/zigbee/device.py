@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+from contextlib import suppress
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -637,13 +638,16 @@ class ZHADevice(LogMixin):
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
 
-    def async_cleanup_handles(self) -> None:
-        """Unsubscribe the dispatchers and timers."""
-        # pylint: disable=pointless-string-statement
-        """TODO
-        for unsubscribe in self.unsubs:
-            unsubscribe()
-        """
+    async def on_remove(self) -> None:
+        """Cancel tasks this device owns."""
+        tasks = [t for t in self._tracked_tasks if not (t.done() or t.cancelled())]
+        for task in tasks:
+            self.debug("Cancelling task: %s", task)
+            task.cancel()
+        with suppress(asyncio.CancelledError):
+            await asyncio.gather(*tasks, return_exceptions=True)
+        for platform_entity in self._platform_entities.values():
+            await platform_entity.on_remove()
 
     @property
     def zha_device_info(self) -> dict[str, Any]:

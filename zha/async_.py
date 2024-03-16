@@ -1,6 +1,6 @@
 """Async utilities for Zigbee Home Automation."""
 
-from asyncio import AbstractEventLoop, Semaphore, Task, gather, get_running_loop
+from asyncio import AbstractEventLoop, Future, Semaphore, Task, gather, get_running_loop
 from collections.abc import Awaitable, Coroutine
 from typing import Any, TypeVar
 
@@ -39,3 +39,8 @@ async def gather_with_limited_concurrency(
         *(create_eager_task(sem_task(task)) for task in tasks),
         return_exceptions=return_exceptions,
     )
+
+
+def cancelling(task: Future[Any]) -> bool:
+    """Return True if task is cancelling."""
+    return bool((cancelling_ := getattr(task, "cancelling", None)) and cancelling_())

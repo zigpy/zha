@@ -7,16 +7,6 @@ from collections.abc import Callable
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from homeassistant.const import CONF_TYPE, Platform
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.dispatcher import (
-    async_dispatcher_connect,
-    async_dispatcher_send,
-)
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity_registry import async_entries_for_device
-from homeassistant.helpers.typing import ConfigType
 from slugify import slugify
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
@@ -32,6 +22,8 @@ from zigpy.quirks.v2 import (
 from zigpy.state import State
 from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
+
+from zha.application.gateway import ZHAGateway
 
 from .. import (  # noqa: F401
     alarm_control_panel,
@@ -50,7 +42,7 @@ from .. import (  # noqa: F401
     switch,
     update,
 )
-from . import const as zha_const, registries as zha_regs
+from . import Platform, const as zha_const, registries as zha_regs
 
 # importing cluster handlers updates registries
 from .cluster_handlers import (  # noqa: F401
@@ -77,6 +69,23 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+PLATFORMS = (
+    Platform.ALARM_CONTROL_PANEL,
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.CLIMATE,
+    Platform.COVER,
+    Platform.DEVICE_TRACKER,
+    Platform.FAN,
+    Platform.LIGHT,
+    Platform.LOCK,
+    Platform.NUMBER,
+    Platform.SELECT,
+    Platform.SENSOR,
+    Platform.SIREN,
+    Platform.SWITCH,
+    Platform.UPDATE,
+)
 
 QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
     (
@@ -533,9 +542,9 @@ class ProbeEndpoint:
                     entity_and_handler.claimed_cluster_handlers,
                 )
 
-    def initialize(self, hass: HomeAssistant) -> None:
+    def initialize(self, gateway: ZHAGateway) -> None:
         """Update device overrides config."""
-        zha_config = get_zha_data(hass).yaml_config
+        zha_config = get_zha_data(gateway).yaml_config
         if overrides := zha_config.get(zha_const.CONF_DEVICE_CONFIG):
             self._device_configs.update(overrides)
 
@@ -543,20 +552,23 @@ class ProbeEndpoint:
 class GroupProbe:
     """Determine the appropriate component for a group."""
 
-    _hass: HomeAssistant
+    _gateway: ZHAGateway
 
     def __init__(self) -> None:
         """Initialize instance."""
         self._unsubs: list[Callable[[], None]] = []
 
-    def initialize(self, hass: HomeAssistant) -> None:
+    def initialize(self, gateway: ZHAGateway) -> None:
         """Initialize the group probe."""
-        self._hass = hass
+        self._gateway = gateway
+        # pylint: disable=pointless-string-statement
+        """TODO
         self._unsubs.append(
             async_dispatcher_connect(
                 hass, zha_const.SIGNAL_GROUP_ENTITY_REMOVED, self._reprobe_group
             )
         )
+        """
 
     def cleanup(self) -> None:
         """Clean up on when ZHA shuts down."""
@@ -567,8 +579,7 @@ class GroupProbe:
     @callback
     def _reprobe_group(self, group_id: int) -> None:
         """Reprobe a group for entities after its members change."""
-        zha_gateway = get_zha_gateway(self._hass)
-        if (zha_group := zha_gateway.groups.get(group_id)) is None:
+        if (zha_group := self._gateway.groups.get(group_id)) is None:
             return
         self.discover_group_entities(zha_group)
 
