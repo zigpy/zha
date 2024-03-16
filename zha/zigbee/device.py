@@ -438,7 +438,7 @@ class ZHADevice(LogMixin):
             )
         )
         """
-        discovery.PROBE.discover_device_entities(zha_dev)
+        discovery.DEVICE_PROBE.discover_device_entities(zha_dev)
         return zha_dev
 
     """TODO verify

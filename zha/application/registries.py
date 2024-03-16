@@ -515,4 +515,4 @@ class ZHAEntityRegistry:
         )
 
 
-ZHA_ENTITIES = ZHAEntityRegistry()
+PLATFORM_ENTITIES = ZHAEntityRegistry()

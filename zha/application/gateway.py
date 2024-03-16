@@ -127,7 +127,7 @@ class ZHAGateway:
 
     async def async_initialize(self) -> None:
         """Initialize controller and connect radio."""
-        discovery.PROBE.initialize(self)
+        discovery.ENDPOINT_PROBE.initialize(self)
         discovery.GROUP_PROBE.initialize(self)
 
         self.shutting_down = False
