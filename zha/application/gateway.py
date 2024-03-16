@@ -280,11 +280,11 @@ class ZHAGateway:
             """Fetch updated state for mains powered devices."""
             await self.async_fetch_updated_state_mains()
             _LOGGER.debug("Allowing polled requests")
-            self.hass.data[DATA_ZHA].allow_polling = True
+            self.data[DATA_ZHA].allow_polling = True
 
         # background the fetching of state for mains powered devices
-        self.config_entry.async_create_background_task(
-            self.hass, fetch_updated_state(), "zha.gateway-fetch_updated_state"
+        self.async_create_background_task(
+            fetch_updated_state(), "zha.gateway-fetch_updated_state"
         )
 
     async def stop_network(self) -> None:
@@ -418,7 +418,6 @@ class ZHAGateway:
         self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_REMOVED)
         zha_group = self._groups.pop(zigpy_group.group_id)
         zha_group.info("group_removed")
-        self._cleanup_group_entity_registry_entries(zigpy_group)
 
     def _send_group_gateway_message(  # pylint: disable=unused-argument
         self,
