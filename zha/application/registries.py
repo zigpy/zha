@@ -6,34 +6,24 @@ import collections
 from collections.abc import Callable
 import dataclasses
 from operator import attrgetter
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 import attr
-from homeassistant.const import Platform
 from zigpy import zcl
 import zigpy.profiles.zha
 import zigpy.profiles.zll
 from zigpy.types.named import EUI64
 
-from .decorators import DictRegistry, NestedDictRegistry, SetRegistry
+from zha.application import Platform
 
 if TYPE_CHECKING:
-    from ..application.entity import ZhaEntity, ZhaGroupEntity
-    from .cluster_handlers import ClientClusterHandler, ClusterHandler
+    from zha.application.platforms import GroupEntity, PlatformEntity
+    from zha.zigbee.cluster_handlers import ClusterHandler
 
-
-_ZhaEntityT = TypeVar("_ZhaEntityT", bound=type["ZhaEntity"])
-_ZhaGroupEntityT = TypeVar("_ZhaGroupEntityT", bound=type["ZhaGroupEntity"])
 
 GROUP_ENTITY_DOMAINS = [Platform.LIGHT, Platform.SWITCH, Platform.FAN]
 
-IKEA_AIR_PURIFIER_CLUSTER = 0xFC7D
-PHILLIPS_REMOTE_CLUSTER = 0xFC00
-SMARTTHINGS_ACCELERATION_CLUSTER = 0xFC02
 SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE = 0x8000
-SMARTTHINGS_HUMIDITY_CLUSTER = 0xFC45
-TUYA_MANUFACTURER_CLUSTER = 0xEF00
-VOC_LEVEL_CLUSTER = 0x042E
 
 REMOTE_DEVICE_TYPES = {
     zigpy.profiles.zha.PROFILE_ID: [
@@ -73,8 +63,6 @@ SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS = {
     zcl.clusters.security.IasAce.cluster_id: Platform.ALARM_CONTROL_PANEL,
 }
 
-BINDABLE_CLUSTERS = SetRegistry()
-
 DEVICE_CLASS = {
     zigpy.profiles.zha.PROFILE_ID: {
         SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE: Platform.DEVICE_TRACKER,
@@ -105,14 +93,6 @@ DEVICE_CLASS = {
     },
 }
 DEVICE_CLASS = collections.defaultdict(dict, DEVICE_CLASS)
-
-CLUSTER_HANDLER_ONLY_CLUSTERS = SetRegistry()
-CLIENT_CLUSTER_HANDLER_REGISTRY: DictRegistry[type[ClientClusterHandler]] = (
-    DictRegistry()
-)
-ZIGBEE_CLUSTER_HANDLER_REGISTRY: NestedDictRegistry[type[ClusterHandler]] = (
-    NestedDictRegistry()
-)
 
 WEIGHT_ATTR = attrgetter("weight")
 
@@ -268,29 +248,31 @@ class MatchRule:
 class EntityClassAndClusterHandlers:
     """Container for entity class and corresponding cluster handlers."""
 
-    entity_class: type[ZhaEntity]
+    entity_class: type[PlatformEntity]
     claimed_cluster_handlers: list[ClusterHandler]
 
 
-class ZHAEntityRegistry:
+class PlatformEntityRegistry:
     """Cluster handler to ZHA Entity mapping."""
 
     def __init__(self) -> None:
         """Initialize Registry instance."""
-        self._strict_registry: dict[Platform, dict[MatchRule, type[ZhaEntity]]] = (
+        self._strict_registry: dict[Platform, dict[MatchRule, type[PlatformEntity]]] = (
             collections.defaultdict(dict)
         )
         self._multi_entity_registry: dict[
-            Platform, dict[int | str | None, dict[MatchRule, list[type[ZhaEntity]]]]
+            Platform,
+            dict[int | str | None, dict[MatchRule, list[type[PlatformEntity]]]],
         ] = collections.defaultdict(
             lambda: collections.defaultdict(lambda: collections.defaultdict(list))
         )
         self._config_diagnostic_entity_registry: dict[
-            Platform, dict[int | str | None, dict[MatchRule, list[type[ZhaEntity]]]]
+            Platform,
+            dict[int | str | None, dict[MatchRule, list[type[PlatformEntity]]]],
         ] = collections.defaultdict(
             lambda: collections.defaultdict(lambda: collections.defaultdict(list))
         )
-        self._group_registry: dict[str, type[ZhaGroupEntity]] = {}
+        self._group_registry: dict[str, type[GroupEntity]] = {}
         self.single_device_matches: dict[Platform, dict[EUI64, list[str]]] = (
             collections.defaultdict(lambda: collections.defaultdict(list))
         )
@@ -302,8 +284,8 @@ class ZHAEntityRegistry:
         model: str,
         cluster_handlers: list[ClusterHandler],
         quirk_id: str | None,
-        default: type[ZhaEntity] | None = None,
-    ) -> tuple[type[ZhaEntity] | None, list[ClusterHandler]]:
+        default: type[PlatformEntity] | None = None,
+    ) -> tuple[type[PlatformEntity] | None, list[ClusterHandler]]:
         """Match a ZHA ClusterHandler to a ZHA Entity class."""
         matches = self._strict_registry[component]
         for match in sorted(matches, key=WEIGHT_ATTR, reverse=True):
@@ -382,7 +364,7 @@ class ZHAEntityRegistry:
 
         return result, list(all_claimed)
 
-    def get_group_entity(self, component: str) -> type[ZhaGroupEntity] | None:
+    def get_group_entity(self, component: str) -> type[GroupEntity] | None:
         """Match a ZHA group to a ZHA Entity class."""
         return self._group_registry.get(component)
 
@@ -395,7 +377,7 @@ class ZHAEntityRegistry:
         models: Callable | set[str] | str | None = None,
         aux_cluster_handlers: Callable | set[str] | str | None = None,
         quirk_ids: set[str] | str | None = None,
-    ) -> Callable[[_ZhaEntityT], _ZhaEntityT]:
+    ) -> Callable[[type[PlatformEntity]], type[PlatformEntity]]:
         """Decorate a strict match rule."""
 
         rule = MatchRule(
@@ -407,7 +389,7 @@ class ZHAEntityRegistry:
             quirk_ids,
         )
 
-        def decorator(zha_ent: _ZhaEntityT) -> _ZhaEntityT:
+        def decorator(zha_ent: type[PlatformEntity]) -> type[PlatformEntity]:
             """Register a strict match rule.
 
             All non-empty fields of a match rule must match.
@@ -427,7 +409,7 @@ class ZHAEntityRegistry:
         aux_cluster_handlers: Callable | set[str] | str | None = None,
         stop_on_match_group: int | str | None = None,
         quirk_ids: set[str] | str | None = None,
-    ) -> Callable[[_ZhaEntityT], _ZhaEntityT]:
+    ) -> Callable[[type[PlatformEntity]], type[PlatformEntity]]:
         """Decorate a loose match rule."""
 
         rule = MatchRule(
@@ -439,7 +421,7 @@ class ZHAEntityRegistry:
             quirk_ids,
         )
 
-        def decorator(zha_entity: _ZhaEntityT) -> _ZhaEntityT:
+        def decorator(zha_entity: type[PlatformEntity]) -> type[PlatformEntity]:
             """Register a loose match rule.
 
             All non empty fields of a match rule must match.
@@ -462,7 +444,7 @@ class ZHAEntityRegistry:
         aux_cluster_handlers: Callable | set[str] | str | None = None,
         stop_on_match_group: int | str | None = None,
         quirk_ids: set[str] | str | None = None,
-    ) -> Callable[[_ZhaEntityT], _ZhaEntityT]:
+    ) -> Callable[[type[PlatformEntity]], type[PlatformEntity]]:
         """Decorate a loose match rule."""
 
         rule = MatchRule(
@@ -474,7 +456,7 @@ class ZHAEntityRegistry:
             quirk_ids,
         )
 
-        def decorator(zha_entity: _ZhaEntityT) -> _ZhaEntityT:
+        def decorator(zha_entity: type[PlatformEntity]) -> type[PlatformEntity]:
             """Register a loose match rule.
 
             All non-empty fields of a match rule must match.
@@ -489,10 +471,10 @@ class ZHAEntityRegistry:
 
     def group_match(
         self, component: Platform
-    ) -> Callable[[_ZhaGroupEntityT], _ZhaGroupEntityT]:
+    ) -> Callable[[type[GroupEntity]], type[GroupEntity]]:
         """Decorate a group match rule."""
 
-        def decorator(zha_ent: _ZhaGroupEntityT) -> _ZhaGroupEntityT:
+        def decorator(zha_ent: type[GroupEntity]) -> type[GroupEntity]:
             """Register a group match rule."""
             self._group_registry[component] = zha_ent
             return zha_ent
@@ -515,4 +497,4 @@ class ZHAEntityRegistry:
         )
 
 
-PLATFORM_ENTITIES = ZHAEntityRegistry()
+PLATFORM_ENTITIES = PlatformEntityRegistry()
