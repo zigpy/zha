@@ -14,7 +14,17 @@ readme = "README.md"
 license = {text = "GPL-3.0"}
 requires-python = ">=3.12"
 dependencies = [
+    "bellows==0.38.1",
+    "pyserial==3.5",
+    "pyserial-asyncio==0.6",
+    "zha-quirks==0.0.112",
+    "zigpy-deconz==0.23.1",
     "zigpy>=0.63.5",
+    "zigpy-xbee==0.20.1",
+    "zigpy-zigate==0.12.0",
+    "zigpy-znp==0.12.1",
+    "universal-silabs-flasher==0.0.18",
+    "pyserial-asyncio-fast==0.11"
 ]
 
 [tool.setuptools.packages.find]
