@@ -8,14 +8,9 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, TypeVar
 
-from homeassistant.const import Platform
-from homeassistant.core import callback
-from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.util.async_ import gather_with_limited_concurrency
-
-from . import const, discovery, registries
-from .cluster_handlers import ClusterHandler
-from .helpers import get_zha_data
+from zha.application import Platform, const, discovery, registries
+from zha.async_ import gather_with_limited_concurrency
+from zha.zigbee.cluster_handlers import ClusterHandler
 
 if TYPE_CHECKING:
     from zigpy import Endpoint as ZigpyEndpoint
@@ -110,8 +105,7 @@ class Endpoint:
         endpoint = cls(zigpy_endpoint, device)
         endpoint.add_all_cluster_handlers()
         endpoint.add_client_cluster_handlers()
-        if not device.is_coordinator:
-            discovery.PROBE.discover_entities(endpoint)
+        discovery.PROBE.discover_entities(endpoint)
         return endpoint
 
     def add_all_cluster_handlers(self) -> None:
@@ -220,15 +214,16 @@ class Endpoint:
         if self.device.status == DeviceStatus.INITIALIZED:
             return
 
-        zha_data = get_zha_data(self.device.hass)
-        zha_data.platforms[platform].append(
+        self.device.gateway.data[platform].append(
             (entity_class, (unique_id, self.device, cluster_handlers), kwargs or {})
         )
 
-    @callback
+    # pylint: disable=pointless-string-statement
+    """TODO verify
     def async_send_signal(self, signal: str, *args: Any) -> None:
-        """Send a signal through hass dispatcher."""
+        #Send a signal through hass dispatcher.
         async_dispatcher_send(self.device.hass, signal, *args)
+    """
 
     def send_event(self, signal: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""
