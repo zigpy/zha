@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import binascii
 import collections
-from collections.abc import Callable, Iterator
 import dataclasses
 from dataclasses import dataclass
 import enum
@@ -16,11 +15,6 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, State, callback
-from homeassistant.helpers import config_validation as cv, device_registry as dr
-from homeassistant.helpers.typing import ConfigType
 import voluptuous as vol
 import zigpy.exceptions
 import zigpy.types
@@ -29,13 +23,19 @@ import zigpy.zcl
 from zigpy.zcl.foundation import CommandSchema
 import zigpy.zdo.types as zdo_types
 
-from .const import CLUSTER_TYPE_IN, CLUSTER_TYPE_OUT, CUSTOM_CONFIGURATION, DATA_ZHA
-from .registries import BINDABLE_CLUSTERS
+from zha.application import Platform
+from zha.application.const import (
+    CLUSTER_TYPE_IN,
+    CLUSTER_TYPE_OUT,
+    CUSTOM_CONFIGURATION,
+    DATA_ZHA,
+)
+from zha.zigbee.cluster_handlers.registries import BINDABLE_CLUSTERS
 
 if TYPE_CHECKING:
-    from .cluster_handlers import ClusterHandler
-    from .device import ZHADevice
-    from .gateway import ZHAGateway
+    from zha.application.gateway import ZHAGateway
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import ZHADevice
 
 _ClusterHandlerT = TypeVar("_ClusterHandlerT", bound="ClusterHandler")
 _T = TypeVar("_T")
@@ -118,37 +118,6 @@ async def get_matched_clusters(
     return clusters_to_bind
 
 
-def cluster_command_schema_to_vol_schema(schema: CommandSchema) -> vol.Schema:
-    """Convert a cluster command schema to a voluptuous schema."""
-    return vol.Schema(
-        {
-            vol.Optional(field.name)
-            if field.optional
-            else vol.Required(field.name): schema_type_to_vol(field.type)
-            for field in schema.fields
-        }
-    )
-
-
-def schema_type_to_vol(field_type: Any) -> Any:
-    """Convert a schema type to a voluptuous type."""
-    if issubclass(field_type, enum.Flag) and field_type.__members__:
-        return cv.multi_select(
-            [key.replace("_", " ") for key in field_type.__members__]
-        )
-    if issubclass(field_type, enum.Enum) and field_type.__members__:
-        return vol.In([key.replace("_", " ") for key in field_type.__members__])
-    if (
-        issubclass(field_type, zigpy.types.FixedIntType)
-        or issubclass(field_type, enum.Flag)
-        or issubclass(field_type, enum.Enum)
-    ):
-        return vol.All(
-            vol.Coerce(int), vol.Range(field_type.min_value, field_type.max_value)
-        )
-    return str
-
-
 def convert_to_zcl_values(
     fields: dict[str, Any], schema: CommandSchema
 ) -> dict[str, Any]:
@@ -186,7 +155,6 @@ def convert_to_zcl_values(
     return converted_fields
 
 
-@callback
 def async_is_bindable_target(source_zha_device, target_zha_device):
     """Determine if target is bindable to source."""
     if target_zha_device.nwk == 0x0000:
@@ -205,117 +173,16 @@ def async_is_bindable_target(source_zha_device, target_zha_device):
     return False
 
 
-@callback
 def async_get_zha_config_value(
-    config_entry: ConfigEntry, section: str, config_key: str, default: _T
+    config_entry: dict[str, Any], section: str, config_key: str, default: _T
 ) -> _T:
     """Get the value for the specified configuration from the ZHA config entry."""
     return (
-        config_entry.options.get(CUSTOM_CONFIGURATION, {})
+        config_entry.get("options", {})
+        .get(CUSTOM_CONFIGURATION, {})
         .get(section, {})
         .get(config_key, default)
     )
-
-
-def async_cluster_exists(hass, cluster_id, skip_coordinator=True):
-    """Determine if a device containing the specified in cluster is paired."""
-    zha_gateway = get_zha_gateway(hass)
-    zha_devices = zha_gateway.devices.values()
-    for zha_device in zha_devices:
-        if skip_coordinator and zha_device.is_coordinator:
-            continue
-        clusters_by_endpoint = zha_device.async_get_clusters()
-        for clusters in clusters_by_endpoint.values():
-            if (
-                cluster_id in clusters[CLUSTER_TYPE_IN]
-                or cluster_id in clusters[CLUSTER_TYPE_OUT]
-            ):
-                return True
-    return False
-
-
-@callback
-def async_get_zha_device(hass: HomeAssistant, device_id: str) -> ZHADevice:
-    """Get a ZHA device for the given device registry id."""
-    device_registry = dr.async_get(hass)
-    registry_device = device_registry.async_get(device_id)
-    if not registry_device:
-        _LOGGER.error("Device id `%s` not found in registry", device_id)
-        raise KeyError(f"Device id `{device_id}` not found in registry.")
-    zha_gateway = get_zha_gateway(hass)
-    try:
-        ieee_address = list(registry_device.identifiers)[0][1]
-        ieee = zigpy.types.EUI64.convert(ieee_address)
-    except (IndexError, ValueError) as ex:
-        _LOGGER.error(
-            "Unable to determine device IEEE for device with device id `%s`", device_id
-        )
-        raise KeyError(
-            f"Unable to determine device IEEE for device with device id `{device_id}`."
-        ) from ex
-    return zha_gateway.devices[ieee]
-
-
-def find_state_attributes(states: list[State], key: str) -> Iterator[Any]:
-    """Find attributes with matching key from states."""
-    for state in states:
-        if (value := state.attributes.get(key)) is not None:
-            yield value
-
-
-def mean_int(*args):
-    """Return the mean of the supplied values."""
-    return int(sum(args) / len(args))
-
-
-def mean_tuple(*args):
-    """Return the mean values along the columns of the supplied values."""
-    return tuple(sum(x) / len(x) for x in zip(*args))
-
-
-def reduce_attribute(
-    states: list[State],
-    key: str,
-    default: Any | None = None,
-    reduce: Callable[..., Any] = mean_int,
-) -> Any:
-    """Find the first attribute matching key from states.
-
-    If none are found, return default.
-    """
-    attrs = list(find_state_attributes(states, key))
-
-    if not attrs:
-        return default
-
-    if len(attrs) == 1:
-        return attrs[0]
-
-    return reduce(*attrs)
-
-
-class LogMixin:
-    """Log helper."""
-
-    def log(self, level, msg, *args, **kwargs):
-        """Log with level."""
-        raise NotImplementedError
-
-    def debug(self, msg, *args, **kwargs):
-        """Debug level log."""
-        return self.log(logging.DEBUG, msg, *args, **kwargs)
-
-    def info(self, msg, *args, **kwargs):
-        """Info level log."""
-        return self.log(logging.INFO, msg, *args, **kwargs)
-
-    def warning(self, msg, *args, **kwargs):
-        """Warning method log."""
-        return self.log(logging.WARNING, msg, *args, **kwargs)
-
-    def error(self, msg, *args, **kwargs):
-        """Error level log."""
-        return self.log(logging.ERROR, msg, *args, **kwargs)
 
 
 def convert_install_code(value: str) -> zigpy.types.KeyData:
@@ -396,9 +263,9 @@ def qr_to_install_code(qr_code: str) -> tuple[zigpy.types.EUI64, zigpy.types.Key
 
 @dataclasses.dataclass(kw_only=True, slots=True)
 class ZHAData:
-    """ZHA component data stored in `hass.data`."""
+    """ZHA data stored in `gateway.data`."""
 
-    yaml_config: ConfigType = dataclasses.field(default_factory=dict)
+    yaml_config: dict[str, Any] = dataclasses.field(default_factory=dict)
     platforms: collections.defaultdict[Platform, list] = dataclasses.field(
         default_factory=lambda: collections.defaultdict(list)
     )
@@ -409,17 +276,9 @@ class ZHAData:
     allow_polling: bool = dataclasses.field(default=False)
 
 
-def get_zha_data(hass: HomeAssistant) -> ZHAData:
+def get_zha_data(gateway: ZHAGateway) -> ZHAData:
     """Get the global ZHA data object."""
-    if DATA_ZHA not in hass.data:
-        hass.data[DATA_ZHA] = ZHAData()
+    if DATA_ZHA not in gateway.data:
+        gateway.data[DATA_ZHA] = ZHAData()
 
-    return hass.data[DATA_ZHA]
-
-
-def get_zha_gateway(hass: HomeAssistant) -> ZHAGateway:
-    """Get the ZHA gateway object."""
-    if (zha_gateway := get_zha_data(hass).gateway) is None:
-        raise ValueError("No gateway object exists")
-
-    return zha_gateway
+    return gateway.data[DATA_ZHA]
