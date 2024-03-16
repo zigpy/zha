@@ -5,8 +5,9 @@ from __future__ import annotations
 import abc
 import asyncio
 from contextlib import suppress
+from dataclasses import dataclass
 import logging
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, Final, Optional, Union
 
 from zigpy.types.named import EUI64
 
@@ -292,3 +293,16 @@ class GroupEntity(BaseEntity):
         json["name"] = self._name
         json["group_id"] = self.group_id
         return json
+
+
+@dataclass
+class PlatformEntityStateChangedEvent:
+    """Event for when an entity state changes."""
+
+    event_type: Final[str] = "entity"
+    event: Final[str] = STATE_CHANGED
+    platform: Platform
+    unique_id: str
+    device_ieee: Optional[EUI64]
+    endpoint_id: Optional[int]
+    group_id: Optional[int]
