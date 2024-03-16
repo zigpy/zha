@@ -65,8 +65,8 @@ from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-i
     smartenergy,
 )
 from zha.zigbee.cluster_handlers.registries import (
+    CLUSTER_HANDLER_ONLY_CLUSTERS,
     CLUSTER_HANDLER_REGISTRY,
-    HANDLER_ONLY_CLUSTERS,
 )
 from zha.zigbee.group import Group
 
@@ -390,7 +390,7 @@ class EndpointProbe:
         }
         remaining_cluster_handlers = endpoint.unclaimed_cluster_handlers()
         for cluster_handler in remaining_cluster_handlers:
-            if cluster_handler.cluster.cluster_id in HANDLER_ONLY_CLUSTERS:
+            if cluster_handler.cluster.cluster_id in CLUSTER_HANDLER_ONLY_CLUSTERS:
                 endpoint.claim_cluster_handlers([cluster_handler])
                 continue
 

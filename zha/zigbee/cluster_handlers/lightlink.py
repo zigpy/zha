@@ -7,7 +7,7 @@ from zigpy.zcl.foundation import GENERAL_COMMANDS, GeneralCommand
 from . import ClusterHandler, ClusterHandlerStatus, registries
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(LightLink.cluster_id)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(LightLink.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(LightLink.cluster_id)
 class LightLinkClusterHandler(ClusterHandler):
     """Lightlink cluster handler."""

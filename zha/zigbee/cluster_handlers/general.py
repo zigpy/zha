@@ -171,7 +171,7 @@ class ApplianceControlClusterHandler(ClusterHandler):
     """Appliance Control cluster handler."""
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(Basic.cluster_id)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(Basic.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(Basic.cluster_id)
 class BasicClusterHandler(ClusterHandler):
     """Cluster handler to interact with the basic cluster."""
@@ -578,7 +578,7 @@ class PartitionClusterHandler(ClusterHandler):
     """Partition cluster handler."""
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(PollControl.cluster_id)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(PollControl.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(PollControl.cluster_id)
 class PollControlClusterHandler(ClusterHandler):
     """Poll Control cluster handler."""

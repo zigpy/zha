@@ -53,7 +53,7 @@ class SmartThingsHumidityClusterHandler(ClusterHandler):
     )
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(OSRAM_BUTTON_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(OSRAM_BUTTON_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(OSRAM_BUTTON_CLUSTER)
 class OsramButtonClusterHandler(ClusterHandler):
     """Osram button cluster handler."""
@@ -61,7 +61,7 @@ class OsramButtonClusterHandler(ClusterHandler):
     REPORT_CONFIG = ()
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(PHILLIPS_REMOTE_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(PHILLIPS_REMOTE_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(PHILLIPS_REMOTE_CLUSTER)
 class PhillipsRemoteClusterHandler(ClusterHandler):
     """Phillips remote cluster handler."""
@@ -69,7 +69,7 @@ class PhillipsRemoteClusterHandler(ClusterHandler):
     REPORT_CONFIG = ()
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(TUYA_MANUFACTURER_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(TUYA_MANUFACTURER_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(TUYA_MANUFACTURER_CLUSTER)
 class TuyaClusterHandler(ClusterHandler):
     """Cluster handler for the Tuya manufacturer Zigbee cluster."""
@@ -86,7 +86,7 @@ class TuyaClusterHandler(ClusterHandler):
             }
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(AQARA_OPPLE_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(AQARA_OPPLE_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(AQARA_OPPLE_CLUSTER)
 class OppleRemoteClusterHandler(ClusterHandler):
     """Opple cluster handler."""
@@ -367,7 +367,7 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
         )
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(IKEA_AIR_PURIFIER_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_AIR_PURIFIER_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(IKEA_AIR_PURIFIER_CLUSTER)
 class IkeaAirPurifierClusterHandler(ClusterHandler):
     """IKEA Air Purifier cluster handler."""
@@ -414,7 +414,7 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
             )
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(IKEA_REMOTE_CLUSTER)
 class IkeaRemoteClusterHandler(ClusterHandler):
     """Ikea Matter remote cluster handler."""
@@ -429,7 +429,7 @@ class XiaomiVibrationAQ1ClusterHandler(MultistateInputClusterHandler):
     """Xiaomi DoorLock Cluster is in fact a MultiStateInput Cluster."""
 
 
-@registries.HANDLER_ONLY_CLUSTERS.register(SONOFF_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SONOFF_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(SONOFF_CLUSTER)
 class SonoffPresenceSenorClusterHandler(ClusterHandler):
     """SonoffPresenceSensor cluster handler."""
