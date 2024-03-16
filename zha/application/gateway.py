@@ -147,6 +147,7 @@ class ZHAGateway:
         self.shutting_down = False
         self._reload_task: asyncio.Task | None = None
         self.data: dict[str, Any] = {}
+        self._tracked_completable_tasks: list[asyncio.Task] = []
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
@@ -593,6 +594,11 @@ class ZHAGateway:
                 remove_future=remove_future,
             )
         )
+
+    def track_task(self, task: asyncio.Task) -> None:
+        """Create a tracked task."""
+        self._tracked_completable_tasks.append(task)
+        task.add_done_callback(self._tracked_completable_tasks.remove)
 
     @callback
     def async_enable_debug_mode(self, filterer: _LogFilterType | None = None) -> None:

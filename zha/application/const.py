@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import enum
 import logging
+from typing import Final
 
 import bellows.zigbee.application
 from homeassistant.const import Platform
@@ -24,6 +25,7 @@ ATTR_ATTRIBUTE_NAME = "attribute_name"
 ATTR_AVAILABLE = "available"
 ATTR_CLUSTER_ID = "cluster_id"
 ATTR_CLUSTER_TYPE = "cluster_type"
+ATTR_COMMAND: Final = "command"
 ATTR_COMMAND_TYPE = "command_type"
 ATTR_DEVICE_IEEE = "device_ieee"
 ATTR_DEVICE_TYPE = "device_type"
@@ -39,6 +41,7 @@ ATTR_MANUFACTURER = "manufacturer"
 ATTR_MANUFACTURER_CODE = "manufacturer_code"
 ATTR_MEMBERS = "members"
 ATTR_MODEL = "model"
+ATTR_NAME = "name"
 ATTR_NEIGHBORS = "neighbors"
 ATTR_NODE_DESCRIPTOR = "node_descriptor"
 ATTR_NWK = "nwk"
