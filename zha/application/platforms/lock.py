@@ -1,121 +1,62 @@
 """Locks on Zigbee Home Automation networks."""
 
 import functools
-from typing import Any
+from typing import TYPE_CHECKING, Any, Final
 
-from homeassistant.components.lock import STATE_LOCKED, STATE_UNLOCKED, LockEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import (
-    AddEntitiesCallback,
-    async_get_current_platform,
-)
-from homeassistant.helpers.typing import StateType
-import voluptuous as vol
 from zigpy.zcl.foundation import Status
 
-from .core import discovery
-from .core.const import (
+from zha.application import Platform
+from zha.application.platforms import PlatformEntity
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_DOORLOCK,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
+    CLUSTER_HANDLER_EVENT,
 )
-from .core.helpers import get_zha_data
-from .core.registries import PLATFORM_ENTITIES
-from .entity import ZhaEntity
 
-# The first state is Zigbee 'Not fully locked'
-STATE_LIST = [STATE_UNLOCKED, STATE_LOCKED, STATE_UNLOCKED]
+if TYPE_CHECKING:
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.endpoint import Endpoint
+
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.LOCK)
 
-VALUE_TO_STATE = dict(enumerate(STATE_LIST))
-
-SERVICE_SET_LOCK_USER_CODE = "set_lock_user_code"
-SERVICE_ENABLE_LOCK_USER_CODE = "enable_lock_user_code"
-SERVICE_DISABLE_LOCK_USER_CODE = "disable_lock_user_code"
-SERVICE_CLEAR_LOCK_USER_CODE = "clear_lock_user_code"
-
-
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation Door Lock from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.LOCK]
-
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities, async_add_entities, entities_to_create
-        ),
-    )
-    config_entry.async_on_unload(unsub)
-
-    platform = async_get_current_platform()
-
-    platform.async_register_entity_service(
-        SERVICE_SET_LOCK_USER_CODE,
-        {
-            vol.Required("code_slot"): vol.Coerce(int),
-            vol.Required("user_code"): cv.string,
-        },
-        "async_set_lock_user_code",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_ENABLE_LOCK_USER_CODE,
-        {
-            vol.Required("code_slot"): vol.Coerce(int),
-        },
-        "async_enable_lock_user_code",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_DISABLE_LOCK_USER_CODE,
-        {
-            vol.Required("code_slot"): vol.Coerce(int),
-        },
-        "async_disable_lock_user_code",
-    )
-
-    platform.async_register_entity_service(
-        SERVICE_CLEAR_LOCK_USER_CODE,
-        {
-            vol.Required("code_slot"): vol.Coerce(int),
-        },
-        "async_clear_lock_user_code",
-    )
+STATE_LOCKED: Final[str] = "locked"
+STATE_UNLOCKED: Final[str] = "unlocked"
+STATE_LOCKING: Final[str] = "locking"
+STATE_UNLOCKING: Final[str] = "unlocking"
+STATE_JAMMED: Final[str] = "jammed"
+# The first state is Zigbee 'Not fully locked'
+STATE_LIST: Final[list[str]] = [STATE_UNLOCKED, STATE_LOCKED, STATE_UNLOCKED]
+VALUE_TO_STATE: Final = dict(enumerate(STATE_LIST))
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DOORLOCK)
-class ZhaDoorLock(ZhaEntity, LockEntity):
+class ZhaDoorLock(PlatformEntity):
     """Representation of a ZHA lock."""
 
+    PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
 
-    def __init__(self, unique_id, zha_device, cluster_handlers, **kwargs):
-        """Init this sensor."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
-        self._doorlock_cluster_handler = self.cluster_handlers.get(
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
+        **kwargs,
+    ):
+        """Initialize the lock."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_DOORLOCK
         )
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._doorlock_cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
+        self._state = VALUE_TO_STATE.get(
+            self._doorlock_cluster_handler.cluster.get("lock_state"), None
         )
-
-    def async_restore_last_state(self, last_state):
-        """Restore previous state."""
-        self._state = VALUE_TO_STATE.get(last_state.state, last_state.state)
+        self._doorlock_cluster_handler.on_event(
+            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+        )
 
     @property
     def is_locked(self) -> bool:
@@ -124,49 +65,21 @@ class ZhaDoorLock(ZhaEntity, LockEntity):
             return False
         return self._state == STATE_LOCKED
 
-    @property
-    def extra_state_attributes(self) -> dict[str, StateType]:
-        """Return state attributes."""
-        return self.state_attributes
-
-    async def async_lock(self, **kwargs: Any) -> None:
+    async def async_lock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Lock the lock."""
         result = await self._doorlock_cluster_handler.lock_door()
         if result[0] is not Status.SUCCESS:
             self.error("Error with lock_door: %s", result)
             return
-        self.async_write_ha_state()
+        self.maybe_send_state_changed_event()
 
-    async def async_unlock(self, **kwargs: Any) -> None:
+    async def async_unlock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Unlock the lock."""
         result = await self._doorlock_cluster_handler.unlock_door()
         if result[0] is not Status.SUCCESS:
             self.error("Error with unlock_door: %s", result)
             return
-        self.async_write_ha_state()
-
-    async def async_update(self) -> None:
-        """Attempt to retrieve state from the lock."""
-        await super().async_update()
-        await self.async_get_state()
-
-    def async_set_state(self, attr_id, attr_name, value):
-        """Handle state update from cluster handler."""
-        self._state = VALUE_TO_STATE.get(value, self._state)
-        self.async_write_ha_state()
-
-    async def async_get_state(self, from_cache=True):
-        """Attempt to retrieve state from the lock."""
-        if self._doorlock_cluster_handler:
-            state = await self._doorlock_cluster_handler.get_attribute_value(
-                "lock_state", from_cache=from_cache
-            )
-            if state is not None:
-                self._state = VALUE_TO_STATE.get(state, self._state)
-
-    async def refresh(self, time):
-        """Call async_get_state at an interval."""
-        await self.async_get_state(from_cache=False)
+        self.maybe_send_state_changed_event()
 
     async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
         """Set the user_code to index X on the lock."""
@@ -193,3 +106,26 @@ class ZhaDoorLock(ZhaEntity, LockEntity):
         if self._doorlock_cluster_handler:
             await self._doorlock_cluster_handler.async_clear_user_code(code_slot)
             self.debug("User code at slot %s cleared", code_slot)
+
+    async def async_update(self) -> None:
+        """Attempt to retrieve state from the lock."""
+        await super().async_update()  # TODO check this for 2x reads
+        if self._doorlock_cluster_handler:
+            state = await self._doorlock_cluster_handler.get_attribute_value(
+                "lock_state", from_cache=False
+            )
+            if state is not None:
+                self._state = VALUE_TO_STATE.get(state, self._state)
+
+    def handle_cluster_handler_attribute_updated(
+        self, event: ClusterAttributeUpdatedEvent
+    ) -> None:
+        """Handle state update from cluster handler."""
+        self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
+        self.maybe_send_state_changed_event()
+
+    def get_state(self) -> dict:
+        """Get the state of the lock."""
+        response = super().get_state()
+        response["is_locked"] = self.is_locked
+        return response
