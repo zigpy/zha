@@ -2,34 +2,130 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 import functools
-from typing import Any, TYPE_CHECKING
-
+from typing import TYPE_CHECKING
 
 from zigpy.quirks.v2 import BinarySensorMetadata, EntityMetadata
-import zigpy.types as t
-from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.clusters.security import IasZone
 
+from zha.application import Platform
 from zha.application.const import QUIRK_METADATA
-from zha.application.platforms import PlatformEntity
-from zha.application.platforms.registries import PLATFORM_ENTITIES, Platform
-from zha.application.zigbee.cluster_handlers import (
-    CLUSTER_HANDLER_EVENT,
-    ClusterAttributeUpdatedEvent,
-)
-from zha.server.zigbee.cluster_handlers.const import (
+from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ACCELEROMETER,
     CLUSTER_HANDLER_BINARY_INPUT,
+    CLUSTER_HANDLER_EVENT,
+    CLUSTER_HANDLER_HUE_OCCUPANCY,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_ZONE,
 )
 
 if TYPE_CHECKING:
-    from zha.server.zigbee.cluster import ClusterHandler
-    from zha.server.zigbee.device import Device
-    from zha.server.zigbee.endpoint import Endpoint
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.endpoint import Endpoint
+
+
+STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.BINARY_SENSOR)
+MULTI_MATCH = functools.partial(
+    PLATFORM_ENTITIES.multipass_match, Platform.BINARY_SENSOR
+)
+CONFIG_DIAGNOSTIC_MATCH = functools.partial(
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
+)
+
+
+class BinarySensorDeviceClass(StrEnum):
+    """Device class for binary sensors."""
+
+    # On means low, Off means normal
+    BATTERY = "battery"
+
+    # On means charging, Off means not charging
+    BATTERY_CHARGING = "battery_charging"
+
+    # On means carbon monoxide detected, Off means no carbon monoxide (clear)
+    CO = "carbon_monoxide"
+
+    # On means cold, Off means normal
+    COLD = "cold"
+
+    # On means connected, Off means disconnected
+    CONNECTIVITY = "connectivity"
+
+    # On means open, Off means closed
+    DOOR = "door"
+
+    # On means open, Off means closed
+    GARAGE_DOOR = "garage_door"
+
+    # On means gas detected, Off means no gas (clear)
+    GAS = "gas"
+
+    # On means hot, Off means normal
+    HEAT = "heat"
+
+    # On means light detected, Off means no light
+    LIGHT = "light"
+
+    # On means open (unlocked), Off means closed (locked)
+    LOCK = "lock"
+
+    # On means wet, Off means dry
+    MOISTURE = "moisture"
+
+    # On means motion detected, Off means no motion (clear)
+    MOTION = "motion"
+
+    # On means moving, Off means not moving (stopped)
+    MOVING = "moving"
+
+    # On means occupied, Off means not occupied (clear)
+    OCCUPANCY = "occupancy"
+
+    # On means open, Off means closed
+    OPENING = "opening"
+
+    # On means plugged in, Off means unplugged
+    PLUG = "plug"
+
+    # On means power detected, Off means no power
+    POWER = "power"
+
+    # On means home, Off means away
+    PRESENCE = "presence"
+
+    # On means problem detected, Off means no problem (OK)
+    PROBLEM = "problem"
+
+    # On means running, Off means not running
+    RUNNING = "running"
+
+    # On means unsafe, Off means safe
+    SAFETY = "safety"
+
+    # On means smoke detected, Off means no smoke (clear)
+    SMOKE = "smoke"
+
+    # On means sound detected, Off means no sound (clear)
+    SOUND = "sound"
+
+    # On means tampering detected, Off means no tampering (clear)
+    TAMPER = "tamper"
+
+    # On means update available, Off means up-to-date
+    UPDATE = "update"
+
+    # On means vibration detected, Off means no vibration
+    VIBRATION = "vibration"
+
+    # On means open, Off means closed
+    WINDOW = "window"
+
 
 # Zigbee Cluster Library Zone Type to Home Assistant device class
 IAS_ZONE_CLASS_MAPPING = {
@@ -41,16 +137,11 @@ IAS_ZONE_CLASS_MAPPING = {
     IasZone.ZoneType.Vibration_Movement_Sensor: BinarySensorDeviceClass.VIBRATION,
 }
 
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.BINARY_SENSOR)
-MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.BINARY_SENSOR)
-CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
-)
-
 
 class BinarySensor(PlatformEntity):
     """ZHA BinarySensor."""
 
+    _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
     PLATFORM: Platform = Platform.BINARY_SENSOR
 
@@ -59,7 +150,7 @@ class BinarySensor(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: Device,
+        device: ZHADevice,
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
@@ -70,22 +161,12 @@ class BinarySensor(PlatformEntity):
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_EVENT, self._handle_event_protocol
         )
-        self._state: bool = bool(
-            self._cluster_handler.cluster.get(self._attribute_name)
-        )
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
         binary_sensor_metadata: BinarySensorMetadata = entity_metadata.entity_metadata
         self._attribute_name = binary_sensor_metadata.attribute_name
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
-        )
 
     @property
     def is_on(self) -> bool:
@@ -95,9 +176,40 @@ class BinarySensor(PlatformEntity):
             return False
         return self.parse(raw_state)
 
-    def async_set_state(self, attr_id, attr_name, value):
-        """Set the state."""
-        self.async_write_ha_state()
+    @property
+    def device_class(self) -> BinarySensorDeviceClass | None:
+        """Return the class of this entity."""
+        return self._attr_device_class
+
+    def get_state(self) -> dict:
+        """Return the state of the binary sensor."""
+        response = super().get_state()
+        response["state"] = self.is_on
+        return response
+
+    def handle_cluster_handler_attribute_updated(
+        self, event: ClusterAttributeUpdatedEvent
+    ) -> None:
+        """Handle attribute updates from the cluster handler."""
+        if self._attribute_name is None or self._attribute_name != event.name:
+            return
+        self._state = bool(event.value)
+        self.maybe_send_state_changed_event()
+
+    async def async_update(self) -> None:
+        """Attempt to retrieve on off state from the binary sensor."""
+        await super().async_update()
+        attribute = getattr(self._cluster_handler, "value_attribute", "on_off")
+        attr_value = await self._cluster_handler.get_attribute_value(attribute)
+        if attr_value is not None:
+            self._state = attr_value
+            self.maybe_send_state_changed_event()
+
+    def to_json(self) -> dict:
+        """Return a JSON representation of the binary sensor."""
+        json = super().to_json()
+        json["sensor_attribute"] = self._attribute_name
+        return json
 
     @staticmethod
     def parse(value: bool | int) -> bool:
@@ -136,15 +248,18 @@ class Opening(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
 
+    # pylint: disable=pointless-string-statement
+    """TODO
     # Client/out cluster attributes aren't stored in the zigpy database, but are properly stored in the runtime cache.
     # We need to manually restore the last state from the sensor state to the runtime cache for now.
 
     def async_restore_last_state(self, last_state):
-        """Restore previous state to zigpy cache."""
+        #Restore previous state to zigpy cache.
         self._cluster_handler.cluster.update_attribute(
             OnOff.attributes_by_name[self._attribute_name].id,
             t.Bool.true if last_state.state == STATE_ON else t.Bool.false,
         )
+    """
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -197,36 +312,6 @@ class IASZone(BinarySensor):
     def parse(value: bool | int) -> bool:
         """Parse the raw attribute into a bool state."""
         return BinarySensor.parse(value & 3)  # use only bit 0 and 1 for alarm state
-
-    # temporary code to migrate old IasZone sensors to update attribute cache state once
-    # remove in 2024.4.0
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return state attributes."""
-        return {"migrated_to_cache": True}  # writing new state means we're migrated
-
-    # temporary migration code
-
-    def async_restore_last_state(self, last_state):
-        """Restore previous state."""
-        # trigger migration if extra state attribute is not present
-        if "migrated_to_cache" not in last_state.attributes:
-            self.migrate_to_zigpy_cache(last_state)
-
-    # temporary migration code
-
-    def migrate_to_zigpy_cache(self, last_state):
-        """Save old IasZone sensor state to attribute cache."""
-        # previous HA versions did not update the attribute cache for IasZone sensors, so do it once here
-        # a HA state write is triggered shortly afterwards and writes the "migrated_to_cache" extra state attribute
-        if last_state.state == STATE_ON:
-            migrated_state = IasZone.ZoneStatus.Alarm_1
-        else:
-            migrated_state = IasZone.ZoneStatus(0)
-
-        self._cluster_handler.cluster.update_attribute(
-            IasZone.attributes_by_name[self._attribute_name].id, migrated_state
-        )
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE, models={"WL4200", "WL4200S"})

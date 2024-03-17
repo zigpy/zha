@@ -2,65 +2,50 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
 
-from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, Platform
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from zigpy.quirks.v2 import (
     EntityMetadata,
     WriteAttributeButtonMetadata,
     ZCLCommandButtonMetadata,
 )
 
-from .core import discovery
-from .core.const import CLUSTER_HANDLER_IDENTIFY, QUIRK_METADATA, SIGNAL_ADD_ENTITIES
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
+from zha.application import Platform
+from zha.application.const import QUIRK_METADATA
+from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
 
 if TYPE_CHECKING:
-    from .core.cluster_handlers import ClusterHandler
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.endpoint import Endpoint
 
 
-MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.BUTTON)
+MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.BUTTON)
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.BUTTON
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.BUTTON
 )
 DEFAULT_DURATION = 5  # seconds
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation button from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.BUTTON]
+class ButtonDeviceClass(StrEnum):
+    """Device class for buttons."""
 
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities,
-            async_add_entities,
-            entities_to_create,
-        ),
-    )
-    config_entry.async_on_unload(unsub)
+    IDENTIFY = "identify"
+    RESTART = "restart"
+    UPDATE = "update"
 
 
-class ZHAButton(ZhaEntity, ButtonEntity):
+class ZHAButton(PlatformEntity):
     """Defines a ZHA button."""
+
+    PLATFORM = Platform.BUTTON
 
     _command_name: str
     _args: list[Any]
@@ -69,15 +54,16 @@ class ZHAButton(ZhaEntity, ButtonEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
-    ) -> None:
-        """Init this button."""
+    ):
+        """Initialize button."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         if QUIRK_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -102,6 +88,12 @@ class ZHAButton(ZhaEntity, ButtonEntity):
         kwargs = self.get_kwargs() or {}
         await command(*arguments, **kwargs)
 
+    def to_json(self) -> dict:
+        """Return a JSON representation of the button."""
+        json = super().to_json()
+        json["command"] = self._command_name
+        return json
+
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IDENTIFY)
 class ZHAIdentifyButton(ZHAButton):
@@ -119,7 +111,7 @@ class ZHAIdentifyButton(ZHAButton):
 
         Return entity if it is a supported configuration, otherwise return None
         """
-        if ZHA_ENTITIES.prevent_entity_creation(
+        if PLATFORM_ENTITIES.prevent_entity_creation(
             Platform.BUTTON, zha_device.ieee, CLUSTER_HANDLER_IDENTIFY
         ):
             return None
@@ -132,7 +124,7 @@ class ZHAIdentifyButton(ZHAButton):
     _args = [DEFAULT_DURATION]
 
 
-class ZHAAttributeButton(ZhaEntity, ButtonEntity):
+class ZHAAttributeButton(PlatformEntity):
     """Defines a ZHA button, which writes a value to an attribute."""
 
     _attribute_name: str
@@ -141,15 +133,16 @@ class ZHAAttributeButton(ZhaEntity, ButtonEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> None:
         """Init this button."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         if QUIRK_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -163,7 +156,6 @@ class ZHAAttributeButton(ZhaEntity, ButtonEntity):
         await self._cluster_handler.write_attributes_safe(
             {self._attribute_name: self._attribute_value}
         )
-        self.async_write_ha_state()
 
 
 @CONFIG_DIAGNOSTIC_MATCH(

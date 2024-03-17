@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Coroutine
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Final
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 import zigpy.exceptions
@@ -45,6 +46,7 @@ from zigpy.zcl.foundation import Status
 from zha.exceptions import ZHAException
 
 from . import (
+    CLUSTER_HANDLER_EVENT,
     AttrReportConfig,
     ClientClusterHandler,
     ClusterHandler,
@@ -67,6 +69,15 @@ from .helpers import is_hue_motion_sensor
 
 if TYPE_CHECKING:
     from ..endpoint import Endpoint
+
+
+@dataclass
+class LevelChangeEvent:
+    """Event to signal that a cluster attribute has been updated."""
+
+    level: int
+    event_type: Final[str] = "cluster_handler_event"
+    event: str
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Alarms.cluster_id)
@@ -354,7 +365,13 @@ class LevelControlClusterHandler(ClusterHandler):
 
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
-        self.async_send_signal(f"{self.unique_id}_{command}", level)
+        self.emit(
+            CLUSTER_HANDLER_EVENT,
+            LevelChangeEvent(
+                level=level,
+                event=f"cluster_handler_{command}",
+            ),
+        )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateInput.cluster_id)

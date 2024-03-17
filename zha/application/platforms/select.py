@@ -34,7 +34,7 @@ from .core.const import (
     Strobe,
 )
 from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
+from .core.registries import PLATFORM_ENTITIES
 from .entity import ZhaEntity
 
 if TYPE_CHECKING:
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
 
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.SELECT
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.SELECT
 )
 _LOGGER = logging.getLogger(__name__)
 

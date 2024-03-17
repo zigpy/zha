@@ -24,12 +24,12 @@ from .core.const import (
     SIGNAL_ATTR_UPDATED,
 )
 from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
+from .core.registries import PLATFORM_ENTITIES
 from .entity import ZhaEntity
 
 # The first state is Zigbee 'Not fully locked'
 STATE_LIST = [STATE_UNLOCKED, STATE_LOCKED, STATE_UNLOCKED]
-MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.LOCK)
+MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.LOCK)
 
 VALUE_TO_STATE = dict(enumerate(STATE_LIST))
 

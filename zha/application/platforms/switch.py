@@ -29,17 +29,17 @@ from .core.const import (
     SIGNAL_ATTR_UPDATED,
 )
 from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
+from .core.registries import PLATFORM_ENTITIES
 from .entity import ZhaEntity, ZhaGroupEntity
 
 if TYPE_CHECKING:
     from .core.cluster_handlers import ClusterHandler
     from .core.device import ZHADevice
 
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.SWITCH)
-GROUP_MATCH = functools.partial(ZHA_ENTITIES.group_match, Platform.SWITCH)
+STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.SWITCH)
+GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.SWITCH)
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.SWITCH
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.SWITCH
 )
 
 _LOGGER = logging.getLogger(__name__)

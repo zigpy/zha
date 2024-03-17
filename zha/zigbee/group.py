@@ -187,6 +187,11 @@ class Group(LogMixin):
         return self._zigpy_group
 
     @property
+    def gateway(self) -> ZHAGateway:
+        """Return the gateway for this group."""
+        return self._gateway
+
+    @property
     def members(self) -> list[GroupMember]:
         """Return the ZHA devices that are members of this group."""
         return [

@@ -75,7 +75,7 @@ from .core.const import (
     SIGNAL_ATTR_UPDATED,
 )
 from .core.helpers import get_zha_data
-from .core.registries import SMARTTHINGS_HUMIDITY_CLUSTER, ZHA_ENTITIES
+from .core.registries import SMARTTHINGS_HUMIDITY_CLUSTER, PLATFORM_ENTITIES
 from .entity import BaseZhaEntity, ZhaEntity
 
 if TYPE_CHECKING:
@@ -103,10 +103,10 @@ _LOGGER = logging.getLogger(__name__)
 CLUSTER_HANDLER_ST_HUMIDITY_CLUSTER = (
     f"cluster_handler_0x{SMARTTHINGS_HUMIDITY_CLUSTER:04x}"
 )
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.SENSOR)
-MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.SENSOR)
+STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.SENSOR)
+MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SENSOR)
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.SENSOR
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.SENSOR
 )
 
 
@@ -1243,7 +1243,9 @@ class RSSISensor(Sensor):
         Return entity if it is a supported configuration, otherwise return None
         """
         key = f"{CLUSTER_HANDLER_BASIC}_{cls._unique_id_suffix}"
-        if ZHA_ENTITIES.prevent_entity_creation(Platform.SENSOR, zha_device.ieee, key):
+        if PLATFORM_ENTITIES.prevent_entity_creation(
+            Platform.SENSOR, zha_device.ieee, key
+        ):
             return None
         return cls(unique_id, zha_device, cluster_handlers, **kwargs)
 

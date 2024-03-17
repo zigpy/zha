@@ -39,14 +39,14 @@ from .core.const import (
     Strobe,
 )
 from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
+from .core.registries import PLATFORM_ENTITIES
 from .entity import ZhaEntity
 
 if TYPE_CHECKING:
     from .core.cluster_handlers import ClusterHandler
     from .core.device import ZHADevice
 
-MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.SIREN)
+MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SIREN)
 DEFAULT_DURATION = 5  # seconds
 
 

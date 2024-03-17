@@ -30,7 +30,7 @@ from .core.const import (
     SIGNAL_ATTR_UPDATED,
 )
 from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
+from .core.registries import PLATFORM_ENTITIES
 from .entity import ZhaEntity
 
 if TYPE_CHECKING:
@@ -39,9 +39,9 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.NUMBER)
+STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.NUMBER)
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.NUMBER
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.NUMBER
 )
 
 
