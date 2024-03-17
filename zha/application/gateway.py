@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Collection, Coroutine
+from collections.abc import Callable
 from contextlib import suppress
 from datetime import timedelta
 from enum import Enum
@@ -38,7 +38,11 @@ from zha.application.const import (
     ZHA_GW_MSG_GROUP_REMOVED,
     RadioType,
 )
-from zha.async_ import cancelling, create_eager_task, gather_with_limited_concurrency
+from zha.async_ import (
+    AsyncUtilMixin,
+    create_eager_task,
+    gather_with_limited_concurrency,
+)
 from zha.zigbee.device import DeviceStatus, ZHADevice
 from zha.zigbee.group import Group, GroupMember
 
@@ -56,11 +60,12 @@ class DevicePairingStatus(Enum):
     INITIALIZED = 4
 
 
-class ZHAGateway:
+class ZHAGateway(AsyncUtilMixin):
     """Gateway that handles events that happen on the ZHA Zigbee network."""
 
     def __init__(self, config: dict[str, Any]) -> None:
         """Initialize the gateway."""
+        super().__init__()
         self._config: dict[str, Any] = config
         self._devices: dict[EUI64, ZHADevice] = {}
         self._groups: dict[int, Group] = {}
@@ -507,64 +512,6 @@ class ZHAGateway:
         """Return groups."""
         return self._groups
 
-    def block_till_done(self) -> None:
-        """Block until all pending work is done."""
-        asyncio.run_coroutine_threadsafe(
-            self.async_block_till_done(), asyncio.get_running_loop()
-        ).result()
-
-    async def async_block_till_done(self, wait_background_tasks: bool = False) -> None:
-        """Block until all pending work is done."""
-        # To flush out any call_soon_threadsafe
-        await asyncio.sleep(0)
-        start_time: float | None = None
-        current_task = asyncio.current_task()
-        while tasks := [
-            task
-            for task in (
-                self._tracked_completable_tasks
-                | self._background_tasks
-                | self._device_init_tasks
-                if wait_background_tasks
-                else self._tracked_completable_tasks | self._device_init_tasks
-            )
-            if task is not current_task and not cancelling(task)
-        ]:
-            await self._await_and_log_pending(tasks)
-
-            if start_time is None:
-                # Avoid calling monotonic() until we know
-                # we may need to start logging blocked tasks.
-                start_time = 0
-            elif start_time == 0:
-                # If we have waited twice then we set the start
-                # time
-                start_time = time.monotonic()
-            elif time.monotonic() - start_time > BLOCK_LOG_TIMEOUT:
-                # We have waited at least three loops and new tasks
-                # continue to block. At this point we start
-                # logging all waiting tasks.
-                for task in tasks:
-                    _LOGGER.debug("Waiting for task: %s", task)
-
-    async def _await_and_log_pending(
-        self, pending: Collection[asyncio.Future[Any]]
-    ) -> None:
-        """Await and log tasks that take a long time."""
-        wait_time = 0
-        while pending:
-            _, pending = await asyncio.wait(pending, timeout=BLOCK_LOG_TIMEOUT)
-            if not pending:
-                return
-            wait_time += BLOCK_LOG_TIMEOUT
-            for task in pending:
-                _LOGGER.debug("Waited %s seconds for task: %s", wait_time, task)
-
-    def track_task(self, task: asyncio.Task) -> None:
-        """Create a tracked task."""
-        self._tracked_completable_tasks.append(task)
-        task.add_done_callback(self._tracked_completable_tasks.remove)
-
     def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> ZHADevice:
         """Get or create a ZHA device."""
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
@@ -759,34 +706,3 @@ class ZHAGateway:
         """Handle message from a device Event handler."""
         if sender.ieee in self.devices and not self.devices[sender.ieee].available:
             self.async_update_device(sender, available=True)
-
-    def async_create_background_task(
-        self, target: Coroutine[Any, Any, _R], name: str, eager_start: bool = False
-    ) -> asyncio.Task[_R]:
-        """Create a task from within the event loop.
-
-        This type of task is for background tasks that usually run for
-        the lifetime of Home Assistant or an integration's setup.
-
-        A background task is different from a normal task:
-
-          - Will not block startup
-          - Will be automatically cancelled on shutdown
-          - Calls to async_block_till_done will not wait for completion
-
-        If you are using this in your integration, use the create task
-        methods on the config entry instead.
-
-        This method must be run in the event loop.
-        """
-        if eager_start:
-            task = create_eager_task(target, name=name, loop=asyncio.get_running_loop())
-            if task.done():
-                return task
-        else:
-            # Use loop.create_task
-            # to avoid the extra function call in asyncio.create_task.
-            task = asyncio.get_running_loop().create_task(target, name=name)
-        self._background_tasks.add(task)
-        task.add_done_callback(self._background_tasks.remove)
-        return task
