@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import datetime as dt
-from datetime import timedelta
 from enum import IntFlag, StrEnum
 import functools
-from random import randint
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
@@ -619,7 +617,6 @@ class SinopeTechnologiesThermostat(Thermostat):
     """Sinope Technologies Thermostat."""
 
     manufacturer = 0x119C
-    update_time_interval = timedelta(minutes=randint(45, 75))
 
     def __init__(
         self,
@@ -635,15 +632,15 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._supported_flags |= ClimateEntityFeature.PRESET_MODE
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
 
-        @periodic(self.update_time_interval)
-        async def _update_time() -> None:
-            await self._async_update_time()
-
         self._tracked_tasks.append(
             asyncio.create_task(
-                _update_time(), name=f"sinope_time_updater_{self.unique_id}"
+                self._update_time(), name=f"sinope_time_updater_{self.unique_id}"
             )
         )
+
+    @periodic((2700, 4500))
+    async def _update_time(self) -> None:
+        await self._async_update_time()
 
     @property
     def _rm_rs_action(self) -> HVACAction:

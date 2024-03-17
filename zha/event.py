@@ -18,6 +18,7 @@ class EventBase:
         """Initialize event base."""
         super().__init__(*args, **kwargs)
         self._listeners: dict[str, list[Callable]] = {}
+        self._event_tasks: list[asyncio.Task] = []
 
     def on_event(  # pylint: disable=invalid-name
         self, event_name: str, callback: Callable
@@ -49,9 +50,13 @@ class EventBase:
         for listener in self._listeners.get(event_name, []):
             if inspect.iscoroutinefunction(listener):
                 if data is None:
-                    asyncio.create_task(listener())
+                    task = asyncio.create_task(listener())
+                    self._event_tasks.append(task)
+                    task.add_done_callback(self._event_tasks.remove)
                 else:
-                    asyncio.create_task(listener(data))
+                    task = asyncio.create_task(listener(data))
+                    self._event_tasks.append(task)
+                    task.add_done_callback(self._event_tasks.remove)
             elif data is None:
                 listener()
             else:
@@ -65,6 +70,8 @@ class EventBase:
             _LOGGER.warning("Received unknown event: %s", event)
             return
         if inspect.iscoroutinefunction(handler):
-            asyncio.create_task(handler(event))
+            task = asyncio.create_task(handler(event))
+            self._event_tasks.append(task)
+            task.add_done_callback(self._event_tasks.remove)
         else:
             handler(event)

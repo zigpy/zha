@@ -240,7 +240,7 @@ class BaseFan(BaseEntity):
     ) -> None:
         """Turn the entity on."""
         if preset_mode is not None:
-            self.async_set_preset_mode(preset_mode)
+            await self.async_set_preset_mode(preset_mode)
         elif speed is not None:
             await self.async_set_percentage(self.speed_to_percentage(speed))
         elif percentage is not None:
@@ -261,13 +261,6 @@ class BaseFan(BaseEntity):
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set the preset mode for the fan."""
         await self._async_set_fan_mode(self.preset_name_to_mode[preset_mode])
-
-    @abstractmethod
-    async def _async_set_fan_mode(self, fan_mode: int) -> None:
-        """Set the fan mode for the fan."""
-
-    def async_set_state(self, attr_id, attr_name, value):
-        """Handle state update from cluster handler."""
 
     @abstractmethod
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
@@ -370,7 +363,7 @@ class ZhaFan(PlatformEntity, BaseFan):
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
         await self._fan_cluster_handler.async_set_speed(fan_mode)
-        self.async_set_state(0, "fan_mode", fan_mode)
+        self.maybe_send_state_changed_event()
 
 
 @GROUP_MATCH()
@@ -425,7 +418,7 @@ class FanGroup(GroupEntity, BaseFan):
         with wrap_zigpy_exceptions():
             await self._fan_cluster_handler.write_attributes({"fan_mode": fan_mode})
 
-        self.async_set_state(0, "fan_mode", fan_mode)
+        self.maybe_send_state_changed_event()
 
     def update(self, _: Any = None) -> None:
         """Attempt to retrieve on off state from the fan."""

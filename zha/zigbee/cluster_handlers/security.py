@@ -96,7 +96,7 @@ class IasAceClusterHandler(ClusterHandler):
         )
 
         zigbee_reply = self.arm_map[mode](code)
-        self._endpoint.device.hass.async_create_task(zigbee_reply)
+        self._endpoint.device.gateway.async_create_task(zigbee_reply)
 
         if self.invalid_tries >= self.max_invalid_tries:
             self.alarm_status = AceCluster.AlarmStatus.Emergency
@@ -218,7 +218,7 @@ class IasAceClusterHandler(ClusterHandler):
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )
-        self._endpoint.device.hass.async_create_task(response)
+        self._endpoint.device.gateway.async_create_task(response)
 
     def _send_panel_status_changed(self) -> None:
         """Handle the IAS ACE panel status changed command."""
@@ -228,7 +228,7 @@ class IasAceClusterHandler(ClusterHandler):
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )
-        self._endpoint.device.hass.async_create_task(response)
+        self._endpoint.device.gateway.async_create_task(response)
         self.emit(
             CLUSTER_HANDLER_EVENT,
             ClusterHandlerStateChangedEvent(),

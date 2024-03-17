@@ -197,7 +197,7 @@ class ClusterHandler(LogMixin, EventBase):
         return hash(self._unique_id)
 
     def async_send_signal(self, signal: str, *args: Any) -> None:
-        """Send a signal through hass dispatcher."""
+        """Send a signal through dispatcher."""
         self._endpoint.async_send_signal(signal, *args)
 
     async def bind(self) -> None:
@@ -461,7 +461,7 @@ class ClusterHandler(LogMixin, EventBase):
         """Handle ZDO commands on this cluster."""
 
     def zha_send_event(self, command: str, arg: list | dict | CommandSchema) -> None:
-        """Relay events to hass."""
+        """Relay events to listeners."""
 
         args: list | dict
         if isinstance(arg, CommandSchema):

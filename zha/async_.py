@@ -44,7 +44,7 @@ def create_eager_task(
         coro,
         loop=loop or get_running_loop(),
         name=name,
-        eager_start=True,  # type: ignore[call-arg]
+        eager_start=True,
     )
 
 
@@ -154,7 +154,7 @@ class AsyncUtilMixin:
         """Initialize the async mixin."""
         self._tracked_completable_tasks: list[asyncio.Task] = []
         self._device_init_tasks: dict[EUI64, asyncio.Task] = {}
-        self._background_tasks: set[asyncio.Future[Any]] = set()
+        self._background_tasks: set[asyncio.Future[Any]] = []
         super().__init__(*args, **kw_args)
 
     def block_till_done(self) -> None:
@@ -174,9 +174,10 @@ class AsyncUtilMixin:
             for task in (
                 self._tracked_completable_tasks
                 | self._background_tasks
-                | self._device_init_tasks
+                | list(self._device_init_tasks.values())
                 if wait_background_tasks
-                else self._tracked_completable_tasks | self._device_init_tasks
+                else self._tracked_completable_tasks
+                | list(self._device_init_tasks.values())
             )
             if task is not current_task and not cancelling(task)
         ]:

@@ -407,8 +407,6 @@ class Shade(PlatformEntity):
     @property
     def is_closed(self) -> bool | None:
         """Return True if shade is closed."""
-        if self._is_open is None:
-            return None
         return not self._is_open
 
     def handle_cluster_handler_attribute_updated(
