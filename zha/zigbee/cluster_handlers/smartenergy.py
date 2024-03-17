@@ -276,7 +276,7 @@ class MeteringClusterHandler(ClusterHandler):
         return self.cluster.get(Metering.AttributeDefs.multiplier.name) or 1
 
     @property
-    def status(self) -> int | None:
+    def metering_status(self) -> int | None:
         """Return metering device status."""
         if (status := self.cluster.get(Metering.AttributeDefs.status.name)) is None:
             return None

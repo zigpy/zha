@@ -1,65 +1,36 @@
-"""Sensors on Zigbee Home Automation networks."""
+"""Sensors on Zigbee Home Automation networks."""  # pylint: disable=too-many-lines
 
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import timedelta
 import enum
 import functools
 import logging
 import numbers
-import random
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Final, Self
 
-from homeassistant.components.climate import HVACAction
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntity,
-    SensorEntityDescription,
-    SensorStateClass,
-)
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    CONCENTRATION_PARTS_PER_BILLION,
-    CONCENTRATION_PARTS_PER_MILLION,
-    LIGHT_LUX,
-    PERCENTAGE,
-    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
-    EntityCategory,
-    Platform,
-    UnitOfApparentPower,
-    UnitOfElectricCurrent,
-    UnitOfElectricPotential,
-    UnitOfEnergy,
-    UnitOfFrequency,
-    UnitOfMass,
-    UnitOfPower,
-    UnitOfPressure,
-    UnitOfTemperature,
-    UnitOfTime,
-    UnitOfVolume,
-    UnitOfVolumeFlowRate,
-)
-from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_track_time_interval
-from homeassistant.helpers.typing import StateType
 from zigpy import types
 from zigpy.quirks.v2 import EntityMetadata, ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
-from .core import discovery
-from .core.const import (
+from zha.application import Platform
+from zha.application.const import DATA_ZHA, QUIRK_METADATA
+from zha.application.platforms import BaseEntity, EntityCategory, PlatformEntity
+from zha.application.platforms.climate import HVACAction
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.decorators import periodic
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_INPUT,
     CLUSTER_HANDLER_BASIC,
     CLUSTER_HANDLER_COVER,
     CLUSTER_HANDLER_DEVICE_TEMPERATURE,
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
+    CLUSTER_HANDLER_EVENT,
     CLUSTER_HANDLER_HUMIDITY,
     CLUSTER_HANDLER_ILLUMINANCE,
     CLUSTER_HANDLER_LEAF_WETNESS,
@@ -69,18 +40,13 @@ from .core.const import (
     CLUSTER_HANDLER_SOIL_MOISTURE,
     CLUSTER_HANDLER_TEMPERATURE,
     CLUSTER_HANDLER_THERMOSTAT,
-    DATA_ZHA,
-    QUIRK_METADATA,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
+    SMARTTHINGS_HUMIDITY_CLUSTER,
 )
-from .core.helpers import get_zha_data
-from .core.registries import SMARTTHINGS_HUMIDITY_CLUSTER, PLATFORM_ENTITIES
-from .entity import BaseZhaEntity, ZhaEntity
 
 if TYPE_CHECKING:
-    from .core.cluster_handlers import ClusterHandler
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.endpoint import Endpoint
 
 BATTERY_SIZES = {
     0: "No battery",
@@ -110,35 +76,548 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation sensor from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.SENSOR]
+class SensorStateClass(enum.StrEnum):
+    """State class for sensors."""
 
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities,
-            async_add_entities,
-            entities_to_create,
-        ),
-    )
-    config_entry.async_on_unload(unsub)
+    MEASUREMENT = "measurement"
+    """The state represents a measurement in present time."""
+
+    TOTAL = "total"
+    """The state represents a total amount.
+
+    For example: net energy consumption"""
+
+    TOTAL_INCREASING = "total_increasing"
+    """The state represents a monotonically increasing total.
+
+    For example: an amount of consumed gas"""
 
 
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class Sensor(ZhaEntity, SensorEntity):
+class SensorDeviceClass(enum.StrEnum):
+    """Device class for sensors."""
+
+    # Non-numerical device classes
+    DATE = "date"
+    """Date.
+
+    Unit of measurement: `None`
+
+    ISO8601 format: https://en.wikipedia.org/wiki/ISO_8601
+    """
+
+    ENUM = "enum"
+    """Enumeration.
+
+    Provides a fixed list of options the state of the sensor can be in.
+
+    Unit of measurement: `None`
+    """
+
+    TIMESTAMP = "timestamp"
+    """Timestamp.
+
+    Unit of measurement: `None`
+
+    ISO8601 format: https://en.wikipedia.org/wiki/ISO_8601
+    """
+
+    # Numerical device classes, these should be aligned with NumberDeviceClass
+    APPARENT_POWER = "apparent_power"
+    """Apparent power.
+
+    Unit of measurement: `VA`
+    """
+
+    AQI = "aqi"
+    """Air Quality Index.
+
+    Unit of measurement: `None`
+    """
+
+    ATMOSPHERIC_PRESSURE = "atmospheric_pressure"
+    """Atmospheric pressure.
+
+    Unit of measurement: `UnitOfPressure` units
+    """
+
+    BATTERY = "battery"
+    """Percentage of battery that is left.
+
+    Unit of measurement: `%`
+    """
+
+    CO = "carbon_monoxide"
+    """Carbon Monoxide gas concentration.
+
+    Unit of measurement: `ppm` (parts per million)
+    """
+
+    CO2 = "carbon_dioxide"
+    """Carbon Dioxide gas concentration.
+
+    Unit of measurement: `ppm` (parts per million)
+    """
+
+    CURRENT = "current"
+    """Current.
+
+    Unit of measurement: `A`, `mA`
+    """
+
+    DATA_RATE = "data_rate"
+    """Data rate.
+
+    Unit of measurement: UnitOfDataRate
+    """
+
+    DATA_SIZE = "data_size"
+    """Data size.
+
+    Unit of measurement: UnitOfInformation
+    """
+
+    DISTANCE = "distance"
+    """Generic distance.
+
+    Unit of measurement: `LENGTH_*` units
+    - SI /metric: `mm`, `cm`, `m`, `km`
+    - USCS / imperial: `in`, `ft`, `yd`, `mi`
+    """
+
+    DURATION = "duration"
+    """Fixed duration.
+
+    Unit of measurement: `d`, `h`, `min`, `s`, `ms`
+    """
+
+    ENERGY = "energy"
+    """Energy.
+
+    Use this device class for sensors measuring energy consumption, for example
+    electric energy consumption.
+    Unit of measurement: `Wh`, `kWh`, `MWh`, `MJ`, `GJ`
+    """
+
+    ENERGY_STORAGE = "energy_storage"
+    """Stored energy.
+
+    Use this device class for sensors measuring stored energy, for example the amount
+    of electric energy currently stored in a battery or the capacity of a battery.
+
+    Unit of measurement: `Wh`, `kWh`, `MWh`, `MJ`, `GJ`
+    """
+
+    FREQUENCY = "frequency"
+    """Frequency.
+
+    Unit of measurement: `Hz`, `kHz`, `MHz`, `GHz`
+    """
+
+    GAS = "gas"
+    """Gas.
+
+    Unit of measurement:
+    - SI / metric: `m³`
+    - USCS / imperial: `ft³`, `CCF`
+    """
+
+    HUMIDITY = "humidity"
+    """Relative humidity.
+
+    Unit of measurement: `%`
+    """
+
+    ILLUMINANCE = "illuminance"
+    """Illuminance.
+
+    Unit of measurement: `lx`
+    """
+
+    IRRADIANCE = "irradiance"
+    """Irradiance.
+
+    Unit of measurement:
+    - SI / metric: `W/m²`
+    - USCS / imperial: `BTU/(h⋅ft²)`
+    """
+
+    MOISTURE = "moisture"
+    """Moisture.
+
+    Unit of measurement: `%`
+    """
+
+    MONETARY = "monetary"
+    """Amount of money.
+
+    Unit of measurement: ISO4217 currency code
+
+    See https://en.wikipedia.org/wiki/ISO_4217#Active_codes for active codes
+    """
+
+    NITROGEN_DIOXIDE = "nitrogen_dioxide"
+    """Amount of NO2.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    NITROGEN_MONOXIDE = "nitrogen_monoxide"
+    """Amount of NO.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    NITROUS_OXIDE = "nitrous_oxide"
+    """Amount of N2O.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    OZONE = "ozone"
+    """Amount of O3.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    PH = "ph"
+    """Potential hydrogen (acidity/alkalinity).
+
+    Unit of measurement: Unitless
+    """
+
+    PM1 = "pm1"
+    """Particulate matter <= 1 μm.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    PM10 = "pm10"
+    """Particulate matter <= 10 μm.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    PM25 = "pm25"
+    """Particulate matter <= 2.5 μm.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    POWER_FACTOR = "power_factor"
+    """Power factor.
+
+    Unit of measurement: `%`, `None`
+    """
+
+    POWER = "power"
+    """Power.
+
+    Unit of measurement: `W`, `kW`
+    """
+
+    PRECIPITATION = "precipitation"
+    """Accumulated precipitation.
+
+    Unit of measurement: UnitOfPrecipitationDepth
+    - SI / metric: `cm`, `mm`
+    - USCS / imperial: `in`
+    """
+
+    PRECIPITATION_INTENSITY = "precipitation_intensity"
+    """Precipitation intensity.
+
+    Unit of measurement: UnitOfVolumetricFlux
+    - SI /metric: `mm/d`, `mm/h`
+    - USCS / imperial: `in/d`, `in/h`
+    """
+
+    PRESSURE = "pressure"
+    """Pressure.
+
+    Unit of measurement:
+    - `mbar`, `cbar`, `bar`
+    - `Pa`, `hPa`, `kPa`
+    - `inHg`
+    - `psi`
+    """
+
+    REACTIVE_POWER = "reactive_power"
+    """Reactive power.
+
+    Unit of measurement: `var`
+    """
+
+    SIGNAL_STRENGTH = "signal_strength"
+    """Signal strength.
+
+    Unit of measurement: `dB`, `dBm`
+    """
+
+    SOUND_PRESSURE = "sound_pressure"
+    """Sound pressure.
+
+    Unit of measurement: `dB`, `dBA`
+    """
+
+    SPEED = "speed"
+    """Generic speed.
+
+    Unit of measurement: `SPEED_*` units or `UnitOfVolumetricFlux`
+    - SI /metric: `mm/d`, `mm/h`, `m/s`, `km/h`
+    - USCS / imperial: `in/d`, `in/h`, `ft/s`, `mph`
+    - Nautical: `kn`
+    - Beaufort: `Beaufort`
+    """
+
+    SULPHUR_DIOXIDE = "sulphur_dioxide"
+    """Amount of SO2.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    TEMPERATURE = "temperature"
+    """Temperature.
+
+    Unit of measurement: `°C`, `°F`, `K`
+    """
+
+    VOLATILE_ORGANIC_COMPOUNDS = "volatile_organic_compounds"
+    """Amount of VOC.
+
+    Unit of measurement: `µg/m³`
+    """
+
+    VOLATILE_ORGANIC_COMPOUNDS_PARTS = "volatile_organic_compounds_parts"
+    """Ratio of VOC.
+
+    Unit of measurement: `ppm`, `ppb`
+    """
+
+    VOLTAGE = "voltage"
+    """Voltage.
+
+    Unit of measurement: `V`, `mV`
+    """
+
+    VOLUME = "volume"
+    """Generic volume.
+
+    Unit of measurement: `VOLUME_*` units
+    - SI / metric: `mL`, `L`, `m³`
+    - USCS / imperial: `ft³`, `CCF`, `fl. oz.`, `gal` (warning: volumes expressed in
+    USCS/imperial units are currently assumed to be US volumes)
+    """
+
+    VOLUME_STORAGE = "volume_storage"
+    """Generic stored volume.
+
+    Use this device class for sensors measuring stored volume, for example the amount
+    of fuel in a fuel tank.
+
+    Unit of measurement: `VOLUME_*` units
+    - SI / metric: `mL`, `L`, `m³`
+    - USCS / imperial: `ft³`, `CCF`, `fl. oz.`, `gal` (warning: volumes expressed in
+    USCS/imperial units are currently assumed to be US volumes)
+    """
+
+    VOLUME_FLOW_RATE = "volume_flow_rate"
+    """Generic flow rate
+
+    Unit of measurement: UnitOfVolumeFlowRate
+    - SI / metric: `m³/h`, `L/min`
+    - USCS / imperial: `ft³/min`, `gal/min`
+    """
+
+    WATER = "water"
+    """Water.
+
+    Unit of measurement:
+    - SI / metric: `m³`, `L`
+    - USCS / imperial: `ft³`, `CCF`, `gal` (warning: volumes expressed in
+    USCS/imperial units are currently assumed to be US volumes)
+    """
+
+    WEIGHT = "weight"
+    """Generic weight, represents a measurement of an object's mass.
+
+    Weight is used instead of mass to fit with every day language.
+
+    Unit of measurement: `MASS_*` units
+    - SI / metric: `µg`, `mg`, `g`, `kg`
+    - USCS / imperial: `oz`, `lb`
+    """
+
+    WIND_SPEED = "wind_speed"
+    """Wind speed.
+
+    Unit of measurement: `SPEED_*` units
+    - SI /metric: `m/s`, `km/h`
+    - USCS / imperial: `ft/s`, `mph`
+    - Nautical: `kn`
+    - Beaufort: `Beaufort`
+    """
+
+
+NON_NUMERIC_DEVICE_CLASSES = {
+    SensorDeviceClass.DATE,
+    SensorDeviceClass.ENUM,
+    SensorDeviceClass.TIMESTAMP,
+}
+
+# Percentage units
+PERCENTAGE: Final[str] = "%"
+
+
+class UnitOfTemperature(enum.StrEnum):
+    """Temperature units."""
+
+    CELSIUS = "°C"
+    FAHRENHEIT = "°F"
+    KELVIN = "K"
+
+
+class UnitOfPressure(enum.StrEnum):
+    """Pressure units."""
+
+    PA = "Pa"
+    HPA = "hPa"
+    KPA = "kPa"
+    BAR = "bar"
+    CBAR = "cbar"
+    MBAR = "mbar"
+    MMHG = "mmHg"
+    INHG = "inHg"
+    PSI = "psi"
+
+
+class UnitOfPower(enum.StrEnum):
+    """Power units."""
+
+    WATT = "W"
+    KILO_WATT = "kW"
+    BTU_PER_HOUR = "BTU/h"
+
+
+class UnitOfApparentPower(enum.StrEnum):
+    """Apparent power units."""
+
+    VOLT_AMPERE = "VA"
+
+
+class UnitOfElectricCurrent(enum.StrEnum):
+    """Electric current units."""
+
+    MILLIAMPERE = "mA"
+    AMPERE = "A"
+
+
+# Electric_potential units
+class UnitOfElectricPotential(enum.StrEnum):
+    """Electric potential units."""
+
+    MILLIVOLT = "mV"
+    VOLT = "V"
+
+
+class UnitOfFrequency(enum.StrEnum):
+    """Frequency units."""
+
+    HERTZ = "Hz"
+    KILOHERTZ = "kHz"
+    MEGAHERTZ = "MHz"
+    GIGAHERTZ = "GHz"
+
+
+class UnitOfVolumeFlowRate(enum.StrEnum):
+    """Volume flow rate units."""
+
+    CUBIC_METERS_PER_HOUR = "m³/h"
+    CUBIC_FEET_PER_MINUTE = "ft³/min"
+    LITERS_PER_MINUTE = "L/min"
+    GALLONS_PER_MINUTE = "gal/min"
+
+
+class UnitOfVolume(enum.StrEnum):
+    """Volume units."""
+
+    CUBIC_FEET = "ft³"
+    CENTUM_CUBIC_FEET = "CCF"
+    CUBIC_METERS = "m³"
+    LITERS = "L"
+    MILLILITERS = "mL"
+    GALLONS = "gal"
+    """Assumed to be US gallons in conversion utilities.
+
+    British/Imperial gallons are not yet supported"""
+    FLUID_OUNCES = "fl. oz."
+    """Assumed to be US fluid ounces in conversion utilities.
+
+    British/Imperial fluid ounces are not yet supported"""
+
+
+class UnitOfTime(enum.StrEnum):
+    """Time units."""
+
+    MICROSECONDS = "μs"
+    MILLISECONDS = "ms"
+    SECONDS = "s"
+    MINUTES = "min"
+    HOURS = "h"
+    DAYS = "d"
+    WEEKS = "w"
+    MONTHS = "m"
+    YEARS = "y"
+
+
+class UnitOfEnergy(enum.StrEnum):
+    """Energy units."""
+
+    GIGA_JOULE = "GJ"
+    KILO_WATT_HOUR = "kWh"
+    MEGA_JOULE = "MJ"
+    MEGA_WATT_HOUR = "MWh"
+    WATT_HOUR = "Wh"
+
+
+class UnitOfMass(enum.StrEnum):
+    """Mass units."""
+
+    GRAMS = "g"
+    KILOGRAMS = "kg"
+    MILLIGRAMS = "mg"
+    MICROGRAMS = "µg"
+    OUNCES = "oz"
+    POUNDS = "lb"
+    STONES = "st"
+
+
+# Concentration units
+CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "µg/m³"
+CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER: Final = "mg/m³"
+CONCENTRATION_MICROGRAMS_PER_CUBIC_FOOT: Final = "μg/ft³"
+CONCENTRATION_PARTS_PER_CUBIC_METER: Final = "p/m³"
+CONCENTRATION_PARTS_PER_MILLION: Final = "ppm"
+CONCENTRATION_PARTS_PER_BILLION: Final = "ppb"
+
+# Signal_strength units
+SIGNAL_STRENGTH_DECIBELS: Final = "dB"
+SIGNAL_STRENGTH_DECIBELS_MILLIWATT: Final = "dBm"
+
+# Light units
+LIGHT_LUX: Final = "lx"
+
+
+class Sensor(PlatformEntity):
     """Base ZHA sensor."""
 
+    PLATFORM = Platform.SENSOR
     _attribute_name: int | str | None = None
     _decimals: int = 1
     _divisor: int = 1
     _multiplier: int | float = 1
+    _attr_native_unit_of_measurement: str | None = None
+    _attr_device_class: SensorDeviceClass | None = None
+    _attr_state_class: SensorStateClass | None = None
 
     @classmethod
     def create_entity(
@@ -169,15 +648,19 @@ class Sensor(ZhaEntity, SensorEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         if QUIRK_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+        )
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -191,15 +674,8 @@ class Sensor(ZhaEntity, SensorEntity):
         if sensor_metadata.unit is not None:
             self._attr_native_unit_of_measurement = sensor_metadata.unit
 
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
-        )
-
     @property
-    def native_value(self) -> StateType:
+    def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
         assert self._attribute_name is not None
         raw_state = self._cluster_handler.cluster.get(self._attribute_name)
@@ -207,9 +683,35 @@ class Sensor(ZhaEntity, SensorEntity):
             return None
         return self.formatter(raw_state)
 
-    def async_set_state(self, attr_id: int, attr_name: str, value: Any) -> None:
-        """Handle state update from cluster handler."""
-        self.async_write_ha_state()
+    def get_state(self) -> dict:
+        """Return the state for this sensor."""
+        assert self._attribute_name is not None
+        raw_state = self._cluster_handler.cluster.get(self._attribute_name)
+        if raw_state is None:
+            return None
+        response = super().get_state()
+        raw_state = self.formatter(raw_state)
+        response["state"] = raw_state
+        return response
+
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle attribute updates from the cluster handler."""
+        self.maybe_send_state_changed_event()
+
+    def to_json(self) -> dict:
+        """Return a JSON representation of the sensor."""
+        json = super().to_json()
+        json["attribute"] = self._attribute_name
+        json["decimals"] = self._decimals
+        json["divisor"] = self._divisor
+        json["multiplier"] = self._multiplier
+        json["unit"] = self._attr_native_unit_of_measurement
+        json["device_class"] = self._attr_device_class
+        json["state_class"] = self._attr_state_class
+        return json
 
     def formatter(self, value: int | enum.IntEnum) -> int | float | str | None:
         """Numeric pass-through formatter."""
@@ -220,59 +722,56 @@ class Sensor(ZhaEntity, SensorEntity):
         return round(float(value * self._multiplier) / self._divisor)
 
 
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class PollableSensor(Sensor):
     """Base ZHA sensor that polls for state."""
 
+    _REFRESH_INTERVAL = (30, 45)
     _use_custom_polling: bool = True
 
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
-        self._cancel_refresh_handle: CALLBACK_TYPE | None = None
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        if self._use_custom_polling:
-            refresh_interval = random.randint(30, 60)
-            self._cancel_refresh_handle = async_track_time_interval(
-                self.hass, self._refresh, timedelta(seconds=refresh_interval)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cancel_refresh_handle: Callable | None = None
+        if self.should_poll:
+            self._tracked_tasks.append(
+                asyncio.create_task(
+                    self._refresh(),
+                    name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
+                )
             )
-            self.debug("started polling with refresh interval of %s", refresh_interval)
 
-    async def async_will_remove_from_hass(self) -> None:
-        """Disconnect entity object when removed."""
-        if self._cancel_refresh_handle is not None:
-            self._cancel_refresh_handle()
-            self._cancel_refresh_handle = None
-        self.debug("stopped polling during device removal")
-        await super().async_will_remove_from_hass()
+    @property
+    def should_poll(self) -> bool:
+        """Return True if we need to poll for state changes."""
+        return self._use_custom_polling
 
-    async def _refresh(self, time):
+    @periodic(_REFRESH_INTERVAL)
+    async def _refresh(self):
         """Call async_update at a constrained random interval."""
-        if self._zha_device.available and self.hass.data[DATA_ZHA].allow_polling:
+        if self.device.available and self.device.gateway.data[DATA_ZHA].allow_polling:
             self.debug("polling for updated state")
             await self.async_update()
-            self.async_write_ha_state()
+            self.maybe_send_state_changed_event()
         else:
             self.debug(
                 "skipping polling for updated state, available: %s, allow polled requests: %s",
-                self._zha_device.available,
-                self.hass.data[DATA_ZHA].allow_polling,
+                self.device.available,
+                self.device.gateway.data[DATA_ZHA].allow_polling,
             )
 
 
-class DeviceCounterSensor(BaseZhaEntity, SensorEntity):
+class DeviceCounterSensor(BaseEntity):
     """Device counter sensor."""
 
-    _attr_should_poll = True
+    _REFRESH_INTERVAL = (30, 45)
+    _use_custom_polling: bool = True
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
@@ -305,48 +804,71 @@ class DeviceCounterSensor(BaseZhaEntity, SensorEntity):
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, zha_device, **kwargs)
-        state: State = self._zha_device.gateway.application_controller.state
+        super().__init__(unique_id, **kwargs)
+        self._device: ZHADevice = zha_device
+        state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
             getattr(state, counter_groups).get(counter_group, {}).get(counter, None)
         )
         self._attr_name: str = self._zigpy_counter.name
-        self.remove_future: asyncio.Future
+        self._tracked_tasks.append(
+            asyncio.create_task(
+                self._refresh(),
+                name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
+            )
+        )
 
     @property
     def available(self) -> bool:
         """Return entity availability."""
-        return self._zha_device.available
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        self.remove_future = self.hass.loop.create_future()
-        self._zha_device.gateway.register_entity_reference(
-            self._zha_device.ieee,
-            self.entity_id,
-            self._zha_device,
-            {},
-            self.device_info,
-            self.remove_future,
-        )
-
-    async def async_will_remove_from_hass(self) -> None:
-        """Disconnect entity object when removed."""
-        await super().async_will_remove_from_hass()
-        self.zha_device.gateway.remove_entity_reference(self)
-        self.remove_future.set_result(True)
-
-    @property
-    def native_value(self) -> StateType:
-        """Return the state of the entity."""
-        return self._zigpy_counter.value
+        return self._device.available
 
     async def async_update(self) -> None:
         """Retrieve latest state."""
-        self.async_write_ha_state()
+        self.maybe_send_state_changed_event()
+
+    @periodic(_REFRESH_INTERVAL)
+    async def _refresh(self):
+        """Call async_update at a constrained random interval."""
+        if self._device.available and self._device.gateway.data[DATA_ZHA].allow_polling:
+            self.debug("polling for updated state")
+            await self.async_update()
+            self.maybe_send_state_changed_event()
+        else:
+            self.debug(
+                "skipping polling for updated state, available: %s, allow polled requests: %s",
+                self._device.available,
+                self._device.gateway.data[DATA_ZHA].allow_polling,
+            )
+
+    def get_identifiers(self) -> dict[str, str | int]:
+        """Return a dict with the information necessary to identify this entity."""
+        return {
+            "unique_id": self.unique_id,
+            "platform": self.PLATFORM,
+            "device_ieee": self._device.ieee,
+        }
+
+    def send_event(self, signal: dict[str, Any]) -> None:
+        """Broadcast an event from this platform entity."""
+        signal["platform_entity"] = {
+            "name": self._attr_name,
+            "unique_id": self._unique_id,
+            "platform": self.PLATFORM,
+        }
+        _LOGGER.info("Sending event from device counter sensor entity: %s", signal)
+        self._device.send_event(signal)
+
+    def to_json(self) -> dict:
+        """Return a JSON representation of the platform entity."""
+        json = super().to_json()
+        json["name"] = self._attr_name
+        json["device_ieee"] = str(self._device.ieee)
+        json["counter"] = self._zigpy_counter.name
+        json["counter_value"] = self._zigpy_counter.value
+        return json
 
 
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class EnumSensor(Sensor):
     """Sensor with value from enum."""
 
@@ -355,7 +877,7 @@ class EnumSensor(Sensor):
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
-        ZhaEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
+        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
         sensor_metadata: ZCLEnumMetadata = entity_metadata.entity_metadata
         self._attribute_name = sensor_metadata.attribute_name
         self._enum = sensor_metadata.enum
@@ -371,7 +893,6 @@ class EnumSensor(Sensor):
     manufacturers="Digi",
     stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AnalogInput(Sensor):
     """Sensor that displays analog input values."""
 
@@ -380,7 +901,6 @@ class AnalogInput(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Battery(Sensor):
     """Battery sensor of power configuration cluster."""
 
@@ -409,7 +929,7 @@ class Battery(Sensor):
         return cls(unique_id, zha_device, cluster_handlers, **kwargs)
 
     @staticmethod
-    def formatter(value: int) -> int | None:
+    def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
         """Return the state of the entity."""
         # per zcl specs battery percent is reported at 200% ¯\_(ツ)_/¯
         if not isinstance(value, numbers.Number) or value == -1 or value == 255:
@@ -417,20 +937,19 @@ class Battery(Sensor):
         value = round(value / 2)
         return value
 
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return device state attrs for battery sensors."""
-        state_attrs = {}
+    def get_state(self) -> dict[str, Any]:
+        """Return the state for battery sensors."""
+        response = super().get_state()
         battery_size = self._cluster_handler.cluster.get("battery_size")
         if battery_size is not None:
-            state_attrs["battery_size"] = BATTERY_SIZES.get(battery_size, "Unknown")
+            response["battery_size"] = BATTERY_SIZES.get(battery_size, "Unknown")
         battery_quantity = self._cluster_handler.cluster.get("battery_quantity")
         if battery_quantity is not None:
-            state_attrs["battery_quantity"] = battery_quantity
+            response["battery_quantity"] = battery_quantity
         battery_voltage = self._cluster_handler.cluster.get("battery_voltage")
         if battery_voltage is not None:
-            state_attrs["battery_voltage"] = round(battery_voltage / 10, 2)
-        return state_attrs
+            response["battery_voltage"] = round(battery_voltage / 10, 2)
+        return response
 
 
 @MULTI_MATCH(
@@ -438,7 +957,6 @@ class Battery(Sensor):
     stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     models={"VZM31-SN", "SP 234", "outletv4"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ElectricalMeasurement(PollableSensor):
     """Active power measurement."""
 
@@ -449,24 +967,17 @@ class ElectricalMeasurement(PollableSensor):
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _div_mul_prefix: str | None = "ac_power"
 
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return device state attrs for sensor."""
-        attrs = {}
+    def get_state(self) -> dict[str, Any]:
+        """Return the state for this sensor."""
+        response = super().get_state()
         if self._cluster_handler.measurement_type is not None:
-            attrs["measurement_type"] = self._cluster_handler.measurement_type
+            response["measurement_type"] = self._cluster_handler.measurement_type
 
         max_attr_name = f"{self._attribute_name}_max"
+        if (max_v := self._cluster_handler.cluster.get(max_attr_name)) is not None:
+            response[max_attr_name] = str(self.formatter(max_v))
 
-        try:
-            max_v = self._cluster_handler.cluster.get(max_attr_name)
-        except KeyError:
-            pass
-        else:
-            if max_v is not None:
-                attrs[max_attr_name] = str(self.formatter(max_v))
-
-        return attrs
+        return response
 
     def formatter(self, value: int) -> int | float:
         """Return 'normalized' value."""
@@ -488,7 +999,6 @@ class ElectricalMeasurement(PollableSensor):
     cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class PolledElectricalMeasurement(ElectricalMeasurement):
     """Polled active power measurement."""
 
@@ -496,7 +1006,6 @@ class PolledElectricalMeasurement(ElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
     """Apparent power measurement."""
 
@@ -509,7 +1018,6 @@ class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ElectricalMeasurementRMSCurrent(PolledElectricalMeasurement):
     """RMS current measurement."""
 
@@ -522,7 +1030,6 @@ class ElectricalMeasurementRMSCurrent(PolledElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ElectricalMeasurementRMSVoltage(PolledElectricalMeasurement):
     """RMS Voltage measurement."""
 
@@ -535,7 +1042,6 @@ class ElectricalMeasurementRMSVoltage(PolledElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ElectricalMeasurementFrequency(PolledElectricalMeasurement):
     """Frequency measurement."""
 
@@ -549,7 +1055,6 @@ class ElectricalMeasurementFrequency(PolledElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ElectricalMeasurementPowerFactor(PolledElectricalMeasurement):
     """Power Factor measurement."""
 
@@ -569,7 +1074,6 @@ class ElectricalMeasurementPowerFactor(PolledElectricalMeasurement):
     cluster_handler_names=CLUSTER_HANDLER_HUMIDITY,
     stop_on_match_group=CLUSTER_HANDLER_HUMIDITY,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Humidity(Sensor):
     """Humidity sensor."""
 
@@ -581,7 +1085,6 @@ class Humidity(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_SOIL_MOISTURE)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SoilMoisture(Sensor):
     """Soil Moisture sensor."""
 
@@ -594,7 +1097,6 @@ class SoilMoisture(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEAF_WETNESS)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class LeafWetness(Sensor):
     """Leaf Wetness sensor."""
 
@@ -607,7 +1109,6 @@ class LeafWetness(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ILLUMINANCE)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Illuminance(Sensor):
     """Illuminance Sensor."""
 
@@ -626,19 +1127,20 @@ class Illuminance(Sensor):
 
 
 @dataclass(frozen=True, kw_only=True)
-class SmartEnergyMeteringEntityDescription(SensorEntityDescription):
+class SmartEnergyMeteringEntityDescription:
     """Dataclass that describes a Zigbee smart energy metering entity."""
 
     key: str = "instantaneous_demand"
     state_class: SensorStateClass | None = SensorStateClass.MEASUREMENT
     scale: int = 1
+    native_unit_of_measurement: str | None = None
+    device_class: SensorDeviceClass | None = None
 
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SmartEnergyMetering(PollableSensor):
     """Metering sensor."""
 
@@ -730,7 +1232,7 @@ class SmartEnergyMetering(PollableSensor):
         attrs = {}
         if self._cluster_handler.device_type is not None:
             attrs["device_type"] = self._cluster_handler.device_type
-        if (status := self._cluster_handler.status) is not None:
+        if (status := self._cluster_handler.metering_status) is not None:
             if isinstance(status, enum.IntFlag):
                 attrs["status"] = str(
                     status.name if status.name is not None else status.value
@@ -739,8 +1241,22 @@ class SmartEnergyMetering(PollableSensor):
                 attrs["status"] = str(status)[len(status.__class__.__name__) + 1 :]
         return attrs
 
+    def get_state(self) -> dict[str, Any]:
+        """Return state for this sensor."""
+        response = super().get_state()
+        if self._cluster_handler.device_type is not None:
+            response["device_type"] = self._cluster_handler.device_type
+        if (status := self._cluster_handler.metering_status) is not None:
+            if isinstance(status, enum.IntFlag):
+                response["status"] = str(
+                    status.name if status.name is not None else status.value
+                )
+            else:
+                response["status"] = str(status)[len(status.__class__.__name__) + 1 :]
+        return response
+
     @property
-    def native_value(self) -> StateType:
+    def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
         state = super().native_value
         if hasattr(self, "entity_description") and state is not None:
@@ -761,7 +1277,6 @@ class SmartEnergySummationEntityDescription(SmartEnergyMeteringEntityDescription
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SmartEnergySummation(SmartEnergyMetering):
     """Smart Energy Metering summation sensor."""
 
@@ -844,7 +1359,6 @@ class SmartEnergySummation(SmartEnergyMetering):
     models={"TS011F", "ZLinky_TIC", "TICMeter"},
     stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class PolledSmartEnergySummation(SmartEnergySummation):
     """Polled Smart Energy Metering summation sensor."""
 
@@ -855,7 +1369,6 @@ class PolledSmartEnergySummation(SmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Tier1SmartEnergySummation(PolledSmartEnergySummation):
     """Tier 1 Smart Energy Metering summation sensor."""
 
@@ -869,7 +1382,6 @@ class Tier1SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Tier2SmartEnergySummation(PolledSmartEnergySummation):
     """Tier 2 Smart Energy Metering summation sensor."""
 
@@ -883,7 +1395,6 @@ class Tier2SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Tier3SmartEnergySummation(PolledSmartEnergySummation):
     """Tier 3 Smart Energy Metering summation sensor."""
 
@@ -897,7 +1408,6 @@ class Tier3SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Tier4SmartEnergySummation(PolledSmartEnergySummation):
     """Tier 4 Smart Energy Metering summation sensor."""
 
@@ -911,7 +1421,6 @@ class Tier4SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Tier5SmartEnergySummation(PolledSmartEnergySummation):
     """Tier 5 Smart Energy Metering summation sensor."""
 
@@ -925,7 +1434,6 @@ class Tier5SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Tier6SmartEnergySummation(PolledSmartEnergySummation):
     """Tier 6 Smart Energy Metering summation sensor."""
 
@@ -938,7 +1446,6 @@ class Tier6SmartEnergySummation(PolledSmartEnergySummation):
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SmartEnergySummationReceived(PolledSmartEnergySummation):
     """Smart Energy Metering summation received sensor."""
 
@@ -970,7 +1477,6 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_PRESSURE)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Pressure(Sensor):
     """Pressure sensor."""
 
@@ -982,7 +1488,6 @@ class Pressure(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_TEMPERATURE)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class Temperature(Sensor):
     """Temperature Sensor."""
 
@@ -994,7 +1499,6 @@ class Temperature(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DEVICE_TEMPERATURE)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class DeviceTemperature(Sensor):
     """Device Temperature Sensor."""
 
@@ -1008,7 +1512,6 @@ class DeviceTemperature(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="carbon_dioxide_concentration")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class CarbonDioxideConcentration(Sensor):
     """Carbon Dioxide Concentration sensor."""
 
@@ -1021,7 +1524,6 @@ class CarbonDioxideConcentration(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="carbon_monoxide_concentration")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class CarbonMonoxideConcentration(Sensor):
     """Carbon Monoxide Concentration sensor."""
 
@@ -1035,7 +1537,6 @@ class CarbonMonoxideConcentration(Sensor):
 
 @MULTI_MATCH(generic_ids="cluster_handler_0x042e", stop_on_match_group="voc_level")
 @MULTI_MATCH(cluster_handler_names="voc_level", stop_on_match_group="voc_level")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class VOCLevel(Sensor):
     """VOC Level sensor."""
 
@@ -1052,7 +1553,6 @@ class VOCLevel(Sensor):
     models="lumi.airmonitor.acn01",
     stop_on_match_group="voc_level",
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class PPBVOCLevel(Sensor):
     """VOC Level sensor."""
 
@@ -1067,7 +1567,6 @@ class PPBVOCLevel(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="pm25")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class PM25(Sensor):
     """Particulate Matter 2.5 microns or less sensor."""
 
@@ -1080,7 +1579,6 @@ class PM25(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="formaldehyde_concentration")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class FormaldehydeConcentration(Sensor):
     """Formaldehyde Concentration sensor."""
 
@@ -1096,7 +1594,6 @@ class FormaldehydeConcentration(Sensor):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ThermostatHVACAction(Sensor):
     """Thermostat HVAC action sensor."""
 
@@ -1180,13 +1677,24 @@ class ThermostatHVACAction(Sensor):
             return HVACAction.IDLE
         return HVACAction.OFF
 
+    def get_state(self) -> dict:
+        """Return the current HVAC action."""
+        response = super().get_state()
+        if (
+            self._cluster_handler.pi_heating_demand is None
+            and self._cluster_handler.pi_cooling_demand is None
+        ):
+            response["state"] = self._rm_rs_action
+        else:
+            response["state"] = self._pi_demand_action
+        return response
+
 
 @MULTI_MATCH(
     cluster_handler_names={CLUSTER_HANDLER_THERMOSTAT},
     manufacturers="Sinope Technologies",
     stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SinopeHVACAction(ThermostatHVACAction):
     """Sinope Thermostat HVAC action sensor."""
 
@@ -1216,7 +1724,6 @@ class SinopeHVACAction(ThermostatHVACAction):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BASIC)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class RSSISensor(Sensor):
     """RSSI sensor for a device."""
 
@@ -1250,13 +1757,18 @@ class RSSISensor(Sensor):
         return cls(unique_id, zha_device, cluster_handlers, **kwargs)
 
     @property
-    def native_value(self) -> StateType:
+    def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
-        return getattr(self._zha_device.device, self._attribute_name)
+        return getattr(self._device.device, self._attribute_name)
+
+    def get_state(self) -> dict:
+        """Return the state of the sensor."""
+        response = super().get_state()
+        response["state"] = getattr(self.device.device, self._unique_id_suffix)
+        return response
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BASIC)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
@@ -1273,7 +1785,6 @@ class LQISensor(RSSISensor):
         "_TZE200_htnnfasr",
     },
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class TimeLeft(Sensor):
     """Sensor that displays time left value."""
 
@@ -1286,7 +1797,6 @@ class TimeLeft(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="ikea_airpurifier")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class IkeaDeviceRunTime(Sensor):
     """Sensor that displays device run time (in minutes)."""
 
@@ -1300,7 +1810,6 @@ class IkeaDeviceRunTime(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="ikea_airpurifier")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class IkeaFilterRunTime(Sensor):
     """Sensor that displays run time of the current filter (in minutes)."""
 
@@ -1321,7 +1830,6 @@ class AqaraFeedingSource(types.enum8):
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AqaraPetFeederLastFeedingSource(EnumSensor):
     """Sensor that displays the last feeding source of pet feeder."""
 
@@ -1333,7 +1841,6 @@ class AqaraPetFeederLastFeedingSource(EnumSensor):
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AqaraPetFeederLastFeedingSize(Sensor):
     """Sensor that displays the last feeding size of the pet feeder."""
 
@@ -1344,7 +1851,6 @@ class AqaraPetFeederLastFeedingSize(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AqaraPetFeederPortionsDispensed(Sensor):
     """Sensor that displays the number of portions dispensed by the pet feeder."""
 
@@ -1356,7 +1862,6 @@ class AqaraPetFeederPortionsDispensed(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AqaraPetFeederWeightDispensed(Sensor):
     """Sensor that displays the weight dispensed by the pet feeder."""
 
@@ -1369,7 +1874,6 @@ class AqaraPetFeederWeightDispensed(Sensor):
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"})
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AqaraSmokeDensityDbm(Sensor):
     """Sensor that displays the smoke density of an Aqara smoke sensor in dB/m."""
 
@@ -1390,7 +1894,6 @@ class SonoffIlluminationStates(types.enum8):
 
 
 @MULTI_MATCH(cluster_handler_names="sonoff_manufacturer", models={"SNZB-06P"})
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SonoffPresenceSenorIlluminationStatus(EnumSensor):
     """Sensor that displays the illumination status the last time peresence was detected."""
 
@@ -1402,7 +1905,6 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class PiHeatingDemand(Sensor):
     """Sensor that displays the percentage of heating power demanded.
 
@@ -1428,7 +1930,6 @@ class SetpointChangeSourceEnum(types.enum8):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SetpointChangeSource(EnumSensor):
     """Sensor that displays the source of the setpoint change.
 
@@ -1444,7 +1945,6 @@ class SetpointChangeSource(EnumSensor):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class WindowCoveringTypeSensor(EnumSensor):
     """Sensor that displays the type of a cover device."""
 
@@ -1459,7 +1959,6 @@ class WindowCoveringTypeSensor(EnumSensor):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_BASIC, models={"lumi.curtain.agl001"}
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
     """Sensor that displays the power source of the Aqara E1 curtain motor device."""
 
@@ -1483,7 +1982,6 @@ class AqaraE1HookState(types.enum8):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.curtain.agl001"}
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class AqaraCurtainHookStateSensor(EnumSensor):
     """Representation of a ZHA curtain mode configuration entity."""
 
