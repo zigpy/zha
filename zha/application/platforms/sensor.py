@@ -207,7 +207,6 @@ class Sensor(ZhaEntity, SensorEntity):
             return None
         return self.formatter(raw_state)
 
-    @callback
     def async_set_state(self, attr_id: int, attr_name: str, value: Any) -> None:
         """Handle state update from cluster handler."""
         self.async_write_ha_state()

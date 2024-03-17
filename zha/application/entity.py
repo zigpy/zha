@@ -96,18 +96,15 @@ class BaseZhaEntity(LogMixin, entity.Entity):
             via_device=(DOMAIN, zha_gateway.state.node_info.ieee),
         )
 
-    @callback
     def async_state_changed(self) -> None:
         """Entity state changed."""
         self.async_write_ha_state()
 
-    @callback
     def async_update_state_attribute(self, key: str, value: Any) -> None:
         """Update a single device state attribute."""
         self._extra_state_attributes.update({key: value})
         self.async_write_ha_state()
 
-    @callback
     def async_set_state(self, attr_id: int, attr_name: str, value: Any) -> None:
         """Set the entity state."""
 
@@ -117,7 +114,6 @@ class BaseZhaEntity(LogMixin, entity.Entity):
             unsub()
             self._unsubs.remove(unsub)
 
-    @callback
     def async_accept_signal(
         self,
         cluster_handler: ClusterHandler | None,
@@ -240,7 +236,6 @@ class ZhaEntity(BaseZhaEntity, RestoreEntity):
         self.zha_device.gateway.remove_entity_reference(self)
         self.remove_future.set_result(True)
 
-    @callback
     def async_restore_last_state(self, last_state) -> None:
         """Restore previous state."""
 
@@ -343,7 +338,6 @@ class ZhaGroupEntity(BaseZhaEntity):
 
         self.async_on_remove(send_removed_signal)
 
-    @callback
     def async_state_changed_listener(self, event: Event[EventStateChangedData]) -> None:
         """Handle child updates."""
         # Delay to ensure that we get updates from all members before updating the group

@@ -98,7 +98,6 @@ class Switch(ZhaEntity, SwitchEntity):
         await self._on_off_cluster_handler.turn_off()
         self.async_write_ha_state()
 
-    @callback
     def async_set_state(self, attr_id: int, attr_name: str, value: Any):
         """Handle state update from cluster handler."""
         self.async_write_ha_state()
@@ -237,7 +236,6 @@ class ZHASwitchConfigurationEntity(ZhaEntity, SwitchEntity):
             self._cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
         )
 
-    @callback
     def async_set_state(self, attr_id: int, attr_name: str, value: Any):
         """Handle state update from cluster handler."""
         self.async_write_ha_state()

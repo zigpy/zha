@@ -159,7 +159,6 @@ class BaseLight(LogMixin, light.LightEntity):
             return False
         return self._attr_state
 
-    @callback
     def set_level(self, value: int) -> None:
         """Set the brightness of this light between 0..254.
 
@@ -568,7 +567,6 @@ class BaseLight(LogMixin, light.LightEntity):
         """Return if the light is transitioning."""
         return self._transitioning_individual or self._transitioning_group
 
-    @callback
     def async_transition_set_flag(self) -> None:
         """Set _transitioning to True."""
         self.debug("setting transitioning flag to True")
@@ -582,7 +580,6 @@ class BaseLight(LogMixin, light.LightEntity):
             )
         self._async_unsub_transition_listener()
 
-    @callback
     def async_transition_start_timer(self, transition_time) -> None:
         """Start a timer to unset _transitioning_individual after transition_time.
 
@@ -600,14 +597,12 @@ class BaseLight(LogMixin, light.LightEntity):
             self.async_transition_complete,
         )
 
-    @callback
     def _async_unsub_transition_listener(self) -> None:
         """Unsubscribe transition listener."""
         if self._transition_listener:
             self._transition_listener()
             self._transition_listener = None
 
-    @callback
     def async_transition_complete(self, _=None) -> None:
         """Set _transitioning_individual to False and write HA state."""
         self.debug("transition complete - future attribute reports will write HA state")
@@ -759,7 +754,6 @@ class Light(BaseLight, ZhaEntity):
             True,
         )
 
-    @callback
     def async_set_state(self, attr_id, attr_name, value):
         """Set the state."""
         if self.is_transitioning:
@@ -796,7 +790,6 @@ class Light(BaseLight, ZhaEntity):
             signal_override=True,
         )
 
-        @callback
         def transition_on(signal):
             """Handle a transition start event from a group."""
             if self.entity_id in signal["entity_ids"]:
@@ -812,7 +805,6 @@ class Light(BaseLight, ZhaEntity):
             signal_override=True,
         )
 
-        @callback
         def transition_off(signal):
             """Handle a transition finished event from a group."""
             if self.entity_id in signal["entity_ids"]:
@@ -843,7 +835,6 @@ class Light(BaseLight, ZhaEntity):
         self.debug("stopped polling during device removal")
         await super().async_will_remove_from_hass()
 
-    @callback
     def async_restore_last_state(self, last_state):
         """Restore previous state."""
         self._attr_state = last_state.state == STATE_ON
@@ -1011,7 +1002,6 @@ class Light(BaseLight, ZhaEntity):
                     self.hass.data[DATA_ZHA].allow_polling,
                 )
 
-    @callback
     def _assume_group_state(self, signal, update_params) -> None:
         """Handle an assume group state event from a group."""
         if self.entity_id in signal["entity_ids"] and self._attr_available:

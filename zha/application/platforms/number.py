@@ -359,7 +359,6 @@ class ZhaNumber(ZhaEntity, NumberEntity):
         engineering_units = self._analog_output_cluster_handler.engineering_units
         return UNITS.get(engineering_units)
 
-    @callback
     def async_set_state(self, attr_id, attr_name, value):
         """Handle value update from cluster handler."""
         self.async_write_ha_state()

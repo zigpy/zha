@@ -136,7 +136,6 @@ class BaseFan(FanEntity):
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
 
-    @callback
     def async_set_state(self, attr_id, attr_name, value):
         """Handle state update from cluster handler."""
 
@@ -176,7 +175,6 @@ class ZhaFan(BaseFan, ZhaEntity):
         """Return the current preset mode."""
         return self.preset_modes_to_name.get(self._fan_cluster_handler.fan_mode)
 
-    @callback
     def async_set_state(self, attr_id, attr_name, value):
         """Handle state update from cluster handler."""
         self.async_write_ha_state()

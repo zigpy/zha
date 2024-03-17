@@ -11,6 +11,7 @@ import zigpy.types as t
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.clusters.security import IasZone
 
+from zha.application.const import QUIRK_METADATA
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.registries import PLATFORM_ENTITIES, Platform
 from zha.application.zigbee.cluster_handlers import (
@@ -47,17 +48,31 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 
-class BinarySensor(ZhaEntity, BinarySensorEntity):
+class BinarySensor(PlatformEntity):
     """ZHA BinarySensor."""
 
     _attribute_name: str
+    PLATFORM: Platform = Platform.BINARY_SENSOR
 
-    def __init__(self, unique_id, zha_device, cluster_handlers, **kwargs) -> None:
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs,
+    ) -> None:
         """Initialize the ZHA binary sensor."""
         self._cluster_handler = cluster_handlers[0]
         if QUIRK_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+        )
+        self._state: bool = bool(
+            self._cluster_handler.cluster.get(self._attribute_name)
+        )
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -80,7 +95,6 @@ class BinarySensor(ZhaEntity, BinarySensorEntity):
             return False
         return self.parse(raw_state)
 
-    @callback
     def async_set_state(self, attr_id, attr_name, value):
         """Set the state."""
         self.async_write_ha_state()
@@ -124,7 +138,7 @@ class Opening(BinarySensor):
 
     # Client/out cluster attributes aren't stored in the zigpy database, but are properly stored in the runtime cache.
     # We need to manually restore the last state from the sensor state to the runtime cache for now.
-    @callback
+
     def async_restore_last_state(self, last_state):
         """Restore previous state to zigpy cache."""
         self._cluster_handler.cluster.update_attribute(
@@ -192,7 +206,7 @@ class IASZone(BinarySensor):
         return {"migrated_to_cache": True}  # writing new state means we're migrated
 
     # temporary migration code
-    @callback
+
     def async_restore_last_state(self, last_state):
         """Restore previous state."""
         # trigger migration if extra state attribute is not present
@@ -200,7 +214,7 @@ class IASZone(BinarySensor):
             self.migrate_to_zigpy_cache(last_state)
 
     # temporary migration code
-    @callback
+
     def migrate_to_zigpy_cache(self, last_state):
         """Save old IasZone sensor state to attribute cache."""
         # previous HA versions did not update the attribute cache for IasZone sensors, so do it once here

@@ -113,7 +113,6 @@ class ZhaDoorLock(ZhaEntity, LockEntity):
             self._doorlock_cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
         )
 
-    @callback
     def async_restore_last_state(self, last_state):
         """Restore previous state."""
         self._state = VALUE_TO_STATE.get(last_state.state, last_state.state)
@@ -151,7 +150,6 @@ class ZhaDoorLock(ZhaEntity, LockEntity):
         await super().async_update()
         await self.async_get_state()
 
-    @callback
     def async_set_state(self, attr_id, attr_name, value):
         """Handle state update from cluster handler."""
         self._state = VALUE_TO_STATE.get(value, self._state)

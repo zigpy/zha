@@ -6,26 +6,246 @@ import abc
 import asyncio
 from contextlib import suppress
 from dataclasses import dataclass
+from enum import StrEnum
 import logging
-from typing import TYPE_CHECKING, Any, Final, Optional, Union
+from typing import TYPE_CHECKING, Any, Final, Optional
 
 from zigpy.types.named import EUI64
 
-from zha.application.platforms.model import STATE_CHANGED, EntityStateChangedEvent
-from zha.application.platforms.registries import Platform
+from zha.application import Platform
+from zha.const import EVENT, EVENT_TYPE, STATE_CHANGED, EventTypes
 from zha.event import EventBase
 from zha.mixins import LogMixin
-from zha.server.const import EVENT, EVENT_TYPE, EventTypes, PlatformEntityEvents
-from zha.server.websocket.api.model import WebSocketCommand
 
 if TYPE_CHECKING:
-    from zha.server.zigbee.cluster import ClusterHandler
-    from zha.server.zigbee.device import Device
-    from zha.server.zigbee.endpoint import Endpoint
-    from zha.server.zigbee.group import Group
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.group import Group
 
 
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class MinimalPlatformEntity:
+    """Platform entity model."""
+
+    name: str
+    unique_id: str
+    platform: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class MinimalEndpoint:
+    """Minimal endpoint model."""
+
+    id: int
+    unique_id: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class MinimalDevice:
+    """Minimal device model."""
+
+    ieee: EUI64
+
+
+@dataclass(frozen=True, kw_only=True)
+class Attribute:
+    """Attribute model."""
+
+    id: int
+    name: str
+    value: Any
+
+
+@dataclass(frozen=True, kw_only=True)
+class MinimalCluster:
+    """Minimal cluster model."""
+
+    id: int
+    endpoint_attribute: str
+    name: str
+    endpoint_id: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class MinimalClusterHandler:
+    """Minimal cluster handler model."""
+
+    unique_id: str
+    cluster: MinimalCluster
+
+
+@dataclass(frozen=True, kw_only=True)
+class MinimalGroup:
+    """Minimal group model."""
+
+    id: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class DeviceTrackerState:
+    """Device tracker state model."""
+
+    connected: bool
+    battery_level: Optional[float]
+
+
+@dataclass(frozen=True, kw_only=True)
+class BooleanState:
+    """Boolean value state model."""
+
+    state: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class CoverState:
+    """Cover state model."""
+
+    current_position: int
+    state: Optional[str]
+    is_opening: bool
+    is_closing: bool
+    is_closed: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class ShadeState:
+    """Cover state model."""
+
+    current_position: Optional[
+        int
+    ]  # TODO: how should we represent this when it is None?
+    is_closed: bool
+    state: Optional[str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class FanState:
+    """Fan state model."""
+
+    preset_mode: Optional[
+        str
+    ]  # TODO: how should we represent these when they are None?
+    percentage: Optional[int]  # TODO: how should we represent these when they are None?
+    is_on: bool
+    speed: Optional[str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class LockState:
+    """Lock state model."""
+
+    is_locked: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class BatteryState:
+    """Battery state model."""
+
+    state: Optional[str | float | int]
+    battery_size: Optional[str]
+    battery_quantity: Optional[int]
+    battery_voltage: Optional[float]
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectricalMeasurementState:
+    """Electrical measurement state model."""
+
+    state: Optional[str | float | int]
+    measurement_type: Optional[str]
+    active_power_max: Optional[str]
+    rms_current_max: Optional[str]
+    rms_voltage_max: Optional[str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class LightState:
+    """Light state model."""
+
+    on: bool
+    brightness: Optional[int]
+    hs_color: Optional[tuple[float, float]]
+    color_temp: Optional[int]
+    effect: Optional[str]
+    off_brightness: Optional[int]
+
+
+@dataclass(frozen=True, kw_only=True)
+class ThermostatState:
+    """Thermostat state model."""
+
+    current_temperature: Optional[float]
+    target_temperature: Optional[float]
+    target_temperature_low: Optional[float]
+    target_temperature_high: Optional[float]
+    hvac_action: Optional[str]
+    hvac_mode: Optional[str]
+    preset_mode: Optional[str]
+    fan_mode: Optional[str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class SwitchState:
+    """Switch state model."""
+
+    state: bool
+
+
+class SmareEnergyMeteringState:
+    """Smare energy metering state model."""
+
+    state: Optional[str | float | int]
+    device_type: Optional[str]
+    status: Optional[str]
+
+
+@dataclass(frozen=True, kw_only=True)
+class PlatformEntityStateChangedEvent:
+    """Platform entity event."""
+
+    event_type: Final[str] = "platform_entity_event"
+    event: Final[str] = "platform_entity_state_changed"
+    platform_entity: MinimalPlatformEntity
+    endpoint: Optional[MinimalEndpoint]
+    device: Optional[MinimalDevice]
+    group: Optional[MinimalGroup]
+    state: (
+        DeviceTrackerState
+        | CoverState
+        | ShadeState
+        | FanState
+        | LockState
+        | BatteryState
+        | ElectricalMeasurementState
+        | LightState
+        | SwitchState
+        | SmareEnergyMeteringState
+        | BooleanState
+        | ThermostatState
+    )
+
+
+@dataclass(frozen=True, kw_only=True)
+class EntityStateChangedEvent:
+    """Event for when an entity state changes."""
+
+    event_type: Final[str] = "entity"
+    event: Final[str] = STATE_CHANGED
+    platform: str
+    unique_id: str
+    device_ieee: Optional[EUI64]
+    endpoint_id: Optional[int]
+    group_id: Optional[int]
+
+
+class PlatformEntityEvents(StrEnum):
+    """WS platform entity events."""
+
+    PLATFORM_ENTITY_STATE_CHANGED = "platform_entity_state_changed"
 
 
 class BaseEntity(LogMixin, EventBase):
@@ -33,13 +253,18 @@ class BaseEntity(LogMixin, EventBase):
 
     PLATFORM: Platform = Platform.UNKNOWN
 
-    def __init__(
-        self,
-        unique_id: str,
-    ):
+    _unique_id_suffix: str | None = None
+    """suffix to add to the unique_id of the entity. Used for multi
+       entities using the same cluster handler/cluster id for the entity."""
+
+    def __init__(self, unique_id: str, **kwargs: Any) -> None:
         """Initialize the platform entity."""
         super().__init__()
         self._unique_id: str = unique_id
+        if self._unique_id_suffix:
+            self._unique_id += f"-{self._unique_id_suffix}"
+        self._state: Any = None
+        self._extra_state_attributes: dict[str, Any] = {}
         self._previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
 
@@ -61,6 +286,11 @@ class BaseEntity(LogMixin, EventBase):
         return {
             "class_name": self.__class__.__name__,
         }
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return device specific state attributes."""
+        return self._extra_state_attributes
 
     async def async_update(self) -> None:
         """Retrieve latest state."""
@@ -85,9 +315,7 @@ class BaseEntity(LogMixin, EventBase):
                     EVENT_TYPE: EventTypes.PLATFORM_ENTITY_EVENT,
                 }
             )
-            self.emit(
-                STATE_CHANGED, EntityStateChangedEvent.parse_obj(self.get_identifiers())
-            )
+            self.emit(STATE_CHANGED, EntityStateChangedEvent(**self.get_identifiers()))
             self._previous_state = state
 
     def to_json(self) -> dict:
@@ -109,40 +337,26 @@ class BaseEntity(LogMixin, EventBase):
 class PlatformEntity(BaseEntity):
     """Class that represents an entity for a device platform."""
 
-    unique_id_suffix: str | None = None
-
-    def __init_subclass__(
-        cls: type[PlatformEntity], id_suffix: str | None = None, **kwargs: Any
-    ):
-        """Initialize subclass.
-
-        :param id_suffix: suffix to add to the unique_id of the entity. Used for multi
-                          entities using the same cluster handler/cluster id for the entity.
-        """
-        super().__init_subclass__(**kwargs)
-        if id_suffix:
-            cls.unique_id_suffix = id_suffix
-
     def __init__(
         self,
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: Device,
+        device: ZHADevice,
+        **kwargs: Any,
     ):
         """Initialize the platform entity."""
-        super().__init__(unique_id)
+        super().__init__(unique_id, **kwargs)
         ieeetail = "".join([f"{o:02x}" for o in device.ieee[:4]])
         ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
         self._name: str = f"{device.name} {ieeetail} {ch_names}"
-        if self.unique_id_suffix:
+        if self._unique_id_suffix:
             self._name += f" {self.unique_id_suffix}"
-            self._unique_id += f"-{self.unique_id_suffix}"
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
         for cluster_handler in cluster_handlers:
             self.cluster_handlers[cluster_handler.name] = cluster_handler
-        self._device: Device = device
+        self._device: ZHADevice = device
         self._endpoint = endpoint
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
         if self.unique_id not in self._device.platform_entities:
@@ -154,7 +368,7 @@ class PlatformEntity(BaseEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: Device,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> PlatformEntity | None:
         """Entity Factory.
@@ -164,7 +378,7 @@ class PlatformEntity(BaseEntity):
         return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
-    def device(self) -> Device:
+    def device(self) -> ZHADevice:
         """Return the device."""
         return self._device
 
@@ -293,16 +507,3 @@ class GroupEntity(BaseEntity):
         json["name"] = self._name
         json["group_id"] = self.group_id
         return json
-
-
-@dataclass
-class PlatformEntityStateChangedEvent:
-    """Event for when an entity state changes."""
-
-    event_type: Final[str] = "entity"
-    event: Final[str] = STATE_CHANGED
-    platform: Platform
-    unique_id: str
-    device_ieee: Optional[EUI64]
-    endpoint_id: Optional[int]
-    group_id: Optional[int]

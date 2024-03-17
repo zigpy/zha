@@ -7,7 +7,7 @@ https://home-assistant.io/integrations/zha/
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
 import zigpy.zcl
 from zigpy.zcl.clusters.security import (
@@ -21,15 +21,21 @@ from zigpy.zcl.clusters.security import (
 )
 
 from zha.exceptions import ZHAException
-
-from . import ClusterHandler, ClusterHandlerStatus, registries
-from .const import SIGNAL_ATTR_UPDATED
+from zha.zigbee.cluster_handlers import ClusterHandler, ClusterHandlerStatus, registries
+from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_EVENT, SIGNAL_ATTR_UPDATED
 
 if TYPE_CHECKING:
     from ..endpoint import Endpoint
 
 SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
+
+
+class ClusterHandlerStateChangedEvent:
+    """Event to signal that a cluster attribute has been updated."""
+
+    event_type: Final[str] = "cluster_handler_event"
+    event: Final[str] = "cluster_handler_state_changed"
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
@@ -196,7 +202,6 @@ class IasAceClusterHandler(ClusterHandler):
         """Set the specified alarm status."""
         self.alarm_status = status
         self.armed_state = AceCluster.PanelStatus.In_Alarm
-        self.async_send_signal(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}")
         self._send_panel_status_changed()
 
     def _get_zone_id_map(self):
@@ -224,6 +229,10 @@ class IasAceClusterHandler(ClusterHandler):
             self.alarm_status,
         )
         self._endpoint.device.hass.async_create_task(response)
+        self.emit(
+            CLUSTER_HANDLER_EVENT,
+            ClusterHandlerStateChangedEvent(),
+        )
 
     def _get_bypassed_zone_list(self):
         """Handle the IAS ACE bypassed zone list command."""

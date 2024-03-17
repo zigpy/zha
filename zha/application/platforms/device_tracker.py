@@ -94,7 +94,6 @@ class ZHADeviceScannerEntity(ScannerEntity, ZhaEntity):
         """Return the source type, eg gps or router, of the device."""
         return SourceType.ROUTER
 
-    @callback
     def async_battery_percentage_remaining_updated(self, attr_id, attr_name, value):
         """Handle tracking."""
         if attr_name != "battery_percentage_remaining":

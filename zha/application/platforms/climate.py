@@ -520,7 +520,6 @@ class SinopeTechnologiesThermostat(Thermostat):
             return HVACAction.IDLE
         return HVACAction.OFF
 
-    @callback
     def _async_update_time(self, timestamp=None) -> None:
         """Update thermostat's time display."""
 

@@ -242,7 +242,6 @@ class ZhaCover(ZhaEntity, CoverEntity):
         """Return the current tilt position of the cover."""
         return self._cover_cluster_handler.current_position_tilt_percentage
 
-    @callback
     def zcl_attribute_updated(self, attr_id, attr_name, value):
         """Handle position update from cluster handler."""
         if attr_id in (
@@ -260,7 +259,6 @@ class ZhaCover(ZhaEntity, CoverEntity):
             )
         self.async_write_ha_state()
 
-    @callback
     def async_update_state(self, state):
         """Handle state update from HA operations below."""
         _LOGGER.debug("async_update_state=%s", state)
@@ -404,20 +402,17 @@ class Shade(ZhaEntity, CoverEntity):
             self._level_cluster_handler, SIGNAL_SET_LEVEL, self.async_set_level
         )
 
-    @callback
     def async_restore_last_state(self, last_state):
         """Restore previous state."""
         self._is_open = last_state.state == STATE_OPEN
         if ATTR_CURRENT_POSITION in last_state.attributes:
             self._position = last_state.attributes[ATTR_CURRENT_POSITION]
 
-    @callback
     def async_set_open_closed(self, attr_id: int, attr_name: str, value: bool) -> None:
         """Set open/closed state."""
         self._is_open = bool(value)
         self.async_write_ha_state()
 
-    @callback
     def async_set_level(self, value: int) -> None:
         """Set the reported position."""
         value = max(0, min(255, value))

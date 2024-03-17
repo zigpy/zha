@@ -43,6 +43,7 @@ class Platform(StrEnum):
     TTS = "tts"
     VACUUM = "vacuum"
     VALVE = "valve"
+    UNKNOWN = "unknown"
     UPDATE = "update"
     WAKE_WORD = "wake_word"
     WATER_HEATER = "water_heater"

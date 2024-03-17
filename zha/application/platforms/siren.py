@@ -167,7 +167,6 @@ class ZHASiren(ZhaEntity, SirenEntity):
         self._attr_is_on = False
         self.async_write_ha_state()
 
-    @callback
     def async_set_off(self, _) -> None:
         """Set is_on to False and write HA state."""
         self._attr_is_on = False
