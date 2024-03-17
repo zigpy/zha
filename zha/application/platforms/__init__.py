@@ -10,6 +10,7 @@ from enum import StrEnum
 import logging
 from typing import TYPE_CHECKING, Any, Final, Optional
 
+from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
@@ -25,6 +26,22 @@ if TYPE_CHECKING:
 
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class EntityCategory(StrEnum):
+    """Category of an entity.
+
+    An entity with a category will:
+    - Not be exposed to cloud, Alexa, or Google Assistant components
+    - Not be included in indirect service calls to devices or areas
+    """
+
+    # Config: An entity which allows changing the configuration of a device.
+    CONFIG = "config"
+
+    # Diagnostic: An entity exposing some configuration parameter,
+    # or diagnostics of a device.
+    DIAGNOSTIC = "diagnostic"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -337,6 +354,11 @@ class BaseEntity(LogMixin, EventBase):
 class PlatformEntity(BaseEntity):
     """Class that represents an entity for a device platform."""
 
+    _attr_entity_registry_enabled_default: bool
+    _attr_translation_key: str | None
+    _attr_unit_of_measurement: str | None
+    _attr_entity_category: EntityCategory | None
+
     def __init__(
         self,
         unique_id: str,
@@ -351,7 +373,7 @@ class PlatformEntity(BaseEntity):
         ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
         self._name: str = f"{device.name} {ieeetail} {ch_names}"
         if self._unique_id_suffix:
-            self._name += f" {self.unique_id_suffix}"
+            self._name += f" {self._unique_id_suffix}"
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
         for cluster_handler in cluster_handlers:
@@ -376,6 +398,31 @@ class PlatformEntity(BaseEntity):
         Return a platform entity if it is a supported configuration, otherwise return None
         """
         return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+
+    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+        """Init this entity from the quirks metadata."""
+        if entity_metadata.initially_disabled:
+            self._attr_entity_registry_enabled_default = False
+
+        if entity_metadata.translation_key:
+            self._attr_translation_key = entity_metadata.translation_key
+
+        if hasattr(entity_metadata.entity_metadata, "attribute_name"):
+            if not entity_metadata.translation_key:
+                self._attr_translation_key = (
+                    entity_metadata.entity_metadata.attribute_name
+                )
+            self._unique_id_suffix = entity_metadata.entity_metadata.attribute_name
+        elif hasattr(entity_metadata.entity_metadata, "command_name"):
+            if not entity_metadata.translation_key:
+                self._attr_translation_key = (
+                    entity_metadata.entity_metadata.command_name
+                )
+            self._unique_id_suffix = entity_metadata.entity_metadata.command_name
+        if entity_metadata.entity_type is EntityType.CONFIG:
+            self._attr_entity_category = EntityCategory.CONFIG
+        elif entity_metadata.entity_type is EntityType.DIAGNOSTIC:
+            self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
     def device(self) -> ZHADevice:
