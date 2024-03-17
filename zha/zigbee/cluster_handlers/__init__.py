@@ -569,6 +569,28 @@ class ClusterHandler(LogMixin, EventBase):
                     f"Failed to write attribute {name}={value}: {record.status}",
                 )
 
+    def to_json(self) -> dict:
+        """Return JSON representation of this cluster handler."""
+        json = {
+            "class_name": self.__class__.__name__,
+            "generic_id": self._generic_id,
+            "endpoint_id": self._endpoint.id,
+            "cluster": {
+                "id": self._cluster.cluster_id,
+                "name": self._cluster.name,
+                "type": "client" if self._cluster.is_client else "server",
+                "commands": self._cluster.commands,
+            },
+            "id": self._id,
+            "unique_id": self._unique_id,
+            "status": self._status.name,
+        }
+
+        if hasattr(self, "value_attribute"):
+            json["value_attribute"] = self.value_attribute
+
+        return json
+
     def log(self, level, msg, *args, **kwargs) -> None:
         """Log a message."""
         msg = f"[%s:%s]: {msg}"

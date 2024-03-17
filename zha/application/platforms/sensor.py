@@ -685,13 +685,14 @@ class Sensor(PlatformEntity):
 
     def get_state(self) -> dict:
         """Return the state for this sensor."""
-        assert self._attribute_name is not None
-        raw_state = self._cluster_handler.cluster.get(self._attribute_name)
-        if raw_state is None:
-            return None
         response = super().get_state()
-        raw_state = self.formatter(raw_state)
-        response["state"] = raw_state
+        if self._attribute_name is not None:
+            raw_state = self._cluster_handler.cluster.get(self._attribute_name)
+            if raw_state is None:
+                return None
+
+            raw_state = self.formatter(raw_state)
+            response["state"] = raw_state
         return response
 
     def handle_cluster_handler_attribute_updated(
@@ -755,7 +756,7 @@ class PollableSensor(Sensor):
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self):
         """Call async_update at a constrained random interval."""
-        if self.device.available and self.device.gateway.data[DATA_ZHA].allow_polling:
+        if self.device.available and self.device.gateway.config.allow_polling:
             self.debug("polling for updated state")
             await self.async_update()
             self.maybe_send_state_changed_event()
@@ -763,7 +764,7 @@ class PollableSensor(Sensor):
             self.debug(
                 "skipping polling for updated state, available: %s, allow polled requests: %s",
                 self.device.available,
-                self.device.gateway.data[DATA_ZHA].allow_polling,
+                self.device.gateway.config.allow_polling,
             )
 
 
@@ -777,7 +778,7 @@ class DeviceCounterSensor(BaseEntity):
     _attr_entity_registry_enabled_default = False
 
     @classmethod
-    def create_entity(
+    def create_platform_entity(
         cls,
         unique_id: str,
         zha_device: ZHADevice,
@@ -830,7 +831,7 @@ class DeviceCounterSensor(BaseEntity):
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self):
         """Call async_update at a constrained random interval."""
-        if self._device.available and self._device.gateway.data[DATA_ZHA].allow_polling:
+        if self._device.available and self._device.gateway.config.allow_polling:
             self.debug("polling for updated state")
             await self.async_update()
             self.maybe_send_state_changed_event()
@@ -838,7 +839,7 @@ class DeviceCounterSensor(BaseEntity):
             self.debug(
                 "skipping polling for updated state, available: %s, allow polled requests: %s",
                 self._device.available,
-                self._device.gateway.data[DATA_ZHA].allow_polling,
+                self._device.gateway.config.allow_polling,
             )
 
     def get_identifiers(self) -> dict[str, str | int]:
@@ -1727,7 +1728,6 @@ class SinopeHVACAction(ThermostatHVACAction):
 class RSSISensor(Sensor):
     """RSSI sensor for a device."""
 
-    _attribute_name = "rssi"
     _unique_id_suffix = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
@@ -1759,7 +1759,7 @@ class RSSISensor(Sensor):
     @property
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
-        return getattr(self._device.device, self._attribute_name)
+        return getattr(self._device.device, self._unique_id_suffix)
 
     def get_state(self) -> dict:
         """Return the state of the sensor."""
@@ -1772,7 +1772,6 @@ class RSSISensor(Sensor):
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
-    _attribute_name = "lqi"
     _unique_id_suffix = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None

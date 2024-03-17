@@ -309,7 +309,7 @@ class ZhaFan(PlatformEntity, BaseFan):
         endpoint: Endpoint,
         device: ZHADevice,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize the fan."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(

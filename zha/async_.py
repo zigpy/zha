@@ -172,12 +172,9 @@ class AsyncUtilMixin:
         while tasks := [
             task
             for task in (
-                self._tracked_completable_tasks
-                | self._background_tasks
-                | list(self._device_init_tasks.values())
+                self._tracked_completable_tasks | self._background_tasks
                 if wait_background_tasks
                 else self._tracked_completable_tasks
-                | list(self._device_init_tasks.values())
             )
             if task is not current_task and not cancelling(task)
         ]:

@@ -1,5 +1,7 @@
 """Locks on Zigbee Home Automation networks."""
 
+from __future__ import annotations
+
 import functools
 from typing import TYPE_CHECKING, Any, Final
 
@@ -45,7 +47,7 @@ class ZhaDoorLock(PlatformEntity):
         endpoint: Endpoint,
         device: ZHADevice,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize the lock."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers.get(

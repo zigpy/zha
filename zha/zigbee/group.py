@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity, PlatformEntityStateChangedEvent
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
@@ -19,6 +18,7 @@ from zha.mixins import LogMixin
 if TYPE_CHECKING:
     from zigpy.group import Group as ZigpyGroup, GroupEndpoint
 
+    from zha.application.gateway import ZHAGateway
     from zha.application.platforms import GroupEntity
     from zha.zigbee.device import Device
 

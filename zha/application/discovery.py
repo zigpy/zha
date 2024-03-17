@@ -23,7 +23,8 @@ from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
 from zha.application import Platform, const as zha_const
-from zha.application.gateway import ZHAGateway
+
+# TODO add update back
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     alarm_control_panel,
     binary_sensor,
@@ -39,7 +40,6 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     sensor,
     siren,
     switch,
-    update,
 )
 from zha.application.registries import (
     DEVICE_CLASS,
@@ -70,9 +70,8 @@ from zha.zigbee.cluster_handlers.registries import (
 )
 from zha.zigbee.group import Group
 
-from .helpers import get_zha_data
-
 if TYPE_CHECKING:
+    from zha.application.gateway import ZHAGateway
     from zha.zigbee.device import ZHADevice
     from zha.zigbee.endpoint import Endpoint
 
@@ -157,6 +156,14 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
 
 class DeviceProbe:
     """Probe to discover entities for a device."""
+
+    def __init__(self) -> None:
+        """Initialize instance."""
+        self._gateway: ZHAGateway
+
+    def initialize(self, gateway: ZHAGateway) -> None:
+        """Initialize the group probe."""
+        self._gateway = gateway
 
     def discover_device_entities(self, device: ZHADevice) -> None:
         """Discover entities for a ZHA device."""
@@ -299,7 +306,7 @@ class DeviceProbe:
             device.name,
         )
         state: State = device.gateway.application_controller.state
-        platforms: dict[Platform, list] = get_zha_data(device.hass).platforms
+        platforms: dict[Platform, list] = self._gateway.config.platforms
 
         def process_counters(counter_groups: str) -> None:
             for counter_group, counters in getattr(state, counter_groups).items():
@@ -525,7 +532,7 @@ class EndpointProbe:
 
     def initialize(self, gateway: ZHAGateway) -> None:
         """Update device overrides config."""
-        zha_config = get_zha_data(gateway).yaml_config
+        zha_config = gateway.config.yaml_config
         if overrides := zha_config.get(zha_const.CONF_DEVICE_CONFIG):
             self._device_configs.update(overrides)
 

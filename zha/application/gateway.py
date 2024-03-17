@@ -38,6 +38,7 @@ from zha.application.const import (
     ZHA_GW_MSG_GROUP_REMOVED,
     RadioType,
 )
+from zha.application.helpers import ZHAData
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
@@ -63,10 +64,10 @@ class DevicePairingStatus(Enum):
 class ZHAGateway(AsyncUtilMixin):
     """Gateway that handles events that happen on the ZHA Zigbee network."""
 
-    def __init__(self, config: dict[str, Any]) -> None:
+    def __init__(self, config: ZHAData) -> None:
         """Initialize the gateway."""
         super().__init__()
-        self._config: dict[str, Any] = config
+        self.config: ZHAData = config
         self._devices: dict[EUI64, ZHADevice] = {}
         self._groups: dict[int, Group] = {}
         self.application_controller: ControllerApplication = None
@@ -75,22 +76,24 @@ class ZHAGateway(AsyncUtilMixin):
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
-        self.data: dict[str, Any] = {}
         self._tracked_completable_tasks: list[asyncio.Task] = []
         self._device_init_tasks: dict[EUI64, asyncio.Task] = {}
         self._background_tasks: set[asyncio.Future[Any]] = set()
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
-        radio_type = RadioType[self.config_entry.data[CONF_RADIO_TYPE]]
+        radio_type = RadioType[self.config.config_entry_data["data"][CONF_RADIO_TYPE]]
 
-        app_config = self._config.get(CONF_ZIGPY, {})
-        database = self._config.get(
+        app_config = self.config.yaml_config.get(CONF_ZIGPY, {})
+        # pylint: disable=pointless-string-statement
+        """TODO
+        database = self.config.get(
             CONF_DATABASE,
             self.hass.config.path(DEFAULT_DATABASE_NAME),
         )
         app_config[CONF_DATABASE] = database
-        app_config[CONF_DEVICE] = self.config_entry.data[CONF_DEVICE]
+        """
+        app_config[CONF_DEVICE] = self.config.config_entry_data["data"][CONF_DEVICE]
 
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
             app_config[CONF_NWK_VALIDATE_SETTINGS] = True
@@ -124,7 +127,7 @@ class ZHAGateway(AsyncUtilMixin):
         return radio_type.controller, radio_type.controller.SCHEMA(app_config)
 
     @classmethod
-    async def async_from_config(cls, config: dict[str, Any]) -> Self:
+    async def async_from_config(cls, config: ZHAData) -> Self:
         """Create an instance of a gateway from config objects."""
         instance = cls(config)
         await instance.async_initialize()
@@ -132,6 +135,7 @@ class ZHAGateway(AsyncUtilMixin):
 
     async def async_initialize(self) -> None:
         """Initialize controller and connect radio."""
+        discovery.DEVICE_PROBE.initialize(self)
         discovery.ENDPOINT_PROBE.initialize(self)
         discovery.GROUP_PROBE.initialize(self)
 
@@ -234,11 +238,13 @@ class ZHAGateway(AsyncUtilMixin):
         """Create platform entities."""
 
         for platform in discovery.PLATFORMS:
-            for platform_entity_class, args in self.data[platform]:
-                platform_entity = platform_entity_class.create_platform_entity(*args)
+            for platform_entity_class, args, kw_args in self.config.platforms[platform]:
+                platform_entity = platform_entity_class.create_platform_entity(
+                    *args, **kw_args
+                )
                 if platform_entity:
                     _LOGGER.debug("Platform entity data: %s", platform_entity.to_json())
-            self.data[platform].clear()
+            self.config.platforms[platform].clear()
 
     @property
     def radio_concurrency(self) -> int:
@@ -285,7 +291,7 @@ class ZHAGateway(AsyncUtilMixin):
             """Fetch updated state for mains powered devices."""
             await self.async_fetch_updated_state_mains()
             _LOGGER.debug("Allowing polled requests")
-            self.data[DATA_ZHA].allow_polling = True
+            self.config.allow_polling = True
 
         # background the fetching of state for mains powered devices
         self.async_create_background_task(

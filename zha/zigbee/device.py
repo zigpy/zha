@@ -146,14 +146,14 @@ class ZHADevice(LogMixin):
 
         if self.is_mains_powered:
             self.consider_unavailable_time: int = async_get_zha_config_value(
-                self._gateway.config_entry,
+                self._gateway.config,
                 ZHA_OPTIONS,
                 CONF_CONSIDER_UNAVAILABLE_MAINS,
                 CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
             )
         else:
             self.consider_unavailable_time = async_get_zha_config_value(
-                self._gateway.config_entry,
+                self._gateway.config,
                 ZHA_OPTIONS,
                 CONF_CONSIDER_UNAVAILABLE_BATTERY,
                 CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
@@ -472,7 +472,7 @@ class ZHADevice(LogMixin):
             self._checkins_missed_count = 0
             return
 
-        if self._gateway.data[const.DATA_ZHA].allow_polling:
+        if self._gateway.config.allow_polling:
             if (
                 self._checkins_missed_count >= _CHECKIN_GRACE_PERIODS
                 or self.manufacturer == "LUMI"
@@ -582,7 +582,7 @@ class ZHADevice(LogMixin):
     async def async_configure(self) -> None:
         """Configure the device."""
         should_identify = async_get_zha_config_value(
-            self._gateway.config_entry,
+            self._gateway.config,
             ZHA_OPTIONS,
             CONF_ENABLE_IDENTIFY_ON_JOIN,
             True,
@@ -655,13 +655,10 @@ class ZHADevice(LogMixin):
         device_info: dict[str, Any] = {}
         device_info.update(self.device_info)
         device_info[ATTR_ACTIVE_COORDINATOR] = self.is_active_coordinator
-        device_info["entities"] = [
-            {
-                "entity_id": entity_ref.reference_id,
-                ATTR_NAME: entity_ref.device_info[ATTR_NAME],
-            }
-            for entity_ref in self.gateway.device_registry[self.ieee]
-        ]
+        device_info["entities"] = {
+            unique_id: platform_entity.to_json()
+            for unique_id, platform_entity in self.platform_entities.items()
+        }
 
         topology = self.gateway.application_controller.topology
         device_info[ATTR_NEIGHBORS] = [

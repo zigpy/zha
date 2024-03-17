@@ -30,7 +30,10 @@ from zha.application.const import (
     CUSTOM_CONFIGURATION,
     DATA_ZHA,
 )
-from zha.zigbee.cluster_handlers.registries import BINDABLE_CLUSTERS
+from zha.decorators import SetRegistry
+
+# from zha.zigbee.cluster_handlers.registries import BINDABLE_CLUSTERS
+BINDABLE_CLUSTERS = SetRegistry()
 
 if TYPE_CHECKING:
     from zha.application.gateway import ZHAGateway
@@ -174,11 +177,11 @@ def async_is_bindable_target(source_zha_device, target_zha_device):
 
 
 def async_get_zha_config_value(
-    config_entry: dict[str, Any], section: str, config_key: str, default: _T
+    zha_data: ZHAData, section: str, config_key: str, default: _T
 ) -> _T:
     """Get the value for the specified configuration from the ZHA config entry."""
     return (
-        config_entry.get("options", {})
+        zha_data.config_entry_data.get("options", {})
         .get(CUSTOM_CONFIGURATION, {})
         .get(section, {})
         .get(config_key, default)
@@ -266,6 +269,7 @@ class ZHAData:
     """ZHA data stored in `gateway.data`."""
 
     yaml_config: dict[str, Any] = dataclasses.field(default_factory=dict)
+    config_entry_data: dict[str, Any] = dataclasses.field(default_factory=dict)
     platforms: collections.defaultdict[Platform, list] = dataclasses.field(
         default_factory=lambda: collections.defaultdict(list)
     )
@@ -274,11 +278,3 @@ class ZHAData:
         default_factory=dict
     )
     allow_polling: bool = dataclasses.field(default=False)
-
-
-def get_zha_data(gateway: ZHAGateway) -> ZHAData:
-    """Get the global ZHA data object."""
-    if DATA_ZHA not in gateway.data:
-        gateway.data[DATA_ZHA] = ZHAData()
-
-    return gateway.data[DATA_ZHA]

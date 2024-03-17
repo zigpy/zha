@@ -11,6 +11,10 @@ from typing import TYPE_CHECKING, Any, Final, TypeVar
 from zha.application import Platform, const, discovery, registries
 from zha.async_ import gather_with_limited_concurrency
 from zha.zigbee.cluster_handlers import ClusterHandler
+from zha.zigbee.cluster_handlers.registries import (
+    CLIENT_CLUSTER_HANDLER_REGISTRY,
+    CLUSTER_HANDLER_REGISTRY,
+)
 
 if TYPE_CHECKING:
     from zigpy import Endpoint as ZigpyEndpoint
@@ -111,7 +115,7 @@ class Endpoint:
     def add_all_cluster_handlers(self) -> None:
         """Create and add cluster handlers for all input clusters."""
         for cluster_id, cluster in self.zigpy_endpoint.in_clusters.items():
-            cluster_handler_classes = registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.get(
+            cluster_handler_classes = CLUSTER_HANDLER_REGISTRY.get(
                 cluster_id, {None: ClusterHandler}
             )
             quirk_id = (
@@ -158,7 +162,7 @@ class Endpoint:
         for (
             cluster_id,
             cluster_handler_class,
-        ) in registries.CLIENT_CLUSTER_HANDLER_REGISTRY.items():
+        ) in CLIENT_CLUSTER_HANDLER_REGISTRY.items():
             cluster = self.zigpy_endpoint.out_clusters.get(cluster_id)
             if cluster is not None:
                 cluster_handler = cluster_handler_class(cluster, self)
@@ -214,8 +218,12 @@ class Endpoint:
         if self.device.status == DeviceStatus.INITIALIZED:
             return
 
-        self.device.gateway.data[platform].append(
-            (entity_class, (unique_id, self.device, cluster_handlers), kwargs or {})
+        self.device.gateway.config.platforms[platform].append(
+            (
+                entity_class,
+                (unique_id, cluster_handlers, self, self.device),
+                kwargs or {},
+            )
         )
 
     # pylint: disable=pointless-string-statement

@@ -71,13 +71,13 @@ if TYPE_CHECKING:
     from ..endpoint import Endpoint
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class LevelChangeEvent:
     """Event to signal that a cluster attribute has been updated."""
 
     level: int
-    event_type: Final[str] = "cluster_handler_event"
     event: str
+    event_type: Final[str] = "cluster_handler_event"
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Alarms.cluster_id)

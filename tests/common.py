@@ -11,6 +11,9 @@ import zigpy.types as t
 import zigpy.zcl
 import zigpy.zcl.foundation as zcl_f
 
+from zha.application import Platform
+from zha.application.gateway import ZHAGateway
+from zha.application.platforms import PlatformEntity
 from zha.zigbee.device import ZHADevice
 from zha.zigbee.group import Group
 
@@ -35,7 +38,7 @@ def patch_cluster(cluster: zigpy.zcl.Cluster) -> None:
                     zcl_f.ReadAttributeRecord(
                         attr_id,
                         zcl_f.Status.SUCCESS,
-                        zcl_f.TypeValue(python_type=None, value=value),
+                        zcl_f.TypeValue(type=None, value=value),
                     )
                 )
             else:
@@ -100,7 +103,7 @@ def update_attribute_cache(cluster: zigpy.zcl.Cluster) -> None:
             attrid = zigpy.types.uint16_t(attrid)
         attrs.append(make_attribute(attrid, value))
 
-    hdr = make_zcl_header(zcl_f.Command.Report_Attributes)
+    hdr = make_zcl_header(zcl_f.GeneralCommand.Report_Attributes)
     hdr.frame_control.disable_default_response = True
     msg = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Report_Attributes].schema(
         attribute_reports=attrs
@@ -118,7 +121,7 @@ def make_attribute(attrid: int, value: Any, status: int = 0) -> zcl_f.Attribute:
 
 
 async def send_attributes_report(
-    server: Server, cluster: zigpy.zcl.Cluster, attributes: dict
+    zha_gateway: ZHAGateway, cluster: zigpy.zcl.Cluster, attributes: dict
 ) -> None:
     """Cause the sensor to receive an attribute report from the network.
 
@@ -142,7 +145,7 @@ async def send_attributes_report(
     hdr = make_zcl_header(zcl_f.GeneralCommand.Report_Attributes)
     hdr.frame_control.disable_default_response = True
     cluster.handle_message(hdr, msg)
-    await server.block_till_done()
+    await zha_gateway.async_block_till_done()
 
 
 def make_zcl_header(
@@ -165,12 +168,10 @@ def reset_clusters(clusters: list[zigpy.zcl.Cluster]) -> None:
         cluster.write_attributes.reset_mock()
 
 
-def find_entity(
-    device_proxy: DeviceProxy, platform: Platform
-) -> Optional[BasePlatformEntity]:
+def find_entity(device: ZHADevice, platform: Platform) -> Optional[PlatformEntity]:
     """Find an entity for the specified platform on the given device."""
-    for entity in device_proxy.device_model.entities.values():
-        if entity.platform == platform:
+    for entity in device.platform_entities.values():
+        if platform == entity.PLATFORM:
             return entity
     return None
 

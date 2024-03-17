@@ -1,16 +1,13 @@
 """Test configuration for the ZHA component."""
 
-from asyncio import AbstractEventLoop
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 import itertools
 import logging
-import os
-import tempfile
 import time
-from typing import Any, AsyncGenerator, Optional
-from unittest.mock import AsyncMock, MagicMock, PropertyMock, patch
+from typing import Any, Optional
+from unittest.mock import AsyncMock, MagicMock, create_autospec, patch
+import warnings
 
-import aiohttp
 import pytest
 import zigpy
 from zigpy.application import ControllerApplication
@@ -20,58 +17,229 @@ import zigpy.device
 import zigpy.group
 import zigpy.profiles
 import zigpy.types
+from zigpy.zcl.clusters.general import Basic, Groups
+from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
 from tests import common
+from zha.application.const import (
+    CONF_ALARM_ARM_REQUIRES_CODE,
+    CONF_ALARM_FAILED_TRIES,
+    CONF_ALARM_MASTER_CODE,
+    CONF_ENABLE_ENHANCED_LIGHT_TRANSITION,
+    CONF_GROUP_MEMBERS_ASSUME_STATE,
+    CONF_RADIO_TYPE,
+    CUSTOM_CONFIGURATION,
+    ZHA_ALARM_OPTIONS,
+    ZHA_OPTIONS,
+)
+from zha.application.gateway import ZHAGateway
+from zha.application.helpers import ZHAData
+from zha.zigbee.device import ZHADevice
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
+COUNTER_NAMES = ["counter_1", "counter_2", "counter_3"]
 _LOGGER = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def server_configuration() -> ServerConfiguration:
-    """Server configuration fixture."""
-    port = aiohttp.test_utils.unused_port()  # type: ignore
-    with tempfile.TemporaryDirectory() as tempdir:
-        # you can e.g. create a file here:
-        config_path = os.path.join(tempdir, "configuration.json")
-        server_config = ServerConfiguration.parse_obj(
-            {
-                "zigpy_configuration": {
-                    "database_path": os.path.join(tempdir, "zigbee.db"),
-                    "enable_quirks": True,
-                },
-                "radio_configuration": {
-                    "type": "ezsp",
-                    "path": "/dev/tty.SLAB_USBtoUART",
-                    "baudrate": 115200,
-                    "flow_control": "hardware",
-                },
-                "host": "localhost",
-                "port": port,
-                "network_auto_start": False,
-            }
-        )
-        with open(config_path, "w") as tmpfile:
-            tmpfile.write(server_config.json())
-            return server_config
+class _FakeApp(ControllerApplication):
+    async def add_endpoint(self, descriptor: zdo_t.SimpleDescriptor):
+        pass
+
+    async def connect(self):
+        pass
+
+    async def disconnect(self):
+        pass
+
+    async def force_remove(self, dev: zigpy.device.Device):
+        pass
+
+    async def load_network_info(self, *, load_devices: bool = False):
+        pass
+
+    async def permit_ncp(self, time_s: int = 60):
+        pass
+
+    async def permit_with_link_key(
+        self, node: zigpy.types.EUI64, link_key: zigpy.types.KeyData, time_s: int = 60
+    ):
+        pass
+
+    async def reset_network_info(self):
+        pass
+
+    async def send_packet(self, packet: zigpy.types.ZigbeePacket):
+        pass
+
+    async def start_network(self):
+        pass
+
+    async def write_network_info(
+        self, *, network_info: zigpy.state.NetworkInfo, node_info: zigpy.state.NodeInfo
+    ) -> None:
+        pass
+
+    async def request(
+        self,
+        device: zigpy.device.Device,
+        profile: zigpy.types.uint16_t,
+        cluster: zigpy.types.uint16_t,
+        src_ep: zigpy.types.uint8_t,
+        dst_ep: zigpy.types.uint8_t,
+        sequence: zigpy.types.uint8_t,
+        data: bytes,
+        *,
+        expect_reply: bool = True,
+        use_ieee: bool = False,
+        extended_timeout: bool = False,
+    ):
+        pass
+
+    async def move_network_to_channel(
+        self, new_channel: int, *, num_broadcasts: int = 5
+    ) -> None:
+        pass
+
+
+def _wrap_mock_instance(obj: Any) -> MagicMock:
+    """Auto-mock every attribute and method in an object."""
+    mock = create_autospec(obj, spec_set=True, instance=True)
+
+    for attr_name in dir(obj):
+        if attr_name.startswith("__") and attr_name not in {"__getitem__"}:
+            continue
+
+        real_attr = getattr(obj, attr_name)
+        mock_attr = getattr(mock, attr_name)
+
+        if callable(real_attr) and not hasattr(real_attr, "__aenter__"):
+            mock_attr.side_effect = real_attr
+        else:
+            setattr(mock, attr_name, real_attr)
+
+    return mock
 
 
 @pytest.fixture
-def zigpy_app_controller() -> ControllerApplication:
+async def zigpy_app_controller():
     """Zigpy ApplicationController fixture."""
-    app = MagicMock(spec_set=ControllerApplication)
-    app.startup = AsyncMock()
-    app.shutdown = AsyncMock()
-    groups = zigpy.group.Groups(app)
-    groups.add_group(FIXTURE_GRP_ID, FIXTURE_GRP_NAME, suppress_event=True)
-    app.configure_mock(groups=groups)
-    type(app).ieee = PropertyMock()
-    app.ieee.return_value = zigpy.types.EUI64.convert("00:15:8d:00:02:32:4f:32")
-    type(app).nwk = PropertyMock(return_value=zigpy.types.NWK(0x0000))
-    type(app).devices = PropertyMock(return_value={})
-    return app
+    app = _FakeApp(
+        {
+            zigpy.config.CONF_DATABASE: None,
+            zigpy.config.CONF_DEVICE: {zigpy.config.CONF_DEVICE_PATH: "/dev/null"},
+            zigpy.config.CONF_STARTUP_ENERGY_SCAN: False,
+            zigpy.config.CONF_NWK_BACKUP_ENABLED: False,
+            zigpy.config.CONF_TOPO_SCAN_ENABLED: False,
+            zigpy.config.CONF_OTA: {
+                zigpy.config.CONF_OTA_ENABLED: False,
+            },
+        }
+    )
+
+    app.groups.add_group(FIXTURE_GRP_ID, FIXTURE_GRP_NAME, suppress_event=True)
+
+    app.state.node_info.nwk = 0x0000
+    app.state.node_info.ieee = zigpy.types.EUI64.convert("00:15:8d:00:02:32:4f:32")
+    app.state.network_info.pan_id = 0x1234
+    app.state.network_info.extended_pan_id = app.state.node_info.ieee
+    app.state.network_info.channel = 15
+    app.state.network_info.network_key.key = zigpy.types.KeyData(range(16))
+    app.state.counters = zigpy.state.CounterGroups()
+    app.state.counters["ezsp_counters"] = zigpy.state.CounterGroup("ezsp_counters")
+    for name in COUNTER_NAMES:
+        app.state.counters["ezsp_counters"][name].increment()
+
+    # Create a fake coordinator device
+    dev = app.add_device(nwk=app.state.node_info.nwk, ieee=app.state.node_info.ieee)
+    dev.node_desc = zdo_t.NodeDescriptor()
+    dev.node_desc.logical_type = zdo_t.LogicalType.Coordinator
+    dev.manufacturer = "Coordinator Manufacturer"
+    dev.model = "Coordinator Model"
+
+    ep = dev.add_endpoint(1)
+    ep.add_input_cluster(Basic.cluster_id)
+    ep.add_input_cluster(Groups.cluster_id)
+
+    with patch("zigpy.device.Device.request", return_value=[Status.SUCCESS]):
+        # The mock wrapping accesses deprecated attributes, so we suppress the warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            mock_app = _wrap_mock_instance(app)
+            mock_app.backups = _wrap_mock_instance(app.backups)
+
+        yield mock_app
+
+
+@pytest.fixture
+async def zha_data() -> ZHAData:
+    """Fixture representing zha configuration data."""
+    return ZHAData(
+        yaml_config={},
+        config_entry_data={
+            "data": {
+                zigpy.config.CONF_DEVICE: {
+                    zigpy.config.CONF_DEVICE_PATH: "/dev/ttyUSB0"
+                },
+                CONF_RADIO_TYPE: "ezsp",
+            },
+            "options": {
+                CUSTOM_CONFIGURATION: {
+                    ZHA_OPTIONS: {
+                        CONF_ENABLE_ENHANCED_LIGHT_TRANSITION: True,
+                        CONF_GROUP_MEMBERS_ASSUME_STATE: False,
+                    },
+                    ZHA_ALARM_OPTIONS: {
+                        CONF_ALARM_ARM_REQUIRES_CODE: False,
+                        CONF_ALARM_MASTER_CODE: "4321",
+                        CONF_ALARM_FAILED_TRIES: 2,
+                    },
+                }
+            },
+        },
+    )
+
+
+@pytest.fixture
+def mock_zigpy_connect(
+    zigpy_app_controller: ControllerApplication,
+) -> Generator[ControllerApplication, None, None]:
+    """Patch the zigpy radio connection with our mock application."""
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "bellows.zigbee.application.ControllerApplication",
+            return_value=zigpy_app_controller,
+        ),
+    ):
+        yield zigpy_app_controller
+
+
+@pytest.fixture
+def zha_gateway(zha_data: ZHAData, mock_zigpy_connect: ControllerApplication):
+    """Set up ZHA component."""
+
+    async def _gateway(config=None) -> ZHAGateway:
+        zha_gateway = await ZHAGateway.async_from_config(zha_data)
+        await zha_gateway.async_block_till_done()
+        return zha_gateway
+
+    return _gateway
+
+
+@pytest.fixture(scope="session", autouse=True)
+def disable_request_retry_delay():
+    """Disable ZHA request retrying delay to speed up failures."""
+
+    with patch(
+        "zha.zigbee.cluster_handlers.RETRYABLE_REQUEST_DECORATOR",
+        zigpy.util.retryable_request(tries=3, delay=0),
+    ):
+        yield
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -89,39 +257,16 @@ def globally_load_quirks():
 
 
 @pytest.fixture
-async def connected_client_and_server(
-    event_loop: AbstractEventLoop,
-    server_configuration: ServerConfiguration,
-    zigpy_app_controller: ControllerApplication,
-) -> AsyncGenerator[tuple[Controller, Server], None]:
-    """Return the connected client and server fixture."""
-
-    application_controller_patch = patch(
-        "bellows.zigbee.application.ControllerApplication.new",
-        return_value=zigpy_app_controller,
-    )
-
-    with application_controller_patch:
-        async with Server(configuration=server_configuration) as server:
-            await server.controller.start_network()
-            async with Controller(
-                f"ws://localhost:{server_configuration.port}"
-            ) as controller:
-                await controller.clients.listen()
-                yield controller, server
-
-
-@pytest.fixture
 def device_joined(
-    connected_client_and_server: tuple[Controller, Server],
-) -> Callable[[zigpy.device.Device], Device]:
+    zha_gateway,
+) -> Callable[[zigpy.device.Device], ZHADevice]:
     """Return a newly joined ZHAWS device."""
 
-    async def _zha_device(zigpy_dev: zigpy.device.Device) -> Device:
-        client, server = connected_client_and_server
-        await server.controller.async_device_initialized(zigpy_dev)
-        await server.block_till_done()
-        return server.controller.get_device(zigpy_dev.ieee)
+    async def _zha_device(zigpy_dev: zigpy.device.Device) -> ZHADevice:
+        gateway: ZHAGateway = await zha_gateway()
+        await gateway.async_device_initialized(zigpy_dev)
+        await gateway.async_block_till_done()
+        return gateway.get_device(zigpy_dev.ieee)
 
     return _zha_device
 
