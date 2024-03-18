@@ -9,7 +9,7 @@ from datetime import timedelta
 from enum import Enum
 import logging
 import time
-from typing import Any, Final, Self, TypeVar, cast
+from typing import Final, Self, TypeVar, cast
 
 from zigpy.application import ControllerApplication
 from zigpy.config import CONF_DEVICE, CONF_DEVICE_PATH, CONF_NWK_VALIDATE_SETTINGS
