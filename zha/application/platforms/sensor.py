@@ -620,7 +620,7 @@ class Sensor(PlatformEntity):
 
     @classmethod
     def create_platform_entity(
-        cls: Self,
+        cls: type[Self],
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
@@ -915,7 +915,7 @@ class Battery(Sensor):
 
     @classmethod
     def create_platform_entity(
-        cls: Self,
+        cls: type[Self],
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
@@ -1460,7 +1460,7 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
 
     @classmethod
     def create_platform_entity(
-        cls: Self,
+        cls: type[Self],
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
@@ -1609,7 +1609,7 @@ class ThermostatHVACAction(Sensor):
 
     @classmethod
     def create_platform_entity(
-        cls: Self,
+        cls: type[Self],
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
@@ -1746,7 +1746,7 @@ class RSSISensor(Sensor):
 
     @classmethod
     def create_platform_entity(
-        cls: Self,
+        cls: type[Self],
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,

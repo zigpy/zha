@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 import re
-from typing import Any
+from typing import Any, Final
 from unittest import mock
 from unittest.mock import AsyncMock, patch
 
@@ -60,6 +60,7 @@ from .zha_devices_list import (
 
 NO_TAIL_ID = re.compile("_\\d$")
 UNIQUE_ID_HD = re.compile(r"^(([\da-fA-F]{2}:){7}[\da-fA-F]{2}-\d{1,3})", re.X)
+STATE_OFF: Final[str] = "off"
 
 IGNORE_SUFFIXES = [
     zigpy.zcl.clusters.general.OnOff.StartUpOnOff.__name__,

@@ -203,6 +203,7 @@ def find_entity_id(
         for entity_id in entities:
             if qualifier in entity_id:
                 return entity_id
+        return None
     else:
         return entities[0]
 

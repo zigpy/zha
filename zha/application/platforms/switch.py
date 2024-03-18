@@ -174,7 +174,7 @@ class ZHASwitchConfigurationEntity(PlatformEntity):
 
     @classmethod
     def create_platform_entity(
-        cls: Self,
+        cls: type[Self],
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
@@ -630,7 +630,7 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
 
     @classmethod
     def create_platform_entity(
-        cls: Self,
+        cls: type[Self],
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
