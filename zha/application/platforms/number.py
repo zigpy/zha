@@ -621,6 +621,7 @@ class UnitOfTemperature(StrEnum):
 class ZhaNumber(PlatformEntity):
     """Representation of a ZHA Number entity."""
 
+    PLATFORM = Platform.NUMBER
     _attr_translation_key: str = "number"
 
     def __init__(
@@ -736,6 +737,7 @@ class ZhaNumber(PlatformEntity):
 class ZHANumberConfigurationEntity(PlatformEntity):
     """Representation of a ZHA number configuration entity."""
 
+    PLATFORM = Platform.NUMBER
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_step: float = 1.0
     _attr_multiplier: float = 1
