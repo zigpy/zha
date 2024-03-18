@@ -455,9 +455,9 @@ async def test_group_probe_cleanup_called(
 
 
 async def test_quirks_v2_entity_discovery(
-    hass,
+    zha_gateway: ZHAGateway,
     zigpy_device_mock,
-    zha_device_joined,
+    device_joined,
 ) -> None:
     """Test quirks v2 discovery."""
 
@@ -508,23 +508,22 @@ async def test_quirks_v2_entity_discovery(
     }
     update_attribute_cache(zigpy_device.endpoints[1].on_off)
 
-    zha_device = await zha_device_joined(zigpy_device)
+    zha_device = await device_joined(zigpy_device)
 
     entity_id = find_entity_id(
         Platform.NUMBER,
         zha_device,
-        hass,
     )
     assert entity_id is not None
 
-    state = hass.states.get(entity_id)
+    state = zha_gateway.states.get(entity_id)
     assert state is not None
 
 
 async def test_quirks_v2_entity_discovery_e1_curtain(
-    hass,
+    zha_gateway: ZHAGateway,
     zigpy_device_mock,
-    zha_device_joined,
+    device_joined,
 ) -> None:
     """Test quirks v2 discovery for e1 curtain motor."""
     aqara_E1_device = zigpy_device_mock(
@@ -622,37 +621,34 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
     }
     update_attribute_cache(aqara_E1_device.endpoints[1].window_covering)
 
-    zha_device = await zha_device_joined(aqara_E1_device)
+    zha_device = await device_joined(aqara_E1_device)
 
     power_source_entity_id = find_entity_id(
         Platform.SENSOR,
         zha_device,
-        hass,
         qualifier=BasicCluster.AttributeDefs.power_source.name,
     )
     assert power_source_entity_id is not None
-    state = hass.states.get(power_source_entity_id)
+    state = zha_gateway.states.get(power_source_entity_id)
     assert state is not None
     assert state.state == BasicCluster.PowerSource.Mains_single_phase.name
 
     hook_state_entity_id = find_entity_id(
         Platform.SENSOR,
         zha_device,
-        hass,
         qualifier="hooks_state",
     )
     assert hook_state_entity_id is not None
-    state = hass.states.get(hook_state_entity_id)
+    state = zha_gateway.states.get(hook_state_entity_id)
     assert state is not None
     assert state.state == AqaraE1HookState.Unlocked.name
 
     error_detected_entity_id = find_entity_id(
         Platform.BINARY_SENSOR,
         zha_device,
-        hass,
     )
     assert error_detected_entity_id is not None
-    state = hass.states.get(error_detected_entity_id)
+    state = zha_gateway.states.get(error_detected_entity_id)
     assert state is not None
     assert state.state == STATE_OFF
 
@@ -723,7 +719,7 @@ def _get_test_device(zigpy_device_mock, manufacturer: str, model: str):
 async def test_quirks_v2_entity_no_metadata(
     zha_gateway: ZHAGateway,
     zigpy_device_mock,
-    zha_device_joined,
+    device_joined,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - no metadata."""
@@ -732,7 +728,7 @@ async def test_quirks_v2_entity_no_metadata(
         zigpy_device_mock, "Ikea of Sweden2", "TRADFRI remote control2"
     )
     setattr(zigpy_device, "_exposes_metadata", {})
-    zha_device = await zha_device_joined(zigpy_device)
+    zha_device = await device_joined(zigpy_device)
     assert (
         f"Device: {str(zigpy_device.ieee)}-{zha_device.name} does not expose any quirks v2 entities"
         in caplog.text
@@ -742,7 +738,7 @@ async def test_quirks_v2_entity_no_metadata(
 async def test_quirks_v2_entity_discovery_errors(
     zha_gateway: ZHAGateway,
     zigpy_device_mock,
-    zha_device_joined,
+    device_joined,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - errors."""
@@ -750,7 +746,7 @@ async def test_quirks_v2_entity_discovery_errors(
     zigpy_device = _get_test_device(
         zigpy_device_mock, "Ikea of Sweden3", "TRADFRI remote control3"
     )
-    zha_device = await zha_device_joined(zigpy_device)
+    zha_device = await device_joined(zigpy_device)
 
     m1 = f"Device: {str(zigpy_device.ieee)}-{zha_device.name} does not have an"
     m2 = " endpoint with id: 3 - unable to create entity with cluster"
