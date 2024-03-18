@@ -16,12 +16,12 @@ from zigpy.zcl.clusters.hvac import (
     UserInterface,
 )
 
-from . import AttrReportConfig, ClusterHandler, registries
+from . import AttrReportConfig, ClusterAttributeUpdatedEvent, ClusterHandler, registries
 from .const import (
+    CLUSTER_HANDLER_EVENT,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
     REPORT_CONFIG_OP,
-    SIGNAL_ATTR_UPDATED,
 )
 
 REPORT_CONFIG_CLIMATE = (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 25)
@@ -72,8 +72,14 @@ class FanClusterHandler(ClusterHandler):
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
         if attr_name == "fan_mode":
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}", attrid, attr_name, value
+            self.emit(
+                CLUSTER_HANDLER_EVENT,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=attr_name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                ),
             )
 
 
@@ -286,11 +292,14 @@ class ThermostatClusterHandler(ClusterHandler):
         self.debug(
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
-        self.async_send_signal(
-            f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-            attrid,
-            attr_name,
-            value,
+        self.emit(
+            CLUSTER_HANDLER_EVENT,
+            ClusterAttributeUpdatedEvent(
+                attribute_id=attrid,
+                attribute_name=attr_name,
+                attribute_value=value,
+                cluster_handler_unique_id=self.unique_id,
+            ),
         )
 
     async def async_set_operation_mode(self, mode) -> bool:

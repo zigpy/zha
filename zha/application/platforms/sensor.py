@@ -978,6 +978,9 @@ class ElectricalMeasurement(PollableSensor):
             response["measurement_type"] = self._cluster_handler.measurement_type
 
         max_attr_name = f"{self._attribute_name}_max"
+        if max_attr_name not in self._cluster_handler.cluster.AttributeDefs:
+            return response
+
         if (max_v := self._cluster_handler.cluster.get(max_attr_name)) is not None:
             response[max_attr_name] = str(self.formatter(max_v))
 

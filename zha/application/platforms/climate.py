@@ -1,4 +1,4 @@
-"""Climate on Zigbee Home Automation."""
+"""Climate on Zigbee Home Automation."""  # pylint: disable=too-many-lines
 
 from __future__ import annotations
 
@@ -606,6 +606,27 @@ class Thermostat(PlatformEntity):
         handler = getattr(self, f"async_preset_handler_{preset}")
         await handler(enable)
 
+    def to_json(self) -> dict:
+        """Return a JSON representation of the thermostat."""
+        json = super().to_json()
+        json["hvac_modes"] = self.hvac_modes
+        json["fan_modes"] = self.fan_modes
+        json["preset_modes"] = self.preset_modes
+        return json
+
+    def get_state(self) -> dict:
+        """Get the state of the lock."""
+        response = super().get_state()
+        response["current_temperature"] = self.current_temperature
+        response["target_temperature"] = self.target_temperature
+        response["target_temperature_high"] = self.target_temperature_high
+        response["target_temperature_low"] = self.target_temperature_low
+        response["hvac_action"] = self.hvac_action
+        response["hvac_mode"] = self.hvac_mode
+        response["preset_mode"] = self.preset_mode
+        response["fan_mode"] = self.fan_mode
+        return response
+
 
 @MULTI_MATCH(
     cluster_handler_names={CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"},
@@ -664,7 +685,7 @@ class SinopeTechnologiesThermostat(Thermostat):
             return HVACAction.IDLE
         return HVACAction.OFF
 
-    def _async_update_time(self) -> None:
+    async def _async_update_time(self) -> None:
         """Update thermostat's time display."""
 
         secs_2k = (
@@ -673,10 +694,8 @@ class SinopeTechnologiesThermostat(Thermostat):
         ).total_seconds()
 
         self.debug("Updating time: %s", secs_2k)
-        self._manufacturer_ch.cluster.create_catching_task(
-            self._manufacturer_ch.write_attributes_safe(
-                {"secs_since_2k": secs_2k}, manufacturer=self.manufacturer
-            )
+        await self._manufacturer_ch.write_attributes_safe(
+            {"secs_since_2k": secs_2k}, manufacturer=self.manufacturer
         )
 
     async def async_preset_handler_away(self, is_away: bool = False) -> None:

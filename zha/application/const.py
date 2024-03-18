@@ -198,7 +198,7 @@ def string(value: Any) -> str:
 class NodeStrClass(str):
     """Wrapper class to be able to add attributes on a string."""
 
-    def __voluptuous_compile__(self, schema: vol.Schema) -> Any:
+    def __voluptuous_compile__(self, schema: vol.Schema) -> Any:  # pylint: disable=unused-argument
         """Needed because vol.Schema.compile does not handle str subclasses."""
         return _compile_scalar(self)
 
@@ -280,9 +280,15 @@ MFG_CLUSTER_ID_START = 0xFC00
 POWER_MAINS_POWERED = "Mains"
 POWER_BATTERY_OR_UNKNOWN = "Battery or Unknown"
 
+# Device is in away mode
+PRESET_AWAY = "away"
 PRESET_SCHEDULE = "Schedule"
 PRESET_COMPLEX = "Complex"
 PRESET_TEMP_MANUAL = "Temporary manual"
+# Device turn all valve full up
+PRESET_BOOST = "boost"
+# No preset is active
+PRESET_NONE = "none"
 
 QUIRK_METADATA = "quirk_metadata"
 

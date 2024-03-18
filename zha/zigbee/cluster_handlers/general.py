@@ -49,6 +49,7 @@ from . import (
     CLUSTER_HANDLER_EVENT,
     AttrReportConfig,
     ClientClusterHandler,
+    ClusterAttributeUpdatedEvent,
     ClusterHandler,
     parse_and_log_command,
     registries,
@@ -60,7 +61,6 @@ from .const import (
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
-    SIGNAL_ATTR_UPDATED,
     SIGNAL_MOVE_LEVEL,
     SIGNAL_SET_LEVEL,
     SIGNAL_UPDATE_DEVICE,
@@ -512,11 +512,14 @@ class OnOffClusterHandler(ClusterHandler):
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
         if attrid == OnOff.AttributeDefs.on_off.id:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-                attrid,
-                OnOff.AttributeDefs.on_off.name,
-                value,
+            self.emit(
+                CLUSTER_HANDLER_EVENT,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=OnOff.AttributeDefs.on_off.name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                ),
             )
 
     async def async_update(self):

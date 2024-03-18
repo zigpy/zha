@@ -10,12 +10,19 @@ from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER, XIAOMI_AQARA_VIBRATION_A
 import zigpy.zcl
 from zigpy.zcl.clusters.closures import DoorLock
 
-from . import AttrReportConfig, ClientClusterHandler, ClusterHandler, registries
+from . import (
+    AttrReportConfig,
+    ClientClusterHandler,
+    ClusterAttributeUpdatedEvent,
+    ClusterHandler,
+    registries,
+)
 from .const import (
     AQARA_OPPLE_CLUSTER,
     ATTRIBUTE_ID,
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
+    CLUSTER_HANDLER_EVENT,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     INOVELLI_CLUSTER,
@@ -210,11 +217,14 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
             attr_name = UNKNOWN
 
         if attrid == self.value_attribute:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-                attrid,
-                attr_name,
-                value,
+            self.emit(
+                CLUSTER_HANDLER_EVENT,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=attr_name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                ),
             )
             return
 

@@ -10,10 +10,12 @@ from zigpy.zcl.clusters.closures import ConfigStatus, DoorLock, Shade, WindowCov
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
+    ClusterAttributeUpdatedEvent,
     ClusterHandler,
     registries,
 )
 from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_EVENT,
     REPORT_CONFIG_IMMEDIATE,
     SIGNAL_ATTR_UPDATED,
 )
@@ -37,11 +39,14 @@ class DoorLockClusterHandler(ClusterHandler):
             DoorLock.AttributeDefs.lock_state.name, from_cache=True
         )
         if result is not None:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-                DoorLock.AttributeDefs.lock_state.id,
-                DoorLock.AttributeDefs.lock_state.name,
-                result,
+            self.emit(
+                CLUSTER_HANDLER_EVENT,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=DoorLock.AttributeDefs.lock_state.id,
+                    attribute_name=DoorLock.AttributeDefs.lock_state.name,
+                    attribute_value=result,
+                    cluster_handler_unique_id=self.unique_id,
+                ),
             )
 
     def cluster_command(self, tsn, command_id, args):
@@ -72,8 +77,14 @@ class DoorLockClusterHandler(ClusterHandler):
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
         if attrid == self._value_attribute:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}", attrid, attr_name, value
+            self.emit(
+                CLUSTER_HANDLER_EVENT,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=attr_name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                ),
             )
 
     async def async_set_user_code(self, code_slot: int, user_code: str) -> None:
