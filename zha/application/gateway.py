@@ -68,9 +68,6 @@ class ZHAGateway(AsyncUtilMixin):
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
-        self._tracked_completable_tasks: list[asyncio.Task] = []
-        self._device_init_tasks: dict[EUI64, asyncio.Task] = {}
-        self._background_tasks: set[asyncio.Future[Any]] = set()
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""

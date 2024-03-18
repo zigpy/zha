@@ -50,7 +50,7 @@ class IasAceClusterHandler(ClusterHandler):
             AceCluster.ServerCommandDefs.bypass.id: self._bypass,
             AceCluster.ServerCommandDefs.emergency.id: self._emergency,
             AceCluster.ServerCommandDefs.fire.id: self._fire,
-            AceCluster.ServerCommandDefs.panic.id: self._panic,
+            AceCluster.ServerCommandDefs.panic.id: self.panic,
             AceCluster.ServerCommandDefs.get_zone_id_map.id: self._get_zone_id_map,
             AceCluster.ServerCommandDefs.get_zone_info.id: self._get_zone_info,
             AceCluster.ServerCommandDefs.get_panel_status.id: self._send_panel_status_response,
@@ -194,7 +194,7 @@ class IasAceClusterHandler(ClusterHandler):
         """Handle the IAS ACE fire command."""
         self._set_alarm(AceCluster.AlarmStatus.Fire)
 
-    def _panic(self) -> None:
+    def panic(self) -> None:
         """Handle the IAS ACE panic command."""
         self._set_alarm(AceCluster.AlarmStatus.Emergency_Panic)
 

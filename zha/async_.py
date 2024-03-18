@@ -152,9 +152,9 @@ class AsyncUtilMixin:
 
     def __init__(self, *args, **kw_args) -> None:
         """Initialize the async mixin."""
-        self._tracked_completable_tasks: list[asyncio.Task] = []
+        self._tracked_completable_tasks: set[asyncio.Task] = set()
         self._device_init_tasks: dict[EUI64, asyncio.Task] = {}
-        self._background_tasks: set[asyncio.Future[Any]] = []
+        self._background_tasks: set[asyncio.Future[Any]] = set()
         super().__init__(*args, **kw_args)
 
     def block_till_done(self) -> None:
@@ -368,7 +368,9 @@ class AsyncUtilMixin:
                 None, zhajob.target, *args
             )
 
-        task_bucket = self._background_tasks if background else self._tasks
+        task_bucket = (
+            self._background_tasks if background else self._tracked_completable_tasks
+        )
         task_bucket.add(task)
         task.add_done_callback(task_bucket.remove)
 
@@ -407,8 +409,8 @@ class AsyncUtilMixin:
             # Use loop.create_task
             # to avoid the extra function call in asyncio.create_task.
             task = asyncio.get_running_loop().create_task(target, name=name)
-        self._tasks.add(task)
-        task.add_done_callback(self._tasks.remove)
+        self._tracked_completable_tasks.add(task)
+        task.add_done_callback(self._tracked_completable_tasks.remove)
         return task
 
     @callback
@@ -449,8 +451,8 @@ class AsyncUtilMixin:
     ) -> asyncio.Future[_T]:
         """Add an executor job from within the event loop."""
         task = asyncio.get_running_loop().run_in_executor(None, target, *args)
-        self._tasks.add(task)
-        task.add_done_callback(self._tasks.remove)
+        self._tracked_completable_tasks.add(task)
+        task.add_done_callback(self._tracked_completable_tasks.remove)
 
         return task
 
@@ -462,8 +464,8 @@ class AsyncUtilMixin:
         task = asyncio.get_running_loop().run_in_executor(
             self.import_executor, target, *args
         )
-        self._tasks.add(task)
-        task.add_done_callback(self._tasks.remove)
+        self._tracked_completable_tasks.add(task)
+        task.add_done_callback(self._tracked_completable_tasks.remove)
         return task
 
     @overload

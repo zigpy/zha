@@ -198,7 +198,7 @@ class ClusterHandler(LogMixin, EventBase):
 
     def async_send_signal(self, signal: str, *args: Any) -> None:
         """Send a signal through dispatcher."""
-        self._endpoint.async_send_signal(signal, *args)
+        # self._endpoint.async_send_signal(signal, *args) TODO
 
     async def bind(self) -> None:
         """Bind a zigbee cluster.

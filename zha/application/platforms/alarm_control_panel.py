@@ -88,7 +88,7 @@ class ZHAAlarmControlPanel(PlatformEntity):
     ) -> None:
         """Initialize the ZHA alarm control device."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        cfg_entry = device.gateway.config_entry
+        cfg_entry = device.gateway.config
         self._cluster_handler: IasAceClusterHandler = cluster_handlers[0]
         self._cluster_handler.panel_code = async_get_zha_config_value(
             cfg_entry, ZHA_ALARM_OPTIONS, CONF_ALARM_MASTER_CODE, "1234"
