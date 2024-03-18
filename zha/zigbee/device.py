@@ -180,8 +180,10 @@ class ZHADevice(LogMixin):
         if not self.is_coordinator:
             self.debug("starting availability checks")
             self._tracked_tasks.append(
-                asyncio.create_task(
-                    self._check_available(), name=f"device_check_alive_{self.ieee}"
+                self.gateway.async_create_background_task(
+                    self._check_available(),
+                    name=f"device_check_alive_{self.ieee}",
+                    eager_start=True,
                 )
             )
 

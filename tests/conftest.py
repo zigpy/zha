@@ -4,6 +4,7 @@ from collections.abc import Callable, Generator
 import itertools
 import logging
 import time
+from types import TracebackType
 from typing import Any, Optional
 from unittest.mock import AsyncMock, MagicMock, create_autospec, patch
 import warnings
@@ -173,7 +174,7 @@ async def zigpy_app_controller():
 
 
 @pytest.fixture
-async def zha_data() -> ZHAData:
+def zha_data() -> ZHAData:
     """Fixture representing zha configuration data."""
     return ZHAData(
         yaml_config={},
@@ -201,11 +202,31 @@ async def zha_data() -> ZHAData:
     )
 
 
+class TestGateway:
+    """Test ZHA gateway context manager."""
+
+    def __init__(self, data: ZHAData):
+        """Initialize the ZHA gateway."""
+        self.zha_data: ZHAData = data
+        self.zha_gateway: ZHAGateway
+
+    async def __aenter__(self) -> ZHAGateway:
+        """Start the ZHA gateway."""
+        self.zha_gateway = await ZHAGateway.async_from_config(self.zha_data)
+        await self.zha_gateway.async_block_till_done()
+        return self.zha_gateway
+
+    async def __aexit__(
+        self, exc_type: Exception, exc_value: str, traceback: TracebackType
+    ) -> None:
+        """Shutdown the ZHA gateway."""
+        await self.zha_gateway.shutdown()
+
+
 @pytest.fixture
-def mock_zigpy_connect(
-    zigpy_app_controller: ControllerApplication,
-) -> Generator[ControllerApplication, None, None]:
-    """Patch the zigpy radio connection with our mock application."""
+async def zha_gateway(zha_data: ZHAData, zigpy_app_controller):
+    """Set up ZHA component."""
+
     with (
         patch(
             "bellows.zigbee.application.ControllerApplication.new",
@@ -216,19 +237,8 @@ def mock_zigpy_connect(
             return_value=zigpy_app_controller,
         ),
     ):
-        yield zigpy_app_controller
-
-
-@pytest.fixture
-def zha_gateway(zha_data: ZHAData, mock_zigpy_connect: ControllerApplication):
-    """Set up ZHA component."""
-
-    async def _gateway(config=None) -> ZHAGateway:
-        zha_gateway = await ZHAGateway.async_from_config(zha_data)
-        await zha_gateway.async_block_till_done()
-        return zha_gateway
-
-    return _gateway
+        async with TestGateway(zha_data) as gateway:
+            yield gateway
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -263,10 +273,9 @@ def device_joined(
     """Return a newly joined ZHAWS device."""
 
     async def _zha_device(zigpy_dev: zigpy.device.Device) -> ZHADevice:
-        gateway: ZHAGateway = await zha_gateway()
-        await gateway.async_device_initialized(zigpy_dev)
-        await gateway.async_block_till_done()
-        return gateway.get_device(zigpy_dev.ieee)
+        await zha_gateway.async_device_initialized(zigpy_dev)
+        await zha_gateway.async_block_till_done()
+        return zha_gateway.get_device(zigpy_dev.ieee)
 
     return _zha_device
 

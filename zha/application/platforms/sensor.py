@@ -742,9 +742,10 @@ class PollableSensor(Sensor):
         self._cancel_refresh_handle: Callable | None = None
         if self.should_poll:
             self._tracked_tasks.append(
-                asyncio.create_task(
+                device.gateway.async_create_background_task(
                     self._refresh(),
                     name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
+                    eager_start=True,
                 )
             )
 
@@ -813,9 +814,10 @@ class DeviceCounterSensor(BaseEntity):
         )
         self._attr_name: str = self._zigpy_counter.name
         self._tracked_tasks.append(
-            asyncio.create_task(
+            self._device.gateway.async_create_background_task(
                 self._refresh(),
                 name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
+                eager_start=True,
             )
         )
 

@@ -346,7 +346,9 @@ class AsyncUtilMixin:
             # to avoid the extra function call in asyncio.create_task.
             if eager_start:
                 task = create_eager_task(
-                    zhajob.target(*args), name=zhajob.name, loop=self.loop
+                    zhajob.target(*args),
+                    name=zhajob.name,
+                    loop=asyncio.get_running_loop(),
                 )
                 if task.done():
                     return task
@@ -398,7 +400,7 @@ class AsyncUtilMixin:
         target: target to call.
         """
         if eager_start:
-            task = create_eager_task(target, name=name, loop=self.loop)
+            task = create_eager_task(target, name=name, loop=asyncio.get_running_loop())
             if task.done():
                 return task
         else:
@@ -430,7 +432,7 @@ class AsyncUtilMixin:
         This method must be run in the event loop.
         """
         if eager_start:
-            task = create_eager_task(target, name=name, loop=self.loop)
+            task = create_eager_task(target, name=name, loop=asyncio.get_running_loop())
             if task.done():
                 return task
         else:

@@ -633,8 +633,10 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
 
         self._tracked_tasks.append(
-            asyncio.create_task(
-                self._update_time(), name=f"sinope_time_updater_{self.unique_id}"
+            device.gateway.async_create_background_task(
+                self._update_time(),
+                name=f"sinope_time_updater_{self.unique_id}",
+                eager_start=True,
             )
         )
 

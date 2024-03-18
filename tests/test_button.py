@@ -52,7 +52,6 @@ async def test_button(
     """Test zha button platform."""
 
     zha_device, cluster = contact_sensor
-    gateway = await zha_gateway()
     assert cluster is not None
     entity: PlatformEntity = find_entity(zha_device, Platform.BUTTON)  # type: ignore
     assert entity is not None
@@ -64,7 +63,7 @@ async def test_button(
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
         await entity.async_press()
-        await gateway.async_block_till_done()
+        await zha_gateway.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0

@@ -66,8 +66,10 @@ class ZHADeviceScannerEntity(PlatformEntity):
             CLUSTER_HANDLER_EVENT, self._handle_event_protocol
         )
         self._tracked_tasks.append(
-            asyncio.create_task(
-                self._refresh(), name=f"device_tracker_refresh_{self.unique_id}"
+            device.gateway.async_create_background_task(
+                self._refresh(),
+                name=f"device_tracker_refresh_{self.unique_id}",
+                eager_start=True,
             )
         )
 

@@ -72,7 +72,6 @@ class ZHAGateway(AsyncUtilMixin):
         self._groups: dict[int, Group] = {}
         self.application_controller: ControllerApplication = None
         self.coordinator_zha_device: ZHADevice = None  # type: ignore[assignment]
-        self._unsubs: list[Callable[[], None]] = []
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
@@ -297,30 +296,6 @@ class ZHAGateway(AsyncUtilMixin):
         self.async_create_background_task(
             fetch_updated_state(), "zha.gateway-fetch_updated_state"
         )
-
-    async def stop_network(self) -> None:
-        """Stop the Zigbee network."""
-        if self.application_controller is None:
-            return
-        tasks = [
-            t
-            for t in self._device_init_tasks.values()
-            if not (t.done() or t.cancelled())
-        ]
-        for task in tasks:
-            _LOGGER.debug("Cancelling task: %s", task)
-            task.cancel()
-        with suppress(asyncio.CancelledError):
-            await asyncio.gather(*tasks, return_exceptions=True)
-
-        for device in self._devices.values():
-            await device.on_remove()
-
-        await self.application_controller.pre_shutdown()
-        self.application_controller = None
-        await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
-        self._devices.clear()
-        self._groups.clear()
 
     def device_joined(self, device: zigpy.device.Device) -> None:
         """Handle device joined.
@@ -691,14 +666,28 @@ class ZHAGateway(AsyncUtilMixin):
             _LOGGER.debug("Ignoring duplicate shutdown event")
             return
 
+        tasks = [
+            t
+            for t in self._device_init_tasks.values()
+            if not (t.done() or t.cancelled())
+        ]
+        for task in tasks:
+            _LOGGER.debug("Cancelling task: %s", task)
+            task.cancel()
+        with suppress(asyncio.CancelledError):
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+        for device in self._devices.values():
+            await device.on_remove()
+
         _LOGGER.debug("Shutting down ZHA ControllerApplication")
         self.shutting_down = True
 
-        for unsubscribe in self._unsubs:
-            unsubscribe()
-        for device in self.devices.values():
-            device.async_cleanup_handles()
         await self.application_controller.shutdown()
+        self.application_controller = None
+        await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
+        self._devices.clear()
+        self._groups.clear()
 
     def handle_message(  # pylint: disable=unused-argument
         self,

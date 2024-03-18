@@ -981,7 +981,9 @@ class Light(PlatformEntity, BaseLight):
             self.maybe_send_state_changed_event()
 
         self._tracked_tasks.append(
-            asyncio.create_task(_refresh(), name=f"light_refresh_{self.unique_id}")
+            device.gateway.async_create_background_task(
+                _refresh(), name=f"light_refresh_{self.unique_id}", eager_start=True
+            )
         )
 
         self.async_accept_signal(
