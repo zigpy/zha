@@ -742,11 +742,12 @@ class ZHANumberConfigurationEntity(PlatformEntity):
     _attribute_name: str
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -766,7 +767,7 @@ class ZHANumberConfigurationEntity(PlatformEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def __init__(
         self,

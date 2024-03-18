@@ -315,6 +315,7 @@ def zigpy_device_mock(
         nwk: int = 0xB79C,
         patch_cluster: bool = True,
         quirk: Optional[Callable] = None,
+        attributes: dict[int, dict[str, dict[str, Any]]] = None,
     ) -> zigpy.device.Device:
         """Make a fake device using the specified cluster classes."""
         device = zigpy.device.Device(
@@ -347,6 +348,15 @@ def zigpy_device_mock(
                     endpoint.in_clusters.values(), endpoint.out_clusters.values()
                 ):
                     common.patch_cluster(cluster)
+
+        if attributes is not None:
+            for ep_id, clusters in attributes.items():
+                for cluster_name, attrs in clusters.items():
+                    cluster = getattr(device.endpoints[ep_id], cluster_name)
+
+                    for name, value in attrs.items():
+                        attr_id = cluster.find_attribute(name).id
+                        cluster._attr_cache[attr_id] = value
 
         return device
 

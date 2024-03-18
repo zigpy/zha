@@ -619,11 +619,12 @@ class Sensor(PlatformEntity):
     _attr_state_class: SensorStateClass | None = None
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -642,7 +643,7 @@ class Sensor(PlatformEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def __init__(
         self,
@@ -913,11 +914,12 @@ class Battery(Sensor):
     _attr_native_unit_of_measurement = PERCENTAGE
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -926,9 +928,9 @@ class Battery(Sensor):
         battery_percent_remaining attribute, but zha-device-handlers takes care of it
         so create the entity regardless
         """
-        if zha_device.is_mains_powered:
+        if device.is_mains_powered:
             return None
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @staticmethod
     def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
@@ -1457,11 +1459,12 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
     _attr_translation_key: str = "summation_received"
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -1475,7 +1478,9 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
         """
         if cluster_handlers[0].cluster.get(cls._attribute_name) is None:
             return None
-        return super().create_entity(unique_id, zha_device, cluster_handlers, **kwargs)
+        return super().create_platform_entity(
+            unique_id, cluster_handlers, endpoint, device, **kwargs
+        )
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_PRESSURE)
@@ -1603,11 +1608,12 @@ class ThermostatHVACAction(Sensor):
     _attr_translation_key: str = "hvac_action"
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -1615,7 +1621,7 @@ class ThermostatHVACAction(Sensor):
         Return entity if it is a supported configuration, otherwise return None
         """
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
     def native_value(self) -> str | None:
@@ -1739,11 +1745,12 @@ class RSSISensor(Sensor):
     _attr_translation_key: str = "rssi"
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -1751,11 +1758,9 @@ class RSSISensor(Sensor):
         Return entity if it is a supported configuration, otherwise return None
         """
         key = f"{CLUSTER_HANDLER_BASIC}_{cls._unique_id_suffix}"
-        if PLATFORM_ENTITIES.prevent_entity_creation(
-            Platform.SENSOR, zha_device.ieee, key
-        ):
+        if PLATFORM_ENTITIES.prevent_entity_creation(Platform.SENSOR, device.ieee, key):
             return None
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
     def native_value(self) -> str | int | float | None:

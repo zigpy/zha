@@ -173,11 +173,12 @@ class ZHASwitchConfigurationEntity(PlatformEntity):
     _on_value: int = 1
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -197,7 +198,7 @@ class ZHASwitchConfigurationEntity(PlatformEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def __init__(
         self,
@@ -628,11 +629,12 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
     _attr_icon: str = "mdi:arrow-up-down"
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: Self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -661,7 +663,7 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
     def is_on(self) -> bool:
