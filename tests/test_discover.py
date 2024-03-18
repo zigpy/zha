@@ -4,7 +4,7 @@ from collections.abc import Callable
 import re
 from typing import Any
 from unittest import mock
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
@@ -29,10 +29,20 @@ import zigpy.zcl.clusters.general
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 
-from zha.application.discovery import PLATFORMS
+from zha.application import Platform
+from zha.application.discovery import (
+    ENDPOINT_PROBE,
+    GROUP_PROBE,
+    PLATFORMS,
+    EndpointProbe,
+)
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
-from zha.application.registries import PLATFORM_ENTITIES
+from zha.application.registries import (
+    PLATFORM_ENTITIES,
+    SINGLE_INPUT_CLUSTER_DEVICE_CLASS,
+)
+from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.device import ZHADevice
 from zha.zigbee.endpoint import Endpoint
 
@@ -159,16 +169,12 @@ def _get_first_identify_cluster(zigpy_device):
             return endpoint.identify
 
 
-@mock.patch(
-    "homeassistant.components.zha.core.discovery.ProbeEndpoint.discover_by_device_type"
-)
-@mock.patch(
-    "homeassistant.components.zha.core.discovery.ProbeEndpoint.discover_by_cluster_id"
-)
+@mock.patch("zha.application.discovery.EndpointProbe.discover_by_device_type")
+@mock.patch("zha.application.discovery.EndpointProbe.discover_by_cluster_id")
 def test_discover_entities(m1, m2) -> None:
     """Test discover endpoint class method."""
     endpoint = mock.MagicMock()
-    disc.PROBE.discover_entities(endpoint)
+    ENDPOINT_PROBE.discover_entities(endpoint)
     assert m1.call_count == 1
     assert m1.call_args[0][0] is endpoint
     assert m2.call_count == 1
@@ -197,10 +203,10 @@ def test_discover_by_device_type(device_type, platform, hit) -> None:
         return_value=(mock.sentinel.entity_cls, mock.sentinel.claimed)
     )
     with mock.patch(
-        "homeassistant.components.zha.core.registries.ZHA_ENTITIES.get_entity",
+        "zha.application.registries.PLATFORM_ENTITIES.get_entity",
         get_entity_mock,
     ):
-        disc.PROBE.discover_by_device_type(endpoint)
+        ENDPOINT_PROBE.discover_by_device_type(endpoint)
     if hit:
         assert get_entity_mock.call_count == 1
         assert endpoint.claim_cluster_handlers.call_count == 1
@@ -225,12 +231,12 @@ def test_discover_by_device_type_override() -> None:
     )
     with (
         mock.patch(
-            "homeassistant.components.zha.core.registries.ZHA_ENTITIES.get_entity",
+            "zha.application.registries.PLATFORM_ENTITIES.get_entity",
             get_entity_mock,
         ),
-        mock.patch.dict(disc.PROBE._device_configs, overrides, clear=True),
+        mock.patch.dict(ENDPOINT_PROBE._device_configs, overrides, clear=True),
     ):
-        disc.PROBE.discover_by_device_type(endpoint)
+        ENDPOINT_PROBE.discover_by_device_type(endpoint)
         assert get_entity_mock.call_count == 1
         assert endpoint.claim_cluster_handlers.call_count == 1
         assert endpoint.claim_cluster_handlers.call_args[0][0] is mock.sentinel.claimed
@@ -251,12 +257,14 @@ def test_discover_probe_single_cluster() -> None:
     get_entity_mock = mock.MagicMock(
         return_value=(mock.sentinel.entity_cls, mock.sentinel.claimed)
     )
-    cluster_handler_mock = mock.MagicMock(spec_set=cluster_handlers.ClusterHandler)
+    cluster_handler_mock = mock.MagicMock(spec_set=ClusterHandler)
     with mock.patch(
-        "homeassistant.components.zha.core.registries.ZHA_ENTITIES.get_entity",
+        "zha.application.registries.PLATFORM_ENTITIES.get_entity",
         get_entity_mock,
     ):
-        disc.PROBE.probe_single_cluster(Platform.SWITCH, cluster_handler_mock, endpoint)
+        ENDPOINT_PROBE.probe_single_cluster(
+            Platform.SWITCH, cluster_handler_mock, endpoint
+        )
 
     assert get_entity_mock.call_count == 1
     assert endpoint.claim_cluster_handlers.call_count == 1
@@ -275,9 +283,7 @@ async def test_discover_endpoint(
 ) -> None:
     """Test device discovery."""
 
-    with mock.patch(
-        "homeassistant.components.zha.core.endpoint.Endpoint.async_new_entity"
-    ) as new_ent:
+    with mock.patch("zha.zigbee.endpoint.Endpoint.async_new_entity") as new_ent:
         device = zha_device_mock(
             device_info[SIG_ENDPOINTS],
             manufacturer=device_info[SIG_MANUFACTURER],
@@ -337,14 +343,12 @@ def _ch_mock(cluster):
 
 @mock.patch(
     (
-        "homeassistant.components.zha.core.discovery.ProbeEndpoint"
+        "zha.application.discovery.EndpointProbe"
         ".handle_on_off_output_cluster_exception"
     ),
     new=mock.MagicMock(),
 )
-@mock.patch(
-    "homeassistant.components.zha.core.discovery.ProbeEndpoint.probe_single_cluster"
-)
+@mock.patch("zha.application.discovery.EndpointProbe.probe_single_cluster")
 def _test_single_input_cluster_device_class(probe_mock):
     """Test SINGLE_INPUT_CLUSTER_DEVICE_CLASS matching by cluster id or class."""
 
@@ -353,6 +357,8 @@ def _test_single_input_cluster_device_class(probe_mock):
     multistate_ch = _ch_mock(zigpy.zcl.clusters.general.MultistateInput)
 
     class QuirkedIAS(zigpy.quirks.CustomCluster, zigpy.zcl.clusters.security.IasZone):
+        """Quirked IAS Zone cluster."""
+
         pass
 
     ias_ch = _ch_mock(QuirkedIAS)
@@ -370,7 +376,7 @@ def _test_single_input_cluster_device_class(probe_mock):
         ias_ch,
     ]
 
-    disc.ProbeEndpoint().discover_by_cluster_id(endpoint)
+    EndpointProbe().discover_by_cluster_id(endpoint)
     assert probe_mock.call_count == len(endpoint.unclaimed_cluster_handlers())
     probes = (
         (Platform.LOCK, door_ch),
@@ -395,9 +401,7 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
         zigpy.zcl.clusters.security.IasZone: Platform.BINARY_SENSOR,
     }
 
-    with mock.patch.dict(
-        zha_regs.SINGLE_INPUT_CLUSTER_DEVICE_CLASS, mock_reg, clear=True
-    ):
+    with mock.patch.dict(SINGLE_INPUT_CLUSTER_DEVICE_CLASS, mock_reg, clear=True):
         _test_single_input_cluster_device_class()
 
 
@@ -409,7 +413,7 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
     ],
 )
 async def test_device_override(
-    hass_disable_services, zigpy_device_mock, setup_zha, override, entity_id
+    zha_gateway: ZHAGateway, zigpy_device_mock, setup_zha, override, entity_id
 ) -> None:
     """Test device discovery override."""
 
@@ -433,22 +437,21 @@ async def test_device_override(
         override = {"device_config": {"00:11:22:33:44:55:66:77-1": {"type": override}}}
 
     await setup_zha(override)
-    assert hass_disable_services.states.get(entity_id) is None
-    zha_gateway = get_zha_gateway(hass_disable_services)
+    assert zha_gateway.states.get(entity_id) is None
     await zha_gateway.async_device_initialized(zigpy_device)
-    await hass_disable_services.async_block_till_done()
-    assert hass_disable_services.states.get(entity_id) is not None
+    await zha_gateway.async_block_till_done()
+    assert zha_gateway.states.get(entity_id) is not None
 
 
 async def test_group_probe_cleanup_called(
-    hass_disable_services, setup_zha, config_entry
+    zha_gateway: ZHAGateway, setup_zha, config_entry
 ) -> None:
     """Test cleanup happens when ZHA is unloaded."""
     await setup_zha()
-    disc.GROUP_PROBE.cleanup = mock.Mock(wraps=disc.GROUP_PROBE.cleanup)
-    await config_entry.async_unload(hass_disable_services)
-    await hass_disable_services.async_block_till_done()
-    disc.GROUP_PROBE.cleanup.assert_called()
+    GROUP_PROBE.cleanup = mock.Mock(wraps=GROUP_PROBE.cleanup)
+    await config_entry.async_unload(zha_gateway)
+    await zha_gateway.async_block_till_done()
+    GROUP_PROBE.cleanup.assert_called()
 
 
 async def test_quirks_v2_entity_discovery(
