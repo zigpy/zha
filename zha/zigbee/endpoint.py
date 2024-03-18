@@ -8,7 +8,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, TypeVar
 
-from zha.application import Platform, const, discovery, registries
+from zha.application import Platform, const, discovery
 from zha.async_ import gather_with_limited_concurrency
 from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.cluster_handlers.registries import (

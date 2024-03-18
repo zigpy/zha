@@ -28,7 +28,6 @@ from zha.application.const import (
     CLUSTER_TYPE_IN,
     CLUSTER_TYPE_OUT,
     CUSTOM_CONFIGURATION,
-    DATA_ZHA,
 )
 from zha.decorators import SetRegistry
 

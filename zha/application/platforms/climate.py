@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import datetime as dt
 from enum import IntFlag, StrEnum
 import functools

@@ -1,17 +1,10 @@
 """Test zha sensor."""
+from collections.abc import Awaitable, Callable
 import math
-from typing import Any, Awaitable, Callable, Optional
+from typing import Any, Optional
 
 import pytest
 from slugify import slugify
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha
-from zigpy.zcl import Cluster
-import zigpy.zcl.clusters.general as general
-import zigpy.zcl.clusters.homeautomation as homeautomation
-import zigpy.zcl.clusters.measurement as measurement
-import zigpy.zcl.clusters.smartenergy as smartenergy
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import (
     BatteryEntity,
@@ -23,6 +16,10 @@ from zhaws.client.proxy import DeviceProxy
 from zhaws.server.platforms.registries import Platform
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
+from zigpy.device import Device as ZigpyDevice
+import zigpy.profiles.zha
+from zigpy.zcl import Cluster
+from zigpy.zcl.clusters import general, homeautomation, measurement, smartenergy
 
 from .common import find_entity_id, find_entity_ids, send_attributes_report
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE

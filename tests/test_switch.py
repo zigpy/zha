@@ -1,16 +1,11 @@
 """Test zha switch."""
+from collections.abc import Awaitable, Callable
 import logging
-from typing import Awaitable, Callable, Optional
+from typing import Optional
 from unittest.mock import call, patch
 
 import pytest
 from slugify import slugify
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha
-import zigpy.profiles.zha as zha
-import zigpy.zcl.clusters.general as general
-import zigpy.zcl.foundation as zcl_f
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import BasePlatformEntity, SwitchEntity, SwitchGroupEntity
 from zhaws.client.proxy import DeviceProxy, GroupProxy
@@ -18,6 +13,13 @@ from zhaws.server.platforms.registries import Platform
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
 from zhaws.server.zigbee.group import Group, GroupMemberReference
+from zigpy.device import Device as ZigpyDevice
+from zigpy.profiles import zha
+import zigpy.profiles.zha
+from zigpy.zcl.clusters import general
+import zigpy.zcl.foundation as zcl_f
+
+from tests.common import mock_coro
 
 from .common import (
     async_find_group_entity_id,
@@ -26,8 +28,6 @@ from .common import (
     update_attribute_cache,
 )
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
-
-from tests.common import mock_coro
 
 ON = 1
 OFF = 0

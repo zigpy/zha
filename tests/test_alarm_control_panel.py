@@ -1,19 +1,19 @@
 """Test zha alarm control panel."""
+from collections.abc import Awaitable, Callable
 import logging
-from typing import Awaitable, Callable, Optional
+from typing import Optional
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha as zha
-import zigpy.zcl.clusters.security as security
-import zigpy.zcl.foundation as zcl_f
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import AlarmControlPanelEntity
 from zhaws.client.proxy import DeviceProxy
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
+from zigpy.device import Device as ZigpyDevice
+from zigpy.profiles import zha
+from zigpy.zcl.clusters import security
+import zigpy.zcl.foundation as zcl_f
 
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 from contextlib import suppress
 from datetime import timedelta
 from enum import Enum
@@ -12,12 +12,7 @@ import time
 from typing import Any, Final, Self, TypeVar, cast
 
 from zigpy.application import ControllerApplication
-from zigpy.config import (
-    CONF_DATABASE,
-    CONF_DEVICE,
-    CONF_DEVICE_PATH,
-    CONF_NWK_VALIDATE_SETTINGS,
-)
+from zigpy.config import CONF_DEVICE, CONF_DEVICE_PATH, CONF_NWK_VALIDATE_SETTINGS
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
@@ -29,8 +24,6 @@ from zha.application.const import (
     CONF_RADIO_TYPE,
     CONF_USE_THREAD,
     CONF_ZIGPY,
-    DATA_ZHA,
-    DEFAULT_DATABASE_NAME,
     DEVICE_PAIRING_STATUS,
     ZHA_GW_MSG_GROUP_ADDED,
     ZHA_GW_MSG_GROUP_MEMBER_ADDED,

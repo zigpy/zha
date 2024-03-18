@@ -1,19 +1,19 @@
 """Test zha analog output."""
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
+from typing import Optional
 from unittest.mock import call
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha as zha
-import zigpy.types
-import zigpy.zcl.clusters.general as general
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import NumberEntity
 from zhaws.client.proxy import DeviceProxy
 from zhaws.server.platforms.registries import Platform
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
+from zigpy.device import Device as ZigpyDevice
+from zigpy.profiles import zha
+import zigpy.types
+from zigpy.zcl.clusters import general
 
 from .common import find_entity, send_attributes_report, update_attribute_cache
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE

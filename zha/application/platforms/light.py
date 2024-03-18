@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections import Counter
 from collections.abc import Callable, Iterable
 from enum import IntFlag, StrEnum
@@ -22,7 +21,6 @@ from zha.application.const import (
     CONF_ENABLE_ENHANCED_LIGHT_TRANSITION,
     CONF_ENABLE_LIGHT_TRANSITIONING_FLAG,
     CONF_GROUP_MEMBERS_ASSUME_STATE,
-    DATA_ZHA,
     ZHA_OPTIONS,
 )
 from zha.application.helpers import async_get_zha_config_value

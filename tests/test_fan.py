@@ -1,17 +1,11 @@
 """Test zha fan."""
+from collections.abc import Awaitable, Callable
 import logging
-from typing import Awaitable, Callable, Optional
+from typing import Optional
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
 from slugify import slugify
-from zigpy.device import Device as ZigpyDevice
-from zigpy.exceptions import ZigbeeException
-import zigpy.profiles.zha as zha
-import zigpy.zcl.clusters.general as general
-import zigpy.zcl.clusters.hvac as hvac
-import zigpy.zcl.foundation as zcl_f
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import FanEntity, FanGroupEntity
 from zhaws.client.proxy import DeviceProxy, GroupProxy
@@ -28,6 +22,11 @@ from zhaws.server.platforms.registries import Platform
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
 from zhaws.server.zigbee.group import Group, GroupMemberReference
+from zigpy.device import Device as ZigpyDevice
+from zigpy.exceptions import ZigbeeException
+from zigpy.profiles import zha
+from zigpy.zcl.clusters import general, hvac
+import zigpy.zcl.foundation as zcl_f
 
 from .common import async_find_group_entity_id, find_entity_id, send_attributes_report
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE

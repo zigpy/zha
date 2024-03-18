@@ -1,23 +1,22 @@
 """Test zha siren."""
 import asyncio
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
+from typing import Optional
 from unittest.mock import patch
 
 import pytest
 from slugify import slugify
-from zigpy.const import SIG_EP_PROFILE
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha as zha
-import zigpy.zcl.clusters.general as general
-import zigpy.zcl.clusters.security as security
-import zigpy.zcl.foundation as zcl_f
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import SirenEntity
 from zhaws.client.proxy import DeviceProxy
 from zhaws.server.platforms.registries import Platform
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
+from zigpy.const import SIG_EP_PROFILE
+from zigpy.device import Device as ZigpyDevice
+from zigpy.profiles import zha
+from zigpy.zcl.clusters import general, security
+import zigpy.zcl.foundation as zcl_f
 
 from .common import find_entity_id, mock_coro
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE

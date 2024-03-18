@@ -1,21 +1,12 @@
 """Test zha device discovery."""
 
+from collections.abc import Awaitable, Callable
 import itertools
 import re
-from typing import Awaitable, Callable
 from unittest import mock
 
 import pytest
 from slugify import slugify
-from zigpy.const import SIG_ENDPOINTS, SIG_MANUFACTURER, SIG_MODEL, SIG_NODE_DESC
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha
-import zigpy.quirks
-import zigpy.types
-import zigpy.zcl.clusters.closures
-import zigpy.zcl.clusters.general as general
-import zigpy.zcl.clusters.security
-
 from zhaws.client.controller import Controller
 import zhaws.server.platforms.discovery as disc
 from zhaws.server.platforms.registries import (
@@ -27,6 +18,14 @@ from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.cluster import ClusterHandler
 from zhaws.server.zigbee.device import Device
 from zhaws.server.zigbee.endpoint import Endpoint
+from zigpy.const import SIG_ENDPOINTS, SIG_MANUFACTURER, SIG_MODEL, SIG_NODE_DESC
+from zigpy.device import Device as ZigpyDevice
+import zigpy.profiles.zha
+import zigpy.quirks
+import zigpy.types
+from zigpy.zcl.clusters import general
+import zigpy.zcl.clusters.closures
+import zigpy.zcl.clusters.security
 
 from .zha_devices_list import (
     DEV_SIG_CHANNELS,

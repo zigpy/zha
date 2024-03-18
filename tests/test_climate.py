@@ -1,18 +1,13 @@
 """Test zha climate."""
+from collections.abc import Awaitable, Callable
 import logging
-from typing import Awaitable, Callable, Optional
+from typing import Optional
 from unittest.mock import patch
 
 import pytest
 from slugify import slugify
 import zhaquirks.sinope.thermostat
 import zhaquirks.tuya.ts0601_trv
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles
-import zigpy.zcl.clusters
-from zigpy.zcl.clusters.hvac import Thermostat
-import zigpy.zcl.foundation as zcl_f
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import SensorEntity, ThermostatEntity
 from zhaws.client.proxy import DeviceProxy
@@ -25,6 +20,11 @@ from zhaws.server.platforms.registries import Platform
 from zhaws.server.platforms.sensor import SinopeHVACAction, ThermostatHVACAction
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
+from zigpy.device import Device as ZigpyDevice
+import zigpy.profiles
+import zigpy.zcl.clusters
+from zigpy.zcl.clusters.hvac import Thermostat
+import zigpy.zcl.foundation as zcl_f
 
 from .common import find_entity_id, send_attributes_report
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE

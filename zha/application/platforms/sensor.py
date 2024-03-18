@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
 import enum
@@ -18,7 +17,7 @@ from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
-from zha.application.const import DATA_ZHA, QUIRK_METADATA
+from zha.application.const import QUIRK_METADATA
 from zha.application.platforms import BaseEntity, EntityCategory, PlatformEntity
 from zha.application.platforms.climate import HVACAction
 from zha.application.registries import PLATFORM_ENTITIES

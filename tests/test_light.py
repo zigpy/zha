@@ -2,19 +2,13 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import logging
-from typing import Awaitable, Callable
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 from pydantic import ValidationError
 import pytest
 from slugify import slugify
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha as zha
-import zigpy.zcl.clusters.general as general
-import zigpy.zcl.clusters.lighting as lighting
-import zigpy.zcl.foundation as zcl_f
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import LightEntity, LightGroupEntity
 from zhaws.client.proxy import DeviceProxy, GroupProxy
@@ -24,6 +18,10 @@ from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.cluster.lighting import ColorClusterHandler
 from zhaws.server.zigbee.device import Device
 from zhaws.server.zigbee.group import Group, GroupMemberReference
+from zigpy.device import Device as ZigpyDevice
+from zigpy.profiles import zha
+from zigpy.zcl.clusters import general, lighting
+import zigpy.zcl.foundation as zcl_f
 
 from .common import (
     async_find_group_entity_id,

@@ -25,7 +25,7 @@ from zigpy.zcl.clusters.general import Groups, Identify
 from zigpy.zcl.foundation import Status as ZclStatus, ZCLCommandDef
 import zigpy.zdo.types as zdo_types
 
-from zha.application import const, discovery
+from zha.application import discovery
 from zha.application.const import (
     ATTR_ACTIVE_COORDINATOR,
     ATTR_ARGS,

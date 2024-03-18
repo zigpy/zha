@@ -1,17 +1,11 @@
 """Test zha cover."""
 import asyncio
-from typing import Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
+from typing import Optional
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from slugify import slugify
-from zigpy.device import Device as ZigpyDevice
-import zigpy.profiles.zha
-import zigpy.types
-import zigpy.zcl.clusters.closures as closures
-import zigpy.zcl.clusters.general as general
-import zigpy.zcl.foundation as zcl_f
-
 from zhaws.client.controller import Controller
 from zhaws.client.model.types import CoverEntity
 from zhaws.client.proxy import DeviceProxy
@@ -19,11 +13,16 @@ from zhaws.server.platforms.cover import STATE_CLOSED, STATE_OPEN
 from zhaws.server.platforms.registries import Platform
 from zhaws.server.websocket.server import Server
 from zhaws.server.zigbee.device import Device
+from zigpy.device import Device as ZigpyDevice
+import zigpy.profiles.zha
+import zigpy.types
+from zigpy.zcl.clusters import closures, general
+import zigpy.zcl.foundation as zcl_f
+
+from tests.common import mock_coro
 
 from .common import find_entity_id, send_attributes_report, update_attribute_cache
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
-
-from tests.common import mock_coro
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Callable, Generator
+from collections.abc import Callable
 import itertools
 import logging
 import time

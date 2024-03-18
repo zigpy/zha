@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from enum import StrEnum
 import functools
 import time
