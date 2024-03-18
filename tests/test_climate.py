@@ -1,5 +1,7 @@
 """Test zha climate."""
 
+# pylint: disable=redefined-outer-name,too-many-lines
+
 from collections.abc import Awaitable, Callable
 import logging
 from unittest.mock import call, patch
@@ -19,7 +21,6 @@ from zha.application import Platform
 from zha.application.const import (
     PRESET_AWAY,
     PRESET_BOOST,
-    PRESET_COMPLEX,
     PRESET_NONE,
     PRESET_SCHEDULE,
     PRESET_TEMP_MANUAL,
@@ -516,7 +517,7 @@ async def test_hvac_mode(
     sys_mode,
     hvac_mode,
 ):
-    """Test HVAC modee."""
+    """Test HVAC mode."""
 
     thrm_cluster = device_climate.device.endpoints[1].thermostat
     entity_id = find_entity_id(Platform.CLIMATE, device_climate)
@@ -552,7 +553,7 @@ async def test_hvac_mode(
         (0x05, {"off", "cool", "heat", "heat_cool"}),
     ),
 )
-async def test_hvac_modes(
+async def test_hvac_modes(  # pylint: disable=unused-argument
     device_climate_mock: Callable[..., ZHADevice],
     zha_gateway: ZHAGateway,
     seq_of_op,
@@ -765,7 +766,7 @@ async def test_preset_setting(
             [
                 zcl_f.WriteAttributesStatusRecord(
                     status=zcl_f.Status.FAILURE,
-                    attrid=SinopeTechnologiesThermostatCluster.AttributeDefs.set_occupancy.id,
+                    attrid=SinopeTechnologiesThermostatCluster.AttributeDefs.set_occupancy.id,  # pylint: disable=no-member
                 )
             ]
         )
@@ -798,7 +799,7 @@ async def test_preset_setting(
             [
                 zcl_f.WriteAttributesStatusRecord(
                     status=zcl_f.Status.FAILURE,
-                    attrid=SinopeTechnologiesThermostatCluster.AttributeDefs.set_occupancy.id,
+                    attrid=SinopeTechnologiesThermostatCluster.AttributeDefs.set_occupancy.id,  # pylint: disable=no-member
                 )
             ]
         )
