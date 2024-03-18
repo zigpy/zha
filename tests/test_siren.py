@@ -1,22 +1,21 @@
 """Test zha siren."""
+
 import asyncio
 from collections.abc import Awaitable, Callable
-from typing import Optional
 from unittest.mock import patch
 
 import pytest
 from slugify import slugify
-from zhaws.client.controller import Controller
-from zhaws.client.model.types import SirenEntity
-from zhaws.client.proxy import DeviceProxy
-from zhaws.server.platforms.registries import Platform
-from zhaws.server.websocket.server import Server
-from zhaws.server.zigbee.device import Device
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
+
+from zha.application import Platform
+from zha.application.gateway import ZHAGateway
+from zha.application.platforms import PlatformEntity
+from zha.zigbee.device import ZHADevice
 
 from .common import find_entity_id, mock_coro
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
@@ -25,8 +24,8 @@ from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 @pytest.fixture
 async def siren(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-) -> tuple[Device, security.IasWd]:
+    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+) -> tuple[ZHADevice, security.IasWd]:
     """Siren fixture."""
 
     zigpy_device = zigpy_device_mock(
@@ -44,41 +43,38 @@ async def siren(
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
-def get_entity(zha_dev: DeviceProxy, entity_id: str) -> SirenEntity:
+def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
-        entity.platform + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.device_model.entities.values()
+        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
+        for entity in zha_dev.platform_entities.values()
     }
     return entities[entity_id]  # type: ignore
 
 
 async def test_siren(
-    siren: tuple[Device, security.IasWd],
-    connected_client_and_server: tuple[Controller, Server],
+    siren: tuple[ZHADevice, security.IasWd],  # pylint: disable=redefined-outer-name
+    zha_gateway: ZHAGateway,
 ) -> None:
     """Test zha siren platform."""
 
     zha_device, cluster = siren
     assert cluster is not None
-    controller, server = connected_client_and_server
     entity_id = find_entity_id(Platform.SIREN, zha_device)
     assert entity_id is not None
 
-    client_device: Optional[DeviceProxy] = controller.devices.get(zha_device.ieee)
-    assert client_device is not None
-    entity = get_entity(client_device, entity_id)
+    entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.state.state is False
+    assert entity.get_state()["state"] is False
 
     # turn on from client
     with patch(
         "zigpy.zcl.Cluster.request",
-        return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
+        return_value=[0x00, zcl_f.Status.SUCCESS],
     ):
-        await controller.sirens.turn_on(entity)
-        await server.block_till_done()
+        await entity.async_turn_on()
+        await zha_gateway.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
@@ -89,15 +85,15 @@ async def test_siren(
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state.state is True
+    assert entity.get_state()["state"] is True
 
     # turn off from client
     with patch(
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await controller.sirens.turn_off(entity)
-        await server.block_till_done()
+        await entity.async_turn_off()
+        await zha_gateway.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
@@ -108,15 +104,15 @@ async def test_siren(
         cluster.request.reset_mock()
 
     # test that the state has changed to off
-    assert entity.state.state is False
+    assert entity.get_state()["state"] is False
 
     # turn on from client with options
     with patch(
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await controller.sirens.turn_on(entity, duration=100, volume_level=3, tone=3)
-        await server.block_till_done()
+        await entity.async_turn_on(duration=100, volume_level=3, tone=3)
+        await zha_gateway.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
@@ -127,35 +123,33 @@ async def test_siren(
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state.state is True
+    assert entity.get_state()["state"] is True
 
 
 @pytest.mark.looptime
 async def test_siren_timed_off(
-    siren: tuple[Device, security.IasWd],
-    connected_client_and_server: tuple[Controller, Server],
+    siren: tuple[ZHADevice, security.IasWd],  # pylint: disable=redefined-outer-name
+    zha_gateway: ZHAGateway,
 ) -> None:
     """Test zha siren platform."""
     zha_device, cluster = siren
     assert cluster is not None
-    controller, server = connected_client_and_server
+
     entity_id = find_entity_id(Platform.SIREN, zha_device)
     assert entity_id is not None
 
-    client_device: Optional[DeviceProxy] = controller.devices.get(zha_device.ieee)
-    assert client_device is not None
-    entity = get_entity(client_device, entity_id)
+    entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.state.state is False
+    assert entity.get_state()["state"] is False
 
     # turn on from client
     with patch(
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await controller.sirens.turn_on(entity)
-        await server.block_till_done()
+        await entity.async_turn_on()
+        await zha_gateway.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
@@ -166,9 +160,9 @@ async def test_siren_timed_off(
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state.state is True
+    assert entity.get_state()["state"] is True
 
     await asyncio.sleep(6)
 
     # test that the state has changed to off from the timer
-    assert entity.state.state is False
+    assert entity.get_state()["state"] is False

@@ -56,6 +56,7 @@ class SirenEntityFeature(IntFlag):
 class ZHASiren(PlatformEntity):
     """Representation of a ZHA siren."""
 
+    PLATFORM = Platform.SIREN
     _attr_name: str = "Siren"
 
     def __init__(
