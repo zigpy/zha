@@ -73,6 +73,7 @@ class ZhaDoorLock(PlatformEntity):
         if result[0] is not Status.SUCCESS:
             self.error("Error with lock_door: %s", result)
             return
+        self._state = STATE_LOCKED
         self.maybe_send_state_changed_event()
 
     async def async_unlock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -81,6 +82,7 @@ class ZhaDoorLock(PlatformEntity):
         if result[0] is not Status.SUCCESS:
             self.error("Error with unlock_door: %s", result)
             return
+        self._state = STATE_UNLOCKED
         self.maybe_send_state_changed_event()
 
     async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
