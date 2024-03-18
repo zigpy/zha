@@ -46,7 +46,7 @@ async def contact_sensor(
 
 
 async def test_button(
-    contact_sensor: tuple[ZHADevice, general.Identify],
+    contact_sensor: tuple[ZHADevice, general.Identify],  # pylint: disable=redefined-outer-name
     zha_gateway,
 ) -> None:
     """Test zha button platform."""

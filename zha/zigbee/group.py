@@ -6,7 +6,7 @@ import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
 import logging
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, Any
 
 import zigpy.exceptions
 from zigpy.types.named import EUI64
@@ -26,19 +26,20 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class GroupMemberReference(NamedTuple):
+class GroupMemberReference:
     """Describes a group member."""
 
     ieee: EUI64
     endpoint_id: int
 
 
-class GroupEntityReference(NamedTuple):
+@dataclass(frozen=True, kw_only=True)
+class GroupEntityReference:
     """Reference to a group entity."""
 
-    name: str | None
-    original_name: str | None
     entity_id: int
+    name: str | None = None
+    original_name: str | None = None
 
 
 class GroupMember(LogMixin):

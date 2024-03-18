@@ -254,8 +254,8 @@ class EntityStateChangedEvent:
     event: Final[str] = STATE_CHANGED
     platform: str
     unique_id: str
-    device_ieee: Optional[EUI64]
-    endpoint_id: Optional[int]
+    device_ieee: Optional[EUI64] = None
+    endpoint_id: Optional[int] = None
     group_id: Optional[int] = None
 
 
@@ -503,7 +503,6 @@ class GroupEntity(BaseEntity):
     ) -> None:
         """Initialize a group."""
         super().__init__(f"{self.PLATFORM}.{group.group_id}")
-        self._zigpy_group: Group = group
         self._name: str = f"{group.name}_0x{group.group_id:04x}"
         self._group: Group = group
         self._group.register_group_entity(self)

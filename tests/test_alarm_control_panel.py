@@ -41,7 +41,7 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
 )
 async def test_alarm_control_panel(
     device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-    zigpy_device: ZigpyDevice,
+    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test zhaws alarm control panel platform."""

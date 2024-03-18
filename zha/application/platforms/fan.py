@@ -374,9 +374,9 @@ class FanGroup(GroupEntity, BaseFan):
 
     def __init__(self, group: Group):
         """Initialize a fan group."""
+        self._fan_cluster_handler: ClusterHandler = group.endpoint[hvac.Fan.cluster_id]
         super().__init__(group)
         self._available: bool = False
-        self._fan_cluster_handler = group.endpoint[hvac.Fan.cluster_id]
         self._percentage = None
         self._preset_mode = None
 
