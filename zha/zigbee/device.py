@@ -1005,6 +1005,10 @@ class ZHADevice(LogMixin):
                 fmt = f"{log_msg[1]} completed: %s"
             zdo.debug(fmt, *(log_msg[2] + (outcome,)))
 
+    def send_event(self, signal: dict[str, Any]) -> None:
+        """Broadcast an event from this device."""
+        signal["device"] = {"ieee": str(self.ieee)}
+
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
         msg = f"[%s](%s): {msg}"

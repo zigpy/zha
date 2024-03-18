@@ -256,7 +256,7 @@ class EntityStateChangedEvent:
     unique_id: str
     device_ieee: Optional[EUI64]
     endpoint_id: Optional[int]
-    group_id: Optional[int]
+    group_id: Optional[int] = None
 
 
 class PlatformEntityEvents(StrEnum):

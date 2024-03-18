@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from contextlib import suppress
 from datetime import timedelta
 from enum import Enum
@@ -666,16 +666,17 @@ class ZHAGateway(AsyncUtilMixin):
             _LOGGER.debug("Ignoring duplicate shutdown event")
             return
 
-        tasks = [
-            t
-            for t in self._device_init_tasks.values()
-            if not (t.done() or t.cancelled())
-        ]
-        for task in tasks:
-            _LOGGER.debug("Cancelling task: %s", task)
-            task.cancel()
-        with suppress(asyncio.CancelledError):
-            await asyncio.gather(*tasks, return_exceptions=True)
+        async def _cancel_tasks(tasks_to_cancel: Iterable) -> None:
+            tasks = [t for t in tasks_to_cancel if not (t.done() or t.cancelled())]
+            for task in tasks:
+                _LOGGER.debug("Cancelling task: %s", task)
+                task.cancel()
+            with suppress(asyncio.CancelledError):
+                await asyncio.gather(*tasks, return_exceptions=True)
+
+        await _cancel_tasks(self._background_tasks)
+        await _cancel_tasks(self._tracked_completable_tasks)
+        await _cancel_tasks(self._device_init_tasks.values())
 
         for device in self._devices.values():
             await device.on_remove()

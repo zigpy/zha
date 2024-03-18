@@ -1,5 +1,6 @@
 """Test configuration for the ZHA component."""
 
+import asyncio
 from collections.abc import Callable, Generator
 import itertools
 import logging
@@ -221,6 +222,7 @@ class TestGateway:
     ) -> None:
         """Shutdown the ZHA gateway."""
         await self.zha_gateway.shutdown()
+        await asyncio.sleep(0)
 
 
 @pytest.fixture
