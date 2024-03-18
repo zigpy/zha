@@ -56,7 +56,7 @@ _ReturnFuncType = Callable[_P, Coroutine[Any, Any, Any]]
 
 @contextlib.contextmanager
 def wrap_zigpy_exceptions() -> Iterator[None]:
-    """Wrap zigpy exceptions in `HomeAssistantError` exceptions."""
+    """Wrap zigpy exceptions in `ZHAException` exceptions."""
     try:
         yield
     except TimeoutError as exc:
