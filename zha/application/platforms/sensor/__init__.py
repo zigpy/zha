@@ -270,6 +270,7 @@ class PollableSensor(Sensor):
 class DeviceCounterSensor(BaseEntity):
     """Device counter sensor."""
 
+    PLATFORM = Platform.SENSOR
     _REFRESH_INTERVAL = (30, 45)
     _use_custom_polling: bool = True
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL
@@ -305,11 +306,14 @@ class DeviceCounterSensor(BaseEntity):
     ) -> None:
         """Init this sensor."""
         super().__init__(unique_id, **kwargs)
+        self._name = f"{zha_device.name} {counter_group} {counter}"
         self._device: ZHADevice = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
             getattr(state, counter_groups).get(counter_group, {}).get(counter, None)
         )
+        self._zigpy_counter_groups: str = counter_groups
+        self._zigpy_counter_group: str = counter_group
         self._attr_name: str = self._zigpy_counter.name
         self._tracked_tasks.append(
             self._device.gateway.async_create_background_task(
@@ -318,6 +322,14 @@ class DeviceCounterSensor(BaseEntity):
                 eager_start=True,
             )
         )
+        # we double create these in discovery tests because we reissue the create calls to count and prove them out
+        if self.unique_id not in self._device.platform_entities:
+            self._device.platform_entities[self.unique_id] = self
+
+    @property
+    def name(self) -> str:
+        """Return the name of the platform entity."""
+        return self._name
 
     @property
     def available(self) -> bool:
@@ -350,6 +362,12 @@ class DeviceCounterSensor(BaseEntity):
             "device_ieee": self._device.ieee,
         }
 
+    def get_state(self) -> dict[str, Any]:
+        """Return the state for this sensor."""
+        response = super().get_state()
+        response["state"] = self._zigpy_counter.value
+        return response
+
     def send_event(self, signal: dict[str, Any]) -> None:
         """Broadcast an event from this platform entity."""
         signal["platform_entity"] = {
@@ -367,6 +385,8 @@ class DeviceCounterSensor(BaseEntity):
         json["device_ieee"] = str(self._device.ieee)
         json["counter"] = self._zigpy_counter.name
         json["counter_value"] = self._zigpy_counter.value
+        json["counter_groups"] = self._zigpy_counter_groups
+        json["counter_group"] = self._zigpy_counter_group
         return json
 
 

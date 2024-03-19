@@ -416,7 +416,7 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     attribute report it received correctly.
     """
     assert entity.get_state()["state"] == state
-    # assert entity.unit == unit_of_measurement TODO do we want these in zhaws or only in HA?
+    # TODO assert entity._attr_native_unit_of_measurement == unit_of_measurement
 
 
 async def test_electrical_measurement_init(
@@ -505,37 +505,37 @@ async def test_electrical_measurement_init(
             homeautomation.ElectricalMeasurement.cluster_id,
             {"apparent_power", "rms_voltage", "rms_current"},
             {
-                "power",
-                "ac_frequency",
-                "power_factor",
+                "electrical_measurement",
+                "electrical_measurement_ac_frequency",
+                "electrical_measurement_power_factor",
             },
             {
-                "apparent_power",
-                "voltage",
-                "current",
+                "electrical_measurement_apparent_power",
+                "electrical_measurement_rms_voltage",
+                "electrical_measurement_rms_current",
             },
         ),
         (
             homeautomation.ElectricalMeasurement.cluster_id,
             {"apparent_power", "rms_current", "ac_frequency", "power_factor"},
-            {"voltage", "power"},
+            {"electrical_measurement_rms_voltage", "electrical_measurement"},
             {
-                "apparent_power",
-                "current",
-                "ac_frequency",
-                "power_factor",
+                "electrical_measurement_apparent_power",
+                "electrical_measurement_current",
+                "electrical_measurement_ac_frequency",
+                "electrical_measurement_power_factor",
             },
         ),
         (
             homeautomation.ElectricalMeasurement.cluster_id,
             set(),
             {
-                "voltage",
-                "power",
-                "apparent_power",
-                "current",
-                "ac_frequency",
-                "power_factor",
+                "electrical_measurement_rms_voltage",
+                "electrical_measurement",
+                "electrical_measurement_apparent_power",
+                "electrical_measurement_rms_current",
+                "electrical_measurement_ac_frequency",
+                "electrical_measurement_power_factor",
             },
             set(),
         ),
@@ -545,7 +545,7 @@ async def test_electrical_measurement_init(
                 "instantaneous_demand",
             },
             {
-                "summation_delivered",
+                "smartenergy_metering_summation_delivered",
             },
             {
                 "instantaneous_demand",
@@ -556,16 +556,16 @@ async def test_electrical_measurement_init(
             {"instantaneous_demand", "current_summ_delivered"},
             {},
             {
-                "instantaneous_demand",
-                "summation_delivered",
+                "smartenergy_metering",
+                "smartenergy_metering_summation_delivered",
             },
         ),
         (
             smartenergy.Metering.cluster_id,
             {},
             {
-                "instantaneous_demand",
-                "summation_delivered",
+                "smartenergy_metering",
+                "smartenergy_metering_summation_delivered",
             },
             {},
         ),
@@ -603,7 +603,6 @@ async def test_unsupported_attributes_sensor(
         cluster.add_unsupported_attribute(attr)
 
     zha_device = await device_joined(zigpy_device)
-    await zha_gateway.async_block_till_done()
 
     present_entity_ids = set(
         find_entity_ids(Platform.SENSOR, zha_device, omit=["lqi", "rssi"])
@@ -800,7 +799,7 @@ async def test_elec_measurement_sensor_type(
     ),
 )
 async def test_elec_measurement_skip_unsupported_attribute(
-    elec_measurement_zha_dev: ZHADevice,
+    elec_measurement_zha_dev: ZHADevice,  # pylint: disable=redefined-outer-name
     supported_attributes: set[str],
 ) -> None:
     """Test zha electrical measurement skipping update of unsupported attributes."""
@@ -902,7 +901,8 @@ async def zigpy_device_aqara_sensor_v2(
 
 
 async def test_last_feeding_size_sensor_v2(
-    zha_gateway: ZHAGateway, zigpy_device_aqara_sensor_v2
+    zha_gateway: ZHAGateway,
+    zigpy_device_aqara_sensor_v2,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test quirks defined sensor."""
 
@@ -912,64 +912,37 @@ async def test_last_feeding_size_sensor_v2(
         Platform.SENSOR, zha_device, qualifier="last_feeding_size"
     )
     assert entity_id is not None
+    entity = get_entity(zha_device, entity_id)
+    assert entity is not None
 
     await send_attributes_report(zha_gateway, cluster, {0x010C: 1})
-    assert_state(zha_gateway, entity_id, 1.0)
+    assert_state(entity, 1.0, "g")
 
-    await send_attributes_report(hass, cluster, {0x010C: 5})
-    assert_state(zha_gateway, entity_id, 5.0)
-
-
-@pytest.fixture
-async def coordinator(zha_gateway: ZHAGateway, zigpy_device_mock, device_joined):
-    """Test ZHA fan platform."""
-
-    zigpy_device = zigpy_device_mock(
-        {
-            1: {
-                SIG_EP_INPUT: [general.Groups.cluster_id],
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.CONTROL_BRIDGE,
-                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-            }
-        },
-        ieee="00:15:8d:00:02:32:4f:32",
-        nwk=0x0000,
-        node_descriptor=b"\xf8\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff",
-    )
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
-    return zha_device
+    await send_attributes_report(zha_gateway, cluster, {0x010C: 5})
+    assert_state(entity, 5.0, "g")
 
 
 async def test_device_counter_sensors(
     zha_gateway: ZHAGateway,
-    coordinator: ZHADevice,
 ) -> None:
     """Test quirks defined sensor."""
 
-    entity_id = "sensor.coordinator_manufacturer_coordinator_model_counter_1"
-    state = hass.states.get(entity_id)
-    assert state is None
+    coordinator = zha_gateway.coordinator_zha_device
+    assert coordinator.is_coordinator
+    entity_id = (
+        "sensor.coordinator_manufacturer_coordinator_model_ezsp_counters_counter_1"
+    )
+    entity = get_entity(coordinator, entity_id)
+    assert entity is not None
 
-    # Enable the entity.
-    entity_registry.async_update_entity(entity_id, disabled_by=None)
-    await hass.config_entries.async_reload(config_entry.entry_id)
-    await hass.async_block_till_done()
-
-    state = hass.states.get(entity_id)
-    assert state is not None
-    assert state.state == "1"
+    assert entity.get_state()["state"] == 1
 
     # simulate counter increment on application
     coordinator.device.application.state.counters["ezsp_counters"][
         "counter_1"
     ].increment()
 
-    next_update = dt_util.utcnow() + timedelta(seconds=60)
-    async_fire_time_changed(hass, next_update)
-    await hass.async_block_till_done()
+    await entity.async_update()
+    await zha_gateway.async_block_till_done()
 
-    state = hass.states.get(entity_id)
-    assert state is not None
-    assert state.state == "2"
+    assert entity.get_state()["state"] == 2

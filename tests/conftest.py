@@ -270,7 +270,7 @@ def globally_load_quirks():
 
 @pytest.fixture
 def device_joined(
-    zha_gateway,
+    zha_gateway: ZHAGateway,  # pylint: disable=redefined-outer-name
 ) -> Callable[[zigpy.device.Device], ZHADevice]:
     """Return a newly joined ZHAWS device."""
 
