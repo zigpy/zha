@@ -210,7 +210,7 @@ class AsyncUtilMixin:
 
     def track_task(self, task: asyncio.Task) -> None:
         """Create a tracked task."""
-        self._tracked_completable_tasks.append(task)
+        self._tracked_completable_tasks.add(task)
         task.add_done_callback(self._tracked_completable_tasks.remove)
 
     def add_job(
