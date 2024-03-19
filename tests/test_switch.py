@@ -1,4 +1,5 @@
 """Test zha switch."""
+
 from collections.abc import Awaitable, Callable
 import logging
 from typing import Optional
@@ -6,13 +7,6 @@ from unittest.mock import call, patch
 
 import pytest
 from slugify import slugify
-from zhaws.client.controller import Controller
-from zhaws.client.model.types import BasePlatformEntity, SwitchEntity, SwitchGroupEntity
-from zhaws.client.proxy import DeviceProxy, GroupProxy
-from zhaws.server.platforms.registries import Platform
-from zhaws.server.websocket.server import Server
-from zhaws.server.zigbee.device import Device
-from zhaws.server.zigbee.group import Group, GroupMemberReference
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha

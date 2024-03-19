@@ -688,11 +688,9 @@ class Sensor(PlatformEntity):
         response = super().get_state()
         if self._attribute_name is not None:
             raw_state = self._cluster_handler.cluster.get(self._attribute_name)
-            if raw_state is None:
-                return None
-
-            raw_state = self.formatter(raw_state)
-            response["state"] = raw_state
+            if raw_state is not None:
+                raw_state = self.formatter(raw_state)
+                response["state"] = raw_state
         return response
 
     def handle_cluster_handler_attribute_updated(
@@ -978,11 +976,11 @@ class ElectricalMeasurement(PollableSensor):
             response["measurement_type"] = self._cluster_handler.measurement_type
 
         max_attr_name = f"{self._attribute_name}_max"
-        if max_attr_name not in self._cluster_handler.cluster.AttributeDefs:
+        if not hasattr(self._cluster_handler.cluster.AttributeDefs, max_attr_name):
             return response
 
         if (max_v := self._cluster_handler.cluster.get(max_attr_name)) is not None:
-            response[max_attr_name] = str(self.formatter(max_v))
+            response[max_attr_name] = self.formatter(max_v)
 
         return response
 
@@ -1216,12 +1214,13 @@ class SmartEnergyMetering(PollableSensor):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> None:
         """Init."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
         entity_description = self._ENTITY_DESCRIPTION_MAP.get(
             self._cluster_handler.unit_of_measurement
