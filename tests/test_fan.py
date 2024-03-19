@@ -119,7 +119,7 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
         for entity in zha_dev.platform_entities.values()
     }
-    return entities[entity_id]  # type: ignore
+    return entities[entity_id]
 
 
 def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
@@ -129,14 +129,13 @@ def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
         for entity in group.group_entities.values()
     }
 
-    return entities.get(entity_id)  # type: ignore
+    return entities.get(entity_id)
 
 
 async def test_fan(
     device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
     zigpy_device: ZigpyDevice,
     zha_gateway: ZHAGateway,
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test zha fan platform."""
 

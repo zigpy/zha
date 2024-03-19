@@ -68,18 +68,15 @@ class BaseSwitch(BaseEntity, ABC):
             return False
         return self._on_off_cluster_handler.on_off
 
+    # TODO revert this once group entities use cluster handlers
     async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity on."""
-        result = await self._on_off_cluster_handler.on()
-        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
-            return
+        await self._on_off_cluster_handler.turn_on()
         self.maybe_send_state_changed_event()
 
     async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity off."""
-        result = await self._on_off_cluster_handler.off()
-        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
-            return
+        await self._on_off_cluster_handler.turn_off()
         self.maybe_send_state_changed_event()
 
     def get_state(self) -> dict:
@@ -144,6 +141,20 @@ class SwitchGroup(GroupEntity, BaseSwitch):
     def is_on(self) -> bool:
         """Return if the switch is on based on the statemachine."""
         return bool(self._state)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+        """Turn the entity on."""
+        result = await self._on_off_cluster_handler.on()
+        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
+            return
+        self.maybe_send_state_changed_event()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+        """Turn the entity off."""
+        result = await self._on_off_cluster_handler.off()
+        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
+            return
+        self.maybe_send_state_changed_event()
 
     def update(self, _: Any | None = None) -> None:
         """Query all members and determine the light group state."""
