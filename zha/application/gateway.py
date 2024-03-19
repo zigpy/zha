@@ -190,11 +190,6 @@ class ZHAGateway(AsyncUtilMixin):
         """Restore ZHA devices from zigpy application state."""
 
         assert self.application_controller
-        self._devices = {
-            zigpy_device.ieee: ZHADevice.new(zigpy_device, self)
-            for zigpy_device in self.application_controller.devices.values()
-        }
-        self.create_platform_entities()
         for zigpy_device in self.application_controller.devices.values():
             zha_device = self.get_or_create_device(zigpy_device)
             delta_msg = "not known"
@@ -212,6 +207,7 @@ class ZHAGateway(AsyncUtilMixin):
                 delta_msg,
                 zha_device.consider_unavailable_time,
             )
+        self.create_platform_entities()
 
     def load_groups(self) -> None:
         """Initialize ZHA groups."""
