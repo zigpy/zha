@@ -18,7 +18,7 @@ import zigpy.zcl.foundation as zcl_f
 from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import GroupEntity, PlatformEntity
-from zha.application.platforms.fan import (
+from zha.application.platforms.fan.const import (
     PRESET_MODE_AUTO,
     PRESET_MODE_ON,
     PRESET_MODE_SMART,

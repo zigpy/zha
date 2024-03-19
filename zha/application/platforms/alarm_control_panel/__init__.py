@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
 import functools
 import logging
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING
 
 from zigpy.zcl.clusters.security import IasAce
 
@@ -18,6 +17,14 @@ from zha.application.const import (
 )
 from zha.application.helpers import async_get_zha_config_value
 from zha.application.platforms import PlatformEntity
+from zha.application.platforms.alarm_control_panel.const import (
+    IAS_ACE_STATE_MAP,
+    SUPPORT_ALARM_ARM_AWAY,
+    SUPPORT_ALARM_ARM_HOME,
+    SUPPORT_ALARM_ARM_NIGHT,
+    SUPPORT_ALARM_TRIGGER,
+    AlarmState,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_EVENT,
@@ -37,39 +44,7 @@ STRICT_MATCH = functools.partial(
     PLATFORM_ENTITIES.strict_match, Platform.ALARM_CONTROL_PANEL
 )
 
-SUPPORT_ALARM_ARM_HOME: Final[int] = 1
-SUPPORT_ALARM_ARM_AWAY: Final[int] = 2
-SUPPORT_ALARM_ARM_NIGHT: Final[int] = 4
-SUPPORT_ALARM_TRIGGER: Final[int] = 8
-SUPPORT_ALARM_ARM_CUSTOM_BYPASS: Final[int] = 16
-SUPPORT_ALARM_ARM_VACATION: Final[int] = 32
-
 _LOGGER = logging.getLogger(__name__)
-
-
-class AlarmState(StrEnum):
-    """Alarm state."""
-
-    DISARMED = "disarmed"
-    ARMED_HOME = "armed_home"
-    ARMED_AWAY = "armed_away"
-    ARMED_NIGHT = "armed_night"
-    ARMED_VACATION = "armed_vacation"
-    ARMED_CUSTOM_BYPASS = "armed_custom_bypass"
-    PENDING = "pending"
-    ARMING = "arming"
-    DISARMING = "disarming"
-    TRIGGERED = "triggered"
-    UNKNOWN = "unknown"
-
-
-IAS_ACE_STATE_MAP = {
-    IasAce.PanelStatus.Panel_Disarmed: AlarmState.DISARMED,
-    IasAce.PanelStatus.Armed_Stay: AlarmState.ARMED_HOME,
-    IasAce.PanelStatus.Armed_Night: AlarmState.ARMED_NIGHT,
-    IasAce.PanelStatus.Armed_Away: AlarmState.ARMED_AWAY,
-    IasAce.PanelStatus.In_Alarm: AlarmState.TRIGGERED,
-}
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_ACE)

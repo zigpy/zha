@@ -2,20 +2,16 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
 
-from zigpy.quirks.v2 import (
-    EntityMetadata,
-    WriteAttributeButtonMetadata,
-    ZCLCommandButtonMetadata,
-)
+from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetadata
 
 from zha.application import Platform
-from zha.application.const import QUIRK_METADATA
+from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
 
@@ -29,17 +25,8 @@ MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.BUTT
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.BUTTON
 )
-DEFAULT_DURATION = 5  # seconds
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class ButtonDeviceClass(StrEnum):
-    """Device class for buttons."""
-
-    IDENTIFY = "identify"
-    RESTART = "restart"
-    UPDATE = "update"
 
 
 class ZHAButton(PlatformEntity):
@@ -61,17 +48,18 @@ class ZHAButton(PlatformEntity):
     ):
         """Initialize button."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def _init_from_quirks_metadata(
+        self, entity_metadata: ZCLCommandButtonMetadata
+    ) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
-        button_metadata: ZCLCommandButtonMetadata = entity_metadata.entity_metadata
-        self._command_name = button_metadata.command_name
-        self._args = button_metadata.args
-        self._kwargs = button_metadata.kwargs
+        self._command_name = entity_metadata.command_name
+        self._args = entity_metadata.args
+        self._kwargs = entity_metadata.kwargs
 
     def get_args(self) -> list[Any]:
         """Return the arguments to use in the command."""
@@ -141,16 +129,17 @@ class ZHAAttributeButton(PlatformEntity):
     ) -> None:
         """Init this button."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def _init_from_quirks_metadata(
+        self, entity_metadata: WriteAttributeButtonMetadata
+    ) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
-        button_metadata: WriteAttributeButtonMetadata = entity_metadata.entity_metadata
-        self._attribute_name = button_metadata.attribute_name
-        self._attribute_value = button_metadata.attribute_value
+        self._attribute_name = entity_metadata.attribute_name
+        self._attribute_value = entity_metadata.attribute_value
 
     async def async_press(self) -> None:
         """Write attribute with defined value."""

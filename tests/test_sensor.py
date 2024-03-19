@@ -874,7 +874,9 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
 
 @pytest.fixture
 async def zigpy_device_aqara_sensor_v2(
-    zha_gateway: ZHAGateway, zigpy_device_mock, device_joined
+    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zigpy_device_mock,
+    device_joined,
 ):
     """Device tracker zigpy Aqara motion sensor device."""
 

@@ -8,20 +8,43 @@ import enum
 import functools
 import logging
 import numbers
-from typing import TYPE_CHECKING, Any, Final, Self
+from typing import TYPE_CHECKING, Any, Self
 
 from zigpy import types
-from zigpy.quirks.v2 import EntityMetadata, ZCLEnumMetadata, ZCLSensorMetadata
+from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
-from zha.application.const import QUIRK_METADATA
+from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import BaseEntity, EntityCategory, PlatformEntity
-from zha.application.platforms.climate import HVACAction
+from zha.application.platforms.climate.const import HVACAction
+from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
+from zha.units import (
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    CONCENTRATION_PARTS_PER_BILLION,
+    CONCENTRATION_PARTS_PER_MILLION,
+    LIGHT_LUX,
+    PERCENTAGE,
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    UnitOfApparentPower,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfFrequency,
+    UnitOfMass,
+    UnitOfPower,
+    UnitOfPressure,
+    UnitOfTemperature,
+    UnitOfTime,
+    UnitOfVolume,
+    UnitOfVolumeFlowRate,
+    validate_unit,
+)
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_INPUT,
@@ -75,537 +98,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 
-class SensorStateClass(enum.StrEnum):
-    """State class for sensors."""
-
-    MEASUREMENT = "measurement"
-    """The state represents a measurement in present time."""
-
-    TOTAL = "total"
-    """The state represents a total amount.
-
-    For example: net energy consumption"""
-
-    TOTAL_INCREASING = "total_increasing"
-    """The state represents a monotonically increasing total.
-
-    For example: an amount of consumed gas"""
-
-
-class SensorDeviceClass(enum.StrEnum):
-    """Device class for sensors."""
-
-    # Non-numerical device classes
-    DATE = "date"
-    """Date.
-
-    Unit of measurement: `None`
-
-    ISO8601 format: https://en.wikipedia.org/wiki/ISO_8601
-    """
-
-    ENUM = "enum"
-    """Enumeration.
-
-    Provides a fixed list of options the state of the sensor can be in.
-
-    Unit of measurement: `None`
-    """
-
-    TIMESTAMP = "timestamp"
-    """Timestamp.
-
-    Unit of measurement: `None`
-
-    ISO8601 format: https://en.wikipedia.org/wiki/ISO_8601
-    """
-
-    # Numerical device classes, these should be aligned with NumberDeviceClass
-    APPARENT_POWER = "apparent_power"
-    """Apparent power.
-
-    Unit of measurement: `VA`
-    """
-
-    AQI = "aqi"
-    """Air Quality Index.
-
-    Unit of measurement: `None`
-    """
-
-    ATMOSPHERIC_PRESSURE = "atmospheric_pressure"
-    """Atmospheric pressure.
-
-    Unit of measurement: `UnitOfPressure` units
-    """
-
-    BATTERY = "battery"
-    """Percentage of battery that is left.
-
-    Unit of measurement: `%`
-    """
-
-    CO = "carbon_monoxide"
-    """Carbon Monoxide gas concentration.
-
-    Unit of measurement: `ppm` (parts per million)
-    """
-
-    CO2 = "carbon_dioxide"
-    """Carbon Dioxide gas concentration.
-
-    Unit of measurement: `ppm` (parts per million)
-    """
-
-    CURRENT = "current"
-    """Current.
-
-    Unit of measurement: `A`, `mA`
-    """
-
-    DATA_RATE = "data_rate"
-    """Data rate.
-
-    Unit of measurement: UnitOfDataRate
-    """
-
-    DATA_SIZE = "data_size"
-    """Data size.
-
-    Unit of measurement: UnitOfInformation
-    """
-
-    DISTANCE = "distance"
-    """Generic distance.
-
-    Unit of measurement: `LENGTH_*` units
-    - SI /metric: `mm`, `cm`, `m`, `km`
-    - USCS / imperial: `in`, `ft`, `yd`, `mi`
-    """
-
-    DURATION = "duration"
-    """Fixed duration.
-
-    Unit of measurement: `d`, `h`, `min`, `s`, `ms`
-    """
-
-    ENERGY = "energy"
-    """Energy.
-
-    Use this device class for sensors measuring energy consumption, for example
-    electric energy consumption.
-    Unit of measurement: `Wh`, `kWh`, `MWh`, `MJ`, `GJ`
-    """
-
-    ENERGY_STORAGE = "energy_storage"
-    """Stored energy.
-
-    Use this device class for sensors measuring stored energy, for example the amount
-    of electric energy currently stored in a battery or the capacity of a battery.
-
-    Unit of measurement: `Wh`, `kWh`, `MWh`, `MJ`, `GJ`
-    """
-
-    FREQUENCY = "frequency"
-    """Frequency.
-
-    Unit of measurement: `Hz`, `kHz`, `MHz`, `GHz`
-    """
-
-    GAS = "gas"
-    """Gas.
-
-    Unit of measurement:
-    - SI / metric: `m³`
-    - USCS / imperial: `ft³`, `CCF`
-    """
-
-    HUMIDITY = "humidity"
-    """Relative humidity.
-
-    Unit of measurement: `%`
-    """
-
-    ILLUMINANCE = "illuminance"
-    """Illuminance.
-
-    Unit of measurement: `lx`
-    """
-
-    IRRADIANCE = "irradiance"
-    """Irradiance.
-
-    Unit of measurement:
-    - SI / metric: `W/m²`
-    - USCS / imperial: `BTU/(h⋅ft²)`
-    """
-
-    MOISTURE = "moisture"
-    """Moisture.
-
-    Unit of measurement: `%`
-    """
-
-    MONETARY = "monetary"
-    """Amount of money.
-
-    Unit of measurement: ISO4217 currency code
-
-    See https://en.wikipedia.org/wiki/ISO_4217#Active_codes for active codes
-    """
-
-    NITROGEN_DIOXIDE = "nitrogen_dioxide"
-    """Amount of NO2.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    NITROGEN_MONOXIDE = "nitrogen_monoxide"
-    """Amount of NO.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    NITROUS_OXIDE = "nitrous_oxide"
-    """Amount of N2O.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    OZONE = "ozone"
-    """Amount of O3.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    PH = "ph"
-    """Potential hydrogen (acidity/alkalinity).
-
-    Unit of measurement: Unitless
-    """
-
-    PM1 = "pm1"
-    """Particulate matter <= 1 μm.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    PM10 = "pm10"
-    """Particulate matter <= 10 μm.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    PM25 = "pm25"
-    """Particulate matter <= 2.5 μm.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    POWER_FACTOR = "power_factor"
-    """Power factor.
-
-    Unit of measurement: `%`, `None`
-    """
-
-    POWER = "power"
-    """Power.
-
-    Unit of measurement: `W`, `kW`
-    """
-
-    PRECIPITATION = "precipitation"
-    """Accumulated precipitation.
-
-    Unit of measurement: UnitOfPrecipitationDepth
-    - SI / metric: `cm`, `mm`
-    - USCS / imperial: `in`
-    """
-
-    PRECIPITATION_INTENSITY = "precipitation_intensity"
-    """Precipitation intensity.
-
-    Unit of measurement: UnitOfVolumetricFlux
-    - SI /metric: `mm/d`, `mm/h`
-    - USCS / imperial: `in/d`, `in/h`
-    """
-
-    PRESSURE = "pressure"
-    """Pressure.
-
-    Unit of measurement:
-    - `mbar`, `cbar`, `bar`
-    - `Pa`, `hPa`, `kPa`
-    - `inHg`
-    - `psi`
-    """
-
-    REACTIVE_POWER = "reactive_power"
-    """Reactive power.
-
-    Unit of measurement: `var`
-    """
-
-    SIGNAL_STRENGTH = "signal_strength"
-    """Signal strength.
-
-    Unit of measurement: `dB`, `dBm`
-    """
-
-    SOUND_PRESSURE = "sound_pressure"
-    """Sound pressure.
-
-    Unit of measurement: `dB`, `dBA`
-    """
-
-    SPEED = "speed"
-    """Generic speed.
-
-    Unit of measurement: `SPEED_*` units or `UnitOfVolumetricFlux`
-    - SI /metric: `mm/d`, `mm/h`, `m/s`, `km/h`
-    - USCS / imperial: `in/d`, `in/h`, `ft/s`, `mph`
-    - Nautical: `kn`
-    - Beaufort: `Beaufort`
-    """
-
-    SULPHUR_DIOXIDE = "sulphur_dioxide"
-    """Amount of SO2.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    TEMPERATURE = "temperature"
-    """Temperature.
-
-    Unit of measurement: `°C`, `°F`, `K`
-    """
-
-    VOLATILE_ORGANIC_COMPOUNDS = "volatile_organic_compounds"
-    """Amount of VOC.
-
-    Unit of measurement: `µg/m³`
-    """
-
-    VOLATILE_ORGANIC_COMPOUNDS_PARTS = "volatile_organic_compounds_parts"
-    """Ratio of VOC.
-
-    Unit of measurement: `ppm`, `ppb`
-    """
-
-    VOLTAGE = "voltage"
-    """Voltage.
-
-    Unit of measurement: `V`, `mV`
-    """
-
-    VOLUME = "volume"
-    """Generic volume.
-
-    Unit of measurement: `VOLUME_*` units
-    - SI / metric: `mL`, `L`, `m³`
-    - USCS / imperial: `ft³`, `CCF`, `fl. oz.`, `gal` (warning: volumes expressed in
-    USCS/imperial units are currently assumed to be US volumes)
-    """
-
-    VOLUME_STORAGE = "volume_storage"
-    """Generic stored volume.
-
-    Use this device class for sensors measuring stored volume, for example the amount
-    of fuel in a fuel tank.
-
-    Unit of measurement: `VOLUME_*` units
-    - SI / metric: `mL`, `L`, `m³`
-    - USCS / imperial: `ft³`, `CCF`, `fl. oz.`, `gal` (warning: volumes expressed in
-    USCS/imperial units are currently assumed to be US volumes)
-    """
-
-    VOLUME_FLOW_RATE = "volume_flow_rate"
-    """Generic flow rate
-
-    Unit of measurement: UnitOfVolumeFlowRate
-    - SI / metric: `m³/h`, `L/min`
-    - USCS / imperial: `ft³/min`, `gal/min`
-    """
-
-    WATER = "water"
-    """Water.
-
-    Unit of measurement:
-    - SI / metric: `m³`, `L`
-    - USCS / imperial: `ft³`, `CCF`, `gal` (warning: volumes expressed in
-    USCS/imperial units are currently assumed to be US volumes)
-    """
-
-    WEIGHT = "weight"
-    """Generic weight, represents a measurement of an object's mass.
-
-    Weight is used instead of mass to fit with every day language.
-
-    Unit of measurement: `MASS_*` units
-    - SI / metric: `µg`, `mg`, `g`, `kg`
-    - USCS / imperial: `oz`, `lb`
-    """
-
-    WIND_SPEED = "wind_speed"
-    """Wind speed.
-
-    Unit of measurement: `SPEED_*` units
-    - SI /metric: `m/s`, `km/h`
-    - USCS / imperial: `ft/s`, `mph`
-    - Nautical: `kn`
-    - Beaufort: `Beaufort`
-    """
-
-
-NON_NUMERIC_DEVICE_CLASSES = {
-    SensorDeviceClass.DATE,
-    SensorDeviceClass.ENUM,
-    SensorDeviceClass.TIMESTAMP,
-}
-
-# Percentage units
-PERCENTAGE: Final[str] = "%"
-
-
-class UnitOfTemperature(enum.StrEnum):
-    """Temperature units."""
-
-    CELSIUS = "°C"
-    FAHRENHEIT = "°F"
-    KELVIN = "K"
-
-
-class UnitOfPressure(enum.StrEnum):
-    """Pressure units."""
-
-    PA = "Pa"
-    HPA = "hPa"
-    KPA = "kPa"
-    BAR = "bar"
-    CBAR = "cbar"
-    MBAR = "mbar"
-    MMHG = "mmHg"
-    INHG = "inHg"
-    PSI = "psi"
-
-
-class UnitOfPower(enum.StrEnum):
-    """Power units."""
-
-    WATT = "W"
-    KILO_WATT = "kW"
-    BTU_PER_HOUR = "BTU/h"
-
-
-class UnitOfApparentPower(enum.StrEnum):
-    """Apparent power units."""
-
-    VOLT_AMPERE = "VA"
-
-
-class UnitOfElectricCurrent(enum.StrEnum):
-    """Electric current units."""
-
-    MILLIAMPERE = "mA"
-    AMPERE = "A"
-
-
-# Electric_potential units
-class UnitOfElectricPotential(enum.StrEnum):
-    """Electric potential units."""
-
-    MILLIVOLT = "mV"
-    VOLT = "V"
-
-
-class UnitOfFrequency(enum.StrEnum):
-    """Frequency units."""
-
-    HERTZ = "Hz"
-    KILOHERTZ = "kHz"
-    MEGAHERTZ = "MHz"
-    GIGAHERTZ = "GHz"
-
-
-class UnitOfVolumeFlowRate(enum.StrEnum):
-    """Volume flow rate units."""
-
-    CUBIC_METERS_PER_HOUR = "m³/h"
-    CUBIC_FEET_PER_MINUTE = "ft³/min"
-    LITERS_PER_MINUTE = "L/min"
-    GALLONS_PER_MINUTE = "gal/min"
-
-
-class UnitOfVolume(enum.StrEnum):
-    """Volume units."""
-
-    CUBIC_FEET = "ft³"
-    CENTUM_CUBIC_FEET = "CCF"
-    CUBIC_METERS = "m³"
-    LITERS = "L"
-    MILLILITERS = "mL"
-    GALLONS = "gal"
-    """Assumed to be US gallons in conversion utilities.
-
-    British/Imperial gallons are not yet supported"""
-    FLUID_OUNCES = "fl. oz."
-    """Assumed to be US fluid ounces in conversion utilities.
-
-    British/Imperial fluid ounces are not yet supported"""
-
-
-class UnitOfTime(enum.StrEnum):
-    """Time units."""
-
-    MICROSECONDS = "μs"
-    MILLISECONDS = "ms"
-    SECONDS = "s"
-    MINUTES = "min"
-    HOURS = "h"
-    DAYS = "d"
-    WEEKS = "w"
-    MONTHS = "m"
-    YEARS = "y"
-
-
-class UnitOfEnergy(enum.StrEnum):
-    """Energy units."""
-
-    GIGA_JOULE = "GJ"
-    KILO_WATT_HOUR = "kWh"
-    MEGA_JOULE = "MJ"
-    MEGA_WATT_HOUR = "MWh"
-    WATT_HOUR = "Wh"
-
-
-class UnitOfMass(enum.StrEnum):
-    """Mass units."""
-
-    GRAMS = "g"
-    KILOGRAMS = "kg"
-    MILLIGRAMS = "mg"
-    MICROGRAMS = "µg"
-    OUNCES = "oz"
-    POUNDS = "lb"
-    STONES = "st"
-
-
-# Concentration units
-CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "µg/m³"
-CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER: Final = "mg/m³"
-CONCENTRATION_MICROGRAMS_PER_CUBIC_FOOT: Final = "μg/ft³"
-CONCENTRATION_PARTS_PER_CUBIC_METER: Final = "p/m³"
-CONCENTRATION_PARTS_PER_MILLION: Final = "ppm"
-CONCENTRATION_PARTS_PER_BILLION: Final = "ppb"
-
-# Signal_strength units
-SIGNAL_STRENGTH_DECIBELS: Final = "dB"
-SIGNAL_STRENGTH_DECIBELS_MILLIWATT: Final = "dBm"
-
-# Light units
-LIGHT_LUX: Final = "lx"
-
-
 class Sensor(PlatformEntity):
     """Base ZHA sensor."""
 
@@ -632,7 +124,7 @@ class Sensor(PlatformEntity):
         Return entity if it is a supported configuration, otherwise return None
         """
         cluster_handler = cluster_handlers[0]
-        if QUIRK_METADATA not in kwargs and (
+        if ENTITY_METADATA not in kwargs and (
             cls._attribute_name in cluster_handler.cluster.unsupported_attributes
             or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
         ):
@@ -655,24 +147,32 @@ class Sensor(PlatformEntity):
     ) -> None:
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_EVENT, self._handle_event_protocol
         )
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def _init_from_quirks_metadata(self, entity_metadata: ZCLSensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
-        sensor_metadata: ZCLSensorMetadata = entity_metadata.entity_metadata
-        self._attribute_name = sensor_metadata.attribute_name
-        if sensor_metadata.divisor is not None:
-            self._divisor = sensor_metadata.divisor
-        if sensor_metadata.multiplier is not None:
-            self._multiplier = sensor_metadata.multiplier
-        if sensor_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = sensor_metadata.unit
+        self._attribute_name = entity_metadata.attribute_name
+        if entity_metadata.divisor is not None:
+            self._divisor = entity_metadata.divisor
+        if entity_metadata.multiplier is not None:
+            self._multiplier = entity_metadata.multiplier
+        if entity_metadata.device_class is not None:
+            self._attr_device_class = validate_device_class(
+                SensorDeviceClass,
+                entity_metadata.device_class,
+                Platform.SENSOR.value,
+                _LOGGER,
+            )
+        if entity_metadata.device_class is None and entity_metadata.unit is not None:
+            self._attr_native_unit_of_measurement = validate_unit(
+                entity_metadata.unit
+            ).value
 
     @property
     def native_value(self) -> str | int | float | None:
@@ -876,12 +376,22 @@ class EnumSensor(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ENUM
     _enum: type[enum.Enum]
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._attr_options = [e.name for e in self._enum]
+
+    def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
         """Init this entity from the quirks metadata."""
-        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
-        sensor_metadata: ZCLEnumMetadata = entity_metadata.entity_metadata
-        self._attribute_name = sensor_metadata.attribute_name
-        self._enum = sensor_metadata.enum
+        self._attribute_name = entity_metadata.attribute_name
+        self._enum = entity_metadata.enum
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""

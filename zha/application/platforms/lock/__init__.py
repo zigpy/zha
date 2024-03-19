@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import PlatformEntity
+from zha.application.platforms.lock.const import (
+    STATE_LOCKED,
+    STATE_UNLOCKED,
+    VALUE_TO_STATE,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -22,15 +27,6 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.LOCK)
-
-STATE_LOCKED: Final[str] = "locked"
-STATE_UNLOCKED: Final[str] = "unlocked"
-STATE_LOCKING: Final[str] = "locking"
-STATE_UNLOCKING: Final[str] = "unlocking"
-STATE_JAMMED: Final[str] = "jammed"
-# The first state is Zigbee 'Not fully locked'
-STATE_LIST: Final[list[str]] = [STATE_UNLOCKED, STATE_LOCKED, STATE_UNLOCKED]
-VALUE_TO_STATE: Final = dict(enumerate(STATE_LIST))
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DOORLOCK)

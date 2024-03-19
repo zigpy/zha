@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
 import functools
+import logging
 from typing import TYPE_CHECKING
 
-from zigpy.quirks.v2 import BinarySensorMetadata, EntityMetadata
-from zigpy.zcl.clusters.security import IasZone
+from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.const import QUIRK_METADATA
+from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms.binary_sensor.const import (
+    IAS_ZONE_CLASS_MAPPING,
+    BinarySensorDeviceClass,
+)
+from zha.application.platforms.helpers import validate_device_class
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -37,105 +41,7 @@ MULTI_MATCH = functools.partial(
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
 )
-
-
-class BinarySensorDeviceClass(StrEnum):
-    """Device class for binary sensors."""
-
-    # On means low, Off means normal
-    BATTERY = "battery"
-
-    # On means charging, Off means not charging
-    BATTERY_CHARGING = "battery_charging"
-
-    # On means carbon monoxide detected, Off means no carbon monoxide (clear)
-    CO = "carbon_monoxide"
-
-    # On means cold, Off means normal
-    COLD = "cold"
-
-    # On means connected, Off means disconnected
-    CONNECTIVITY = "connectivity"
-
-    # On means open, Off means closed
-    DOOR = "door"
-
-    # On means open, Off means closed
-    GARAGE_DOOR = "garage_door"
-
-    # On means gas detected, Off means no gas (clear)
-    GAS = "gas"
-
-    # On means hot, Off means normal
-    HEAT = "heat"
-
-    # On means light detected, Off means no light
-    LIGHT = "light"
-
-    # On means open (unlocked), Off means closed (locked)
-    LOCK = "lock"
-
-    # On means wet, Off means dry
-    MOISTURE = "moisture"
-
-    # On means motion detected, Off means no motion (clear)
-    MOTION = "motion"
-
-    # On means moving, Off means not moving (stopped)
-    MOVING = "moving"
-
-    # On means occupied, Off means not occupied (clear)
-    OCCUPANCY = "occupancy"
-
-    # On means open, Off means closed
-    OPENING = "opening"
-
-    # On means plugged in, Off means unplugged
-    PLUG = "plug"
-
-    # On means power detected, Off means no power
-    POWER = "power"
-
-    # On means home, Off means away
-    PRESENCE = "presence"
-
-    # On means problem detected, Off means no problem (OK)
-    PROBLEM = "problem"
-
-    # On means running, Off means not running
-    RUNNING = "running"
-
-    # On means unsafe, Off means safe
-    SAFETY = "safety"
-
-    # On means smoke detected, Off means no smoke (clear)
-    SMOKE = "smoke"
-
-    # On means sound detected, Off means no sound (clear)
-    SOUND = "sound"
-
-    # On means tampering detected, Off means no tampering (clear)
-    TAMPER = "tamper"
-
-    # On means update available, Off means up-to-date
-    UPDATE = "update"
-
-    # On means vibration detected, Off means no vibration
-    VIBRATION = "vibration"
-
-    # On means open, Off means closed
-    WINDOW = "window"
-
-
-# Zigbee Cluster Library Zone Type to Home Assistant device class
-IAS_ZONE_CLASS_MAPPING = {
-    IasZone.ZoneType.Motion_Sensor: BinarySensorDeviceClass.MOTION,
-    IasZone.ZoneType.Contact_Switch: BinarySensorDeviceClass.OPENING,
-    IasZone.ZoneType.Fire_Sensor: BinarySensorDeviceClass.SMOKE,
-    IasZone.ZoneType.Water_Sensor: BinarySensorDeviceClass.MOISTURE,
-    IasZone.ZoneType.Carbon_Monoxide_Sensor: BinarySensorDeviceClass.GAS,
-    IasZone.ZoneType.Vibration_Movement_Sensor: BinarySensorDeviceClass.VIBRATION,
-}
+_LOGGER = logging.getLogger(__name__)
 
 
 class BinarySensor(PlatformEntity):
@@ -155,18 +61,24 @@ class BinarySensor(PlatformEntity):
     ) -> None:
         """Initialize the ZHA binary sensor."""
         self._cluster_handler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_EVENT, self._handle_event_protocol
         )
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
-        binary_sensor_metadata: BinarySensorMetadata = entity_metadata.entity_metadata
-        self._attribute_name = binary_sensor_metadata.attribute_name
+        self._attribute_name = entity_metadata.attribute_name
+        if entity_metadata.device_class is not None:
+            self._attr_device_class = validate_device_class(
+                BinarySensorDeviceClass,
+                entity_metadata.device_class,
+                Platform.BINARY_SENSOR.value,
+                _LOGGER,
+            )
 
     @property
     def is_on(self) -> bool:

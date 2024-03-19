@@ -29,9 +29,9 @@ from zha.application.gateway import ZHAGateway
 from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
-    FanState,
     Thermostat as ThermostatEntity,
 )
+from zha.application.platforms.climate.const import FanState
 from zha.application.platforms.sensor import (
     Sensor,
     SinopeHVACAction,

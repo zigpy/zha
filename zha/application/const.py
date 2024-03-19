@@ -290,7 +290,7 @@ PRESET_BOOST = "boost"
 # No preset is active
 PRESET_NONE = "none"
 
-QUIRK_METADATA = "quirk_metadata"
+ENTITY_METADATA = "entity_metadata"
 
 ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
 
