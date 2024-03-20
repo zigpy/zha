@@ -1,4 +1,4 @@
-"""Platform module for zhas."""
+"""Platform module for Zigbee Home Automation."""
 
 from __future__ import annotations
 
