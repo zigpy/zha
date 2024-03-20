@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from abc import ABC
+import asyncio
 from collections import Counter
-from collections.abc import Callable, Iterable
-from enum import IntFlag, StrEnum
+from collections.abc import Callable
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
@@ -30,9 +31,45 @@ from zha.application.platforms.helpers import (
     mean_tuple,
     reduce_attribute,
 )
+from zha.application.platforms.light.const import (
+    ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY,
+    ATTR_BRIGHTNESS,
+    ATTR_COLOR_MODE,
+    ATTR_COLOR_TEMP,
+    ATTR_EFFECT,
+    ATTR_EFFECT_LIST,
+    ATTR_FLASH,
+    ATTR_HS_COLOR,
+    ATTR_MAX_MIREDS,
+    ATTR_MIN_MIREDS,
+    ATTR_SUPPORTED_FEATURES,
+    ATTR_TRANSITION,
+    ATTR_XY_COLOR,
+    DEFAULT_EXTRA_TRANSITION_DELAY_LONG,
+    DEFAULT_EXTRA_TRANSITION_DELAY_SHORT,
+    DEFAULT_LONG_TRANSITION_TIME,
+    DEFAULT_MIN_BRIGHTNESS,
+    DEFAULT_MIN_TRANSITION_MANUFACTURERS,
+    DEFAULT_ON_OFF_TRANSITION,
+    EFFECT_COLORLOOP,
+    FLASH_EFFECTS,
+    SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
+    SIGNAL_LIGHT_GROUP_STATE_CHANGED,
+    SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
+    SIGNAL_LIGHT_GROUP_TRANSITION_START,
+    STATE_UNAVAILABLE,
+    SUPPORT_GROUP_LIGHT,
+    ColorMode,
+    LightEntityFeature,
+)
+from zha.application.platforms.light.helpers import (
+    brightness_supported,
+    filter_supported_color_modes,
+    valid_supported_color_modes,
+)
 from zha.application.registries import PLATFORM_ENTITIES
+from zha.debounce import Debouncer
 from zha.decorators import periodic
-from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_COLOR,
@@ -50,208 +87,11 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_ON_OFF_TRANSITION = 1  # most bulbs default to a 1-second turn on/off transition
-DEFAULT_EXTRA_TRANSITION_DELAY_SHORT = 0.25
-DEFAULT_EXTRA_TRANSITION_DELAY_LONG = 2.0
-DEFAULT_LONG_TRANSITION_TIME = 10
-DEFAULT_MIN_BRIGHTNESS = 2
-ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY = 0.05
-
-
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.LIGHT)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.LIGHT)
-SIGNAL_LIGHT_GROUP_STATE_CHANGED = "zha_light_group_state_changed"
-SIGNAL_LIGHT_GROUP_TRANSITION_START = "zha_light_group_transition_start"
-SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED = "zha_light_group_transition_finished"
-SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE = "zha_light_group_assume_group_state"
-DEFAULT_MIN_TRANSITION_MANUFACTURERS = {"sengled"}
 
 
-class LightEntityFeature(IntFlag):
-    """Supported features of the light entity."""
-
-    EFFECT = 4
-    FLASH = 8
-    TRANSITION = 32
-
-
-class ColorMode(StrEnum):
-    """Possible light color modes."""
-
-    UNKNOWN = "unknown"
-    """Ambiguous color mode"""
-    ONOFF = "onoff"
-    """Must be the only supported mode"""
-    BRIGHTNESS = "brightness"
-    """Must be the only supported mode"""
-    COLOR_TEMP = "color_temp"
-    HS = "hs"
-    XY = "xy"
-    RGB = "rgb"
-    RGBW = "rgbw"
-    RGBWW = "rgbww"
-    WHITE = "white"
-    """Must *NOT* be the only supported mode"""
-
-
-COLOR_MODES_GROUP_LIGHT = {ColorMode.COLOR_TEMP, ColorMode.XY}
-SUPPORT_GROUP_LIGHT = (
-    LightEntityFeature.EFFECT | LightEntityFeature.FLASH | LightEntityFeature.TRANSITION
-)
-
-# Float that represents transition time in seconds to make change.
-ATTR_TRANSITION: Final[str] = "transition"
-
-# Lists holding color values
-ATTR_RGB_COLOR: Final[str] = "rgb_color"
-ATTR_RGBW_COLOR: Final[str] = "rgbw_color"
-ATTR_RGBWW_COLOR: Final[str] = "rgbww_color"
-ATTR_XY_COLOR: Final[str] = "xy_color"
-ATTR_HS_COLOR: Final[str] = "hs_color"
-ATTR_COLOR_TEMP: Final[str] = "color_temp"
-ATTR_KELVIN: Final[str] = "kelvin"
-ATTR_MIN_MIREDS: Final[str] = "min_mireds"
-ATTR_MAX_MIREDS: Final[str] = "max_mireds"
-ATTR_COLOR_NAME: Final[str] = "color_name"
-ATTR_WHITE_VALUE: Final[str] = "white_value"
-ATTR_WHITE: Final[str] = "white"
-
-# Brightness of the light, 0..255 or percentage
-ATTR_BRIGHTNESS: Final[str] = "brightness"
-ATTR_BRIGHTNESS_PCT: Final[str] = "brightness_pct"
-ATTR_BRIGHTNESS_STEP: Final[str] = "brightness_step"
-ATTR_BRIGHTNESS_STEP_PCT: Final[str] = "brightness_step_pct"
-
-ATTR_COLOR_MODE = "color_mode"
-
-# String representing a profile (built-in ones or external defined).
-ATTR_PROFILE: Final[str] = "profile"
-
-# If the light should flash, can be FLASH_SHORT or FLASH_LONG.
-ATTR_FLASH: Final[str] = "flash"
-FLASH_SHORT: Final[str] = "short"
-FLASH_LONG: Final[str] = "long"
-
-# List of possible effects
-ATTR_EFFECT_LIST: Final[str] = "effect_list"
-
-# Apply an effect to the light, can be EFFECT_COLORLOOP.
-ATTR_EFFECT: Final[str] = "effect"
-EFFECT_COLORLOOP: Final[str] = "colorloop"
-EFFECT_RANDOM: Final[str] = "random"
-EFFECT_WHITE: Final[str] = "white"
-
-ATTR_SUPPORTED_FEATURES: Final[str] = "supported_features"
-
-# Bitfield of features supported by the light entity
-SUPPORT_BRIGHTNESS: Final[int] = 1  # Deprecated, replaced by color modes
-SUPPORT_COLOR_TEMP: Final[int] = 2  # Deprecated, replaced by color modes
-SUPPORT_EFFECT: Final[int] = 4
-SUPPORT_FLASH: Final[int] = 8
-SUPPORT_COLOR: Final[int] = 16  # Deprecated, replaced by color modes
-SUPPORT_TRANSITION: Final[int] = 32
-SUPPORT_WHITE_VALUE: Final[int] = 128  # Deprecated, replaced by color modes
-
-EFFECT_BLINK: Final[int] = 0x00
-EFFECT_BREATHE: Final[int] = 0x01
-EFFECT_OKAY: Final[int] = 0x02
-EFFECT_DEFAULT_VARIANT: Final[int] = 0x00
-
-FLASH_EFFECTS: Final[dict[str, int]] = {
-    FLASH_SHORT: EFFECT_BLINK,
-    FLASH_LONG: EFFECT_BREATHE,
-}
-
-SUPPORT_GROUP_LIGHT = (
-    SUPPORT_BRIGHTNESS
-    | SUPPORT_COLOR_TEMP
-    | SUPPORT_EFFECT
-    | SUPPORT_FLASH
-    | SUPPORT_COLOR
-    | SUPPORT_TRANSITION
-)
-
-FLASH_EFFECTS = {
-    FLASH_SHORT: Identify.EffectIdentifier.Blink,
-    FLASH_LONG: Identify.EffectIdentifier.Breathe,
-}
-
-VALID_COLOR_MODES = {
-    ColorMode.ONOFF,
-    ColorMode.BRIGHTNESS,
-    ColorMode.COLOR_TEMP,
-    ColorMode.HS,
-    ColorMode.XY,
-    ColorMode.RGB,
-    ColorMode.RGBW,
-    ColorMode.RGBWW,
-    ColorMode.WHITE,
-}
-COLOR_MODES_BRIGHTNESS = VALID_COLOR_MODES - {ColorMode.ONOFF}
-COLOR_MODES_COLOR = {
-    ColorMode.HS,
-    ColorMode.RGB,
-    ColorMode.RGBW,
-    ColorMode.RGBWW,
-    ColorMode.XY,
-}
-
-
-def filter_supported_color_modes(color_modes: Iterable[ColorMode]) -> set[ColorMode]:
-    """Filter the given color modes."""
-    color_modes = set(color_modes)
-    if (
-        not color_modes
-        or ColorMode.UNKNOWN in color_modes
-        or (ColorMode.WHITE in color_modes and not color_supported(color_modes))
-    ):
-        raise ZHAException
-
-    if ColorMode.ONOFF in color_modes and len(color_modes) > 1:
-        color_modes.remove(ColorMode.ONOFF)
-    if ColorMode.BRIGHTNESS in color_modes and len(color_modes) > 1:
-        color_modes.remove(ColorMode.BRIGHTNESS)
-    return color_modes
-
-
-def valid_supported_color_modes(
-    color_modes: Iterable[ColorMode | str],
-) -> set[ColorMode | str]:
-    """Validate the given color modes."""
-    color_modes = set(color_modes)
-    if (
-        not color_modes
-        or ColorMode.UNKNOWN in color_modes
-        or (ColorMode.BRIGHTNESS in color_modes and len(color_modes) > 1)
-        or (ColorMode.ONOFF in color_modes and len(color_modes) > 1)
-        or (ColorMode.WHITE in color_modes and not color_supported(color_modes))
-    ):
-        raise vol.Error(f"Invalid supported_color_modes {sorted(color_modes)}")
-    return color_modes
-
-
-def brightness_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
-    """Test if brightness is supported."""
-    if not color_modes:
-        return False
-    return not COLOR_MODES_BRIGHTNESS.isdisjoint(color_modes)
-
-
-def color_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
-    """Test if color is supported."""
-    if not color_modes:
-        return False
-    return not COLOR_MODES_COLOR.isdisjoint(color_modes)
-
-
-def color_temp_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
-    """Test if color temperature is supported."""
-    if not color_modes:
-        return False
-    return ColorMode.COLOR_TEMP in color_modes
-
-
-class BaseLight(BaseEntity):
+class BaseLight(BaseEntity, ABC):
     """Operations common to all light entities."""
 
     PLATFORM = Platform.LIGHT
@@ -771,10 +611,16 @@ class BaseLight(BaseEntity):
         self._transitioning_individual = True
         self._transitioning_group = False
         if isinstance(self, LightGroup):
+            # pylint: disable=pointless-string-statement
+            """
             async_dispatcher_send(
                 self.hass,
                 SIGNAL_LIGHT_GROUP_TRANSITION_START,
                 {"entity_ids": self._entity_ids},
+            )
+            """
+            self.emit(
+                SIGNAL_LIGHT_GROUP_TRANSITION_START,
             )
         self._async_unsub_transition_listener()
 
@@ -789,8 +635,7 @@ class BaseLight(BaseEntity):
         if transition_time >= DEFAULT_LONG_TRANSITION_TIME:
             transition_time += DEFAULT_EXTRA_TRANSITION_DELAY_LONG
         self.debug("starting transitioning timer for %s", transition_time)
-        self._transition_listener = async_call_later(
-            self._zha_device.hass,
+        self._transition_listener = asyncio.get_running_loop().call_later(
             transition_time,
             self.async_transition_complete,
         )
@@ -798,7 +643,7 @@ class BaseLight(BaseEntity):
     def _async_unsub_transition_listener(self) -> None:
         """Unsubscribe transition listener."""
         if self._transition_listener:
-            self._transition_listener()
+            self._transition_listener.cancel()
             self._transition_listener = None
 
     def async_transition_complete(self, _=None) -> None:
@@ -808,16 +653,21 @@ class BaseLight(BaseEntity):
         self._async_unsub_transition_listener()
         self.maybe_send_state_changed_event()
         if isinstance(self, LightGroup):
+            self.emit(
+                SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
+            )
+            # pylint: disable=pointless-string-statement
+            """
             async_dispatcher_send(
                 self.hass,
                 SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
                 {"entity_ids": self._entity_ids},
             )
+            """
             if self._debounced_member_refresh is not None:
                 self.debug("transition complete - refreshing group member states")
-                assert self.platform.config_entry
-                self.platform.config_entry.async_create_background_task(
-                    self.hass,
+
+                self._zha_device.gateway.async_create_background_task(
                     self._debounced_member_refresh.async_call(),
                     "zha.light-refresh-debounced-member",
                 )
@@ -862,7 +712,7 @@ class Light(PlatformEntity, BaseLight):
         effect_list = []
 
         self._zha_config_always_prefer_xy_color_mode = async_get_zha_config_value(
-            device.gateway.config_entry,
+            device.gateway.config,
             ZHA_OPTIONS,
             CONF_ALWAYS_PREFER_XY_COLOR_MODE,
             True,
@@ -945,19 +795,19 @@ class Light(PlatformEntity, BaseLight):
             self._effect_list = effect_list
 
         self._zha_config_transition = async_get_zha_config_value(
-            device.gateway.config_entry,
+            device.gateway.config,
             ZHA_OPTIONS,
             CONF_DEFAULT_LIGHT_TRANSITION,
             0,
         )
         self._zha_config_enhanced_light_transition = async_get_zha_config_value(
-            device.gateway.config_entry,
+            device.gateway.config,
             ZHA_OPTIONS,
             CONF_ENABLE_ENHANCED_LIGHT_TRANSITION,
             False,
         )
         self._zha_config_enable_light_transitioning_flag = async_get_zha_config_value(
-            device.gateway.config_entry,
+            device.gateway.config,
             ZHA_OPTIONS,
             CONF_ENABLE_LIGHT_TRANSITIONING_FLAG,
             True,
@@ -984,49 +834,15 @@ class Light(PlatformEntity, BaseLight):
             )
         )
 
-        self.async_accept_signal(
-            None,
-            SIGNAL_LIGHT_GROUP_STATE_CHANGED,
-            self._maybe_force_refresh,
-            signal_override=True,
-        )
+    def transition_on(self):
+        """Handle a transition start event from a group."""
+        self.debug("group transition started - setting member transitioning flag")
+        self._transitioning_group = True
 
-        def transition_on(signal):
-            """Handle a transition start event from a group."""
-            if self.entity_id in signal["entity_ids"]:
-                self.debug(
-                    "group transition started - setting member transitioning flag"
-                )
-                self._transitioning_group = True
-
-        self.async_accept_signal(
-            None,
-            SIGNAL_LIGHT_GROUP_TRANSITION_START,
-            transition_on,
-            signal_override=True,
-        )
-
-        def transition_off(signal):
-            """Handle a transition finished event from a group."""
-            if self.entity_id in signal["entity_ids"]:
-                self.debug(
-                    "group transition completed - unsetting member transitioning flag"
-                )
-                self._transitioning_group = False
-
-        self.async_accept_signal(
-            None,
-            SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
-            transition_off,
-            signal_override=True,
-        )
-
-        self.async_accept_signal(
-            None,
-            SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
-            self._assume_group_state,
-            signal_override=True,
-        )
+    def transition_off(self):
+        """Handle a transition finished event from a group."""
+        self.debug("group transition completed - unsetting member transitioning flag")
+        self._transitioning_group = False
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -1174,26 +990,25 @@ class Light(PlatformEntity, BaseLight):
                 self.device.gateway.config.allow_polling,
             )
 
-    async def _maybe_force_refresh(self, signal):
+    async def _maybe_force_refresh(self):
         """Force update the state if the signal contains the entity id for this entity."""
-        if self.entity_id in signal["entity_ids"]:
-            if self.is_transitioning:
-                self.debug("skipping _maybe_force_refresh while transitioning")
-                return
-            if self._zha_device.available and self.device.gateway.config.allow_polling:
-                self.debug("forcing polling for updated state")
-                await self.async_get_state()
-                self.maybe_send_state_changed_event()
-            else:
-                self.debug(
-                    "skipping _maybe_force_refresh, available: %s, allow polled requests: %s",
-                    self._zha_device.available,
-                    self.device.gateway.config.allow_polling,
-                )
+        if self.is_transitioning:
+            self.debug("skipping _maybe_force_refresh while transitioning")
+            return
+        if self._zha_device.available and self.device.gateway.config.allow_polling:
+            self.debug("forcing polling for updated state")
+            await self.async_get_state()
+            self.maybe_send_state_changed_event()
+        else:
+            self.debug(
+                "skipping _maybe_force_refresh, available: %s, allow polled requests: %s",
+                self._zha_device.available,
+                self.device.gateway.config.allow_polling,
+            )
 
-    def _assume_group_state(self, signal, update_params) -> None:
+    def _assume_group_state(self, update_params) -> None:
         """Handle an assume group state event from a group."""
-        if self.entity_id in signal["entity_ids"] and self._available:
+        if self._available:
             self.debug("member assuming group state with: %s", update_params)
 
             state = update_params["state"]
@@ -1299,6 +1114,22 @@ class LightGroup(GroupEntity, BaseLight):
         super().__init__(group)
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF = True
 
+        for platform_entity in group.get_platform_entities(Light.PLATFORM):
+            platform_entity.on_event(
+                SIGNAL_LIGHT_GROUP_STATE_CHANGED, platform_entity._maybe_force_refresh
+            )
+            platform_entity.on_event(
+                SIGNAL_LIGHT_GROUP_TRANSITION_START,
+                platform_entity.transition_on,
+            )
+            platform_entity.on_event(
+                SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED, platform_entity.transition_off
+            )
+            platform_entity.on_event(
+                SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
+                platform_entity._assume_group_state,
+            )
+
         for member in group.members:
             # Ensure we do not send group commands that violate the minimum transition
             # time of any members.
@@ -1333,25 +1164,25 @@ class LightGroup(GroupEntity, BaseLight):
         ) = group.zigpy_group.endpoint[Identify.cluster_id]
         self._debounced_member_refresh: Debouncer | None = None
         self._zha_config_transition = async_get_zha_config_value(
-            group.gateway.config_entry,
+            group.gateway.config,
             ZHA_OPTIONS,
             CONF_DEFAULT_LIGHT_TRANSITION,
             0,
         )
         self._zha_config_enable_light_transitioning_flag = async_get_zha_config_value(
-            group.gateway.config_entry,
+            group.gateway.config,
             ZHA_OPTIONS,
             CONF_ENABLE_LIGHT_TRANSITIONING_FLAG,
             True,
         )
         self._zha_config_always_prefer_xy_color_mode = async_get_zha_config_value(
-            group.gateway.config_entry,
+            group.gateway.config,
             ZHA_OPTIONS,
             CONF_ALWAYS_PREFER_XY_COLOR_MODE,
             True,
         )
         self._zha_config_group_members_assume_state = async_get_zha_config_value(
-            group.gateway.config_entry,
+            group.gateway.config,
             ZHA_OPTIONS,
             CONF_GROUP_MEMBERS_ASSUME_STATE,
             True,
@@ -1363,25 +1194,26 @@ class LightGroup(GroupEntity, BaseLight):
         self._color_mode = ColorMode.UNKNOWN
         self._supported_color_modes = {ColorMode.ONOFF}
 
+        force_refresh_debouncer = Debouncer(
+            self._zha_device.gateway,
+            _LOGGER,
+            cooldown=3,
+            immediate=True,
+            function=self._force_member_updates,
+        )
+        self._debounced_member_refresh = force_refresh_debouncer
+
     # remove this when all ZHA platforms and base entities are updated
     @property
     def available(self) -> bool:
         """Return entity availability."""
         return self._available
 
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        if self._debounced_member_refresh is None:
-            force_refresh_debouncer = Debouncer(
-                self.hass,
-                _LOGGER,
-                cooldown=3,
-                immediate=True,
-                function=self._force_member_updates,
-            )
-            self._debounced_member_refresh = force_refresh_debouncer
-            self.async_on_remove(force_refresh_debouncer.async_cancel)
+    async def on_remove(self) -> None:
+        """Cancel tasks this entity owns."""
+        await super().on_remove()
+        if self._debounced_member_refresh:
+            self._debounced_member_refresh.async_cancel()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
@@ -1407,13 +1239,17 @@ class LightGroup(GroupEntity, BaseLight):
         if self._debounced_member_refresh:
             await self._debounced_member_refresh.async_call()
 
-    """TODO
-    async def async_update(self) -> None:
-        #Query all members and determine the light group state.
-        self.debug("updating group state")
-        all_states = [self.hass.states.get(x) for x in self._entity_ids]
-        states: list[State] = list(filter(None, all_states))
-        on_states = [state for state in states if state.state == STATE_ON]
+    def update(self, _: Any = None) -> None:
+        """Query all members and determine the light group state."""
+        self.debug("Updating light group entity state")
+        platform_entities = self._group.get_platform_entities(self.PLATFORM)
+        all_entities = [entity.to_json() for entity in platform_entities]
+        all_states = [entity["state"] for entity in all_entities]
+        states: list = list(filter(None, all_states))
+        self.debug(
+            "All platform entity states for group entity members: %s", all_states
+        )
+        on_states = [state for state in states if state["state"]]
 
         self._state = len(on_states) > 0
 
@@ -1422,13 +1258,11 @@ class LightGroup(GroupEntity, BaseLight):
             self._off_with_transition = False
             self._off_brightness = None
 
-        self._available = any(state.state != STATE_UNAVAILABLE for state in states)
+        self._available = any(state["state"] != STATE_UNAVAILABLE for state in states)
 
         self._brightness = reduce_attribute(on_states, ATTR_BRIGHTNESS)
 
-        self._xy_color = reduce_attribute(
-            on_states, ATTR_XY_COLOR, reduce=mean_tuple
-        )
+        self._xy_color = reduce_attribute(on_states, ATTR_XY_COLOR, reduce=mean_tuple)
 
         if not self._zha_config_always_prefer_xy_color_mode:
             self._hs_color = reduce_attribute(
@@ -1458,7 +1292,7 @@ class LightGroup(GroupEntity, BaseLight):
 
         supported_color_modes = {ColorMode.ONOFF}
         all_supported_color_modes: list[set[ColorMode]] = list(
-            find_state_attributes(states, ATTR_SUPPORTED_COLOR_MODES)
+            find_state_attributes(states, valid_supported_color_modes)
         )
         if all_supported_color_modes:
             # Merge all color modes.
@@ -1469,9 +1303,7 @@ class LightGroup(GroupEntity, BaseLight):
         self._supported_color_modes = supported_color_modes
 
         self._color_mode = ColorMode.UNKNOWN
-        all_color_modes = list(
-            find_state_attributes(on_states, ATTR_COLOR_MODE)
-        )
+        all_color_modes = list(find_state_attributes(on_states, ATTR_COLOR_MODE))
         if all_color_modes:
             # Report the most common color mode, select brightness and onoff last
             color_mode_count = Counter(itertools.chain(all_color_modes))
@@ -1504,66 +1336,21 @@ class LightGroup(GroupEntity, BaseLight):
         # Bitwise-and the supported features with the GroupedLight's features
         # so that we don't break in the future when a new feature is added.
         self._supported_features &= SUPPORT_GROUP_LIGHT
-    """
-
-    def update(self, _: Any = None) -> None:
-        """Query all members and determine the light group state."""
-        self.debug("Updating light group entity state")
-        platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_entities = [entity.to_json() for entity in platform_entities]
-        all_states = [entity["state"] for entity in all_entities]
-        self.debug(
-            "All platform entity states for group entity members: %s", all_states
-        )
-        on_states = [state for state in all_states if state["on"]]
-
-        self._state = len(on_states) > 0
-
-        self._available = any(entity.available for entity in platform_entities)
-
-        self._brightness = reduce_attribute(on_states, ATTR_BRIGHTNESS)
-
-        self._hs_color = reduce_attribute(on_states, ATTR_HS_COLOR, reduce=mean_tuple)
-
-        self._color_temp = reduce_attribute(on_states, ATTR_COLOR_TEMP)
-        self._min_mireds = reduce_attribute(
-            all_entities, ATTR_MIN_MIREDS, default=153, reduce=min
-        )
-        self._max_mireds = reduce_attribute(
-            all_entities, ATTR_MAX_MIREDS, default=500, reduce=max
-        )
-
-        self._effect_list = None
-        all_effect_lists = list(find_state_attributes(all_entities, ATTR_EFFECT_LIST))
-        if all_effect_lists:
-            # Merge all effects from all effect_lists with a union merge.
-            self._effect_list = list(set().union(*all_effect_lists))
-
-        self._effect = None
-        all_effects = list(find_state_attributes(all_states, ATTR_EFFECT))
-        if all_effects:
-            # Report the most common effect.
-            effects_count = Counter(itertools.chain(all_effects))
-            self._effect = effects_count.most_common(1)[0][0]
-
-        self._supported_features = 0
-        for support in find_state_attributes(all_entities, ATTR_SUPPORTED_FEATURES):
-            # Merge supported features by emulating support for every feature
-            # we find.
-            self._supported_features |= support
-        # Bitwise-and the supported features with the GroupedLight's features
-        # so that we don't break in the future when a new feature is added.
-        self._supported_features &= SUPPORT_GROUP_LIGHT
-
         self.maybe_send_state_changed_event()
 
     async def _force_member_updates(self) -> None:
         """Force the update of members to ensure the states are correct for bulbs that don't report their state."""
+        self.emit(
+            SIGNAL_LIGHT_GROUP_STATE_CHANGED,
+        )
+        # pylint: disable=pointless-string-statement
+        """"
         async_dispatcher_send(
             self.hass,
             SIGNAL_LIGHT_GROUP_STATE_CHANGED,
             {"entity_ids": self._entity_ids},
         )
+        """
 
     def _send_member_assume_state_event(
         self, state, service_kwargs, off_brightness=None
@@ -1598,9 +1385,15 @@ class LightGroup(GroupEntity, BaseLight):
         if ATTR_EFFECT in service_kwargs:
             update_params[ATTR_EFFECT] = self._effect
 
+        self.emit(
+            SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
+        )
+        # pylint: disable=pointless-string-statement
+        """
         async_dispatcher_send(
             self.hass,
             SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
             {"entity_ids": self._entity_ids},
             update_params,
         )
+        """

@@ -1,7 +1,9 @@
 """Test Home Assistant color util methods."""
+
 import pytest
 import voluptuous as vol
-import zhaws.server.platforms.util.color as color_util
+
+import zha.application.platforms.light.helpers as color_util
 
 GAMUT = color_util.GamutType(
     color_util.XYPoint(0.704, 0.296),

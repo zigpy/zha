@@ -336,6 +336,11 @@ class DeviceCounterSensor(BaseEntity):
         """Return entity availability."""
         return self._device.available
 
+    @property
+    def device(self) -> ZHADevice:
+        """Return the device."""
+        return self._device
+
     async def async_update(self) -> None:
         """Retrieve latest state."""
         self.maybe_send_state_changed_event()

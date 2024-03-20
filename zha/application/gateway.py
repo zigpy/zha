@@ -16,11 +16,14 @@ from zigpy.config import CONF_DEVICE, CONF_DEVICE_PATH, CONF_NWK_VALIDATE_SETTIN
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
+from zhaquirks import setup as setup_quirks
 from zigpy.state import State
 from zigpy.types.named import EUI64
 
 from zha.application import discovery
 from zha.application.const import (
+    CONF_CUSTOM_QUIRKS_PATH,
+    CONF_ENABLE_QUIRKS,
     CONF_RADIO_TYPE,
     CONF_USE_THREAD,
     CONF_ZIGPY,
@@ -68,6 +71,11 @@ class ZHAGateway(AsyncUtilMixin):
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
+
+        if config.yaml_config.get(CONF_ENABLE_QUIRKS, True):
+            setup_quirks(
+                custom_quirks_path=config.yaml_config.get(CONF_CUSTOM_QUIRKS_PATH)
+            )
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""

@@ -18,6 +18,7 @@ from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 import zigpy.device
 import zigpy.group
 import zigpy.profiles
+from zigpy.quirks import get_device
 import zigpy.types
 from zigpy.zcl.clusters.general import Basic, Groups
 from zigpy.zcl.foundation import Status
@@ -275,7 +276,7 @@ def device_joined(
     """Return a newly joined ZHAWS device."""
 
     async def _zha_device(zigpy_dev: zigpy.device.Device) -> ZHADevice:
-        await zha_gateway.async_device_initialized(zigpy_dev)
+        await zha_gateway.async_device_initialized(get_device(zigpy_dev))
         await zha_gateway.async_block_till_done()
         return zha_gateway.get_device(zigpy_dev.ieee)
 

@@ -63,16 +63,16 @@ class ZHAAlarmControlPanel(PlatformEntity):
     ) -> None:
         """Initialize the ZHA alarm control device."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        cfg_entry = device.gateway.config
+        config = device.gateway.config
         self._cluster_handler: IasAceClusterHandler = cluster_handlers[0]
         self._cluster_handler.panel_code = async_get_zha_config_value(
-            cfg_entry, ZHA_ALARM_OPTIONS, CONF_ALARM_MASTER_CODE, "1234"
+            config, ZHA_ALARM_OPTIONS, CONF_ALARM_MASTER_CODE, "1234"
         )
         self._cluster_handler.code_required_arm_actions = async_get_zha_config_value(
-            cfg_entry, ZHA_ALARM_OPTIONS, CONF_ALARM_ARM_REQUIRES_CODE, False
+            config, ZHA_ALARM_OPTIONS, CONF_ALARM_ARM_REQUIRES_CODE, False
         )
         self._cluster_handler.max_invalid_tries = async_get_zha_config_value(
-            cfg_entry, ZHA_ALARM_OPTIONS, CONF_ALARM_FAILED_TRIES, 3
+            config, ZHA_ALARM_OPTIONS, CONF_ALARM_FAILED_TRIES, 3
         )
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_EVENT, self._handle_event_protocol

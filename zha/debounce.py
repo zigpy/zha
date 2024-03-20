@@ -5,10 +5,12 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from logging import Logger
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from zha.application.gateway import ZHAGateway
 from zha.async_ import ZHAJob
+
+if TYPE_CHECKING:
+    from zha.application.gateway import ZHAGateway
 
 _R_co = TypeVar("_R_co", covariant=True)
 
