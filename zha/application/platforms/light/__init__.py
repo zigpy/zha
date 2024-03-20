@@ -1,5 +1,7 @@
 """Lights on Zigbee Home Automation networks."""
 
+# pylint: disable=too-many-lines
+
 from __future__ import annotations
 
 from abc import ABC
@@ -42,6 +44,7 @@ from zha.application.platforms.light.const import (
     ATTR_HS_COLOR,
     ATTR_MAX_MIREDS,
     ATTR_MIN_MIREDS,
+    ATTR_SUPPORTED_COLOR_MODES,
     ATTR_SUPPORTED_FEATURES,
     ATTR_TRANSITION,
     ATTR_XY_COLOR,
@@ -57,7 +60,6 @@ from zha.application.platforms.light.const import (
     SIGNAL_LIGHT_GROUP_STATE_CHANGED,
     SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
     SIGNAL_LIGHT_GROUP_TRANSITION_START,
-    STATE_UNAVAILABLE,
     SUPPORT_GROUP_LIGHT,
     ColorMode,
     LightEntityFeature,
@@ -65,7 +67,6 @@ from zha.application.platforms.light.const import (
 from zha.application.platforms.light.helpers import (
     brightness_supported,
     filter_supported_color_modes,
-    valid_supported_color_modes,
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
@@ -117,6 +118,7 @@ class BaseLight(BaseEntity, ABC):
         self._effect_list: list[str] | None = None
         self._effect: str | None = None
         self._supported_features: int = 0
+        self._supported_color_modes: set[ColorMode] = set()
         self._state: bool | None = None
         self._zha_config_transition: int = self._DEFAULT_MIN_TRANSITION_TIME
         self._zha_config_enhanced_light_transition: bool = False
@@ -141,6 +143,9 @@ class BaseLight(BaseEntity, ABC):
         response["effect"] = self.effect
         response["off_brightness"] = self._off_brightness
         response["off_with_transition"] = self._off_with_transition
+        response["supported_features"] = self.supported_features
+        response["color_mode"] = self.color_mode
+        response["supported_color_modes"] = self._supported_color_modes
         return response
 
     @property
@@ -190,6 +195,11 @@ class BaseLight(BaseEntity, ABC):
     def color_temp(self) -> int | None:
         """Return the CT color value in mireds."""
         return self._color_temp
+
+    @property
+    def color_mode(self) -> int | None:
+        """Return the color mode."""
+        return self._color_mode
 
     @property
     def effect_list(self) -> list[str] | None:
@@ -676,7 +686,7 @@ class BaseLight(BaseEntity, ABC):
             if self._debounced_member_refresh is not None:
                 self.debug("transition complete - refreshing group member states")
 
-                self._device.gateway.async_create_background_task(
+                self.group.gateway.async_create_background_task(
                     self._debounced_member_refresh.async_call(),
                     "zha.light-refresh-debounced-member",
                 )
@@ -782,11 +792,11 @@ class Light(PlatformEntity, BaseLight):
                 effect_list.append(EFFECT_COLORLOOP)
                 if self._color_cluster_handler.color_loop_active == 1:
                     self._effect = EFFECT_COLORLOOP
-        self._supported_color_modes = filter_supported_color_modes(
+        supported_color_modes: set[ColorMode] = filter_supported_color_modes(
             self._supported_color_modes
         )
-        if len(self._supported_color_modes) == 1:
-            self._color_mode = next(iter(self._supported_color_modes))
+        if len(supported_color_modes) == 1:
+            self._color_mode = next(iter(supported_color_modes))
         else:  # Light supports color_temp + hs, determine which mode the light is in
             assert self._color_cluster_handler
             if (
@@ -1055,7 +1065,7 @@ class Light(PlatformEntity, BaseLight):
 class HueLight(Light):
     """Representation of a HUE light which does not report attributes."""
 
-    _REFRESH_INTERVAL = (3, 5)
+    _REFRESH_INTERVAL = (180, 300)
 
 
 @STRICT_MATCH(
@@ -1173,13 +1183,14 @@ class LightGroup(GroupEntity, BaseLight):
         self._supported_color_modes = {ColorMode.ONOFF}
 
         force_refresh_debouncer = Debouncer(
-            self._device.gateway,
+            self.group.gateway,
             _LOGGER,
             cooldown=3,
             immediate=True,
             function=self._force_member_updates,
         )
         self._debounced_member_refresh = force_refresh_debouncer
+        self.update()
 
     # remove this when all ZHA platforms and base entities are updated
     @property
@@ -1271,15 +1282,15 @@ class LightGroup(GroupEntity, BaseLight):
 
         supported_color_modes = {ColorMode.ONOFF}
         all_supported_color_modes: list[set[ColorMode]] = list(
-            find_state_attributes(states, valid_supported_color_modes)
+            find_state_attributes(states, ATTR_SUPPORTED_COLOR_MODES)
         )
+        self._supported_color_modes = set().union(*all_supported_color_modes)
+
         if all_supported_color_modes:
             # Merge all color modes.
             supported_color_modes = filter_supported_color_modes(
                 set().union(*all_supported_color_modes)
             )
-
-        self._supported_color_modes = supported_color_modes
 
         self._color_mode = ColorMode.UNKNOWN
         all_color_modes = list(find_state_attributes(on_states, ATTR_COLOR_MODE))

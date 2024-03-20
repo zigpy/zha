@@ -358,6 +358,7 @@ class ZHAGateway(AsyncUtilMixin):
         """Handle zigpy group member removed event."""
         # need to handle endpoint correctly on groups
         zha_group = self.get_or_create_group(zigpy_group)
+        discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
         self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
         # pylint: disable=pointless-string-statement
@@ -373,6 +374,7 @@ class ZHAGateway(AsyncUtilMixin):
         """Handle zigpy group member added event."""
         # need to handle endpoint correctly on groups
         zha_group = self.get_or_create_group(zigpy_group)
+        discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_added - endpoint: %s", endpoint)
         self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
         # pylint: disable=pointless-string-statement
@@ -381,10 +383,6 @@ class ZHAGateway(AsyncUtilMixin):
             self.hass, f"{SIGNAL_GROUP_MEMBERSHIP_CHANGE}_0x{zigpy_group.group_id:04x}"
         )
         """
-        if len(zha_group.members) == 2:
-            # we need to do this because there wasn't already
-            # a group entity to remove and re-add
-            discovery.GROUP_PROBE.discover_group_entities(zha_group)
 
     def group_added(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group added event."""

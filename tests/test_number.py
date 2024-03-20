@@ -216,7 +216,7 @@ async def test_level_control_number(
     assert entity.get_state()["state"] == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
-    await entity.async_set_value(new_value)
+    await entity.async_set_native_value(new_value)
     assert level_control_cluster.write_attributes.mock_calls == [
         call({attr: new_value}, manufacturer=None)
     ]
@@ -240,7 +240,7 @@ async def test_level_control_number(
     level_control_cluster.write_attributes.side_effect = ZigbeeException
 
     with pytest.raises(ZHAException):
-        await entity.async_set_value(new_value)
+        await entity.async_set_native_value(new_value)
 
     assert level_control_cluster.write_attributes.mock_calls == [
         call({attr: new_value}, manufacturer=None),
@@ -300,7 +300,7 @@ async def test_color_number(
     assert entity.get_state()["state"] == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
-    await entity.async_set_value(new_value)
+    await entity.async_set_native_value(new_value)
     assert color_cluster.write_attributes.call_count == 1
     assert color_cluster.write_attributes.call_args[0][0] == {
         attr: new_value,
@@ -327,7 +327,7 @@ async def test_color_number(
     color_cluster.write_attributes.side_effect = ZigbeeException
 
     with pytest.raises(ZHAException):
-        await entity.async_set_value(new_value)
+        await entity.async_set_native_value(new_value)
 
     assert color_cluster.write_attributes.mock_calls == [
         call({attr: new_value}, manufacturer=None),

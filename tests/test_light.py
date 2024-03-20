@@ -879,7 +879,7 @@ async def test_zha_group_light_entity(
     assert len(zha_group.members) == 3
 
     # remove the group and ensure that there is no entity and that the entity registry is cleaned up
-    await zha_gateway.controller.async_remove_zigpy_group(zha_group.group_id)
+    await zha_gateway.async_remove_zigpy_group(zha_group.group_id)
     await zha_gateway.async_block_till_done()
     entity = get_group_entity(zha_group, group_entity_id)
     assert entity is None

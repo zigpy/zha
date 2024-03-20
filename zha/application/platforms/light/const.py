@@ -78,6 +78,7 @@ ATTR_BRIGHTNESS_STEP: Final[str] = "brightness_step"
 ATTR_BRIGHTNESS_STEP_PCT: Final[str] = "brightness_step_pct"
 
 ATTR_COLOR_MODE = "color_mode"
+ATTR_SUPPORTED_COLOR_MODES = "supported_color_modes"
 
 # String representing a profile (built-in ones or external defined).
 ATTR_PROFILE: Final[str] = "profile"

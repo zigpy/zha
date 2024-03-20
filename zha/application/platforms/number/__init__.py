@@ -59,9 +59,10 @@ class ZhaNumber(PlatformEntity):
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: ZHADevice,
+        **kwargs: Any,
     ):
         """Initialize the number."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._analog_output_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
@@ -168,6 +169,8 @@ class ZHANumberConfigurationEntity(PlatformEntity):
 
     PLATFORM = Platform.NUMBER
     _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0.0
+    _attr_native_max_value: float = 100.0
     _attr_native_step: float = 1.0
     _attr_multiplier: float = 1
     _attribute_name: str
@@ -210,6 +213,7 @@ class ZHANumberConfigurationEntity(PlatformEntity):
     ) -> None:
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
+        self._attr_device_class: NumberDeviceClass | None = None
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
@@ -242,6 +246,9 @@ class ZHANumberConfigurationEntity(PlatformEntity):
     @property
     def native_value(self) -> float:
         """Return the current value."""
+        value = self._cluster_handler.cluster.get(self._attribute_name)
+        if value is None:
+            return None
         return (
             self._cluster_handler.cluster.get(self._attribute_name)
             * self._attr_multiplier
@@ -263,6 +270,23 @@ class ZHANumberConfigurationEntity(PlatformEntity):
                 self._attribute_name, from_cache=False
             )
             _LOGGER.debug("read value=%s", value)
+
+    def to_json(self) -> dict:
+        """Return the JSON representation of the number entity."""
+        json = super().to_json()
+        json["multiplier"] = self._attr_multiplier
+        json["device_class"] = self._attr_device_class
+        json["step"] = self._attr_native_step
+        json["min_value"] = self._attr_native_min_value
+        json["max_value"] = self._attr_native_max_value
+        json["name"] = self.name
+        return json
+
+    def get_state(self) -> dict:
+        """Return the state of the entity."""
+        response = super().get_state()
+        response["state"] = self.native_value
+        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -358,12 +382,13 @@ class StartUpColorTemperatureConfigurationEntity(ZHANumberConfigurationEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
         **kwargs: Any,
     ) -> None:
         """Init this ZHA startup color temperature entity."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         if self._cluster_handler:
             self._attr_native_min_value: float = self._cluster_handler.min_mireds
             self._attr_native_max_value: float = self._cluster_handler.max_mireds

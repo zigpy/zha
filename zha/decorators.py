@@ -58,7 +58,7 @@ class SetRegistry(set[int | str]):
         return decorator
 
 
-def periodic(refresh_interval: tuple) -> Callable:
+def periodic(refresh_interval: tuple, run_immediately=False) -> Callable:
     """Make a method with periodic refresh."""
 
     def scheduler(func: Callable) -> Callable[[Any, Any], Coroutine[Any, Any, None]]:
@@ -70,6 +70,8 @@ def periodic(refresh_interval: tuple) -> Callable:
                 method_info,
                 sleep_time,
             )
+            if not run_immediately:
+                await asyncio.sleep(sleep_time)
             while True:
                 try:
                     _LOGGER.debug(

@@ -235,7 +235,7 @@ class TestGateway:
 
 
 @pytest.fixture
-async def zha_gateway(zha_data: ZHAData, zigpy_app_controller):
+async def zha_gateway(zha_data: ZHAData, zigpy_app_controller, caplog):
     """Set up ZHA component."""
 
     with (
