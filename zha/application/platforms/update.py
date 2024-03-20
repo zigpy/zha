@@ -106,6 +106,7 @@ class ZHAFirmwareUpdateEntity(
         | UpdateEntityFeature.PROGRESS
         | UpdateEntityFeature.SPECIFIC_VERSION
     )
+    _attr_in_progress: bool | int = False
 
     def __init__(
         self,

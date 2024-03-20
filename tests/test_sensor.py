@@ -608,7 +608,7 @@ async def test_unsupported_attributes_sensor(
         find_entity_ids(Platform.SENSOR, zha_device, omit=["lqi", "rssi"])
     )
     assert present_entity_ids == entity_ids
-    assert missing_entity_ids not in present_entity_ids
+    assert missing_entity_ids not in present_entity_ids  # type: ignore[comparison-overlap]
 
 
 @pytest.mark.parametrize(

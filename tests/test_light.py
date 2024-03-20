@@ -696,8 +696,7 @@ async def test_zha_group_light_entity(
     assert device_3_light_entity is not None
 
     assert (
-        device_1_entity_id != device_2_entity_id
-        and device_1_entity_id != device_3_entity_id
+        device_1_entity_id not in (device_2_entity_id, device_3_entity_id)
     )
     assert device_2_entity_id != device_3_entity_id
 
