@@ -11,6 +11,11 @@ from typing import TYPE_CHECKING, Any, Final, TypeVar
 from zha.application import Platform, const, discovery
 from zha.async_ import gather_with_limited_concurrency
 from zha.zigbee.cluster_handlers import ClusterHandler
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_BASIC,
+    CLUSTER_HANDLER_IDENTIFY,
+    CLUSTER_HANDLER_POWER_CONFIGURATION,
+)
 from zha.zigbee.cluster_handlers.registries import (
     CLIENT_CLUSTER_HANDLER_REGISTRY,
     CLUSTER_HANDLER_REGISTRY,
@@ -149,11 +154,11 @@ class Endpoint:
                 )
                 continue
 
-            if cluster_handler.name == const.CLUSTER_HANDLER_POWER_CONFIGURATION:
+            if cluster_handler.name == CLUSTER_HANDLER_POWER_CONFIGURATION:
                 self._device.power_configuration_ch = cluster_handler
-            elif cluster_handler.name == const.CLUSTER_HANDLER_IDENTIFY:
+            elif cluster_handler.name == CLUSTER_HANDLER_IDENTIFY:
                 self._device.identify_ch = cluster_handler
-            elif cluster_handler.name == const.CLUSTER_HANDLER_BASIC:
+            elif cluster_handler.name == CLUSTER_HANDLER_BASIC:
                 self._device.basic_ch = cluster_handler
             self._all_cluster_handlers[cluster_handler.id] = cluster_handler
 
@@ -213,8 +218,8 @@ class Endpoint:
         **kwargs: Any,
     ) -> None:
         """Create a new entity."""
-        from zha.zigbee.device import (
-            DeviceStatus,  # pylint: disable=import-outside-toplevel
+        from zha.zigbee.device import (  # pylint: disable=import-outside-toplevel
+            DeviceStatus,
         )
 
         if self.device.status == DeviceStatus.INITIALIZED:

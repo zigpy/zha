@@ -375,7 +375,7 @@ class EndpointProbe:
             ep_device_type = endpoint.zigpy_endpoint.device_type
             platform = DEVICE_CLASS[ep_profile_id].get(ep_device_type)
 
-        if platform and platform in zha_const.PLATFORMS:
+        if platform and platform in PLATFORMS:
             platform = cast(Platform, platform)
 
             cluster_handlers = endpoint.unclaimed_cluster_handlers()
@@ -429,7 +429,7 @@ class EndpointProbe:
         endpoint: Endpoint,
     ) -> None:
         """Probe specified cluster for specific component."""
-        if platform is None or platform not in zha_const.PLATFORMS:
+        if platform is None or platform not in PLATFORMS:
             return
         cluster_handler_list = [cluster_handler]
         unique_id = f"{endpoint.unique_id}-{cluster_handler.cluster.cluster_id}"
