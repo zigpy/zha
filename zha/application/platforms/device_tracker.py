@@ -41,6 +41,8 @@ class SourceType(StrEnum):
 class ZHADeviceScannerEntity(PlatformEntity):
     """Represent a tracked device."""
 
+    PLATFORM = Platform.DEVICE_TRACKER
+
     _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_name: str = "Device scanner"
 

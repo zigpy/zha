@@ -175,6 +175,13 @@ async def zigpy_app_controller():
         yield mock_app
 
 
+@pytest.fixture(name="caplog")
+def caplog_fixture(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
+    """Set log level to debug for tests using the caplog fixture."""
+    caplog.set_level(logging.DEBUG)
+    return caplog
+
+
 @pytest.fixture
 def zha_data() -> ZHAData:
     """Fixture representing zha configuration data."""
@@ -214,8 +221,9 @@ class TestGateway:
 
     async def __aenter__(self) -> ZHAGateway:
         """Start the ZHA gateway."""
-        self.zha_gateway = await ZHAGateway.async_from_config(self.zha_data)
+        self.zha_gateway: ZHAGateway = await ZHAGateway.async_from_config(self.zha_data)
         await self.zha_gateway.async_block_till_done()
+        await self.zha_gateway.async_initialize_devices_and_entities()
         return self.zha_gateway
 
     async def __aexit__(
@@ -276,7 +284,7 @@ def device_joined(
     """Return a newly joined ZHAWS device."""
 
     async def _zha_device(zigpy_dev: zigpy.device.Device) -> ZHADevice:
-        await zha_gateway.async_device_initialized(get_device(zigpy_dev))
+        await zha_gateway.async_device_initialized(zigpy_dev)
         await zha_gateway.async_block_till_done()
         return zha_gateway.get_device(zigpy_dev.ieee)
 
@@ -341,6 +349,8 @@ def zigpy_device_mock(
 
         if quirk:
             device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
+        else:
+            device = get_device(device)
 
         if patch_cluster:
             for endpoint in (ep for epid, ep in device.endpoints.items() if epid):

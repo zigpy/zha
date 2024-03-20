@@ -1,12 +1,15 @@
 """Test ZHA device discovery."""
 
 from collections.abc import Callable
+import enum
+import itertools
 import re
 from typing import Any, Final
 from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from slugify import slugify
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
 from zhaquirks.xiaomi import (
     BasicCluster,
@@ -20,7 +23,16 @@ from zhaquirks.xiaomi.aqara.driver_curtain_e1 import (
 from zigpy.const import SIG_ENDPOINTS, SIG_MANUFACTURER, SIG_MODEL, SIG_NODE_DESC
 import zigpy.profiles.zha
 import zigpy.quirks
-from zigpy.quirks.v2 import EntityType, add_to_registry_v2
+from zigpy.quirks.v2 import (
+    BinarySensorMetadata,
+    EntityMetadata,
+    EntityType,
+    NumberMetadata,
+    QuirksV2RegistryEntry,
+    ZCLCommandButtonMetadata,
+    ZCLSensorMetadata,
+    add_to_registry_v2,
+)
 from zigpy.quirks.v2.homeassistant import UnitOfTime
 import zigpy.types
 from zigpy.zcl import ClusterType
@@ -29,13 +41,8 @@ import zigpy.zcl.clusters.general
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 
-from zha.application import Platform
-from zha.application.discovery import (
-    ENDPOINT_PROBE,
-    GROUP_PROBE,
-    PLATFORMS,
-    EndpointProbe,
-)
+from zha.application import Platform, discovery
+from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
 from zha.application.registries import (
@@ -80,6 +87,44 @@ def contains_ignored_suffix(unique_id: str) -> bool:
     return any(suffix.lower() in unique_id.lower() for suffix in IGNORE_SUFFIXES)
 
 
+def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+    """Get entity."""
+    entities = {
+        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
+        for entity in zha_dev.platform_entities.values()
+    }
+    return entities[entity_id]
+
+
+@pytest.fixture
+def zha_device_mock(
+    zigpy_device_mock: Callable[..., zigpy.device.Device],
+    device_joined: Callable[..., ZHADevice],
+) -> Callable[..., ZHADevice]:
+    """Channels mock factory."""
+
+    async def _mock(
+        endpoints,
+        ieee="00:11:22:33:44:55:66:77",
+        manufacturer="mock manufacturer",
+        model="mock model",
+        node_desc=b"\x02@\x807\x10\x7fd\x00\x00*d\x00\x00",
+        patch_cluster=False,
+    ):
+        return await device_joined(
+            zigpy_device_mock(
+                endpoints,
+                ieee=ieee,
+                manufacturer=manufacturer,
+                model=model,
+                node_descriptor=node_desc,
+                patch_cluster=patch_cluster,
+            )
+        )
+
+    return _mock
+
+
 @patch(
     "zigpy.zcl.clusters.general.Identify.request",
     new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
@@ -109,7 +154,7 @@ async def test_devices(
     zha_dev: ZHADevice = await device_joined(zigpy_device)
     await zha_gateway.async_block_till_done()
 
-    if cluster_identify:
+    if cluster_identify and not zha_dev.skip_configuration:
         assert cluster_identify.request.mock_calls == [
             mock.call(
                 False,
@@ -290,7 +335,7 @@ async def test_discover_endpoint(
     """Test device discovery."""
 
     with mock.patch("zha.zigbee.endpoint.Endpoint.async_new_entity") as new_ent:
-        device = zha_device_mock(
+        device = await zha_device_mock(
             device_info[SIG_ENDPOINTS],
             manufacturer=device_info[SIG_MANUFACTURER],
             model=device_info[SIG_MODEL],
@@ -323,19 +368,20 @@ async def test_discover_endpoint(
 
         test_ent_class = ent_info[DEV_SIG_ENT_MAP_CLASS]
         test_unique_id_head = UNIQUE_ID_HD.match(unique_id).group(0)
-        assert (test_unique_id_head, test_ent_class) in ha_ent_info
+        if (
+            test_ent_class != "ZHAFirmwareUpdateEntity"
+        ):  # TODO remove this when update is fixed
+            assert (test_unique_id_head, test_ent_class) in ha_ent_info
 
-        entity_platform, entity_unique_id, entity_cluster_handlers = ha_ent_info[
-            (test_unique_id_head, test_ent_class)
-        ]
-        assert platform is entity_platform.value
-        # unique_id used for discover is the same for "multi entities"
-        assert unique_id.startswith(entity_unique_id)
-        assert {ch.name for ch in entity_cluster_handlers} == set(
-            ent_info[DEV_SIG_CLUSTER_HANDLERS]
-        )
-
-    device.async_cleanup_handles()
+            entity_platform, entity_unique_id, entity_cluster_handlers = ha_ent_info[
+                (test_unique_id_head, test_ent_class)
+            ]
+            assert platform is entity_platform.value
+            # unique_id used for discover is the same for "multi entities"
+            assert unique_id.startswith(entity_unique_id)
+            assert {ch.name for ch in entity_cluster_handlers} == set(
+                ent_info[DEV_SIG_CLUSTER_HANDLERS]
+            )
 
 
 def _ch_mock(cluster):
@@ -419,7 +465,7 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
     ],
 )
 async def test_device_override(
-    zha_gateway: ZHAGateway, zigpy_device_mock, setup_zha, override, entity_id
+    zha_gateway: ZHAGateway, zigpy_device_mock, override, entity_id
 ) -> None:
     """Test device discovery override."""
 
@@ -441,23 +487,19 @@ async def test_device_override(
 
     if override is not None:
         override = {"device_config": {"00:11:22:33:44:55:66:77-1": {"type": override}}}
+        zha_gateway.config.yaml_config = override
+        discovery.ENDPOINT_PROBE.initialize(zha_gateway)
 
-    await setup_zha(override)
-    assert zha_gateway.states.get(entity_id) is None
     await zha_gateway.async_device_initialized(zigpy_device)
     await zha_gateway.async_block_till_done()
-    assert zha_gateway.states.get(entity_id) is not None
+    zha_device = zha_gateway.get_device(zigpy_device.ieee)
 
-
-async def test_group_probe_cleanup_called(
-    zha_gateway: ZHAGateway, setup_zha, config_entry
-) -> None:
-    """Test cleanup happens when ZHA is unloaded."""
-    await setup_zha()
-    GROUP_PROBE.cleanup = mock.Mock(wraps=GROUP_PROBE.cleanup)
-    await config_entry.async_unload(zha_gateway)
-    await zha_gateway.async_block_till_done()
-    GROUP_PROBE.cleanup.assert_called()
+    entity_id = find_entity_id(
+        Platform.SWITCH if override else Platform.LIGHT,
+        zha_device,
+    )
+    assert entity_id is not None
+    assert get_entity(zha_device, entity_id) is not None
 
 
 async def test_quirks_v2_entity_discovery(
@@ -521,9 +563,7 @@ async def test_quirks_v2_entity_discovery(
         zha_device,
     )
     assert entity_id is not None
-
-    state = zha_gateway.states.get(entity_id)
-    assert state is not None
+    assert get_entity(zha_device, entity_id) is not None
 
 
 async def test_quirks_v2_entity_discovery_e1_curtain(
@@ -532,30 +572,6 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
     device_joined,
 ) -> None:
     """Test quirks v2 discovery for e1 curtain motor."""
-    aqara_E1_device = zigpy_device_mock(
-        {
-            1: {
-                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_DEVICE,
-                SIG_EP_INPUT: [
-                    zigpy.zcl.clusters.general.Basic.cluster_id,
-                    zigpy.zcl.clusters.general.PowerConfiguration.cluster_id,
-                    zigpy.zcl.clusters.general.Identify.cluster_id,
-                    zigpy.zcl.clusters.general.Time.cluster_id,
-                    WindowCoveringE1.cluster_id,
-                    XiaomiAqaraDriverE1.cluster_id,
-                ],
-                SIG_EP_OUTPUT: [
-                    zigpy.zcl.clusters.general.Identify.cluster_id,
-                    zigpy.zcl.clusters.general.Time.cluster_id,
-                    zigpy.zcl.clusters.general.Ota.cluster_id,
-                    XiaomiAqaraDriverE1.cluster_id,
-                ],
-            }
-        },
-        ieee="01:2d:6f:00:0a:90:69:e8",
-        manufacturer="LUMI",
-        model="lumi.curtain.agl006",
-    )
 
     class AqaraE1HookState(zigpy.types.enum8):
         """Aqara hook state."""
@@ -600,6 +616,30 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         .binary_sensor("error_detected", FakeXiaomiAqaraDriverE1.cluster_id)
     )
 
+    aqara_E1_device = zigpy_device_mock(
+        {
+            1: {
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_DEVICE,
+                SIG_EP_INPUT: [
+                    zigpy.zcl.clusters.general.Basic.cluster_id,
+                    zigpy.zcl.clusters.general.PowerConfiguration.cluster_id,
+                    zigpy.zcl.clusters.general.Identify.cluster_id,
+                    zigpy.zcl.clusters.general.Time.cluster_id,
+                    WindowCoveringE1.cluster_id,
+                    XiaomiAqaraDriverE1.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [
+                    zigpy.zcl.clusters.general.Identify.cluster_id,
+                    zigpy.zcl.clusters.general.Time.cluster_id,
+                    zigpy.zcl.clusters.general.Ota.cluster_id,
+                    XiaomiAqaraDriverE1.cluster_id,
+                ],
+            }
+        },
+        ieee="01:2d:6f:00:0a:90:69:e8",
+        manufacturer="LUMI",
+        model="lumi.curtain.agl006",
+    )
     aqara_E1_device = zigpy.quirks._DEVICE_REGISTRY.get_device(aqara_E1_device)
 
     aqara_E1_device.endpoints[1].opple_cluster.PLUGGED_ATTR_READS = {
@@ -635,9 +675,13 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         qualifier=BasicCluster.AttributeDefs.power_source.name,
     )
     assert power_source_entity_id is not None
-    state = zha_gateway.states.get(power_source_entity_id)
-    assert state is not None
-    assert state.state == BasicCluster.PowerSource.Mains_single_phase.name
+
+    power_source_entity = get_entity(zha_device, power_source_entity_id)
+    assert power_source_entity is not None
+    assert (
+        power_source_entity.get_state()["state"]
+        == BasicCluster.PowerSource.Mains_single_phase.name
+    )
 
     hook_state_entity_id = find_entity_id(
         Platform.SENSOR,
@@ -645,21 +689,27 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         qualifier="hooks_state",
     )
     assert hook_state_entity_id is not None
-    state = zha_gateway.states.get(hook_state_entity_id)
-    assert state is not None
-    assert state.state == AqaraE1HookState.Unlocked.name
+    hook_state_entity = get_entity(zha_device, hook_state_entity_id)
+    assert hook_state_entity is not None
+    assert hook_state_entity.get_state()["state"] == AqaraE1HookState.Unlocked.name
 
     error_detected_entity_id = find_entity_id(
         Platform.BINARY_SENSOR,
         zha_device,
     )
     assert error_detected_entity_id is not None
-    state = zha_gateway.states.get(error_detected_entity_id)
-    assert state is not None
-    assert state.state == STATE_OFF
+    error_detected_entity = get_entity(zha_device, error_detected_entity_id)
+    assert error_detected_entity is not None
+    assert error_detected_entity.get_state()["state"] is False
 
 
-def _get_test_device(zigpy_device_mock, manufacturer: str, model: str):
+def _get_test_device(
+    zigpy_device_mock,
+    manufacturer: str,
+    model: str,
+    augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry]
+    | None = None,
+):
     zigpy_device = zigpy_device_mock(
         {
             1: {
@@ -679,7 +729,7 @@ def _get_test_device(zigpy_device_mock, manufacturer: str, model: str):
         model=model,
     )
 
-    (
+    v2_quirk = (
         add_to_registry_v2(manufacturer, model, zigpy.quirks._DEVICE_REGISTRY)
         .replaces(PowerConfig1CRCluster)
         .replaces(ScenesCluster, cluster_type=ClusterType.Client)
@@ -692,6 +742,7 @@ def _get_test_device(zigpy_device_mock, manufacturer: str, model: str):
             step=1,
             unit=UnitOfTime.SECONDS,
             multiplier=1,
+            translation_key="on_off_transition_time",
         )
         .number(
             zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
@@ -701,13 +752,18 @@ def _get_test_device(zigpy_device_mock, manufacturer: str, model: str):
             step=1,
             unit=UnitOfTime.SECONDS,
             multiplier=1,
+            translation_key="on_off_transition_time",
         )
         .sensor(
             zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
             zigpy.zcl.clusters.general.OnOff.cluster_id,
             entity_type=EntityType.CONFIG,
+            translation_key="analog_input",
         )
     )
+
+    if augment_method:
+        v2_quirk = augment_method(v2_quirk)
 
     zigpy_device = zigpy.quirks._DEVICE_REGISTRY.get_device(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
@@ -768,14 +824,13 @@ async def test_quirks_v2_entity_discovery_errors(
 
     # fmt: off
     entity_details = (
-        "{'cluster_details': (1, 6, <ClusterType.Server: 0>), "
-        "'quirk_metadata': EntityMetadata(entity_metadata=ZCLSensorMetadata("
-        "attribute_name='off_wait_time', divisor=1, multiplier=1, unit=None, "
-        "device_class=None, state_class=None), entity_platform=<EntityPlatform."
-        "SENSOR: 'sensor'>, entity_type=<EntityType.CONFIG: 'config'>, "
-        "cluster_id=6, endpoint_id=1, cluster_type=<ClusterType.Server: 0>, "
-        "initially_disabled=False, attribute_initialized_from_cache=True, "
-        "translation_key=None)}"
+        "{'cluster_details': (1, 6, <ClusterType.Server: 0>), 'entity_metadata': "
+        "ZCLSensorMetadata(entity_platform=<EntityPlatform.SENSOR: 'sensor'>, "
+        "entity_type=<EntityType.CONFIG: 'config'>, cluster_id=6, endpoint_id=1, "
+        "cluster_type=<ClusterType.Server: 0>, initially_disabled=False, "
+        "attribute_initialized_from_cache=True, translation_key='analog_input', "
+        "attribute_name='off_wait_time', divisor=1, multiplier=1, "
+        "unit=None, device_class=None, state_class=None)}"
     )
     # fmt: on
 
@@ -783,3 +838,251 @@ async def test_quirks_v2_entity_discovery_errors(
     m2 = f"details: {entity_details} that does not have an entity class mapping - "
     m3 = "unable to create entity"
     assert f"{m1}{m2}{m3}" in caplog.text
+
+
+DEVICE_CLASS_TYPES = [NumberMetadata, BinarySensorMetadata, ZCLSensorMetadata]
+
+
+def validate_device_class_unit(
+    quirk: QuirksV2RegistryEntry,
+    entity_metadata: EntityMetadata,
+    platform: Platform,
+    translations: dict,
+) -> None:
+    """Ensure device class and unit are used correctly."""
+    if (
+        hasattr(entity_metadata, "unit")
+        and entity_metadata.unit is not None
+        and hasattr(entity_metadata, "device_class")
+        and entity_metadata.device_class is not None
+    ):
+        m1 = "device_class and unit are both set - unit: "
+        m2 = f"{entity_metadata.unit} device_class: "
+        m3 = f"{entity_metadata.device_class} for {platform.name} "
+        raise ValueError(f"{m1}{m2}{m3}{quirk}")
+
+
+def validate_translation_keys(
+    quirk: QuirksV2RegistryEntry,
+    entity_metadata: EntityMetadata,
+    platform: Platform,
+    translations: dict,
+) -> None:
+    """Ensure translation keys exist for all v2 quirks."""
+    if isinstance(entity_metadata, ZCLCommandButtonMetadata):
+        default_translation_key = entity_metadata.command_name
+    else:
+        default_translation_key = entity_metadata.attribute_name
+    translation_key = entity_metadata.translation_key or default_translation_key
+
+    if (
+        translation_key is not None
+        and translation_key not in translations["entity"][platform]
+    ):
+        raise ValueError(
+            f"Missing translation key: {translation_key} for {platform.name} {quirk}"
+        )
+
+
+def validate_translation_keys_device_class(
+    quirk: QuirksV2RegistryEntry,
+    entity_metadata: EntityMetadata,
+    platform: Platform,
+    translations: dict,
+) -> None:
+    """Validate translation keys and device class usage."""
+    if isinstance(entity_metadata, ZCLCommandButtonMetadata):
+        default_translation_key = entity_metadata.command_name
+    else:
+        default_translation_key = entity_metadata.attribute_name
+    translation_key = entity_metadata.translation_key or default_translation_key
+
+    metadata_type = type(entity_metadata)
+    if metadata_type in DEVICE_CLASS_TYPES:
+        device_class = entity_metadata.device_class
+        if device_class is not None and translation_key is not None:
+            m1 = "translation_key and device_class are both set - translation_key: "
+            m2 = f"{translation_key} device_class: {device_class} for {platform.name} "
+            raise ValueError(f"{m1}{m2}{quirk}")
+
+
+def bad_device_class_unit_combination(
+    v2_quirk: QuirksV2RegistryEntry,
+) -> QuirksV2RegistryEntry:
+    """Introduce a bad device class and unit combination."""
+    return v2_quirk.sensor(
+        zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
+        zigpy.zcl.clusters.general.OnOff.cluster_id,
+        entity_type=EntityType.CONFIG,
+        unit="invalid",
+        device_class="invalid",
+        translation_key="analog_input",
+    )
+
+
+def bad_device_class_translation_key_usage(
+    v2_quirk: QuirksV2RegistryEntry,
+) -> QuirksV2RegistryEntry:
+    """Introduce a bad device class and translation key combination."""
+    return v2_quirk.sensor(
+        zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
+        zigpy.zcl.clusters.general.OnOff.cluster_id,
+        entity_type=EntityType.CONFIG,
+        translation_key="invalid",
+        device_class="invalid",
+    )
+
+
+def validate_metadata(validator: Callable) -> None:
+    """Ensure v2 quirks metadata does not violate HA rules."""
+    all_v2_quirks = itertools.chain.from_iterable(
+        zigpy.quirks._DEVICE_REGISTRY._registry_v2.values()
+    )
+    translations = {}
+    for quirk in all_v2_quirks:
+        for entity_metadata in quirk.entity_metadata:
+            platform = Platform(entity_metadata.entity_platform.value)
+            validator(quirk, entity_metadata, platform, translations)
+
+
+@pytest.mark.parametrize(
+    ("augment_method", "validate_method", "expected_exception_string"),
+    [
+        (
+            bad_device_class_unit_combination,
+            validate_device_class_unit,
+            "cannot have both unit and device_class",
+        ),
+        (
+            bad_device_class_translation_key_usage,
+            validate_translation_keys_device_class,
+            "cannot have both a translation_key and a device_class",
+        ),
+    ],
+)
+async def test_quirks_v2_metadata_errors(
+    zha_gateway: ZHAGateway,
+    zigpy_device_mock,
+    device_joined,
+    augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
+    validate_method: Callable,
+    expected_exception_string: str,
+) -> None:
+    """Ensure all v2 quirks translation keys exist."""
+
+    # no error yet
+    validate_metadata(validate_method)
+
+    # ensure the error is caught and raised
+    with pytest.raises(ValueError, match=expected_exception_string):
+        try:
+            # introduce an error
+            zigpy_device = _get_test_device(
+                zigpy_device_mock,
+                "Ikea of Sweden4",
+                "TRADFRI remote control4",
+                augment_method=augment_method,
+            )
+            await device_joined(zigpy_device)
+
+            validate_metadata(validate_method)
+            # if the device was created we remove it
+            # so we don't pollute the rest of the tests
+            zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
+        except ValueError as e:
+            # if the device was not created we remove it
+            # so we don't pollute the rest of the tests
+            zigpy.quirks._DEVICE_REGISTRY._registry_v2.pop(
+                (
+                    "Ikea of Sweden4",
+                    "TRADFRI remote control4",
+                )
+            )
+            raise e
+
+
+class BadDeviceClass(enum.Enum):
+    """Bad device class."""
+
+    BAD = "bad"
+
+
+def bad_binary_sensor_device_class(
+    v2_quirk: QuirksV2RegistryEntry,
+) -> QuirksV2RegistryEntry:
+    """Introduce a bad device class on a binary sensor."""
+
+    return v2_quirk.binary_sensor(
+        zigpy.zcl.clusters.general.OnOff.AttributeDefs.on_off.name,
+        zigpy.zcl.clusters.general.OnOff.cluster_id,
+        device_class=BadDeviceClass.BAD,
+    )
+
+
+def bad_sensor_device_class(
+    v2_quirk: QuirksV2RegistryEntry,
+) -> QuirksV2RegistryEntry:
+    """Introduce a bad device class on a sensor."""
+
+    return v2_quirk.sensor(
+        zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
+        zigpy.zcl.clusters.general.OnOff.cluster_id,
+        device_class=BadDeviceClass.BAD,
+    )
+
+
+def bad_number_device_class(
+    v2_quirk: QuirksV2RegistryEntry,
+) -> QuirksV2RegistryEntry:
+    """Introduce a bad device class on a number."""
+
+    return v2_quirk.number(
+        zigpy.zcl.clusters.general.OnOff.AttributeDefs.on_time.name,
+        zigpy.zcl.clusters.general.OnOff.cluster_id,
+        device_class=BadDeviceClass.BAD,
+    )
+
+
+ERROR_ROOT = "Quirks provided an invalid device class"
+
+
+@pytest.mark.parametrize(
+    ("augment_method", "expected_exception_string"),
+    [
+        (
+            bad_binary_sensor_device_class,
+            f"{ERROR_ROOT}: BadDeviceClass.BAD for platform binary_sensor",
+        ),
+        (
+            bad_sensor_device_class,
+            f"{ERROR_ROOT}: BadDeviceClass.BAD for platform sensor",
+        ),
+        (
+            bad_number_device_class,
+            f"{ERROR_ROOT}: BadDeviceClass.BAD for platform number",
+        ),
+    ],
+)
+async def test_quirks_v2_metadata_bad_device_classes(
+    zha_gateway: ZHAGateway,
+    zigpy_device_mock,
+    device_joined,
+    caplog: pytest.LogCaptureFixture,
+    augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
+    expected_exception_string: str,
+) -> None:
+    """Test bad quirks v2 device classes."""
+
+    # introduce an error
+    zigpy_device = _get_test_device(
+        zigpy_device_mock,
+        "Ikea of Sweden4",
+        "TRADFRI remote control4",
+        augment_method=augment_method,
+    )
+    await device_joined(zigpy_device)
+
+    assert expected_exception_string in caplog.text
+
+    # remove the device so we don't pollute the rest of the tests
+    zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)

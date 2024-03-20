@@ -100,12 +100,15 @@ class BaseLight(BaseEntity, ABC):
 
     def __init__(self, *args, **kwargs):
         """Initialize the light."""
-        self._zha_device: ZHADevice = None
+        self._device: ZHADevice = None
         super().__init__(*args, **kwargs)
+        self._available: bool = False
         self._min_mireds: int | None = 153
         self._max_mireds: int | None = 500
         self._hs_color: tuple[float, float] | None = None
+        self._xy_color: tuple[float, float] | None = None
         self._color_mode = ColorMode.UNKNOWN  # Set by subclasses
+        self._color_temp: int | None = None
         self._supported_features: int = 0
         self._state: bool | None
         self._brightness: int | None = None
@@ -133,6 +136,7 @@ class BaseLight(BaseEntity, ABC):
         response["on"] = self.is_on
         response["brightness"] = self.brightness
         response["hs_color"] = self.hs_color
+        response["xy_color"] = self.xy_color
         response["color_temp"] = self.color_temp
         response["effect"] = self.effect
         response["off_brightness"] = self._off_brightness
@@ -176,6 +180,11 @@ class BaseLight(BaseEntity, ABC):
     def hs_color(self) -> tuple[float, float] | None:
         """Return the hs color value [int, int]."""
         return self._hs_color
+
+    @property
+    def xy_color(self) -> tuple[float, float] | None:
+        """Return the xy color value [float, float]."""
+        return self._xy_color
 
     @property
     def color_temp(self) -> int | None:
@@ -667,7 +676,7 @@ class BaseLight(BaseEntity, ABC):
             if self._debounced_member_refresh is not None:
                 self.debug("transition complete - refreshing group member states")
 
-                self._zha_device.gateway.async_create_background_task(
+                self._device.gateway.async_create_background_task(
                     self._debounced_member_refresh.async_call(),
                     "zha.light-refresh-debounced-member",
                 )
@@ -682,7 +691,7 @@ class Light(PlatformEntity, BaseLight):
 
     _supported_color_modes: set[ColorMode]
     _attr_translation_key: str = "light"
-    _REFRESH_INTERVAL = (45, 75)
+    _REFRESH_INTERVAL = (2700, 4500)
 
     def __init__(
         self,
@@ -826,7 +835,6 @@ class Light(PlatformEntity, BaseLight):
         async def _refresh() -> None:
             """Call async_get_state at an interval."""
             await self.async_update()
-            self.maybe_send_state_changed_event()
 
         self._tracked_tasks.append(
             device.gateway.async_create_background_task(
@@ -860,9 +868,17 @@ class Light(PlatformEntity, BaseLight):
             self._off_brightness = None
         self.maybe_send_state_changed_event()
 
-    async def async_get_state(self) -> None:
+    async def async_update(self) -> None:
         """Attempt to retrieve the state from the light."""
-        if not self._available:
+        if self.is_transitioning:
+            self.debug("skipping async_update while transitioning")
+            return
+        if not self.device.gateway.config.allow_polling or not self._device.available:
+            self.debug(
+                "skipping polling for updated state, available: %s, allow polled requests: %s",
+                self._device.available,
+                self.device.gateway.config.allow_polling,
+            )
             return
         self.debug("polling current state")
 
@@ -966,45 +982,7 @@ class Light(PlatformEntity, BaseLight):
                     self._effect = EFFECT_COLORLOOP
                 else:
                     self._effect = None
-
-    async def async_update(self) -> None:
-        """Update to the latest state."""
-        if self.is_transitioning:
-            self.debug("skipping async_update while transitioning")
-            return
-        await self.async_get_state()
-
-    async def _refresh(self, time):
-        """Call async_get_state at an interval."""
-        if self.is_transitioning:
-            self.debug("skipping _refresh while transitioning")
-            return
-        if self._zha_device.available and self.device.gateway.config.allow_polling:
-            self.debug("polling for updated state")
-            await self.async_get_state()
-            self.maybe_send_state_changed_event()
-        else:
-            self.debug(
-                "skipping polling for updated state, available: %s, allow polled requests: %s",
-                self._zha_device.available,
-                self.device.gateway.config.allow_polling,
-            )
-
-    async def _maybe_force_refresh(self):
-        """Force update the state if the signal contains the entity id for this entity."""
-        if self.is_transitioning:
-            self.debug("skipping _maybe_force_refresh while transitioning")
-            return
-        if self._zha_device.available and self.device.gateway.config.allow_polling:
-            self.debug("forcing polling for updated state")
-            await self.async_get_state()
-            self.maybe_send_state_changed_event()
-        else:
-            self.debug(
-                "skipping _maybe_force_refresh, available: %s, allow polled requests: %s",
-                self._zha_device.available,
-                self.device.gateway.config.allow_polling,
-            )
+        self.maybe_send_state_changed_event()
 
     def _assume_group_state(self, update_params) -> None:
         """Handle an assume group state event from a group."""
@@ -1112,11 +1090,11 @@ class LightGroup(GroupEntity, BaseLight):
     def __init__(self, group: Group):
         """Initialize a light group."""
         super().__init__(group)
-        self._GROUP_SUPPORTS_EXECUTE_IF_OFF = True
+        self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
         for platform_entity in group.get_platform_entities(Light.PLATFORM):
             platform_entity.on_event(
-                SIGNAL_LIGHT_GROUP_STATE_CHANGED, platform_entity._maybe_force_refresh
+                SIGNAL_LIGHT_GROUP_STATE_CHANGED, platform_entity.async_update
             )
             platform_entity.on_event(
                 SIGNAL_LIGHT_GROUP_TRANSITION_START,
@@ -1195,7 +1173,7 @@ class LightGroup(GroupEntity, BaseLight):
         self._supported_color_modes = {ColorMode.ONOFF}
 
         force_refresh_debouncer = Debouncer(
-            self._zha_device.gateway,
+            self._device.gateway,
             _LOGGER,
             cooldown=3,
             immediate=True,
@@ -1243,13 +1221,12 @@ class LightGroup(GroupEntity, BaseLight):
         """Query all members and determine the light group state."""
         self.debug("Updating light group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_entities = [entity.to_json() for entity in platform_entities]
-        all_states = [entity["state"] for entity in all_entities]
+        all_states = [entity.get_state() for entity in platform_entities]
         states: list = list(filter(None, all_states))
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in states if state["state"]]
+        on_states = [state for state in states if state["on"]]
 
         self._state = len(on_states) > 0
 
@@ -1258,7 +1235,9 @@ class LightGroup(GroupEntity, BaseLight):
             self._off_with_transition = False
             self._off_brightness = None
 
-        self._available = any(state["state"] != STATE_UNAVAILABLE for state in states)
+        self._available = any(
+            platform_entity.device.available for platform_entity in platform_entities
+        )
 
         self._brightness = reduce_attribute(on_states, ATTR_BRIGHTNESS)
 
@@ -1385,9 +1364,7 @@ class LightGroup(GroupEntity, BaseLight):
         if ATTR_EFFECT in service_kwargs:
             update_params[ATTR_EFFECT] = self._effect
 
-        self.emit(
-            SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
-        )
+        self.emit(SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE, update_params)
         # pylint: disable=pointless-string-statement
         """
         async_dispatcher_send(

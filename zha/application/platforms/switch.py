@@ -176,6 +176,8 @@ class SwitchGroup(GroupEntity, BaseSwitch):
 class ZHASwitchConfigurationEntity(PlatformEntity):
     """Representation of a ZHA switch configuration entity."""
 
+    PLATFORM = Platform.SWITCH
+
     _attr_entity_category = EntityCategory.CONFIG
     _attribute_name: str
     _inverter_attribute_name: str | None = None
@@ -298,6 +300,13 @@ class ZHASwitchConfigurationEntity(PlatformEntity):
         )
         self.debug("read value=%s, inverted=%s", value, self.inverted)
         self.maybe_send_state_changed_event()
+
+    def get_state(self) -> dict:
+        """Return the state of the switch."""
+        response = super().get_state()
+        response["state"] = self.is_on
+        response["inverted"] = self.inverted
+        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
