@@ -6,8 +6,13 @@ from functools import cached_property
 
 from zigpy.zcl.clusters.lighting import Ballast, Color
 
-from . import AttrReportConfig, ClientClusterHandler, ClusterHandler, registries
-from .const import REPORT_CONFIG_DEFAULT
+from zha.zigbee.cluster_handlers import (
+    AttrReportConfig,
+    ClientClusterHandler,
+    ClusterHandler,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_DEFAULT
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Ballast.cluster_id)

@@ -19,8 +19,8 @@ from zha.zigbee.cluster_handlers.registries import (
 if TYPE_CHECKING:
     from zigpy import Endpoint as ZigpyEndpoint
 
-    from .cluster_handlers import ClientClusterHandler
-    from .device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClientClusterHandler
+    from zha.zigbee.device import ZHADevice
 
 ATTR_DEVICE_TYPE: Final[str] = "device_type"
 ATTR_PROFILE_ID: Final[str] = "profile_id"
@@ -213,7 +213,9 @@ class Endpoint:
         **kwargs: Any,
     ) -> None:
         """Create a new entity."""
-        from .device import DeviceStatus  # pylint: disable=import-outside-toplevel
+        from zha.zigbee.device import (
+            DeviceStatus,  # pylint: disable=import-outside-toplevel
+        )
 
         if self.device.status == DeviceStatus.INITIALIZED:
             return

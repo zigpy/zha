@@ -16,8 +16,13 @@ from zigpy.zcl.clusters.hvac import (
     UserInterface,
 )
 
-from . import AttrReportConfig, ClusterAttributeUpdatedEvent, ClusterHandler, registries
-from .const import (
+from zha.zigbee.cluster_handlers import (
+    AttrReportConfig,
+    ClusterAttributeUpdatedEvent,
+    ClusterHandler,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_EVENT,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,

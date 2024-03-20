@@ -30,7 +30,7 @@ from zha.zigbee.cluster_handlers import (
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_EVENT
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"

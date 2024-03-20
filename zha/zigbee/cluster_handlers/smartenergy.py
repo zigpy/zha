@@ -22,8 +22,8 @@ from zigpy.zcl.clusters.smartenergy import (
     Tunneling,
 )
 
-from . import AttrReportConfig, ClusterHandler, registries
-from .const import (
+from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
+from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_OP,
@@ -31,7 +31,7 @@ from .const import (
 )
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Calendar.cluster_id)

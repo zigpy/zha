@@ -1,6 +1,6 @@
 """Helpers for use with ZHA Zigbee cluster handlers."""
 
-from . import ClusterHandler
+from zha.zigbee.cluster_handlers import ClusterHandler
 
 
 def is_hue_motion_sensor(cluster_handler: ClusterHandler) -> bool:

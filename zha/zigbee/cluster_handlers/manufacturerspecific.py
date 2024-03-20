@@ -10,14 +10,14 @@ from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER, XIAOMI_AQARA_VIBRATION_A
 import zigpy.zcl
 from zigpy.zcl.clusters.closures import DoorLock
 
-from . import (
+from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
     ClusterAttributeUpdatedEvent,
     ClusterHandler,
     registries,
 )
-from .const import (
+from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
     ATTRIBUTE_ID,
     ATTRIBUTE_NAME,
@@ -40,10 +40,10 @@ from .const import (
     TUYA_MANUFACTURER_CLUSTER,
     UNKNOWN,
 )
-from .general import MultistateInputClusterHandler
+from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
 

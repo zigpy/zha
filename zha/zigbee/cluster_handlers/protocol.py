@@ -23,7 +23,7 @@ from zigpy.zcl.clusters.protocol import (
     MultistateValueRegular,
 )
 
-from . import ClusterHandler, registries
+from zha.zigbee.cluster_handlers import ClusterHandler, registries
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(AnalogInputExtended.cluster_id)

@@ -4,7 +4,7 @@ import zigpy.exceptions
 from zigpy.zcl.clusters.lightlink import LightLink
 from zigpy.zcl.foundation import GENERAL_COMMANDS, GeneralCommand
 
-from . import ClusterHandler, ClusterHandlerStatus, registries
+from zha.zigbee.cluster_handlers import ClusterHandler, ClusterHandlerStatus, registries
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(LightLink.cluster_id)

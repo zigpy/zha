@@ -10,13 +10,12 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import find_entity, mock_coro
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.button import ZHAButton
 from zha.zigbee.device import ZHADevice
-
-from .common import find_entity, mock_coro
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 
 
 @pytest.fixture

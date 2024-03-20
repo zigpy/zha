@@ -44,8 +44,7 @@ from zigpy.zcl.clusters.general import (
 from zigpy.zcl.foundation import Status
 
 from zha.exceptions import ZHAException
-
-from . import (
+from zha.zigbee.cluster_handlers import (
     CLUSTER_HANDLER_EVENT,
     AttrReportConfig,
     ClientClusterHandler,
@@ -54,7 +53,7 @@ from . import (
     parse_and_log_command,
     registries,
 )
-from .const import (
+from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_BATTERY_SAVE,
     REPORT_CONFIG_DEFAULT,
@@ -65,10 +64,10 @@ from .const import (
     SIGNAL_SET_LEVEL,
     SIGNAL_UPDATE_DEVICE,
 )
-from .helpers import is_hue_motion_sensor
+from zha.zigbee.cluster_handlers.helpers import is_hue_motion_sensor
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 
 @dataclass(frozen=True, kw_only=True)

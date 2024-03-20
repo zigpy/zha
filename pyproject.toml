@@ -212,9 +212,9 @@ ignore = [
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 
-[tool.ruff.lint.flake8-tidy-imports.banned-api]
-"async_timeout".msg = "use asyncio.timeout instead"
-"pytz".msg = "use zoneinfo instead"
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true

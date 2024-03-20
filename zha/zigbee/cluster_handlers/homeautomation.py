@@ -13,8 +13,8 @@ from zigpy.zcl.clusters.homeautomation import (
     MeterIdentification,
 )
 
-from . import AttrReportConfig, ClusterHandler, registries
-from .const import (
+from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
+from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_OP,

@@ -21,17 +21,20 @@ from zigpy.zcl.clusters.measurement import (
     TemperatureMeasurement,
 )
 
-from . import AttrReportConfig, ClusterHandler, registries
-from .const import (
+from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
+from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
 )
-from .helpers import is_hue_motion_sensor, is_sonoff_presence_sensor
+from zha.zigbee.cluster_handlers.helpers import (
+    is_hue_motion_sensor,
+    is_sonoff_presence_sensor,
+)
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(FlowMeasurement.cluster_id)
