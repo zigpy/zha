@@ -2,41 +2,27 @@
 
 from __future__ import annotations
 
+from enum import IntFlag, StrEnum
 import functools
 import logging
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
-from homeassistant.components.update import (
-    UpdateDeviceClass,
-    UpdateEntity,
-    UpdateEntityFeature,
-)
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, Platform
-from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    DataUpdateCoordinator,
-)
 from zigpy.ota import OtaImageWithMetadata
 from zigpy.zcl.clusters.general import Ota
 from zigpy.zcl.foundation import Status
 
-from .core import discovery
-from .core.const import CLUSTER_HANDLER_OTA, SIGNAL_ADD_ENTITIES, SIGNAL_ATTR_UPDATED
-from .core.helpers import get_zha_data, get_zha_gateway
-from .core.registries import PLATFORM_ENTITIES
-from .entity import ZhaEntity
+from zha.application import Platform
+from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.exceptions import ZHAException
+from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_OTA
 
 if TYPE_CHECKING:
-    from zigpy.application import ControllerApplication
+    # from zigpy.application import ControllerApplication
 
-    from .core.cluster_handlers import ClusterHandler
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import ZHADevice
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,40 +30,26 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.UPDATE
 )
 
+# pylint: disable=unused-argument
+# pylint: disable=pointless-string-statement
+"""TODO do this in discovery?
+zha_data = get_zha_data(hass)
+entities_to_create = zha_data.platforms[Platform.UPDATE]
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation update from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.UPDATE]
+coordinator = ZHAFirmwareUpdateCoordinator(
+    hass, get_zha_gateway(hass).application_controller
+)
+"""
 
-    coordinator = ZHAFirmwareUpdateCoordinator(
-        hass, get_zha_gateway(hass).application_controller
-    )
-
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities,
-            async_add_entities,
-            entities_to_create,
-            coordinator=coordinator,
-        ),
-    )
-    config_entry.async_on_unload(unsub)
-
-
+# pylint: disable=pointless-string-statement
+"""TODO find a solution for this
 class ZHAFirmwareUpdateCoordinator(DataUpdateCoordinator[None]):  # pylint: disable=hass-enforce-coordinator-module
-    """Firmware update coordinator that broadcasts updates network-wide."""
+    #Firmware update coordinator that broadcasts updates network-wide.
 
     def __init__(
         self, hass: HomeAssistant, controller_application: ControllerApplication
     ) -> None:
-        """Initialize the coordinator."""
+        #Initialize the coordinator.
         super().__init__(
             hass,
             _LOGGER,
@@ -87,15 +59,46 @@ class ZHAFirmwareUpdateCoordinator(DataUpdateCoordinator[None]):  # pylint: disa
         self.controller_application = controller_application
 
     async def async_update_data(self) -> None:
-        """Fetch the latest firmware update data."""
+        #Fetch the latest firmware update data.
         # Broadcast to all devices
         await self.controller_application.ota.broadcast_notify(jitter=100)
+"""
 
 
+class UpdateDeviceClass(StrEnum):
+    """Device class for update."""
+
+    FIRMWARE = "firmware"
+
+
+class UpdateEntityFeature(IntFlag):
+    """Supported features of the update entity."""
+
+    INSTALL = 1
+    SPECIFIC_VERSION = 2
+    PROGRESS = 4
+    BACKUP = 8
+    RELEASE_NOTES = 16
+
+
+SERVICE_INSTALL: Final = "install"
+SERVICE_SKIP: Final = "skip"
+
+ATTR_AUTO_UPDATE: Final = "auto_update"
+ATTR_BACKUP: Final = "backup"
+ATTR_INSTALLED_VERSION: Final = "installed_version"
+ATTR_IN_PROGRESS: Final = "in_progress"
+ATTR_LATEST_VERSION: Final = "latest_version"
+ATTR_RELEASE_SUMMARY: Final = "release_summary"
+ATTR_RELEASE_URL: Final = "release_url"
+ATTR_SKIPPED_VERSION: Final = "skipped_version"
+ATTR_TITLE: Final = "title"
+ATTR_VERSION: Final = "version"
+
+
+# old base classes: CoordinatorEntity[ZHAFirmwareUpdateCoordinator], UpdateEntity
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
-class ZHAFirmwareUpdateEntity(
-    ZhaEntity, CoordinatorEntity[ZHAFirmwareUpdateCoordinator], UpdateEntity
-):
+class ZHAFirmwareUpdateEntity(PlatformEntity):
     """Representation of a ZHA firmware update entity."""
 
     _unique_id_suffix = "firmware_update"
@@ -106,19 +109,26 @@ class ZHAFirmwareUpdateEntity(
         | UpdateEntityFeature.PROGRESS
         | UpdateEntityFeature.SPECIFIC_VERSION
     )
+    _attr_auto_update: bool = False
+    _attr_installed_version: str | None = None
     _attr_in_progress: bool | int = False
+    _attr_latest_version: str | None = None
+    _attr_release_summary: str | None = None
+    _attr_release_url: str | None = None
+    _attr_state: None = None
+    _attr_title: str | None = None
 
     def __init__(
         self,
         unique_id: str,
         zha_device: ZHADevice,
         channels: list[ClusterHandler],
-        coordinator: ZHAFirmwareUpdateCoordinator,
+        coordinator,
         **kwargs: Any,
     ) -> None:
         """Initialize the ZHA update entity."""
         super().__init__(unique_id, zha_device, channels, **kwargs)
-        CoordinatorEntity.__init__(self, coordinator)
+        # CoordinatorEntity.__init__(self, coordinator)
 
         self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_OTA
@@ -144,7 +154,7 @@ class ZHAFirmwareUpdateEntity(
         """Handle attribute updates on the OTA cluster."""
         if attrid == Ota.AttributeDefs.current_file_version.id:
             self._attr_installed_version = f"0x{value:08x}"
-            self.async_write_ha_state()
+            self.maybe_send_state_changed_event()
 
     def device_ota_update_available(
         self, image: OtaImageWithMetadata, current_file_version: int
@@ -157,7 +167,7 @@ class ZHAFirmwareUpdateEntity(
         if image.metadata.changelog:
             self._attr_release_summary = image.metadata.changelog
 
-        self.async_write_ha_state()
+        self.maybe_send_state_changed_event()
 
     def _update_progress(self, current: int, total: int, progress: float) -> None:
         """Update install progress on event."""
@@ -167,7 +177,7 @@ class ZHAFirmwareUpdateEntity(
 
         # Remap progress to 2-100 to avoid 0 and 1
         self._attr_in_progress = int(math.ceil(2 + 98 * progress / 100))
-        self.async_write_ha_state()
+        self.maybe_send_state_changed_event()
 
     async def async_install(
         self, version: str | None, backup: bool, **kwargs: Any
@@ -177,33 +187,35 @@ class ZHAFirmwareUpdateEntity(
 
         # Set the progress to an indeterminate state
         self._attr_in_progress = True
-        self.async_write_ha_state()
+        self.maybe_send_state_changed_event()
 
         try:
-            result = await self.zha_device.device.update_firmware(
+            result = await self.device.device.update_firmware(
                 image=self._latest_firmware,
                 progress_callback=self._update_progress,
             )
         except Exception as ex:
-            raise HomeAssistantError(f"Update was not successful: {ex}") from ex
+            raise ZHAException(f"Update was not successful: {ex}") from ex
 
         # If we tried to install firmware that is no longer compatible with the device,
         # bail out
         if result == Status.NO_IMAGE_AVAILABLE:
             self._attr_latest_version = self._attr_installed_version
-            self.async_write_ha_state()
+            self.maybe_send_state_changed_event()
 
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
-            raise HomeAssistantError(f"Update was not successful: {result}")
+            raise ZHAException(f"Update was not successful: {result}")
 
         # Clear the state
         self._latest_firmware = None
         self._attr_in_progress = False
-        self.async_write_ha_state()
+        self.maybe_send_state_changed_event()
 
+    # pylint: disable=pointless-string-statement
+    """TODO
     async def async_added_to_hass(self) -> None:
-        """Call when entity is added."""
+        #Call when entity is added.
         await super().async_added_to_hass()
 
         # OTA events are sent by the device
@@ -211,13 +223,14 @@ class ZHAFirmwareUpdateEntity(
         self.async_accept_signal(
             self._ota_cluster_handler, SIGNAL_ATTR_UPDATED, self.attribute_updated
         )
+    """
 
-    async def async_will_remove_from_hass(self) -> None:
+    async def on_remove(self) -> None:
         """Call when entity will be removed."""
-        await super().async_will_remove_from_hass()
+        await super().on_remove()
         self._attr_in_progress = False
 
     async def async_update(self) -> None:
         """Update the entity."""
-        await CoordinatorEntity.async_update(self)
+        # await CoordinatorEntity.async_update(self)
         await super().async_update()
