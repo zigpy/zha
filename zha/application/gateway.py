@@ -11,12 +11,12 @@ import logging
 import time
 from typing import Final, Self, TypeVar, cast
 
+from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
 from zigpy.config import CONF_DEVICE, CONF_DEVICE_PATH, CONF_NWK_VALIDATE_SETTINGS
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
-from zhaquirks import setup as setup_quirks
 from zigpy.state import State
 from zigpy.types.named import EUI64
 

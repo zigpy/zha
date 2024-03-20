@@ -49,7 +49,7 @@ async def test_alarm_control_panel(
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
     alarm_entity: ZHAAlarmControlPanel = zha_device.platform_entities.get(
         "00:0d:6f:00:0a:90:69:e7-1"
-    )  # type: ignore
+    )
     assert alarm_entity is not None
     assert isinstance(alarm_entity, ZHAAlarmControlPanel)
 

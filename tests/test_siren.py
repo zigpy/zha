@@ -49,7 +49,7 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
         for entity in zha_dev.platform_entities.values()
     }
-    return entities[entity_id]  # type: ignore
+    return entities[entity_id]
 
 
 async def test_siren(

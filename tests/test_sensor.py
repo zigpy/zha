@@ -451,7 +451,7 @@ async def test_electrical_measurement_init(
         cluster,
         {EMAttrs.active_power.id: 100},
     )
-    assert entity.get_state()["state"] == 100  # type: ignore
+    assert entity.get_state()["state"] == 100
 
     cluster_handler = list(zha_device._endpoints.values())[0].all_cluster_handlers[
         "1:0x0b04"

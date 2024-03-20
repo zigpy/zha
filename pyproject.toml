@@ -39,6 +39,9 @@ testing = [
 [tool.setuptools-git-versioning]
 enabled = true
 
+[tool.codespell]
+ignore-words-list = "hass"
+
 [tool.mypy]
 python_version = "3.12"
 check_untyped_defs = true

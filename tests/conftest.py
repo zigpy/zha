@@ -221,7 +221,7 @@ class TestGateway:
 
     async def __aenter__(self) -> ZHAGateway:
         """Start the ZHA gateway."""
-        self.zha_gateway: ZHAGateway = await ZHAGateway.async_from_config(self.zha_data)
+        self.zha_gateway = await ZHAGateway.async_from_config(self.zha_data)
         await self.zha_gateway.async_block_till_done()
         await self.zha_gateway.async_initialize_devices_and_entities()
         return self.zha_gateway

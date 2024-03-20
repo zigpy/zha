@@ -18,8 +18,6 @@ from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.light.const import FLASH_EFFECTS, FLASH_LONG, FLASH_SHORT
-from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers.lighting import ColorClusterHandler
 from zha.zigbee.device import ZHADevice
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -204,7 +202,7 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
         for entity in zha_dev.platform_entities.values()
     }
-    return entities[entity_id]  # type: ignore
+    return entities[entity_id]
 
 
 def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
@@ -214,7 +212,7 @@ def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
         for entity in group.group_entities.values()
     }
 
-    return entities.get(entity_id)  # type: ignore
+    return entities.get(entity_id)
 
 
 @pytest.mark.looptime

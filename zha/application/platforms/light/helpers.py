@@ -571,8 +571,7 @@ def color_temperature_to_hs(color_temperature_kelvin: float) -> tuple[float, flo
 def color_temperature_to_rgb(
     color_temperature_kelvin: float,
 ) -> tuple[float, float, float]:
-    """
-    Return an RGB color from a color temperature in Kelvin.
+    """Return an RGB color from a color temperature in Kelvin.
 
     This is a rough approximation based on the formula provided by T. Helland
     http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
@@ -626,8 +625,7 @@ def while_levels_to_color_temperature(
 
 
 def _clamp(color_component: float, minimum: float = 0, maximum: float = 255) -> float:
-    """
-    Clamp the given color component value between the given min and max values.
+    """Clamp the given color component value between the given min and max values.
 
     The range defined by the minimum and maximum values is inclusive, i.e. given a
     color_component of 0 and a minimum of 10, the returned value is 10.
@@ -689,8 +687,7 @@ def get_distance_between_two_points(one: XYPoint, two: XYPoint) -> float:
 
 
 def get_closest_point_to_line(A: XYPoint, B: XYPoint, P: XYPoint) -> XYPoint:
-    """
-    Find the closest point from P to a line defined by A and B.
+    """Find the closest point from P to a line defined by A and B.
 
     This point will be reproducible by the lamp
     as it is on the edge of the gamut.
@@ -712,8 +709,7 @@ def get_closest_point_to_line(A: XYPoint, B: XYPoint, P: XYPoint) -> XYPoint:
 def get_closest_point_to_point(
     xy_tuple: tuple[float, float], Gamut: GamutType
 ) -> tuple[float, float]:
-    """
-    Get the closest matching color within the gamut of the light.
+    """Get the closest matching color within the gamut of the light.
 
     Should only be used if the supplied color is outside of the color gamut.
     """

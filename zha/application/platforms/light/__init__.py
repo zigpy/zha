@@ -117,9 +117,7 @@ class BaseLight(BaseEntity, ABC):
         self._off_brightness: int | None = None
         self._effect_list: list[str] | None = None
         self._effect: str | None = None
-        self._supported_features: int = 0
         self._supported_color_modes: set[ColorMode] = set()
-        self._state: bool | None = None
         self._zha_config_transition: int = self._DEFAULT_MIN_TRANSITION_TIME
         self._zha_config_enhanced_light_transition: bool = False
         self._zha_config_enable_light_transitioning_flag: bool = True

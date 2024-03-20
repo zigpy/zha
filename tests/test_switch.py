@@ -105,7 +105,7 @@ async def test_switch(
     entity_id = find_entity_id(Platform.SWITCH, zha_device)
     assert entity_id is not None
 
-    entity: PlatformEntity = get_entity(zha_device, entity_id)  # type: ignore
+    entity: PlatformEntity = get_entity(zha_device, entity_id)
     assert entity is not None
 
     assert bool(bool(entity.get_state()["state"])) is False
