@@ -364,9 +364,9 @@ class MeteringClusterHandler(ClusterHandler):
             return round(value_watt)
         if selector == self.FormatSelector.SUMMATION:
             assert self._summa_format
-            return self._summa_format.format(value_float).lstrip()
+            return float(self._summa_format.format(value_float).lstrip())
         assert self._format_spec
-        return self._format_spec.format(value_float).lstrip()
+        return float(self._format_spec.format(value_float).lstrip())
 
     demand_formatter = partialmethod(_formatter_function, FormatSelector.DEMAND)
     summa_formatter = partialmethod(_formatter_function, FormatSelector.SUMMATION)

@@ -20,6 +20,7 @@ from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.sensor import UnitOfMass
+from zha.units import UnitOfEnergy, UnitOfPressure, UnitOfVolume
 from zha.zigbee.device import ZHADevice
 
 from .common import find_entity_id, find_entity_ids, send_attributes_report
@@ -118,12 +119,12 @@ async def async_test_metering(
     await send_attributes_report(
         zha_gateway, cluster, {1025: 1, 1024: 12345, 1026: 100}
     )
-    assert_state(entity, "12345.0", None)
+    assert_state(entity, 12345.0, None)
     assert entity.get_state()["status"] == "NO_ALARMS"
     assert entity.get_state()["device_type"] == "Electric Metering"
 
     await send_attributes_report(zha_gateway, cluster, {1024: 12346, "status": 64 + 8})
-    assert_state(entity, "12346.0", None)
+    assert_state(entity, 12346.0, None)
     assert entity.get_state()["status"] == "POWER_FAILURE|SERVICE_DISCONNECT"
 
     await send_attributes_report(
@@ -141,7 +142,7 @@ async def async_test_smart_energy_summation(
     await send_attributes_report(
         zha_gateway, cluster, {1025: 1, "current_summ_delivered": 12321, 1026: 100}
     )
-    assert_state(entity, "12.32", "m³")
+    assert_state(entity, 12.32, "m³")
     assert entity.get_state()["status"] == "NO_ALARMS"
     assert entity.get_state()["device_type"] == "Electric Metering"
 
@@ -617,74 +618,86 @@ async def test_unsupported_attributes_sensor(
         (
             1,
             12320,
-            "1.23",
-            "m³",
+            1.23,
+            UnitOfVolume.CUBIC_METERS,
         ),
         (
             1,
             1232000,
-            "123.20",
-            "m³",
+            123.2,
+            UnitOfVolume.CUBIC_METERS,
         ),
         (
             3,
             2340,
-            "0.23",
-            "100 ft³",
+            0.23,
+            UnitOfVolume.CUBIC_METERS,
         ),
         (
             3,
             2360,
-            "0.24",
-            "100 ft³",
+            0.24,
+            UnitOfVolume.CUBIC_METERS,
         ),
         (
             8,
             23660,
-            "2.37",
-            "kPa",
+            2.37,
+            UnitOfPressure.KPA,
         ),
         (
             0,
             9366,
             0.937,
-            "kWh",
+            UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             999,
             0.1,
-            "kWh",
+            UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             10091,
             1.009,
-            "kWh",
+            UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             10099,
             1.01,
-            "kWh",
+            UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             100999,
             10.1,
-            "kWh",
+            UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             100023,
             10.002,
-            "kWh",
+            UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             102456,
             10.246,
-            "kWh",
+            UnitOfEnergy.KILO_WATT_HOUR,
+        ),
+        (
+            5,
+            102456,
+            10.25,
+            "IMP gal",
+        ),
+        (
+            7,
+            50124,
+            5.01,
+            UnitOfVolume.LITERS,
         ),
     ),
 )

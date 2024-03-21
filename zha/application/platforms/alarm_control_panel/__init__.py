@@ -129,6 +129,12 @@ class ZHAAlarmControlPanel(PlatformEntity):
             | SUPPORT_ALARM_TRIGGER
         )
 
+    def to_json(self) -> dict:
+        """Return a JSON representation of the alarm control panel."""
+        json = super().to_json()
+        json["supported_features"] = self.supported_features
+        return json
+
     @property
     def state(self) -> str:
         """Return the state of the entity."""

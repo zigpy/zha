@@ -458,6 +458,7 @@ class Thermostat(PlatformEntity):
         response["hvac_mode"] = self.hvac_mode
         response["preset_mode"] = self.preset_mode
         response["fan_mode"] = self.fan_mode
+        response.update(self.extra_state_attributes)
         return response
 
 

@@ -281,7 +281,6 @@ class BaseEntity(LogMixin, EventBase):
         if self._unique_id_suffix:
             self._unique_id += f"-{self._unique_id_suffix}"
         self._state: Any = None
-        self._extra_state_attributes: dict[str, Any] = {}
         self._previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
 
@@ -303,11 +302,6 @@ class BaseEntity(LogMixin, EventBase):
         return {
             "class_name": self.__class__.__name__,
         }
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return device specific state attributes."""
-        return self._extra_state_attributes
 
     async def async_update(self) -> None:
         """Retrieve latest state."""

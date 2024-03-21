@@ -186,11 +186,8 @@ class Sensor(PlatformEntity):
     def get_state(self) -> dict:
         """Return the state for this sensor."""
         response = super().get_state()
-        if self._attribute_name is not None:
-            raw_state = self._cluster_handler.cluster.get(self._attribute_name)
-            if raw_state is not None:
-                raw_state = self.formatter(raw_state)
-                response["state"] = raw_state
+        native_value = self.native_value
+        response["state"] = native_value
         return response
 
     def handle_cluster_handler_attribute_updated(
@@ -770,21 +767,6 @@ class SmartEnergyMetering(PollableSensor):
         """Pass through cluster handler formatter."""
         return self._cluster_handler.demand_formatter(value)
 
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return device state attrs for battery sensors."""
-        attrs = {}
-        if self._cluster_handler.device_type is not None:
-            attrs["device_type"] = self._cluster_handler.device_type
-        if (status := self._cluster_handler.metering_status) is not None:
-            if isinstance(status, enum.IntFlag):
-                attrs["status"] = str(
-                    status.name if status.name is not None else status.value
-                )
-            else:
-                attrs["status"] = str(status)[len(status.__class__.__name__) + 1 :]
-        return attrs
-
     def get_state(self) -> dict[str, Any]:
         """Return state for this sensor."""
         response = super().get_state()
@@ -797,16 +779,8 @@ class SmartEnergyMetering(PollableSensor):
                 )
             else:
                 response["status"] = str(status)[len(status.__class__.__name__) + 1 :]
+        response["zcl_unit_of_measurement"] = self._cluster_handler.unit_of_measurement
         return response
-
-    @property
-    def native_value(self) -> str | int | float | None:
-        """Return the state of the entity."""
-        state = super().native_value
-        if hasattr(self, "entity_description") and state is not None:
-            return float(state) * self.entity_description.scale
-
-        return state
 
 
 @dataclass(frozen=True, kw_only=True)
