@@ -116,6 +116,8 @@ class ZHAIdentifyButton(ZHAButton):
 class ZHAAttributeButton(PlatformEntity):
     """Defines a ZHA button, which writes a value to an attribute."""
 
+    PLATFORM = Platform.BUTTON
+
     _attribute_name: str
     _attribute_value: Any = None
 
