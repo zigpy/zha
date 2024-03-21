@@ -152,15 +152,17 @@ class AsyncUtilMixin:
 
     def __init__(self, *args, **kw_args) -> None:
         """Initialize the async mixin."""
+        self.loop = asyncio.get_running_loop()
         self._tracked_completable_tasks: set[asyncio.Task] = set()
         self._device_init_tasks: dict[EUI64, asyncio.Task] = {}
         self._background_tasks: set[asyncio.Future[Any]] = set()
+        self._untracked_background_tasks: set[asyncio.Future[Any]] = set()
         super().__init__(*args, **kw_args)
 
     def block_till_done(self) -> None:
         """Block until all pending work is done."""
         asyncio.run_coroutine_threadsafe(
-            self.async_block_till_done(), asyncio.get_running_loop()
+            self.async_block_till_done(), self.loop
         ).result()
 
     async def async_block_till_done(self, wait_background_tasks: bool = False) -> None:
@@ -227,14 +229,16 @@ class AsyncUtilMixin:
         if target is None:
             raise ValueError("Don't call add_job with None")
         if asyncio.iscoroutine(target):
-            asyncio.get_running_loop().call_soon_threadsafe(
-                functools.partial(self.async_add_job, target, eager_start=True)
+            self.loop.call_soon_threadsafe(
+                functools.partial(self.async_create_task, target, eager_start=True)
             )
             return
         if TYPE_CHECKING:
             target = cast(Callable[..., Any], target)
-        asyncio.get_running_loop().call_soon_threadsafe(
-            functools.partial(self.async_add_job, target, *args, eager_start=True)
+        self.loop.call_soon_threadsafe(
+            functools.partial(
+                self.async_add_job, ZHAJob(target), *args, eager_start=True
+            )
         )
 
     @overload
@@ -348,25 +352,21 @@ class AsyncUtilMixin:
                 task = create_eager_task(
                     zhajob.target(*args),
                     name=zhajob.name,
-                    loop=asyncio.get_running_loop(),
+                    loop=self.loop,
                 )
                 if task.done():
                     return task
             else:
-                task = asyncio.get_running_loop().create_task(
-                    zhajob.target(*args), name=zhajob.name
-                )
+                task = self.loop.create_task(zhajob.target(*args), name=zhajob.name)
         elif zhajob.job_type is ZHAJobType.Callback:
             if TYPE_CHECKING:
                 zhajob.target = cast(Callable[..., _R], zhajob.target)
-            asyncio.get_running_loop().call_soon(zhajob.target, *args)
+            self.loop.call_soon(zhajob.target, *args)
             return None
         else:
             if TYPE_CHECKING:
                 zhajob.target = cast(Callable[..., _R], zhajob.target)
-            task = asyncio.get_running_loop().run_in_executor(
-                None, zhajob.target, *args
-            )
+            task = self.loop.run_in_executor(None, zhajob.target, *args)
 
         task_bucket = (
             self._background_tasks if background else self._tracked_completable_tasks
@@ -383,8 +383,8 @@ class AsyncUtilMixin:
 
         target: target to call.
         """
-        asyncio.get_running_loop().call_soon_threadsafe(
-            self.async_create_task, target, name
+        self.loop.call_soon_threadsafe(
+            functools.partial(self.async_create_task, target, name, eager_start=True)
         )
 
     @callback
@@ -402,20 +402,24 @@ class AsyncUtilMixin:
         target: target to call.
         """
         if eager_start:
-            task = create_eager_task(target, name=name, loop=asyncio.get_running_loop())
+            task = create_eager_task(target, name=name, loop=self.loop)
             if task.done():
                 return task
         else:
             # Use loop.create_task
             # to avoid the extra function call in asyncio.create_task.
-            task = asyncio.get_running_loop().create_task(target, name=name)
+            task = self.loop.create_task(target, name=name)
         self._tracked_completable_tasks.add(task)
         task.add_done_callback(self._tracked_completable_tasks.remove)
         return task
 
     @callback
     def async_create_background_task(
-        self, target: Coroutine[Any, Any, _R], name: str, eager_start: bool = False
+        self,
+        target: Coroutine[Any, Any, _R],
+        name: str,
+        eager_start: bool = False,
+        untracked: bool = False,
     ) -> asyncio.Task[_R]:
         """Create a task from within the event loop.
 
@@ -434,15 +438,19 @@ class AsyncUtilMixin:
         This method must be run in the event loop.
         """
         if eager_start:
-            task = create_eager_task(target, name=name, loop=asyncio.get_running_loop())
+            task = create_eager_task(target, name=name, loop=self.loop)
             if task.done():
                 return task
         else:
             # Use loop.create_task
             # to avoid the extra function call in asyncio.create_task.
-            task = asyncio.get_running_loop().create_task(target, name=name)
-        self._background_tasks.add(task)
-        task.add_done_callback(self._background_tasks.remove)
+            task = self.loop.create_task(target, name=name)
+
+        task_bucket = (
+            self._untracked_background_tasks if untracked else self._background_tasks
+        )
+        task_bucket.add(task)
+        task.add_done_callback(task_bucket.remove)
         return task
 
     @callback
@@ -450,7 +458,7 @@ class AsyncUtilMixin:
         self, target: Callable[..., _T], *args: Any
     ) -> asyncio.Future[_T]:
         """Add an executor job from within the event loop."""
-        task = asyncio.get_running_loop().run_in_executor(None, target, *args)
+        task = self.loop.run_in_executor(None, target, *args)
         self._tracked_completable_tasks.add(task)
         task.add_done_callback(self._tracked_completable_tasks.remove)
 
@@ -461,9 +469,7 @@ class AsyncUtilMixin:
         self, target: Callable[..., _T], *args: Any
     ) -> asyncio.Future[_T]:
         """Add an import executor job from within the event loop."""
-        task = asyncio.get_running_loop().run_in_executor(
-            self.import_executor, target, *args
-        )
+        task = self.loop.run_in_executor(self.import_executor, target, *args)
         self._tracked_completable_tasks.add(task)
         task.add_done_callback(self._tracked_completable_tasks.remove)
         return task

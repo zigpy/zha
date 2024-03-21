@@ -684,7 +684,7 @@ class BaseLight(BaseEntity, ABC):
             if self._debounced_member_refresh is not None:
                 self.debug("transition complete - refreshing group member states")
 
-                self.group.gateway.async_create_background_task(
+                self.group.gateway.async_create_task(
                     self._debounced_member_refresh.async_call(),
                     "zha.light-refresh-debounced-member",
                 )
@@ -846,7 +846,10 @@ class Light(PlatformEntity, BaseLight):
 
         self._tracked_tasks.append(
             device.gateway.async_create_background_task(
-                _refresh(), name=f"light_refresh_{self.unique_id}", eager_start=True
+                _refresh(),
+                name=f"light_refresh_{self.unique_id}",
+                eager_start=True,
+                untracked=True,
             )
         )
 

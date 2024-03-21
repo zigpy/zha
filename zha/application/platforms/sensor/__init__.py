@@ -244,6 +244,7 @@ class PollableSensor(Sensor):
                     self._refresh(),
                     name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
                     eager_start=True,
+                    untracked=True,
                 )
             )
 
@@ -320,6 +321,7 @@ class DeviceCounterSensor(BaseEntity):
                 self._refresh(),
                 name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
                 eager_start=True,
+                untracked=True,
             )
         )
         # we double create these in discovery tests because we reissue the create calls to count and prove them out

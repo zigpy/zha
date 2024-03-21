@@ -103,5 +103,5 @@ def periodic(refresh_interval: tuple, run_immediately=False) -> Callable:
 
 def callback(func: Callable[..., Any]) -> Callable[..., Any]:
     """Annotation to mark method as safe to call from within the event loop."""
-    setattr(func, "_hass_callback", True)
+    setattr(func, "_zha_callback", True)
     return func

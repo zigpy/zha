@@ -184,6 +184,7 @@ class ZHADevice(LogMixin):
                     self._check_available(),
                     name=f"device_check_alive_{self.ieee}",
                     eager_start=True,
+                    untracked=True,
                 )
             )
 

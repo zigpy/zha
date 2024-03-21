@@ -178,6 +178,6 @@ class Debouncer(Generic[_R_co]):
     def _schedule_timer(self) -> None:
         """Schedule a timer."""
         if not self._shutdown_requested:
-            self._timer_task = asyncio.get_running_loop().call_later(
+            self._timer_task = self.gateway.loop.call_later(
                 self.cooldown, self._on_debounce
             )

@@ -71,6 +71,7 @@ class ZHADeviceScannerEntity(PlatformEntity):
                 self._refresh(),
                 name=f"device_tracker_refresh_{self.unique_id}",
                 eager_start=True,
+                untracked=True,
             )
         )
 

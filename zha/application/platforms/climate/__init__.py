@@ -490,6 +490,7 @@ class SinopeTechnologiesThermostat(Thermostat):
                 self._update_time(),
                 name=f"sinope_time_updater_{self.unique_id}",
                 eager_start=True,
+                untracked=True,
             )
         )
 
