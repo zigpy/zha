@@ -63,6 +63,11 @@ async def async_test_iaszone_on_off(
     await zha_gateway.async_block_till_done()
     assert not entity.is_on
 
+    # check that binary sensor remains off when non-alarm bits change
+    cluster.listener_event("cluster_command", 1, 0, [0b1111111100])  # type: ignore[unreachable]
+    await zha_gateway.async_block_till_done()
+    assert not entity.is_on
+
 
 @pytest.mark.parametrize(
     "device, on_off_test, cluster_name, entity_type, plugs",

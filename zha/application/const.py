@@ -64,6 +64,9 @@ ATTR_WARNING_DEVICE_STROBE = "strobe"
 ATTR_WARNING_DEVICE_STROBE_DUTY_CYCLE = "duty_cycle"
 ATTR_WARNING_DEVICE_STROBE_INTENSITY = "intensity"
 
+# Class of device within its domain
+ATTR_DEVICE_CLASS: Final = "device_class"
+
 CLUSTER_DETAILS = "cluster_details"
 
 CLUSTER_COMMAND_SERVER = "server"

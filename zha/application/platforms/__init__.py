@@ -476,6 +476,7 @@ class PlatformEntity(BaseEntity):
         json["cluster_handlers"] = [ch.to_json() for ch in self._cluster_handlers]
         json["device_ieee"] = str(self._device.ieee)
         json["endpoint_id"] = self._endpoint.id
+        json["available"] = self.available
         return json
 
     async def async_update(self) -> None:

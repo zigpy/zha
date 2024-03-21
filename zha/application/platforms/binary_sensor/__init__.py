@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
+from zha.application.const import ATTR_DEVICE_CLASS, ENTITY_METADATA
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
@@ -121,6 +121,8 @@ class BinarySensor(PlatformEntity):
         """Return a JSON representation of the binary sensor."""
         json = super().to_json()
         json["sensor_attribute"] = self._attribute_name
+        if hasattr(self, ATTR_DEVICE_CLASS):
+            json[ATTR_DEVICE_CLASS] = self._attr_device_class
         return json
 
     @staticmethod
@@ -205,6 +207,19 @@ class IASZone(BinarySensor):
     """ZHA IAS BinarySensor."""
 
     _attribute_name = "zone_status"
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: ZHADevice,
+        **kwargs,
+    ) -> None:
+        """Initialize the ZHA binary sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._attr_device_class = self.device_class
+        self._attr_translation_key = self.translation_key
 
     @property
     def translation_key(self) -> str | None:

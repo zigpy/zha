@@ -762,6 +762,8 @@ class SmartEnergyMetering(PollableSensor):
         )
         if entity_description is not None:
             self.entity_description = entity_description
+            self._attr_device_class = entity_description.device_class
+            self._attr_state_class = entity_description.state_class
 
     def formatter(self, value: int) -> int | float:
         """Pass through cluster handler formatter."""
