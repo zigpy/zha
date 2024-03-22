@@ -4,7 +4,7 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from slugify import slugify
@@ -14,7 +14,15 @@ import zigpy.types
 from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import (
+    find_entity_id,
+    make_zcl_header,
+    send_attributes_report,
+    update_attribute_cache,
+)
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
+from zha.application.const import ATTR_COMMAND
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.cover import (
@@ -22,11 +30,11 @@ from zha.application.platforms.cover import (
     STATE_CLOSED,
     STATE_OPEN,
 )
+from zha.application.platforms.cover.const import STATE_CLOSING, STATE_OPENING
 from zha.exceptions import ZHAException
 from zha.zigbee.device import ZHADevice
 
-from .common import find_entity_id, send_attributes_report, update_attribute_cache
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+Default_Response = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Default_Response].schema
 
 
 @pytest.fixture
@@ -250,8 +258,38 @@ async def test_cover(
         assert cluster.request.call_count == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0x01
-        assert cluster.request.call_args[0][2].command.name == "down_close"
+        assert cluster.request.call_args[0][2].command.name == WCCmds.down_close.name
         assert cluster.request.call_args[1]["expect_reply"] is True
+
+        assert entity.get_state()["state"] == STATE_CLOSING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 100}
+        )
+
+        assert entity.get_state()["state"] == STATE_CLOSED
+
+    # tilt close from client
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
+        await entity.async_close_cover_tilt()
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert cluster.request.call_args[0][0] is False
+        assert cluster.request.call_args[0][1] == 0x08
+        assert (
+            cluster.request.call_args[0][2].command.name
+            == WCCmds.go_to_tilt_percentage.name
+        )
+        assert cluster.request.call_args[0][3] == 100
+        assert cluster.request.call_args[1]["expect_reply"] is True
+
+        assert entity.get_state()["state"] == STATE_CLOSING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
+        )
+
+        assert entity.get_state()["state"] == STATE_CLOSED
 
     # open from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x0, zcl_f.Status.SUCCESS]):
@@ -260,8 +298,38 @@ async def test_cover(
         assert cluster.request.call_count == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0x00
-        assert cluster.request.call_args[0][2].command.name == "up_open"
+        assert cluster.request.call_args[0][2].command.name == WCCmds.up_open.name
         assert cluster.request.call_args[1]["expect_reply"] is True
+
+        assert entity.get_state()["state"] == STATE_OPENING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
+        )
+
+        assert entity.get_state()["state"] == STATE_OPEN
+
+    # open tilt from client
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x0, zcl_f.Status.SUCCESS]):
+        await entity.async_open_cover_tilt()
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert cluster.request.call_args[0][0] is False
+        assert cluster.request.call_args[0][1] == 0x08
+        assert (
+            cluster.request.call_args[0][2].command.name
+            == WCCmds.go_to_tilt_percentage.name
+        )
+        assert cluster.request.call_args[0][3] == 0
+        assert cluster.request.call_args[1]["expect_reply"] is True
+
+        assert entity.get_state()["state"] == STATE_OPENING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
+        )
+
+        assert entity.get_state()["state"] == STATE_OPEN
 
     # set position UI
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
@@ -274,6 +342,48 @@ async def test_cover(
         assert cluster.request.call_args[0][3] == 53
         assert cluster.request.call_args[1]["expect_reply"] is True
 
+        assert entity.get_state()["state"] == STATE_CLOSING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 35}
+        )
+
+        assert entity.get_state()["state"] == STATE_CLOSING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 53}
+        )
+
+        assert entity.get_state()["state"] == STATE_OPEN
+
+    # set tilt position UI
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
+        await entity.async_set_cover_tilt_position(tilt_position=47)
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert cluster.request.call_args[0][0] is False
+        assert cluster.request.call_args[0][1] == 0x08
+        assert (
+            cluster.request.call_args[0][2].command.name
+            == WCCmds.go_to_tilt_percentage.name
+        )
+        assert cluster.request.call_args[0][3] == 53
+        assert cluster.request.call_args[1]["expect_reply"] is True
+
+        assert entity.get_state()["state"] == STATE_CLOSING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 35}
+        )
+
+        assert entity.get_state()["state"] == STATE_CLOSING
+
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 53}
+        )
+
+        assert entity.get_state()["state"] == STATE_OPEN
+
     # stop from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x2, zcl_f.Status.SUCCESS]):
         await entity.async_stop_cover()
@@ -281,8 +391,180 @@ async def test_cover(
         assert cluster.request.call_count == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0x02
-        assert cluster.request.call_args[0][2].command.name == "stop"
+        assert cluster.request.call_args[0][2].command.name == WCCmds.stop.name
         assert cluster.request.call_args[1]["expect_reply"] is True
+
+    # stop tilt from client
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x2, zcl_f.Status.SUCCESS]):
+        await entity.async_stop_cover_tilt()
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert cluster.request.call_args[0][0] is False
+        assert cluster.request.call_args[0][1] == 0x02
+        assert cluster.request.call_args[0][2].command.name == WCCmds.stop.name
+        assert cluster.request.call_args[1]["expect_reply"] is True
+
+
+async def test_cover_failures(
+    zha_gateway: ZHAGateway, device_joined, zigpy_cover_device
+) -> None:
+    """Test ZHA cover platform failure cases."""
+
+    # load up cover domain
+    cluster = zigpy_cover_device.endpoints[1].window_covering
+    cluster.PLUGGED_ATTR_READS = {
+        WCAttrs.current_position_tilt_percentage.name: 42,
+        WCAttrs.window_covering_type.name: WCT.Tilt_blind_tilt_and_lift,
+    }
+    update_attribute_cache(cluster)
+    zha_device = await device_joined(zigpy_cover_device)
+
+    entity_id = find_entity_id(Platform.COVER, zha_device)
+    assert entity_id is not None
+    entity = get_entity(zha_device, entity_id)
+    assert entity is not None
+
+    # test to see if it opens
+    await send_attributes_report(
+        zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
+    )
+
+    assert entity.get_state()["state"] == STATE_OPEN
+
+    # close from UI
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.down_close.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to close cover"):
+            await entity.async_close_cover()
+            await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.down_close.id
+        )
+        assert entity.get_state()["state"] == STATE_OPEN
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.go_to_tilt_percentage.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to close cover tilt"):
+            await entity.async_close_cover_tilt()
+            await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.go_to_tilt_percentage.id
+        )
+
+    # open from UI
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.up_open.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to open cover"):
+            await entity.async_open_cover()
+            await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.up_open.id
+        )
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.go_to_tilt_percentage.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to open cover tilt"):
+            await entity.async_open_cover_tilt()
+            await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.go_to_tilt_percentage.id
+        )
+
+    # set position UI
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.go_to_lift_percentage.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to set cover position"):
+            await entity.async_set_cover_position(position=47)
+            await zha_gateway.async_block_till_done()
+
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.go_to_lift_percentage.id
+        )
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.go_to_tilt_percentage.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to set cover tilt position"):
+            await entity.async_set_cover_tilt_position(tilt_position=47)
+            await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.go_to_tilt_percentage.id
+        )
+
+    # stop from UI
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.stop.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to stop cover"):
+            await entity.async_stop_cover()
+            await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.stop.id
+        )
+
+    # stop tilt from UI
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=Default_Response(
+            command_id=closures.WindowCovering.ServerCommandDefs.stop.id,
+            status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+        ),
+    ):
+        with pytest.raises(ZHAException, match=r"Failed to stop cover"):
+            await entity.async_stop_cover_tilt()
+            await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert (
+            cluster.request.call_args[0][1]
+            == closures.WindowCovering.ServerCommandDefs.stop.id
+        )
 
 
 async def test_shade(
@@ -319,10 +601,14 @@ async def test_shade(
 
     # close from client command fails
     with (
-        patch("zigpy.zcl.Cluster.request", side_effect=asyncio.TimeoutError),
-        pytest.raises(
-            ZHAException, match="Failed to send request: device did not respond"
+        patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=Default_Response(
+                command_id=general.OnOff.ServerCommandDefs.off.id,
+                status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+            ),
         ),
+        pytest.raises(ZHAException, match="Failed to close cover"),
     ):
         await entity.async_close_cover()
         await zha_gateway.async_block_till_done()
@@ -346,10 +632,14 @@ async def test_shade(
     assert entity.get_state()["state"] == STATE_CLOSED
 
     with (
-        patch("zigpy.zcl.Cluster.request", side_effect=asyncio.TimeoutError),
-        pytest.raises(
-            ZHAException, match="Failed to send request: device did not respond"
+        patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=Default_Response(
+                command_id=general.OnOff.ServerCommandDefs.on.id,
+                status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+            ),
         ),
+        pytest.raises(ZHAException, match="Failed to open cover"),
     ):
         await entity.async_open_cover()
         await zha_gateway.async_block_till_done()
@@ -371,10 +661,14 @@ async def test_shade(
 
     # set position UI command fails
     with (
-        patch("zigpy.zcl.Cluster.request", side_effect=asyncio.TimeoutError),
-        pytest.raises(
-            ZHAException, match="Failed to send request: device did not respond"
+        patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=Default_Response(
+                command_id=general.LevelControl.ServerCommandDefs.move_to_level_with_on_off.id,
+                status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+            ),
         ),
+        pytest.raises(ZHAException, match="Failed to set cover position"),
     ):
         await entity.async_set_cover_position(position=47)
         await zha_gateway.async_block_till_done()
@@ -399,6 +693,23 @@ async def test_shade(
     # report position change
     await send_attributes_report(zha_gateway, cluster_level, {8: 0, 0: 100, 1: 1})
     assert entity.get_state()["current_position"] == int(100 * 100 / 255)
+
+    # stop command fails
+    with (
+        patch(
+            "zigpy.zcl.Cluster.request",
+            return_value=Default_Response(
+                command_id=general.LevelControl.ServerCommandDefs.stop.id,
+                status=zcl_f.Status.UNSUP_CLUSTER_COMMAND,
+            ),
+        ),
+        pytest.raises(ZHAException, match="Failed to stop cover"),
+    ):
+        await entity.async_stop_cover()
+        await zha_gateway.async_block_till_done()
+        assert cluster_level.request.call_count == 1
+        assert cluster_level.request.call_args[0][0] is False
+        assert cluster_level.request.call_args[0][1] in (0x0003, 0x0007)
 
     # test cover stop
     with patch(
@@ -464,3 +775,39 @@ async def test_keen_vent(
         assert cluster_level.request.call_count == 1
         assert entity.get_state()["state"] == STATE_OPEN
         assert entity.get_state()["current_position"] == 100
+
+
+async def test_cover_remote(
+    zha_gateway: ZHAGateway, device_joined, zigpy_cover_remote
+) -> None:
+    """Test ZHA cover remote."""
+
+    # load up cover domain
+    zha_device = await device_joined(zigpy_cover_remote)
+    zha_device.zha_send_event = MagicMock(wraps=zha_device.zha_send_event)
+
+    cluster = zigpy_cover_remote.endpoints[1].out_clusters[
+        closures.WindowCovering.cluster_id
+    ]
+
+    zha_device.zha_send_event.reset_mock()
+
+    # up command
+    hdr = make_zcl_header(0, global_command=False)
+    cluster.handle_message(hdr, [])
+    await zha_gateway.async_block_till_done()
+
+    assert zha_device.zha_send_event.call_count == 1
+    assert ATTR_COMMAND in zha_device.zha_send_event.call_args[0][0]
+    assert zha_device.zha_send_event.call_args[0][0][ATTR_COMMAND] == "up_open"
+
+    zha_device.zha_send_event.reset_mock()
+
+    # down command
+    hdr = make_zcl_header(1, global_command=False)
+    cluster.handle_message(hdr, [])
+    await zha_gateway.async_block_till_done()
+
+    assert zha_device.zha_send_event.call_count == 1
+    assert ATTR_COMMAND in zha_device.zha_send_event.call_args[0][0]
+    assert zha_device.zha_send_event.call_args[0][0][ATTR_COMMAND] == "down_close"
