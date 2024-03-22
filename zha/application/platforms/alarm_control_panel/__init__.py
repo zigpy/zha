@@ -85,10 +85,6 @@ class ZHAAlarmControlPanel(PlatformEntity):
         """Handle state changed on cluster."""
         self.maybe_send_state_changed_event()
 
-    def async_set_armed_mode(self) -> None:
-        """Set the entity state."""
-        self.maybe_send_state_changed_event()
-
     @property
     def code_arm_required(self) -> bool:
         """Whether the code is required for arm actions."""
@@ -133,6 +129,7 @@ class ZHAAlarmControlPanel(PlatformEntity):
         """Return a JSON representation of the alarm control panel."""
         json = super().to_json()
         json["supported_features"] = self.supported_features
+        json["code_arm_required"] = self.code_arm_required
         return json
 
     @property
