@@ -113,6 +113,9 @@ async def async_test_illuminance(
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 10, 2: 20})
     assert_state(entity, 1.0, "lx")
 
+    await send_attributes_report(zha_gateway, cluster, {0: 0xFFFF})
+    assert_state(entity, None, "lx")
+
 
 async def async_test_metering(
     zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
@@ -588,10 +591,12 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     # TODO assert entity._attr_native_unit_of_measurement == unit_of_measurement
 
 
+@pytest.mark.looptime
 async def test_electrical_measurement_init(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
     zha_gateway: ZHAGateway,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test proper initialization of the electrical measurement cluster."""
 
@@ -637,6 +642,16 @@ async def test_electrical_measurement_init(
     assert cluster_handler.ac_power_divisor == 5
     assert cluster_handler.ac_power_multiplier == 1
     assert entity.get_state()["state"] == 4.0
+
+    zha_device.available = False
+
+    await asyncio.sleep(70)
+    assert (
+        "1-2820: skipping polling for updated state, available: False, allow polled requests: True"
+        in caplog.text
+    )
+
+    zha_device.available = True
 
     await send_attributes_report(
         zha_gateway,
@@ -1139,8 +1154,9 @@ async def test_last_feeding_size_sensor_v2(
     assert_state(entity, 5.0, "g")
 
 
+@pytest.mark.looptime
 async def test_device_counter_sensors(
-    zha_gateway: ZHAGateway,
+    zha_gateway: ZHAGateway, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test quirks defined sensor."""
 
@@ -1163,3 +1179,11 @@ async def test_device_counter_sensors(
     await zha_gateway.async_block_till_done()
 
     assert entity.get_state()["state"] == 2
+
+    coordinator.available = False
+    await asyncio.sleep(120)
+
+    assert (
+        "counter_1: skipping polling for updated state, available: False, allow polled requests: True"
+        in caplog.text
+    )

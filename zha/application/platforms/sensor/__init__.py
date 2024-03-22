@@ -387,6 +387,7 @@ class DeviceCounterSensor(BaseEntity):
         json = super().to_json()
         json["name"] = self._attr_name
         json["device_ieee"] = str(self._device.ieee)
+        json["available"] = self.available
         json["counter"] = self._zigpy_counter.name
         json["counter_value"] = self._zigpy_counter.value
         json["counter_groups"] = self._zigpy_counter_groups

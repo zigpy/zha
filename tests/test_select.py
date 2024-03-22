@@ -1,6 +1,7 @@
 """Test ZHA select entities."""
 
 from collections.abc import Awaitable, Callable
+from unittest.mock import call
 
 import pytest
 from slugify import slugify
@@ -258,3 +259,11 @@ async def test_on_off_select_attribute_report_v2(
     assert entity._attr_entity_category == EntityCategory.CONFIG
     # TODO assert entity._attr_entity_registry_enabled_default is True
     assert entity._attr_translation_key == "motion_sensitivity"
+
+    await entity.async_select_option(AqaraMotionSensitivities.Medium.name)
+    await zha_gateway.async_block_till_done()
+    assert entity.get_state()["state"] == AqaraMotionSensitivities.Medium.name
+    assert cluster.write_attributes.call_count == 1
+    assert cluster.write_attributes.call_args == call(
+        {"motion_sensitivity": AqaraMotionSensitivities.Medium}, manufacturer=None
+    )
