@@ -103,9 +103,9 @@ class BinarySensor(PlatformEntity):
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Handle attribute updates from the cluster handler."""
-        if self._attribute_name is None or self._attribute_name != event.name:
+        if self._attribute_name is None or self._attribute_name != event.attribute_name:
             return
-        self._state = bool(event.value)
+        self._state = bool(event.attribute_value)
         self.maybe_send_state_changed_event()
 
     async def async_update(self) -> None:
