@@ -628,14 +628,6 @@ class BaseLight(BaseEntity, ABC):
         self._transitioning_individual = True
         self._transitioning_group = False
         if isinstance(self, LightGroup):
-            # pylint: disable=pointless-string-statement
-            """
-            async_dispatcher_send(
-                self.hass,
-                SIGNAL_LIGHT_GROUP_TRANSITION_START,
-                {"entity_ids": self._entity_ids},
-            )
-            """
             self.emit(
                 SIGNAL_LIGHT_GROUP_TRANSITION_START,
             )
@@ -673,14 +665,6 @@ class BaseLight(BaseEntity, ABC):
             self.emit(
                 SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
             )
-            # pylint: disable=pointless-string-statement
-            """
-            async_dispatcher_send(
-                self.hass,
-                SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
-                {"entity_ids": self._entity_ids},
-            )
-            """
             if self._debounced_member_refresh is not None:
                 self.debug("transition complete - refreshing group member states")
 
@@ -997,7 +981,7 @@ class Light(PlatformEntity, BaseLight):
 
     def _assume_group_state(self, update_params) -> None:
         """Handle an assume group state event from a group."""
-        if self._available:
+        if self.available:
             self.debug("member assuming group state with: %s", update_params)
 
             state = update_params["state"]
@@ -1104,17 +1088,17 @@ class LightGroup(GroupEntity, BaseLight):
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
         for platform_entity in group.get_platform_entities(Light.PLATFORM):
-            platform_entity.on_event(
+            self.on_event(
                 SIGNAL_LIGHT_GROUP_STATE_CHANGED, platform_entity.async_update
             )
-            platform_entity.on_event(
+            self.on_event(
                 SIGNAL_LIGHT_GROUP_TRANSITION_START,
                 platform_entity.transition_on,
             )
-            platform_entity.on_event(
+            self.on_event(
                 SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED, platform_entity.transition_off
             )
-            platform_entity.on_event(
+            self.on_event(
                 SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
                 platform_entity._assume_group_state,
             )
@@ -1334,14 +1318,6 @@ class LightGroup(GroupEntity, BaseLight):
         self.emit(
             SIGNAL_LIGHT_GROUP_STATE_CHANGED,
         )
-        # pylint: disable=pointless-string-statement
-        """"
-        async_dispatcher_send(
-            self.hass,
-            SIGNAL_LIGHT_GROUP_STATE_CHANGED,
-            {"entity_ids": self._entity_ids},
-        )
-        """
 
     def _send_member_assume_state_event(
         self, state, service_kwargs, off_brightness=None
@@ -1377,12 +1353,3 @@ class LightGroup(GroupEntity, BaseLight):
             update_params[ATTR_EFFECT] = self._effect
 
         self.emit(SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE, update_params)
-        # pylint: disable=pointless-string-statement
-        """
-        async_dispatcher_send(
-            self.hass,
-            SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
-            {"entity_ids": self._entity_ids},
-            update_params,
-        )
-        """
