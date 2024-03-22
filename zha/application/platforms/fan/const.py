@@ -25,7 +25,12 @@ PRESET_MODES = list(NAME_TO_PRESET_MODE)
 DEFAULT_ON_PERCENTAGE: Final[int] = 50
 
 ATTR_PERCENTAGE: Final[str] = "percentage"
+ATTR_PERCENTAGE_STEP: Final[str] = "percentage_step"
+ATTR_OSCILLATING: Final[str] = "oscillating"
+ATTR_DIRECTION: Final[str] = "direction"
 ATTR_PRESET_MODE: Final[str] = "preset_mode"
+ATTR_PRESET_MODES: Final[str] = "preset_modes"
+
 SUPPORT_SET_SPEED: Final[int] = 1
 
 SPEED_OFF: Final[str] = "off"

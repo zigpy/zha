@@ -26,6 +26,7 @@ from zha.application.platforms.fan.const import (
     FanEntityFeature,
 )
 from zha.application.platforms.fan.helpers import (
+    NotValidPresetModeError,
     int_states_in_range,
     ordered_list_item_to_percentage,
     percentage_to_ordered_list_item,
@@ -64,26 +65,6 @@ class BaseFan(BaseEntity):
         return list(self.preset_modes_to_name.values())
 
     @property
-    def supported_features(self) -> int:
-        """Flag supported features."""
-        return SUPPORT_SET_SPEED
-
-    @property
-    def speed_count(self) -> int:
-        """Return the number of speeds the fan supports."""
-        return int_states_in_range(SPEED_RANGE)
-
-    @property
-    def speed_range(self) -> tuple[int, int]:
-        """Return the range of speeds the fan supports. Off is not included."""
-        return SPEED_RANGE
-
-    @property
-    def is_on(self) -> bool:
-        """Return true if the entity is on."""
-        return self.speed not in [SPEED_OFF, None]  # pylint: disable=no-member
-
-    @property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return PRESET_MODES_TO_NAME
@@ -92,6 +73,31 @@ class BaseFan(BaseEntity):
     def preset_name_to_mode(self) -> dict[str, int]:
         """Return a dict from preset name to mode."""
         return {v: k for k, v in self.preset_modes_to_name.items()}
+
+    @property
+    def default_on_percentage(self) -> int:
+        """Return the default on percentage."""
+        return DEFAULT_ON_PERCENTAGE
+
+    @property
+    def speed_range(self) -> tuple[int, int]:
+        """Return the range of speeds the fan supports. Off is not included."""
+        return SPEED_RANGE
+
+    @property
+    def speed_count(self) -> int:
+        """Return the number of speeds the fan supports."""
+        return int_states_in_range(self.speed_range)
+
+    @property
+    def supported_features(self) -> int:
+        """Flag supported features."""
+        return SUPPORT_SET_SPEED
+
+    @property
+    def is_on(self) -> bool:
+        """Return true if the entity is on."""
+        return self.speed not in [SPEED_OFF, None]  # pylint: disable=no-member
 
     @property
     def percentage_step(self) -> float:
@@ -105,11 +111,6 @@ class BaseFan(BaseEntity):
         if preset_modes := self.preset_modes:
             speeds.extend(preset_modes)
         return speeds
-
-    @property
-    def default_on_percentage(self) -> int:
-        """Return the default on percentage."""
-        return DEFAULT_ON_PERCENTAGE
 
     async def async_turn_on(  # pylint: disable=unused-argument
         self,
@@ -126,7 +127,7 @@ class BaseFan(BaseEntity):
         elif percentage is not None:
             await self.async_set_percentage(percentage)
         else:
-            percentage = DEFAULT_ON_PERCENTAGE
+            percentage = self.default_on_percentage
             await self.async_set_percentage(percentage)
 
     async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -140,7 +141,13 @@ class BaseFan(BaseEntity):
 
     async def async_set_preset_mode(self, preset_mode: str) -> None:
         """Set the preset mode for the fan."""
-        await self._async_set_fan_mode(self.preset_name_to_mode[preset_mode])
+        try:
+            mode = self.preset_name_to_mode[preset_mode]
+        except KeyError as ex:
+            raise NotValidPresetModeError(
+                f"{preset_mode} is not a valid preset mode"
+            ) from ex
+        await self._async_set_fan_mode(mode)
 
     @abstractmethod
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
@@ -175,6 +182,7 @@ class BaseFan(BaseEntity):
         json["speed_count"] = self.speed_count
         json["speed_list"] = self.speed_list
         json["percentage_step"] = self.percentage_step
+        json["default_on_percentage"] = self.default_on_percentage
         return json
 
 
@@ -195,9 +203,10 @@ class ZhaFan(PlatformEntity, BaseFan):
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_FAN
         )
-        self._fan_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
-        )
+        if self._fan_cluster_handler:
+            self._fan_cluster_handler.on_event(
+                CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            )
 
     @property
     def percentage(self) -> int | None:
@@ -365,6 +374,9 @@ class IkeaFan(ZhaFan):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             "ikea_airpurifier"
+        )
+        self._fan_cluster_handler.on_event(
+            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
         )
 
     @property
