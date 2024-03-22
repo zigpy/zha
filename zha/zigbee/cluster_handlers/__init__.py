@@ -555,7 +555,6 @@ class ClusterHandler(LogMixin, EventBase):
         """Wrap `write_attributes` to throw an exception on attribute write failure."""
 
         res = await self.write_attributes(attributes, manufacturer=manufacturer)
-
         for record in res[0]:
             if record.status != Status.SUCCESS:
                 try:
