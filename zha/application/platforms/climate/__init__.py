@@ -445,6 +445,9 @@ class Thermostat(PlatformEntity):
         json["hvac_modes"] = self.hvac_modes
         json["fan_modes"] = self.fan_modes
         json["preset_modes"] = self.preset_modes
+        json["supported_features"] = self.supported_features
+        json["max_temp"] = self.max_temp
+        json["min_temp"] = self.min_temp
         return json
 
     def get_state(self) -> dict:

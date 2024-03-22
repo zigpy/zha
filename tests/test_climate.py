@@ -2,9 +2,10 @@
 
 # pylint: disable=redefined-outer-name,too-many-lines
 
+import asyncio
 from collections.abc import Awaitable, Callable
 import logging
-from unittest.mock import call, patch
+from unittest.mock import AsyncMock, call, patch
 
 import pytest
 from slugify import slugify
@@ -382,6 +383,30 @@ async def test_climate_hvac_action_running_state(
     )
     assert entity.get_state()["hvac_action"] == "fan"
     assert sensor_entity.get_state()["state"] == "fan"
+
+
+@pytest.mark.looptime
+async def test_sinope_time(
+    device_climate_sinope: ZHADevice,
+    zha_gateway: ZHAGateway,
+):
+    """Test hvac action via running state."""
+
+    mfg_cluster = device_climate_sinope.device.endpoints[1].sinope_manufacturer_specific
+    assert mfg_cluster is not None
+
+    entity_id = find_entity_id(Platform.CLIMATE, device_climate_sinope)
+    entity: ThermostatEntity = get_entity(device_climate_sinope, entity_id)
+    assert entity is not None
+    assert isinstance(entity, ThermostatEntity)
+
+    entity._async_update_time = AsyncMock(wraps=entity._async_update_time)
+
+    await asyncio.sleep(4600)
+
+    assert entity._async_update_time.await_count == 1
+    assert mfg_cluster.write_attributes.await_count == 1
+    assert "secs_since_2k" in mfg_cluster.write_attributes.await_args_list[0][0][0]
 
 
 async def test_climate_hvac_action_running_state_zen(
