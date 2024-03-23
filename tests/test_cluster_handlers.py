@@ -7,7 +7,7 @@ import logging
 import math
 from types import NoneType
 from unittest import mock
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from zigpy.device import Device as ZigpyDevice
@@ -28,6 +28,8 @@ from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
     ClusterHandler,
+    ClusterHandlerStatus,
+    parse_and_log_command,
     retry_request,
 )
 from zha.zigbee.cluster_handlers.const import (
@@ -298,7 +300,11 @@ async def test_in_cluster_handler_config(
     ).get(None)
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
+    assert cluster_handler.status == ClusterHandlerStatus.CREATED
+
     await cluster_handler.async_configure()
+
+    assert cluster_handler.status == ClusterHandlerStatus.CONFIGURED
 
     assert cluster.bind.call_count == bind_count
     assert cluster.configure_reporting.call_count == 0
@@ -712,6 +718,7 @@ async def test_poll_control_cluster_command(poll_control_device: ZHADevice) -> N
     cluster = poll_control_ch.cluster
     # events = async_capture_events("zha_event")
 
+    poll_control_ch.zha_send_event = MagicMock(wraps=poll_control_ch.zha_send_event)
     with mock.patch.object(poll_control_ch, "check_in_response", checkin_mock):
         tsn = 22
         hdr = make_zcl_header(0, global_command=False, tsn=tsn)
@@ -724,17 +731,10 @@ async def test_poll_control_cluster_command(poll_control_device: ZHADevice) -> N
     assert checkin_mock.await_count == 1
     assert checkin_mock.await_args[0][0] == tsn
 
-    # pylint: disable=pointless-string-statement
-    """
-    assert len(events) == 1
-    data = events[0].data
-    assert data["command"] == "checkin"
-    assert data["args"][0] is mock.sentinel.args
-    assert data["args"][1] is mock.sentinel.args2
-    assert data["args"][2] is mock.sentinel.args3
-    assert data["unique_id"] == "00:11:22:33:44:55:66:77:1:0x0020"
-    assert data["device_id"] == poll_control_device.device_id
-    """
+    assert poll_control_ch.zha_send_event.call_count == 1
+    assert poll_control_ch.zha_send_event.call_args_list[0] == mock.call(
+        "checkin", [mock.sentinel.args, mock.sentinel.args2, mock.sentinel.args3]
+    )
 
 
 async def test_poll_control_ignore_list(poll_control_device: ZHADevice) -> None:
@@ -1071,3 +1071,13 @@ async def test_cluster_handler_naming() -> None:
         for cluster_handler in cluster_handler_dict.values():
             assert not issubclass(cluster_handler, ClientClusterHandler)
             assert cluster_handler.__name__.endswith("ClusterHandler")
+
+
+def test_parse_and_log_command(poll_control_ch):  # noqa: F811
+    """Test that `parse_and_log_command` correctly parses a known command."""
+    assert parse_and_log_command(poll_control_ch, 0x00, 0x01, []) == "fast_poll_stop"
+
+
+def test_parse_and_log_command_unknown(poll_control_ch):  # noqa: F811
+    """Test that `parse_and_log_command` correctly parses an unknown command."""
+    assert parse_and_log_command(poll_control_ch, 0x00, 0xAB, []) == "0xAB"
