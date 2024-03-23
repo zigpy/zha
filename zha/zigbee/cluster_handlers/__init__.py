@@ -20,6 +20,13 @@ from zigpy.zcl.foundation import (
     ZCLAttributeDef,
 )
 
+from zha.application.const import (
+    ATTR_TYPE,
+    ZHA_CLUSTER_HANDLER_MSG,
+    ZHA_CLUSTER_HANDLER_MSG_BIND,
+    ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
+    ZHA_CLUSTER_HANDLER_MSG_DATA,
+)
 from zha.application.helpers import safe_read
 from zha.event import EventBase
 from zha.exceptions import ZHAException
@@ -198,7 +205,7 @@ class ClusterHandler(LogMixin, EventBase):
 
     def async_send_signal(self, signal: str, *args: Any) -> None:
         """Send a signal through dispatcher."""
-        # self._endpoint.async_send_signal(signal, *args) TODO
+        self._endpoint.async_send_signal(signal, *args)
 
     async def bind(self) -> None:
         """Bind a zigbee cluster.
@@ -209,10 +216,7 @@ class ClusterHandler(LogMixin, EventBase):
         try:
             res = await self.cluster.bind()
             self.debug("bound '%s' cluster: %s", self.cluster.ep_attribute, res[0])
-            # pylint: disable=pointless-string-statement
-            """ TODO
-            async_dispatcher_send(
-                self._endpoint.device.hass,
+            self._endpoint.device.emit(
                 ZHA_CLUSTER_HANDLER_MSG,
                 {
                     ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_BIND,
@@ -223,7 +227,6 @@ class ClusterHandler(LogMixin, EventBase):
                     },
                 },
             )
-            """
         except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
             self.debug(
                 "Failed to bind '%s' cluster: %s",
@@ -231,10 +234,7 @@ class ClusterHandler(LogMixin, EventBase):
                 str(ex),
                 exc_info=ex,
             )
-            # pylint: disable=pointless-string-statement
-            """ TODO
-            async_dispatcher_send(
-                self._endpoint.device.hass,
+            self._endpoint.device.emit(
                 ZHA_CLUSTER_HANDLER_MSG,
                 {
                     ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_BIND,
@@ -245,7 +245,6 @@ class ClusterHandler(LogMixin, EventBase):
                     },
                 },
             )
-            """
 
     async def configure_reporting(self) -> None:
         """Configure attribute reporting for a cluster.
@@ -300,10 +299,7 @@ class ClusterHandler(LogMixin, EventBase):
                 rest[REPORT_CONFIG_ATTR_PER_REQ:],
             )
 
-        # pylint: disable=pointless-string-statement
-        """ TODO
-        async_dispatcher_send(
-            self._endpoint.device.hass,
+        self._endpoint.device.emit(
             ZHA_CLUSTER_HANDLER_MSG,
             {
                 ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
@@ -314,7 +310,6 @@ class ClusterHandler(LogMixin, EventBase):
                 },
             },
         )
-        """
 
     def _configure_reporting_status(
         self,

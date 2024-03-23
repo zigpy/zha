@@ -419,9 +419,7 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
         if attr_name == "fan_mode":
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}", attrid, attr_name, value
-            )
+            self.attribute_updated(attrid, attr_name, value)
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)

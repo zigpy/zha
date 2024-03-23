@@ -233,12 +233,9 @@ class Endpoint:
             )
         )
 
-    # pylint: disable=pointless-string-statement
-    """TODO verify
     def async_send_signal(self, signal: str, *args: Any) -> None:
-        #Send a signal through hass dispatcher.
-        async_dispatcher_send(self.device.hass, signal, *args)
-    """
+        """Send a signal through hass dispatcher."""
+        self.device.emit(signal, *args)
 
     def send_event(self, signal: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""

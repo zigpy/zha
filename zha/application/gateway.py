@@ -22,16 +22,31 @@ from zigpy.types.named import EUI64
 
 from zha.application import discovery
 from zha.application.const import (
+    ATTR_IEEE,
+    ATTR_MANUFACTURER,
+    ATTR_MODEL,
+    ATTR_NWK,
+    ATTR_SIGNATURE,
+    ATTR_TYPE,
     CONF_CUSTOM_QUIRKS_PATH,
     CONF_ENABLE_QUIRKS,
     CONF_RADIO_TYPE,
     CONF_USE_THREAD,
     CONF_ZIGPY,
     DEVICE_PAIRING_STATUS,
+    UNKNOWN_MANUFACTURER,
+    UNKNOWN_MODEL,
+    ZHA_GW_MSG,
+    ZHA_GW_MSG_DEVICE_FULL_INIT,
+    ZHA_GW_MSG_DEVICE_INFO,
+    ZHA_GW_MSG_DEVICE_JOINED,
+    ZHA_GW_MSG_DEVICE_REMOVED,
     ZHA_GW_MSG_GROUP_ADDED,
+    ZHA_GW_MSG_GROUP_INFO,
     ZHA_GW_MSG_GROUP_MEMBER_ADDED,
     ZHA_GW_MSG_GROUP_MEMBER_REMOVED,
     ZHA_GW_MSG_GROUP_REMOVED,
+    ZHA_GW_MSG_RAW_INIT,
     RadioType,
 )
 from zha.application.helpers import ZHAData
@@ -40,6 +55,7 @@ from zha.async_ import (
     create_eager_task,
     gather_with_limited_concurrency,
 )
+from zha.event import EventBase
 from zha.zigbee.device import DeviceStatus, ZHADevice
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -57,7 +73,7 @@ class DevicePairingStatus(Enum):
     INITIALIZED = 4
 
 
-class ZHAGateway(AsyncUtilMixin):
+class ZHAGateway(AsyncUtilMixin, EventBase):
     """Gateway that handles events that happen on the ZHA Zigbee network."""
 
     def __init__(self, config: ZHAData) -> None:
@@ -297,10 +313,8 @@ class ZHAGateway(AsyncUtilMixin):
         At this point, no information about the device is known other than its
         address
         """
-        # pylint: disable=pointless-string-statement
-        """TODO
-        async_dispatcher_send(
-            self.hass,
+
+        self.emit(
             ZHA_GW_MSG,
             {
                 ATTR_TYPE: ZHA_GW_MSG_DEVICE_JOINED,
@@ -311,15 +325,11 @@ class ZHAGateway(AsyncUtilMixin):
                 },
             },
         )
-        """
 
     def raw_device_initialized(self, device: zigpy.device.Device) -> None:  # pylint: disable=unused-argument
         """Handle a device initialization without quirks loaded."""
-        # pylint: disable=pointless-string-statement
-        """TODO
-        manuf = device.manufacturer
-        async_dispatcher_send(
-            self.hass,
+
+        self.emit(
             ZHA_GW_MSG,
             {
                 ATTR_TYPE: ZHA_GW_MSG_RAW_INIT,
@@ -328,12 +338,13 @@ class ZHAGateway(AsyncUtilMixin):
                     ATTR_IEEE: str(device.ieee),
                     DEVICE_PAIRING_STATUS: DevicePairingStatus.INTERVIEW_COMPLETE.name,
                     ATTR_MODEL: device.model if device.model else UNKNOWN_MODEL,
-                    ATTR_MANUFACTURER: manuf if manuf else UNKNOWN_MANUFACTURER,
+                    ATTR_MANUFACTURER: device.manufacturer
+                    if device.manufacturer
+                    else UNKNOWN_MANUFACTURER,
                     ATTR_SIGNATURE: device.get_signature(),
                 },
             },
         )
-        """
 
     def device_initialized(self, device: zigpy.device.Device) -> None:
         """Handle device joined and basic information discovered."""
@@ -361,12 +372,6 @@ class ZHAGateway(AsyncUtilMixin):
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
         self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
-        # pylint: disable=pointless-string-statement
-        """TODO
-        async_dispatcher_send(
-            self.hass, f"{SIGNAL_GROUP_MEMBERSHIP_CHANGE}_0x{zigpy_group.group_id:04x}"
-        )
-        """
 
     def group_member_added(
         self, zigpy_group: zigpy.group.Group, endpoint: zigpy.endpoint.Endpoint
@@ -377,12 +382,6 @@ class ZHAGateway(AsyncUtilMixin):
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_added - endpoint: %s", endpoint)
         self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
-        # pylint: disable=pointless-string-statement
-        """TODO
-        async_dispatcher_send(
-            self.hass, f"{SIGNAL_GROUP_MEMBERSHIP_CHANGE}_0x{zigpy_group.group_id:04x}"
-        )
-        """
 
     def group_added(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group added event."""
@@ -405,57 +404,33 @@ class ZHAGateway(AsyncUtilMixin):
         """Send the gateway event for a zigpy group event."""
         zha_group = self._groups.get(zigpy_group.group_id)
         if zha_group is not None:
-            # pylint: disable=pointless-string-statement
-            """TODO
-            async_dispatcher_send(
-                self.hass,
+            self.emit(
                 ZHA_GW_MSG,
                 {
                     ATTR_TYPE: gateway_message_type,
                     ZHA_GW_MSG_GROUP_INFO: zha_group.group_info,
                 },
             )
-            """
 
     def device_removed(self, device: zigpy.device.Device) -> None:
         """Handle device being removed from the network."""
         _LOGGER.info("Removing device %s - %s", device.ieee, f"0x{device.nwk:04x}")
         zha_device = self._devices.pop(device.ieee, None)
         if zha_device is not None:
+            device_info = zha_device.zha_device_info
             self.track_task(
                 create_eager_task(
                     zha_device.on_remove(), name="ZHAGateway._async_remove_device"
                 )
             )
-            # pylint: disable=pointless-string-statement
-            """TODO
-            ### zhawss
-            self.server.client_manager.broadcast(
-                {
-                    DEVICE: device.zha_device_info,
-                    MESSAGE_TYPE: MessageTypes.EVENT,
-                    EVENT_TYPE: EventTypes.CONTROLLER_EVENT,
-                    EVENT: ControllerEvents.DEVICE_REMOVED,
-                }
-            )
-            ### HA
-            device_info = zha_device.zha_device_info
-            zha_device.async_cleanup_handles()
-            async_dispatcher_send(self.hass, f"{SIGNAL_REMOVE}_{str(zha_device.ieee)}")
-            self.hass.async_create_task(
-                self._async_remove_device(zha_device, entity_refs),
-                "ZHAGateway._async_remove_device",
-            )
             if device_info is not None:
-                async_dispatcher_send(
-                    self.hass,
+                self.emit(
                     ZHA_GW_MSG,
                     {
                         ATTR_TYPE: ZHA_GW_MSG_DEVICE_REMOVED,
                         ZHA_GW_MSG_DEVICE_INFO: device_info,
                     },
                 )
-            """
 
     def get_device(self, ieee: EUI64) -> ZHADevice | None:
         """Return ZHADevice for given ieee."""
@@ -539,40 +514,28 @@ class ZHAGateway(AsyncUtilMixin):
 
         device_info = zha_device.zha_device_info
         device_info[DEVICE_PAIRING_STATUS] = DevicePairingStatus.INITIALIZED.name
-        # pylint: disable=pointless-string-statement
-        """TODO
-        async_dispatcher_send(
-            self.hass,
+        self.emit(
             ZHA_GW_MSG,
             {
                 ATTR_TYPE: ZHA_GW_MSG_DEVICE_FULL_INIT,
                 ZHA_GW_MSG_DEVICE_INFO: device_info,
             },
         )
-        """
 
     async def _async_device_joined(self, zha_device: ZHADevice) -> None:
         zha_device.available = True
         device_info = zha_device.device_info
         await zha_device.async_configure()
         device_info[DEVICE_PAIRING_STATUS] = DevicePairingStatus.CONFIGURED.name
-        # pylint: disable=pointless-string-statement
-        """TODO
-        async_dispatcher_send(
-            self.hass,
+        self.emit(
             ZHA_GW_MSG,
             {
                 ATTR_TYPE: ZHA_GW_MSG_DEVICE_FULL_INIT,
                 ZHA_GW_MSG_DEVICE_INFO: device_info,
             },
         )
-        """
         await zha_device.async_initialize(from_cache=False)
         self.create_platform_entities()
-        # pylint: disable=pointless-string-statement
-        """TODO
-        async_dispatcher_send(self.hass, SIGNAL_ADD_ENTITIES)
-        """
 
     async def _async_device_rejoined(self, zha_device: ZHADevice) -> None:
         _LOGGER.debug(
@@ -585,17 +548,13 @@ class ZHAGateway(AsyncUtilMixin):
         await zha_device.async_configure()
         device_info = zha_device.device_info
         device_info[DEVICE_PAIRING_STATUS] = DevicePairingStatus.CONFIGURED.name
-        # pylint: disable=pointless-string-statement
-        """TODO
-        async_dispatcher_send(
-            self.hass,
+        self.emit(
             ZHA_GW_MSG,
             {
                 ATTR_TYPE: ZHA_GW_MSG_DEVICE_FULL_INIT,
                 ZHA_GW_MSG_DEVICE_INFO: device_info,
             },
         )
-        """
         # force async_initialize() to fire so don't explicitly call it
         zha_device.available = False
         zha_device.update_available(True)

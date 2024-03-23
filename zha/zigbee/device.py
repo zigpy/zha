@@ -35,6 +35,7 @@ from zha.application.const import (
     ATTR_CLUSTER_TYPE,
     ATTR_COMMAND,
     ATTR_COMMAND_TYPE,
+    ATTR_DEVICE_IEEE,
     ATTR_DEVICE_TYPE,
     ATTR_ENDPOINT_ID,
     ATTR_ENDPOINT_NAMES,
@@ -57,6 +58,8 @@ from zha.application.const import (
     ATTR_ROUTES,
     ATTR_RSSI,
     ATTR_SIGNATURE,
+    ATTR_TYPE,
+    ATTR_UNIQUE_ID,
     ATTR_VALUE,
     CLUSTER_COMMAND_SERVER,
     CLUSTER_COMMANDS_CLIENT,
@@ -74,11 +77,15 @@ from zha.application.const import (
     UNKNOWN,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
+    ZHA_CLUSTER_HANDLER_CFG_DONE,
+    ZHA_CLUSTER_HANDLER_MSG,
+    ZHA_EVENT,
     ZHA_OPTIONS,
 )
 from zha.application.helpers import async_get_zha_config_value, convert_to_zcl_values
 from zha.application.platforms import PlatformEntity
 from zha.decorators import periodic
+from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
 from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
@@ -119,7 +126,7 @@ class DeviceStatus(Enum):
     INITIALIZED = 2
 
 
-class ZHADevice(LogMixin):
+class ZHADevice(LogMixin, EventBase):
     """ZHA Zigbee device object."""
 
     __polling_interval: int
@@ -131,6 +138,7 @@ class ZHADevice(LogMixin):
         _gateway: ZHAGateway,
     ) -> None:
         """Initialize the gateway."""
+        super().__init__()
         self._gateway: ZHAGateway = _gateway
         self._zigpy_device: ZigpyDevice = zigpy_device
         self.quirk_applied: bool = isinstance(
@@ -543,18 +551,14 @@ class ZHADevice(LogMixin):
 
     def zha_send_event(self, event_data: dict[str, str | int]) -> None:  # pylint: disable=unused-argument
         """Relay events to hass."""
-        # pylint: disable=pointless-string-statement
-        """TODO verify
-        self.hass.bus.async_fire(
-            const.ZHA_EVENT,
+        self.emit(
+            ZHA_EVENT,
             {
-                const.ATTR_DEVICE_IEEE: str(self.ieee),
-                const.ATTR_UNIQUE_ID: str(self.ieee),
-                ATTR_DEVICE_ID: self.device_id,
+                ATTR_DEVICE_IEEE: str(self.ieee),
+                ATTR_UNIQUE_ID: str(self.ieee),
                 **event_data,
             },
         )
-        """
 
     async def _async_became_available(self) -> None:
         """Update device availability and signal entities."""
@@ -603,16 +607,16 @@ class ZHADevice(LogMixin):
         if isinstance(self._zigpy_device, CustomDeviceV2):
             self.debug("applying quirks v2 custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
-        # pylint: disable=pointless-string-statement
-        """ TODO verify
-        async_dispatcher_send(
-            self.hass,
-            const.ZHA_CLUSTER_HANDLER_MSG,
+
+        self.emit(
+            ZHA_CLUSTER_HANDLER_MSG,
             {
-                const.ATTR_TYPE: const.ZHA_CLUSTER_HANDLER_CFG_DONE,
+                ATTR_TYPE: ZHA_CLUSTER_HANDLER_CFG_DONE,
+                ATTR_DEVICE_IEEE: str(self.ieee),
+                ATTR_UNIQUE_ID: str(self.ieee),
             },
         )
-        """
+
         self.debug("completed configuration")
 
         if (

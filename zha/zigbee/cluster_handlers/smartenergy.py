@@ -27,7 +27,6 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_OP,
-    SIGNAL_ATTR_UPDATED,
 )
 
 if TYPE_CHECKING:
@@ -324,8 +323,7 @@ class MeteringClusterHandler(ClusterHandler):
         result = await self.get_attributes(attrs, from_cache=False, only_cache=False)
         if result:
             for attr, value in result.items():
-                self.async_send_signal(
-                    f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
+                self.attribute_updated(
                     self.cluster.find_attribute(attr).id,
                     attr,
                     value,

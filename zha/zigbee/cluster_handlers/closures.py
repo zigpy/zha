@@ -17,7 +17,6 @@ from zha.zigbee.cluster_handlers import (
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_EVENT,
     REPORT_CONFIG_IMMEDIATE,
-    SIGNAL_ATTR_UPDATED,
 )
 
 
@@ -193,8 +192,7 @@ class WindowCoveringClusterHandler(ClusterHandler):
             is not None
         ):
             # the 100 - value is because we need to invert the value before giving it to the entity
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
+            self.attribute_updated(
                 WindowCovering.AttributeDefs.current_position_lift_percentage.id,
                 WindowCovering.AttributeDefs.current_position_lift_percentage.name,
                 100
@@ -210,8 +208,7 @@ class WindowCoveringClusterHandler(ClusterHandler):
             is not None
         ):
             # the 100 - value is because we need to invert the value before giving it to the entity
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
+            self.attribute_updated(
                 WindowCovering.AttributeDefs.current_position_tilt_percentage.id,
                 WindowCovering.AttributeDefs.current_position_tilt_percentage.name,
                 100
