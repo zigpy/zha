@@ -101,7 +101,7 @@ def zha_device_mock(
     zigpy_device_mock: Callable[..., zigpy.device.Device],
     device_joined: Callable[..., ZHADevice],
 ) -> Callable[..., ZHADevice]:
-    """Channels mock factory."""
+    """Mock device factory."""
 
     async def _mock(
         endpoints,

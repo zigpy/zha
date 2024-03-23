@@ -1,6 +1,6 @@
 """Constants for the alarm control panel platform."""
 
-from enum import StrEnum
+from enum import IntFlag, StrEnum
 from typing import Final
 
 from zigpy.zcl.clusters.security import IasAce
@@ -36,3 +36,24 @@ IAS_ACE_STATE_MAP = {
     IasAce.PanelStatus.Armed_Away: AlarmState.ARMED_AWAY,
     IasAce.PanelStatus.In_Alarm: AlarmState.TRIGGERED,
 }
+
+ATTR_CHANGED_BY: Final[str] = "changed_by"
+ATTR_CODE_ARM_REQUIRED: Final[str] = "code_arm_required"
+
+
+class CodeFormat(StrEnum):
+    """Code formats for the Alarm Control Panel."""
+
+    TEXT = "text"
+    NUMBER = "number"
+
+
+class AlarmControlPanelEntityFeature(IntFlag):
+    """Supported features of the alarm control panel entity."""
+
+    ARM_HOME = 1
+    ARM_AWAY = 2
+    ARM_NIGHT = 4
+    TRIGGER = 8
+    ARM_CUSTOM_BYPASS = 16
+    ARM_VACATION = 32

@@ -24,6 +24,7 @@ from zha.application.platforms.alarm_control_panel.const import (
     SUPPORT_ALARM_ARM_NIGHT,
     SUPPORT_ALARM_TRIGGER,
     AlarmState,
+    CodeFormat,
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import (
@@ -51,6 +52,7 @@ _LOGGER = logging.getLogger(__name__)
 class ZHAAlarmControlPanel(PlatformEntity):
     """Entity for ZHA alarm control devices."""
 
+    _attr_translation_key: str = "alarm_control_panel"
     PLATFORM = Platform.ALARM_CONTROL_PANEL
 
     def __init__(
@@ -89,6 +91,16 @@ class ZHAAlarmControlPanel(PlatformEntity):
     def code_arm_required(self) -> bool:
         """Whether the code is required for arm actions."""
         return self._cluster_handler.code_required_arm_actions
+
+    @property
+    def code_format(self) -> CodeFormat:
+        """Code format or None if no code is required."""
+        return CodeFormat.NUMBER
+
+    @property
+    def translation_key(self) -> str:
+        """Return the translation key."""
+        return self._attr_translation_key
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
@@ -130,6 +142,8 @@ class ZHAAlarmControlPanel(PlatformEntity):
         json = super().to_json()
         json["supported_features"] = self.supported_features
         json["code_arm_required"] = self.code_arm_required
+        json["code_format"] = self.code_format
+        json["translation_key"] = self.translation_key
         return json
 
     @property

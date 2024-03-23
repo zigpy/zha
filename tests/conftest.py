@@ -300,7 +300,7 @@ def cluster_handler() -> Callable:
     ) -> MagicMock:
         ch = MagicMock()
         ch.name = name
-        ch.generic_id = f"channel_0x{cluster_id:04x}"
+        ch.generic_id = f"cluster_handler_0x{cluster_id:04x}"
         ch.id = f"{endpoint_id}:0x{cluster_id:04x}"
         ch.async_configure = AsyncMock()
         ch.async_initialize = AsyncMock()
