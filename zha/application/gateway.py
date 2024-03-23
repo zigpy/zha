@@ -41,7 +41,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.zigbee.device import DeviceStatus, ZHADevice
-from zha.zigbee.group import Group, GroupMember
+from zha.zigbee.group import Group, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 _R = TypeVar("_R")
@@ -603,7 +603,7 @@ class ZHAGateway(AsyncUtilMixin):
     async def async_create_zigpy_group(
         self,
         name: str,
-        members: list[GroupMember] | None,
+        members: list[GroupMemberReference] | None,
         group_id: int | None = None,
     ) -> Group | None:
         """Create a new Zigpy Zigbee group."""
@@ -669,6 +669,7 @@ class ZHAGateway(AsyncUtilMixin):
         await _cancel_tasks(self._background_tasks)
         await _cancel_tasks(self._tracked_completable_tasks)
         await _cancel_tasks(self._device_init_tasks.values())
+        self._cancel_cancellable_timers()
 
         for device in self._devices.values():
             await device.on_remove()

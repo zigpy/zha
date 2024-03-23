@@ -159,12 +159,6 @@ class AsyncUtilMixin:
         self._untracked_background_tasks: set[asyncio.Future[Any]] = set()
         super().__init__(*args, **kw_args)
 
-    def block_till_done(self) -> None:
-        """Block until all pending work is done."""
-        asyncio.run_coroutine_threadsafe(
-            self.async_block_till_done(), self.loop
-        ).result()
-
     async def async_block_till_done(self, wait_background_tasks: bool = False) -> None:
         """Block until all pending work is done."""
         # To flush out any call_soon_threadsafe
@@ -240,6 +234,19 @@ class AsyncUtilMixin:
                 self.async_add_job, ZHAJob(target), *args, eager_start=True
             )
         )
+
+    def _cancel_cancellable_timers(self) -> None:
+        """Cancel timer handles marked as cancellable."""
+        # pylint: disable-next=protected-access
+        handles: Iterable[asyncio.TimerHandle] = self.loop._scheduled  # type: ignore[attr-defined]
+        for handle in handles:
+            if (
+                not handle.cancelled()
+                and (args := handle._args)  # pylint: disable=protected-access
+                and type(job := args[0]) is ZHAJob
+                and job.cancel_on_shutdown
+            ):
+                handle.cancel()
 
     @overload
     @callback

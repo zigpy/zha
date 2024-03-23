@@ -119,7 +119,7 @@ async def _send_time_changed(zha_gateway: ZHAGateway, seconds: int):
 @pytest.mark.looptime
 async def test_check_available_success(
     zha_gateway: ZHAGateway,
-    device_with_basic_cluster_handler: ZigpyDevice,
+    device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
 ) -> None:
     """Check device availability success on 1st try."""
@@ -138,7 +138,7 @@ async def test_check_available_success(
     )
     _seens = [time.time(), device_with_basic_cluster_handler.last_seen]
 
-    def _update_last_seen(*args, **kwargs):
+    def _update_last_seen(*args, **kwargs):  # pylint: disable=unused-argument
         new_last_seen = _seens.pop()
         device_with_basic_cluster_handler.last_seen = new_last_seen
 
@@ -170,7 +170,7 @@ async def test_check_available_success(
 @pytest.mark.looptime
 async def test_check_available_unsuccessful(
     zha_gateway: ZHAGateway,
-    device_with_basic_cluster_handler: ZigpyDevice,
+    device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
 ) -> None:
     """Check device availability all tries fail."""
@@ -214,7 +214,7 @@ async def test_check_available_unsuccessful(
 @pytest.mark.looptime
 async def test_check_available_no_basic_cluster_handler(
     zha_gateway: ZHAGateway,
-    device_without_basic_cluster_handler: ZigpyDevice,
+    device_without_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -238,7 +238,7 @@ async def test_check_available_no_basic_cluster_handler(
 
 async def test_device_is_active_coordinator(
     device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-    zigpy_device: Callable[..., ZigpyDevice],
+    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test that the current coordinator is uniquely detected."""
 
