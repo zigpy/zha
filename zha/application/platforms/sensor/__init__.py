@@ -223,6 +223,7 @@ class PollableSensor(Sensor):
 
     _REFRESH_INTERVAL = (30, 45)
     _use_custom_polling: bool = True
+    __polling_interval: int
 
     def __init__(
         self,
@@ -243,6 +244,10 @@ class PollableSensor(Sensor):
                     eager_start=True,
                     untracked=True,
                 )
+            )
+            self.debug(
+                "started polling with refresh interval of %s",
+                getattr(self, "__polling_interval"),
             )
 
     @property
@@ -270,6 +275,7 @@ class DeviceCounterSensor(BaseEntity):
 
     PLATFORM = Platform.SENSOR
     _REFRESH_INTERVAL = (30, 45)
+    __polling_interval: int
     _use_custom_polling: bool = True
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL
     _attr_entity_category = EntityCategory.DIAGNOSTIC
@@ -320,6 +326,10 @@ class DeviceCounterSensor(BaseEntity):
                 eager_start=True,
                 untracked=True,
             )
+        )
+        self.debug(
+            "started polling with refresh interval of %s",
+            getattr(self, "__polling_interval"),
         )
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
         if self.unique_id not in self._device.platform_entities:

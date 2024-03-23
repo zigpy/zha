@@ -684,6 +684,7 @@ class Light(PlatformEntity, BaseLight):
     _supported_color_modes: set[ColorMode]
     _attr_translation_key: str = "light"
     _REFRESH_INTERVAL = (2700, 4500)
+    __polling_interval: int
 
     def __init__(
         self,
@@ -823,19 +824,23 @@ class Light(PlatformEntity, BaseLight):
                 CLUSTER_HANDLER_EVENT, self._handle_event_protocol
             )
 
-        @periodic(self._REFRESH_INTERVAL)
-        async def _refresh() -> None:
-            """Call async_get_state at an interval."""
-            await self.async_update()
-
         self._tracked_tasks.append(
             device.gateway.async_create_background_task(
-                _refresh(),
+                self._refresh(),
                 name=f"light_refresh_{self.unique_id}",
                 eager_start=True,
                 untracked=True,
             )
         )
+        self.debug(
+            "started polling with refresh interval of %s",
+            getattr(self, "__polling_interval"),
+        )
+
+    @periodic(_REFRESH_INTERVAL)
+    async def _refresh(self) -> None:
+        """Call async_get_state at an interval."""
+        await self.async_update()
 
     def transition_on(self):
         """Handle a transition start event from a group."""

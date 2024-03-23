@@ -65,6 +65,7 @@ def periodic(refresh_interval: tuple, run_immediately=False) -> Callable:
         async def wrapper(*args: Any, **kwargs: Any) -> None:
             sleep_time = random.randint(*refresh_interval)
             method_info = f"[{func.__module__}::{func.__qualname__}]"
+            setattr(args[0], "__polling_interval", sleep_time)
             _LOGGER.debug(
                 "Sleep time for periodic task: %s is %s seconds",
                 method_info,

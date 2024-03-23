@@ -45,6 +45,7 @@ class ZHADeviceScannerEntity(PlatformEntity):
 
     _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_name: str = "Device scanner"
+    __polling_interval: int
 
     def __init__(
         self,
@@ -73,6 +74,10 @@ class ZHADeviceScannerEntity(PlatformEntity):
                 eager_start=True,
                 untracked=True,
             )
+        )
+        self.debug(
+            "started polling with refresh interval of %s",
+            getattr(self, "__polling_interval"),
         )
 
     async def async_update(self) -> None:

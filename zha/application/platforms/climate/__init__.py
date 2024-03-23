@@ -474,6 +474,7 @@ class SinopeTechnologiesThermostat(Thermostat):
     """Sinope Technologies Thermostat."""
 
     manufacturer = 0x119C
+    __polling_interval: int
 
     def __init__(
         self,
@@ -496,6 +497,10 @@ class SinopeTechnologiesThermostat(Thermostat):
                 eager_start=True,
                 untracked=True,
             )
+        )
+        self.debug(
+            "started time updating interval of %s",
+            getattr(self, "__polling_interval"),
         )
 
     @periodic((2700, 4500))

@@ -122,6 +122,7 @@ class DeviceStatus(Enum):
 class ZHADevice(LogMixin):
     """ZHA Zigbee device object."""
 
+    __polling_interval: int
     _ha_device_id: str
 
     def __init__(
@@ -178,7 +179,6 @@ class ZHADevice(LogMixin):
                 self._endpoints[ep_id] = Endpoint.new(endpoint, self)
 
         if not self.is_coordinator:
-            self.debug("starting availability checks")
             self._tracked_tasks.append(
                 self.gateway.async_create_background_task(
                     self._check_available(),
@@ -186,6 +186,10 @@ class ZHADevice(LogMixin):
                     eager_start=True,
                     untracked=True,
                 )
+            )
+            self.debug(
+                "starting availability checks - interval: %s",
+                getattr(self, "__polling_interval"),
             )
 
     @property
