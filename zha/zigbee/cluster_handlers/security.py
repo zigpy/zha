@@ -7,6 +7,7 @@ https://home-assistant.io/integrations/zha/
 from __future__ import annotations
 
 from collections.abc import Callable
+import dataclasses
 from typing import TYPE_CHECKING, Any, Final
 
 import zigpy.zcl
@@ -36,6 +37,7 @@ SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class ClusterHandlerStateChangedEvent:
     """Event to signal that a cluster attribute has been updated."""
 
@@ -109,7 +111,7 @@ class IasAceClusterHandler(ClusterHandler):
             self.emit_propagated_event(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}")
         else:
             self.emit_propagated_event(f"{self.unique_id}_{SIGNAL_ARMED_STATE_CHANGED}")
-        self._send_panel_status_changed()
+        self._emit_panel_status_changed()
 
     def _disarm(self, code: str):
         """Test the code and disarm the panel if the code is correct."""
@@ -207,7 +209,7 @@ class IasAceClusterHandler(ClusterHandler):
         """Set the specified alarm status."""
         self.alarm_status = status
         self.armed_state = AceCluster.PanelStatus.In_Alarm
-        self._send_panel_status_changed()
+        self._emit_panel_status_changed()
 
     def _get_zone_id_map(self):
         """Handle the IAS ACE zone id map command."""
@@ -225,7 +227,7 @@ class IasAceClusterHandler(ClusterHandler):
         )
         self._endpoint.device.gateway.async_create_task(response)
 
-    def _send_panel_status_changed(self) -> None:
+    def _emit_panel_status_changed(self) -> None:
         """Handle the IAS ACE panel status changed command."""
         response = self.panel_status_changed(
             self.armed_state,
