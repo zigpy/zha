@@ -92,6 +92,7 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
             setup_quirks(
                 custom_quirks_path=config.yaml_config.get(CONF_CUSTOM_QUIRKS_PATH)
             )
+        self.config.gateway = self
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
