@@ -21,11 +21,9 @@ from zigpy.zcl.foundation import (
 )
 
 from zha.application.const import (
-    ATTR_TYPE,
     ZHA_CLUSTER_HANDLER_MSG,
     ZHA_CLUSTER_HANDLER_MSG_BIND,
     ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
-    ZHA_CLUSTER_HANDLER_MSG_DATA,
 )
 from zha.application.helpers import safe_read
 from zha.event import EventBase
@@ -135,6 +133,30 @@ class ClusterAttributeUpdatedEvent:
     event: Final[str] = CLUSTER_HANDLER_ATTRIBUTE_UPDATED
 
 
+@dataclass(kw_only=True, frozen=True)
+class ClusterBindEvent:
+    """Event generated when the cluster is bound."""
+
+    cluster_name: str
+    cluster_id: int
+    success: bool
+    cluster_handler_unique_id: str
+    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
+    event: Final[str] = ZHA_CLUSTER_HANDLER_MSG_BIND
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterConfigureReportingEvent:
+    """Event generates when a cluster configures attribute reporting."""
+
+    cluster_name: str
+    cluster_id: int
+    attributes: dict[str, dict[str, Any]]
+    cluster_handler_unique_id: str
+    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
+    event: Final[str] = ZHA_CLUSTER_HANDLER_MSG_CFG_RPT
+
+
 class ClusterHandler(LogMixin, EventBase):
     """Base cluster handler for a Zigbee cluster."""
 
@@ -218,14 +240,12 @@ class ClusterHandler(LogMixin, EventBase):
             self.debug("bound '%s' cluster: %s", self.cluster.ep_attribute, res[0])
             self._endpoint.device.emit(
                 ZHA_CLUSTER_HANDLER_MSG,
-                {
-                    ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_BIND,
-                    ZHA_CLUSTER_HANDLER_MSG_DATA: {
-                        "cluster_name": self.cluster.name,
-                        "cluster_id": self.cluster.cluster_id,
-                        "success": res[0] == 0,
-                    },
-                },
+                ClusterBindEvent(
+                    cluster_name=self.cluster.name,
+                    cluster_id=self.cluster.cluster_id,
+                    cluster_handler_unique_id=self.unique_id,
+                    success=res[0] == 0,
+                ),
             )
         except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
             self.debug(
@@ -236,14 +256,12 @@ class ClusterHandler(LogMixin, EventBase):
             )
             self._endpoint.device.emit(
                 ZHA_CLUSTER_HANDLER_MSG,
-                {
-                    ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_BIND,
-                    ZHA_CLUSTER_HANDLER_MSG_DATA: {
-                        "cluster_name": self.cluster.name,
-                        "cluster_id": self.cluster.cluster_id,
-                        "success": False,
-                    },
-                },
+                ClusterBindEvent(
+                    cluster_name=self.cluster.name,
+                    cluster_id=self.cluster.cluster_id,
+                    cluster_handler_unique_id=self.unique_id,
+                    success=False,
+                ),
             )
 
     async def configure_reporting(self) -> None:
@@ -301,14 +319,12 @@ class ClusterHandler(LogMixin, EventBase):
 
         self._endpoint.device.emit(
             ZHA_CLUSTER_HANDLER_MSG,
-            {
-                ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
-                ZHA_CLUSTER_HANDLER_MSG_DATA: {
-                    "cluster_name": self.cluster.name,
-                    "cluster_id": self.cluster.cluster_id,
-                    "attributes": event_data,
-                },
-            },
+            ClusterConfigureReportingEvent(
+                cluster_name=self.cluster.name,
+                cluster_id=self.cluster.cluster_id,
+                cluster_handler_unique_id=self.unique_id,
+                attributes=event_data,
+            ),
         )
 
     def _configure_reporting_status(

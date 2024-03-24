@@ -11,7 +11,7 @@ from enum import Enum
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Final, Self
 
 from zigpy import types
 from zigpy.device import Device as ZigpyDevice
@@ -35,7 +35,6 @@ from zha.application.const import (
     ATTR_CLUSTER_TYPE,
     ATTR_COMMAND,
     ATTR_COMMAND_TYPE,
-    ATTR_DEVICE_IEEE,
     ATTR_DEVICE_TYPE,
     ATTR_ENDPOINT_ID,
     ATTR_ENDPOINT_NAMES,
@@ -58,8 +57,6 @@ from zha.application.const import (
     ATTR_ROUTES,
     ATTR_RSSI,
     ATTR_SIGNATURE,
-    ATTR_TYPE,
-    ATTR_UNIQUE_ID,
     ATTR_VALUE,
     CLUSTER_COMMAND_SERVER,
     CLUSTER_COMMANDS_CLIENT,
@@ -124,6 +121,27 @@ class DeviceStatus(Enum):
 
     CREATED = 1
     INITIALIZED = 2
+
+
+@dataclass(kw_only=True, frozen=True)
+class ZHAEvent:
+    """Event generated when a device wishes to send an arbitrary event."""
+
+    device_ieee: str
+    unique_id: str
+    data: dict[str, Any]
+    event_type: Final[str] = ZHA_EVENT
+    event: Final[str] = ZHA_EVENT
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterHandlerConfigurationComplete:
+    """Event generated when all cluster handlers are configured."""
+
+    device_ieee: str
+    unique_id: str
+    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
+    event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
 
 
 class ZHADevice(LogMixin, EventBase):
@@ -553,11 +571,11 @@ class ZHADevice(LogMixin, EventBase):
         """Relay events to hass."""
         self.emit(
             ZHA_EVENT,
-            {
-                ATTR_DEVICE_IEEE: str(self.ieee),
-                ATTR_UNIQUE_ID: str(self.ieee),
-                **event_data,
-            },
+            ZHAEvent(
+                device_ieee=str(self.ieee),
+                unique_id=str(self.ieee),
+                data=event_data,
+            ),
         )
 
     async def _async_became_available(self) -> None:
@@ -609,12 +627,10 @@ class ZHADevice(LogMixin, EventBase):
             await self._zigpy_device.apply_custom_configuration()
 
         self.emit(
-            ZHA_CLUSTER_HANDLER_MSG,
-            {
-                ATTR_TYPE: ZHA_CLUSTER_HANDLER_CFG_DONE,
-                ATTR_DEVICE_IEEE: str(self.ieee),
-                ATTR_UNIQUE_ID: str(self.ieee),
-            },
+            ClusterHandlerConfigurationComplete(
+                device_ieee=str(self.ieee),
+                unique_id=str(self.ieee),
+            )
         )
 
         self.debug("completed configuration")
