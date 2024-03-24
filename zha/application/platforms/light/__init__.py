@@ -214,6 +214,11 @@ class BaseLight(BaseEntity, ABC):
         """Flag supported features."""
         return self._supported_features
 
+    @property
+    def supported_color_modes(self) -> set[ColorMode]:
+        """Flag supported color modes."""
+        return self._supported_color_modes
+
     def to_json(self) -> dict:
         """Return a JSON representation of the select."""
         json = super().to_json()
