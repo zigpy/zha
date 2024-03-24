@@ -47,7 +47,7 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_OUTPUT)
-class ZhaNumber(PlatformEntity):
+class Number(PlatformEntity):
     """Representation of a ZHA Number entity."""
 
     PLATFORM = Platform.NUMBER
@@ -170,7 +170,7 @@ class ZhaNumber(PlatformEntity):
         return response
 
 
-class ZHANumberConfigurationEntity(PlatformEntity):
+class NumberConfigurationEntity(PlatformEntity):
     """Representation of a ZHA number configuration entity."""
 
     PLATFORM = Platform.NUMBER
@@ -331,7 +331,7 @@ class ZHANumberConfigurationEntity(PlatformEntity):
     cluster_handler_names="opple_cluster",
     models={"lumi.motion.ac02", "lumi.motion.agl04"},
 )
-class AqaraMotionDetectionInterval(ZHANumberConfigurationEntity):
+class AqaraMotionDetectionInterval(NumberConfigurationEntity):
     """Representation of a ZHA motion detection interval configuration entity."""
 
     _unique_id_suffix = "detection_interval"
@@ -342,7 +342,7 @@ class AqaraMotionDetectionInterval(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-class OnOffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
+class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on off transition time configuration entity."""
 
     _unique_id_suffix = "on_off_transition_time"
@@ -353,7 +353,7 @@ class OnOffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-class OnLevelConfigurationEntity(ZHANumberConfigurationEntity):
+class OnLevelConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on level configuration entity."""
 
     _unique_id_suffix = "on_level"
@@ -364,7 +364,7 @@ class OnLevelConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-class OnTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
+class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on transition time configuration entity."""
 
     _unique_id_suffix = "on_transition_time"
@@ -375,7 +375,7 @@ class OnTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-class OffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
+class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA off transition time configuration entity."""
 
     _unique_id_suffix = "off_transition_time"
@@ -386,7 +386,7 @@ class OffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-class DefaultMoveRateConfigurationEntity(ZHANumberConfigurationEntity):
+class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA default move rate configuration entity."""
 
     _unique_id_suffix = "default_move_rate"
@@ -397,7 +397,7 @@ class DefaultMoveRateConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-class StartUpCurrentLevelConfigurationEntity(ZHANumberConfigurationEntity):
+class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA startup current level configuration entity."""
 
     _unique_id_suffix = "start_up_current_level"
@@ -408,7 +408,7 @@ class StartUpCurrentLevelConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COLOR)
-class StartUpColorTemperatureConfigurationEntity(ZHANumberConfigurationEntity):
+class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA startup color temperature configuration entity."""
 
     _unique_id_suffix = "start_up_color_temperature"
@@ -438,7 +438,7 @@ class StartUpColorTemperatureConfigurationEntity(ZHANumberConfigurationEntity):
         "_TZE200_htnnfasr",
     },
 )
-class TimerDurationMinutes(ZHANumberConfigurationEntity):
+class TimerDurationMinutes(NumberConfigurationEntity):
     """Representation of a ZHA timer duration configuration entity."""
 
     _unique_id_suffix = "timer_duration"
@@ -452,7 +452,7 @@ class TimerDurationMinutes(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names="ikea_airpurifier")
-class FilterLifeTime(ZHANumberConfigurationEntity):
+class FilterLifeTime(NumberConfigurationEntity):
     """Representation of a ZHA filter lifetime configuration entity."""
 
     _unique_id_suffix = "filter_life_time"
@@ -470,7 +470,7 @@ class FilterLifeTime(ZHANumberConfigurationEntity):
     manufacturers={"TexasInstruments"},
     models={"ti.router"},
 )
-class TiRouterTransmitPower(ZHANumberConfigurationEntity):
+class TiRouterTransmitPower(NumberConfigurationEntity):
     """Representation of a ZHA TI transmit power configuration entity."""
 
     _unique_id_suffix = "transmit_power"
@@ -481,7 +481,7 @@ class TiRouterTransmitPower(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliRemoteDimmingUpSpeed(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
     """Inovelli remote dimming up speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_up_remote"
@@ -494,7 +494,7 @@ class InovelliRemoteDimmingUpSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliButtonDelay(ZHANumberConfigurationEntity):
+class InovelliButtonDelay(NumberConfigurationEntity):
     """Inovelli button delay configuration entity."""
 
     _unique_id_suffix = "button_delay"
@@ -507,7 +507,7 @@ class InovelliButtonDelay(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliLocalDimmingUpSpeed(ZHANumberConfigurationEntity):
+class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
     """Inovelli local dimming up speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_up_local"
@@ -520,7 +520,7 @@ class InovelliLocalDimmingUpSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliLocalRampRateOffToOn(ZHANumberConfigurationEntity):
+class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
     """Inovelli off to on local ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_off_to_on_local"
@@ -533,7 +533,7 @@ class InovelliLocalRampRateOffToOn(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliRemoteDimmingSpeedOffToOn(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
     """Inovelli off to on remote ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_off_to_on_remote"
@@ -546,7 +546,7 @@ class InovelliRemoteDimmingSpeedOffToOn(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliRemoteDimmingDownSpeed(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
     """Inovelli remote dimming down speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_down_remote"
@@ -559,7 +559,7 @@ class InovelliRemoteDimmingDownSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliLocalDimmingDownSpeed(ZHANumberConfigurationEntity):
+class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
     """Inovelli local dimming down speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_down_local"
@@ -572,7 +572,7 @@ class InovelliLocalDimmingDownSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliLocalRampRateOnToOff(ZHANumberConfigurationEntity):
+class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
     """Inovelli local on to off ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_on_to_off_local"
@@ -585,7 +585,7 @@ class InovelliLocalRampRateOnToOff(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliRemoteDimmingSpeedOnToOff(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
     """Inovelli remote on to off ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_on_to_off_remote"
@@ -598,7 +598,7 @@ class InovelliRemoteDimmingSpeedOnToOff(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliMinimumLoadDimmingLevel(ZHANumberConfigurationEntity):
+class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
     """Inovelli minimum load dimming level configuration entity."""
 
     _unique_id_suffix = "minimum_level"
@@ -611,7 +611,7 @@ class InovelliMinimumLoadDimmingLevel(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliMaximumLoadDimmingLevel(ZHANumberConfigurationEntity):
+class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
     """Inovelli maximum load dimming level configuration entity."""
 
     _unique_id_suffix = "maximum_level"
@@ -624,7 +624,7 @@ class InovelliMaximumLoadDimmingLevel(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliAutoShutoffTimer(ZHANumberConfigurationEntity):
+class InovelliAutoShutoffTimer(NumberConfigurationEntity):
     """Inovelli automatic switch shutoff timer configuration entity."""
 
     _unique_id_suffix = "auto_off_timer"
@@ -639,7 +639,7 @@ class InovelliAutoShutoffTimer(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM35-SN"}
 )
-class InovelliQuickStartTime(ZHANumberConfigurationEntity):
+class InovelliQuickStartTime(NumberConfigurationEntity):
     """Inovelli fan quick start time configuration entity."""
 
     _unique_id_suffix = "quick_start_time"
@@ -652,7 +652,7 @@ class InovelliQuickStartTime(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliLoadLevelIndicatorTimeout(ZHANumberConfigurationEntity):
+class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
     """Inovelli load level indicator timeout configuration entity."""
 
     _unique_id_suffix = "load_level_indicator_timeout"
@@ -665,7 +665,7 @@ class InovelliLoadLevelIndicatorTimeout(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliDefaultAllLEDOnColor(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
     """Inovelli default all led color when on configuration entity."""
 
     _unique_id_suffix = "led_color_when_on"
@@ -678,7 +678,7 @@ class InovelliDefaultAllLEDOnColor(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliDefaultAllLEDOffColor(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
     """Inovelli default all led color when off configuration entity."""
 
     _unique_id_suffix = "led_color_when_off"
@@ -691,7 +691,7 @@ class InovelliDefaultAllLEDOffColor(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliDefaultAllLEDOnIntensity(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
     """Inovelli default all led intensity when on configuration entity."""
 
     _unique_id_suffix = "led_intensity_when_on"
@@ -704,7 +704,7 @@ class InovelliDefaultAllLEDOnIntensity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliDefaultAllLEDOffIntensity(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
     """Inovelli default all led intensity when off configuration entity."""
 
     _unique_id_suffix = "led_intensity_when_off"
@@ -717,7 +717,7 @@ class InovelliDefaultAllLEDOffIntensity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliDoubleTapUpLevel(ZHANumberConfigurationEntity):
+class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
     """Inovelli double tap up level configuration entity."""
 
     _unique_id_suffix = "double_tap_up_level"
@@ -730,7 +730,7 @@ class InovelliDoubleTapUpLevel(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-class InovelliDoubleTapDownLevel(ZHANumberConfigurationEntity):
+class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     """Inovelli double tap down level configuration entity."""
 
     _unique_id_suffix = "double_tap_down_level"
@@ -745,7 +745,7 @@ class InovelliDoubleTapDownLevel(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-class AqaraPetFeederServingSize(ZHANumberConfigurationEntity):
+class AqaraPetFeederServingSize(NumberConfigurationEntity):
     """Aqara pet feeder serving size configuration entity."""
 
     _unique_id_suffix = "serving_size"
@@ -762,7 +762,7 @@ class AqaraPetFeederServingSize(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-class AqaraPetFeederPortionWeight(ZHANumberConfigurationEntity):
+class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
     """Aqara pet feeder portion weight configuration entity."""
 
     _unique_id_suffix = "portion_weight"
@@ -780,7 +780,7 @@ class AqaraPetFeederPortionWeight(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-class AqaraThermostatAwayTemp(ZHANumberConfigurationEntity):
+class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     """Aqara away preset temperature configuration entity."""
 
     _unique_id_suffix = "away_preset_temperature"
@@ -800,7 +800,7 @@ class AqaraThermostatAwayTemp(ZHANumberConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
 )
-class ThermostatLocalTempCalibration(ZHANumberConfigurationEntity):
+class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     """Local temperature calibration."""
 
     _unique_id_suffix = "local_temperature_calibration"
@@ -832,7 +832,7 @@ class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY, models={"SNZB-06P"}
 )
-class SonoffPresenceSenorTimeout(ZHANumberConfigurationEntity):
+class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
     """Configuration of Sonoff sensor presence detection timeout."""
 
     _unique_id_suffix = "presence_detection_timeout"
@@ -846,7 +846,7 @@ class SonoffPresenceSenorTimeout(ZHANumberConfigurationEntity):
     _attr_icon: str = "mdi:timer-edit"
 
 
-class ZCLTemperatureEntity(ZHANumberConfigurationEntity):
+class ZCLTemperatureEntity(NumberConfigurationEntity):
     """Common entity class for ZCL temperature input."""
 
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS

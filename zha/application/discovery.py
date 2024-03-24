@@ -106,19 +106,19 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         Platform.BUTTON,
         WriteAttributeButtonMetadata,
         EntityType.CONFIG,
-    ): button.ZHAAttributeButton,
+    ): button.WriteAttributeButton,
     (
         Platform.BUTTON,
         WriteAttributeButtonMetadata,
         EntityType.STANDARD,
-    ): button.ZHAAttributeButton,
-    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.CONFIG): button.ZHAButton,
+    ): button.WriteAttributeButton,
+    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.CONFIG): button.Button,
     (
         Platform.BUTTON,
         ZCLCommandButtonMetadata,
         EntityType.DIAGNOSTIC,
-    ): button.ZHAButton,
-    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.STANDARD): button.ZHAButton,
+    ): button.Button,
+    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.STANDARD): button.Button,
     (
         Platform.BINARY_SENSOR,
         BinarySensorMetadata,
@@ -149,14 +149,14 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         Platform.NUMBER,
         NumberMetadata,
         EntityType.CONFIG,
-    ): number.ZHANumberConfigurationEntity,
-    (Platform.NUMBER, NumberMetadata, EntityType.DIAGNOSTIC): number.ZhaNumber,
-    (Platform.NUMBER, NumberMetadata, EntityType.STANDARD): number.ZhaNumber,
+    ): number.NumberConfigurationEntity,
+    (Platform.NUMBER, NumberMetadata, EntityType.DIAGNOSTIC): number.Number,
+    (Platform.NUMBER, NumberMetadata, EntityType.STANDARD): number.Number,
     (
         Platform.SWITCH,
         SwitchMetadata,
         EntityType.CONFIG,
-    ): switch.ZHASwitchConfigurationEntity,
+    ): switch.SwitchConfigurationEntity,
     (Platform.SWITCH, SwitchMetadata, EntityType.STANDARD): switch.Switch,
 }
 

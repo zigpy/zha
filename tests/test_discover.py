@@ -369,7 +369,7 @@ async def test_discover_endpoint(
         test_ent_class = ent_info[DEV_SIG_ENT_MAP_CLASS]
         test_unique_id_head = UNIQUE_ID_HD.match(unique_id).group(0)
         if (
-            test_ent_class != "ZHAFirmwareUpdateEntity"
+            test_ent_class != "FirmwareUpdateEntity"
         ):  # TODO remove this when update is fixed
             assert (test_unique_id_head, test_ent_class) in ha_ent_info
 

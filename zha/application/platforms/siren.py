@@ -53,7 +53,7 @@ class SirenEntityFeature(IntFlag):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHASiren(PlatformEntity):
+class Siren(PlatformEntity):
     """Representation of a ZHA siren."""
 
     PLATFORM = Platform.SIREN

@@ -1,4 +1,4 @@
-"""Support for the ZHA platform."""
+"""Support for the ZHA device tracker platform."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ class SourceType(StrEnum):
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
-class ZHADeviceScannerEntity(PlatformEntity):
+class DeviceScannerEntity(PlatformEntity):
     """Represent a tracked device."""
 
     PLATFORM = Platform.DEVICE_TRACKER

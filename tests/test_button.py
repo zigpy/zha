@@ -29,7 +29,7 @@ from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_T
 from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import EntityCategory, PlatformEntity
-from zha.application.platforms.button import ZHAAttributeButton, ZHAButton
+from zha.application.platforms.button import Button, WriteAttributeButton
 from zha.application.platforms.button.const import ButtonDeviceClass
 from zha.exceptions import ZHAException
 from zha.zigbee.device import ZHADevice
@@ -122,7 +122,7 @@ async def test_button(
     assert cluster is not None
     entity: PlatformEntity = find_entity(zha_device, Platform.BUTTON)  # type: ignore
     assert entity is not None
-    assert isinstance(entity, ZHAButton)
+    assert isinstance(entity, Button)
     assert entity.PLATFORM == Platform.BUTTON
 
     with patch(
@@ -159,7 +159,7 @@ async def test_frost_unlock(
     )
     entity: PlatformEntity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert isinstance(entity, ZHAAttributeButton)
+    assert isinstance(entity, WriteAttributeButton)
 
     assert entity._attr_device_class == ButtonDeviceClass.RESTART
     assert entity._attr_entity_category == EntityCategory.CONFIG
@@ -260,7 +260,7 @@ async def test_quirks_command_button(
     assert cluster is not None
     entity_id = find_entity_id(Platform.BUTTON, zha_device)
     entity: PlatformEntity = get_entity(zha_device, entity_id)
-    assert isinstance(entity, ZHAButton)
+    assert isinstance(entity, Button)
     assert entity is not None
 
     with patch(
@@ -285,7 +285,7 @@ async def test_quirks_write_attr_button(
     assert cluster is not None
     entity_id = find_entity_id(Platform.BUTTON, zha_device, qualifier="feed")
     entity: PlatformEntity = get_entity(zha_device, entity_id)
-    assert isinstance(entity, ZHAAttributeButton)
+    assert isinstance(entity, WriteAttributeButton)
     assert entity is not None
 
     assert cluster.get(cluster.AttributeDefs.feed.name) == 0

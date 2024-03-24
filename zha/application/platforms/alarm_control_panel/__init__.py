@@ -49,7 +49,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_ACE)
-class ZHAAlarmControlPanel(PlatformEntity):
+class AlarmControlPanel(PlatformEntity):
     """Entity for ZHA alarm control devices."""
 
     _attr_translation_key: str = "alarm_control_panel"

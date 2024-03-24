@@ -49,7 +49,7 @@ MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVE
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
-class ZhaCover(PlatformEntity):
+class Cover(PlatformEntity):
     """Representation of a ZHA cover."""
 
     PLATFORM = Platform.COVER

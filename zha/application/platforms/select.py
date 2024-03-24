@@ -41,7 +41,7 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-class ZHAEnumSelectEntity(PlatformEntity):
+class EnumSelectEntity(PlatformEntity):
     """Representation of a ZHA select entity."""
 
     PLATFORM = Platform.SELECT
@@ -92,7 +92,7 @@ class ZHAEnumSelectEntity(PlatformEntity):
         return response
 
 
-class ZHANonZCLSelectEntity(ZHAEnumSelectEntity):
+class NonZCLSelectEntity(EnumSelectEntity):
     """Representation of a ZHA select entity with no ZCL interaction."""
 
     @property
@@ -102,7 +102,7 @@ class ZHANonZCLSelectEntity(ZHAEnumSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultToneSelectEntity(ZHANonZCLSelectEntity):
+class DefaultToneSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren tone select entity."""
 
     _unique_id_suffix = IasWd.Warning.WarningMode.__name__
@@ -111,7 +111,7 @@ class ZHADefaultToneSelectEntity(ZHANonZCLSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultSirenLevelSelectEntity(ZHANonZCLSelectEntity):
+class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren level select entity."""
 
     _unique_id_suffix = IasWd.Warning.SirenLevel.__name__
@@ -120,7 +120,7 @@ class ZHADefaultSirenLevelSelectEntity(ZHANonZCLSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultStrobeLevelSelectEntity(ZHANonZCLSelectEntity):
+class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren strobe level select entity."""
 
     _unique_id_suffix = IasWd.StrobeLevel.__name__
@@ -129,7 +129,7 @@ class ZHADefaultStrobeLevelSelectEntity(ZHANonZCLSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultStrobeSelectEntity(ZHANonZCLSelectEntity):
+class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren strobe select entity."""
 
     _unique_id_suffix = Strobe.__name__
@@ -235,7 +235,7 @@ class ZCLEnumSelectEntity(PlatformEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
-class ZHAStartupOnOffSelectEntity(ZCLEnumSelectEntity):
+class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA startup onoff select entity."""
 
     _unique_id_suffix = OnOff.StartUpOnOff.__name__

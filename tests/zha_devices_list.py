@@ -66,7 +66,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.adurolight_adurolight_ncc_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -104,7 +104,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-5-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.bosch_isw_zpr1_wp13_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-5-1"): {
@@ -129,7 +129,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-5-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.bosch_isw_zpr1_wp13_firmware",
             },
         },
@@ -152,7 +152,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.centralite_3130_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -172,7 +172,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.centralite_3130_firmware",
             },
         },
@@ -200,7 +200,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.centralite_3210_l_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
@@ -255,7 +255,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.centralite_3210_l_firmware",
             },
         },
@@ -278,7 +278,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.centralite_3310_s_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -308,7 +308,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.centralite_3310_s_firmware",
             },
         },
@@ -343,7 +343,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.centralite_3315_s_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -368,7 +368,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.centralite_3315_s_firmware",
             },
         },
@@ -403,7 +403,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.centralite_3320_l_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -428,7 +428,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.centralite_3320_l_firmware",
             },
         },
@@ -463,7 +463,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.centralite_3326_l_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -488,7 +488,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.centralite_3326_l_firmware",
             },
         },
@@ -523,7 +523,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.centralite_motion_sensor_a_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -555,7 +555,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.centralite_motion_sensor_a_firmware",
             },
         },
@@ -592,7 +592,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.climaxtechnology_psmp5_00_00_02_02tc_identify"
                 ),
@@ -623,7 +623,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-4-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.climaxtechnology_psmp5_00_00_02_02tc_firmware",
             },
         },
@@ -653,7 +653,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.climaxtechnology_sd8sc_00_00_03_12tc_identify"
                 ),
@@ -670,35 +670,35 @@ DEVICES = [
             },
             ("select", "00:11:22:33:44:55:66:77-1-1282-WarningMode"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultToneSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultToneSelectEntity",
                 DEV_SIG_ENT_MAP_ID: (
                     "select.climaxtechnology_sd8sc_00_00_03_12tc_default_siren_tone"
                 ),
             },
             ("select", "00:11:22:33:44:55:66:77-1-1282-SirenLevel"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultSirenLevelSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultSirenLevelSelectEntity",
                 DEV_SIG_ENT_MAP_ID: (
                     "select.climaxtechnology_sd8sc_00_00_03_12tc_default_siren_level"
                 ),
             },
             ("select", "00:11:22:33:44:55:66:77-1-1282-StrobeLevel"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultStrobeLevelSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultStrobeLevelSelectEntity",
                 DEV_SIG_ENT_MAP_ID: (
                     "select.climaxtechnology_sd8sc_00_00_03_12tc_default_strobe_level"
                 ),
             },
             ("select", "00:11:22:33:44:55:66:77-1-1282-Strobe"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultStrobeSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultStrobeSelectEntity",
                 DEV_SIG_ENT_MAP_ID: (
                     "select.climaxtechnology_sd8sc_00_00_03_12tc_default_strobe"
                 ),
             },
             ("siren", "00:11:22:33:44:55:66:77-1-1282"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHASiren",
+                DEV_SIG_ENT_MAP_CLASS: "Siren",
                 DEV_SIG_ENT_MAP_ID: "siren.climaxtechnology_sd8sc_00_00_03_12tc_siren",
             },
         },
@@ -728,7 +728,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.climaxtechnology_ws15_00_00_03_03tc_identify"
                 ),
@@ -775,7 +775,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-11-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.feibit_inc_co_fb56_zcw08ku1_1_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-11-0-rssi"): {
@@ -813,7 +813,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.heiman_smokesensor_em_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -833,7 +833,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.heiman_smokesensor_em_firmware",
             },
         },
@@ -861,7 +861,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.heiman_co_v16_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -876,7 +876,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.heiman_co_v16_firmware",
             },
         },
@@ -899,27 +899,27 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("select", "00:11:22:33:44:55:66:77-1-1282-WarningMode"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultToneSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultToneSelectEntity",
                 DEV_SIG_ENT_MAP_ID: "select.heiman_warningdevice_default_siren_tone",
             },
             ("select", "00:11:22:33:44:55:66:77-1-1282-SirenLevel"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultSirenLevelSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultSirenLevelSelectEntity",
                 DEV_SIG_ENT_MAP_ID: "select.heiman_warningdevice_default_siren_level",
             },
             ("select", "00:11:22:33:44:55:66:77-1-1282-StrobeLevel"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultStrobeLevelSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultStrobeLevelSelectEntity",
                 DEV_SIG_ENT_MAP_ID: "select.heiman_warningdevice_default_strobe_level",
             },
             ("select", "00:11:22:33:44:55:66:77-1-1282-Strobe"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADefaultStrobeSelectEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DefaultStrobeSelectEntity",
                 DEV_SIG_ENT_MAP_ID: "select.heiman_warningdevice_default_strobe",
             },
             ("siren", "00:11:22:33:44:55:66:77-1"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ias_wd"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHASiren",
+                DEV_SIG_ENT_MAP_CLASS: "Siren",
                 DEV_SIG_ENT_MAP_ID: "siren.heiman_warningdevice_siren",
             },
             ("binary_sensor", "00:11:22:33:44:55:66:77-1-1280"): {
@@ -929,7 +929,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.heiman_warningdevice_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -944,7 +944,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.heiman_warningdevice_firmware",
             },
         },
@@ -972,7 +972,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-6-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.hivehome_com_mot003_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-6-1"): {
@@ -1002,7 +1002,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-6-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.hivehome_com_mot003_firmware",
             },
         },
@@ -1039,7 +1039,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_bulb_e12_ws_opal_600lm_identify"
                 ),
@@ -1060,7 +1060,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_bulb_e12_ws_opal_600lm_firmware",
             },
         },
@@ -1090,7 +1090,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_bulb_e26_cws_opal_600lm_identify"
                 ),
@@ -1111,7 +1111,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_bulb_e26_cws_opal_600lm_firmware",
             },
         },
@@ -1141,7 +1141,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_bulb_e26_w_opal_1000lm_identify"
                 ),
@@ -1162,7 +1162,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_bulb_e26_w_opal_1000lm_firmware",
             },
         },
@@ -1192,7 +1192,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_bulb_e26_ws_opal_980lm_identify"
                 ),
@@ -1213,7 +1213,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_bulb_e26_ws_opal_980lm_firmware",
             },
         },
@@ -1243,7 +1243,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_bulb_e26_opal_1000lm_identify"
                 ),
@@ -1264,7 +1264,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_bulb_e26_opal_1000lm_firmware",
             },
         },
@@ -1294,7 +1294,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_control_outlet_identify"
                 ),
@@ -1311,7 +1311,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_control_outlet_firmware",
             },
         },
@@ -1334,7 +1334,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_motion_sensor_identify"
                 ),
@@ -1365,7 +1365,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_motion_sensor_firmware",
             },
         },
@@ -1388,7 +1388,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_on_off_switch_identify"
                 ),
@@ -1412,7 +1412,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_on_off_switch_firmware",
             },
         },
@@ -1435,7 +1435,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_remote_control_identify"
                 ),
@@ -1459,7 +1459,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_remote_control_firmware",
             },
         },
@@ -1489,7 +1489,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_signal_repeater_identify"
                 ),
@@ -1508,7 +1508,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_signal_repeater_firmware",
             },
         },
@@ -1531,7 +1531,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.ikea_of_sweden_tradfri_wireless_dimmer_identify"
                 ),
@@ -1557,7 +1557,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ikea_of_sweden_tradfri_wireless_dimmer_firmware",
             },
         },
@@ -1592,7 +1592,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.jasco_products_45852_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794"): {
@@ -1617,7 +1617,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.jasco_products_45852_firmware",
             },
         },
@@ -1652,7 +1652,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.jasco_products_45856_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794"): {
@@ -1677,7 +1677,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.jasco_products_45856_firmware",
             },
         },
@@ -1712,7 +1712,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.jasco_products_45857_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794"): {
@@ -1737,7 +1737,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.jasco_products_45857_firmware",
             },
         },
@@ -1760,7 +1760,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.keen_home_inc_sv02_610_mp_1_3_identify",
             },
             ("cover", "00:11:22:33:44:55:66:77-1"): {
@@ -1795,7 +1795,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.keen_home_inc_sv02_610_mp_1_3_firmware",
             },
         },
@@ -1818,7 +1818,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.keen_home_inc_sv02_612_mp_1_2_identify",
             },
             ("cover", "00:11:22:33:44:55:66:77-1"): {
@@ -1853,7 +1853,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.keen_home_inc_sv02_612_mp_1_2_firmware",
             },
         },
@@ -1876,7 +1876,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.keen_home_inc_sv02_612_mp_1_3_identify",
             },
             ("cover", "00:11:22:33:44:55:66:77-1"): {
@@ -1911,7 +1911,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.keen_home_inc_sv02_612_mp_1_3_firmware",
             },
         },
@@ -1939,7 +1939,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: (
                     "button.king_of_fans_inc_hbuniversalcfremote_identify"
                 ),
@@ -1961,7 +1961,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.king_of_fans_inc_hbuniversalcfremote_firmware",
             },
         },
@@ -1984,7 +1984,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lds_zbt_cctswitch_d0001_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2004,7 +2004,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lds_zbt_cctswitch_d0001_firmware",
             },
         },
@@ -2032,7 +2032,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.ledvance_a19_rgbw_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -2047,7 +2047,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ledvance_a19_rgbw_firmware",
             },
         },
@@ -2075,7 +2075,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.ledvance_flex_rgbw_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -2090,7 +2090,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ledvance_flex_rgbw_firmware",
             },
         },
@@ -2118,7 +2118,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.ledvance_plug_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -2133,7 +2133,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ledvance_plug_firmware",
             },
         },
@@ -2161,7 +2161,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.ledvance_rt_rgbw_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -2176,7 +2176,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.ledvance_rt_rgbw_firmware",
             },
         },
@@ -2230,7 +2230,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_plug_maus01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
@@ -2265,7 +2265,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_plug_maus01_firmware",
             },
         },
@@ -2305,7 +2305,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_relay_c2acn01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
@@ -2365,7 +2365,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_relay_c2acn01_firmware",
             },
         },
@@ -2402,7 +2402,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_remote_b186acn01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2422,7 +2422,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_remote_b186acn01_firmware",
             },
         },
@@ -2459,7 +2459,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_remote_b286acn01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2479,7 +2479,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_remote_b286acn01_firmware",
             },
         },
@@ -2537,7 +2537,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_remote_b286opcn01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2610,7 +2610,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_remote_b486opcn01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2648,7 +2648,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_remote_b686opcn01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2721,7 +2721,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_remote_b686opcn01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2878,7 +2878,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sen_ill_mgl01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1024"): {
@@ -2930,7 +2930,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_86sw1_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -2950,7 +2950,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_86sw1_firmware",
             },
         },
@@ -2987,7 +2987,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_cube_aqgl01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3007,7 +3007,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_cube_aqgl01_firmware",
             },
         },
@@ -3044,7 +3044,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_ht_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3074,7 +3074,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_ht_firmware",
             },
         },
@@ -3097,7 +3097,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_magnet_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3122,7 +3122,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_magnet_firmware",
             },
         },
@@ -3145,7 +3145,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_magnet_aq2_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3200,7 +3200,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_motion_aq2_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3232,7 +3232,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_motion_aq2_firmware",
             },
         },
@@ -3260,7 +3260,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_smoke_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3287,7 +3287,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_smoke_firmware",
             },
         },
@@ -3310,7 +3310,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_switch_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3330,7 +3330,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_switch_firmware",
             },
         },
@@ -3431,7 +3431,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_sensor_wleak_aq1_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3451,7 +3451,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_wleak_aq1_firmware",
             },
         },
@@ -3501,7 +3501,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_vibration_aq1_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3526,7 +3526,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_vibration_aq1_firmware",
             },
         },
@@ -3549,7 +3549,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.lumi_lumi_weather_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3607,7 +3607,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.nyce_3010_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3650,7 +3650,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.nyce_3014_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3734,7 +3734,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-3-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.osram_lightify_a19_rgbw_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-3-0-rssi"): {
@@ -3749,7 +3749,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-3-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.osram_lightify_a19_rgbw_firmware",
             },
         },
@@ -3772,7 +3772,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.osram_lightify_dimming_switch_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -3792,7 +3792,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.osram_lightify_dimming_switch_firmware",
             },
         },
@@ -3820,7 +3820,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-3-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.osram_lightify_flex_rgbw_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-3-0-rssi"): {
@@ -3835,7 +3835,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-3-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.osram_lightify_flex_rgbw_firmware",
             },
         },
@@ -3863,7 +3863,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-3-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.osram_lightify_rt_tunable_white_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-3-2820"): {
@@ -3914,7 +3914,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-3-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.osram_lightify_rt_tunable_white_firmware",
             },
         },
@@ -3942,7 +3942,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-3-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.osram_plug_01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-3-0-rssi"): {
@@ -3957,7 +3957,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-3-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.osram_plug_01_firmware",
             },
         },
@@ -4056,7 +4056,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.osram_switch_4x_lightify_firmware",
             },
         },
@@ -4101,7 +4101,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-2-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.philips_rwl020_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-2-1"): {
@@ -4111,7 +4111,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-2-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.philips_rwl020_firmware",
             },
         },
@@ -4139,7 +4139,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.samjin_button_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -4164,7 +4164,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.samjin_button_firmware",
             },
         },
@@ -4192,7 +4192,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.samjin_multi_identify",
             },
             ("binary_sensor", "00:11:22:33:44:55:66:77-1-64514"): {
@@ -4222,7 +4222,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.samjin_multi_firmware",
             },
         },
@@ -4250,7 +4250,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.samjin_water_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -4275,7 +4275,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.samjin_water_firmware",
             },
         },
@@ -4298,7 +4298,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.securifi_ltd_unk_model_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
@@ -4348,7 +4348,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.securifi_ltd_unk_model_firmware",
             },
         },
@@ -4376,7 +4376,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sercomm_corp_sz_dws04n_sf_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -4401,7 +4401,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sercomm_corp_sz_dws04n_sf_firmware",
             },
         },
@@ -4436,7 +4436,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sercomm_corp_sz_esw01_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
@@ -4491,7 +4491,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sercomm_corp_sz_esw01_firmware",
             },
         },
@@ -4519,7 +4519,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sercomm_corp_sz_pir04_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -4549,7 +4549,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sercomm_corp_sz_pir04_firmware",
             },
         },
@@ -4572,7 +4572,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sinope_technologies_rm3250zb_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
@@ -4624,7 +4624,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sinope_technologies_rm3250zb_firmware",
             },
         },
@@ -4654,7 +4654,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sinope_technologies_th1123zb_identify",
             },
             ("climate", "00:11:22:33:44:55:66:77-1"): {
@@ -4729,7 +4729,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sinope_technologies_th1123zb_firmware",
             },
         },
@@ -4759,7 +4759,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sinope_technologies_th1124zb_identify",
             },
             ("climate", "00:11:22:33:44:55:66:77-1"): {
@@ -4834,7 +4834,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sinope_technologies_th1124zb_firmware",
             },
         },
@@ -4862,7 +4862,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.smartthings_outletv4_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
@@ -4912,7 +4912,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.smartthings_outletv4_firmware",
             },
         },
@@ -4935,7 +4935,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("device_tracker", "00:11:22:33:44:55:66:77-1"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["power"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHADeviceScannerEntity",
+                DEV_SIG_ENT_MAP_CLASS: "DeviceScannerEntity",
                 DEV_SIG_ENT_MAP_ID: "device_tracker.smartthings_tagv4_device_scanner",
             },
             ("binary_sensor", "00:11:22:33:44:55:66:77-1-15"): {
@@ -4945,7 +4945,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.smartthings_tagv4_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -4960,7 +4960,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.smartthings_tagv4_firmware",
             },
         },
@@ -4983,7 +4983,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.third_reality_inc_3rss007z_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
@@ -5003,7 +5003,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.third_reality_inc_3rss007z_firmware",
             },
         },
@@ -5026,7 +5026,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.third_reality_inc_3rss008z_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -5051,7 +5051,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.third_reality_inc_3rss008z_firmware",
             },
         },
@@ -5079,7 +5079,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.visonic_mct_340_e_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -5104,7 +5104,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.visonic_mct_340_e_firmware",
             },
         },
@@ -5127,7 +5127,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.zen_within_zen_01_identify",
             },
             ("climate", "00:11:22:33:44:55:66:77-1"): {
@@ -5167,7 +5167,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.zen_within_zen_01_firmware",
             },
         },
@@ -5241,7 +5241,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.tyzb01_ns1ndbww_ts0004_firmware",
             },
         },
@@ -5269,7 +5269,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.netvox_z308e3ed_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -5312,7 +5312,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sengled_e11_g13_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794"): {
@@ -5337,7 +5337,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sengled_e11_g13_firmware",
             },
         },
@@ -5365,7 +5365,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sengled_e12_n14_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794"): {
@@ -5390,7 +5390,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sengled_e12_n14_firmware",
             },
         },
@@ -5418,7 +5418,7 @@ DEVICES = [
             },
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.sengled_z01_a19nae26_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794"): {
@@ -5443,7 +5443,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.sengled_z01_a19nae26_firmware",
             },
         },
@@ -5466,7 +5466,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.unk_manufacturer_unk_model_identify",
             },
             ("cover", "00:11:22:33:44:55:66:77-1"): {
@@ -5684,7 +5684,7 @@ DEVICES = [
             },
             ("number", "00:11:22:33:44:55:66:77-218-13"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["analog_output"],
-                DEV_SIG_ENT_MAP_CLASS: "ZhaNumber",
+                DEV_SIG_ENT_MAP_CLASS: "Number",
                 DEV_SIG_ENT_MAP_ID: "number.digi_xbee3_number",
             },
             ("switch", "00:11:22:33:44:55:66:77-218-6"): {
@@ -5699,7 +5699,7 @@ DEVICES = [
             },
             ("number", "00:11:22:33:44:55:66:77-219-13"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["analog_output"],
-                DEV_SIG_ENT_MAP_CLASS: "ZhaNumber",
+                DEV_SIG_ENT_MAP_CLASS: "Number",
                 DEV_SIG_ENT_MAP_ID: "number.digi_xbee3_number_2",
             },
             ("switch", "00:11:22:33:44:55:66:77-220-6"): {
@@ -5788,7 +5788,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.konke_3afe170100510001_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1"): {
@@ -5864,7 +5864,7 @@ DEVICES = [
         DEV_SIG_ENT_MAP: {
             ("button", "00:11:22:33:44:55:66:77-2-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAIdentifyButton",
+                DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
                 DEV_SIG_ENT_MAP_ID: "button.philips_sml001_identify",
             },
             ("sensor", "00:11:22:33:44:55:66:77-2-1"): {
@@ -5914,7 +5914,7 @@ DEVICES = [
             },
             ("update", "00:11:22:33:44:55:66:77-2-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
-                DEV_SIG_ENT_MAP_CLASS: "ZHAFirmwareUpdateEntity",
+                DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.philips_sml001_firmware",
             },
         },

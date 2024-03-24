@@ -29,7 +29,7 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-class ZHAButton(PlatformEntity):
+class Button(PlatformEntity):
     """Defines a ZHA button."""
 
     PLATFORM = Platform.BUTTON
@@ -84,7 +84,7 @@ class ZHAButton(PlatformEntity):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IDENTIFY)
-class ZHAIdentifyButton(ZHAButton):
+class IdentifyButton(Button):
     """Defines a ZHA identify button."""
 
     @classmethod
@@ -113,7 +113,7 @@ class ZHAIdentifyButton(ZHAButton):
     _args = [DEFAULT_DURATION]
 
 
-class ZHAAttributeButton(PlatformEntity):
+class WriteAttributeButton(PlatformEntity):
     """Defines a ZHA button, which writes a value to an attribute."""
 
     PLATFORM = Platform.BUTTON
@@ -156,7 +156,7 @@ class ZHAAttributeButton(PlatformEntity):
         "_TZE200_htnnfasr",
     },
 )
-class FrostLockResetButton(ZHAAttributeButton):
+class FrostLockResetButton(WriteAttributeButton):
     """Defines a ZHA frost lock reset button."""
 
     _unique_id_suffix = "reset_frost_lock"
@@ -170,7 +170,7 @@ class FrostLockResetButton(ZHAAttributeButton):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.motion.ac01"}
 )
-class NoPresenceStatusResetButton(ZHAAttributeButton):
+class NoPresenceStatusResetButton(WriteAttributeButton):
     """Defines a ZHA no presence status reset button."""
 
     _unique_id_suffix = "reset_no_presence_status"
@@ -182,7 +182,7 @@ class NoPresenceStatusResetButton(ZHAAttributeButton):
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
-class AqaraPetFeederFeedButton(ZHAAttributeButton):
+class AqaraPetFeederFeedButton(WriteAttributeButton):
     """Defines a feed button for the aqara c1 pet feeder."""
 
     _unique_id_suffix = "feeding"
@@ -194,7 +194,7 @@ class AqaraPetFeederFeedButton(ZHAAttributeButton):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraSelfTestButton(ZHAAttributeButton):
+class AqaraSelfTestButton(WriteAttributeButton):
     """Defines a ZHA self-test button for Aqara smoke sensors."""
 
     _unique_id_suffix = "self_test"

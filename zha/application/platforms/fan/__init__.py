@@ -187,7 +187,7 @@ class BaseFan(BaseEntity):
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_FAN)
-class ZhaFan(PlatformEntity, BaseFan):
+class Fan(PlatformEntity, BaseFan):
     """Representation of a ZHA fan."""
 
     def __init__(
@@ -359,7 +359,7 @@ IKEA_PRESET_MODES_TO_NAME = {
     cluster_handler_names="ikea_airpurifier",
     models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
 )
-class IkeaFan(ZhaFan):
+class IkeaFan(Fan):
     """Representation of an Ikea fan."""
 
     def __init__(
@@ -401,7 +401,7 @@ class IkeaFan(ZhaFan):
     cluster_handler_names=CLUSTER_HANDLER_FAN,
     models={"HBUniversalCFRemote", "HDC52EastwindFan"},
 )
-class KofFan(ZhaFan):
+class KofFan(Fan):
     """Representation of a fan made by King Of Fans."""
 
     _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE

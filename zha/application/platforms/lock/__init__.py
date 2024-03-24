@@ -30,7 +30,7 @@ MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.LOCK
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DOORLOCK)
-class ZhaDoorLock(PlatformEntity):
+class DoorLock(PlatformEntity):
     """Representation of a ZHA lock."""
 
     PLATFORM = Platform.LOCK

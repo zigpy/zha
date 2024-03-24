@@ -98,7 +98,7 @@ ATTR_VERSION: Final = "version"
 
 # old base classes: CoordinatorEntity[ZHAFirmwareUpdateCoordinator], UpdateEntity
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
-class ZHAFirmwareUpdateEntity(PlatformEntity):
+class FirmwareUpdateEntity(PlatformEntity):
     """Representation of a ZHA firmware update entity."""
 
     _unique_id_suffix = "firmware_update"

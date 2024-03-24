@@ -11,7 +11,7 @@ from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application.gateway import ZHAGateway
-from zha.application.platforms.alarm_control_panel import ZHAAlarmControlPanel
+from zha.application.platforms.alarm_control_panel import AlarmControlPanel
 from zha.zigbee.device import ZHADevice
 
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -47,11 +47,11 @@ async def test_alarm_control_panel(
     """Test zhaws alarm control panel platform."""
     zha_device: ZHADevice = await device_joined(zigpy_device)
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
-    alarm_entity: ZHAAlarmControlPanel = zha_device.platform_entities.get(
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
         "00:0d:6f:00:0a:90:69:e7-1"
     )
     assert alarm_entity is not None
-    assert isinstance(alarm_entity, ZHAAlarmControlPanel)
+    assert isinstance(alarm_entity, AlarmControlPanel)
 
     # test that the state is STATE_ALARM_DISARMED
     assert alarm_entity.state == "disarmed"
@@ -220,7 +220,7 @@ async def test_alarm_control_panel(
 async def reset_alarm_panel(
     zha_gateway: ZHAGateway,
     cluster: security.IasAce,
-    entity: ZHAAlarmControlPanel,
+    entity: AlarmControlPanel,
 ) -> None:
     """Reset the state of the alarm panel."""
     cluster.client_command.reset_mock()
