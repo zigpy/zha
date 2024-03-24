@@ -338,7 +338,7 @@ class DeviceCounterSensor(BaseEntity):
     @property
     def name(self) -> str:
         """Return the name of the platform entity."""
-        return self._name
+        return self._attr_name
 
     @property
     def native_value(self) -> int | None:
