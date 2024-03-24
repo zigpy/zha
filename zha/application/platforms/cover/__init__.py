@@ -381,6 +381,11 @@ class Shade(PlatformEntity):
         return self._position
 
     @property
+    def current_cover_tilt_position(self) -> int | None:
+        """Return the current tilt position of the cover."""
+        return None
+
+    @property
     def is_closed(self) -> bool | None:
         """Return True if shade is closed."""
         return not self._is_open
