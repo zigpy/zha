@@ -625,7 +625,7 @@ class PollControlClusterHandler(ClusterHandler):
             cmd_name = command_id
 
         self.debug("Received %s tsn command '%s': %s", tsn, cmd_name, args)
-        self.zha_send_event(cmd_name, args)
+        self.emit_zha_event(cmd_name, args)
         if cmd_name == PollControl.ClientCommandDefs.checkin.name:
             self.cluster.create_catching_task(self.check_in_response(tsn))
 

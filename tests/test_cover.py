@@ -784,30 +784,30 @@ async def test_cover_remote(
 
     # load up cover domain
     zha_device = await device_joined(zigpy_cover_remote)
-    zha_device.zha_send_event = MagicMock(wraps=zha_device.zha_send_event)
+    zha_device.emit_zha_event = MagicMock(wraps=zha_device.emit_zha_event)
 
     cluster = zigpy_cover_remote.endpoints[1].out_clusters[
         closures.WindowCovering.cluster_id
     ]
 
-    zha_device.zha_send_event.reset_mock()
+    zha_device.emit_zha_event.reset_mock()
 
     # up command
     hdr = make_zcl_header(0, global_command=False)
     cluster.handle_message(hdr, [])
     await zha_gateway.async_block_till_done()
 
-    assert zha_device.zha_send_event.call_count == 1
-    assert ATTR_COMMAND in zha_device.zha_send_event.call_args[0][0]
-    assert zha_device.zha_send_event.call_args[0][0][ATTR_COMMAND] == "up_open"
+    assert zha_device.emit_zha_event.call_count == 1
+    assert ATTR_COMMAND in zha_device.emit_zha_event.call_args[0][0]
+    assert zha_device.emit_zha_event.call_args[0][0][ATTR_COMMAND] == "up_open"
 
-    zha_device.zha_send_event.reset_mock()
+    zha_device.emit_zha_event.reset_mock()
 
     # down command
     hdr = make_zcl_header(1, global_command=False)
     cluster.handle_message(hdr, [])
     await zha_gateway.async_block_till_done()
 
-    assert zha_device.zha_send_event.call_count == 1
-    assert ATTR_COMMAND in zha_device.zha_send_event.call_args[0][0]
-    assert zha_device.zha_send_event.call_args[0][0][ATTR_COMMAND] == "down_close"
+    assert zha_device.emit_zha_event.call_count == 1
+    assert ATTR_COMMAND in zha_device.emit_zha_event.call_args[0][0]
+    assert zha_device.emit_zha_event.call_args[0][0][ATTR_COMMAND] == "down_close"

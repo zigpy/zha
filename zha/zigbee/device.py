@@ -561,13 +561,13 @@ class ZHADevice(LogMixin, EventBase):
             return
         if availability_changed and not available:
             self.debug("Device availability changed and device became unavailable")
-            self.zha_send_event(
+            self.emit_zha_event(
                 {
                     "device_event_type": "device_offline",
                 },
             )
 
-    def zha_send_event(self, event_data: dict[str, str | int]) -> None:  # pylint: disable=unused-argument
+    def emit_zha_event(self, event_data: dict[str, str | int]) -> None:  # pylint: disable=unused-argument
         """Relay events to hass."""
         self.emit(
             ZHA_EVENT,

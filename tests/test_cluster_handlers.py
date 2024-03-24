@@ -718,7 +718,7 @@ async def test_poll_control_cluster_command(poll_control_device: ZHADevice) -> N
     cluster = poll_control_ch.cluster
     # events = async_capture_events("zha_event")
 
-    poll_control_ch.zha_send_event = MagicMock(wraps=poll_control_ch.zha_send_event)
+    poll_control_ch.emit_zha_event = MagicMock(wraps=poll_control_ch.emit_zha_event)
     with mock.patch.object(poll_control_ch, "check_in_response", checkin_mock):
         tsn = 22
         hdr = make_zcl_header(0, global_command=False, tsn=tsn)
@@ -731,8 +731,8 @@ async def test_poll_control_cluster_command(poll_control_device: ZHADevice) -> N
     assert checkin_mock.await_count == 1
     assert checkin_mock.await_args[0][0] == tsn
 
-    assert poll_control_ch.zha_send_event.call_count == 1
-    assert poll_control_ch.zha_send_event.call_args_list[0] == mock.call(
+    assert poll_control_ch.emit_zha_event.call_count == 1
+    assert poll_control_ch.emit_zha_event.call_args_list[0] == mock.call(
         "checkin", [mock.sentinel.args, mock.sentinel.args2, mock.sentinel.args3]
     )
 

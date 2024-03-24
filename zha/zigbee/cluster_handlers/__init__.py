@@ -471,7 +471,7 @@ class ClusterHandler(LogMixin, EventBase):
     def zdo_command(self, *args, **kwargs) -> None:
         """Handle ZDO commands on this cluster."""
 
-    def zha_send_event(self, command: str, arg: list | dict | CommandSchema) -> None:
+    def emit_zha_event(self, command: str, arg: list | dict | CommandSchema) -> None:
         """Relay events to listeners."""
 
         args: list | dict
@@ -483,7 +483,7 @@ class ClusterHandler(LogMixin, EventBase):
             args = arg
             params = {}
         else:
-            raise TypeError(f"Unexpected zha_send_event {command!r} argument: {arg!r}")
+            raise TypeError(f"Unexpected emit_zha_event {command!r} argument: {arg!r}")
 
         self._endpoint.send_event(
             {
@@ -682,7 +682,7 @@ class ClientClusterHandler(ClusterHandler):
         except KeyError:
             attr_name = "Unknown"
 
-        self.zha_send_event(
+        self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,
             {
                 ATTRIBUTE_ID: attrid,
@@ -697,4 +697,4 @@ class ClientClusterHandler(ClusterHandler):
             self._cluster.server_commands is not None
             and self._cluster.server_commands.get(command_id) is not None
         ):
-            self.zha_send_event(self._cluster.server_commands[command_id].name, args)
+            self.emit_zha_event(self._cluster.server_commands[command_id].name, args)

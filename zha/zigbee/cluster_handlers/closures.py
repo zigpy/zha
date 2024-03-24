@@ -60,7 +60,7 @@ class DoorLockClusterHandler(ClusterHandler):
         command_name = self._cluster.client_commands[command_id].name
 
         if command_name == DoorLock.ClientCommandDefs.operation_event_notification.name:
-            self.zha_send_event(
+            self.emit_zha_event(
                 command_name,
                 {
                     "source": args[0].name,

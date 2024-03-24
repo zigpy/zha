@@ -239,7 +239,7 @@ class Endpoint:
 
     def send_event(self, signal: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""
-        self.device.zha_send_event(
+        self.device.emit_zha_event(
             {
                 const.ATTR_UNIQUE_ID: self.unique_id,
                 const.ATTR_ENDPOINT_ID: self.id,

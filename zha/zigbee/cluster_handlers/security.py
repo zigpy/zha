@@ -90,7 +90,7 @@ class IasAceClusterHandler(ClusterHandler):
         """Handle the IAS ACE arm command."""
         mode = AceCluster.ArmMode(arm_mode)
 
-        self.zha_send_event(
+        self.emit_zha_event(
             AceCluster.ServerCommandDefs.arm.name,
             {
                 "arm_mode": mode.value,
@@ -186,7 +186,7 @@ class IasAceClusterHandler(ClusterHandler):
 
     def _bypass(self, zone_list, code) -> None:
         """Handle the IAS ACE bypass command."""
-        self.zha_send_event(
+        self.emit_zha_event(
             AceCluster.ServerCommandDefs.bypass.name,
             {"zone_list": zone_list, "code": code},
         )

@@ -228,7 +228,7 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
             )
             return
 
-        self.zha_send_event(
+        self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,
             {
                 ATTRIBUTE_ID: attrid,
