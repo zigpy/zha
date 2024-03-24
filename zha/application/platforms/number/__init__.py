@@ -283,7 +283,9 @@ class ZHANumberConfigurationEntity(PlatformEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
-        return self._attr_native_unit_of_measurement
+        if hasattr(self, "_attr_native_unit_of_measurement"):
+            return self._attr_native_unit_of_measurement
+        return None
 
     @property
     def mode(self) -> NumberMode:
