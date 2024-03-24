@@ -19,6 +19,7 @@ class EventBase:
         super().__init__(*args, **kwargs)
         self._listeners: dict[str, list[Callable]] = {}
         self._event_tasks: list[asyncio.Task] = []
+        self._golbal_listeners: list[Callable] = []
 
     def on_event(  # pylint: disable=invalid-name
         self, event_name: str, callback: Callable
@@ -31,6 +32,19 @@ class EventBase:
             """Unsubscribe listeners."""
             if callback in listeners:
                 listeners.remove(callback)
+
+        return unsubscribe
+
+    def on_all_events(  # pylint: disable=invalid-name
+        self, callback: Callable
+    ) -> Callable:
+        """Register a callback for all events."""
+        self._golbal_listeners.append(callback)
+
+        def unsubscribe() -> None:
+            """Unsubscribe listeners."""
+            if callback in self._golbal_listeners:
+                self._golbal_listeners.remove(callback)
 
         return unsubscribe
 
@@ -47,7 +61,7 @@ class EventBase:
 
     def emit(self, event_name: str, data=None) -> None:
         """Run all callbacks for an event."""
-        for listener in self._listeners.get(event_name, []):
+        for listener in [*self._listeners.get(event_name, []), *self._golbal_listeners]:
             if inspect.iscoroutinefunction(listener):
                 if data is None:
                     task = asyncio.create_task(listener())
