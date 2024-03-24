@@ -237,13 +237,13 @@ class Endpoint:
         """Send a signal through hass dispatcher."""
         self.device.emit(signal, *args)
 
-    def send_event(self, signal: dict[str, Any]) -> None:
+    def emit_zha_event(self, event_data: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""
         self.device.emit_zha_event(
             {
                 const.ATTR_UNIQUE_ID: self.unique_id,
                 const.ATTR_ENDPOINT_ID: self.id,
-                **signal,
+                **event_data,
             }
         )
 

@@ -286,10 +286,6 @@ class Group(LogMixin):
         group_info["members"] = [member.member_info for member in self.members]
         return group_info
 
-    def send_event(self, event: dict[str, Any]) -> None:
-        """Send an event from this group."""
-        # TODO self._server.client_manager.broadcast(event) #pylint: disable=fixme
-
     async def _maybe_update_group_members(
         self, event: PlatformEntityStateChangedEvent
     ) -> None:

@@ -14,7 +14,7 @@ from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
-from zha.const import EVENT, EVENT_TYPE, STATE_CHANGED, EventTypes
+from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.mixins import LogMixin
 
@@ -290,10 +290,6 @@ class BaseEntity(LogMixin, EventBase):
         return self._unique_id
 
     @abc.abstractmethod
-    def send_event(self, signal: dict[str, Any]) -> None:
-        """Broadcast an event from this platform entity."""
-
-    @abc.abstractmethod
     def get_identifiers(self) -> dict[str, str | int]:
         """Return a dict with the information necessary to identify this entity."""
 
@@ -319,13 +315,6 @@ class BaseEntity(LogMixin, EventBase):
         """Send the state of this platform entity."""
         state = self.get_state()
         if self._previous_state != state:
-            self.send_event(
-                {
-                    "state": self.get_state(),
-                    EVENT: PlatformEntityEvents.PLATFORM_ENTITY_STATE_CHANGED,
-                    EVENT_TYPE: EventTypes.PLATFORM_ENTITY_EVENT,
-                }
-            )
             self.emit(STATE_CHANGED, EntityStateChangedEvent(**self.get_identifiers()))
             self._previous_state = state
 
@@ -455,20 +444,6 @@ class PlatformEntity(BaseEntity):
             "endpoint_id": self.endpoint.id,
         }
 
-    def send_event(self, signal: dict[str, Any]) -> None:
-        """Broadcast an event from this platform entity."""
-        signal["platform_entity"] = {
-            "name": self._name,
-            "unique_id": self._unique_id,
-            "platform": self.PLATFORM,
-        }
-        signal["endpoint"] = {
-            "id": self._endpoint.id,
-            "unique_id": self._endpoint.unique_id,
-        }
-        self.debug("Sending event from platform entity: %s", signal)
-        self.device.send_event(signal)
-
     def to_json(self) -> dict:
         """Return a JSON representation of the platform entity."""
         json = super().to_json()
@@ -531,19 +506,6 @@ class GroupEntity(BaseEntity):
 
     def update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
-
-    def send_event(self, signal: dict[str, Any]) -> None:
-        """Broadcast an event from this group entity."""
-        signal["platform_entity"] = {
-            "name": self._name,
-            "unique_id": self._unique_id,
-            "platform": self.PLATFORM,
-        }
-        signal["group"] = {
-            "id": self._group.group_id,
-        }
-        self.debug("Sending event from group entity: %s", signal)
-        self._group.send_event(signal)
 
     def to_json(self) -> dict[str, Any]:
         """Return a JSON representation of the group."""

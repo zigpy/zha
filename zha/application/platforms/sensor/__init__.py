@@ -387,16 +387,6 @@ class DeviceCounterSensor(BaseEntity):
         response["state"] = self._zigpy_counter.value
         return response
 
-    def send_event(self, signal: dict[str, Any]) -> None:
-        """Broadcast an event from this platform entity."""
-        signal["platform_entity"] = {
-            "name": self._attr_name,
-            "unique_id": self._unique_id,
-            "platform": self.PLATFORM,
-        }
-        self.debug("Sending event from device counter sensor entity: %s", signal)
-        self._device.send_event(signal)
-
     def to_json(self) -> dict:
         """Return a JSON representation of the platform entity."""
         json = super().to_json()

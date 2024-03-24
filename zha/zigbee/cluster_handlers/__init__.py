@@ -485,7 +485,7 @@ class ClusterHandler(LogMixin, EventBase):
         else:
             raise TypeError(f"Unexpected emit_zha_event {command!r} argument: {arg!r}")
 
-        self._endpoint.send_event(
+        self._endpoint.emit_zha_event(
             {
                 UNIQUE_ID: self.unique_id,
                 CLUSTER_ID: self.cluster.cluster_id,
