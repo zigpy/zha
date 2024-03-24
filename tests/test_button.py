@@ -27,7 +27,7 @@ import zigpy.zcl.foundation as zcl_f
 from tests.common import find_entity, find_entity_id, mock_coro, update_attribute_cache
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.button import Button, WriteAttributeButton
 from zha.application.platforms.button.const import ButtonDeviceClass
@@ -114,7 +114,7 @@ async def tuya_water_valve(zigpy_device_mock, device_joined):
 
 async def test_button(
     contact_sensor: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha button platform."""
 
@@ -147,7 +147,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 
 async def test_frost_unlock(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     tuya_water_valve: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test custom frost unlock ZHA button."""
@@ -251,7 +251,7 @@ async def custom_button_device(zigpy_device_mock, device_joined):
 
 
 async def test_quirks_command_button(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     custom_button_device: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA button platform."""
@@ -276,7 +276,7 @@ async def test_quirks_command_button(
 
 
 async def test_quirks_write_attr_button(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     custom_button_device: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA button platform."""

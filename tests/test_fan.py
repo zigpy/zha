@@ -17,7 +17,7 @@ from zigpy.zcl.clusters import general, hvac
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
@@ -140,7 +140,7 @@ def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
 async def test_fan(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha fan platform."""
 
@@ -232,7 +232,7 @@ async def test_fan(
 
 
 async def async_turn_on(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     entity: PlatformEntity,
     speed: Optional[str] = None,
 ) -> None:
@@ -241,14 +241,14 @@ async def async_turn_on(
     await zha_gateway.async_block_till_done()
 
 
-async def async_turn_off(zha_gateway: ZHAGateway, entity: PlatformEntity) -> None:
+async def async_turn_off(zha_gateway: Gateway, entity: PlatformEntity) -> None:
     """Turn fan off."""
     await entity.async_turn_off()
     await zha_gateway.async_block_till_done()
 
 
 async def async_set_speed(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     entity: PlatformEntity,
     speed: Optional[str] = None,
 ) -> None:
@@ -258,7 +258,7 @@ async def async_set_speed(
 
 
 async def async_set_percentage(
-    zha_gateway: ZHAGateway, entity: PlatformEntity, percentage=None
+    zha_gateway: Gateway, entity: PlatformEntity, percentage=None
 ):
     """Set percentage for specified fan."""
     await entity.async_set_percentage(percentage)
@@ -266,7 +266,7 @@ async def async_set_percentage(
 
 
 async def async_set_preset_mode(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     entity: PlatformEntity,
     preset_mode: Optional[str] = None,
 ) -> None:
@@ -281,7 +281,7 @@ async def async_set_preset_mode(
     new=AsyncMock(return_value=zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]),
 )
 async def test_zha_group_fan_entity(
-    device_fan_1: Device, device_fan_2: Device, zha_gateway: ZHAGateway
+    device_fan_1: Device, device_fan_2: Device, zha_gateway: Gateway
 ):
     """Test the fan entity for a ZHAWS group."""
 
@@ -382,7 +382,7 @@ async def test_zha_group_fan_entity(
 async def test_zha_group_fan_entity_failure_state(
     device_fan_1: Device,
     device_fan_2: Device,
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ):
     """Test the fan entity for a ZHA group when writing attributes generates an exception."""
@@ -440,7 +440,7 @@ async def test_zha_group_fan_entity_failure_state(
 async def test_fan_init(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     plug_read: dict,
     expected_state: bool,
     expected_speed: Optional[str],
@@ -466,7 +466,7 @@ async def test_fan_init(
 async def test_fan_update_entity(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ):
     """Test zha fan refresh state."""
 
@@ -530,7 +530,7 @@ def zigpy_device_ikea(zigpy_device_mock) -> ZigpyDevice:
 
 
 async def test_fan_ikea(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_ikea: ZigpyDevice,
 ) -> None:
@@ -636,7 +636,7 @@ async def test_fan_ikea_init(
 
 
 async def test_fan_ikea_update_entity(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_ikea: ZigpyDevice,
 ) -> None:
@@ -693,7 +693,7 @@ def zigpy_device_kof(zigpy_device_mock) -> ZigpyDevice:
 
 
 async def test_fan_kof(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_kof: ZigpyDevice,
 ) -> None:
@@ -787,7 +787,7 @@ async def test_fan_kof_init(
 
 
 async def test_fan_kof_update_entity(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_kof: ZigpyDevice,
 ) -> None:

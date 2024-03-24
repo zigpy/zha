@@ -71,7 +71,7 @@ from zha.zigbee.cluster_handlers.registries import (
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.application.gateway import ZHAGateway
+    from zha.application.gateway import Gateway
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -166,9 +166,9 @@ class DeviceProbe:
 
     def __init__(self) -> None:
         """Initialize instance."""
-        self._gateway: ZHAGateway
+        self._gateway: Gateway
 
-    def initialize(self, gateway: ZHAGateway) -> None:
+    def initialize(self, gateway: Gateway) -> None:
         """Initialize the group probe."""
         self._gateway = gateway
 
@@ -537,7 +537,7 @@ class EndpointProbe:
                     entity_and_handler.claimed_cluster_handlers,
                 )
 
-    def initialize(self, gateway: ZHAGateway) -> None:
+    def initialize(self, gateway: Gateway) -> None:
         """Update device overrides config."""
         zha_config = gateway.config.yaml_config
         if overrides := zha_config.get(zha_const.CONF_DEVICE_CONFIG):
@@ -549,9 +549,9 @@ class GroupProbe:
 
     def __init__(self) -> None:
         """Initialize instance."""
-        self._gateway: ZHAGateway
+        self._gateway: Gateway
 
-    def initialize(self, gateway: ZHAGateway) -> None:
+    def initialize(self, gateway: Gateway) -> None:
         """Initialize the group probe."""
         self._gateway = gateway
 

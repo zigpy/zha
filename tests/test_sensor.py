@@ -18,7 +18,7 @@ from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from zha.application import Platform
 from zha.application.const import ATTR_DEVICE_CLASS, ZHA_CLUSTER_HANDLER_READS_PER_REQ
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.sensor import UnitOfMass
 from zha.application.platforms.sensor.const import SensorDeviceClass
@@ -80,7 +80,7 @@ async def elec_measurement_zha_dev(
 
 
 async def async_test_humidity(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test humidity sensor."""
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 1000, 2: 100})
@@ -88,7 +88,7 @@ async def async_test_humidity(
 
 
 async def async_test_temperature(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test temperature sensor."""
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 2900, 2: 100})
@@ -96,7 +96,7 @@ async def async_test_temperature(
 
 
 async def async_test_pressure(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test pressure sensor."""
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 1000, 2: 10000})
@@ -107,7 +107,7 @@ async def async_test_pressure(
 
 
 async def async_test_illuminance(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test illuminance sensor."""
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 10, 2: 20})
@@ -118,7 +118,7 @@ async def async_test_illuminance(
 
 
 async def async_test_metering(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test Smart Energy metering sensor."""
     await send_attributes_report(
@@ -167,7 +167,7 @@ async def async_test_metering(
 
 
 async def async_test_smart_energy_summation_delivered(
-    zha_gateway: ZHAGateway, cluster, entity
+    zha_gateway: Gateway, cluster, entity
 ):
     """Test SmartEnergy Summation delivered sensor."""
 
@@ -181,7 +181,7 @@ async def async_test_smart_energy_summation_delivered(
 
 
 async def async_test_smart_energy_summation_received(
-    zha_gateway: ZHAGateway, cluster, entity
+    zha_gateway: Gateway, cluster, entity
 ):
     """Test SmartEnergy Summation received sensor."""
 
@@ -195,7 +195,7 @@ async def async_test_smart_energy_summation_received(
 
 
 async def async_test_smart_energy_summation(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test SmartEnergy Summation delivered sensro."""
 
@@ -208,7 +208,7 @@ async def async_test_smart_energy_summation(
 
 
 async def async_test_electrical_measurement(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement sensor."""
     # update divisor cached value
@@ -239,7 +239,7 @@ async def async_test_electrical_measurement(
 
 
 async def async_test_em_apparent_power(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement Apparent Power sensor."""
     # update divisor cached value
@@ -259,7 +259,7 @@ async def async_test_em_apparent_power(
 
 
 async def async_test_em_power_factor(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test electrical measurement Power Factor sensor."""
     # update divisor cached value
@@ -279,7 +279,7 @@ async def async_test_em_power_factor(
 
 
 async def async_test_em_rms_current(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement RMS Current sensor."""
 
@@ -298,7 +298,7 @@ async def async_test_em_rms_current(
 
 
 async def async_test_em_rms_voltage(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement RMS Voltage sensor."""
 
@@ -317,7 +317,7 @@ async def async_test_em_rms_voltage(
 
 
 async def async_test_powerconfiguration(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test powerconfiguration/battery sensor."""
     await send_attributes_report(zha_gateway, cluster, {33: 98})
@@ -330,7 +330,7 @@ async def async_test_powerconfiguration(
 
 
 async def async_test_powerconfiguration2(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test powerconfiguration/battery sensor."""
     await send_attributes_report(zha_gateway, cluster, {33: -1})
@@ -344,7 +344,7 @@ async def async_test_powerconfiguration2(
 
 
 async def async_test_device_temperature(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test temperature sensor."""
     await send_attributes_report(zha_gateway, cluster, {0: 2900})
@@ -352,7 +352,7 @@ async def async_test_device_temperature(
 
 
 async def async_test_setpoint_change_source(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test the translation of numerical state into enum text."""
     await send_attributes_report(
@@ -364,7 +364,7 @@ async def async_test_setpoint_change_source(
 
 
 async def async_test_pi_heating_demand(
-    zha_gateway: ZHAGateway, cluster: Cluster, entity: PlatformEntity
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test pi heating demand is correctly returned."""
     await send_attributes_report(
@@ -531,7 +531,7 @@ async def async_test_pi_heating_demand(
 async def test_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster_id: int,
     entity_suffix: str,
     test_func: Callable[[Cluster, PlatformEntity], Awaitable[None]],
@@ -595,7 +595,7 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
 async def test_electrical_measurement_init(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test proper initialization of the electrical measurement cluster."""
@@ -758,7 +758,7 @@ async def test_electrical_measurement_init(
 async def test_unsupported_attributes_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster_id: int,
     unsupported_attributes: set,
     entity_ids: set,
@@ -887,7 +887,7 @@ async def test_unsupported_attributes_sensor(
 async def test_se_summation_uom(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     raw_uom: int,
     raw_value: int,
     expected_state: str,
@@ -948,7 +948,7 @@ async def test_elec_measurement_sensor_type(
     raw_measurement_type: int,
     expected_type: str,
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test zha electrical measurement sensor type."""
 
@@ -967,7 +967,7 @@ async def test_elec_measurement_sensor_type(
 
 @pytest.mark.looptime
 async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     elec_measurement_zigpy_dev: ZigpyDevice,
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
@@ -1105,7 +1105,7 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
 
 @pytest.fixture
 async def zigpy_device_aqara_sensor_v2(
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
 ):
@@ -1133,7 +1133,7 @@ async def zigpy_device_aqara_sensor_v2(
 
 
 async def test_last_feeding_size_sensor_v2(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_aqara_sensor_v2,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test quirks defined sensor."""
@@ -1156,7 +1156,7 @@ async def test_last_feeding_size_sensor_v2(
 
 @pytest.mark.looptime
 async def test_device_counter_sensors(
-    zha_gateway: ZHAGateway, caplog: pytest.LogCaptureFixture
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test quirks defined sensor."""
 

@@ -22,7 +22,7 @@ import zigpy.zdo.types as zdo_t
 
 from tests.common import make_zcl_header
 from zha.application.const import ATTR_QUIRK_ID
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
@@ -284,7 +284,7 @@ async def test_in_cluster_handler_config(
     attrs,
     endpoint: Endpoint,
     zigpy_device_mock,
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test ZHA core cluster handler configuration for input clusters."""
     zigpy_dev = zigpy_device_mock(
@@ -355,7 +355,7 @@ async def test_out_cluster_handler_config(
     bind_count: int,
     endpoint: Endpoint,
     zigpy_device_mock,
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test ZHA core cluster handler configuration for output clusters."""
     zigpy_dev = zigpy_device_mock(
@@ -847,7 +847,7 @@ async def test_zll_device_groups(
     mock.MagicMock(),
 )
 async def test_cluster_no_ep_attribute(
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[..., Device],
 ) -> None:
@@ -863,7 +863,7 @@ async def test_cluster_no_ep_attribute(
     assert zha_device._endpoints[1].all_cluster_handlers["1:0x042e"].name
 
 
-async def test_configure_reporting(zha_gateway: ZHAGateway, endpoint: Endpoint) -> None:  # pylint: disable=unused-argument
+async def test_configure_reporting(zha_gateway: Gateway, endpoint: Endpoint) -> None:  # pylint: disable=unused-argument
     """Test setting up a cluster handler and configuring attribute reporting in two batches."""
 
     class TestZigbeeClusterHandler(ClusterHandler):
@@ -915,7 +915,7 @@ async def test_configure_reporting(zha_gateway: ZHAGateway, endpoint: Endpoint) 
     ]
 
 
-async def test_invalid_cluster_handler(zha_gateway: ZHAGateway, caplog) -> None:  # pylint: disable=unused-argument
+async def test_invalid_cluster_handler(zha_gateway: Gateway, caplog) -> None:  # pylint: disable=unused-argument
     """Test setting up a cluster handler that fails to match properly."""
 
     class TestZigbeeClusterHandler(ClusterHandler):
@@ -957,7 +957,7 @@ async def test_invalid_cluster_handler(zha_gateway: ZHAGateway, caplog) -> None:
     assert "missing_attr" in caplog.text
 
 
-async def test_standard_cluster_handler(zha_gateway: ZHAGateway) -> None:  # pylint: disable=unused-argument
+async def test_standard_cluster_handler(zha_gateway: Gateway) -> None:  # pylint: disable=unused-argument
     """Test setting up a cluster handler that matches a standard cluster."""
 
     class TestZigbeeClusterHandler(ColorClusterHandler):
@@ -992,7 +992,7 @@ async def test_standard_cluster_handler(zha_gateway: ZHAGateway) -> None:  # pyl
     )
 
 
-async def test_quirk_id_cluster_handler(zha_gateway: ZHAGateway) -> None:  # pylint: disable=unused-argument
+async def test_quirk_id_cluster_handler(zha_gateway: Gateway) -> None:  # pylint: disable=unused-argument
     """Test setting up a cluster handler that matches a standard cluster."""
 
     class TestZigbeeClusterHandler(ColorClusterHandler):

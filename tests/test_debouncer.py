@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.debounce import Debouncer
 from zha.decorators import callback
 
@@ -14,7 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.looptime
-async def test_immediate_works(zha_gateway: ZHAGateway) -> None:
+async def test_immediate_works(zha_gateway: Gateway) -> None:
     """Test immediate works."""
     calls = []
     debouncer = Debouncer(
@@ -69,7 +69,7 @@ async def test_immediate_works(zha_gateway: ZHAGateway) -> None:
 
 
 @pytest.mark.looptime
-async def test_immediate_works_with_schedule_call(zha_gateway: ZHAGateway) -> None:
+async def test_immediate_works_with_schedule_call(zha_gateway: Gateway) -> None:
     """Test immediate works with scheduled calls."""
     calls = []
     debouncer = Debouncer(
@@ -127,7 +127,7 @@ async def test_immediate_works_with_schedule_call(zha_gateway: ZHAGateway) -> No
     assert debouncer._job.target == debouncer.function
 
 
-async def test_immediate_works_with_callback_function(zha_gateway: ZHAGateway) -> None:
+async def test_immediate_works_with_callback_function(zha_gateway: Gateway) -> None:
     """Test immediate works with callback function."""
     calls = []
     debouncer = Debouncer(
@@ -148,7 +148,7 @@ async def test_immediate_works_with_callback_function(zha_gateway: ZHAGateway) -
     debouncer.async_cancel()
 
 
-async def test_immediate_works_with_executor_function(zha_gateway: ZHAGateway) -> None:
+async def test_immediate_works_with_executor_function(zha_gateway: Gateway) -> None:
     """Test immediate works with executor function."""
     calls = []
     debouncer = Debouncer(
@@ -171,7 +171,7 @@ async def test_immediate_works_with_executor_function(zha_gateway: ZHAGateway) -
 
 @pytest.mark.looptime
 async def test_immediate_works_with_passed_callback_function_raises(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test immediate works with a callback function that raises."""
     calls = []
@@ -236,7 +236,7 @@ async def test_immediate_works_with_passed_callback_function_raises(
 
 @pytest.mark.looptime
 async def test_immediate_works_with_passed_coroutine_raises(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test immediate works with a coroutine that raises."""
     calls = []
@@ -299,7 +299,7 @@ async def test_immediate_works_with_passed_coroutine_raises(
 
 
 @pytest.mark.looptime
-async def test_not_immediate_works(zha_gateway: ZHAGateway) -> None:
+async def test_not_immediate_works(zha_gateway: Gateway) -> None:
     """Test immediate works."""
     calls = []
     debouncer = Debouncer(
@@ -351,7 +351,7 @@ async def test_not_immediate_works(zha_gateway: ZHAGateway) -> None:
 
 
 @pytest.mark.looptime
-async def test_not_immediate_works_schedule_call(zha_gateway: ZHAGateway) -> None:
+async def test_not_immediate_works_schedule_call(zha_gateway: Gateway) -> None:
     """Test immediate works with schedule call."""
     calls = []
     debouncer = Debouncer(
@@ -407,7 +407,7 @@ async def test_not_immediate_works_schedule_call(zha_gateway: ZHAGateway) -> Non
 
 
 @pytest.mark.looptime
-async def test_immediate_works_with_function_swapped(zha_gateway: ZHAGateway) -> None:
+async def test_immediate_works_with_function_swapped(zha_gateway: Gateway) -> None:
     """Test immediate works and we can change out the function."""
     calls = []
 
@@ -469,9 +469,7 @@ async def test_immediate_works_with_function_swapped(zha_gateway: ZHAGateway) ->
     assert debouncer._job.target == debouncer.function
 
 
-async def test_shutdown(
-    zha_gateway: ZHAGateway, caplog: pytest.LogCaptureFixture
-) -> None:
+async def test_shutdown(zha_gateway: Gateway, caplog: pytest.LogCaptureFixture) -> None:
     """Test shutdown."""
     calls = []
     future = asyncio.Future()
@@ -506,7 +504,7 @@ async def test_shutdown(
 
 
 @pytest.mark.looptime
-async def test_background(zha_gateway: ZHAGateway) -> None:
+async def test_background(zha_gateway: Gateway) -> None:
     """Test background tasks are created when background is True."""
     calls = []
 

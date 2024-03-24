@@ -18,7 +18,7 @@ from zha.mixins import LogMixin
 if TYPE_CHECKING:
     from zigpy.group import Group as ZigpyGroup, GroupEndpoint
 
-    from zha.application.gateway import ZHAGateway
+    from zha.application.gateway import Gateway
     from zha.application.platforms import GroupEntity
     from zha.zigbee.device import Device
 
@@ -153,7 +153,7 @@ class Group(LogMixin):
 
     def __init__(
         self,
-        gateway: ZHAGateway,
+        gateway: Gateway,
         zigpy_group: zigpy.group.Group,
     ) -> None:
         """Initialize the group."""
@@ -188,7 +188,7 @@ class Group(LogMixin):
         return self._zigpy_group
 
     @property
-    def gateway(self) -> ZHAGateway:
+    def gateway(self) -> Gateway:
         """Return the gateway for this group."""
         return self._gateway
 

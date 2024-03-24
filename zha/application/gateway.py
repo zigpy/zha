@@ -73,7 +73,7 @@ class DevicePairingStatus(Enum):
     INITIALIZED = 4
 
 
-class ZHAGateway(AsyncUtilMixin, EventBase):
+class Gateway(AsyncUtilMixin, EventBase):
     """Gateway that handles events that happen on the ZHA Zigbee network."""
 
     def __init__(self, config: ZHAData) -> None:
@@ -395,7 +395,7 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
             device_info = zha_device.zha_device_info
             self.track_task(
                 create_eager_task(
-                    zha_device.on_remove(), name="ZHAGateway._async_remove_device"
+                    zha_device.on_remove(), name="Gateway._async_remove_device"
                 )
             )
             if device_info is not None:

@@ -15,7 +15,7 @@ from zigpy.zcl.clusters import general
 import zigpy.zdo.types as zdo_t
 
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.zigbee.device import Device
 
 
@@ -106,7 +106,7 @@ async def ota_zha_device(
     return zha_device
 
 
-async def _send_time_changed(zha_gateway: ZHAGateway, seconds: int):
+async def _send_time_changed(zha_gateway: Gateway, seconds: int):
     """Send a time changed event."""
     await asyncio.sleep(seconds)
     await zha_gateway.async_block_till_done()
@@ -118,7 +118,7 @@ async def _send_time_changed(zha_gateway: ZHAGateway, seconds: int):
 )
 @pytest.mark.looptime
 async def test_check_available_success(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
@@ -169,7 +169,7 @@ async def test_check_available_success(
 )
 @pytest.mark.looptime
 async def test_check_available_unsuccessful(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
@@ -213,7 +213,7 @@ async def test_check_available_unsuccessful(
 )
 @pytest.mark.looptime
 async def test_check_available_no_basic_cluster_handler(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_without_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,

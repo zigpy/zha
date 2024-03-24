@@ -16,7 +16,7 @@ import zigpy.zdo.types
 from tests.common import async_find_group_entity_id, find_entity_id
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.helpers import ZHAData
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.zigbee.device import Device
@@ -156,7 +156,7 @@ def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
 
 
 async def test_device_left(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
 ) -> None:
@@ -170,7 +170,7 @@ async def test_device_left(
 
 
 async def test_gateway_group_methods(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_light_1,  # pylint: disable=redefined-outer-name
     device_light_2,  # pylint: disable=redefined-outer-name
     coordinator,  # pylint: disable=redefined-outer-name
@@ -256,7 +256,7 @@ async def test_gateway_group_methods(
 
 
 async def test_gateway_create_group_with_id(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_light_1,  # pylint: disable=redefined-outer-name
     coordinator,  # pylint: disable=redefined-outer-name
 ) -> None:
@@ -280,11 +280,11 @@ async def test_gateway_create_group_with_id(
 
 
 @patch(
-    "zha.application.gateway.ZHAGateway.load_devices",
+    "zha.application.gateway.Gateway.load_devices",
     MagicMock(),
 )
 @patch(
-    "zha.application.gateway.ZHAGateway.load_groups",
+    "zha.application.gateway.Gateway.load_groups",
     MagicMock(),
 )
 @pytest.mark.parametrize(
@@ -310,7 +310,7 @@ async def test_gateway_initialize_bellows_thread(
         "bellows.zigbee.application.ControllerApplication.new",
         return_value=zigpy_app_controller,
     ) as mock_new:
-        zha_gw = ZHAGateway(zha_data)
+        zha_gw = Gateway(zha_data)
         await zha_gw.async_initialize()
         assert mock_new.mock_calls[-1].kwargs["config"]["use_thread"] is thread_state
         await zha_gw.shutdown()
@@ -337,7 +337,7 @@ async def test_gateway_force_multi_pan_channel(
     #Test ZHA disabling the UART thread when connecting to a TCP coordinator.
     zha_data.config_entry_data["data"]["device"]["path"] = device_path
     zha_data.yaml_config["zigpy_config"] = config_override
-    zha_gw = ZHAGateway(zha_data)
+    zha_gw = Gateway(zha_data)
 
     _, config = zha_gw.get_application_controller_data()
     assert config["network"]["channel"] == expected_channel
@@ -352,7 +352,7 @@ async def test_startup_concurrency_limit(
     zigpy_device_mock,
 ):
     """Test ZHA gateway limits concurrency on startup."""
-    zha_gw = ZHAGateway(zha_data)
+    zha_gw = Gateway(zha_data)
 
     with patch(
         "bellows.zigbee.application.ControllerApplication.new",

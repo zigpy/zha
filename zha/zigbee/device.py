@@ -89,7 +89,7 @@ from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
-    from zha.application.gateway import ZHAGateway
+    from zha.application.gateway import Gateway
 
 _LOGGER = logging.getLogger(__name__)
 _UPDATE_ALIVE_INTERVAL = (60, 90)
@@ -153,11 +153,11 @@ class Device(LogMixin, EventBase):
     def __init__(
         self,
         zigpy_device: zigpy.device.Device,
-        _gateway: ZHAGateway,
+        _gateway: Gateway,
     ) -> None:
         """Initialize the gateway."""
         super().__init__()
-        self._gateway: ZHAGateway = _gateway
+        self._gateway: Gateway = _gateway
         self._zigpy_device: ZigpyDevice = zigpy_device
         self.quirk_applied: bool = isinstance(
             self._zigpy_device, zigpy.quirks.CustomDevice
@@ -457,7 +457,7 @@ class Device(LogMixin, EventBase):
     def new(
         cls,
         zigpy_dev: zigpy.device.Device,
-        gateway: ZHAGateway,
+        gateway: Gateway,
     ) -> Self:
         """Create new device."""
         zha_dev = cls(zigpy_dev, gateway)

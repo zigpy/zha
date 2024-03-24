@@ -13,7 +13,7 @@ from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.zigbee.device import Device
 
@@ -54,7 +54,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 async def test_siren(
     siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha siren platform."""
 
@@ -129,7 +129,7 @@ async def test_siren(
 @pytest.mark.looptime
 async def test_siren_timed_off(
     siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha siren platform."""
     zha_device, cluster = siren

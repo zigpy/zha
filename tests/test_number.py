@@ -12,7 +12,7 @@ import zigpy.types
 from zigpy.zcl.clusters import general, lighting
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
@@ -71,7 +71,7 @@ async def light(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
 async def test_number(
     zigpy_analog_output_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha number platform."""
     cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
@@ -160,7 +160,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     ),
 )
 async def test_level_control_number(
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     light: Device,  # pylint: disable=redefined-outer-name
     device_joined,
     attr: str,
@@ -255,7 +255,7 @@ async def test_level_control_number(
     (("start_up_color_temperature", 500, 350),),
 )
 async def test_color_number(
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     light: Device,  # pylint: disable=redefined-outer-name
     device_joined,
     attr: str,

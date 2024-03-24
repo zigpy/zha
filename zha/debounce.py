@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 from zha.async_ import ZHAJob
 
 if TYPE_CHECKING:
-    from zha.application.gateway import ZHAGateway
+    from zha.application.gateway import Gateway
 
 _R_co = TypeVar("_R_co", covariant=True)
 
@@ -20,7 +20,7 @@ class Debouncer(Generic[_R_co]):
 
     def __init__(
         self,
-        gateway: ZHAGateway,
+        gateway: Gateway,
         logger: Logger,
         *,
         cooldown: float,

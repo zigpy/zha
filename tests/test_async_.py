@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.async_ import AsyncUtilMixin, ZHAJob, ZHAJobType, create_eager_task
 from zha.decorators import callback
 
@@ -28,7 +28,7 @@ async def test_zhajob_forbid_coroutine() -> None:
 
 
 @pytest.mark.parametrize("eager_start", [True, False])
-async def test_cancellable_zhajob(zha_gateway: ZHAGateway, eager_start: bool) -> None:
+async def test_cancellable_zhajob(zha_gateway: Gateway, eager_start: bool) -> None:
     """Simulate a shutdown, ensure cancellable jobs are cancelled."""
     job = MagicMock()
 
@@ -63,7 +63,7 @@ async def test_async_add_zha_job_schedule_callback() -> None:
 
 
 async def test_async_add_zha_job_eager_start_coro_suspends(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test scheduling a coro as a task that will suspend with eager_start."""
 
@@ -80,7 +80,7 @@ async def test_async_add_zha_job_eager_start_coro_suspends(
 
 
 async def test_async_run_zha_job_eager_start_coro_suspends(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test scheduling a coro as a task that will suspend with eager_start."""
 
@@ -94,7 +94,7 @@ async def test_async_run_zha_job_eager_start_coro_suspends(
     assert task not in zha_gateway._tracked_completable_tasks
 
 
-async def test_async_add_zha_job_background(zha_gateway: ZHAGateway) -> None:
+async def test_async_add_zha_job_background(zha_gateway: Gateway) -> None:
     """Test scheduling a coro as a background task with async_add_zha_job."""
 
     async def job_that_suspends():
@@ -109,7 +109,7 @@ async def test_async_add_zha_job_background(zha_gateway: ZHAGateway) -> None:
     assert task not in zha_gateway._background_tasks
 
 
-async def test_async_run_zha_job_background(zha_gateway: ZHAGateway) -> None:
+async def test_async_run_zha_job_background(zha_gateway: Gateway) -> None:
     """Test scheduling a coro as a background task with async_run_zha_job."""
 
     async def job_that_suspends():
@@ -124,7 +124,7 @@ async def test_async_run_zha_job_background(zha_gateway: ZHAGateway) -> None:
     assert task not in zha_gateway._background_tasks
 
 
-async def test_async_add_zha_job_eager_background(zha_gateway: ZHAGateway) -> None:
+async def test_async_add_zha_job_eager_background(zha_gateway: Gateway) -> None:
     """Test scheduling a coro as an eager background task with async_add_zha_job."""
 
     async def job_that_suspends():
@@ -139,7 +139,7 @@ async def test_async_add_zha_job_eager_background(zha_gateway: ZHAGateway) -> No
     assert task not in zha_gateway._background_tasks
 
 
-async def test_async_run_zha_job_eager_background(zha_gateway: ZHAGateway) -> None:
+async def test_async_run_zha_job_eager_background(zha_gateway: Gateway) -> None:
     """Test scheduling a coro as an eager background task with async_run_zha_job."""
 
     async def job_that_suspends():
@@ -155,7 +155,7 @@ async def test_async_run_zha_job_eager_background(zha_gateway: ZHAGateway) -> No
 
 
 async def test_async_run_zha_job_background_synchronous(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test scheduling a coro as an eager background task with async_run_zha_job."""
 
@@ -172,7 +172,7 @@ async def test_async_run_zha_job_background_synchronous(
     await task
 
 
-async def test_async_run_zha_job_synchronous(zha_gateway: ZHAGateway) -> None:
+async def test_async_run_zha_job_synchronous(zha_gateway: Gateway) -> None:
     """Test scheduling a coro as an eager task with async_run_zha_job."""
 
     async def job_that_does_not_suspends():
@@ -188,7 +188,7 @@ async def test_async_run_zha_job_synchronous(zha_gateway: ZHAGateway) -> None:
     await task
 
 
-async def test_async_add_zha_job_coro_named(zha_gateway: ZHAGateway) -> None:
+async def test_async_add_zha_job_coro_named(zha_gateway: Gateway) -> None:
     """Test that we schedule coroutines and add jobs to the job pool with a name."""
 
     async def mycoro():
@@ -201,7 +201,7 @@ async def test_async_add_zha_job_coro_named(zha_gateway: ZHAGateway) -> None:
     assert "named coro" in str(task)
 
 
-async def test_async_add_zha_job_eager_start(zha_gateway: ZHAGateway) -> None:
+async def test_async_add_zha_job_eager_start(zha_gateway: Gateway) -> None:
     """Test eager_start with async_add_zha_job."""
 
     async def mycoro():
@@ -258,7 +258,7 @@ async def test_async_add_zha_job_schedule_corofunction_eager_start() -> None:
 
 
 async def test_async_add_zha_job_schedule_partial_coroutinefunction(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test that we schedule partial coros and add jobs to the job pool."""
     zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
@@ -377,7 +377,7 @@ async def test_async_run_zha_job_delegates_non_async() -> None:
     assert len(zha_gateway.async_add_zha_job.mock_calls) == 1
 
 
-async def test_pending_scheduler(zha_gateway: ZHAGateway) -> None:
+async def test_pending_scheduler(zha_gateway: Gateway) -> None:
     """Add a coro to pending tasks."""
     call_count = []
 
@@ -394,7 +394,7 @@ async def test_pending_scheduler(zha_gateway: ZHAGateway) -> None:
     assert len(call_count) == 3
 
 
-def test_add_job_pending_tasks_coro(zha_gateway: ZHAGateway) -> None:
+def test_add_job_pending_tasks_coro(zha_gateway: Gateway) -> None:
     """Add a coro to pending tasks."""
 
     async def test_coro():
@@ -407,7 +407,7 @@ def test_add_job_pending_tasks_coro(zha_gateway: ZHAGateway) -> None:
     assert len(zha_gateway._tracked_completable_tasks) == 0
 
 
-async def test_async_add_job_pending_tasks_coro(zha_gateway: ZHAGateway) -> None:
+async def test_async_add_job_pending_tasks_coro(zha_gateway: Gateway) -> None:
     """Add a coro to pending tasks."""
     call_count = []
 
@@ -424,7 +424,7 @@ async def test_async_add_job_pending_tasks_coro(zha_gateway: ZHAGateway) -> None
     assert len(zha_gateway._tracked_completable_tasks) == 0
 
 
-async def test_async_create_task_pending_tasks_coro(zha_gateway: ZHAGateway) -> None:
+async def test_async_create_task_pending_tasks_coro(zha_gateway: Gateway) -> None:
     """Add a coro to pending tasks."""
     call_count = []
 
@@ -441,7 +441,7 @@ async def test_async_create_task_pending_tasks_coro(zha_gateway: ZHAGateway) -> 
     assert len(zha_gateway._tracked_completable_tasks) == 0
 
 
-async def test_async_add_job_pending_tasks_executor(zha_gateway: ZHAGateway) -> None:
+async def test_async_add_job_pending_tasks_executor(zha_gateway: Gateway) -> None:
     """Run an executor in pending tasks."""
     call_count = []
 
@@ -463,7 +463,7 @@ async def test_async_add_job_pending_tasks_executor(zha_gateway: ZHAGateway) -> 
     assert len(call_count) == 2
 
 
-async def test_async_add_job_pending_tasks_callback(zha_gateway: ZHAGateway) -> None:
+async def test_async_add_job_pending_tasks_callback(zha_gateway: Gateway) -> None:
     """Run a callback in pending tasks."""
     call_count = []
 
@@ -488,13 +488,13 @@ async def test_async_add_job_pending_tasks_callback(zha_gateway: ZHAGateway) -> 
     assert len(call_count) == 2
 
 
-async def test_add_job_with_none(zha_gateway: ZHAGateway) -> None:
+async def test_add_job_with_none(zha_gateway: Gateway) -> None:
     """Try to add a job with None as function."""
     with pytest.raises(ValueError):
         zha_gateway.async_add_job(None, "test_arg")
 
 
-async def test_async_functions_with_callback(zha_gateway: ZHAGateway) -> None:
+async def test_async_functions_with_callback(zha_gateway: Gateway) -> None:
     """Test we deal with async functions accidentally marked as callback."""
     runs = []
 
@@ -510,7 +510,7 @@ async def test_async_functions_with_callback(zha_gateway: ZHAGateway) -> None:
     assert len(runs) == 2
 
 
-async def test_async_run_job_starts_tasks_eagerly(zha_gateway: ZHAGateway) -> None:
+async def test_async_run_job_starts_tasks_eagerly(zha_gateway: Gateway) -> None:
     """Test async_run_job starts tasks eagerly."""
     runs = []
 
@@ -524,7 +524,7 @@ async def test_async_run_job_starts_tasks_eagerly(zha_gateway: ZHAGateway) -> No
     await task
 
 
-async def test_async_run_job_starts_coro_eagerly(zha_gateway: ZHAGateway) -> None:
+async def test_async_run_job_starts_coro_eagerly(zha_gateway: Gateway) -> None:
     """Test async_run_job starts coros eagerly."""
     runs = []
 
@@ -539,7 +539,7 @@ async def test_async_run_job_starts_coro_eagerly(zha_gateway: ZHAGateway) -> Non
 
 
 @pytest.mark.parametrize("eager_start", [True, False])
-async def test_background_task(zha_gateway: ZHAGateway, eager_start: bool) -> None:
+async def test_background_task(zha_gateway: Gateway, eager_start: bool) -> None:
     """Test background tasks being quit."""
     result = asyncio.Future()
 
@@ -560,7 +560,7 @@ async def test_background_task(zha_gateway: ZHAGateway, eager_start: bool) -> No
 
 
 async def test_shutdown_does_not_block_on_normal_tasks(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Ensure shutdown does not block on normal tasks."""
     result = asyncio.Future()
@@ -583,7 +583,7 @@ async def test_shutdown_does_not_block_on_normal_tasks(
 
 
 async def test_shutdown_does_not_block_on_shielded_tasks(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Ensure shutdown does not block on shielded tasks."""
     result = asyncio.Future()
@@ -610,7 +610,7 @@ async def test_shutdown_does_not_block_on_shielded_tasks(
 
 
 @pytest.mark.parametrize("eager_start", [True, False])
-async def test_cancellable_ZHAJob(zha_gateway: ZHAGateway, eager_start: bool) -> None:
+async def test_cancellable_ZHAJob(zha_gateway: Gateway, eager_start: bool) -> None:
     """Simulate a shutdown, ensure cancellable jobs are cancelled."""
     job = MagicMock()
 

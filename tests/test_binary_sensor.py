@@ -8,7 +8,7 @@ import zigpy.profiles.zha
 from zigpy.zcl.clusters import general, measurement, security
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone, Occupancy
 from zha.zigbee.device import Device
@@ -37,7 +37,7 @@ DEVICE_OCCUPANCY = {
 
 
 async def async_test_binary_sensor_on_off(
-    zha_gateway: ZHAGateway, cluster: general.OnOff, entity: Occupancy
+    zha_gateway: Gateway, cluster: general.OnOff, entity: Occupancy
 ) -> None:
     """Test getting on and off messages for binary sensors."""
     # binary sensor on
@@ -50,7 +50,7 @@ async def async_test_binary_sensor_on_off(
 
 
 async def async_test_iaszone_on_off(
-    zha_gateway: ZHAGateway, cluster: security.IasZone, entity: IASZone
+    zha_gateway: Gateway, cluster: security.IasZone, entity: IASZone
 ) -> None:
     """Test getting on and off messages for iaszone binary sensors."""
     # binary sensor on
@@ -91,7 +91,7 @@ async def async_test_iaszone_on_off(
 async def test_binary_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device: dict,
     on_off_test: Callable[..., Awaitable[None]],
     cluster_name: str,

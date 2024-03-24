@@ -12,7 +12,7 @@ from zigpy.zcl.clusters import general
 from tests.common import find_entity_id, send_attributes_report
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.device_tracker import SourceType
 from zha.application.registries import SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
@@ -50,7 +50,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 @pytest.mark.looptime
 async def test_device_tracker(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_joined,
     zigpy_device_dt,  # pylint: disable=redefined-outer-name
 ) -> None:

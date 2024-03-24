@@ -35,7 +35,7 @@ from zha.decorators import SetRegistry
 BINDABLE_CLUSTERS = SetRegistry()
 
 if TYPE_CHECKING:
-    from zha.application.gateway import ZHAGateway
+    from zha.application.gateway import Gateway
     from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
 
@@ -272,7 +272,7 @@ class ZHAData:
     platforms: collections.defaultdict[Platform, list] = dataclasses.field(
         default_factory=lambda: collections.defaultdict(list)
     )
-    gateway: ZHAGateway | None = dataclasses.field(default=None)
+    gateway: Gateway | None = dataclasses.field(default=None)
     device_trigger_cache: dict[str, tuple[str, dict]] = dataclasses.field(
         default_factory=dict
     )

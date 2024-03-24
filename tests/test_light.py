@@ -24,7 +24,7 @@ from zha.application.const import (
     CUSTOM_CONFIGURATION,
     ZHA_OPTIONS,
 )
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.light.const import (
     FLASH_EFFECTS,
@@ -282,7 +282,7 @@ def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
 async def test_light_refresh(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ):
     """Test zha light platform refresh."""
     zigpy_device = zigpy_device_mock(LIGHT_ON_OFF)
@@ -348,7 +348,7 @@ async def test_light_refresh(
 async def test_light(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device: dict,
     reporting: tuple,  # pylint: disable=unused-argument
 ) -> None:
@@ -474,7 +474,7 @@ async def test_light(
 
 
 async def async_test_on_off_from_light(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: general.OnOff,
     entity: PlatformEntity | GroupEntity,
 ) -> None:
@@ -491,7 +491,7 @@ async def async_test_on_off_from_light(
 
 
 async def async_test_on_from_light(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: general.OnOff,
     entity: PlatformEntity | GroupEntity,
 ) -> None:
@@ -505,7 +505,7 @@ async def async_test_on_from_light(
 
 
 async def async_test_on_off_from_client(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: general.OnOff,
     entity: PlatformEntity | GroupEntity,
 ) -> None:
@@ -530,7 +530,7 @@ async def async_test_on_off_from_client(
 
 
 async def async_test_off_from_client(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: general.OnOff,
     entity: PlatformEntity | GroupEntity,
 ) -> None:
@@ -553,7 +553,7 @@ async def async_test_off_from_client(
     )
 
 
-async def _async_shift_time(zha_gateway: ZHAGateway):
+async def _async_shift_time(zha_gateway: Gateway):
     """Shift time to cause call later tasks to run."""
     await asyncio.sleep(11)
     await zha_gateway.async_block_till_done()
@@ -561,7 +561,7 @@ async def _async_shift_time(zha_gateway: ZHAGateway):
 
 @pytest.mark.looptime
 async def async_test_level_on_off_from_client(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     on_off_cluster: general.OnOff,
     level_cluster: general.LevelControl,
     entity: PlatformEntity | GroupEntity,
@@ -645,7 +645,7 @@ async def async_test_level_on_off_from_client(
 
 
 async def async_test_dimmer_from_light(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: general.LevelControl,
     entity: PlatformEntity | GroupEntity,
     level: int,
@@ -666,7 +666,7 @@ async def async_test_dimmer_from_light(
 
 
 async def async_test_flash_from_client(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: general.Identify,
     entity: PlatformEntity | GroupEntity,
     flash: str,
@@ -713,7 +713,7 @@ async def test_zha_group_light_entity(
     device_light_2: Device,  # pylint: disable=redefined-outer-name
     device_light_3: Device,  # pylint: disable=redefined-outer-name
     coordinator: Device,  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test the light entity for a ZHA group."""
 
@@ -999,7 +999,7 @@ async def test_zha_group_light_entity(
 )
 # TODO expected_state is not used
 async def test_light_initialization(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     plugged_attr_reads: dict[str, Any],
@@ -1042,7 +1042,7 @@ async def test_light_initialization(
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
 async def test_transitions(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_light_1,  # pylint: disable=redefined-outer-name
     device_light_2,  # pylint: disable=redefined-outer-name
     eWeLink_light,  # pylint: disable=redefined-outer-name
@@ -1725,7 +1725,7 @@ async def test_transitions(
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
 async def test_on_with_off_color(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_light_1,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test turning on the light and sending color commands before on/level commands for supporting lights."""
@@ -1850,7 +1850,7 @@ async def test_on_with_off_color(
 )
 @pytest.mark.looptime
 async def test_group_member_assume_state(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     coordinator,  # pylint: disable=redefined-outer-name
     device_light_1,  # pylint: disable=redefined-outer-name
     device_light_2,  # pylint: disable=redefined-outer-name

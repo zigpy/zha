@@ -22,7 +22,7 @@ from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.select import AqaraMotionSensitivities
 from zha.zigbee.device import Device
@@ -64,7 +64,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 async def test_select(
     siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha select platform."""
     zha_device, cluster = siren
@@ -137,7 +137,7 @@ class MotionSensitivityQuirk(CustomDevice):
 
 @pytest.fixture
 async def zigpy_device_aqara_sensor(
-    zha_gateway: ZHAGateway, zigpy_device_mock, device_joined
+    zha_gateway: Gateway, zigpy_device_mock, device_joined
 ):
     """Device tracker zigpy Aqara motion sensor device."""
 
@@ -162,7 +162,7 @@ async def zigpy_device_aqara_sensor(
 
 
 async def test_on_off_select_attribute_report(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_joined,
     zigpy_device_aqara_sensor,  # pylint: disable=redefined-outer-name
 ) -> None:
@@ -205,7 +205,7 @@ async def test_on_off_select_attribute_report(
 
 @pytest.fixture
 async def zigpy_device_aqara_sensor_v2(
-    zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
 ):
@@ -232,7 +232,7 @@ async def zigpy_device_aqara_sensor_v2(
 
 
 async def test_on_off_select_attribute_report_v2(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_aqara_sensor_v2,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA attribute report parsing for select platform."""

@@ -10,7 +10,7 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms.alarm_control_panel import AlarmControlPanel
 from zha.zigbee.device import Device
 
@@ -42,7 +42,7 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
 async def test_alarm_control_panel(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zhaws alarm control panel platform."""
     zha_device: Device = await device_joined(zigpy_device)
@@ -218,7 +218,7 @@ async def test_alarm_control_panel(
 
 
 async def reset_alarm_panel(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: security.IasAce,
     entity: AlarmControlPanel,
 ) -> None:

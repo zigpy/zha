@@ -12,7 +12,7 @@ import zigpy.zcl
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
@@ -121,7 +121,7 @@ def make_attribute(attrid: int, value: Any, status: int = 0) -> zcl_f.Attribute:
 
 
 async def send_attributes_report(
-    zha_gateway: ZHAGateway, cluster: zigpy.zcl.Cluster, attributes: dict
+    zha_gateway: Gateway, cluster: zigpy.zcl.Cluster, attributes: dict
 ) -> None:
     """Cause the sensor to receive an attribute report from the network.
 

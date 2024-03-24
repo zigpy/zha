@@ -23,7 +23,7 @@ from tests.common import (
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import ATTR_COMMAND
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.cover import (
     ATTR_CURRENT_POSITION,
@@ -127,7 +127,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 
 async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     device_joined,
     zigpy_cover_device,
 ) -> None:
@@ -184,7 +184,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
 async def test_cover(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_cover_device: ZigpyDevice,
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha cover platform."""
 
@@ -406,7 +406,7 @@ async def test_cover(
 
 
 async def test_cover_failures(
-    zha_gateway: ZHAGateway, device_joined, zigpy_cover_device
+    zha_gateway: Gateway, device_joined, zigpy_cover_device
 ) -> None:
     """Test ZHA cover platform failure cases."""
 
@@ -570,7 +570,7 @@ async def test_cover_failures(
 async def test_shade(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_shade_device: ZigpyDevice,
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha cover platform for shade device type."""
 
@@ -725,7 +725,7 @@ async def test_shade(
 async def test_keen_vent(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_keen_vent: ZigpyDevice,
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test keen vent."""
 
@@ -778,7 +778,7 @@ async def test_keen_vent(
 
 
 async def test_cover_remote(
-    zha_gateway: ZHAGateway, device_joined, zigpy_cover_remote
+    zha_gateway: Gateway, device_joined, zigpy_cover_remote
 ) -> None:
     """Test ZHA cover remote."""
 

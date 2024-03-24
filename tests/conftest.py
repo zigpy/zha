@@ -36,7 +36,7 @@ from zha.application.const import (
     ZHA_ALARM_OPTIONS,
     ZHA_OPTIONS,
 )
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.helpers import ZHAData
 from zha.zigbee.device import Device
 
@@ -217,11 +217,11 @@ class TestGateway:
     def __init__(self, data: ZHAData):
         """Initialize the ZHA gateway."""
         self.zha_data: ZHAData = data
-        self.zha_gateway: ZHAGateway
+        self.zha_gateway: Gateway
 
-    async def __aenter__(self) -> ZHAGateway:
+    async def __aenter__(self) -> Gateway:
         """Start the ZHA gateway."""
-        self.zha_gateway = await ZHAGateway.async_from_config(self.zha_data)
+        self.zha_gateway = await Gateway.async_from_config(self.zha_data)
         await self.zha_gateway.async_block_till_done()
         await self.zha_gateway.async_initialize_devices_and_entities()
         return self.zha_gateway
@@ -279,7 +279,7 @@ def globally_load_quirks():
 
 @pytest.fixture
 def device_joined(
-    zha_gateway: ZHAGateway,  # pylint: disable=redefined-outer-name
+    zha_gateway: Gateway,  # pylint: disable=redefined-outer-name
 ) -> Callable[[zigpy.device.Device], Device]:
     """Return a newly joined ZHAWS device."""
 

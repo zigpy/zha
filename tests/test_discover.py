@@ -43,7 +43,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform, discovery
 from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.registries import (
     PLATFORM_ENTITIES,
@@ -132,7 +132,7 @@ def zha_device_mock(
 @pytest.mark.parametrize("device", DEVICES)
 async def test_devices(
     device,
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock,
     device_joined,
 ) -> None:
@@ -330,7 +330,7 @@ def test_discover_probe_single_cluster() -> None:
 async def test_discover_endpoint(
     device_info: dict[str, Any],
     zha_device_mock: Callable[..., Device],
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test device discovery."""
 
@@ -465,7 +465,7 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
     ],
 )
 async def test_device_override(
-    zha_gateway: ZHAGateway, zigpy_device_mock, override, entity_id
+    zha_gateway: Gateway, zigpy_device_mock, override, entity_id
 ) -> None:
     """Test device discovery override."""
 
@@ -503,7 +503,7 @@ async def test_device_override(
 
 
 async def test_quirks_v2_entity_discovery(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock,
     device_joined,
 ) -> None:
@@ -567,7 +567,7 @@ async def test_quirks_v2_entity_discovery(
 
 
 async def test_quirks_v2_entity_discovery_e1_curtain(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock,
     device_joined,
 ) -> None:
@@ -779,7 +779,7 @@ def _get_test_device(
 
 
 async def test_quirks_v2_entity_no_metadata(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock,
     device_joined,
     caplog: pytest.LogCaptureFixture,
@@ -798,7 +798,7 @@ async def test_quirks_v2_entity_no_metadata(
 
 
 async def test_quirks_v2_entity_discovery_errors(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock,
     device_joined,
     caplog: pytest.LogCaptureFixture,
@@ -961,7 +961,7 @@ def validate_metadata(validator: Callable) -> None:
     ],
 )
 async def test_quirks_v2_metadata_errors(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock,
     device_joined,
     augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
@@ -1064,7 +1064,7 @@ ERROR_ROOT = "Quirks provided an invalid device class"
     ],
 )
 async def test_quirks_v2_metadata_bad_device_classes(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     zigpy_device_mock,
     device_joined,
     caplog: pytest.LogCaptureFixture,

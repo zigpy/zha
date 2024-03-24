@@ -11,7 +11,7 @@ from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.zigbee.device import Device
 
@@ -58,7 +58,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 async def test_lock(
     lock: tuple[Device, closures.DoorLock],  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha lock platform."""
 
@@ -107,7 +107,7 @@ async def test_lock(
 
 
 async def async_lock(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: closures.DoorLock,
     entity: PlatformEntity,
 ) -> None:
@@ -133,7 +133,7 @@ async def async_lock(
 
 
 async def async_unlock(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: closures.DoorLock,
     entity: PlatformEntity,
 ) -> None:
@@ -159,7 +159,7 @@ async def async_unlock(
 
 
 async def async_set_user_code(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: closures.DoorLock,
     entity: PlatformEntity,
 ) -> None:
@@ -179,7 +179,7 @@ async def async_set_user_code(
 
 
 async def async_clear_user_code(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: closures.DoorLock,
     entity: PlatformEntity,
 ) -> None:
@@ -194,7 +194,7 @@ async def async_clear_user_code(
 
 
 async def async_enable_user_code(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: closures.DoorLock,
     entity: PlatformEntity,
 ) -> None:
@@ -210,7 +210,7 @@ async def async_enable_user_code(
 
 
 async def async_disable_user_code(
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
     cluster: closures.DoorLock,
     entity: PlatformEntity,
 ) -> None:

@@ -25,7 +25,7 @@ from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
-from zha.application.gateway import ZHAGateway
+from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
@@ -127,7 +127,7 @@ async def device_switch_2(
 async def test_switch(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha switch platform."""
     zha_device = await device_joined(zigpy_device)
@@ -238,7 +238,7 @@ async def test_switch(
 async def test_zha_group_switch_entity(
     device_switch_1: Device,  # pylint: disable=redefined-outer-name
     device_switch_2: Device,  # pylint: disable=redefined-outer-name
-    zha_gateway: ZHAGateway,
+    zha_gateway: Gateway,
 ) -> None:
     """Test the switch entity for a ZHA group."""
     member_ieee_addresses = [device_switch_1.ieee, device_switch_2.ieee]
@@ -391,7 +391,7 @@ class WindowDetectionFunctionQuirk(CustomDevice):
 
 
 @pytest.fixture
-async def zigpy_device_tuya(zha_gateway: ZHAGateway, zigpy_device_mock, device_joined):
+async def zigpy_device_tuya(zha_gateway: Gateway, zigpy_device_mock, device_joined):
     """Device tracker zigpy tuya device."""
 
     zigpy_dev = zigpy_device_mock(
@@ -412,7 +412,7 @@ async def zigpy_device_tuya(zha_gateway: ZHAGateway, zigpy_device_mock, device_j
 
 
 async def test_switch_configurable(
-    zha_gateway: ZHAGateway, device_joined, zigpy_device_tuya
+    zha_gateway: Gateway, device_joined, zigpy_device_tuya
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -522,7 +522,7 @@ async def test_switch_configurable(
 
 
 async def test_switch_configurable_custom_on_off_values(
-    zha_gateway: ZHAGateway, device_joined, zigpy_device_mock
+    zha_gateway: Gateway, device_joined, zigpy_device_mock
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -600,7 +600,7 @@ async def test_switch_configurable_custom_on_off_values(
 
 
 async def test_switch_configurable_custom_on_off_values_force_inverted(
-    zha_gateway: ZHAGateway, device_joined, zigpy_device_mock
+    zha_gateway: Gateway, device_joined, zigpy_device_mock
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -679,7 +679,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
 
 
 async def test_switch_configurable_custom_on_off_values_inverter_attribute(
-    zha_gateway: ZHAGateway, device_joined, zigpy_device_mock
+    zha_gateway: Gateway, device_joined, zigpy_device_mock
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -767,7 +767,7 @@ WCM = closures.WindowCovering.WindowCoveringMode
 
 
 async def test_cover_inversion_switch(
-    zha_gateway: ZHAGateway, device_joined, zigpy_cover_device
+    zha_gateway: Gateway, device_joined, zigpy_cover_device
 ) -> None:
     """Test ZHA cover platform."""
 
@@ -863,7 +863,7 @@ async def test_cover_inversion_switch(
 
 
 async def test_cover_inversion_switch_not_created(
-    zha_gateway: ZHAGateway, device_joined, zigpy_cover_device
+    zha_gateway: Gateway, device_joined, zigpy_cover_device
 ) -> None:
     """Test ZHA cover platform."""
 
