@@ -175,6 +175,7 @@ class ZHANumberConfigurationEntity(PlatformEntity):
 
     PLATFORM = Platform.NUMBER
     _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_unit_of_measurement: str | None
     _attr_native_min_value: float = 0.0
     _attr_native_max_value: float = 100.0
     _attr_native_step: float = 1.0
