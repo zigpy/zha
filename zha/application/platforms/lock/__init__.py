@@ -70,7 +70,7 @@ class ZhaDoorLock(PlatformEntity):
             self.error("Error with lock_door: %s", result)
             return
         self._state = STATE_LOCKED
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_unlock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Unlock the lock."""
@@ -79,7 +79,7 @@ class ZhaDoorLock(PlatformEntity):
             self.error("Error with unlock_door: %s", result)
             return
         self._state = STATE_UNLOCKED
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
         """Set the user_code to index X on the lock."""
@@ -122,7 +122,7 @@ class ZhaDoorLock(PlatformEntity):
     ) -> None:
         """Handle state update from cluster handler."""
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def get_state(self) -> dict:
         """Get the state of the lock."""

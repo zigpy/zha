@@ -315,7 +315,7 @@ class BaseEntity(LogMixin, EventBase):
         with suppress(asyncio.CancelledError):
             await asyncio.gather(*tasks, return_exceptions=True)
 
-    def maybe_send_state_changed_event(self) -> None:
+    def maybe_emit_state_changed_event(self) -> None:
         """Send the state of this platform entity."""
         state = self.get_state()
         if self._previous_state != state:
@@ -489,7 +489,7 @@ class PlatformEntity(BaseEntity):
         ]
         if tasks:
             await asyncio.gather(*tasks)
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
 
 
 class GroupEntity(BaseEntity):

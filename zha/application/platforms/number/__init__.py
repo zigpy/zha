@@ -127,7 +127,7 @@ class ZhaNumber(PlatformEntity):
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await self._analog_output_cluster_handler.async_set_present_value(float(value))
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
         """Attempt to retrieve the state of the entity."""
@@ -144,13 +144,13 @@ class ZhaNumber(PlatformEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle value update from cluster handler."""
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_set_value(self, value: Any, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Update the current value from service."""
         num_value = float(value)
         if await self._analog_output_cluster_handler.async_set_present_value(num_value):
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
 
     def to_json(self) -> dict:
         """Return the JSON representation of the number entity."""
@@ -297,7 +297,7 @@ class ZHANumberConfigurationEntity(PlatformEntity):
         await self._cluster_handler.write_attributes_safe(
             {self._attribute_name: int(value / self._attr_multiplier)}
         )
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
         """Attempt to retrieve the state of the entity."""

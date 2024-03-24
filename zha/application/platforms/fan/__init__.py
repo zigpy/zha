@@ -158,7 +158,7 @@ class BaseFan(BaseEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle state update from cluster handler."""
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def speed_to_percentage(self, speed: str) -> int:
         """Map a legacy speed to a percentage."""
@@ -252,7 +252,7 @@ class ZhaFan(PlatformEntity, BaseFan):
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
         await self._fan_cluster_handler.async_set_speed(fan_mode)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
 
 @GROUP_MATCH()
@@ -307,7 +307,7 @@ class FanGroup(GroupEntity, BaseFan):
         with wrap_zigpy_exceptions():
             await self._fan_cluster_handler.write_attributes({"fan_mode": fan_mode})
 
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def update(self, _: Any = None) -> None:
         """Attempt to retrieve on off state from the fan."""
@@ -337,7 +337,7 @@ class FanGroup(GroupEntity, BaseFan):
             self._percentage = None
             self._preset_mode = None
 
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
 
 IKEA_SPEED_RANGE = (1, 10)  # off is not included

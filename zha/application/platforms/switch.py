@@ -72,12 +72,12 @@ class BaseSwitch(BaseEntity, ABC):
     async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity on."""
         await self._on_off_cluster_handler.turn_on()
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity off."""
         await self._on_off_cluster_handler.turn_off()
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def get_state(self) -> dict:
         """Return the state of the switch."""
@@ -114,7 +114,7 @@ class Switch(PlatformEntity, BaseSwitch):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle state update from cluster handler."""
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
         """Attempt to retrieve on off state from the switch."""
@@ -123,7 +123,7 @@ class Switch(PlatformEntity, BaseSwitch):
             await self._on_off_cluster_handler.get_attribute_value(
                 "on_off", from_cache=False
             )
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
 
 
 @GROUP_MATCH()
@@ -148,7 +148,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
             return
         self._state = True
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity off."""
@@ -156,7 +156,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
             return
         self._state = False
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def update(self, _: Any | None = None) -> None:
         """Query all members and determine the light group state."""
@@ -172,7 +172,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self._state = len(on_states) > 0
         self._available = any(entity.available for entity in platform_entities)
 
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
 
 class ZHASwitchConfigurationEntity(PlatformEntity):
@@ -248,7 +248,7 @@ class ZHASwitchConfigurationEntity(PlatformEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle state update from cluster handler."""
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     @property
     def inverted(self) -> bool:
@@ -281,7 +281,7 @@ class ZHASwitchConfigurationEntity(PlatformEntity):
             await self._cluster_handler.write_attributes_safe(
                 {self._attribute_name: self._off_value}
             )
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity on."""
@@ -301,7 +301,7 @@ class ZHASwitchConfigurationEntity(PlatformEntity):
             self._inverter_attribute_name, from_cache=False
         )
         self.debug("read value=%s, inverted=%s", value, self.inverted)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def get_state(self) -> dict:
         """Return the state of the switch."""
@@ -713,7 +713,7 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
             from_cache=False,
             only_cache=False,
         )
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def _async_on_off(self, invert: bool) -> None:
         """Turn the entity on or off."""

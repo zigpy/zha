@@ -346,7 +346,7 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
         zha_group = self.get_or_create_group(zigpy_group)
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
-        self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
+        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
 
     def group_member_added(
         self, zigpy_group: zigpy.group.Group, endpoint: zigpy.endpoint.Endpoint
@@ -356,22 +356,22 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
         zha_group = self.get_or_create_group(zigpy_group)
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_added - endpoint: %s", endpoint)
-        self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
+        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
 
     def group_added(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group added event."""
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.info("group_added")
         # need to dispatch for entity creation here
-        self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_ADDED)
+        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_ADDED)
 
     def group_removed(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group removed event."""
-        self._send_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_REMOVED)
+        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_REMOVED)
         zha_group = self._groups.pop(zigpy_group.group_id)
         zha_group.info("group_removed")
 
-    def _send_group_gateway_message(  # pylint: disable=unused-argument
+    def _emit_group_gateway_message(  # pylint: disable=unused-argument
         self,
         zigpy_group: zigpy.group.Group,
         gateway_message_type: str,

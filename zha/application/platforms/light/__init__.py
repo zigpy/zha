@@ -177,7 +177,7 @@ class BaseLight(BaseEntity, ABC):
         """
         value = max(0, min(254, event.level))
         self._brightness = value
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     @property
     def hs_color(self) -> tuple[float, float] | None:
@@ -243,7 +243,7 @@ class BaseLight(BaseEntity, ABC):
             return
         value = max(0, min(254, value))
         self._brightness = value
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
@@ -500,7 +500,7 @@ class BaseLight(BaseEntity, ABC):
         self._off_with_transition = False
         self._off_brightness = None
         self.debug("turned on: %s", t_log)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
@@ -548,7 +548,7 @@ class BaseLight(BaseEntity, ABC):
                 self._brightness = 1
                 self._off_with_transition = transition is not None
 
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_handle_color_commands(
         self,
@@ -665,7 +665,7 @@ class BaseLight(BaseEntity, ABC):
         self.debug("transition complete - future attribute reports will write HA state")
         self._transitioning_individual = False
         self._async_unsub_transition_listener()
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
         if isinstance(self, LightGroup):
             self.emit(
                 SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
@@ -871,7 +871,7 @@ class Light(PlatformEntity, BaseLight):
         if event.attribute_value:
             self._off_with_transition = False
             self._off_brightness = None
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
         """Attempt to retrieve the state from the light."""
@@ -987,7 +987,7 @@ class Light(PlatformEntity, BaseLight):
                     self._effect = EFFECT_COLORLOOP
                 else:
                     self._effect = None
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def _assume_group_state(self, update_params) -> None:
         """Handle an assume group state event from a group."""
@@ -1049,7 +1049,7 @@ class Light(PlatformEntity, BaseLight):
             elif self._effect_list and effect in self._effect_list:
                 self._effect = effect
 
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
 
 
 @STRICT_MATCH(
@@ -1321,7 +1321,7 @@ class LightGroup(GroupEntity, BaseLight):
         # Bitwise-and the supported features with the GroupedLight's features
         # so that we don't break in the future when a new feature is added.
         self._supported_features &= SUPPORT_GROUP_LIGHT
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def _force_member_updates(self) -> None:
         """Force the update of members to ensure the states are correct for bulbs that don't report their state."""

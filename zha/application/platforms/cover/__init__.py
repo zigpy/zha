@@ -223,13 +223,13 @@ class ZhaCover(PlatformEntity):
                 is_lift_update=event.attribute_id
                 == WCAttrs.current_position_lift_percentage.id,
             )
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def async_update_state(self, state):
         """Handle state update from HA operations below."""
         _LOGGER.debug("async_update_state=%s", state)
         self._state = state
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover."""
@@ -302,7 +302,7 @@ class ZhaCover(PlatformEntity):
             raise ZHAException(f"Failed to stop cover: {res[1]}")
         self._target_lift_position = self.current_cover_position
         self._determine_state(self.current_cover_position)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_stop_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Stop the cover tilt."""
@@ -311,7 +311,7 @@ class ZhaCover(PlatformEntity):
             raise ZHAException(f"Failed to stop cover: {res[1]}")
         self._target_tilt_position = self.current_cover_tilt_position
         self._determine_state(self.current_cover_tilt_position, is_lift_update=False)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def get_state(self) -> dict:
         """Get the state of the cover."""
@@ -395,13 +395,13 @@ class Shade(PlatformEntity):
     ) -> None:
         """Set open/closed state."""
         self._is_open = bool(event.attribute_value)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_set_level(self, event: LevelChangeEvent) -> None:
         """Set the reported position."""
         value = max(0, min(255, event.level))
         self._position = int(value * 100 / 255)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the window cover."""
@@ -410,7 +410,7 @@ class Shade(PlatformEntity):
             raise ZHAException(f"Failed to open cover: {res[1]}")
 
         self._is_open = True
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Close the window cover."""
@@ -419,7 +419,7 @@ class Shade(PlatformEntity):
             raise ZHAException(f"Failed to close cover: {res[1]}")
 
         self._is_open = False
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
         """Move the roller shutter to a specific position."""
@@ -432,7 +432,7 @@ class Shade(PlatformEntity):
             raise ZHAException(f"Failed to set cover position: {res[1]}")
 
         self._position = new_pos
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_stop_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Stop the cover."""
@@ -479,4 +479,4 @@ class KeenVent(Shade):
 
         self._is_open = True
         self._position = position
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()

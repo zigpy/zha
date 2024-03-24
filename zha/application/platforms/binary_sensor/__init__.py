@@ -106,7 +106,7 @@ class BinarySensor(PlatformEntity):
         if self._attribute_name is None or self._attribute_name != event.attribute_name:
             return
         self._state = bool(event.attribute_value)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
         """Attempt to retrieve on off state from the binary sensor."""
@@ -115,7 +115,7 @@ class BinarySensor(PlatformEntity):
         attr_value = await self._cluster_handler.get_attribute_value(attribute)
         if attr_value is not None:
             self._state = attr_value
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
 
     def to_json(self) -> dict:
         """Return a JSON representation of the binary sensor."""

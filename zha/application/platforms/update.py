@@ -154,7 +154,7 @@ class ZHAFirmwareUpdateEntity(PlatformEntity):
         """Handle attribute updates on the OTA cluster."""
         if attrid == Ota.AttributeDefs.current_file_version.id:
             self._attr_installed_version = f"0x{value:08x}"
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
 
     def device_ota_update_available(
         self, image: OtaImageWithMetadata, current_file_version: int
@@ -167,7 +167,7 @@ class ZHAFirmwareUpdateEntity(PlatformEntity):
         if image.metadata.changelog:
             self._attr_release_summary = image.metadata.changelog
 
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def _update_progress(self, current: int, total: int, progress: float) -> None:
         """Update install progress on event."""
@@ -177,7 +177,7 @@ class ZHAFirmwareUpdateEntity(PlatformEntity):
 
         # Remap progress to 2-100 to avoid 0 and 1
         self._attr_in_progress = int(math.ceil(2 + 98 * progress / 100))
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     async def async_install(
         self, version: str | None, backup: bool, **kwargs: Any
@@ -187,7 +187,7 @@ class ZHAFirmwareUpdateEntity(PlatformEntity):
 
         # Set the progress to an indeterminate state
         self._attr_in_progress = True
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
         try:
             result = await self.device.device.update_firmware(
@@ -201,7 +201,7 @@ class ZHAFirmwareUpdateEntity(PlatformEntity):
         # bail out
         if result == Status.NO_IMAGE_AVAILABLE:
             self._attr_latest_version = self._attr_installed_version
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
 
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
@@ -210,7 +210,7 @@ class ZHAFirmwareUpdateEntity(PlatformEntity):
         # Clear the state
         self._latest_firmware = None
         self._attr_in_progress = False
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     # pylint: disable=pointless-string-statement
     """TODO

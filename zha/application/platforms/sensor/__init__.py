@@ -195,7 +195,7 @@ class Sensor(PlatformEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle attribute updates from the cluster handler."""
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def to_json(self) -> dict:
         """Return a JSON representation of the sensor."""
@@ -261,7 +261,7 @@ class PollableSensor(Sensor):
         if self.device.available and self.device.gateway.config.allow_polling:
             self.debug("polling for updated state")
             await self.async_update()
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
         else:
             self.debug(
                 "skipping polling for updated state, available: %s, allow polled requests: %s",
@@ -357,7 +357,7 @@ class DeviceCounterSensor(BaseEntity):
 
     async def async_update(self) -> None:
         """Retrieve latest state."""
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self):
@@ -365,7 +365,7 @@ class DeviceCounterSensor(BaseEntity):
         if self._device.available and self._device.gateway.config.allow_polling:
             self.debug("polling for updated state")
             await self.async_update()
-            self.maybe_send_state_changed_event()
+            self.maybe_emit_state_changed_event()
         else:
             self.debug(
                 "skipping polling for updated state, available: %s, allow polled requests: %s",

@@ -76,7 +76,7 @@ class ZHAEnumSelectEntity(PlatformEntity):
         self._cluster_handler.data_cache[self._attribute_name] = self._enum[
             option.replace(" ", "_")
         ]
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def to_json(self) -> dict:
         """Return a JSON representation of the select."""
@@ -211,14 +211,14 @@ class ZCLEnumSelectEntity(PlatformEntity):
         await self._cluster_handler.write_attributes_safe(
             {self._attribute_name: self._enum[option.replace(" ", "_")]}
         )
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_attribute_updated(
         self,
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle value update from cluster handler."""
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     def to_json(self) -> dict:
         """Return a JSON representation of the select."""

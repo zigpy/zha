@@ -90,7 +90,7 @@ class ZHADeviceScannerEntity(PlatformEntity):
                 self._connected = False
             else:
                 self._connected = True
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     @periodic((30, 45))
     async def _refresh(self) -> None:
@@ -116,7 +116,7 @@ class ZHADeviceScannerEntity(PlatformEntity):
         self.debug("battery_percentage_remaining updated: %s", event.attribute_value)
         self._connected = True
         self._battery_level = Battery.formatter(event.attribute_value)
-        self.maybe_send_state_changed_event()
+        self.maybe_emit_state_changed_event()
 
     @property
     def battery_level(self):
