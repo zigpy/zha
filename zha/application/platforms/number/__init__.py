@@ -35,7 +35,7 @@ from zha.zigbee.cluster_handlers.const import (
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class Number(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ):
         """Initialize the number."""
@@ -190,7 +190,7 @@ class NumberConfigurationEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -217,7 +217,7 @@ class NumberConfigurationEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
@@ -422,7 +422,7 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this ZHA startup color temperature entity."""

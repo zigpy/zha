@@ -13,7 +13,7 @@ import zigpy.zcl.foundation as zcl_f
 from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 from .common import find_entity_id, send_attributes_report, update_attribute_cache
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -28,8 +28,8 @@ SET_USER_STATUS = 9
 @pytest.fixture
 async def lock(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> tuple[ZHADevice, closures.DoorLock]:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> tuple[Device, closures.DoorLock]:
     """Lock cluster fixture."""
 
     zigpy_device = zigpy_device_mock(
@@ -47,7 +47,7 @@ async def lock(
     return zha_device, zigpy_device.endpoints[1].door_lock
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -57,7 +57,7 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
 
 
 async def test_lock(
-    lock: tuple[ZHADevice, closures.DoorLock],  # pylint: disable=redefined-outer-name
+    lock: tuple[Device, closures.DoorLock],  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test zha lock platform."""

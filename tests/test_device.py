@@ -16,7 +16,7 @@ import zigpy.zdo.types as zdo_t
 
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application.gateway import ZHAGateway
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 
 @pytest.fixture
@@ -85,9 +85,9 @@ def device_without_basic_cluster_handler(
 
 @pytest.fixture
 async def ota_zha_device(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZHADevice:
+) -> Device:
     """ZHA device with OTA cluster fixture."""
     zigpy_dev = zigpy_device_mock(
         {
@@ -120,7 +120,7 @@ async def _send_time_changed(zha_gateway: ZHAGateway, seconds: int):
 async def test_check_available_success(
     zha_gateway: ZHAGateway,
     device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Check device availability success on 1st try."""
     zha_device = await device_joined(device_with_basic_cluster_handler)
@@ -171,7 +171,7 @@ async def test_check_available_success(
 async def test_check_available_unsuccessful(
     zha_gateway: ZHAGateway,
     device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Check device availability all tries fail."""
 
@@ -215,7 +215,7 @@ async def test_check_available_unsuccessful(
 async def test_check_available_no_basic_cluster_handler(
     zha_gateway: ZHAGateway,
     device_without_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability for a device without basic cluster."""
@@ -237,7 +237,7 @@ async def test_check_available_no_basic_cluster_handler(
 
 
 async def test_device_is_active_coordinator(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test that the current coordinator is uniquely detected."""

@@ -17,7 +17,7 @@ from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 
@@ -43,7 +43,7 @@ class Button(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ):
         """Initialize button."""
@@ -93,7 +93,7 @@ class IdentifyButton(Button):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -126,7 +126,7 @@ class WriteAttributeButton(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this button."""

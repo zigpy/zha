@@ -44,7 +44,7 @@ from zha.zigbee.cluster_handlers.registries import (
     CLIENT_CLUSTER_HANDLER_REGISTRY,
     CLUSTER_HANDLER_REGISTRY,
 )
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 from zha.zigbee.endpoint import Endpoint
 
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -125,9 +125,9 @@ def poll_control_ch(
 
 @pytest.fixture
 async def poll_control_device(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZHADevice:
+) -> Device:
     """Poll control device fixture."""
     cluster_id = zigpy.zcl.clusters.general.PollControl.cluster_id
     zigpy_dev = zigpy_device_mock(
@@ -431,7 +431,7 @@ def test_epch_unclaimed_cluster_handlers(cluster_handler) -> None:
     ch_3 = cluster_handler(CLUSTER_HANDLER_COLOR, 768)
 
     ep_cluster_handlers = Endpoint(
-        mock.MagicMock(spec_set=ZigpyEndpoint), mock.MagicMock(spec_set=ZHADevice)
+        mock.MagicMock(spec_set=ZigpyEndpoint), mock.MagicMock(spec_set=Device)
     )
     all_cluster_handlers = {ch_1.id: ch_1, ch_2.id: ch_2, ch_3.id: ch_3}
     with mock.patch.dict(
@@ -469,7 +469,7 @@ def test_epch_claim_cluster_handlers(cluster_handler) -> None:
     ch_3 = cluster_handler(CLUSTER_HANDLER_COLOR, 768)
 
     ep_cluster_handlers = Endpoint(
-        mock.MagicMock(spec_set=ZigpyEndpoint), mock.MagicMock(spec_set=ZHADevice)
+        mock.MagicMock(spec_set=ZigpyEndpoint), mock.MagicMock(spec_set=Device)
     )
     all_cluster_handlers = {ch_1.id: ch_1, ch_2.id: ch_2, ch_3.id: ch_3}
     with mock.patch.dict(
@@ -503,7 +503,7 @@ def test_epch_claim_cluster_handlers(cluster_handler) -> None:
 async def test_ep_cluster_handlers_all_cluster_handlers(
     m1,  # pylint: disable=unused-argument
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Test Endpointcluster_handlers adding all cluster_handlers."""
     zha_device = await device_joined(
@@ -554,11 +554,11 @@ async def test_ep_cluster_handlers_all_cluster_handlers(
 async def test_cluster_handler_power_config(
     m1,  # pylint: disable=unused-argument
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Test that cluster_handlers only get a single power cluster_handler."""
     in_clusters = [0, 1, 6, 8]
-    zha_device: ZHADevice = await device_joined(
+    zha_device: Device = await device_joined(
         zigpy_device_mock(
             endpoints={
                 1: {
@@ -648,7 +648,7 @@ async def test_ep_cluster_handlers_configure(cluster_handler) -> None:
     type(endpoint_mock).device_type = mock.PropertyMock(
         return_value=zigpy.profiles.zha.DeviceType.COLOR_DIMMABLE_LIGHT
     )
-    zha_dev = mock.MagicMock(spec_set=ZHADevice)
+    zha_dev = mock.MagicMock(spec_set=Device)
     type(zha_dev).quirk_id = mock.PropertyMock(return_value=None)
     endpoint = Endpoint.new(endpoint_mock, zha_dev)
 
@@ -711,7 +711,7 @@ async def test_poll_control_checkin_response(
     assert cluster.endpoint.request.call_args_list[1][0][0] == 0x0020
 
 
-async def test_poll_control_cluster_command(poll_control_device: ZHADevice) -> None:
+async def test_poll_control_cluster_command(poll_control_device: Device) -> None:
     """Test poll control cluster_handler response to cluster command."""
     checkin_mock = AsyncMock()
     poll_control_ch = poll_control_device._endpoints[1].all_cluster_handlers["1:0x0020"]
@@ -737,7 +737,7 @@ async def test_poll_control_cluster_command(poll_control_device: ZHADevice) -> N
     )
 
 
-async def test_poll_control_ignore_list(poll_control_device: ZHADevice) -> None:
+async def test_poll_control_ignore_list(poll_control_device: Device) -> None:
     """Test poll control cluster_handler ignore list."""
     set_long_poll_mock = AsyncMock()
     poll_control_ch = poll_control_device._endpoints[1].all_cluster_handlers["1:0x0020"]
@@ -756,7 +756,7 @@ async def test_poll_control_ignore_list(poll_control_device: ZHADevice) -> None:
     assert set_long_poll_mock.call_count == 0
 
 
-async def test_poll_control_ikea(poll_control_device: ZHADevice) -> None:
+async def test_poll_control_ikea(poll_control_device: Device) -> None:
     """Test poll control cluster_handler ignore list for ikea."""
     set_long_poll_mock = AsyncMock()
     poll_control_ch = poll_control_device._endpoints[1].all_cluster_handlers["1:0x0020"]
@@ -849,7 +849,7 @@ async def test_zll_device_groups(
 async def test_cluster_no_ep_attribute(
     zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[..., ZHADevice],
+    device_joined: Callable[..., Device],
 ) -> None:
     """Test cluster handlers for clusters without ep_attribute."""
 
@@ -936,7 +936,7 @@ async def test_invalid_cluster_handler(zha_gateway: ZHAGateway, caplog) -> None:
         ],
     )
 
-    mock_zha_device = mock.AsyncMock(spec=ZHADevice)
+    mock_zha_device = mock.AsyncMock(spec=Device)
     mock_zha_device.quirk_id = None
     zha_endpoint = Endpoint(zigpy_ep, mock_zha_device)
 
@@ -976,7 +976,7 @@ async def test_standard_cluster_handler(zha_gateway: ZHAGateway) -> None:  # pyl
         ],
     )
 
-    mock_zha_device = mock.AsyncMock(spec=ZHADevice)
+    mock_zha_device = mock.AsyncMock(spec=Device)
     mock_zha_device.quirk_id = None
     zha_endpoint = Endpoint(zigpy_ep, mock_zha_device)
 
@@ -1011,7 +1011,7 @@ async def test_quirk_id_cluster_handler(zha_gateway: ZHAGateway) -> None:  # pyl
         ],
     )
 
-    mock_zha_device = mock.AsyncMock(spec=ZHADevice)
+    mock_zha_device = mock.AsyncMock(spec=Device)
     mock_zha_device.quirk_id = "__test_quirk_id"
     zha_endpoint = Endpoint(zigpy_ep, mock_zha_device)
 

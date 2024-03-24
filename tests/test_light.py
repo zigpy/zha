@@ -32,7 +32,7 @@ from zha.application.platforms.light.const import (
     FLASH_SHORT,
     ColorMode,
 )
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
 from .common import (
@@ -96,8 +96,8 @@ LIGHT_COLOR = {
 @pytest.fixture
 async def coordinator(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test zha light platform."""
 
     zigpy_device = zigpy_device_mock(
@@ -121,8 +121,8 @@ async def coordinator(
 @pytest.fixture
 async def device_light_1(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test zha light platform."""
 
     zigpy_device = zigpy_device_mock(
@@ -158,8 +158,8 @@ async def device_light_1(
 @pytest.fixture
 async def device_light_2(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test zha light platform."""
 
     zigpy_device = zigpy_device_mock(
@@ -194,8 +194,8 @@ async def device_light_2(
 @pytest.fixture
 async def device_light_3(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test zha light platform."""
 
     zigpy_device = zigpy_device_mock(
@@ -224,7 +224,7 @@ async def device_light_3(
 @pytest.fixture
 async def eWeLink_light(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ):
     """Mock eWeLink light."""
 
@@ -259,7 +259,7 @@ async def eWeLink_light(
     return zha_device
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -281,7 +281,7 @@ def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
 @pytest.mark.looptime
 async def test_light_refresh(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
 ):
     """Test zha light platform refresh."""
@@ -347,7 +347,7 @@ async def test_light_refresh(
 @pytest.mark.looptime
 async def test_light(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
     device: dict,
     reporting: tuple,  # pylint: disable=unused-argument
@@ -709,10 +709,10 @@ async def async_test_flash_from_client(
 )
 @pytest.mark.looptime
 async def test_zha_group_light_entity(
-    device_light_1: ZHADevice,  # pylint: disable=redefined-outer-name
-    device_light_2: ZHADevice,  # pylint: disable=redefined-outer-name
-    device_light_3: ZHADevice,  # pylint: disable=redefined-outer-name
-    coordinator: ZHADevice,  # pylint: disable=redefined-outer-name
+    device_light_1: Device,  # pylint: disable=redefined-outer-name
+    device_light_2: Device,  # pylint: disable=redefined-outer-name
+    device_light_3: Device,  # pylint: disable=redefined-outer-name
+    coordinator: Device,  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test the light entity for a ZHA group."""
@@ -1001,7 +1001,7 @@ async def test_zha_group_light_entity(
 async def test_light_initialization(
     zha_gateway: ZHAGateway,
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     plugged_attr_reads: dict[str, Any],
     config_override: dict[str, Any],
     expected_state: dict[str, Any],  # pylint: disable=unused-argument

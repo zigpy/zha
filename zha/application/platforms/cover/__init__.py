@@ -40,7 +40,7 @@ from zha.zigbee.cluster_handlers.general import LevelChangeEvent
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class Cover(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs,
     ) -> None:
         """Init this cover."""
@@ -348,7 +348,7 @@ class Shade(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs,
     ) -> None:
         """Initialize the ZHA light."""

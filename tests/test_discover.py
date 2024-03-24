@@ -50,7 +50,7 @@ from zha.application.registries import (
     SINGLE_INPUT_CLUSTER_DEVICE_CLASS,
 )
 from zha.zigbee.cluster_handlers import ClusterHandler
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 from zha.zigbee.endpoint import Endpoint
 
 from .common import find_entity_id, update_attribute_cache
@@ -87,7 +87,7 @@ def contains_ignored_suffix(unique_id: str) -> bool:
     return any(suffix.lower() in unique_id.lower() for suffix in IGNORE_SUFFIXES)
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -99,8 +99,8 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
 @pytest.fixture
 def zha_device_mock(
     zigpy_device_mock: Callable[..., zigpy.device.Device],
-    device_joined: Callable[..., ZHADevice],
-) -> Callable[..., ZHADevice]:
+    device_joined: Callable[..., Device],
+) -> Callable[..., Device]:
     """Mock device factory."""
 
     async def _mock(
@@ -151,7 +151,7 @@ async def test_devices(
     if cluster_identify:
         cluster_identify.request.reset_mock()
 
-    zha_dev: ZHADevice = await device_joined(zigpy_device)
+    zha_dev: Device = await device_joined(zigpy_device)
     await zha_gateway.async_block_till_done()
 
     if cluster_identify and not zha_dev.skip_configuration:
@@ -329,7 +329,7 @@ def test_discover_probe_single_cluster() -> None:
 @pytest.mark.parametrize("device_info", DEVICES)
 async def test_discover_endpoint(
     device_info: dict[str, Any],
-    zha_device_mock: Callable[..., ZHADevice],
+    zha_device_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test device discovery."""

@@ -37,7 +37,7 @@ BINDABLE_CLUSTERS = SetRegistry()
 if TYPE_CHECKING:
     from zha.application.gateway import ZHAGateway
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
 
 _ClusterHandlerT = TypeVar("_ClusterHandlerT", bound="ClusterHandler")
 _T = TypeVar("_T")
@@ -84,7 +84,7 @@ async def safe_read(
 
 
 async def get_matched_clusters(
-    source_zha_device: ZHADevice, target_zha_device: ZHADevice
+    source_zha_device: Device, target_zha_device: Device
 ) -> list[BindingPair]:
     """Get matched input/output cluster pairs for 2 devices."""
     source_clusters = source_zha_device.async_get_std_clusters()

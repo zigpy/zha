@@ -30,7 +30,7 @@ from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SIREN)
@@ -64,7 +64,7 @@ class Siren(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this siren."""

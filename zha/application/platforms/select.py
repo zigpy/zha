@@ -31,7 +31,7 @@ from zha.zigbee.cluster_handlers.const import (
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 
@@ -54,7 +54,7 @@ class EnumSelectEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
@@ -151,7 +151,7 @@ class ZCLEnumSelectEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -178,7 +178,7 @@ class ZCLEnumSelectEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""

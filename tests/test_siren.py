@@ -15,7 +15,7 @@ import zigpy.zcl.foundation as zcl_f
 from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 from .common import find_entity_id, mock_coro
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
@@ -24,8 +24,8 @@ from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 @pytest.fixture
 async def siren(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> tuple[ZHADevice, security.IasWd]:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> tuple[Device, security.IasWd]:
     """Siren fixture."""
 
     zigpy_device = zigpy_device_mock(
@@ -43,7 +43,7 @@ async def siren(
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -53,7 +53,7 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
 
 
 async def test_siren(
-    siren: tuple[ZHADevice, security.IasWd],  # pylint: disable=redefined-outer-name
+    siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test zha siren platform."""
@@ -128,7 +128,7 @@ async def test_siren(
 
 @pytest.mark.looptime
 async def test_siren_timed_off(
-    siren: tuple[ZHADevice, security.IasWd],  # pylint: disable=redefined-outer-name
+    siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test zha siren platform."""

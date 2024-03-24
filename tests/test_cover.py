@@ -32,7 +32,7 @@ from zha.application.platforms.cover import (
 )
 from zha.application.platforms.cover.const import STATE_CLOSING, STATE_OPENING
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 Default_Response = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Default_Response].schema
 
@@ -117,7 +117,7 @@ WCT = closures.WindowCovering.WindowCoveringType
 WCCS = closures.WindowCovering.ConfigStatus
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -182,7 +182,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
 
 
 async def test_cover(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_cover_device: ZigpyDevice,
     zha_gateway: ZHAGateway,
 ) -> None:
@@ -568,7 +568,7 @@ async def test_cover_failures(
 
 
 async def test_shade(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_shade_device: ZigpyDevice,
     zha_gateway: ZHAGateway,
 ) -> None:
@@ -723,7 +723,7 @@ async def test_shade(
 
 
 async def test_keen_vent(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_keen_vent: ZigpyDevice,
     zha_gateway: ZHAGateway,
 ) -> None:

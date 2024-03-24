@@ -144,7 +144,7 @@ class ClusterHandlerConfigurationComplete:
     event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
 
 
-class ZHADevice(LogMixin, EventBase):
+class Device(LogMixin, EventBase):
     """ZHA Zigbee device object."""
 
     __polling_interval: int

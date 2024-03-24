@@ -56,7 +56,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.zigbee.device import DeviceStatus, ZHADevice
+from zha.zigbee.device import Device, DeviceStatus
 from zha.zigbee.group import Group, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
@@ -80,10 +80,10 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
         """Initialize the gateway."""
         super().__init__()
         self.config: ZHAData = config
-        self._devices: dict[EUI64, ZHADevice] = {}
+        self._devices: dict[EUI64, Device] = {}
         self._groups: dict[int, Group] = {}
         self.application_controller: ControllerApplication = None
-        self.coordinator_zha_device: ZHADevice = None  # type: ignore[assignment]
+        self.coordinator_zha_device: Device = None  # type: ignore[assignment]
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
@@ -407,8 +407,8 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
                     },
                 )
 
-    def get_device(self, ieee: EUI64) -> ZHADevice | None:
-        """Return ZHADevice for given ieee."""
+    def get_device(self, ieee: EUI64) -> Device | None:
+        """Return Device for given ieee."""
         return self._devices.get(ieee)
 
     def get_group(self, group_id_or_name: int | str) -> Group | None:
@@ -426,7 +426,7 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
         return self.application_controller.state
 
     @property
-    def devices(self) -> dict[EUI64, ZHADevice]:
+    def devices(self) -> dict[EUI64, Device]:
         """Return devices."""
         return self._devices
 
@@ -435,10 +435,10 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
         """Return groups."""
         return self._groups
 
-    def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> ZHADevice:
+    def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> Device:
         """Get or create a ZHA device."""
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
-            zha_device = ZHADevice.new(zigpy_device, self)
+            zha_device = Device.new(zigpy_device, self)
             self._devices[zigpy_device.ieee] = zha_device
         return zha_device
 
@@ -497,7 +497,7 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
             },
         )
 
-    async def _async_device_joined(self, zha_device: ZHADevice) -> None:
+    async def _async_device_joined(self, zha_device: Device) -> None:
         zha_device.available = True
         device_info = zha_device.device_info
         await zha_device.async_configure()
@@ -512,7 +512,7 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
         await zha_device.async_initialize(from_cache=False)
         self.create_platform_entities()
 
-    async def _async_device_rejoined(self, zha_device: ZHADevice) -> None:
+    async def _async_device_rejoined(self, zha_device: Device) -> None:
         _LOGGER.debug(
             "skipping discovery for previously discovered device - %s:%s",
             zha_device.nwk,

@@ -43,7 +43,7 @@ from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.FAN)
@@ -195,7 +195,7 @@ class Fan(PlatformEntity, BaseFan):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs,
     ) -> None:
         """Initialize the fan."""
@@ -367,7 +367,7 @@ class IkeaFan(Fan):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs,
     ):
         """Initialize the fan."""

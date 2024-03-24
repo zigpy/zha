@@ -72,7 +72,7 @@ from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
     from zha.application.gateway import ZHAGateway
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
@@ -172,7 +172,7 @@ class DeviceProbe:
         """Initialize the group probe."""
         self._gateway = gateway
 
-    def discover_device_entities(self, device: ZHADevice) -> None:
+    def discover_device_entities(self, device: Device) -> None:
         """Discover entities for a ZHA device."""
         _LOGGER.debug(
             "Discovering entities for device: %s-%s",
@@ -187,7 +187,7 @@ class DeviceProbe:
         self.discover_quirks_v2_entities(device)
         PLATFORM_ENTITIES.clean_up()
 
-    def discover_quirks_v2_entities(self, device: ZHADevice) -> None:
+    def discover_quirks_v2_entities(self, device: Device) -> None:
         """Discover entities for a ZHA device exposed by quirks v2."""
         _LOGGER.debug(
             "Attempting to discover quirks v2 entities for device: %s-%s",
@@ -305,7 +305,7 @@ class DeviceProbe:
                     [cluster_handler.name],
                 )
 
-    def discover_coordinator_device_entities(self, device: ZHADevice) -> None:
+    def discover_coordinator_device_entities(self, device: Device) -> None:
         """Discover entities for the coordinator device."""
         _LOGGER.debug(
             "Discovering entities for coordinator device: %s-%s",

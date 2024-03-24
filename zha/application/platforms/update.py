@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     # from zigpy.application import ControllerApplication
 
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -121,7 +121,7 @@ class FirmwareUpdateEntity(PlatformEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
+        zha_device: Device,
         channels: list[ClusterHandler],
         coordinator,
         **kwargs: Any,

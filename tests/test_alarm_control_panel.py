@@ -12,7 +12,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms.alarm_control_panel import AlarmControlPanel
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
@@ -40,12 +40,12 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
 async def test_alarm_control_panel(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test zhaws alarm control panel platform."""
-    zha_device: ZHADevice = await device_joined(zigpy_device)
+    zha_device: Device = await device_joined(zigpy_device)
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
     alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
         "00:0d:6f:00:0a:90:69:e7-1"

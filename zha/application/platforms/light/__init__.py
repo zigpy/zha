@@ -82,7 +82,7 @@ from zha.zigbee.cluster_handlers.general import LevelChangeEvent
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
 
@@ -101,7 +101,7 @@ class BaseLight(BaseEntity, ABC):
 
     def __init__(self, *args, **kwargs):
         """Initialize the light."""
-        self._device: ZHADevice = None
+        self._device: Device = None
         super().__init__(*args, **kwargs)
         self._available: bool = False
         self._min_mireds: int | None = 153
@@ -696,7 +696,7 @@ class Light(PlatformEntity, BaseLight):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs,
     ) -> None:
         """Initialize the light."""

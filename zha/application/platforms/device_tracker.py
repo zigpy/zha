@@ -20,7 +20,7 @@ from zha.zigbee.cluster_handlers.const import (
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(
@@ -52,7 +52,7 @@ class DeviceScannerEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs,
     ):
         """Initialize the ZHA device tracker."""

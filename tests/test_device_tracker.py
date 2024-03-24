@@ -16,7 +16,7 @@ from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.device_tracker import SourceType
 from zha.application.registries import SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def zigpy_device_dt(zigpy_device_mock):
     return zigpy_device_mock(endpoints)
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity

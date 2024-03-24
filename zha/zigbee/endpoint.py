@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from zigpy import Endpoint as ZigpyEndpoint
 
     from zha.zigbee.cluster_handlers import ClientClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
 
 ATTR_DEVICE_TYPE: Final[str] = "device_type"
 ATTR_PROFILE_ID: Final[str] = "profile_id"
@@ -39,19 +39,19 @@ CALLABLE_T = TypeVar("CALLABLE_T", bound=Callable)
 class Endpoint:
     """Endpoint for a zha device."""
 
-    def __init__(self, zigpy_endpoint: ZigpyEndpoint, device: ZHADevice) -> None:
+    def __init__(self, zigpy_endpoint: ZigpyEndpoint, device: Device) -> None:
         """Initialize instance."""
         assert zigpy_endpoint is not None
         assert device is not None
         self._zigpy_endpoint: ZigpyEndpoint = zigpy_endpoint
-        self._device: ZHADevice = device
+        self._device: Device = device
         self._all_cluster_handlers: dict[str, ClusterHandler] = {}
         self._claimed_cluster_handlers: dict[str, ClusterHandler] = {}
         self._client_cluster_handlers: dict[str, ClientClusterHandler] = {}
         self._unique_id: str = f"{str(device.ieee)}-{zigpy_endpoint.endpoint_id}"
 
     @property
-    def device(self) -> ZHADevice:
+    def device(self) -> Device:
         """Return the device this endpoint belongs to."""
         return self._device
 
@@ -109,7 +109,7 @@ class Endpoint:
         )
 
     @classmethod
-    def new(cls, zigpy_endpoint: ZigpyEndpoint, device: ZHADevice) -> Endpoint:
+    def new(cls, zigpy_endpoint: ZigpyEndpoint, device: Device) -> Endpoint:
         """Create new endpoint and populate cluster handlers."""
         endpoint = cls(zigpy_endpoint, device)
         endpoint.add_all_cluster_handlers()

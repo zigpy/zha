@@ -38,7 +38,7 @@ from zha.application.const import (
 )
 from zha.application.gateway import ZHAGateway
 from zha.application.helpers import ZHAData
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -280,10 +280,10 @@ def globally_load_quirks():
 @pytest.fixture
 def device_joined(
     zha_gateway: ZHAGateway,  # pylint: disable=redefined-outer-name
-) -> Callable[[zigpy.device.Device], ZHADevice]:
+) -> Callable[[zigpy.device.Device], Device]:
     """Return a newly joined ZHAWS device."""
 
-    async def _zha_device(zigpy_dev: zigpy.device.Device) -> ZHADevice:
+    async def _zha_device(zigpy_dev: zigpy.device.Device) -> Device:
         await zha_gateway.async_device_initialized(zigpy_dev)
         await zha_gateway.async_block_till_done()
         return zha_gateway.get_device(zigpy_dev.ieee)

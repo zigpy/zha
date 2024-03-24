@@ -19,7 +19,7 @@ from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.helpers import ZHAData
 from zha.application.platforms import GroupEntity, PlatformEntity
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
 IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
@@ -43,9 +43,9 @@ def zigpy_dev_basic(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevic
 
 @pytest.fixture
 async def zha_dev_basic(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> ZHADevice:
+) -> Device:
     """ZHA device with just a basic cluster."""
 
     zha_device = await device_joined(zigpy_dev_basic)
@@ -55,8 +55,8 @@ async def zha_dev_basic(
 @pytest.fixture
 async def coordinator(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test ZHA light platform."""
 
     zigpy_device = zigpy_device_mock(
@@ -80,8 +80,8 @@ async def coordinator(
 @pytest.fixture
 async def device_light_1(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test ZHA light platform."""
 
     zigpy_device = zigpy_device_mock(
@@ -110,8 +110,8 @@ async def device_light_1(
 @pytest.fixture
 async def device_light_2(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test ZHA light platform."""
 
     zigpy_device = zigpy_device_mock(
@@ -136,7 +136,7 @@ async def device_light_2(
     return zha_device
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -158,7 +158,7 @@ def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
 async def test_device_left(
     zha_gateway: ZHAGateway,
     zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zha_dev_basic: ZHADevice,  # pylint: disable=redefined-outer-name
+    zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Device leaving the network should become unavailable."""
 
@@ -404,7 +404,7 @@ async def test_startup_concurrency_limit(
     assert zha_gw.radio_concurrency == radio_concurrency
 
     with patch(
-        "zha.zigbee.device.ZHADevice.async_initialize",
+        "zha.zigbee.device.Device.async_initialize",
         side_effect=mock_send_packet,
     ):
         await zha_gw.async_fetch_updated_state_mains()

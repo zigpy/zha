@@ -39,7 +39,7 @@ from zha.application.platforms.sensor import (
     ThermostatHVACAction,
 )
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 from .common import find_entity_id, send_attributes_report
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -192,8 +192,8 @@ ATTR_PRESET_MODE = "preset_mode"
 @pytest.fixture
 def device_climate_mock(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> Callable[..., ZHADevice]:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Callable[..., Device]:
     """Test regular thermostat device."""
 
     async def _dev(clusters, plug=None, manuf=None, quirk=None):
@@ -258,7 +258,7 @@ async def device_climate_moes(device_climate_mock):
 
 
 @pytest.fixture
-async def device_climate_beca(device_climate_mock) -> ZHADevice:
+async def device_climate_beca(device_climate_mock) -> Device:
     """Beca thermostat."""
 
     return await device_climate_mock(
@@ -279,7 +279,7 @@ async def device_climate_zonnsmart(device_climate_mock):
     )
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> ThermostatEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> ThermostatEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -288,7 +288,7 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> ThermostatEntity:
     return entities[entity_id]
 
 
-def get_sensor_entity(zha_dev: ZHADevice, entity_id: str) -> Sensor:
+def get_sensor_entity(zha_dev: Device, entity_id: str) -> Sensor:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -307,7 +307,7 @@ def test_sequence_mappings():
 
 
 async def test_climate_local_temperature(
-    device_climate: ZHADevice,
+    device_climate: Device,
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test local temperature."""
@@ -326,7 +326,7 @@ async def test_climate_local_temperature(
 
 
 async def test_climate_hvac_action_running_state(
-    device_climate_sinope: ZHADevice,
+    device_climate_sinope: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test hvac action via running state."""
@@ -387,7 +387,7 @@ async def test_climate_hvac_action_running_state(
 
 @pytest.mark.looptime
 async def test_sinope_time(
-    device_climate_sinope: ZHADevice,
+    device_climate_sinope: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test hvac action via running state."""
@@ -410,7 +410,7 @@ async def test_sinope_time(
 
 
 async def test_climate_hvac_action_running_state_zen(
-    device_climate_zen: ZHADevice,
+    device_climate_zen: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test Zen hvac action via running state."""
@@ -488,7 +488,7 @@ async def test_climate_hvac_action_running_state_zen(
 
 
 async def test_climate_hvac_action_pi_demand(
-    device_climate: ZHADevice,
+    device_climate: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test hvac action based on pi_heating/cooling_demand attrs."""
@@ -537,7 +537,7 @@ async def test_climate_hvac_action_pi_demand(
     ),
 )
 async def test_hvac_mode(
-    device_climate: ZHADevice,
+    device_climate: Device,
     zha_gateway: ZHAGateway,
     sys_mode,
     hvac_mode,
@@ -579,7 +579,7 @@ async def test_hvac_mode(
     ),
 )
 async def test_hvac_modes(  # pylint: disable=unused-argument
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
     seq_of_op,
     modes,
@@ -607,7 +607,7 @@ async def test_hvac_modes(  # pylint: disable=unused-argument
     ),
 )
 async def test_target_temperature(
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
     sys_mode,
     preset,
@@ -648,7 +648,7 @@ async def test_target_temperature(
     ),
 )
 async def test_target_temperature_high(
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
     preset,
     unoccupied,
@@ -687,7 +687,7 @@ async def test_target_temperature_high(
     ),
 )
 async def test_target_temperature_low(
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
     preset,
     unoccupied,
@@ -729,7 +729,7 @@ async def test_target_temperature_low(
     ),
 )
 async def test_set_hvac_mode(
-    device_climate: ZHADevice,
+    device_climate: Device,
     zha_gateway: ZHAGateway,
     hvac_mode,
     sys_mode,
@@ -771,7 +771,7 @@ async def test_set_hvac_mode(
 
 
 async def test_preset_setting(
-    device_climate_sinope: ZHADevice,
+    device_climate_sinope: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test preset setting."""
@@ -854,7 +854,7 @@ async def test_preset_setting(
 
 
 async def test_preset_setting_invalid(
-    device_climate_sinope: ZHADevice,
+    device_climate_sinope: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test invalid preset setting."""
@@ -876,7 +876,7 @@ async def test_preset_setting_invalid(
 
 
 async def test_set_temperature_hvac_mode(
-    device_climate: ZHADevice,
+    device_climate: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test setting HVAC mode in temperature service call."""
@@ -901,7 +901,7 @@ async def test_set_temperature_hvac_mode(
 
 
 async def test_set_temperature_heat_cool(
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
 ):
     """Test setting temperature service call in heating/cooling HVAC mode."""
@@ -966,7 +966,7 @@ async def test_set_temperature_heat_cool(
 
 
 async def test_set_temperature_heat(
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
 ):
     """Test setting temperature service call in heating HVAC mode."""
@@ -1028,7 +1028,7 @@ async def test_set_temperature_heat(
 
 
 async def test_set_temperature_cool(
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
 ):
     """Test setting temperature service call in cooling HVAC mode."""
@@ -1090,7 +1090,7 @@ async def test_set_temperature_cool(
 
 
 async def test_set_temperature_wrong_mode(
-    device_climate_mock: Callable[..., ZHADevice],
+    device_climate_mock: Callable[..., Device],
     zha_gateway: ZHAGateway,
 ):
     """Test setting temperature service call for wrong HVAC mode."""
@@ -1130,7 +1130,7 @@ async def test_set_temperature_wrong_mode(
 
 
 async def test_occupancy_reset(
-    device_climate_sinope: ZHADevice,
+    device_climate_sinope: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test away preset reset."""
@@ -1159,7 +1159,7 @@ async def test_occupancy_reset(
 
 
 async def test_fan_mode(
-    device_climate_fan: ZHADevice,
+    device_climate_fan: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test fan mode."""
@@ -1195,7 +1195,7 @@ async def test_fan_mode(
 
 
 async def test_set_fan_mode_not_supported(
-    device_climate_fan: ZHADevice,
+    device_climate_fan: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test fan setting unsupported mode."""
@@ -1213,7 +1213,7 @@ async def test_set_fan_mode_not_supported(
 
 
 async def test_set_fan_mode(
-    device_climate_fan: ZHADevice,
+    device_climate_fan: Device,
     zha_gateway: ZHAGateway,
 ):
     """Test fan mode setting."""
@@ -1240,7 +1240,7 @@ async def test_set_fan_mode(
     assert fan_cluster.write_attributes.call_args[0][0] == {"fan_mode": 5}
 
 
-async def test_set_moes_preset(device_climate_moes: ZHADevice, zha_gateway: ZHAGateway):
+async def test_set_moes_preset(device_climate_moes: Device, zha_gateway: ZHAGateway):
     """Test setting preset for moes trv."""
 
     entity_id = find_entity_id(Platform.CLIMATE, device_climate_moes)
@@ -1331,7 +1331,7 @@ async def test_set_moes_preset(device_climate_moes: ZHADevice, zha_gateway: ZHAG
 
 
 async def test_set_moes_operation_mode(
-    device_climate_moes: ZHADevice, zha_gateway: ZHAGateway
+    device_climate_moes: Device, zha_gateway: ZHAGateway
 ):
     """Test setting preset for moes trv."""
 
@@ -1388,7 +1388,7 @@ PRESET_ECO = "eco"
 )
 async def test_beca_operation_mode_update(
     zha_gateway: ZHAGateway,
-    device_climate_beca: ZHADevice,
+    device_climate_beca: Device,
     preset_attr: int,
     preset_mode: str,
 ) -> None:

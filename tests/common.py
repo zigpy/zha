@@ -14,7 +14,7 @@ import zigpy.zcl.foundation as zcl_f
 from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 from zha.zigbee.group import Group
 
 _LOGGER = logging.getLogger(__name__)
@@ -168,7 +168,7 @@ def reset_clusters(clusters: list[zigpy.zcl.Cluster]) -> None:
         cluster.write_attributes.reset_mock()
 
 
-def find_entity(device: ZHADevice, platform: Platform) -> Optional[PlatformEntity]:
+def find_entity(device: Device, platform: Platform) -> Optional[PlatformEntity]:
     """Find an entity for the specified platform on the given device."""
     for entity in device.platform_entities.values():
         if platform == entity.PLATFORM:
@@ -189,7 +189,7 @@ def mock_coro(
 
 
 def find_entity_id(
-    domain: str, zha_device: ZHADevice, qualifier: Optional[str] = None
+    domain: str, zha_device: Device, qualifier: Optional[str] = None
 ) -> Optional[str]:
     """Find the entity id under the testing.
 
@@ -209,7 +209,7 @@ def find_entity_id(
 
 
 def find_entity_ids(
-    domain: str, zha_device: ZHADevice, omit: Optional[list[str]] = None
+    domain: str, zha_device: Device, omit: Optional[list[str]] = None
 ) -> list[str]:
     """Find the entity ids under the testing.
 

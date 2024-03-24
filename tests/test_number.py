@@ -15,7 +15,7 @@ from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 from .common import (
     find_entity,
@@ -70,7 +70,7 @@ async def light(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
 
 async def test_number(
     zigpy_analog_output_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test zha number platform."""
@@ -139,7 +139,7 @@ async def test_number(
     assert entity.get_state()["state"] == 30.0
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -161,7 +161,7 @@ def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
 )
 async def test_level_control_number(
     zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
-    light: ZHADevice,  # pylint: disable=redefined-outer-name
+    light: Device,  # pylint: disable=redefined-outer-name
     device_joined,
     attr: str,
     initial_value: int,
@@ -256,7 +256,7 @@ async def test_level_control_number(
 )
 async def test_color_number(
     zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
-    light: ZHADevice,  # pylint: disable=redefined-outer-name
+    light: Device,  # pylint: disable=redefined-outer-name
     device_joined,
     attr: str,
     initial_value: int,

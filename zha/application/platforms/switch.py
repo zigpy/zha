@@ -35,7 +35,7 @@ from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.SWITCH)
@@ -97,7 +97,7 @@ class Switch(PlatformEntity, BaseSwitch):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Initialize the ZHA switch."""
@@ -193,7 +193,7 @@ class SwitchConfigurationEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -220,7 +220,7 @@ class SwitchConfigurationEntity(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
@@ -655,7 +655,7 @@ class WindowCoveringInversionSwitch(SwitchConfigurationEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.

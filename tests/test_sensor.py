@@ -23,7 +23,7 @@ from zha.application.platforms import PlatformEntity
 from zha.application.platforms.sensor import UnitOfMass
 from zha.application.platforms.sensor.const import SensorDeviceClass
 from zha.units import PERCENTAGE, UnitOfEnergy, UnitOfPressure, UnitOfVolume
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 from .common import find_entity_id, find_entity_ids, send_attributes_report
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -70,8 +70,8 @@ async def elec_measurement_zigpy_dev(
 @pytest.fixture
 async def elec_measurement_zha_dev(
     elec_measurement_zigpy_dev: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Electric Measurement ZHA device."""
 
     zha_dev = await device_joined(elec_measurement_zigpy_dev)
@@ -530,7 +530,7 @@ async def async_test_pi_heating_demand(
 )
 async def test_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
     cluster_id: int,
     entity_suffix: str,
@@ -572,7 +572,7 @@ async def test_sensor(
     await test_func(zha_gateway, cluster, entity)
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
@@ -594,7 +594,7 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
 @pytest.mark.looptime
 async def test_electrical_measurement_init(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -757,7 +757,7 @@ async def test_electrical_measurement_init(
 )
 async def test_unsupported_attributes_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
     cluster_id: int,
     unsupported_attributes: set,
@@ -886,7 +886,7 @@ async def test_unsupported_attributes_sensor(
 )
 async def test_se_summation_uom(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
     raw_uom: int,
     raw_value: int,
@@ -947,7 +947,7 @@ async def test_elec_measurement_sensor_type(
     elec_measurement_zigpy_dev: ZigpyDevice,  # pylint: disable=redefined-outer-name
     raw_measurement_type: int,
     expected_type: str,
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test zha electrical measurement sensor type."""
@@ -969,7 +969,7 @@ async def test_elec_measurement_sensor_type(
 async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
     elec_measurement_zigpy_dev: ZigpyDevice,
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Test ZHA electrical measurement sensor polling."""
 
@@ -1031,7 +1031,7 @@ async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-out
     ),
 )
 async def test_elec_measurement_skip_unsupported_attribute(
-    elec_measurement_zha_dev: ZHADevice,  # pylint: disable=redefined-outer-name
+    elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
     supported_attributes: set[str],
 ) -> None:
     """Test zha electrical measurement skipping update of unsupported attributes."""

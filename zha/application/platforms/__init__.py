@@ -20,7 +20,7 @@ from zha.mixins import LogMixin
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
 
@@ -347,7 +347,7 @@ class PlatformEntity(BaseEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
@@ -361,7 +361,7 @@ class PlatformEntity(BaseEntity):
         self.cluster_handlers: dict[str, ClusterHandler] = {}
         for cluster_handler in cluster_handlers:
             self.cluster_handlers[cluster_handler.name] = cluster_handler
-        self._device: ZHADevice = device
+        self._device: Device = device
         self._endpoint = endpoint
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
         if self.unique_id not in self._device.platform_entities:
@@ -373,7 +373,7 @@ class PlatformEntity(BaseEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> PlatformEntity | None:
         """Entity Factory.
@@ -411,7 +411,7 @@ class PlatformEntity(BaseEntity):
             self._attr_entity_category = None
 
     @property
-    def device(self) -> ZHADevice:
+    def device(self) -> Device:
         """Return the device."""
         return self._device
 

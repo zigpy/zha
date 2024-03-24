@@ -67,7 +67,7 @@ from zha.zigbee.cluster_handlers.const import (
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import ZHADevice
+    from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
 BATTERY_SIZES = {
@@ -116,7 +116,7 @@ class Sensor(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -142,7 +142,7 @@ class Sensor(PlatformEntity):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
@@ -230,7 +230,7 @@ class PollableSensor(Sensor):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
@@ -285,7 +285,7 @@ class DeviceCounterSensor(BaseEntity):
     def create_platform_entity(
         cls,
         unique_id: str,
-        zha_device: ZHADevice,
+        zha_device: Device,
         counter_groups: str,
         counter_group: str,
         counter: str,
@@ -302,7 +302,7 @@ class DeviceCounterSensor(BaseEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
+        zha_device: Device,
         counter_groups: str,
         counter_group: str,
         counter: str,
@@ -311,7 +311,7 @@ class DeviceCounterSensor(BaseEntity):
         """Init this sensor."""
         super().__init__(unique_id, **kwargs)
         self._name = f"{zha_device.name} {counter_group} {counter}"
-        self._device: ZHADevice = zha_device
+        self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
             getattr(state, counter_groups).get(counter_group, {}).get(counter, None)
@@ -351,7 +351,7 @@ class DeviceCounterSensor(BaseEntity):
         return self._device.available
 
     @property
-    def device(self) -> ZHADevice:
+    def device(self) -> Device:
         """Return the device."""
         return self._device
 
@@ -411,7 +411,7 @@ class EnumSensor(Sensor):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
@@ -458,7 +458,7 @@ class Battery(Sensor):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -757,7 +757,7 @@ class SmartEnergyMetering(PollableSensor):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init."""
@@ -986,7 +986,7 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -1135,7 +1135,7 @@ class ThermostatHVACAction(Sensor):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -1272,7 +1272,7 @@ class RSSISensor(Sensor):
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
-        device: ZHADevice,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.

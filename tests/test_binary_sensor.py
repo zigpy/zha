@@ -11,7 +11,7 @@ from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone, Occupancy
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 
 from .common import find_entity, send_attributes_report, update_attribute_cache
 from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -90,7 +90,7 @@ async def async_test_iaszone_on_off(
 )
 async def test_binary_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: ZHAGateway,
     device: dict,
     on_off_test: Callable[..., Awaitable[None]],

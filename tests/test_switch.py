@@ -28,7 +28,7 @@ from zha.application import Platform
 from zha.application.gateway import ZHAGateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ZHADevice
+from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
 from .common import (
@@ -81,8 +81,8 @@ def zigpy_cover_device(zigpy_device_mock):
 @pytest.fixture
 async def device_switch_1(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test zha switch platform."""
 
     zigpy_dev = zigpy_device_mock(
@@ -104,8 +104,8 @@ async def device_switch_1(
 @pytest.fixture
 async def device_switch_2(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
-) -> ZHADevice:
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
     """Test zha switch platform."""
 
     zigpy_dev = zigpy_device_mock(
@@ -125,7 +125,7 @@ async def device_switch_2(
 
 
 async def test_switch(
-    device_joined: Callable[[ZigpyDevice], Awaitable[ZHADevice]],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
@@ -236,8 +236,8 @@ async def test_switch(
 
 
 async def test_zha_group_switch_entity(
-    device_switch_1: ZHADevice,  # pylint: disable=redefined-outer-name
-    device_switch_2: ZHADevice,  # pylint: disable=redefined-outer-name
+    device_switch_1: Device,  # pylint: disable=redefined-outer-name
+    device_switch_2: Device,  # pylint: disable=redefined-outer-name
     zha_gateway: ZHAGateway,
 ) -> None:
     """Test the switch entity for a ZHA group."""
@@ -338,7 +338,7 @@ async def test_zha_group_switch_entity(
     assert bool(entity.get_state()["state"]) is True
 
 
-def get_entity(zha_dev: ZHADevice, entity_id: str) -> PlatformEntity:
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
         entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
