@@ -97,16 +97,7 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
         radio_type = RadioType[self.config.config_entry_data["data"][CONF_RADIO_TYPE]]
-
         app_config = self.config.yaml_config.get(CONF_ZIGPY, {})
-        # pylint: disable=pointless-string-statement
-        """TODO
-        database = self.config.get(
-            CONF_DATABASE,
-            self.hass.config.path(DEFAULT_DATABASE_NAME),
-        )
-        app_config[CONF_DATABASE] = database
-        """
         app_config[CONF_DEVICE] = self.config.config_entry_data["data"][CONF_DEVICE]
 
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
@@ -120,23 +111,6 @@ class ZHAGateway(AsyncUtilMixin, EventBase):
             and app_config[CONF_DEVICE][CONF_DEVICE_PATH].startswith("socket://")
         ):
             app_config[CONF_USE_THREAD] = False
-
-        # pylint: disable=pointless-string-statement
-        """TODO
-        # Local import to avoid circular dependencies
-        # pylint: disable-next=import-outside-toplevel
-        from homeassistant.components.homeassistant_hardware.silabs_multiprotocol_addon import (
-            is_multiprotocol_url,
-        )
-
-        # Until we have a way to coordinate channels with the Thread half of multi-PAN,
-        # stick to the old zigpy default of channel 15 instead of dynamically scanning
-        if (
-            is_multiprotocol_url(app_config[CONF_DEVICE][CONF_DEVICE_PATH])
-            and app_config.get(CONF_NWK, {}).get(CONF_NWK_CHANNEL) is None
-        ):
-            app_config.setdefault(CONF_NWK, {})[CONF_NWK_CHANNEL] = 15
-        """
 
         return radio_type.controller, radio_type.controller.SCHEMA(app_config)
 
