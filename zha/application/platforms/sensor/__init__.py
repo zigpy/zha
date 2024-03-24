@@ -338,7 +338,7 @@ class DeviceCounterSensor(BaseEntity):
     @property
     def name(self) -> str:
         """Return the name of the platform entity."""
-        return self._attr_name
+        return self._name
 
     @property
     def native_value(self) -> int | None:
@@ -394,7 +394,7 @@ class DeviceCounterSensor(BaseEntity):
             "unique_id": self._unique_id,
             "platform": self.PLATFORM,
         }
-        self.debug("Sending event from device counter sensor entity: %s", signal)
+        self.info("Sending event from device counter sensor entity: %s", signal)
         self._device.send_event(signal)
 
     def to_json(self) -> dict:
