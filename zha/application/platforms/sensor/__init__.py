@@ -394,7 +394,7 @@ class DeviceCounterSensor(BaseEntity):
             "unique_id": self._unique_id,
             "platform": self.PLATFORM,
         }
-        _LOGGER.info("Sending event from device counter sensor entity: %s", signal)
+        self.debug("Sending event from device counter sensor entity: %s", signal)
         self._device.send_event(signal)
 
     def to_json(self) -> dict:

@@ -466,7 +466,7 @@ class PlatformEntity(BaseEntity):
             "id": self._endpoint.id,
             "unique_id": self._endpoint.unique_id,
         }
-        _LOGGER.info("Sending event from platform entity: %s", signal)
+        self.debug("Sending event from platform entity: %s", signal)
         self.device.send_event(signal)
 
     def to_json(self) -> dict:
@@ -542,7 +542,7 @@ class GroupEntity(BaseEntity):
         signal["group"] = {
             "id": self._group.group_id,
         }
-        _LOGGER.info("Sending event from group entity: %s", signal)
+        self.debug("Sending event from group entity: %s", signal)
         self._group.send_event(signal)
 
     def to_json(self) -> dict[str, Any]:
