@@ -52,6 +52,7 @@ class ZhaNumber(PlatformEntity):
 
     PLATFORM = Platform.NUMBER
     _attr_translation_key: str = "number"
+    _attr_mode: NumberMode = NumberMode.AUTO
 
     def __init__(
         self,
@@ -118,6 +119,11 @@ class ZhaNumber(PlatformEntity):
         engineering_units = self._analog_output_cluster_handler.engineering_units
         return UNITS.get(engineering_units)
 
+    @property
+    def mode(self) -> NumberMode:
+        """Return the mode of the entity."""
+        return self._attr_mode
+
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await self._analog_output_cluster_handler.async_set_present_value(float(value))
@@ -174,6 +180,8 @@ class ZHANumberConfigurationEntity(PlatformEntity):
     _attr_native_step: float = 1.0
     _attr_multiplier: float = 1
     _attribute_name: str
+    _attr_icon: str | None = None
+    _attr_mode: NumberMode = NumberMode.AUTO
 
     @classmethod
     def create_platform_entity(
@@ -249,10 +257,37 @@ class ZHANumberConfigurationEntity(PlatformEntity):
         value = self._cluster_handler.cluster.get(self._attribute_name)
         if value is None:
             return None
-        return (
-            self._cluster_handler.cluster.get(self._attribute_name)
-            * self._attr_multiplier
-        )
+        return value * self._attr_multiplier
+
+    @property
+    def native_min_value(self) -> float:
+        """Return the minimum value."""
+        return self._attr_native_min_value
+
+    @property
+    def native_max_value(self) -> float:
+        """Return the maximum value."""
+        return self._attr_native_max_value
+
+    @property
+    def native_step(self) -> float | None:
+        """Return the value step."""
+        return self._attr_native_step
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon to be used for this entity."""
+        return self._attr_icon
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit the value is expressed in."""
+        return self._attr_native_unit_of_measurement
+
+    @property
+    def mode(self) -> NumberMode:
+        """Return the mode of the entity."""
+        return self._attr_mode
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
