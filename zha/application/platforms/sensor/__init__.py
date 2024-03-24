@@ -341,6 +341,11 @@ class DeviceCounterSensor(BaseEntity):
         return self._name
 
     @property
+    def native_value(self) -> int | None:
+        """Return the state of the entity."""
+        return self._zigpy_counter.value
+
+    @property
     def available(self) -> bool:
         """Return entity availability."""
         return self._device.available
