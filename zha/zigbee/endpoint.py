@@ -233,7 +233,7 @@ class Endpoint:
             )
         )
 
-    def async_send_signal(self, signal: str, *args: Any) -> None:
+    def emit_propagated_event(self, signal: str, *args: Any) -> None:
         """Send a signal through hass dispatcher."""
         self.device.emit(signal, *args)
 

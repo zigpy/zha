@@ -225,9 +225,9 @@ class ClusterHandler(LogMixin, EventBase):
         """Make this a hashable."""
         return hash(self._unique_id)
 
-    def async_send_signal(self, signal: str, *args: Any) -> None:
+    def emit_propagated_event(self, signal: str, *args: Any) -> None:
         """Send a signal through dispatcher."""
-        self._endpoint.async_send_signal(signal, *args)
+        self._endpoint.emit_propagated_event(signal, *args)
 
     async def bind(self) -> None:
         """Bind a zigbee cluster.

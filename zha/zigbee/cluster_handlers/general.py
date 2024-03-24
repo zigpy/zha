@@ -295,7 +295,7 @@ class IdentifyClusterHandler(ClusterHandler):
         cmd = parse_and_log_command(self, tsn, command_id, args)
 
         if cmd == Identify.ServerCommandDefs.trigger_effect.name:
-            self.async_send_signal(f"{self.unique_id}_{cmd}", args[0])
+            self.emit_propagated_event(f"{self.unique_id}_{cmd}", args[0])
 
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(LevelControl.cluster_id)
@@ -587,7 +587,7 @@ class OtaClientClusterHandler(ClientClusterHandler):
             self.cluster.update_attribute(
                 Ota.AttributeDefs.current_file_version.id, current_file_version
             )
-            self.async_send_signal(
+            self.emit_propagated_event(
                 SIGNAL_UPDATE_DEVICE.format(signal_id), current_file_version
             )
 
