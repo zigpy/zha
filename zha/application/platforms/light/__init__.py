@@ -1207,7 +1207,7 @@ class LightGroup(GroupEntity, BaseLight):
         off_brightness = self._off_brightness if self._off_with_transition else None
         await super().async_turn_on(**kwargs)
         if self._zha_config_group_members_assume_state:
-            self._send_member_assume_state_event(True, kwargs, off_brightness)
+            self._emit_member_assume_state_event(True, kwargs, off_brightness)
         if self.is_transitioning:  # when transitioning, state is refreshed at the end
             return
         if self._debounced_member_refresh:
@@ -1217,7 +1217,7 @@ class LightGroup(GroupEntity, BaseLight):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         if self._zha_config_group_members_assume_state:
-            self._send_member_assume_state_event(False, kwargs)
+            self._emit_member_assume_state_event(False, kwargs)
         if self.is_transitioning:
             return
         if self._debounced_member_refresh:
@@ -1329,7 +1329,7 @@ class LightGroup(GroupEntity, BaseLight):
             SIGNAL_LIGHT_GROUP_STATE_CHANGED,
         )
 
-    def _send_member_assume_state_event(
+    def _emit_member_assume_state_event(
         self, state, service_kwargs, off_brightness=None
     ) -> None:
         """Send an assume event to all members of the group."""
