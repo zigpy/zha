@@ -248,7 +248,8 @@ class SwitchConfigurationEntity(PlatformEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle state update from cluster handler."""
-        self.maybe_emit_state_changed_event()
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
 
     @property
     def inverted(self) -> bool:

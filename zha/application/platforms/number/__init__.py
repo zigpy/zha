@@ -251,6 +251,9 @@ class NumberConfigurationEntity(PlatformEntity):
             self._attr_native_unit_of_measurement = validate_unit(
                 entity_metadata.unit
             ).value
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+        )
 
     @property
     def native_value(self) -> float:
@@ -308,6 +311,14 @@ class NumberConfigurationEntity(PlatformEntity):
                 self._attribute_name, from_cache=False
             )
             _LOGGER.debug("read value=%s", value)
+
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle value update from cluster handler."""
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
 
     def to_json(self) -> dict:
         """Return the JSON representation of the number entity."""

@@ -218,7 +218,8 @@ class ZCLEnumSelectEntity(PlatformEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle value update from cluster handler."""
-        self.maybe_emit_state_changed_event()
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
 
     def to_json(self) -> dict:
         """Return a JSON representation of the select."""
