@@ -471,6 +471,10 @@ class ClusterHandler(LogMixin, EventBase):
     def zdo_command(self, *args, **kwargs) -> None:
         """Handle ZDO commands on this cluster."""
 
+    def zha_send_event(self, command: str, arg: list | dict | CommandSchema) -> None:
+        """Compatibility method for emitting ZHA events from quirks until they are updated."""
+        self.emit_zha_event(command, arg)
+
     def emit_zha_event(self, command: str, arg: list | dict | CommandSchema) -> None:
         """Relay events to listeners."""
 
