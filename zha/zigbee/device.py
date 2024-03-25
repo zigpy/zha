@@ -70,7 +70,6 @@ from zha.application.const import (
     CONF_ENABLE_IDENTIFY_ON_JOIN,
     POWER_BATTERY_OR_UNKNOWN,
     POWER_MAINS_POWERED,
-    SIGNAL_AVAILABLE,
     UNKNOWN,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
@@ -196,8 +195,6 @@ class Device(LogMixin, EventBase):
         self._tracked_tasks: list[asyncio.Task] = []
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
         self.status: DeviceStatus = DeviceStatus.CREATED
-
-        self._available_signal: str = f"{self.name}_{self.ieee}_{SIGNAL_AVAILABLE}"
 
         self._endpoints: dict[int, Endpoint] = {}
         for ep_id, endpoint in zigpy_device.endpoints.items():
@@ -581,7 +578,8 @@ class Device(LogMixin, EventBase):
     async def _async_became_available(self) -> None:
         """Update device availability and signal entities."""
         await self.async_initialize(False)
-        # TODO async_dispatcher_send(self.hass, f"{self._available_signal}_entity") #pylint: disable=fixme
+        for platform_entity in self._platform_entities.values():
+            platform_entity.maybe_emit_state_changed_event()
 
     @property
     def device_info(self) -> dict[str, Any]:

@@ -454,6 +454,12 @@ class PlatformEntity(BaseEntity):
         json["available"] = self.available
         return json
 
+    def get_state(self) -> dict:
+        """Return the arguments to use in the command."""
+        state = super().get_state()
+        state["available"] = self.available
+        return state
+
     async def async_update(self) -> None:
         """Retrieve latest state."""
         self.debug("polling current state")

@@ -300,8 +300,6 @@ class RadioType(enum.Enum):
         return self._desc
 
 
-SIGNAL_AVAILABLE = "available"
-
 UNKNOWN = "unknown"
 UNKNOWN_MANUFACTURER = "unk_manufacturer"
 UNKNOWN_MODEL = "unk_model"
