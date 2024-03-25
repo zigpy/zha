@@ -56,10 +56,6 @@ from zha.application.platforms.light.const import (
     DEFAULT_ON_OFF_TRANSITION,
     EFFECT_COLORLOOP,
     FLASH_EFFECTS,
-    SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
-    SIGNAL_LIGHT_GROUP_STATE_CHANGED,
-    SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
-    SIGNAL_LIGHT_GROUP_TRANSITION_START,
     SUPPORT_GROUP_LIGHT,
     ColorMode,
     LightEntityFeature,
@@ -633,9 +629,8 @@ class BaseLight(BaseEntity, ABC):
         self._transitioning_individual = True
         self._transitioning_group = False
         if isinstance(self, LightGroup):
-            self.emit(
-                SIGNAL_LIGHT_GROUP_TRANSITION_START,
-            )
+            for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+                platform_entity.transition_on()
         self._async_unsub_transition_listener()
 
     def async_transition_start_timer(self, transition_time) -> None:
@@ -667,9 +662,9 @@ class BaseLight(BaseEntity, ABC):
         self._async_unsub_transition_listener()
         self.maybe_emit_state_changed_event()
         if isinstance(self, LightGroup):
-            self.emit(
-                SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED,
-            )
+            for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+                platform_entity.transition_off()
+
             if self._debounced_member_refresh is not None:
                 self.debug("transition complete - refreshing group member states")
 
@@ -1097,22 +1092,6 @@ class LightGroup(GroupEntity, BaseLight):
         super().__init__(group)
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
-        for platform_entity in group.get_platform_entities(Light.PLATFORM):
-            self.on_event(
-                SIGNAL_LIGHT_GROUP_STATE_CHANGED, platform_entity.async_update
-            )
-            self.on_event(
-                SIGNAL_LIGHT_GROUP_TRANSITION_START,
-                platform_entity.transition_on,
-            )
-            self.on_event(
-                SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED, platform_entity.transition_off
-            )
-            self.on_event(
-                SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE,
-                platform_entity._assume_group_state,
-            )
-
         for member in group.members:
             # Ensure we do not send group commands that violate the minimum transition
             # time of any members.
@@ -1207,7 +1186,7 @@ class LightGroup(GroupEntity, BaseLight):
         off_brightness = self._off_brightness if self._off_with_transition else None
         await super().async_turn_on(**kwargs)
         if self._zha_config_group_members_assume_state:
-            self._emit_member_assume_state_event(True, kwargs, off_brightness)
+            self._make_members_assume_group_state(True, kwargs, off_brightness)
         if self.is_transitioning:  # when transitioning, state is refreshed at the end
             return
         if self._debounced_member_refresh:
@@ -1217,7 +1196,7 @@ class LightGroup(GroupEntity, BaseLight):
         """Turn the entity off."""
         await super().async_turn_off(**kwargs)
         if self._zha_config_group_members_assume_state:
-            self._emit_member_assume_state_event(False, kwargs)
+            self._make_members_assume_group_state(False, kwargs)
         if self.is_transitioning:
             return
         if self._debounced_member_refresh:
@@ -1325,11 +1304,10 @@ class LightGroup(GroupEntity, BaseLight):
 
     async def _force_member_updates(self) -> None:
         """Force the update of members to ensure the states are correct for bulbs that don't report their state."""
-        self.emit(
-            SIGNAL_LIGHT_GROUP_STATE_CHANGED,
-        )
+        for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+            await platform_entity.async_update()
 
-    def _emit_member_assume_state_event(
+    def _make_members_assume_group_state(
         self, state, service_kwargs, off_brightness=None
     ) -> None:
         """Send an assume event to all members of the group."""
@@ -1362,4 +1340,5 @@ class LightGroup(GroupEntity, BaseLight):
         if ATTR_EFFECT in service_kwargs:
             update_params[ATTR_EFFECT] = self._effect
 
-        self.emit(SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE, update_params)
+        for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+            platform_entity._assume_group_state(update_params)

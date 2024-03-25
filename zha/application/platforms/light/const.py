@@ -14,11 +14,6 @@ ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY = 0.05
 
 DEFAULT_MIN_TRANSITION_MANUFACTURERS = {"sengled"}
 
-SIGNAL_LIGHT_GROUP_STATE_CHANGED = "zha_light_group_state_changed"
-SIGNAL_LIGHT_GROUP_TRANSITION_START = "zha_light_group_transition_start"
-SIGNAL_LIGHT_GROUP_TRANSITION_FINISHED = "zha_light_group_transition_finished"
-SIGNAL_LIGHT_GROUP_ASSUME_GROUP_STATE = "zha_light_group_assume_group_state"
-
 STATE_UNAVAILABLE: Final = "unavailable"
 
 
