@@ -758,7 +758,6 @@ async def test_electrical_measurement_init(
 async def test_unsupported_attributes_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: Gateway,
     cluster_id: int,
     unsupported_attributes: set,
     entity_ids: set,
@@ -887,7 +886,6 @@ async def test_unsupported_attributes_sensor(
 async def test_se_summation_uom(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: Gateway,
     raw_uom: int,
     raw_value: int,
     expected_state: str,

@@ -770,7 +770,9 @@ WCM = closures.WindowCovering.WindowCoveringMode
 
 
 async def test_cover_inversion_switch(
-    zha_gateway: Gateway, device_joined, zigpy_cover_device
+    zha_gateway: Gateway,
+    device_joined,
+    zigpy_cover_device,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA cover platform."""
 
@@ -866,7 +868,8 @@ async def test_cover_inversion_switch(
 
 
 async def test_cover_inversion_switch_not_created(
-    zha_gateway: Gateway, device_joined, zigpy_cover_device
+    device_joined,
+    zigpy_cover_device,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA cover platform."""
 

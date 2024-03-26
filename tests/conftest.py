@@ -235,7 +235,11 @@ class TestGateway:
 
 
 @pytest.fixture
-async def zha_gateway(zha_data: ZHAData, zigpy_app_controller, caplog):
+async def zha_gateway(
+    zha_data: ZHAData,  # pylint: disable=redefined-outer-name
+    zigpy_app_controller,  # pylint: disable=redefined-outer-name
+    caplog,  # pylint: disable=unused-argument
+):
     """Set up ZHA component."""
 
     with (
@@ -311,7 +315,7 @@ def cluster_handler() -> Callable:
 
 @pytest.fixture
 def zigpy_device_mock(
-    zigpy_app_controller: ControllerApplication,
+    zigpy_app_controller: ControllerApplication,  # pylint: disable=redefined-outer-name
 ) -> Callable[..., zigpy.device.Device]:
     """Make a fake device using the specified cluster classes."""
 
