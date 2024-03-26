@@ -227,11 +227,13 @@ async def test_switch(
         )
 
     # test updating entity state from client
+    cluster.read_attributes.reset_mock()
     assert bool(entity.get_state()["state"]) is False
     cluster.PLUGGED_ATTR_READS = {"on_off": True}
     update_attribute_cache(cluster)
     await entity.async_update()
     await zha_gateway.async_block_till_done()
+    assert cluster.read_attributes.call_count == 1
     assert bool(entity.get_state()["state"]) is True
 
 

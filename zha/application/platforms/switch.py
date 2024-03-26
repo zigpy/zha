@@ -116,15 +116,6 @@ class Switch(PlatformEntity, BaseSwitch):
         """Handle state update from cluster handler."""
         self.maybe_emit_state_changed_event()
 
-    async def async_update(self) -> None:
-        """Attempt to retrieve on off state from the switch."""
-        await super().async_update()
-        if self._on_off_cluster_handler:
-            await self._on_off_cluster_handler.get_attribute_value(
-                "on_off", from_cache=False
-            )
-            self.maybe_emit_state_changed_event()
-
 
 @GROUP_MATCH()
 class SwitchGroup(GroupEntity, BaseSwitch):
