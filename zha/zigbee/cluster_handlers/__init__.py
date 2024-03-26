@@ -460,7 +460,7 @@ class ClusterHandler(LogMixin, EventBase):
             value,
         )
         self.emit(
-            CLUSTER_HANDLER_EVENT,
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             ClusterAttributeUpdatedEvent(
                 attribute_id=attrid,
                 attribute_name=attr_name,

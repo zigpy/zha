@@ -28,8 +28,8 @@ from zha.application.platforms.alarm_control_panel.const import (
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_EVENT,
     CLUSTER_HANDLER_IAS_ACE,
+    CLUSTER_HANDLER_STATE_CHANGED,
 )
 from zha.zigbee.cluster_handlers.security import (
     ClusterHandlerStateChangedEvent,
@@ -77,7 +77,7 @@ class AlarmControlPanel(PlatformEntity):
             config, ZHA_ALARM_OPTIONS, CONF_ALARM_FAILED_TRIES, 3
         )
         self._cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_STATE_CHANGED, self._handle_event_protocol
         )
 
     def handle_cluster_handler_state_changed(

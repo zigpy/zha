@@ -40,7 +40,7 @@ from zha.decorators import periodic
 from zha.units import UnitOfTemperature
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_EVENT,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
     CLUSTER_HANDLER_THERMOSTAT,
 )
@@ -95,7 +95,8 @@ class Thermostat(PlatformEntity):
             CLUSTER_HANDLER_FAN
         )
         self._thermostat_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     @property

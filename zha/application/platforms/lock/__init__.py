@@ -18,8 +18,8 @@ from zha.application.platforms.lock.const import (
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_DOORLOCK,
-    CLUSTER_HANDLER_EVENT,
 )
 
 if TYPE_CHECKING:
@@ -54,7 +54,8 @@ class DoorLock(PlatformEntity):
             self._doorlock_cluster_handler.cluster.get("lock_state"), None
         )
         self._doorlock_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     @property

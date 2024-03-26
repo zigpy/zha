@@ -24,9 +24,9 @@ from zha.units import UnitOfMass, UnitOfTemperature, validate_unit
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_OUTPUT,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
     CLUSTER_HANDLER_COLOR,
-    CLUSTER_HANDLER_EVENT,
     CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_OCCUPANCY,
@@ -68,7 +68,8 @@ class Number(PlatformEntity):
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
         self._analog_output_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     @property
@@ -242,7 +243,8 @@ class NumberConfigurationEntity(PlatformEntity):
                 entity_metadata.unit
             ).value
         self._cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     @property

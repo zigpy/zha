@@ -22,7 +22,7 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_ID,
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
-    CLUSTER_HANDLER_EVENT,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     INOVELLI_CLUSTER,
@@ -218,7 +218,7 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
 
         if attr_name == self.value_attribute:
             self.emit(
-                CLUSTER_HANDLER_EVENT,
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 ClusterAttributeUpdatedEvent(
                     attribute_id=attrid,
                     attribute_name=attr_name,

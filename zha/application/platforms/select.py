@@ -21,7 +21,7 @@ from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_EVENT,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_HUE_OCCUPANCY,
     CLUSTER_HANDLER_IAS_WD,
     CLUSTER_HANDLER_INOVELLI,
@@ -188,7 +188,8 @@ class ZCLEnumSelectEntity(PlatformEntity):
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:

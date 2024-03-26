@@ -23,7 +23,7 @@ from zha.zigbee.cluster_handlers import (
     registries,
 )
 from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_EVENT,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
     REPORT_CONFIG_OP,
@@ -78,7 +78,7 @@ class FanClusterHandler(ClusterHandler):
         )
         if attr_name == "fan_mode":
             self.emit(
-                CLUSTER_HANDLER_EVENT,
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 ClusterAttributeUpdatedEvent(
                     attribute_id=attrid,
                     attribute_name=attr_name,
@@ -299,7 +299,7 @@ class ThermostatClusterHandler(ClusterHandler):
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
         self.emit(
-            CLUSTER_HANDLER_EVENT,
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             ClusterAttributeUpdatedEvent(
                 attribute_id=attrid,
                 attribute_name=attr_name,

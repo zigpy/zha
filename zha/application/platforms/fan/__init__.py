@@ -38,7 +38,10 @@ from zha.zigbee.cluster_handlers import (
     ClusterAttributeUpdatedEvent,
     wrap_zigpy_exceptions,
 )
-from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_EVENT, CLUSTER_HANDLER_FAN
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    CLUSTER_HANDLER_FAN,
+)
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -205,7 +208,8 @@ class Fan(PlatformEntity, BaseFan):
         )
         if self._fan_cluster_handler:
             self._fan_cluster_handler.on_event(
-                CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
             )
 
     @property
@@ -376,7 +380,8 @@ class IkeaFan(Fan):
             "ikea_airpurifier"
         )
         self._fan_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     @property

@@ -69,8 +69,8 @@ from zha.debounce import Debouncer
 from zha.decorators import periodic
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COLOR,
-    CLUSTER_HANDLER_EVENT,
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_ON_OFF,
 )
@@ -171,6 +171,12 @@ class BaseLight(BaseEntity, ABC):
         on at `on_level` Zigbee attribute value, regardless of the last set
         level
         """
+        if self.is_transitioning:
+            self.debug(
+                "received level change event %s while transitioning - skipping update",
+                event,
+            )
+            return
         value = max(0, min(254, event.level))
         self._brightness = value
         self.maybe_emit_state_changed_event()
@@ -816,12 +822,13 @@ class Light(PlatformEntity, BaseLight):
         )
 
         self._on_off_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
         if self._level_cluster_handler:
             self._level_cluster_handler.on_event(
-                CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED, self.handle_cluster_handler_set_level
             )
 
         self._tracked_tasks.append(

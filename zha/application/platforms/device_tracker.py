@@ -16,7 +16,7 @@ from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_EVENT,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
 )
 
@@ -67,7 +67,8 @@ class DeviceScannerEntity(PlatformEntity):
         self._should_poll: bool = True
         self._battery_level: float | None = None
         self._battery_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
         self._tracked_tasks.append(
             device.gateway.async_create_background_task(

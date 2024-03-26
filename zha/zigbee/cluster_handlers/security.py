@@ -28,7 +28,10 @@ from zha.zigbee.cluster_handlers import (
     ClusterHandlerStatus,
     registries,
 )
-from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_EVENT
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    CLUSTER_HANDLER_STATE_CHANGED,
+)
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
@@ -237,7 +240,7 @@ class IasAceClusterHandler(ClusterHandler):
         )
         self._endpoint.device.gateway.async_create_task(response)
         self.emit(
-            CLUSTER_HANDLER_EVENT,
+            CLUSTER_HANDLER_STATE_CHANGED,
             ClusterHandlerStateChangedEvent(),
         )
 
@@ -407,7 +410,7 @@ class IASZoneClusterHandler(ClusterHandler):
         """Handle attribute updates on this cluster."""
         if attrid == IasZone.AttributeDefs.zone_status.id:
             self.emit(
-                CLUSTER_HANDLER_EVENT,
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 ClusterAttributeUpdatedEvent(
                     attribute_id=attrid,
                     attribute_name=IasZone.AttributeDefs.zone_status.name,

@@ -31,8 +31,8 @@ from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import WindowCoveringClusterHandler
 from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COVER,
-    CLUSTER_HANDLER_EVENT,
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_SHADE,
@@ -85,7 +85,8 @@ class Cover(PlatformEntity):
         self._target_tilt_position: int | None = None
         self._determine_initial_state()
         self._cover_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     def _determine_supported_features(self) -> CoverEntityFeature:
@@ -367,10 +368,11 @@ class Shade(PlatformEntity):
             position = int(position * 100 / 255)
         self._position: int | None = position
         self._on_off_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
         self._level_cluster_handler.on_event(
-            CLUSTER_HANDLER_EVENT, self._handle_event_protocol
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED, self.handle_cluster_handler_set_level
         )
 
     @property
