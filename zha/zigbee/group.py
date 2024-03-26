@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.platforms import PlatformEntity, PlatformEntityStateChangedEvent
+from zha.application.platforms import EntityStateChangedEvent, PlatformEntity
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
 
@@ -286,9 +286,7 @@ class Group(LogMixin):
         group_info["members"] = [member.member_info for member in self.members]
         return group_info
 
-    async def _maybe_update_group_members(
-        self, event: PlatformEntityStateChangedEvent
-    ) -> None:
+    async def _maybe_update_group_members(self, event: EntityStateChangedEvent) -> None:
         """Update the state of the entities that make up the group if they are marked as should poll."""
         tasks = []
         platform_entities = self.get_platform_entities(event.platform)
