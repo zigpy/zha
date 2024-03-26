@@ -45,6 +45,7 @@ class DoorLockClusterHandler(ClusterHandler):
                     attribute_name=DoorLock.AttributeDefs.lock_state.name,
                     attribute_value=result,
                     cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
                 ),
             )
 
@@ -83,6 +84,7 @@ class DoorLockClusterHandler(ClusterHandler):
                     attribute_name=attr_name,
                     attribute_value=value,
                     cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
                 ),
             )
 

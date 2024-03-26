@@ -129,6 +129,7 @@ class ClusterAttributeUpdatedEvent:
     attribute_name: str
     attribute_value: Any
     cluster_handler_unique_id: str
+    cluster_id: int
     event_type: Final[str] = CLUSTER_HANDLER_EVENT
     event: Final[str] = CLUSTER_HANDLER_ATTRIBUTE_UPDATED
 
@@ -465,6 +466,7 @@ class ClusterHandler(LogMixin, EventBase):
                 attribute_name=attr_name,
                 attribute_value=value,
                 cluster_handler_unique_id=self.unique_id,
+                cluster_id=self.cluster.cluster_id,
             ),
         )
 

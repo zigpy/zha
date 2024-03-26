@@ -856,6 +856,11 @@ class Light(PlatformEntity, BaseLight):
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Set the state."""
+        if (
+            event.cluster_id != self._on_off_cluster_handler.cluster.cluster_id
+            or event.attribute_id != OnOff.AttributeDefs.on_off.id
+        ):
+            return
         if self.is_transitioning:
             self.debug(
                 "received onoff %s while transitioning - skipping update",

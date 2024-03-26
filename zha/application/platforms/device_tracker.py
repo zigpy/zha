@@ -7,6 +7,8 @@ import functools
 import time
 from typing import TYPE_CHECKING
 
+from zigpy.zcl.clusters.general import PowerConfiguration
+
 from zha.application import Platform
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.sensor import Battery
@@ -111,7 +113,10 @@ class DeviceScannerEntity(PlatformEntity):
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Handle tracking."""
-        if event.attribute_name != "battery_percentage_remaining":
+        if (
+            event.attribute_name
+            != PowerConfiguration.AttributeDefs.battery_percentage_remaining.name
+        ):
             return
         self.debug("battery_percentage_remaining updated: %s", event.attribute_value)
         self._connected = True

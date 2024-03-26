@@ -5,6 +5,7 @@ from __future__ import annotations
 import functools
 from typing import TYPE_CHECKING, Any
 
+from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -111,6 +112,8 @@ class DoorLock(PlatformEntity):
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Handle state update from cluster handler."""
+        if event.attribute_id != DoorLockCluster.AttributeDefs.lock_state.id:
+            return
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
         self.maybe_emit_state_changed_event()
 

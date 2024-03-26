@@ -224,6 +224,7 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
                     attribute_name=attr_name,
                     attribute_value=value,
                     cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
                 ),
             )
             return

@@ -7,6 +7,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
+from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -394,8 +395,9 @@ class Shade(PlatformEntity):
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Set open/closed state."""
-        self._is_open = bool(event.attribute_value)
-        self.maybe_emit_state_changed_event()
+        if event.attribute_id == OnOff.AttributeDefs.on_off.id:
+            self._is_open = bool(event.attribute_value)
+            self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_set_level(self, event: LevelChangeEvent) -> None:
         """Set the reported position."""

@@ -114,7 +114,8 @@ class Switch(PlatformEntity, BaseSwitch):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle state update from cluster handler."""
-        self.maybe_emit_state_changed_event()
+        if event.attribute_name == OnOff.AttributeDefs.on_off.name:
+            self.maybe_emit_state_changed_event()
 
 
 @GROUP_MATCH()
