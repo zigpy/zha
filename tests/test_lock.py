@@ -98,11 +98,13 @@ async def test_lock(
     await async_disable_user_code(zha_gateway, cluster, entity)
 
     # test updating entity state from client
+    cluster.read_attributes.reset_mock()
     assert entity.get_state()["is_locked"] is False
     cluster.PLUGGED_ATTR_READS = {"lock_state": 1}
     update_attribute_cache(cluster)
     await entity.async_update()
     await zha_gateway.async_block_till_done()
+    assert cluster.read_attributes.call_count == 1
     assert entity.get_state()["is_locked"] is True
 
 

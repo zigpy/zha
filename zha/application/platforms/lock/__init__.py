@@ -107,16 +107,6 @@ class DoorLock(PlatformEntity):
             await self._doorlock_cluster_handler.async_clear_user_code(code_slot)
             self.debug("User code at slot %s cleared", code_slot)
 
-    async def async_update(self) -> None:
-        """Attempt to retrieve state from the lock."""
-        await super().async_update()  # TODO check this for 2x reads
-        if self._doorlock_cluster_handler:
-            state = await self._doorlock_cluster_handler.get_attribute_value(
-                "lock_state", from_cache=False
-            )
-            if state is not None:
-                self._state = VALUE_TO_STATE.get(state, self._state)
-
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
