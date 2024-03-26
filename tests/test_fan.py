@@ -308,6 +308,8 @@ async def test_zha_group_fan_entity(
     entity: GroupEntity = get_group_entity(zha_group, entity_id)  # type: ignore
     assert entity is not None
 
+    assert entity.group_id == zha_group.group_id
+
     assert isinstance(entity, GroupEntity)
 
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
@@ -411,6 +413,7 @@ async def test_zha_group_fan_entity_failure_state(
     assert entity is not None
 
     assert isinstance(entity, GroupEntity)
+    assert entity.group_id == zha_group.group_id
 
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
 

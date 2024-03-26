@@ -741,7 +741,7 @@ async def test_zha_group_light_entity(
     assert entity is not None
 
     assert isinstance(entity, GroupEntity)
-    assert entity is not None
+    assert entity.group_id == zha_group.group_id
 
     device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
     assert device_1_entity_id is not None
@@ -1073,7 +1073,7 @@ async def test_transitions(
     assert entity is not None
 
     assert isinstance(entity, GroupEntity)
-    assert entity is not None
+    assert entity.group_id == zha_group.group_id
 
     device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
     assert device_1_entity_id is not None
@@ -1890,7 +1890,7 @@ async def test_group_member_assume_state(
     assert entity is not None
 
     assert isinstance(entity, GroupEntity)
-    assert entity is not None
+    assert entity.group_id == zha_group.group_id
 
     device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
     device_2_entity_id = find_entity_id(Platform.LIGHT, device_light_2)

@@ -272,6 +272,7 @@ async def test_zha_group_switch_entity(
     assert entity is not None
 
     assert isinstance(entity, GroupEntity)
+    assert entity.group_id == zha_group.group_id
 
     group_cluster_on_off = zha_group.zigpy_group.endpoint[general.OnOff.cluster_id]
     dev1_cluster_on_off = device_switch_1.device.endpoints[1].on_off
