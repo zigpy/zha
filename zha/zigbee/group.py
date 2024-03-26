@@ -80,40 +80,6 @@ class GroupMember(LogMixin):
         member_info["entities"] = self.associated_entities
         return member_info
 
-    # pylint: disable=pointless-string-statement
-    """ TODO verify
-    @property
-    def associated_entities(self) -> list[dict[str, Any]]:
-        #Return the list of entities that were derived from this endpoint.
-        entity_registry = er.async_get(self._device.hass)
-        zha_device_registry = self.device.gateway.device_registry
-
-        entity_info = []
-
-        for entity_ref in zha_device_registry.get(self.device.ieee):
-            # We have device entities now that don't leverage cluster handlers
-            if not entity_ref.cluster_handlers:
-                continue
-            entity = entity_registry.async_get(entity_ref.reference_id)
-            handler = list(entity_ref.cluster_handlers.values())[0]
-
-            if (
-                entity is None
-                or handler.cluster.endpoint.endpoint_id != self.endpoint_id
-            ):
-                continue
-
-            entity_info.append(
-                GroupEntityReference(
-                    name=entity.name,
-                    original_name=entity.original_name,
-                    entity_id=entity_ref.reference_id,
-                )._asdict()
-            )
-
-        return entity_info
-        """
-
     @property
     def associated_entities(self) -> list[PlatformEntity]:
         """Return the list of entities that were derived from this endpoint."""
@@ -140,6 +106,16 @@ class GroupMember(LogMixin):
                 self._group.group_id,
                 str(ex),
             )
+
+    def to_json(self) -> dict[str, Any]:
+        """Get group info."""
+        member_info: dict[str, Any] = {}
+        member_info["endpoint_id"] = self.endpoint_id
+        member_info["device"] = self.device.zha_device_info
+        member_info["entities"] = {
+            entity.unique_id: entity.to_json() for entity in self.associated_entities
+        }
+        return member_info
 
     def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
         """Log a message."""
@@ -245,37 +221,6 @@ class Group(LogMixin):
                 self._maybe_update_group_members,
             )
         self.update_entity_subscriptions()
-
-    @property
-    def member_entity_ids(self) -> list[str]:
-        """Return the ZHA entity ids for all entities for the members of this group."""
-        all_entity_ids: list[str] = []
-        for member in self.members:
-            entity_references = member.associated_entities
-            for entity_reference in entity_references:
-                all_entity_ids.append(entity_reference["entity_id"])
-        return all_entity_ids
-
-    # pylint: disable=pointless-string-statement
-    """ TODO verify
-    def get_domain_entity_ids(self, domain: str) -> list[str]:
-        #Return entity ids from the entity domain for this group.
-        entity_registry = er.async_get(self.hass)
-        domain_entity_ids: list[str] = []
-
-        for member in self.members:
-            if member.device.is_coordinator:
-                continue
-            entities = async_entries_for_device(
-                entity_registry,
-                member.device.device_id,
-                include_disabled_entities=True,
-            )
-            domain_entity_ids.extend(
-                [entity.entity_id for entity in entities if entity.domain == domain]
-            )
-        return domain_entity_ids
-    """
 
     @property
     def group_info(self) -> dict[str, Any]:
