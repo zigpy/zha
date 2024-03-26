@@ -625,10 +625,11 @@ class Device(LogMixin, EventBase):
             await self._zigpy_device.apply_custom_configuration()
 
         self.emit(
+            ZHA_CLUSTER_HANDLER_CFG_DONE,
             ClusterHandlerConfigurationComplete(
                 device_ieee=str(self.ieee),
                 unique_id=str(self.ieee),
-            )
+            ),
         )
 
         self.debug("completed configuration")

@@ -240,7 +240,7 @@ class ClusterHandler(LogMixin, EventBase):
             res = await self.cluster.bind()
             self.debug("bound '%s' cluster: %s", self.cluster.ep_attribute, res[0])
             self._endpoint.device.emit(
-                ZHA_CLUSTER_HANDLER_MSG,
+                ZHA_CLUSTER_HANDLER_MSG_BIND,
                 ClusterBindEvent(
                     cluster_name=self.cluster.name,
                     cluster_id=self.cluster.cluster_id,
@@ -256,7 +256,7 @@ class ClusterHandler(LogMixin, EventBase):
                 exc_info=ex,
             )
             self._endpoint.device.emit(
-                ZHA_CLUSTER_HANDLER_MSG,
+                ZHA_CLUSTER_HANDLER_MSG_BIND,
                 ClusterBindEvent(
                     cluster_name=self.cluster.name,
                     cluster_id=self.cluster.cluster_id,
@@ -319,7 +319,7 @@ class ClusterHandler(LogMixin, EventBase):
             )
 
         self._endpoint.device.emit(
-            ZHA_CLUSTER_HANDLER_MSG,
+            ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
             ClusterConfigureReportingEvent(
                 cluster_name=self.cluster.name,
                 cluster_id=self.cluster.cluster_id,

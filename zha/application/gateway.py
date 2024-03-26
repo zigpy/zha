@@ -290,9 +290,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         """
 
         self.emit(
-            ZHA_GW_MSG,
+            ZHA_GW_MSG_DEVICE_JOINED,
             {
-                ATTR_TYPE: ZHA_GW_MSG_DEVICE_JOINED,
+                ATTR_TYPE: ZHA_GW_MSG,
                 ZHA_GW_MSG_DEVICE_INFO: {
                     ATTR_NWK: device.nwk,
                     ATTR_IEEE: str(device.ieee),
@@ -305,9 +305,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Handle a device initialization without quirks loaded."""
 
         self.emit(
-            ZHA_GW_MSG,
+            ZHA_GW_MSG_RAW_INIT,
             {
-                ATTR_TYPE: ZHA_GW_MSG_RAW_INIT,
+                ATTR_TYPE: ZHA_GW_MSG,
                 ZHA_GW_MSG_DEVICE_INFO: {
                     ATTR_NWK: device.nwk,
                     ATTR_IEEE: str(device.ieee),
@@ -380,9 +380,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group = self._groups.get(zigpy_group.group_id)
         if zha_group is not None:
             self.emit(
-                ZHA_GW_MSG,
+                gateway_message_type,
                 {
-                    ATTR_TYPE: gateway_message_type,
+                    ATTR_TYPE: ZHA_GW_MSG,
                     ZHA_GW_MSG_GROUP_INFO: zha_group.group_info,
                 },
             )
@@ -400,9 +400,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             )
             if device_info is not None:
                 self.emit(
-                    ZHA_GW_MSG,
+                    ZHA_GW_MSG_DEVICE_REMOVED,
                     {
-                        ATTR_TYPE: ZHA_GW_MSG_DEVICE_REMOVED,
+                        ATTR_TYPE: ZHA_GW_MSG,
                         ZHA_GW_MSG_DEVICE_INFO: device_info,
                     },
                 )
@@ -490,9 +490,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         device_info = zha_device.zha_device_info
         device_info[DEVICE_PAIRING_STATUS] = DevicePairingStatus.INITIALIZED.name
         self.emit(
-            ZHA_GW_MSG,
+            ZHA_GW_MSG_DEVICE_FULL_INIT,
             {
-                ATTR_TYPE: ZHA_GW_MSG_DEVICE_FULL_INIT,
+                ATTR_TYPE: ZHA_GW_MSG,
                 ZHA_GW_MSG_DEVICE_INFO: device_info,
             },
         )
@@ -503,9 +503,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         await zha_device.async_configure()
         device_info[DEVICE_PAIRING_STATUS] = DevicePairingStatus.CONFIGURED.name
         self.emit(
-            ZHA_GW_MSG,
+            ZHA_GW_MSG_DEVICE_FULL_INIT,
             {
-                ATTR_TYPE: ZHA_GW_MSG_DEVICE_FULL_INIT,
+                ATTR_TYPE: ZHA_GW_MSG,
                 ZHA_GW_MSG_DEVICE_INFO: device_info,
             },
         )
@@ -524,9 +524,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         device_info = zha_device.device_info
         device_info[DEVICE_PAIRING_STATUS] = DevicePairingStatus.CONFIGURED.name
         self.emit(
-            ZHA_GW_MSG,
+            ZHA_GW_MSG_DEVICE_FULL_INIT,
             {
-                ATTR_TYPE: ZHA_GW_MSG_DEVICE_FULL_INIT,
+                ATTR_TYPE: ZHA_GW_MSG,
                 ZHA_GW_MSG_DEVICE_INFO: device_info,
             },
         )
