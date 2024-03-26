@@ -181,7 +181,7 @@ class ClusterHandler(LogMixin, EventBase):
             attr_def: ZCLAttributeDef = self.cluster.attributes_by_name[
                 self.REPORT_CONFIG[0]["attr"]
             ]
-            self.value_attribute = attr_def.id
+            self.value_attribute = attr_def.name
         self._status: ClusterHandlerStatus = ClusterHandlerStatus.CREATED
         self._cluster.add_listener(self)
         self.data_cache: dict[str, Any] = {}

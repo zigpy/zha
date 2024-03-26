@@ -43,7 +43,7 @@ class DehumidificationClusterHandler(ClusterHandler):
 class FanClusterHandler(ClusterHandler):
     """Fan cluster handler."""
 
-    _value_attribute = 0
+    _value_attribute: str = Fan.AttributeDefs.fan_mode.name
 
     REPORT_CONFIG = (
         AttrReportConfig(attr=Fan.AttributeDefs.fan_mode.name, config=REPORT_CONFIG_OP),

@@ -138,6 +138,18 @@ async def test_number(
     )
     assert entity.get_state()["state"] == 30.0
 
+    # test updating entity state from client
+    cluster.read_attributes.reset_mock()
+    assert entity.get_state()["state"] == 30.0
+    cluster.PLUGGED_ATTR_READS = {"present_value": 20}
+    await entity.async_update()
+    await zha_gateway.async_block_till_done()
+    assert cluster.read_attributes.await_count == 1
+    assert cluster.read_attributes.await_args == call(
+        ["present_value"], allow_cache=False, only_cache=False, manufacturer=None
+    )
+    assert entity.get_state()["state"] == 20.0
+
 
 def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
@@ -249,6 +261,25 @@ async def test_level_control_number(
     ]
     assert entity.get_state()["state"] == initial_value
 
+    # test updating entity state from client
+    level_control_cluster.read_attributes.reset_mock()
+    assert entity.get_state()["state"] == initial_value
+    level_control_cluster.PLUGGED_ATTR_READS = {attr: new_value}
+    await entity.async_update()
+    await zha_gateway.async_block_till_done()
+    assert level_control_cluster.read_attributes.await_count == 1
+    assert level_control_cluster.read_attributes.mock_calls == [
+        call(
+            [
+                attr,
+            ],
+            allow_cache=False,
+            only_cache=False,
+            manufacturer=None,
+        ),
+    ]
+    assert entity.get_state()["state"] == new_value
+
 
 @pytest.mark.parametrize(
     ("attr", "initial_value", "new_value"),
@@ -335,3 +366,22 @@ async def test_color_number(
         call({attr: new_value}, manufacturer=None),
     ]
     assert entity.get_state()["state"] == initial_value
+
+    # test updating entity state from client
+    color_cluster.read_attributes.reset_mock()
+    assert entity.get_state()["state"] == initial_value
+    color_cluster.PLUGGED_ATTR_READS = {attr: new_value}
+    await entity.async_update()
+    await zha_gateway.async_block_till_done()
+    assert color_cluster.read_attributes.await_count == 1
+    assert color_cluster.read_attributes.mock_calls == [
+        call(
+            [
+                attr,
+            ],
+            allow_cache=False,
+            only_cache=False,
+            manufacturer=None,
+        ),
+    ]
+    assert entity.get_state()["state"] == new_value

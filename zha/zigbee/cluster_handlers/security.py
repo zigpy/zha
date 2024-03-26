@@ -337,6 +337,8 @@ class IasWdClusterHandler(ClusterHandler):
 class IASZoneClusterHandler(ClusterHandler):
     """Cluster handler for the IASZone Zigbee cluster."""
 
+    _value_attribute: str = IasZone.AttributeDefs.zone_status.name
+
     ZCL_INIT_ATTRS = {
         IasZone.AttributeDefs.zone_status.name: False,
         IasZone.AttributeDefs.zone_state.name: True,
@@ -413,3 +415,9 @@ class IASZoneClusterHandler(ClusterHandler):
                     cluster_handler_unique_id=self.unique_id,
                 ),
             )
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        await self.get_attribute_value(
+            IasZone.AttributeDefs.zone_status.name, from_cache=False
+        )

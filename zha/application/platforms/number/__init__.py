@@ -129,16 +129,6 @@ class Number(PlatformEntity):
         await self._analog_output_cluster_handler.async_set_present_value(float(value))
         self.maybe_emit_state_changed_event()
 
-    async def async_update(self) -> None:
-        """Attempt to retrieve the state of the entity."""
-        await super().async_update()
-        _LOGGER.debug("polling current state")
-        if self._analog_output_cluster_handler:
-            value = await self._analog_output_cluster_handler.get_attribute_value(
-                "present_value", from_cache=False
-            )
-            _LOGGER.debug("read value=%s", value)
-
     def handle_cluster_handler_attribute_updated(
         self,
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument

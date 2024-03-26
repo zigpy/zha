@@ -112,6 +112,7 @@ class BinarySensor(PlatformEntity):
         """Attempt to retrieve on off state from the binary sensor."""
         await super().async_update()
         attribute = getattr(self._cluster_handler, "value_attribute", "on_off")
+        # this is a cached read to get the value for state mgt so there is no double read
         attr_value = await self._cluster_handler.get_attribute_value(attribute)
         if attr_value is not None:
             self._state = attr_value
@@ -239,6 +240,10 @@ class IASZone(BinarySensor):
     def parse(value: bool | int) -> bool:
         """Parse the raw attribute into a bool state."""
         return BinarySensor.parse(value & 3)  # use only bit 0 and 1 for alarm state
+
+    async def async_update(self) -> None:
+        """Attempt to retrieve on off state from the IAS Zone sensor."""
+        await PlatformEntity.async_update(self)
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE, models={"WL4200", "WL4200S"})

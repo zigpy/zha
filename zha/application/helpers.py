@@ -63,7 +63,11 @@ class BindingPair:
 
 
 async def safe_read(
-    cluster, attributes, allow_cache=True, only_cache=False, manufacturer=None
+    cluster: zigpy.zcl.Cluster,
+    attributes: list[int | str],
+    allow_cache: bool = True,
+    only_cache: bool = False,
+    manufacturer=None,
 ):
     """Swallow all exceptions from network read.
 
@@ -157,7 +161,7 @@ def convert_to_zcl_values(
     return converted_fields
 
 
-def async_is_bindable_target(source_zha_device, target_zha_device):
+def async_is_bindable_target(source_zha_device: Device, target_zha_device: Device):
     """Determine if target is bindable to source."""
     if target_zha_device.nwk == 0x0000:
         return True

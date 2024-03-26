@@ -57,7 +57,10 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    return zigpy_device_mock(endpoints)
+    zigpy_dev: ZigpyDevice = zigpy_device_mock(endpoints)
+    # this one is mains powered
+    zigpy_dev.node_desc.mac_capability_flags |= 0b_0000_0100
+    return zigpy_dev
 
 
 @pytest.fixture
@@ -230,10 +233,12 @@ async def test_switch(
     cluster.read_attributes.reset_mock()
     assert bool(entity.get_state()["state"]) is False
     cluster.PLUGGED_ATTR_READS = {"on_off": True}
-    update_attribute_cache(cluster)
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert cluster.read_attributes.call_count == 1
+    assert cluster.read_attributes.await_count == 1
+    assert cluster.read_attributes.await_args == call(
+        ["on_off"], allow_cache=False, only_cache=False, manufacturer=None
+    )
     assert bool(entity.get_state()["state"]) is True
 
 
@@ -393,7 +398,7 @@ class WindowDetectionFunctionQuirk(CustomDevice):
 
 
 @pytest.fixture
-async def zigpy_device_tuya(zha_gateway: Gateway, zigpy_device_mock, device_joined):
+async def zigpy_device_tuya(zigpy_device_mock, device_joined):
     """Device tracker zigpy tuya device."""
 
     zigpy_dev = zigpy_device_mock(
@@ -414,7 +419,9 @@ async def zigpy_device_tuya(zha_gateway: Gateway, zigpy_device_mock, device_join
 
 
 async def test_switch_configurable(
-    zha_gateway: Gateway, device_joined, zigpy_device_tuya
+    zha_gateway: Gateway,
+    device_joined,
+    zigpy_device_tuya,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -470,24 +477,17 @@ async def test_switch_configurable(
     await entity.async_update()
     await zha_gateway.async_block_till_done()
     # the mocking doesn't update the attr cache so this flips back to initial value
-    assert cluster.read_attributes.call_count == 2
+    assert cluster.read_attributes.call_count == 1
     assert [
         call(
             [
                 "window_detection_function",
-            ],
-            allow_cache=False,
-            only_cache=False,
-            manufacturer=None,
-        ),
-        call(
-            [
                 "window_detection_function_inverter",
             ],
             allow_cache=False,
             only_cache=False,
             manufacturer=None,
-        ),
+        )
     ] == cluster.read_attributes.call_args_list
 
     cluster.write_attributes.reset_mock()

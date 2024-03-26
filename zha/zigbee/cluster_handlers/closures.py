@@ -24,7 +24,7 @@ from zha.zigbee.cluster_handlers.const import (
 class DoorLockClusterHandler(ClusterHandler):
     """Door lock cluster handler."""
 
-    _value_attribute = 0
+    _value_attribute: str = DoorLock.AttributeDefs.lock_state.name
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=DoorLock.AttributeDefs.lock_state.name,
@@ -75,7 +75,7 @@ class DoorLockClusterHandler(ClusterHandler):
         self.debug(
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
-        if attrid == self._value_attribute:
+        if attr_name == self._value_attribute:
             self.emit(
                 CLUSTER_HANDLER_EVENT,
                 ClusterAttributeUpdatedEvent(

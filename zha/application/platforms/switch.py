@@ -286,13 +286,16 @@ class SwitchConfigurationEntity(PlatformEntity):
     async def async_update(self) -> None:
         """Attempt to retrieve the state of the entity."""
         self.debug("Polling current state")
-        value = await self._cluster_handler.get_attribute_value(
-            self._attribute_name, from_cache=False
+        results = await self._cluster_handler.get_attributes(
+            [
+                self._attribute_name,
+                self._inverter_attribute_name,
+            ],
+            from_cache=False,
+            only_cache=False,
         )
-        await self._cluster_handler.get_attribute_value(
-            self._inverter_attribute_name, from_cache=False
-        )
-        self.debug("read value=%s, inverted=%s", value, self.inverted)
+
+        self.debug("read values=%s", results)
         self.maybe_emit_state_changed_event()
 
     def get_state(self) -> dict:

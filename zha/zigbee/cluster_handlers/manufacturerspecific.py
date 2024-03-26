@@ -216,7 +216,7 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
         except KeyError:
             attr_name = UNKNOWN
 
-        if attrid == self.value_attribute:
+        if attr_name == self.value_attribute:
             self.emit(
                 CLUSTER_HANDLER_EVENT,
                 ClusterAttributeUpdatedEvent(

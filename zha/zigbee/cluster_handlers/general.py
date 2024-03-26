@@ -163,6 +163,12 @@ class AnalogOutputClusterHandler(ClusterHandler):
             {AnalogOutput.AttributeDefs.present_value.name: value}
         )
 
+    async def async_update(self):
+        """Update cluster value attribute."""
+        await self.get_attribute_value(
+            AnalogOutput.AttributeDefs.present_value.name, from_cache=False
+        )
+
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(AnalogValue.cluster_id)
 class AnalogValueClusterHandler(ClusterHandler):
@@ -528,9 +534,8 @@ class OnOffClusterHandler(ClusterHandler):
         from_cache = not self._endpoint.device.is_mains_powered
         self.debug("attempting to update onoff state - from cache: %s", from_cache)
         await self.get_attribute_value(
-            OnOff.AttributeDefs.on_off.id, from_cache=from_cache
+            OnOff.AttributeDefs.on_off.name, from_cache=from_cache
         )
-        await super().async_update()
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(OnOffConfiguration.cluster_id)

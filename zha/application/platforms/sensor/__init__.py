@@ -366,7 +366,6 @@ class DeviceCounterSensor(BaseEntity):
         if self._device.available and self._device.gateway.config.allow_polling:
             self.debug("polling for updated state")
             await self.async_update()
-            self.maybe_emit_state_changed_event()
         else:
             self.debug(
                 "skipping polling for updated state, available: %s, allow polled requests: %s",
