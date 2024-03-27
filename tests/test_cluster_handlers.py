@@ -18,6 +18,7 @@ import zigpy.types as t
 from zigpy.zcl import foundation
 import zigpy.zcl.clusters
 from zigpy.zcl.clusters import CLUSTERS_BY_ID
+from zigpy.zcl.clusters.general import OnOff
 import zigpy.zdo.types as zdo_t
 
 from tests.common import make_zcl_header
@@ -316,6 +317,150 @@ async def test_in_cluster_handler_config(
         for attrs in attr[0][0]
     }
     assert set(attrs) == reported_attrs
+
+
+async def test_cluster_handler_bind_error(
+    endpoint: Endpoint,
+    zigpy_device_mock,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test ZHA core cluster handler bind error."""
+    zigpy_dev = zigpy_device_mock(
+        {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
+        "00:11:22:33:44:55:66:77",
+        "test manufacturer",
+        "test model",
+    )
+
+    cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
+    cluster.bind.side_effect = zigpy.exceptions.ZigbeeException
+
+    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+        OnOff.cluster_id, {None, ClusterHandler}
+    ).get(None)
+    cluster_handler = cluster_handler_class(cluster, endpoint)
+
+    await cluster_handler.async_configure()
+
+    assert cluster.bind.await_count == 1
+    assert cluster.configure_reporting.await_count == 0
+    assert f"Failed to bind '{cluster.ep_attribute}' cluster:" in caplog.text
+
+
+async def test_cluster_handler_configure_reporting_error(
+    endpoint: Endpoint,
+    zigpy_device_mock,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test ZHA core cluster handler configure reporting error."""
+    zigpy_dev = zigpy_device_mock(
+        {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
+        "00:11:22:33:44:55:66:77",
+        "test manufacturer",
+        "test model",
+    )
+
+    cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
+    cluster.configure_reporting_multiple.side_effect = zigpy.exceptions.ZigbeeException
+
+    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+        OnOff.cluster_id, {None, ClusterHandler}
+    ).get(None)
+    cluster_handler = cluster_handler_class(cluster, endpoint)
+
+    await cluster_handler.async_configure()
+
+    assert cluster.bind.await_count == 1
+    assert cluster.configure_reporting_multiple.await_count == 1
+    assert f"failed to set reporting on '{cluster.ep_attribute}' cluster" in caplog.text
+
+
+async def test_write_attributes_safe_key_error(
+    endpoint: Endpoint,
+    zigpy_device_mock,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
+) -> None:
+    """Test ZHA core cluster handler write attributes safe key error."""
+    zigpy_dev = zigpy_device_mock(
+        {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
+        "00:11:22:33:44:55:66:77",
+        "test manufacturer",
+        "test model",
+    )
+
+    cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
+    cluster.write_attributes.side_effect = zigpy.exceptions.ZigbeeException
+
+    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+        OnOff.cluster_id, {None, ClusterHandler}
+    ).get(None)
+    cluster_handler = cluster_handler_class(cluster, endpoint)
+
+    with pytest.raises(ZHAException):
+        await cluster_handler.write_attributes_safe({"foo": "bar"})
+
+
+async def test_get_attributes_error(
+    endpoint: Endpoint,
+    zigpy_device_mock,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test ZHA core cluster handler get attributes timeout error."""
+    zigpy_dev = zigpy_device_mock(
+        {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
+        "00:11:22:33:44:55:66:77",
+        "test manufacturer",
+        "test model",
+    )
+
+    cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
+    cluster.read_attributes.side_effect = zigpy.exceptions.ZigbeeException
+
+    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+        OnOff.cluster_id, {None, ClusterHandler}
+    ).get(None)
+    cluster_handler = cluster_handler_class(cluster, endpoint)
+
+    await cluster_handler.get_attributes(["foo"])
+
+    assert (
+        f"failed to get attributes '['foo']' on '{OnOff.ep_attribute}' cluster"
+        in caplog.text
+    )
+
+
+async def test_get_attributes_error_raises(
+    endpoint: Endpoint,
+    zigpy_device_mock,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test ZHA core cluster handler get attributes timeout error."""
+    zigpy_dev = zigpy_device_mock(
+        {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
+        "00:11:22:33:44:55:66:77",
+        "test manufacturer",
+        "test model",
+    )
+
+    cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
+    cluster.read_attributes.side_effect = zigpy.exceptions.ZigbeeException
+
+    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+        OnOff.cluster_id, {None, ClusterHandler}
+    ).get(None)
+    cluster_handler = cluster_handler_class(cluster, endpoint)
+
+    with pytest.raises(zigpy.exceptions.ZigbeeException):
+        await cluster_handler._get_attributes(True, ["foo"])
+
+    assert (
+        f"failed to get attributes '['foo']' on '{OnOff.ep_attribute}' cluster"
+        in caplog.text
+    )
 
 
 @pytest.mark.parametrize(
