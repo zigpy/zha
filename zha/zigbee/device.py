@@ -169,6 +169,7 @@ class Device(LogMixin, EventBase):
         self._power_config_ch: ClusterHandler | None = None
         self._identify_ch: ClusterHandler | None = None
         self._basic_ch: ClusterHandler | None = None
+        self._sw_build_id: int | None = None
 
         if self.is_mains_powered:
             self.consider_unavailable_time: int = async_get_zha_config_value(
@@ -426,17 +427,10 @@ class Device(LogMixin, EventBase):
             ATTR_MODEL: self.model,
         }
 
-    # pylint: disable=pointless-string-statement
-    """ TODO figure this out...
     @property
     def sw_version(self) -> str | None:
-        #Return the software version for this device.
-        device_registry = dr.async_get(self.hass)
-        reg_device: DeviceEntry | None = device_registry.async_get(self.device_id)
-        if reg_device is None:
-            return None
-        return reg_device.sw_version
-    """
+        """Return the software version for this device."""
+        return self._sw_build_id
 
     @property
     def platform_entities(self) -> dict[str, PlatformEntity]:
@@ -471,17 +465,9 @@ class Device(LogMixin, EventBase):
         discovery.DEVICE_PROBE.discover_device_entities(zha_dev)
         return zha_dev
 
-    """TODO verify
     def async_update_sw_build_id(self, sw_version: int) -> None:
-        #Update device sw version.
-        if self.device_id is None:
-            return
-
-        device_registry = dr.async_get(self.hass)
-        device_registry.async_update_device(
-            self.device_id, sw_version=f"0x{sw_version:08x}"
-        )
-    """
+        """Update device sw version."""
+        self._sw_build_id = sw_version
 
     @periodic(_UPDATE_ALIVE_INTERVAL)
     async def _check_available(self, *_: Any) -> None:

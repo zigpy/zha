@@ -23,8 +23,6 @@ from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
 from zha.application import Platform, const as zha_const
-
-# TODO add update back
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     alarm_control_panel,
     binary_sensor,
@@ -40,6 +38,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     sensor,
     siren,
     switch,
+    update,
 )
 from zha.application.registries import (
     DEVICE_CLASS,

@@ -279,7 +279,7 @@ class PlatformEntityRegistry:
 
     def get_entity(
         self,
-        component: Platform,
+        platform: Platform,
         manufacturer: str,
         model: str,
         cluster_handlers: list[ClusterHandler],
@@ -287,11 +287,11 @@ class PlatformEntityRegistry:
         default: type[PlatformEntity] | None = None,
     ) -> tuple[type[PlatformEntity] | None, list[ClusterHandler]]:
         """Match a ZHA ClusterHandler to a ZHA Entity class."""
-        matches = self._strict_registry[component]
+        matches = self._strict_registry[platform]
         for match in sorted(matches, key=WEIGHT_ATTR, reverse=True):
             if match.strict_matched(manufacturer, model, cluster_handlers, quirk_id):
                 claimed = match.claim_cluster_handlers(cluster_handlers)
-                return self._strict_registry[component][match], claimed
+                return self._strict_registry[platform][match], claimed
 
         return default, []
 
@@ -309,7 +309,7 @@ class PlatformEntityRegistry:
             collections.defaultdict(list)
         )
         all_claimed: set[ClusterHandler] = set()
-        for component, stop_match_groups in self._multi_entity_registry.items():
+        for platform, stop_match_groups in self._multi_entity_registry.items():
             for stop_match_grp, matches in stop_match_groups.items():
                 sorted_matches = sorted(matches, key=WEIGHT_ATTR, reverse=True)
                 for match in sorted_matches:
@@ -321,7 +321,7 @@ class PlatformEntityRegistry:
                             ent_n_cluster_handlers = EntityClassAndClusterHandlers(
                                 ent_class, claimed
                             )
-                            result[component].append(ent_n_cluster_handlers)
+                            result[platform].append(ent_n_cluster_handlers)
                         all_claimed |= set(claimed)
                         if stop_match_grp:
                             break
@@ -343,7 +343,7 @@ class PlatformEntityRegistry:
         )
         all_claimed: set[ClusterHandler] = set()
         for (
-            component,
+            platform,
             stop_match_groups,
         ) in self._config_diagnostic_entity_registry.items():
             for stop_match_grp, matches in stop_match_groups.items():
@@ -357,20 +357,20 @@ class PlatformEntityRegistry:
                             ent_n_cluster_handlers = EntityClassAndClusterHandlers(
                                 ent_class, claimed
                             )
-                            result[component].append(ent_n_cluster_handlers)
+                            result[platform].append(ent_n_cluster_handlers)
                         all_claimed |= set(claimed)
                         if stop_match_grp:
                             break
 
         return result, list(all_claimed)
 
-    def get_group_entity(self, component: str) -> type[GroupEntity] | None:
+    def get_group_entity(self, platform: str) -> type[GroupEntity] | None:
         """Match a ZHA group to a ZHA Entity class."""
-        return self._group_registry.get(component)
+        return self._group_registry.get(platform)
 
     def strict_match(
         self,
-        component: Platform,
+        platform: Platform,
         cluster_handler_names: set[str] | str | None = None,
         generic_ids: set[str] | str | None = None,
         manufacturers: Callable | set[str] | str | None = None,
@@ -394,14 +394,14 @@ class PlatformEntityRegistry:
 
             All non-empty fields of a match rule must match.
             """
-            self._strict_registry[component][rule] = zha_ent
+            self._strict_registry[platform][rule] = zha_ent
             return zha_ent
 
         return decorator
 
     def multipass_match(
         self,
-        component: Platform,
+        platform: Platform,
         cluster_handler_names: set[str] | str | None = None,
         generic_ids: set[str] | str | None = None,
         manufacturers: Callable | set[str] | str | None = None,
@@ -427,7 +427,7 @@ class PlatformEntityRegistry:
             All non empty fields of a match rule must match.
             """
             # group the rules by cluster handlers
-            self._multi_entity_registry[component][stop_on_match_group][rule].append(
+            self._multi_entity_registry[platform][stop_on_match_group][rule].append(
                 zha_entity
             )
             return zha_entity
@@ -436,7 +436,7 @@ class PlatformEntityRegistry:
 
     def config_diagnostic_match(
         self,
-        component: Platform,
+        platform: Platform,
         cluster_handler_names: set[str] | str | None = None,
         generic_ids: set[str] | str | None = None,
         manufacturers: Callable | set[str] | str | None = None,
@@ -462,7 +462,7 @@ class PlatformEntityRegistry:
             All non-empty fields of a match rule must match.
             """
             # group the rules by cluster handlers
-            self._config_diagnostic_entity_registry[component][stop_on_match_group][
+            self._config_diagnostic_entity_registry[platform][stop_on_match_group][
                 rule
             ].append(zha_entity)
             return zha_entity
@@ -470,13 +470,13 @@ class PlatformEntityRegistry:
         return decorator
 
     def group_match(
-        self, component: Platform
+        self, platform: Platform
     ) -> Callable[[type[GroupEntity]], type[GroupEntity]]:
         """Decorate a group match rule."""
 
         def decorator(zha_ent: type[GroupEntity]) -> type[GroupEntity]:
             """Register a group match rule."""
-            self._group_registry[component] = zha_ent
+            self._group_registry[platform] = zha_ent
             return zha_ent
 
         return decorator

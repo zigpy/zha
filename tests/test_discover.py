@@ -78,7 +78,6 @@ IGNORE_SUFFIXES = [
     "default_move_rate",
     "start_up_current_level",
     "counter",
-    "firmware_update",  # TODO remove this when update is fixed
 ]
 
 
