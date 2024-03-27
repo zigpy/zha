@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import enum
 import logging
+from numbers import Number
+from typing import Any, Final
 
 import bellows.zigbee.application
-from homeassistant.const import Platform
-import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+from voluptuous.schema_builder import _compile_scalar
 import zigpy.application
 import zigpy.types as t
 import zigpy_deconz.zigbee.application
@@ -24,6 +25,7 @@ ATTR_ATTRIBUTE_NAME = "attribute_name"
 ATTR_AVAILABLE = "available"
 ATTR_CLUSTER_ID = "cluster_id"
 ATTR_CLUSTER_TYPE = "cluster_type"
+ATTR_COMMAND: Final = "command"
 ATTR_COMMAND_TYPE = "command_type"
 ATTR_DEVICE_IEEE = "device_ieee"
 ATTR_DEVICE_TYPE = "device_type"
@@ -39,6 +41,7 @@ ATTR_MANUFACTURER = "manufacturer"
 ATTR_MANUFACTURER_CODE = "manufacturer_code"
 ATTR_MEMBERS = "members"
 ATTR_MODEL = "model"
+ATTR_NAME = "name"
 ATTR_NEIGHBORS = "neighbors"
 ATTR_NODE_DESCRIPTOR = "node_descriptor"
 ATTR_NWK = "nwk"
@@ -61,70 +64,18 @@ ATTR_WARNING_DEVICE_STROBE = "strobe"
 ATTR_WARNING_DEVICE_STROBE_DUTY_CYCLE = "duty_cycle"
 ATTR_WARNING_DEVICE_STROBE_INTENSITY = "intensity"
 
+# Class of device within its domain
+ATTR_DEVICE_CLASS: Final = "device_class"
+
 BAUD_RATES = [2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200, 128000, 256000]
-BINDINGS = "bindings"
 
 CLUSTER_DETAILS = "cluster_details"
-
-CLUSTER_HANDLER_ACCELEROMETER = "accelerometer"
-CLUSTER_HANDLER_BINARY_INPUT = "binary_input"
-CLUSTER_HANDLER_ANALOG_INPUT = "analog_input"
-CLUSTER_HANDLER_ANALOG_OUTPUT = "analog_output"
-CLUSTER_HANDLER_ATTRIBUTE = "attribute"
-CLUSTER_HANDLER_BASIC = "basic"
-CLUSTER_HANDLER_COLOR = "light_color"
-CLUSTER_HANDLER_COVER = "window_covering"
-CLUSTER_HANDLER_DEVICE_TEMPERATURE = "device_temperature"
-CLUSTER_HANDLER_DOORLOCK = "door_lock"
-CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT = "electrical_measurement"
-CLUSTER_HANDLER_EVENT_RELAY = "event_relay"
-CLUSTER_HANDLER_FAN = "fan"
-CLUSTER_HANDLER_HUMIDITY = "humidity"
-CLUSTER_HANDLER_HUE_OCCUPANCY = "philips_occupancy"
-CLUSTER_HANDLER_SOIL_MOISTURE = "soil_moisture"
-CLUSTER_HANDLER_LEAF_WETNESS = "leaf_wetness"
-CLUSTER_HANDLER_IAS_ACE = "ias_ace"
-CLUSTER_HANDLER_IAS_WD = "ias_wd"
-CLUSTER_HANDLER_IDENTIFY = "identify"
-CLUSTER_HANDLER_ILLUMINANCE = "illuminance"
-CLUSTER_HANDLER_LEVEL = ATTR_LEVEL
-CLUSTER_HANDLER_MULTISTATE_INPUT = "multistate_input"
-CLUSTER_HANDLER_OCCUPANCY = "occupancy"
-CLUSTER_HANDLER_ON_OFF = "on_off"
-CLUSTER_HANDLER_OTA = "ota"
-CLUSTER_HANDLER_POWER_CONFIGURATION = "power"
-CLUSTER_HANDLER_PRESSURE = "pressure"
-CLUSTER_HANDLER_SHADE = "shade"
-CLUSTER_HANDLER_SMARTENERGY_METERING = "smartenergy_metering"
-CLUSTER_HANDLER_TEMPERATURE = "temperature"
-CLUSTER_HANDLER_THERMOSTAT = "thermostat"
-CLUSTER_HANDLER_ZDO = "zdo"
-CLUSTER_HANDLER_ZONE = ZONE = "ias_zone"
-CLUSTER_HANDLER_INOVELLI = "inovelli_vzm31sn_cluster"
 
 CLUSTER_COMMAND_SERVER = "server"
 CLUSTER_COMMANDS_CLIENT = "client_commands"
 CLUSTER_COMMANDS_SERVER = "server_commands"
 CLUSTER_TYPE_IN = "in"
 CLUSTER_TYPE_OUT = "out"
-
-PLATFORMS = (
-    Platform.ALARM_CONTROL_PANEL,
-    Platform.BINARY_SENSOR,
-    Platform.BUTTON,
-    Platform.CLIMATE,
-    Platform.COVER,
-    Platform.DEVICE_TRACKER,
-    Platform.FAN,
-    Platform.LIGHT,
-    Platform.LOCK,
-    Platform.NUMBER,
-    Platform.SELECT,
-    Platform.SENSOR,
-    Platform.SIREN,
-    Platform.SWITCH,
-    Platform.UPDATE,
-)
 
 CONF_ALARM_MASTER_CODE = "alarm_master_code"
 CONF_ALARM_FAILED_TRIES = "alarm_failed_tries"
@@ -151,32 +102,80 @@ CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS = 60 * 60 * 2  # 2 hours
 CONF_CONSIDER_UNAVAILABLE_BATTERY = "consider_unavailable_battery"
 CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY = 60 * 60 * 6  # 6 hours
 
+
+def boolean(value: Any) -> bool:
+    """Validate and coerce a boolean value."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        value = value.lower().strip()
+        if value in ("1", "true", "yes", "on", "enable"):
+            return True
+        if value in ("0", "false", "no", "off", "disable"):
+            return False
+    elif isinstance(value, Number):
+        # type ignore: https://github.com/python/mypy/issues/3186
+        return value != 0  # type: ignore[comparison-overlap]
+    raise vol.Invalid(f"invalid boolean value {value}")
+
+
+positive_int = vol.All(vol.Coerce(int), vol.Range(min=0))
+
+
+def string(value: Any) -> str:
+    """Coerce value to string, except for None."""
+    if value is None:
+        raise vol.Invalid("string value is None")
+
+    # This is expected to be the most common case, so check it first.
+    if (
+        type(value) is str  # noqa: E721
+        or type(value) is NodeStrClass  # noqa: E721
+        or isinstance(value, str)
+    ):
+        return value
+
+    elif isinstance(value, (list, dict)):
+        raise vol.Invalid("value should be a string")
+
+    return str(value)
+
+
+class NodeStrClass(str):
+    """Wrapper class to be able to add attributes on a string."""
+
+    def __voluptuous_compile__(self, schema: vol.Schema) -> Any:  # pylint: disable=unused-argument
+        """Needed because vol.Schema.compile does not handle str subclasses."""
+        return _compile_scalar(self)
+
+
+# TODO make these dataclasses
 CONF_ZHA_OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_DEFAULT_LIGHT_TRANSITION, default=0): vol.All(
             vol.Coerce(float), vol.Range(min=0, max=2**16 / 10)
         ),
-        vol.Required(CONF_ENABLE_ENHANCED_LIGHT_TRANSITION, default=False): cv.boolean,
-        vol.Required(CONF_ENABLE_LIGHT_TRANSITIONING_FLAG, default=True): cv.boolean,
-        vol.Required(CONF_ALWAYS_PREFER_XY_COLOR_MODE, default=True): cv.boolean,
-        vol.Required(CONF_GROUP_MEMBERS_ASSUME_STATE, default=True): cv.boolean,
-        vol.Required(CONF_ENABLE_IDENTIFY_ON_JOIN, default=True): cv.boolean,
+        vol.Required(CONF_ENABLE_ENHANCED_LIGHT_TRANSITION, default=False): boolean,
+        vol.Required(CONF_ENABLE_LIGHT_TRANSITIONING_FLAG, default=True): boolean,
+        vol.Required(CONF_ALWAYS_PREFER_XY_COLOR_MODE, default=True): boolean,
+        vol.Required(CONF_GROUP_MEMBERS_ASSUME_STATE, default=True): boolean,
+        vol.Required(CONF_ENABLE_IDENTIFY_ON_JOIN, default=True): boolean,
         vol.Optional(
             CONF_CONSIDER_UNAVAILABLE_MAINS,
             default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
-        ): cv.positive_int,
+        ): positive_int,
         vol.Optional(
             CONF_CONSIDER_UNAVAILABLE_BATTERY,
             default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
-        ): cv.positive_int,
+        ): positive_int,
     }
 )
 
 CONF_ZHA_ALARM_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_ALARM_MASTER_CODE, default="1234"): cv.string,
-        vol.Required(CONF_ALARM_FAILED_TRIES, default=3): cv.positive_int,
-        vol.Required(CONF_ALARM_ARM_REQUIRES_CODE, default=False): cv.boolean,
+        vol.Required(CONF_ALARM_MASTER_CODE, default="1234"): string,
+        vol.Required(CONF_ALARM_FAILED_TRIES, default=3): positive_int,
+        vol.Required(CONF_ALARM_ARM_REQUIRES_CODE, default=False): boolean,
     }
 )
 
@@ -228,21 +227,22 @@ MFG_CLUSTER_ID_START = 0xFC00
 POWER_MAINS_POWERED = "Mains"
 POWER_BATTERY_OR_UNKNOWN = "Battery or Unknown"
 
+# Device is in away mode
+PRESET_AWAY = "away"
 PRESET_SCHEDULE = "Schedule"
 PRESET_COMPLEX = "Complex"
 PRESET_TEMP_MANUAL = "Temporary manual"
+# Device turn all valve full up
+PRESET_BOOST = "boost"
+# No preset is active
+PRESET_NONE = "none"
 
-QUIRK_METADATA = "quirk_metadata"
+ENTITY_METADATA = "entity_metadata"
 
 ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
 
 ZHA_ALARM_OPTIONS = "zha_alarm_options"
 ZHA_OPTIONS = "zha_options"
-
-ZHA_CONFIG_SCHEMAS = {
-    ZHA_OPTIONS: CONF_ZHA_OPTIONS_SCHEMA,
-    ZHA_ALARM_OPTIONS: CONF_ZHA_ALARM_SCHEMA,
-}
 
 _ControllerClsType = type[zigpy.application.ControllerApplication]
 
@@ -300,65 +300,6 @@ class RadioType(enum.Enum):
         return self._desc
 
 
-REPORT_CONFIG_ATTR_PER_REQ = 3
-REPORT_CONFIG_MAX_INT = 900
-REPORT_CONFIG_MAX_INT_BATTERY_SAVE = 10800
-REPORT_CONFIG_MIN_INT = 30
-REPORT_CONFIG_MIN_INT_ASAP = 1
-REPORT_CONFIG_MIN_INT_IMMEDIATE = 0
-REPORT_CONFIG_MIN_INT_OP = 5
-REPORT_CONFIG_MIN_INT_BATTERY_SAVE = 3600
-REPORT_CONFIG_RPT_CHANGE = 1
-REPORT_CONFIG_DEFAULT = (
-    REPORT_CONFIG_MIN_INT,
-    REPORT_CONFIG_MAX_INT,
-    REPORT_CONFIG_RPT_CHANGE,
-)
-REPORT_CONFIG_ASAP = (
-    REPORT_CONFIG_MIN_INT_ASAP,
-    REPORT_CONFIG_MAX_INT,
-    REPORT_CONFIG_RPT_CHANGE,
-)
-REPORT_CONFIG_BATTERY_SAVE = (
-    REPORT_CONFIG_MIN_INT_BATTERY_SAVE,
-    REPORT_CONFIG_MAX_INT_BATTERY_SAVE,
-    REPORT_CONFIG_RPT_CHANGE,
-)
-REPORT_CONFIG_IMMEDIATE = (
-    REPORT_CONFIG_MIN_INT_IMMEDIATE,
-    REPORT_CONFIG_MAX_INT,
-    REPORT_CONFIG_RPT_CHANGE,
-)
-REPORT_CONFIG_OP = (
-    REPORT_CONFIG_MIN_INT_OP,
-    REPORT_CONFIG_MAX_INT,
-    REPORT_CONFIG_RPT_CHANGE,
-)
-
-SENSOR_ACCELERATION = "acceleration"
-SENSOR_BATTERY = "battery"
-SENSOR_ELECTRICAL_MEASUREMENT = CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT
-SENSOR_GENERIC = "generic"
-SENSOR_HUMIDITY = CLUSTER_HANDLER_HUMIDITY
-SENSOR_ILLUMINANCE = CLUSTER_HANDLER_ILLUMINANCE
-SENSOR_METERING = "metering"
-SENSOR_OCCUPANCY = CLUSTER_HANDLER_OCCUPANCY
-SENSOR_OPENING = "opening"
-SENSOR_PRESSURE = CLUSTER_HANDLER_PRESSURE
-SENSOR_TEMPERATURE = CLUSTER_HANDLER_TEMPERATURE
-SENSOR_TYPE = "sensor_type"
-
-SIGNAL_ADD_ENTITIES = "zha_add_new_entities"
-SIGNAL_ATTR_UPDATED = "attribute_updated"
-SIGNAL_AVAILABLE = "available"
-SIGNAL_MOVE_LEVEL = "move_level"
-SIGNAL_REMOVE = "remove"
-SIGNAL_SET_LEVEL = "set_level"
-SIGNAL_STATE_ATTR = "update_state_attribute"
-SIGNAL_UPDATE_DEVICE = "{}_zha_update_device"
-SIGNAL_GROUP_ENTITY_REMOVED = "group_entity_removed"
-SIGNAL_GROUP_MEMBERSHIP_CHANGE = "group_membership_change"
-
 UNKNOWN = "unknown"
 UNKNOWN_MANUFACTURER = "unk_manufacturer"
 UNKNOWN_MODEL = "unk_model"
@@ -415,8 +356,3 @@ class Strobe(t.enum8):
 
     No_Strobe = 0x00
     Strobe = 0x01
-
-
-EZSP_OVERWRITE_EUI64 = (
-    "i_understand_i_can_update_eui64_only_once_and_i_still_want_to_do_it"
-)

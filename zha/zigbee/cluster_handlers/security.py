@@ -7,32 +7,48 @@ https://home-assistant.io/integrations/zha/
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+import dataclasses
+from typing import TYPE_CHECKING, Any, Final
 
-from homeassistant.core import callback
-from homeassistant.exceptions import HomeAssistantError
 import zigpy.zcl
-from zigpy.zcl.clusters.security import IasAce as AceCluster, IasWd, IasZone
-
-from .. import registries
-from ..const import (
-    SIGNAL_ATTR_UPDATED,
-    WARNING_DEVICE_MODE_EMERGENCY,
-    WARNING_DEVICE_SOUND_HIGH,
-    WARNING_DEVICE_SQUAWK_MODE_ARMED,
-    WARNING_DEVICE_STROBE_HIGH,
-    WARNING_DEVICE_STROBE_YES,
+from zigpy.zcl.clusters.security import (
+    IasAce as AceCluster,
+    IasWd,
+    IasZone,
+    Squawk,
+    Strobe,
+    StrobeLevel,
+    WarningType,
 )
-from . import ClusterHandler, ClusterHandlerStatus
+
+from zha.exceptions import ZHAException
+from zha.zigbee.cluster_handlers import (
+    ClusterAttributeUpdatedEvent,
+    ClusterHandler,
+    ClusterHandlerStatus,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    CLUSTER_HANDLER_STATE_CHANGED,
+)
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class ClusterHandlerStateChangedEvent:
+    """Event to signal that a cluster attribute has been updated."""
+
+    event_type: Final[str] = "cluster_handler_event"
+    event: Final[str] = "cluster_handler_state_changed"
+
+
+@registries.CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
 class IasAceClusterHandler(ClusterHandler):
     """IAS Ancillary Control Equipment cluster handler."""
 
@@ -44,7 +60,7 @@ class IasAceClusterHandler(ClusterHandler):
             AceCluster.ServerCommandDefs.bypass.id: self._bypass,
             AceCluster.ServerCommandDefs.emergency.id: self._emergency,
             AceCluster.ServerCommandDefs.fire.id: self._fire,
-            AceCluster.ServerCommandDefs.panic.id: self._panic,
+            AceCluster.ServerCommandDefs.panic.id: self.panic,
             AceCluster.ServerCommandDefs.get_zone_id_map.id: self._get_zone_id_map,
             AceCluster.ServerCommandDefs.get_zone_info.id: self._get_zone_info,
             AceCluster.ServerCommandDefs.get_panel_status.id: self._send_panel_status_response,
@@ -68,7 +84,6 @@ class IasAceClusterHandler(ClusterHandler):
         # where do we store this to handle restarts
         self.alarm_status: AceCluster.AlarmStatus = AceCluster.AlarmStatus.No_Alarm
 
-    @callback
     def cluster_command(self, tsn, command_id, args) -> None:
         """Handle commands received to this cluster."""
         self.debug(
@@ -80,7 +95,7 @@ class IasAceClusterHandler(ClusterHandler):
         """Handle the IAS ACE arm command."""
         mode = AceCluster.ArmMode(arm_mode)
 
-        self.zha_send_event(
+        self.emit_zha_event(
             AceCluster.ServerCommandDefs.arm.name,
             {
                 "arm_mode": mode.value,
@@ -91,15 +106,15 @@ class IasAceClusterHandler(ClusterHandler):
         )
 
         zigbee_reply = self.arm_map[mode](code)
-        self._endpoint.device.hass.async_create_task(zigbee_reply)
+        self._endpoint.device.gateway.async_create_task(zigbee_reply)
 
         if self.invalid_tries >= self.max_invalid_tries:
             self.alarm_status = AceCluster.AlarmStatus.Emergency
             self.armed_state = AceCluster.PanelStatus.In_Alarm
-            self.async_send_signal(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}")
+            self.emit_propagated_event(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}")
         else:
-            self.async_send_signal(f"{self.unique_id}_{SIGNAL_ARMED_STATE_CHANGED}")
-        self._send_panel_status_changed()
+            self.emit_propagated_event(f"{self.unique_id}_{SIGNAL_ARMED_STATE_CHANGED}")
+        self._emit_panel_status_changed()
 
     def _disarm(self, code: str):
         """Test the code and disarm the panel if the code is correct."""
@@ -176,7 +191,7 @@ class IasAceClusterHandler(ClusterHandler):
 
     def _bypass(self, zone_list, code) -> None:
         """Handle the IAS ACE bypass command."""
-        self.zha_send_event(
+        self.emit_zha_event(
             AceCluster.ServerCommandDefs.bypass.name,
             {"zone_list": zone_list, "code": code},
         )
@@ -189,7 +204,7 @@ class IasAceClusterHandler(ClusterHandler):
         """Handle the IAS ACE fire command."""
         self._set_alarm(AceCluster.AlarmStatus.Fire)
 
-    def _panic(self) -> None:
+    def panic(self) -> None:
         """Handle the IAS ACE panic command."""
         self._set_alarm(AceCluster.AlarmStatus.Emergency_Panic)
 
@@ -197,8 +212,7 @@ class IasAceClusterHandler(ClusterHandler):
         """Set the specified alarm status."""
         self.alarm_status = status
         self.armed_state = AceCluster.PanelStatus.In_Alarm
-        self.async_send_signal(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}")
-        self._send_panel_status_changed()
+        self._emit_panel_status_changed()
 
     def _get_zone_id_map(self):
         """Handle the IAS ACE zone id map command."""
@@ -214,9 +228,9 @@ class IasAceClusterHandler(ClusterHandler):
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )
-        self._endpoint.device.hass.async_create_task(response)
+        self._endpoint.device.gateway.async_create_task(response)
 
-    def _send_panel_status_changed(self) -> None:
+    def _emit_panel_status_changed(self) -> None:
         """Handle the IAS ACE panel status changed command."""
         response = self.panel_status_changed(
             self.armed_state,
@@ -224,7 +238,11 @@ class IasAceClusterHandler(ClusterHandler):
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )
-        self._endpoint.device.hass.async_create_task(response)
+        self._endpoint.device.gateway.async_create_task(response)
+        self.emit(
+            CLUSTER_HANDLER_STATE_CHANGED,
+            ClusterHandlerStateChangedEvent(),
+        )
 
     def _get_bypassed_zone_list(self):
         """Handle the IAS ACE bypassed zone list command."""
@@ -236,7 +254,7 @@ class IasAceClusterHandler(ClusterHandler):
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IasWd.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(IasWd.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(IasWd.cluster_id)
 class IasWdClusterHandler(ClusterHandler):
     """IAS Warning Device cluster handler."""
 
@@ -255,9 +273,9 @@ class IasWdClusterHandler(ClusterHandler):
 
     async def issue_squawk(
         self,
-        mode=WARNING_DEVICE_SQUAWK_MODE_ARMED,
-        strobe=WARNING_DEVICE_STROBE_YES,
-        squawk_level=WARNING_DEVICE_SOUND_HIGH,
+        mode=Squawk.SquawkMode.Armed,
+        strobe=Strobe.Strobe,
+        squawk_level=Squawk.SquawkLevel.High_level_sound,
     ):
         """Issue a squawk command.
 
@@ -280,12 +298,12 @@ class IasWdClusterHandler(ClusterHandler):
 
     async def issue_start_warning(
         self,
-        mode=WARNING_DEVICE_MODE_EMERGENCY,
-        strobe=WARNING_DEVICE_STROBE_YES,
-        siren_level=WARNING_DEVICE_SOUND_HIGH,
+        mode=WarningType.WarningMode.Emergency,
+        strobe=Strobe.Strobe,
+        siren_level=WarningType.SirenLevel.High_level_sound,
         warning_duration=5,  # seconds
         strobe_duty_cycle=0x00,
-        strobe_intensity=WARNING_DEVICE_STROBE_HIGH,
+        strobe_intensity=StrobeLevel.High_level_strobe,
     ):
         """Issue a start warning command.
 
@@ -318,9 +336,11 @@ class IasWdClusterHandler(ClusterHandler):
         )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(IasZone.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(IasZone.cluster_id)
 class IASZoneClusterHandler(ClusterHandler):
     """Cluster handler for the IASZone Zigbee cluster."""
+
+    _value_attribute: str = IasZone.AttributeDefs.zone_status.name
 
     ZCL_INIT_ATTRS = {
         IasZone.AttributeDefs.zone_status.name: False,
@@ -328,7 +348,6 @@ class IASZoneClusterHandler(ClusterHandler):
         IasZone.AttributeDefs.zone_type.name: True,
     }
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle commands received to this cluster."""
         if command_id == IasZone.ClientCommandDefs.status_change_notification.id:
@@ -369,7 +388,7 @@ class IASZoneClusterHandler(ClusterHandler):
                 str(ieee),
                 self._cluster.ep_attribute,
             )
-        except HomeAssistantError as ex:
+        except ZHAException as ex:
             self.debug(
                 "Failed to write cie_addr: %s to '%s' cluster: %s",
                 str(ieee),
@@ -387,13 +406,22 @@ class IASZoneClusterHandler(ClusterHandler):
         self._status = ClusterHandlerStatus.CONFIGURED
         self.debug("finished IASZoneClusterHandler configuration")
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
         if attrid == IasZone.AttributeDefs.zone_status.id:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-                attrid,
-                IasZone.AttributeDefs.zone_status.name,
-                value,
+            self.emit(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=IasZone.AttributeDefs.zone_status.name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
+                ),
             )
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        await self.get_attribute_value(
+            IasZone.AttributeDefs.zone_status.name, from_cache=False
+        )

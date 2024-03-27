@@ -2,84 +2,64 @@
 
 from __future__ import annotations
 
+from abc import ABC
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
-from homeassistant.components.switch import SwitchEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ON, STATE_UNAVAILABLE, EntityCategory, Platform
-from homeassistant.core import HomeAssistant, State, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
-from zigpy.quirks.v2 import EntityMetadata, SwitchMetadata
+from zigpy.quirks.v2 import SwitchMetadata
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
-from .core import discovery
-from .core.const import (
+from zha.application import Platform
+from zha.application.const import ENTITY_METADATA
+from zha.application.platforms import (
+    BaseEntity,
+    EntityCategory,
+    GroupEntity,
+    PlatformEntity,
+)
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
     CLUSTER_HANDLER_COVER,
     CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_ON_OFF,
-    QUIRK_METADATA,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
 )
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity, ZhaGroupEntity
+from zha.zigbee.cluster_handlers.general import OnOffClusterHandler
+from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from .core.cluster_handlers import ClusterHandler
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.SWITCH)
-GROUP_MATCH = functools.partial(ZHA_ENTITIES.group_match, Platform.SWITCH)
+STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.SWITCH)
+GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.SWITCH)
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.SWITCH
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.SWITCH
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation switch from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.SWITCH]
+class BaseSwitch(BaseEntity, ABC):
+    """Common base class for zhawss switches."""
 
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities, async_add_entities, entities_to_create
-        ),
-    )
-    config_entry.async_on_unload(unsub)
-
-
-@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
-class Switch(ZhaEntity, SwitchEntity):
-    """ZHA switch."""
-
-    _attr_translation_key = "switch"
+    PLATFORM = Platform.SWITCH
 
     def __init__(
         self,
-        unique_id: str,
-        zha_device: ZHADevice,
-        cluster_handlers: list[ClusterHandler],
+        *args: Any,
         **kwargs: Any,
-    ) -> None:
-        """Initialize the ZHA switch."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
-        self._on_off_cluster_handler = self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
+    ):
+        """Initialize the switch."""
+        self._on_off_cluster_handler: OnOffClusterHandler
+        super().__init__(*args, **kwargs)
 
     @property
     def is_on(self) -> bool:
@@ -88,88 +68,110 @@ class Switch(ZhaEntity, SwitchEntity):
             return False
         return self._on_off_cluster_handler.on_off
 
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    # TODO revert this once group entities use cluster handlers
+    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity on."""
         await self._on_off_cluster_handler.turn_on()
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity off."""
         await self._on_off_cluster_handler.turn_off()
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    @callback
-    def async_set_state(self, attr_id: int, attr_name: str, value: Any):
-        """Handle state update from cluster handler."""
-        self.async_write_ha_state()
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._on_off_cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
-        )
-
-    async def async_update(self) -> None:
-        """Attempt to retrieve on off state from the switch."""
-        self.debug("Polling current state")
-        await self._on_off_cluster_handler.get_attribute_value(
-            "on_off", from_cache=False
-        )
+    def get_state(self) -> dict:
+        """Return the state of the switch."""
+        response = super().get_state()
+        response["state"] = self.is_on
+        return response
 
 
-@GROUP_MATCH()
-class SwitchGroup(ZhaGroupEntity, SwitchEntity):
-    """Representation of a switch group."""
+@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
+class Switch(PlatformEntity, BaseSwitch):
+    """ZHA switch."""
+
+    _attr_translation_key = "switch"
 
     def __init__(
         self,
-        entity_ids: list[str],
         unique_id: str,
-        group_id: int,
-        zha_device: ZHADevice,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> None:
+        """Initialize the ZHA switch."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._on_off_cluster_handler: OnOffClusterHandler = cast(
+            OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
+        )
+        self._on_off_cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
+        )
+
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle state update from cluster handler."""
+        if event.attribute_name == OnOff.AttributeDefs.on_off.name:
+            self.maybe_emit_state_changed_event()
+
+
+@GROUP_MATCH()
+class SwitchGroup(GroupEntity, BaseSwitch):
+    """Representation of a switch group."""
+
+    def __init__(self, group: Group):
         """Initialize a switch group."""
-        super().__init__(entity_ids, unique_id, group_id, zha_device, **kwargs)
-        self._available: bool
+        super().__init__(group)
         self._state: bool
-        group = self.zha_device.gateway.get_group(self._group_id)
-        self._on_off_cluster_handler = group.endpoint[OnOff.cluster_id]
+        self._on_off_cluster_handler = group.zigpy_group.endpoint[OnOff.cluster_id]
+        self.update()
 
     @property
     def is_on(self) -> bool:
         """Return if the switch is on based on the statemachine."""
         return bool(self._state)
 
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity on."""
         result = await self._on_off_cluster_handler.on()
-        if result[1] is not Status.SUCCESS:
+        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
             return
         self._state = True
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity off."""
         result = await self._on_off_cluster_handler.off()
-        if result[1] is not Status.SUCCESS:
+        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
             return
         self._state = False
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    async def async_update(self) -> None:
-        """Query all members and determine the switch group state."""
-        all_states = [self.hass.states.get(x) for x in self._entity_ids]
-        states: list[State] = list(filter(None, all_states))
-        on_states = [state for state in states if state.state == STATE_ON]
+    def update(self, _: Any | None = None) -> None:
+        """Query all members and determine the light group state."""
+        self.debug("Updating switch group entity state")
+        platform_entities = self._group.get_platform_entities(self.PLATFORM)
+        all_entities = [entity.to_json() for entity in platform_entities]
+        all_states = [entity["state"] for entity in all_entities]
+        self.debug(
+            "All platform entity states for group entity members: %s", all_states
+        )
+        on_states = [state for state in all_states if state["state"]]
 
         self._state = len(on_states) > 0
-        self._available = any(state.state != STATE_UNAVAILABLE for state in states)
+        self._available = any(entity.available for entity in platform_entities)
+
+        self.maybe_emit_state_changed_event()
 
 
-class ZHASwitchConfigurationEntity(ZhaEntity, SwitchEntity):
+class SwitchConfigurationEntity(PlatformEntity):
     """Representation of a ZHA switch configuration entity."""
+
+    PLATFORM = Platform.SWITCH
 
     _attr_entity_category = EntityCategory.CONFIG
     _attribute_name: str
@@ -179,11 +181,12 @@ class ZHASwitchConfigurationEntity(ZhaEntity, SwitchEntity):
     _on_value: int = 1
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: type[Self],
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -191,7 +194,7 @@ class ZHASwitchConfigurationEntity(ZhaEntity, SwitchEntity):
         Return entity if it is a supported configuration, otherwise return None
         """
         cluster_handler = cluster_handlers[0]
-        if QUIRK_METADATA not in kwargs and (
+        if ENTITY_METADATA not in kwargs and (
             cls._attribute_name in cluster_handler.cluster.unsupported_attributes
             or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
             or cluster_handler.cluster.get(cls._attribute_name) is None
@@ -203,44 +206,44 @@ class ZHASwitchConfigurationEntity(ZhaEntity, SwitchEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
-
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
-        """Init this entity from the quirks metadata."""
-        super()._init_from_quirks_metadata(entity_metadata)
-        switch_metadata: SwitchMetadata = entity_metadata.entity_metadata
-        self._attribute_name = switch_metadata.attribute_name
-        if switch_metadata.invert_attribute_name:
-            self._inverter_attribute_name = switch_metadata.invert_attribute_name
-        if switch_metadata.force_inverted:
-            self._force_inverted = switch_metadata.force_inverted
-        self._off_value = switch_metadata.off_value
-        self._on_value = switch_metadata.on_value
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
-    @callback
-    def async_set_state(self, attr_id: int, attr_name: str, value: Any):
+    def _init_from_quirks_metadata(self, entity_metadata: SwitchMetadata) -> None:
+        """Init this entity from the quirks metadata."""
+        super()._init_from_quirks_metadata(entity_metadata)
+        self._attribute_name = entity_metadata.attribute_name
+        if entity_metadata.invert_attribute_name:
+            self._inverter_attribute_name = entity_metadata.invert_attribute_name
+        if entity_metadata.force_inverted:
+            self._force_inverted = entity_metadata.force_inverted
+        self._off_value = entity_metadata.off_value
+        self._on_value = entity_metadata.on_value
+
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
         """Handle state update from cluster handler."""
-        self.async_write_ha_state()
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
 
     @property
     def inverted(self) -> bool:
@@ -273,26 +276,37 @@ class ZHASwitchConfigurationEntity(ZhaEntity, SwitchEntity):
             await self._cluster_handler.write_attributes_safe(
                 {self._attribute_name: self._off_value}
             )
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity on."""
         await self.async_turn_on_off(True)
 
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity off."""
         await self.async_turn_on_off(False)
 
     async def async_update(self) -> None:
         """Attempt to retrieve the state of the entity."""
         self.debug("Polling current state")
-        value = await self._cluster_handler.get_attribute_value(
-            self._attribute_name, from_cache=False
+        results = await self._cluster_handler.get_attributes(
+            [
+                self._attribute_name,
+                self._inverter_attribute_name,
+            ],
+            from_cache=False,
+            only_cache=False,
         )
-        await self._cluster_handler.get_attribute_value(
-            self._inverter_attribute_name, from_cache=False
-        )
-        self.debug("read value=%s, inverted=%s", value, self.inverted)
+
+        self.debug("read values=%s", results)
+        self.maybe_emit_state_changed_event()
+
+    def get_state(self) -> dict:
+        """Return the state of the switch."""
+        response = super().get_state()
+        response["state"] = self.is_on
+        response["inverted"] = self.inverted
+        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -301,7 +315,7 @@ class ZHASwitchConfigurationEntity(ZhaEntity, SwitchEntity):
         "_TZE200_b6wax7g0",
     },
 )
-class OnOffWindowDetectionFunctionConfigurationEntity(ZHASwitchConfigurationEntity):
+class OnOffWindowDetectionFunctionConfigurationEntity(SwitchConfigurationEntity):
     """Representation of a ZHA window detection configuration entity."""
 
     _unique_id_suffix = "on_off_window_opened_detection"
@@ -313,7 +327,7 @@ class OnOffWindowDetectionFunctionConfigurationEntity(ZHASwitchConfigurationEnti
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.motion.ac02"}
 )
-class P1MotionTriggerIndicatorSwitch(ZHASwitchConfigurationEntity):
+class P1MotionTriggerIndicatorSwitch(SwitchConfigurationEntity):
     """Representation of a ZHA motion triggering configuration entity."""
 
     _unique_id_suffix = "trigger_indicator"
@@ -325,7 +339,7 @@ class P1MotionTriggerIndicatorSwitch(ZHASwitchConfigurationEntity):
     cluster_handler_names="opple_cluster",
     models={"lumi.plug.mmeu01", "lumi.plug.maeu01"},
 )
-class XiaomiPlugPowerOutageMemorySwitch(ZHASwitchConfigurationEntity):
+class XiaomiPlugPowerOutageMemorySwitch(SwitchConfigurationEntity):
     """Representation of a ZHA power outage memory configuration entity."""
 
     _unique_id_suffix = "power_outage_memory"
@@ -338,7 +352,7 @@ class XiaomiPlugPowerOutageMemorySwitch(ZHASwitchConfigurationEntity):
     manufacturers={"Philips", "Signify Netherlands B.V."},
     models={"SML001", "SML002", "SML003", "SML004"},
 )
-class HueMotionTriggerIndicatorSwitch(ZHASwitchConfigurationEntity):
+class HueMotionTriggerIndicatorSwitch(SwitchConfigurationEntity):
     """Representation of a ZHA motion triggering configuration entity."""
 
     _unique_id_suffix = "trigger_indicator"
@@ -350,7 +364,7 @@ class HueMotionTriggerIndicatorSwitch(ZHASwitchConfigurationEntity):
     cluster_handler_names="ikea_airpurifier",
     models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
 )
-class ChildLock(ZHASwitchConfigurationEntity):
+class ChildLock(SwitchConfigurationEntity):
     """ZHA BinarySensor."""
 
     _unique_id_suffix = "child_lock"
@@ -362,7 +376,7 @@ class ChildLock(ZHASwitchConfigurationEntity):
     cluster_handler_names="ikea_airpurifier",
     models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
 )
-class DisableLed(ZHASwitchConfigurationEntity):
+class DisableLed(SwitchConfigurationEntity):
     """ZHA BinarySensor."""
 
     _unique_id_suffix = "disable_led"
@@ -373,7 +387,7 @@ class DisableLed(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliInvertSwitch(ZHASwitchConfigurationEntity):
+class InovelliInvertSwitch(SwitchConfigurationEntity):
     """Inovelli invert switch control."""
 
     _unique_id_suffix = "invert_switch"
@@ -384,7 +398,7 @@ class InovelliInvertSwitch(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliSmartBulbMode(ZHASwitchConfigurationEntity):
+class InovelliSmartBulbMode(SwitchConfigurationEntity):
     """Inovelli smart bulb mode control."""
 
     _unique_id_suffix = "smart_bulb_mode"
@@ -395,7 +409,7 @@ class InovelliSmartBulbMode(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM35-SN"}
 )
-class InovelliSmartFanMode(ZHASwitchConfigurationEntity):
+class InovelliSmartFanMode(SwitchConfigurationEntity):
     """Inovelli smart fan mode control."""
 
     _unique_id_suffix = "smart_fan_mode"
@@ -406,7 +420,7 @@ class InovelliSmartFanMode(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliDoubleTapUpEnabled(ZHASwitchConfigurationEntity):
+class InovelliDoubleTapUpEnabled(SwitchConfigurationEntity):
     """Inovelli double tap up enabled."""
 
     _unique_id_suffix = "double_tap_up_enabled"
@@ -417,7 +431,7 @@ class InovelliDoubleTapUpEnabled(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliDoubleTapDownEnabled(ZHASwitchConfigurationEntity):
+class InovelliDoubleTapDownEnabled(SwitchConfigurationEntity):
     """Inovelli double tap down enabled."""
 
     _unique_id_suffix = "double_tap_down_enabled"
@@ -428,7 +442,7 @@ class InovelliDoubleTapDownEnabled(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliAuxSwitchScenes(ZHASwitchConfigurationEntity):
+class InovelliAuxSwitchScenes(SwitchConfigurationEntity):
     """Inovelli unique aux switch scenes."""
 
     _unique_id_suffix = "aux_switch_scenes"
@@ -439,7 +453,7 @@ class InovelliAuxSwitchScenes(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliBindingOffToOnSyncLevel(ZHASwitchConfigurationEntity):
+class InovelliBindingOffToOnSyncLevel(SwitchConfigurationEntity):
     """Inovelli send move to level with on/off to bound devices."""
 
     _unique_id_suffix = "binding_off_to_on_sync_level"
@@ -450,7 +464,7 @@ class InovelliBindingOffToOnSyncLevel(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliLocalProtection(ZHASwitchConfigurationEntity):
+class InovelliLocalProtection(SwitchConfigurationEntity):
     """Inovelli local protection control."""
 
     _unique_id_suffix = "local_protection"
@@ -461,7 +475,7 @@ class InovelliLocalProtection(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliOnOffLEDMode(ZHASwitchConfigurationEntity):
+class InovelliOnOffLEDMode(SwitchConfigurationEntity):
     """Inovelli only 1 LED mode control."""
 
     _unique_id_suffix = "on_off_led_mode"
@@ -472,7 +486,7 @@ class InovelliOnOffLEDMode(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliFirmwareProgressLED(ZHASwitchConfigurationEntity):
+class InovelliFirmwareProgressLED(SwitchConfigurationEntity):
     """Inovelli firmware progress LED control."""
 
     _unique_id_suffix = "firmware_progress_led"
@@ -483,7 +497,7 @@ class InovelliFirmwareProgressLED(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliRelayClickInOnOffMode(ZHASwitchConfigurationEntity):
+class InovelliRelayClickInOnOffMode(SwitchConfigurationEntity):
     """Inovelli relay click in on off mode control."""
 
     _unique_id_suffix = "relay_click_in_on_off_mode"
@@ -494,7 +508,7 @@ class InovelliRelayClickInOnOffMode(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliDisableDoubleTapClearNotificationsMode(ZHASwitchConfigurationEntity):
+class InovelliDisableDoubleTapClearNotificationsMode(SwitchConfigurationEntity):
     """Inovelli disable clear notifications double tap control."""
 
     _unique_id_suffix = "disable_clear_notifications_double_tap"
@@ -505,7 +519,7 @@ class InovelliDisableDoubleTapClearNotificationsMode(ZHASwitchConfigurationEntit
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-class AqaraPetFeederLEDIndicator(ZHASwitchConfigurationEntity):
+class AqaraPetFeederLEDIndicator(SwitchConfigurationEntity):
     """Representation of a LED indicator configuration entity."""
 
     _unique_id_suffix = "disable_led_indicator"
@@ -518,7 +532,7 @@ class AqaraPetFeederLEDIndicator(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-class AqaraPetFeederChildLock(ZHASwitchConfigurationEntity):
+class AqaraPetFeederChildLock(SwitchConfigurationEntity):
     """Representation of a child lock configuration entity."""
 
     _unique_id_suffix = "child_lock"
@@ -530,7 +544,7 @@ class AqaraPetFeederChildLock(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ON_OFF, quirk_ids=TUYA_PLUG_ONOFF
 )
-class TuyaChildLockSwitch(ZHASwitchConfigurationEntity):
+class TuyaChildLockSwitch(SwitchConfigurationEntity):
     """Representation of a child lock configuration entity."""
 
     _unique_id_suffix = "child_lock"
@@ -542,7 +556,7 @@ class TuyaChildLockSwitch(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-class AqaraThermostatWindowDetection(ZHASwitchConfigurationEntity):
+class AqaraThermostatWindowDetection(SwitchConfigurationEntity):
     """Representation of an Aqara thermostat window detection configuration entity."""
 
     _unique_id_suffix = "window_detection"
@@ -553,7 +567,7 @@ class AqaraThermostatWindowDetection(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-class AqaraThermostatValveDetection(ZHASwitchConfigurationEntity):
+class AqaraThermostatValveDetection(SwitchConfigurationEntity):
     """Representation of an Aqara thermostat valve detection configuration entity."""
 
     _unique_id_suffix = "valve_detection"
@@ -564,7 +578,7 @@ class AqaraThermostatValveDetection(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-class AqaraThermostatChildLock(ZHASwitchConfigurationEntity):
+class AqaraThermostatChildLock(SwitchConfigurationEntity):
     """Representation of an Aqara thermostat child lock configuration entity."""
 
     _unique_id_suffix = "child_lock"
@@ -576,7 +590,7 @@ class AqaraThermostatChildLock(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraHeartbeatIndicator(ZHASwitchConfigurationEntity):
+class AqaraHeartbeatIndicator(SwitchConfigurationEntity):
     """Representation of a heartbeat indicator configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "heartbeat_indicator"
@@ -588,7 +602,7 @@ class AqaraHeartbeatIndicator(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraLinkageAlarm(ZHASwitchConfigurationEntity):
+class AqaraLinkageAlarm(SwitchConfigurationEntity):
     """Representation of a linkage alarm configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "linkage_alarm"
@@ -600,7 +614,7 @@ class AqaraLinkageAlarm(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraBuzzerManualMute(ZHASwitchConfigurationEntity):
+class AqaraBuzzerManualMute(SwitchConfigurationEntity):
     """Representation of a buzzer manual mute configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "buzzer_manual_mute"
@@ -612,7 +626,7 @@ class AqaraBuzzerManualMute(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraBuzzerManualAlarm(ZHASwitchConfigurationEntity):
+class AqaraBuzzerManualAlarm(SwitchConfigurationEntity):
     """Representation of a buzzer manual mute configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "buzzer_manual_alarm"
@@ -622,7 +636,7 @@ class AqaraBuzzerManualAlarm(ZHASwitchConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
-class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
+class WindowCoveringInversionSwitch(SwitchConfigurationEntity):
     """Representation of a switch that controls inversion for window covering devices.
 
     This is necessary because this cluster uses 2 attributes to control inversion.
@@ -634,11 +648,12 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
     _attr_icon: str = "mdi:arrow-up-down"
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: type[Self],
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -667,7 +682,7 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
     def is_on(self) -> bool:
@@ -696,7 +711,7 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
             from_cache=False,
             only_cache=False,
         )
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
     async def _async_on_off(self, invert: bool) -> None:
         """Turn the entity on or off."""
@@ -719,7 +734,7 @@ class WindowCoveringInversionSwitch(ZHASwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.curtain.agl001"}
 )
-class AqaraE1CurtainMotorHooksLockedSwitch(ZHASwitchConfigurationEntity):
+class AqaraE1CurtainMotorHooksLockedSwitch(SwitchConfigurationEntity):
     """Representation of a switch that controls whether the curtain motor hooks are locked."""
 
     _unique_id_suffix = "hooks_lock"

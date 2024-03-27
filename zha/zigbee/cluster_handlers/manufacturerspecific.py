@@ -5,37 +5,50 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.core import callback
 from zhaquirks.inovelli.types import AllLEDEffectType, SingleLEDEffectType
 from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER, XIAOMI_AQARA_VIBRATION_AQ1
 import zigpy.zcl
 from zigpy.zcl.clusters.closures import DoorLock
 
-from .. import registries
-from ..const import (
-    ATTR_ATTRIBUTE_ID,
-    ATTR_ATTRIBUTE_NAME,
-    ATTR_VALUE,
+from zha.zigbee.cluster_handlers import (
+    AttrReportConfig,
+    ClientClusterHandler,
+    ClusterAttributeUpdatedEvent,
+    ClusterHandler,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import (
+    AQARA_OPPLE_CLUSTER,
+    ATTRIBUTE_ID,
+    ATTRIBUTE_NAME,
+    ATTRIBUTE_VALUE,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    IKEA_AIR_PURIFIER_CLUSTER,
+    IKEA_REMOTE_CLUSTER,
+    INOVELLI_CLUSTER,
+    OSRAM_BUTTON_CLUSTER,
+    PHILLIPS_REMOTE_CLUSTER,
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
     SIGNAL_ATTR_UPDATED,
+    SMARTTHINGS_ACCELERATION_CLUSTER,
+    SMARTTHINGS_HUMIDITY_CLUSTER,
+    SONOFF_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
     UNKNOWN,
 )
-from . import AttrReportConfig, ClientClusterHandler, ClusterHandler
-from .general import MultistateInputClusterHandler
+from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(
-    registries.SMARTTHINGS_HUMIDITY_CLUSTER
-)
+@registries.CLUSTER_HANDLER_REGISTRY.register(SMARTTHINGS_HUMIDITY_CLUSTER)
 class SmartThingsHumidityClusterHandler(ClusterHandler):
     """Smart Things Humidity cluster handler."""
 
@@ -47,26 +60,24 @@ class SmartThingsHumidityClusterHandler(ClusterHandler):
     )
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(0xFD00)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(0xFD00)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(OSRAM_BUTTON_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(OSRAM_BUTTON_CLUSTER)
 class OsramButtonClusterHandler(ClusterHandler):
     """Osram button cluster handler."""
 
     REPORT_CONFIG = ()
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(registries.PHILLIPS_REMOTE_CLUSTER)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(registries.PHILLIPS_REMOTE_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(PHILLIPS_REMOTE_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(PHILLIPS_REMOTE_CLUSTER)
 class PhillipsRemoteClusterHandler(ClusterHandler):
     """Phillips remote cluster handler."""
 
     REPORT_CONFIG = ()
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(registries.TUYA_MANUFACTURER_CLUSTER)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(
-    registries.TUYA_MANUFACTURER_CLUSTER
-)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(TUYA_MANUFACTURER_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(TUYA_MANUFACTURER_CLUSTER)
 class TuyaClusterHandler(ClusterHandler):
     """Cluster handler for the Tuya manufacturer Zigbee cluster."""
 
@@ -82,8 +93,8 @@ class TuyaClusterHandler(ClusterHandler):
             }
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(0xFCC0)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(0xFCC0)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(AQARA_OPPLE_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(AQARA_OPPLE_CLUSTER)
 class OppleRemoteClusterHandler(ClusterHandler):
     """Opple cluster handler."""
 
@@ -169,7 +180,7 @@ class OppleRemoteClusterHandler(ClusterHandler):
                 "hand_open": True,
             }
 
-    async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:
+    async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:  # pylint: disable=unused-argument
         """Initialize cluster handler specific."""
         if self.cluster.endpoint.model in ("lumi.motion.ac02", "lumi.motion.agl04"):
             interval = self.cluster.get("detection_interval", self.cluster.get(0x0102))
@@ -178,9 +189,7 @@ class OppleRemoteClusterHandler(ClusterHandler):
                 self.cluster.endpoint.ias_zone.reset_s = int(interval)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(
-    registries.SMARTTHINGS_ACCELERATION_CLUSTER
-)
+@registries.CLUSTER_HANDLER_REGISTRY.register(SMARTTHINGS_ACCELERATION_CLUSTER)
 class SmartThingsAccelerationClusterHandler(ClusterHandler):
     """Smart Things Acceleration cluster handler."""
 
@@ -200,7 +209,6 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
             "SmartThings",
         )
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
         try:
@@ -208,39 +216,41 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
         except KeyError:
             attr_name = UNKNOWN
 
-        if attrid == self.value_attribute:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-                attrid,
-                attr_name,
-                value,
+        if attr_name == self.value_attribute:
+            self.emit(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=attr_name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
+                ),
             )
             return
 
-        self.zha_send_event(
+        self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,
             {
-                ATTR_ATTRIBUTE_ID: attrid,
-                ATTR_ATTRIBUTE_NAME: attr_name,
-                ATTR_VALUE: value,
+                ATTRIBUTE_ID: attrid,
+                ATTRIBUTE_NAME: attr_name,
+                ATTRIBUTE_VALUE: value,
             },
         )
 
 
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(0xFC31)
+@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(INOVELLI_CLUSTER)
 class InovelliNotificationClientClusterHandler(ClientClusterHandler):
     """Inovelli Notification cluster handler."""
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle an attribute updated on this cluster."""
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle a cluster command received on this cluster."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(0xFC31)
+@registries.CLUSTER_HANDLER_REGISTRY.register(INOVELLI_CLUSTER)
 class InovelliConfigEntityClusterHandler(ClusterHandler):
     """Inovelli Configuration Entity cluster handler."""
 
@@ -334,7 +344,7 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
                 "smart_fan_led_display_levels": True,
             }
 
-    async def issue_all_led_effect(
+    async def issue_all_led_effect(  # pylint: disable=unused-argument
         self,
         effect_type: AllLEDEffectType | int = AllLEDEffectType.Fast_Blink,
         color: int = 200,
@@ -349,7 +359,7 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
 
         await self.led_effect(effect_type, color, level, duration, expect_reply=False)
 
-    async def issue_individual_led_effect(
+    async def issue_individual_led_effect(  # pylint: disable=too-many-arguments,unused-argument
         self,
         led_number: int = 1,
         effect_type: SingleLEDEffectType | int = SingleLEDEffectType.Fast_Blink,
@@ -368,10 +378,8 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
         )
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(registries.IKEA_AIR_PURIFIER_CLUSTER)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(
-    registries.IKEA_AIR_PURIFIER_CLUSTER
-)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_AIR_PURIFIER_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(IKEA_AIR_PURIFIER_CLUSTER)
 class IkeaAirPurifierClusterHandler(ClusterHandler):
     """IKEA Air Purifier cluster handler."""
 
@@ -405,7 +413,6 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
         """Retrieve latest state."""
         await self.get_attribute_value("fan_mode", from_cache=False)
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute update from fan cluster."""
         attr_name = self._get_attribute_name(attrid)
@@ -413,28 +420,26 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
         if attr_name == "fan_mode":
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}", attrid, attr_name, value
-            )
+            self.attribute_updated(attrid, attr_name, value)
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(0xFC80)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(0xFC80)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(IKEA_REMOTE_CLUSTER)
 class IkeaRemoteClusterHandler(ClusterHandler):
     """Ikea Matter remote cluster handler."""
 
     REPORT_CONFIG = ()
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(
+@registries.CLUSTER_HANDLER_REGISTRY.register(
     DoorLock.cluster_id, XIAOMI_AQARA_VIBRATION_AQ1
 )
 class XiaomiVibrationAQ1ClusterHandler(MultistateInputClusterHandler):
     """Xiaomi DoorLock Cluster is in fact a MultiStateInput Cluster."""
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(0xFC11)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(0xFC11)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SONOFF_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(SONOFF_CLUSTER)
 class SonoffPresenceSenorClusterHandler(ClusterHandler):
     """SonoffPresenceSensor cluster handler."""
 

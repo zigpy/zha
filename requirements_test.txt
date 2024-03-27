@@ -7,6 +7,8 @@ pytest-cov
 pytest-sugar
 pytest-timeout
 pytest-asyncio
+pytest-xdist
 pytest
 zigpy>=0.63.5
 ruff
+looptime

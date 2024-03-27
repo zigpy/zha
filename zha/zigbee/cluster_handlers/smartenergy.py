@@ -22,60 +22,58 @@ from zigpy.zcl.clusters.smartenergy import (
     Tunneling,
 )
 
-from .. import registries
-from ..const import (
+from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
+from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_OP,
-    SIGNAL_ATTR_UPDATED,
 )
-from . import AttrReportConfig, ClusterHandler
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Calendar.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Calendar.cluster_id)
 class CalendarClusterHandler(ClusterHandler):
     """Calendar cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(DeviceManagement.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(DeviceManagement.cluster_id)
 class DeviceManagementClusterHandler(ClusterHandler):
     """Device Management cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Drlc.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Drlc.cluster_id)
 class DrlcClusterHandler(ClusterHandler):
     """Demand Response and Load Control cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(EnergyManagement.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(EnergyManagement.cluster_id)
 class EnergyManagementClusterHandler(ClusterHandler):
     """Energy Management cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Events.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Events.cluster_id)
 class EventsClusterHandler(ClusterHandler):
     """Event cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(KeyEstablishment.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(KeyEstablishment.cluster_id)
 class KeyEstablishmentClusterHandler(ClusterHandler):
     """Key Establishment cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(MduPairing.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(MduPairing.cluster_id)
 class MduPairingClusterHandler(ClusterHandler):
     """Pairing cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Messaging.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Messaging.cluster_id)
 class MessagingClusterHandler(ClusterHandler):
     """Messaging cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Metering.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Metering.cluster_id)
 class MeteringClusterHandler(ClusterHandler):
     """Metering cluster handler."""
 
@@ -277,7 +275,7 @@ class MeteringClusterHandler(ClusterHandler):
         return self.cluster.get(Metering.AttributeDefs.multiplier.name) or 1
 
     @property
-    def status(self) -> int | None:
+    def metering_status(self) -> int | None:
         """Return metering device status."""
         if (status := self.cluster.get(Metering.AttributeDefs.status.name)) is None:
             return None
@@ -300,7 +298,7 @@ class MeteringClusterHandler(ClusterHandler):
         """Return unit of measurement."""
         return self.cluster.get(Metering.AttributeDefs.unit_of_measure.name)
 
-    async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:
+    async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:  # pylint: disable=unused-argument
         """Fetch config from device and updates format specifier."""
 
         fmting = self.cluster.get(
@@ -325,8 +323,7 @@ class MeteringClusterHandler(ClusterHandler):
         result = await self.get_attributes(attrs, from_cache=False, only_cache=False)
         if result:
             for attr, value in result.items():
-                self.async_send_signal(
-                    f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
+                self.attribute_updated(
                     self.cluster.find_attribute(attr).id,
                     attr,
                     value,
@@ -365,24 +362,24 @@ class MeteringClusterHandler(ClusterHandler):
             return round(value_watt)
         if selector == self.FormatSelector.SUMMATION:
             assert self._summa_format
-            return self._summa_format.format(value_float).lstrip()
+            return float(self._summa_format.format(value_float).lstrip())
         assert self._format_spec
-        return self._format_spec.format(value_float).lstrip()
+        return float(self._format_spec.format(value_float).lstrip())
 
     demand_formatter = partialmethod(_formatter_function, FormatSelector.DEMAND)
     summa_formatter = partialmethod(_formatter_function, FormatSelector.SUMMATION)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Prepayment.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Prepayment.cluster_id)
 class PrepaymentClusterHandler(ClusterHandler):
     """Prepayment cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Price.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Price.cluster_id)
 class PriceClusterHandler(ClusterHandler):
     """Price cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Tunneling.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Tunneling.cluster_id)
 class TunnelingClusterHandler(ClusterHandler):
     """Tunneling cluster handler."""

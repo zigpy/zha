@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.core import callback
 from zigpy.zcl.clusters.hvac import (
     Dehumidification,
     Fan,
@@ -17,30 +16,34 @@ from zigpy.zcl.clusters.hvac import (
     UserInterface,
 )
 
-from .. import registries
-from ..const import (
+from zha.zigbee.cluster_handlers import (
+    AttrReportConfig,
+    ClusterAttributeUpdatedEvent,
+    ClusterHandler,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
     REPORT_CONFIG_OP,
-    SIGNAL_ATTR_UPDATED,
 )
-from . import AttrReportConfig, ClusterHandler
 
 REPORT_CONFIG_CLIMATE = (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 25)
 REPORT_CONFIG_CLIMATE_DEMAND = (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 5)
 REPORT_CONFIG_CLIMATE_DISCRETE = (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 1)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Dehumidification.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Dehumidification.cluster_id)
 class DehumidificationClusterHandler(ClusterHandler):
     """Dehumidification cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Fan.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Fan.cluster_id)
 class FanClusterHandler(ClusterHandler):
     """Fan cluster handler."""
 
-    _value_attribute = 0
+    _value_attribute: str = Fan.AttributeDefs.fan_mode.name
 
     REPORT_CONFIG = (
         AttrReportConfig(attr=Fan.AttributeDefs.fan_mode.name, config=REPORT_CONFIG_OP),
@@ -67,7 +70,6 @@ class FanClusterHandler(ClusterHandler):
             Fan.AttributeDefs.fan_mode.name, from_cache=False
         )
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute update from fan cluster."""
         attr_name = self._get_attribute_name(attrid)
@@ -75,17 +77,24 @@ class FanClusterHandler(ClusterHandler):
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
         if attr_name == "fan_mode":
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}", attrid, attr_name, value
+            self.emit(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=attr_name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
+                ),
             )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Pump.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Pump.cluster_id)
 class PumpClusterHandler(ClusterHandler):
     """Pump cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Thermostat.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Thermostat.cluster_id)
 class ThermostatClusterHandler(ClusterHandler):
     """Thermostat cluster handler."""
 
@@ -283,18 +292,21 @@ class ThermostatClusterHandler(ClusterHandler):
             Thermostat.AttributeDefs.unoccupied_heating_setpoint.name
         )
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute update cluster."""
         attr_name = self._get_attribute_name(attrid)
         self.debug(
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
-        self.async_send_signal(
-            f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-            attrid,
-            attr_name,
-            value,
+        self.emit(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            ClusterAttributeUpdatedEvent(
+                attribute_id=attrid,
+                attribute_name=attr_name,
+                attribute_value=value,
+                cluster_handler_unique_id=self.unique_id,
+                cluster_id=self.cluster.cluster_id,
+            ),
         )
 
     async def async_set_operation_mode(self, mode) -> bool:
@@ -339,7 +351,7 @@ class ThermostatClusterHandler(ClusterHandler):
         return bool(self.occupancy)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(UserInterface.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(UserInterface.cluster_id)
 class UserInterfaceClusterHandler(ClusterHandler):
     """User interface (thermostat) cluster handler."""
 

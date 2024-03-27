@@ -4,15 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Coroutine, Iterator
 import contextlib
+from dataclasses import dataclass
 from enum import Enum
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, ParamSpec, TypedDict
+from typing import TYPE_CHECKING, Any, Final, ParamSpec, TypedDict
 
-from homeassistant.const import ATTR_COMMAND
-from homeassistant.core import callback
-from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.dispatcher import async_dispatcher_send
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl
@@ -23,28 +20,34 @@ from zigpy.zcl.foundation import (
     ZCLAttributeDef,
 )
 
-from ..const import (
-    ATTR_ARGS,
-    ATTR_ATTRIBUTE_ID,
-    ATTR_ATTRIBUTE_NAME,
-    ATTR_CLUSTER_ID,
-    ATTR_PARAMS,
-    ATTR_TYPE,
-    ATTR_UNIQUE_ID,
-    ATTR_VALUE,
-    CLUSTER_HANDLER_ZDO,
-    REPORT_CONFIG_ATTR_PER_REQ,
-    SIGNAL_ATTR_UPDATED,
+from zha.application.const import (
     ZHA_CLUSTER_HANDLER_MSG,
     ZHA_CLUSTER_HANDLER_MSG_BIND,
     ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
-    ZHA_CLUSTER_HANDLER_MSG_DATA,
-    ZHA_CLUSTER_HANDLER_READS_PER_REQ,
 )
-from ..helpers import LogMixin, safe_read
+from zha.application.helpers import safe_read
+from zha.event import EventBase
+from zha.exceptions import ZHAException
+from zha.mixins import LogMixin
+from zha.zigbee.cluster_handlers.const import (
+    ARGS,
+    ATTRIBUTE_ID,
+    ATTRIBUTE_NAME,
+    ATTRIBUTE_VALUE,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    CLUSTER_HANDLER_EVENT,
+    CLUSTER_HANDLER_ZDO,
+    CLUSTER_ID,
+    CLUSTER_READS_PER_REQ,
+    COMMAND,
+    PARAMS,
+    REPORT_CONFIG_ATTR_PER_REQ,
+    SIGNAL_ATTR_UPDATED,
+    UNIQUE_ID,
+)
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
 RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
@@ -58,20 +61,18 @@ _ReturnFuncType = Callable[_P, Coroutine[Any, Any, Any]]
 
 @contextlib.contextmanager
 def wrap_zigpy_exceptions() -> Iterator[None]:
-    """Wrap zigpy exceptions in `HomeAssistantError` exceptions."""
+    """Wrap zigpy exceptions in `ZHAException` exceptions."""
     try:
         yield
     except TimeoutError as exc:
-        raise HomeAssistantError(
-            "Failed to send request: device did not respond"
-        ) from exc
+        raise ZHAException("Failed to send request: device did not respond") from exc
     except zigpy.exceptions.ZigbeeException as exc:
         message = "Failed to send request"
 
         if str(exc):
             message = f"{message}: {exc}"
 
-        raise HomeAssistantError(message) from exc
+        raise ZHAException(message) from exc
 
 
 def retry_request(func: _FuncType[_P]) -> _ReturnFuncType[_P]:
@@ -120,7 +121,44 @@ class ClusterHandlerStatus(Enum):
     INITIALIZED = 3
 
 
-class ClusterHandler(LogMixin):
+@dataclass(kw_only=True, frozen=True)
+class ClusterAttributeUpdatedEvent:
+    """Event to signal that a cluster attribute has been updated."""
+
+    attribute_id: int
+    attribute_name: str
+    attribute_value: Any
+    cluster_handler_unique_id: str
+    cluster_id: int
+    event_type: Final[str] = CLUSTER_HANDLER_EVENT
+    event: Final[str] = CLUSTER_HANDLER_ATTRIBUTE_UPDATED
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterBindEvent:
+    """Event generated when the cluster is bound."""
+
+    cluster_name: str
+    cluster_id: int
+    success: bool
+    cluster_handler_unique_id: str
+    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
+    event: Final[str] = ZHA_CLUSTER_HANDLER_MSG_BIND
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterConfigureReportingEvent:
+    """Event generates when a cluster configures attribute reporting."""
+
+    cluster_name: str
+    cluster_id: int
+    attributes: dict[str, dict[str, Any]]
+    cluster_handler_unique_id: str
+    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
+    event: Final[str] = ZHA_CLUSTER_HANDLER_MSG_CFG_RPT
+
+
+class ClusterHandler(LogMixin, EventBase):
     """Base cluster handler for a Zigbee cluster."""
 
     REPORT_CONFIG: tuple[AttrReportConfig, ...] = ()
@@ -133,23 +171,24 @@ class ClusterHandler(LogMixin):
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize ClusterHandler."""
+        super().__init__()
         self._generic_id = f"cluster_handler_0x{cluster.cluster_id:04x}"
         self._endpoint: Endpoint = endpoint
-        self._cluster = cluster
-        self._id = f"{endpoint.id}:0x{cluster.cluster_id:04x}"
-        unique_id = endpoint.unique_id.replace("-", ":")
-        self._unique_id = f"{unique_id}:0x{cluster.cluster_id:04x}"
+        self._cluster: zigpy.zcl.Cluster = cluster
+        self._id: str = f"{endpoint.id}:0x{cluster.cluster_id:04x}"
+        unique_id: str = endpoint.unique_id.replace("-", ":")
+        self._unique_id: str = f"{unique_id}:0x{cluster.cluster_id:04x}"
         if not hasattr(self, "_value_attribute") and self.REPORT_CONFIG:
             attr_def: ZCLAttributeDef = self.cluster.attributes_by_name[
                 self.REPORT_CONFIG[0]["attr"]
             ]
-            self.value_attribute = attr_def.id
-        self._status = ClusterHandlerStatus.CREATED
+            self.value_attribute = attr_def.name
+        self._status: ClusterHandlerStatus = ClusterHandlerStatus.CREATED
         self._cluster.add_listener(self)
-        self.data_cache: dict[str, Enum] = {}
+        self.data_cache: dict[str, Any] = {}
 
     @classmethod
-    def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:
+    def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:  # pylint: disable=unused-argument
         """Filter the cluster match for specific devices."""
         return True
 
@@ -159,17 +198,17 @@ class ClusterHandler(LogMixin):
         return self._id
 
     @property
-    def generic_id(self):
+    def generic_id(self) -> str:
         """Return the generic id for this cluster handler."""
         return self._generic_id
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         """Return the unique id for this cluster handler."""
         return self._unique_id
 
     @property
-    def cluster(self):
+    def cluster(self) -> zigpy.zcl.Cluster:
         """Return the zigpy cluster for this cluster handler."""
         return self._cluster
 
@@ -179,7 +218,7 @@ class ClusterHandler(LogMixin):
         return self.cluster.ep_attribute or self._generic_id
 
     @property
-    def status(self):
+    def status(self) -> ClusterHandlerStatus:
         """Return the status of the cluster handler."""
         return self._status
 
@@ -187,12 +226,11 @@ class ClusterHandler(LogMixin):
         """Make this a hashable."""
         return hash(self._unique_id)
 
-    @callback
-    def async_send_signal(self, signal: str, *args: Any) -> None:
-        """Send a signal through hass dispatcher."""
-        self._endpoint.async_send_signal(signal, *args)
+    def emit_propagated_event(self, signal: str, *args: Any) -> None:
+        """Send a signal through dispatcher."""
+        self._endpoint.emit_propagated_event(signal, *args)
 
-    async def bind(self):
+    async def bind(self) -> None:
         """Bind a zigbee cluster.
 
         This also swallows ZigbeeException exceptions that are thrown when
@@ -201,17 +239,14 @@ class ClusterHandler(LogMixin):
         try:
             res = await self.cluster.bind()
             self.debug("bound '%s' cluster: %s", self.cluster.ep_attribute, res[0])
-            async_dispatcher_send(
-                self._endpoint.device.hass,
-                ZHA_CLUSTER_HANDLER_MSG,
-                {
-                    ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_BIND,
-                    ZHA_CLUSTER_HANDLER_MSG_DATA: {
-                        "cluster_name": self.cluster.name,
-                        "cluster_id": self.cluster.cluster_id,
-                        "success": res[0] == 0,
-                    },
-                },
+            self._endpoint.device.emit(
+                ZHA_CLUSTER_HANDLER_MSG_BIND,
+                ClusterBindEvent(
+                    cluster_name=self.cluster.name,
+                    cluster_id=self.cluster.cluster_id,
+                    cluster_handler_unique_id=self.unique_id,
+                    success=res[0] == 0,
+                ),
             )
         except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
             self.debug(
@@ -220,17 +255,14 @@ class ClusterHandler(LogMixin):
                 str(ex),
                 exc_info=ex,
             )
-            async_dispatcher_send(
-                self._endpoint.device.hass,
-                ZHA_CLUSTER_HANDLER_MSG,
-                {
-                    ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_BIND,
-                    ZHA_CLUSTER_HANDLER_MSG_DATA: {
-                        "cluster_name": self.cluster.name,
-                        "cluster_id": self.cluster.cluster_id,
-                        "success": False,
-                    },
-                },
+            self._endpoint.device.emit(
+                ZHA_CLUSTER_HANDLER_MSG_BIND,
+                ClusterBindEvent(
+                    cluster_name=self.cluster.name,
+                    cluster_id=self.cluster.cluster_id,
+                    cluster_handler_unique_id=self.unique_id,
+                    success=False,
+                ),
             )
 
     async def configure_reporting(self) -> None:
@@ -286,17 +318,14 @@ class ClusterHandler(LogMixin):
                 rest[REPORT_CONFIG_ATTR_PER_REQ:],
             )
 
-        async_dispatcher_send(
-            self._endpoint.device.hass,
-            ZHA_CLUSTER_HANDLER_MSG,
-            {
-                ATTR_TYPE: ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
-                ZHA_CLUSTER_HANDLER_MSG_DATA: {
-                    "cluster_name": self.cluster.name,
-                    "cluster_id": self.cluster.cluster_id,
-                    "attributes": event_data,
-                },
-            },
+        self._endpoint.device.emit(
+            ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
+            ClusterConfigureReportingEvent(
+                cluster_name=self.cluster.name,
+                cluster_id=self.cluster.cluster_id,
+                cluster_handler_unique_id=self.unique_id,
+                attributes=event_data,
+            ),
         )
 
     def _configure_reporting_status(
@@ -325,18 +354,19 @@ class ClusterHandler(LogMixin):
                 res,
             )
             # 2.5.8.1.3 Status Field
-            # The status field specifies the status of the Configure Reporting operation attempted on this attribute, as detailed in 2.5.7.3.
-            # Note that attribute status records are not included for successfully configured attributes, in order to save bandwidth.
-            # In the case of successful configuration of all attributes, only a single attribute status record SHALL be included in the command,
-            # with the status field set to SUCCESS and the direction and attribute identifier fields omitted.
+            # The status field specifies the status of the Configure Reporting operation attempted on this attribute,
+            # as detailed in 2.5.7.3. Note that attribute status records are not included for successfully configured
+            # attributes, in order to save bandwidth. In the case of successful configuration of all attributes,
+            # only a single attribute status record SHALL be included in the command, with the status field set to
+            # SUCCESS and the direction and attribute identifier fields omitted.
             for attr in attrs:
                 event_data[attr]["status"] = Status.SUCCESS.name
             return
 
         for record in res:
-            event_data[self.cluster.find_attribute(record.attrid).name][
-                "status"
-            ] = record.status.name
+            event_data[self.cluster.find_attribute(record.attrid).name]["status"] = (
+                record.status.name
+            )
         failed = [
             self.cluster.find_attribute(record.attrid).name
             for record in res
@@ -416,11 +446,9 @@ class ClusterHandler(LogMixin):
         self.debug("finished cluster handler initialization")
         self._status = ClusterHandlerStatus.INITIALIZED
 
-    @callback
-    def cluster_command(self, tsn, command_id, args):
+    def cluster_command(self, tsn, command_id, args) -> None:
         """Handle commands received to this cluster."""
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
         attr_name = self._get_attribute_name(attrid)
@@ -431,20 +459,26 @@ class ClusterHandler(LogMixin):
             attr_name,
             value,
         )
-        self.async_send_signal(
-            f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-            attrid,
-            attr_name,
-            value,
+        self.emit(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            ClusterAttributeUpdatedEvent(
+                attribute_id=attrid,
+                attribute_name=attr_name,
+                attribute_value=value,
+                cluster_handler_unique_id=self.unique_id,
+                cluster_id=self.cluster.cluster_id,
+            ),
         )
 
-    @callback
-    def zdo_command(self, *args, **kwargs):
+    def zdo_command(self, *args, **kwargs) -> None:
         """Handle ZDO commands on this cluster."""
 
-    @callback
     def zha_send_event(self, command: str, arg: list | dict | CommandSchema) -> None:
-        """Relay events to hass."""
+        """Compatibility method for emitting ZHA events from quirks until they are updated."""
+        self.emit_zha_event(command, arg)
+
+    def emit_zha_event(self, command: str, arg: list | dict | CommandSchema) -> None:
+        """Relay events to listeners."""
 
         args: list | dict
         if isinstance(arg, CommandSchema):
@@ -455,20 +489,20 @@ class ClusterHandler(LogMixin):
             args = arg
             params = {}
         else:
-            raise TypeError(f"Unexpected zha_send_event {command!r} argument: {arg!r}")
+            raise TypeError(f"Unexpected emit_zha_event {command!r} argument: {arg!r}")
 
-        self._endpoint.send_event(
+        self._endpoint.emit_zha_event(
             {
-                ATTR_UNIQUE_ID: self.unique_id,
-                ATTR_CLUSTER_ID: self.cluster.cluster_id,
-                ATTR_COMMAND: command,
+                UNIQUE_ID: self.unique_id,
+                CLUSTER_ID: self.cluster.cluster_id,
+                COMMAND: command,
                 # Maintain backwards compatibility with the old zigpy response format
-                ATTR_ARGS: args,
-                ATTR_PARAMS: params,
+                ARGS: args,
+                PARAMS: params,
             }
         )
 
-    async def async_update(self):
+    async def async_update(self) -> None:
         """Retrieve latest state from cluster."""
 
     def _get_attribute_name(self, attrid: int) -> str | int:
@@ -477,7 +511,7 @@ class ClusterHandler(LogMixin):
 
         return self.cluster.attributes[attrid].name
 
-    async def get_attribute_value(self, attribute, from_cache=True):
+    async def get_attribute_value(self, attribute, from_cache=True) -> Any:
         """Get the value for an attribute."""
         manufacturer = None
         manufacturer_code = self._endpoint.device.manufacturer_code
@@ -504,8 +538,8 @@ class ClusterHandler(LogMixin):
         manufacturer_code = self._endpoint.device.manufacturer_code
         if self.cluster.cluster_id >= 0xFC00 and manufacturer_code:
             manufacturer = manufacturer_code
-        chunk = attributes[:ZHA_CLUSTER_HANDLER_READS_PER_REQ]
-        rest = attributes[ZHA_CLUSTER_HANDLER_READS_PER_REQ:]
+        chunk = attributes[:CLUSTER_READS_PER_REQ]
+        rest = attributes[CLUSTER_READS_PER_REQ:]
         result = {}
         while chunk:
             try:
@@ -526,8 +560,8 @@ class ClusterHandler(LogMixin):
                 )
                 if raise_exceptions:
                     raise
-            chunk = rest[:ZHA_CLUSTER_HANDLER_READS_PER_REQ]
-            rest = rest[ZHA_CLUSTER_HANDLER_READS_PER_REQ:]
+            chunk = rest[:CLUSTER_READS_PER_REQ]
+            rest = rest[CLUSTER_READS_PER_REQ:]
         return result
 
     get_attributes = functools.partialmethod(_get_attributes, False)
@@ -538,7 +572,6 @@ class ClusterHandler(LogMixin):
         """Wrap `write_attributes` to throw an exception on attribute write failure."""
 
         res = await self.write_attributes(attributes, manufacturer=manufacturer)
-
         for record in res[0]:
             if record.status != Status.SUCCESS:
                 try:
@@ -548,11 +581,33 @@ class ClusterHandler(LogMixin):
                     name = f"0x{record.attrid:04x}"
                     value = "unknown"
 
-                raise HomeAssistantError(
+                raise ZHAException(
                     f"Failed to write attribute {name}={value}: {record.status}",
                 )
 
-    def log(self, level, msg, *args, **kwargs):
+    def to_json(self) -> dict:
+        """Return JSON representation of this cluster handler."""
+        json = {
+            "class_name": self.__class__.__name__,
+            "generic_id": self._generic_id,
+            "endpoint_id": self._endpoint.id,
+            "cluster": {
+                "id": self._cluster.cluster_id,
+                "name": self._cluster.name,
+                "type": "client" if self._cluster.is_client else "server",
+                "commands": self._cluster.commands,
+            },
+            "id": self._id,
+            "unique_id": self._unique_id,
+            "status": self._status.name,
+        }
+
+        if hasattr(self, "value_attribute"):
+            json["value_attribute"] = self.value_attribute
+
+        return json
+
+    def log(self, level, msg, *args, **kwargs) -> None:
         """Log a message."""
         msg = f"[%s:%s]: {msg}"
         args = (self._endpoint.device.nwk, self._id) + args
@@ -600,15 +655,13 @@ class ZDOClusterHandler(LogMixin):
         """Return the status of the cluster handler."""
         return self._status
 
-    @callback
     def device_announce(self, zigpy_device):
         """Device announce handler."""
 
-    @callback
     def permit_duration(self, duration):
         """Permit handler."""
 
-    async def async_initialize(self, from_cache):
+    async def async_initialize(self, from_cache):  # pylint: disable=unused-argument
         """Initialize cluster handler."""
         self._status = ClusterHandlerStatus.INITIALIZED
 
@@ -626,7 +679,6 @@ class ZDOClusterHandler(LogMixin):
 class ClientClusterHandler(ClusterHandler):
     """ClusterHandler for Zigbee client (output) clusters."""
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, timestamp: Any) -> None:
         """Handle an attribute updated on this cluster."""
         super().attribute_updated(attrid, value, timestamp)
@@ -636,20 +688,19 @@ class ClientClusterHandler(ClusterHandler):
         except KeyError:
             attr_name = "Unknown"
 
-        self.zha_send_event(
+        self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,
             {
-                ATTR_ATTRIBUTE_ID: attrid,
-                ATTR_ATTRIBUTE_NAME: attr_name,
-                ATTR_VALUE: value,
+                ATTRIBUTE_ID: attrid,
+                ATTRIBUTE_NAME: attr_name,
+                ATTRIBUTE_VALUE: value,
             },
         )
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle a cluster command received on this cluster."""
         if (
             self._cluster.server_commands is not None
             and self._cluster.server_commands.get(command_id) is not None
         ):
-            self.zha_send_event(self._cluster.server_commands[command_id].name, args)
+            self.emit_zha_event(self._cluster.server_commands[command_id].name, args)

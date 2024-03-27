@@ -1,4 +1,4 @@
-"""Support for ZHA AnalogOutput cluster."""
+"""Support for ZHA AnalogOutput cluster."""  # pylint: disable=too-many-lines
 
 from __future__ import annotations
 
@@ -6,306 +6,70 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
 
-from homeassistant.components.number import NumberEntity, NumberMode
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory, Platform, UnitOfMass, UnitOfTemperature
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import UndefinedType
-from zigpy.quirks.v2 import EntityMetadata, NumberMetadata
+from zigpy.quirks.v2 import NumberMetadata
 from zigpy.zcl.clusters.hvac import Thermostat
 
-from .core import discovery
-from .core.const import (
+from zha.application import Platform
+from zha.application.const import ENTITY_METADATA
+from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.number.const import (
+    ICONS,
+    UNITS,
+    NumberDeviceClass,
+    NumberMode,
+)
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.units import UnitOfMass, UnitOfTemperature, validate_unit
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_OUTPUT,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
     CLUSTER_HANDLER_COLOR,
     CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_THERMOSTAT,
-    QUIRK_METADATA,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
 )
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
 
 if TYPE_CHECKING:
-    from .core.cluster_handlers import ClusterHandler
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
 
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.NUMBER)
+STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.NUMBER)
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.NUMBER
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.NUMBER
 )
 
 
-UNITS = {
-    0: "Square-meters",
-    1: "Square-feet",
-    2: "Milliamperes",
-    3: "Amperes",
-    4: "Ohms",
-    5: "Volts",
-    6: "Kilo-volts",
-    7: "Mega-volts",
-    8: "Volt-amperes",
-    9: "Kilo-volt-amperes",
-    10: "Mega-volt-amperes",
-    11: "Volt-amperes-reactive",
-    12: "Kilo-volt-amperes-reactive",
-    13: "Mega-volt-amperes-reactive",
-    14: "Degrees-phase",
-    15: "Power-factor",
-    16: "Joules",
-    17: "Kilojoules",
-    18: "Watt-hours",
-    19: "Kilowatt-hours",
-    20: "BTUs",
-    21: "Therms",
-    22: "Ton-hours",
-    23: "Joules-per-kilogram-dry-air",
-    24: "BTUs-per-pound-dry-air",
-    25: "Cycles-per-hour",
-    26: "Cycles-per-minute",
-    27: "Hertz",
-    28: "Grams-of-water-per-kilogram-dry-air",
-    29: "Percent-relative-humidity",
-    30: "Millimeters",
-    31: "Meters",
-    32: "Inches",
-    33: "Feet",
-    34: "Watts-per-square-foot",
-    35: "Watts-per-square-meter",
-    36: "Lumens",
-    37: "Luxes",
-    38: "Foot-candles",
-    39: "Kilograms",
-    40: "Pounds-mass",
-    41: "Tons",
-    42: "Kilograms-per-second",
-    43: "Kilograms-per-minute",
-    44: "Kilograms-per-hour",
-    45: "Pounds-mass-per-minute",
-    46: "Pounds-mass-per-hour",
-    47: "Watts",
-    48: "Kilowatts",
-    49: "Megawatts",
-    50: "BTUs-per-hour",
-    51: "Horsepower",
-    52: "Tons-refrigeration",
-    53: "Pascals",
-    54: "Kilopascals",
-    55: "Bars",
-    56: "Pounds-force-per-square-inch",
-    57: "Centimeters-of-water",
-    58: "Inches-of-water",
-    59: "Millimeters-of-mercury",
-    60: "Centimeters-of-mercury",
-    61: "Inches-of-mercury",
-    62: "°C",
-    63: "°K",
-    64: "°F",
-    65: "Degree-days-Celsius",
-    66: "Degree-days-Fahrenheit",
-    67: "Years",
-    68: "Months",
-    69: "Weeks",
-    70: "Days",
-    71: "Hours",
-    72: "Minutes",
-    73: "Seconds",
-    74: "Meters-per-second",
-    75: "Kilometers-per-hour",
-    76: "Feet-per-second",
-    77: "Feet-per-minute",
-    78: "Miles-per-hour",
-    79: "Cubic-feet",
-    80: "Cubic-meters",
-    81: "Imperial-gallons",
-    82: "Liters",
-    83: "Us-gallons",
-    84: "Cubic-feet-per-minute",
-    85: "Cubic-meters-per-second",
-    86: "Imperial-gallons-per-minute",
-    87: "Liters-per-second",
-    88: "Liters-per-minute",
-    89: "Us-gallons-per-minute",
-    90: "Degrees-angular",
-    91: "Degrees-Celsius-per-hour",
-    92: "Degrees-Celsius-per-minute",
-    93: "Degrees-Fahrenheit-per-hour",
-    94: "Degrees-Fahrenheit-per-minute",
-    95: None,
-    96: "Parts-per-million",
-    97: "Parts-per-billion",
-    98: "%",
-    99: "Percent-per-second",
-    100: "Per-minute",
-    101: "Per-second",
-    102: "Psi-per-Degree-Fahrenheit",
-    103: "Radians",
-    104: "Revolutions-per-minute",
-    105: "Currency1",
-    106: "Currency2",
-    107: "Currency3",
-    108: "Currency4",
-    109: "Currency5",
-    110: "Currency6",
-    111: "Currency7",
-    112: "Currency8",
-    113: "Currency9",
-    114: "Currency10",
-    115: "Square-inches",
-    116: "Square-centimeters",
-    117: "BTUs-per-pound",
-    118: "Centimeters",
-    119: "Pounds-mass-per-second",
-    120: "Delta-Degrees-Fahrenheit",
-    121: "Delta-Degrees-Kelvin",
-    122: "Kilohms",
-    123: "Megohms",
-    124: "Millivolts",
-    125: "Kilojoules-per-kilogram",
-    126: "Megajoules",
-    127: "Joules-per-degree-Kelvin",
-    128: "Joules-per-kilogram-degree-Kelvin",
-    129: "Kilohertz",
-    130: "Megahertz",
-    131: "Per-hour",
-    132: "Milliwatts",
-    133: "Hectopascals",
-    134: "Millibars",
-    135: "Cubic-meters-per-hour",
-    136: "Liters-per-hour",
-    137: "Kilowatt-hours-per-square-meter",
-    138: "Kilowatt-hours-per-square-foot",
-    139: "Megajoules-per-square-meter",
-    140: "Megajoules-per-square-foot",
-    141: "Watts-per-square-meter-Degree-Kelvin",
-    142: "Cubic-feet-per-second",
-    143: "Percent-obscuration-per-foot",
-    144: "Percent-obscuration-per-meter",
-    145: "Milliohms",
-    146: "Megawatt-hours",
-    147: "Kilo-BTUs",
-    148: "Mega-BTUs",
-    149: "Kilojoules-per-kilogram-dry-air",
-    150: "Megajoules-per-kilogram-dry-air",
-    151: "Kilojoules-per-degree-Kelvin",
-    152: "Megajoules-per-degree-Kelvin",
-    153: "Newton",
-    154: "Grams-per-second",
-    155: "Grams-per-minute",
-    156: "Tons-per-hour",
-    157: "Kilo-BTUs-per-hour",
-    158: "Hundredths-seconds",
-    159: "Milliseconds",
-    160: "Newton-meters",
-    161: "Millimeters-per-second",
-    162: "Millimeters-per-minute",
-    163: "Meters-per-minute",
-    164: "Meters-per-hour",
-    165: "Cubic-meters-per-minute",
-    166: "Meters-per-second-per-second",
-    167: "Amperes-per-meter",
-    168: "Amperes-per-square-meter",
-    169: "Ampere-square-meters",
-    170: "Farads",
-    171: "Henrys",
-    172: "Ohm-meters",
-    173: "Siemens",
-    174: "Siemens-per-meter",
-    175: "Teslas",
-    176: "Volts-per-degree-Kelvin",
-    177: "Volts-per-meter",
-    178: "Webers",
-    179: "Candelas",
-    180: "Candelas-per-square-meter",
-    181: "Kelvins-per-hour",
-    182: "Kelvins-per-minute",
-    183: "Joule-seconds",
-    185: "Square-meters-per-Newton",
-    186: "Kilogram-per-cubic-meter",
-    187: "Newton-seconds",
-    188: "Newtons-per-meter",
-    189: "Watts-per-meter-per-degree-Kelvin",
-}
-
-ICONS = {
-    0: "mdi:temperature-celsius",
-    1: "mdi:water-percent",
-    2: "mdi:gauge",
-    3: "mdi:speedometer",
-    4: "mdi:percent",
-    5: "mdi:air-filter",
-    6: "mdi:fan",
-    7: "mdi:flash",
-    8: "mdi:current-ac",
-    9: "mdi:flash",
-    10: "mdi:flash",
-    11: "mdi:flash",
-    12: "mdi:counter",
-    13: "mdi:thermometer-lines",
-    14: "mdi:timer",
-    15: "mdi:palette",
-    16: "mdi:brightness-percent",
-}
-
-
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation Analog Output from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.NUMBER]
-
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities,
-            async_add_entities,
-            entities_to_create,
-        ),
-    )
-    config_entry.async_on_unload(unsub)
-
-
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_OUTPUT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class ZhaNumber(ZhaEntity, NumberEntity):
+class Number(PlatformEntity):
     """Representation of a ZHA Number entity."""
 
+    PLATFORM = Platform.NUMBER
     _attr_translation_key: str = "number"
+    _attr_mode: NumberMode = NumberMode.AUTO
 
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
-    ) -> None:
-        """Init this entity."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
-        self._analog_output_cluster_handler = self.cluster_handlers[
+    ):
+        """Initialize the number."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._analog_output_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._analog_output_cluster_handler,
-            SIGNAL_ATTR_UPDATED,
-            self.async_set_state,
+        self._analog_output_cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
         )
 
     @property
@@ -332,13 +96,10 @@ class ZhaNumber(ZhaEntity, NumberEntity):
     @property
     def native_step(self) -> float | None:
         """Return the value step."""
-        resolution = self._analog_output_cluster_handler.resolution
-        if resolution is not None:
-            return resolution
-        return super().native_step
+        return self._analog_output_cluster_handler.resolution
 
     @property
-    def name(self) -> str | UndefinedType | None:
+    def name(self) -> str | None:
         """Return the name of the number entity."""
         description = self._analog_output_cluster_handler.description
         if description is not None and len(description) > 0:
@@ -350,8 +111,8 @@ class ZhaNumber(ZhaEntity, NumberEntity):
         """Return the icon to be used for this entity."""
         application_type = self._analog_output_cluster_handler.application_type
         if application_type is not None:
-            return ICONS.get(application_type >> 16, super().icon)
-        return super().icon
+            return ICONS.get(application_type >> 16, None)
+        return None
 
     @property
     def native_unit_of_measurement(self) -> str | None:
@@ -359,42 +120,68 @@ class ZhaNumber(ZhaEntity, NumberEntity):
         engineering_units = self._analog_output_cluster_handler.engineering_units
         return UNITS.get(engineering_units)
 
-    @callback
-    def async_set_state(self, attr_id, attr_name, value):
-        """Handle value update from cluster handler."""
-        self.async_write_ha_state()
+    @property
+    def mode(self) -> NumberMode:
+        """Return the mode of the entity."""
+        return self._attr_mode
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await self._analog_output_cluster_handler.async_set_present_value(float(value))
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    async def async_update(self) -> None:
-        """Attempt to retrieve the state of the entity."""
-        await super().async_update()
-        _LOGGER.debug("polling current state")
-        if self._analog_output_cluster_handler:
-            value = await self._analog_output_cluster_handler.get_attribute_value(
-                "present_value", from_cache=False
-            )
-            _LOGGER.debug("read value=%s", value)
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle value update from cluster handler."""
+        self.maybe_emit_state_changed_event()
+
+    async def async_set_value(self, value: Any, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+        """Update the current value from service."""
+        num_value = float(value)
+        if await self._analog_output_cluster_handler.async_set_present_value(num_value):
+            self.maybe_emit_state_changed_event()
+
+    def to_json(self) -> dict:
+        """Return the JSON representation of the number entity."""
+        json = super().to_json()
+        json["engineer_units"] = self._analog_output_cluster_handler.engineering_units
+        json["application_type"] = self._analog_output_cluster_handler.application_type
+        json["step"] = self.native_step
+        json["min_value"] = self.native_min_value
+        json["max_value"] = self.native_max_value
+        json["name"] = self.name
+        return json
+
+    def get_state(self) -> dict:
+        """Return the state of the entity."""
+        response = super().get_state()
+        response["state"] = self.native_value
+        return response
 
 
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class ZHANumberConfigurationEntity(ZhaEntity, NumberEntity):
+class NumberConfigurationEntity(PlatformEntity):
     """Representation of a ZHA number configuration entity."""
 
+    PLATFORM = Platform.NUMBER
     _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_unit_of_measurement: str | None
+    _attr_native_min_value: float = 0.0
+    _attr_native_max_value: float = 100.0
     _attr_native_step: float = 1.0
     _attr_multiplier: float = 1
     _attribute_name: str
+    _attr_icon: str | None = None
+    _attr_mode: NumberMode = NumberMode.AUTO
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: type[Self],
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -402,7 +189,7 @@ class ZHANumberConfigurationEntity(ZhaEntity, NumberEntity):
         Return entity if it is a supported configuration, otherwise return None
         """
         cluster_handler = cluster_handlers[0]
-        if QUIRK_METADATA not in kwargs and (
+        if ENTITY_METADATA not in kwargs and (
             cls._attribute_name in cluster_handler.cluster.unsupported_attributes
             or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
             or cluster_handler.cluster.get(cls._attribute_name) is None
@@ -414,52 +201,98 @@ class ZHANumberConfigurationEntity(ZhaEntity, NumberEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        self._attr_device_class: NumberDeviceClass | None = None
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def _init_from_quirks_metadata(self, entity_metadata: NumberMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
-        number_metadata: NumberMetadata = entity_metadata.entity_metadata
-        self._attribute_name = number_metadata.attribute_name
+        self._attribute_name = entity_metadata.attribute_name
 
-        if number_metadata.min is not None:
-            self._attr_native_min_value = number_metadata.min
-        if number_metadata.max is not None:
-            self._attr_native_max_value = number_metadata.max
-        if number_metadata.step is not None:
-            self._attr_native_step = number_metadata.step
-        if number_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = number_metadata.unit
-        if number_metadata.multiplier is not None:
-            self._attr_multiplier = number_metadata.multiplier
+        if entity_metadata.min is not None:
+            self._attr_native_min_value = entity_metadata.min
+        if entity_metadata.max is not None:
+            self._attr_native_max_value = entity_metadata.max
+        if entity_metadata.step is not None:
+            self._attr_native_step = entity_metadata.step
+        if entity_metadata.multiplier is not None:
+            self._attr_multiplier = entity_metadata.multiplier
+        if entity_metadata.device_class is not None:
+            self._attr_device_class = validate_device_class(
+                NumberDeviceClass,
+                entity_metadata.device_class,
+                Platform.NUMBER.value,
+                _LOGGER,
+            )
+        if entity_metadata.device_class is None and entity_metadata.unit is not None:
+            self._attr_native_unit_of_measurement = validate_unit(
+                entity_metadata.unit
+            ).value
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
+        )
 
     @property
     def native_value(self) -> float:
         """Return the current value."""
-        return (
-            self._cluster_handler.cluster.get(self._attribute_name)
-            * self._attr_multiplier
-        )
+        value = self._cluster_handler.cluster.get(self._attribute_name)
+        if value is None:
+            return None
+        return value * self._attr_multiplier
+
+    @property
+    def native_min_value(self) -> float:
+        """Return the minimum value."""
+        return self._attr_native_min_value
+
+    @property
+    def native_max_value(self) -> float:
+        """Return the maximum value."""
+        return self._attr_native_max_value
+
+    @property
+    def native_step(self) -> float | None:
+        """Return the value step."""
+        return self._attr_native_step
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon to be used for this entity."""
+        return self._attr_icon
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit the value is expressed in."""
+        if hasattr(self, "_attr_native_unit_of_measurement"):
+            return self._attr_native_unit_of_measurement
+        return None
+
+    @property
+    def mode(self) -> NumberMode:
+        """Return the mode of the entity."""
+        return self._attr_mode
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await self._cluster_handler.write_attributes_safe(
             {self._attribute_name: int(value / self._attr_multiplier)}
         )
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
         """Attempt to retrieve the state of the entity."""
@@ -471,13 +304,37 @@ class ZHANumberConfigurationEntity(ZhaEntity, NumberEntity):
             )
             _LOGGER.debug("read value=%s", value)
 
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle value update from cluster handler."""
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
+
+    def to_json(self) -> dict:
+        """Return the JSON representation of the number entity."""
+        json = super().to_json()
+        json["multiplier"] = self._attr_multiplier
+        json["device_class"] = self._attr_device_class
+        json["step"] = self._attr_native_step
+        json["min_value"] = self._attr_native_min_value
+        json["max_value"] = self._attr_native_max_value
+        json["name"] = self.name
+        return json
+
+    def get_state(self) -> dict:
+        """Return the state of the entity."""
+        response = super().get_state()
+        response["state"] = self.native_value
+        return response
+
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster",
     models={"lumi.motion.ac02", "lumi.motion.agl04"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class AqaraMotionDetectionInterval(ZHANumberConfigurationEntity):
+class AqaraMotionDetectionInterval(NumberConfigurationEntity):
     """Representation of a ZHA motion detection interval configuration entity."""
 
     _unique_id_suffix = "detection_interval"
@@ -488,8 +345,7 @@ class AqaraMotionDetectionInterval(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class OnOffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
+class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on off transition time configuration entity."""
 
     _unique_id_suffix = "on_off_transition_time"
@@ -500,8 +356,7 @@ class OnOffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class OnLevelConfigurationEntity(ZHANumberConfigurationEntity):
+class OnLevelConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on level configuration entity."""
 
     _unique_id_suffix = "on_level"
@@ -512,8 +367,7 @@ class OnLevelConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class OnTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
+class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on transition time configuration entity."""
 
     _unique_id_suffix = "on_transition_time"
@@ -524,8 +378,7 @@ class OnTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class OffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
+class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA off transition time configuration entity."""
 
     _unique_id_suffix = "off_transition_time"
@@ -536,8 +389,7 @@ class OffTransitionTimeConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class DefaultMoveRateConfigurationEntity(ZHANumberConfigurationEntity):
+class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA default move rate configuration entity."""
 
     _unique_id_suffix = "default_move_rate"
@@ -548,8 +400,7 @@ class DefaultMoveRateConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEVEL)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class StartUpCurrentLevelConfigurationEntity(ZHANumberConfigurationEntity):
+class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA startup current level configuration entity."""
 
     _unique_id_suffix = "start_up_current_level"
@@ -560,8 +411,7 @@ class StartUpCurrentLevelConfigurationEntity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COLOR)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class StartUpColorTemperatureConfigurationEntity(ZHANumberConfigurationEntity):
+class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA startup color temperature configuration entity."""
 
     _unique_id_suffix = "start_up_color_temperature"
@@ -573,12 +423,13 @@ class StartUpColorTemperatureConfigurationEntity(ZHANumberConfigurationEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this ZHA startup color temperature entity."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         if self._cluster_handler:
             self._attr_native_min_value: float = self._cluster_handler.min_mireds
             self._attr_native_max_value: float = self._cluster_handler.max_mireds
@@ -590,8 +441,7 @@ class StartUpColorTemperatureConfigurationEntity(ZHANumberConfigurationEntity):
         "_TZE200_htnnfasr",
     },
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class TimerDurationMinutes(ZHANumberConfigurationEntity):
+class TimerDurationMinutes(NumberConfigurationEntity):
     """Representation of a ZHA timer duration configuration entity."""
 
     _unique_id_suffix = "timer_duration"
@@ -605,8 +455,7 @@ class TimerDurationMinutes(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names="ikea_airpurifier")
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class FilterLifeTime(ZHANumberConfigurationEntity):
+class FilterLifeTime(NumberConfigurationEntity):
     """Representation of a ZHA filter lifetime configuration entity."""
 
     _unique_id_suffix = "filter_life_time"
@@ -624,8 +473,7 @@ class FilterLifeTime(ZHANumberConfigurationEntity):
     manufacturers={"TexasInstruments"},
     models={"ti.router"},
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class TiRouterTransmitPower(ZHANumberConfigurationEntity):
+class TiRouterTransmitPower(NumberConfigurationEntity):
     """Representation of a ZHA TI transmit power configuration entity."""
 
     _unique_id_suffix = "transmit_power"
@@ -636,8 +484,7 @@ class TiRouterTransmitPower(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliRemoteDimmingUpSpeed(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
     """Inovelli remote dimming up speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_up_remote"
@@ -650,8 +497,7 @@ class InovelliRemoteDimmingUpSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliButtonDelay(ZHANumberConfigurationEntity):
+class InovelliButtonDelay(NumberConfigurationEntity):
     """Inovelli button delay configuration entity."""
 
     _unique_id_suffix = "button_delay"
@@ -664,8 +510,7 @@ class InovelliButtonDelay(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliLocalDimmingUpSpeed(ZHANumberConfigurationEntity):
+class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
     """Inovelli local dimming up speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_up_local"
@@ -678,8 +523,7 @@ class InovelliLocalDimmingUpSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliLocalRampRateOffToOn(ZHANumberConfigurationEntity):
+class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
     """Inovelli off to on local ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_off_to_on_local"
@@ -692,8 +536,7 @@ class InovelliLocalRampRateOffToOn(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliRemoteDimmingSpeedOffToOn(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
     """Inovelli off to on remote ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_off_to_on_remote"
@@ -706,8 +549,7 @@ class InovelliRemoteDimmingSpeedOffToOn(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliRemoteDimmingDownSpeed(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
     """Inovelli remote dimming down speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_down_remote"
@@ -720,8 +562,7 @@ class InovelliRemoteDimmingDownSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliLocalDimmingDownSpeed(ZHANumberConfigurationEntity):
+class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
     """Inovelli local dimming down speed configuration entity."""
 
     _unique_id_suffix = "dimming_speed_down_local"
@@ -734,8 +575,7 @@ class InovelliLocalDimmingDownSpeed(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliLocalRampRateOnToOff(ZHANumberConfigurationEntity):
+class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
     """Inovelli local on to off ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_on_to_off_local"
@@ -748,8 +588,7 @@ class InovelliLocalRampRateOnToOff(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliRemoteDimmingSpeedOnToOff(ZHANumberConfigurationEntity):
+class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
     """Inovelli remote on to off ramp rate configuration entity."""
 
     _unique_id_suffix = "ramp_rate_on_to_off_remote"
@@ -762,8 +601,7 @@ class InovelliRemoteDimmingSpeedOnToOff(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliMinimumLoadDimmingLevel(ZHANumberConfigurationEntity):
+class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
     """Inovelli minimum load dimming level configuration entity."""
 
     _unique_id_suffix = "minimum_level"
@@ -776,8 +614,7 @@ class InovelliMinimumLoadDimmingLevel(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliMaximumLoadDimmingLevel(ZHANumberConfigurationEntity):
+class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
     """Inovelli maximum load dimming level configuration entity."""
 
     _unique_id_suffix = "maximum_level"
@@ -790,8 +627,7 @@ class InovelliMaximumLoadDimmingLevel(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliAutoShutoffTimer(ZHANumberConfigurationEntity):
+class InovelliAutoShutoffTimer(NumberConfigurationEntity):
     """Inovelli automatic switch shutoff timer configuration entity."""
 
     _unique_id_suffix = "auto_off_timer"
@@ -806,8 +642,7 @@ class InovelliAutoShutoffTimer(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM35-SN"}
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliQuickStartTime(ZHANumberConfigurationEntity):
+class InovelliQuickStartTime(NumberConfigurationEntity):
     """Inovelli fan quick start time configuration entity."""
 
     _unique_id_suffix = "quick_start_time"
@@ -820,8 +655,7 @@ class InovelliQuickStartTime(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliLoadLevelIndicatorTimeout(ZHANumberConfigurationEntity):
+class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
     """Inovelli load level indicator timeout configuration entity."""
 
     _unique_id_suffix = "load_level_indicator_timeout"
@@ -834,8 +668,7 @@ class InovelliLoadLevelIndicatorTimeout(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliDefaultAllLEDOnColor(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
     """Inovelli default all led color when on configuration entity."""
 
     _unique_id_suffix = "led_color_when_on"
@@ -848,8 +681,7 @@ class InovelliDefaultAllLEDOnColor(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliDefaultAllLEDOffColor(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
     """Inovelli default all led color when off configuration entity."""
 
     _unique_id_suffix = "led_color_when_off"
@@ -862,8 +694,7 @@ class InovelliDefaultAllLEDOffColor(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliDefaultAllLEDOnIntensity(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
     """Inovelli default all led intensity when on configuration entity."""
 
     _unique_id_suffix = "led_intensity_when_on"
@@ -876,8 +707,7 @@ class InovelliDefaultAllLEDOnIntensity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliDefaultAllLEDOffIntensity(ZHANumberConfigurationEntity):
+class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
     """Inovelli default all led intensity when off configuration entity."""
 
     _unique_id_suffix = "led_intensity_when_off"
@@ -890,8 +720,7 @@ class InovelliDefaultAllLEDOffIntensity(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliDoubleTapUpLevel(ZHANumberConfigurationEntity):
+class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
     """Inovelli double tap up level configuration entity."""
 
     _unique_id_suffix = "double_tap_up_level"
@@ -904,8 +733,7 @@ class InovelliDoubleTapUpLevel(ZHANumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class InovelliDoubleTapDownLevel(ZHANumberConfigurationEntity):
+class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     """Inovelli double tap down level configuration entity."""
 
     _unique_id_suffix = "double_tap_down_level"
@@ -920,8 +748,7 @@ class InovelliDoubleTapDownLevel(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class AqaraPetFeederServingSize(ZHANumberConfigurationEntity):
+class AqaraPetFeederServingSize(NumberConfigurationEntity):
     """Aqara pet feeder serving size configuration entity."""
 
     _unique_id_suffix = "serving_size"
@@ -938,8 +765,7 @@ class AqaraPetFeederServingSize(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class AqaraPetFeederPortionWeight(ZHANumberConfigurationEntity):
+class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
     """Aqara pet feeder portion weight configuration entity."""
 
     _unique_id_suffix = "portion_weight"
@@ -957,8 +783,7 @@ class AqaraPetFeederPortionWeight(ZHANumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class AqaraThermostatAwayTemp(ZHANumberConfigurationEntity):
+class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     """Aqara away preset temperature configuration entity."""
 
     _unique_id_suffix = "away_preset_temperature"
@@ -978,8 +803,7 @@ class AqaraThermostatAwayTemp(ZHANumberConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class ThermostatLocalTempCalibration(ZHANumberConfigurationEntity):
+class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     """Local temperature calibration."""
 
     _unique_id_suffix = "local_temperature_calibration"
@@ -1000,7 +824,6 @@ class ThermostatLocalTempCalibration(ZHANumberConfigurationEntity):
     models={"TRVZB"},
     stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
     """Local temperature calibration for the Sonoff TRVZB."""
 
@@ -1012,8 +835,7 @@ class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY, models={"SNZB-06P"}
 )
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class SonoffPresenceSenorTimeout(ZHANumberConfigurationEntity):
+class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
     """Configuration of Sonoff sensor presence detection timeout."""
 
     _unique_id_suffix = "presence_detection_timeout"
@@ -1027,8 +849,7 @@ class SonoffPresenceSenorTimeout(ZHANumberConfigurationEntity):
     _attr_icon: str = "mdi:timer-edit"
 
 
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
-class ZCLTemperatureEntity(ZHANumberConfigurationEntity):
+class ZCLTemperatureEntity(NumberConfigurationEntity):
     """Common entity class for ZCL temperature input."""
 
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
@@ -1037,7 +858,6 @@ class ZCLTemperatureEntity(ZHANumberConfigurationEntity):
     _attr_multiplier: float = 0.01
 
 
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
     """Min or max heat setpoint setting on thermostats."""
 
@@ -1062,7 +882,6 @@ class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     """Max heat setpoint setting on thermostats.
 
@@ -1078,7 +897,6 @@ class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
-# pylint: disable-next=hass-invalid-inheritance # needs fixing
 class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     """Min heat setpoint setting on thermostats.
 

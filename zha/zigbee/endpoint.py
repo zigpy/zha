@@ -8,20 +8,24 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, TypeVar
 
-from homeassistant.const import Platform
-from homeassistant.core import callback
-from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.util.async_ import gather_with_limited_concurrency
-
-from . import const, discovery, registries
-from .cluster_handlers import ClusterHandler
-from .helpers import get_zha_data
+from zha.application import Platform, const, discovery
+from zha.async_ import gather_with_limited_concurrency
+from zha.zigbee.cluster_handlers import ClusterHandler
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_BASIC,
+    CLUSTER_HANDLER_IDENTIFY,
+    CLUSTER_HANDLER_POWER_CONFIGURATION,
+)
+from zha.zigbee.cluster_handlers.registries import (
+    CLIENT_CLUSTER_HANDLER_REGISTRY,
+    CLUSTER_HANDLER_REGISTRY,
+)
 
 if TYPE_CHECKING:
     from zigpy import Endpoint as ZigpyEndpoint
 
-    from .cluster_handlers import ClientClusterHandler
-    from .device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClientClusterHandler
+    from zha.zigbee.device import Device
 
 ATTR_DEVICE_TYPE: Final[str] = "device_type"
 ATTR_PROFILE_ID: Final[str] = "profile_id"
@@ -35,19 +39,19 @@ CALLABLE_T = TypeVar("CALLABLE_T", bound=Callable)
 class Endpoint:
     """Endpoint for a zha device."""
 
-    def __init__(self, zigpy_endpoint: ZigpyEndpoint, device: ZHADevice) -> None:
+    def __init__(self, zigpy_endpoint: ZigpyEndpoint, device: Device) -> None:
         """Initialize instance."""
         assert zigpy_endpoint is not None
         assert device is not None
         self._zigpy_endpoint: ZigpyEndpoint = zigpy_endpoint
-        self._device: ZHADevice = device
+        self._device: Device = device
         self._all_cluster_handlers: dict[str, ClusterHandler] = {}
         self._claimed_cluster_handlers: dict[str, ClusterHandler] = {}
         self._client_cluster_handlers: dict[str, ClientClusterHandler] = {}
         self._unique_id: str = f"{str(device.ieee)}-{zigpy_endpoint.endpoint_id}"
 
     @property
-    def device(self) -> ZHADevice:
+    def device(self) -> Device:
         """Return the device this endpoint belongs to."""
         return self._device
 
@@ -105,19 +109,19 @@ class Endpoint:
         )
 
     @classmethod
-    def new(cls, zigpy_endpoint: ZigpyEndpoint, device: ZHADevice) -> Endpoint:
+    def new(cls, zigpy_endpoint: ZigpyEndpoint, device: Device) -> Endpoint:
         """Create new endpoint and populate cluster handlers."""
         endpoint = cls(zigpy_endpoint, device)
         endpoint.add_all_cluster_handlers()
         endpoint.add_client_cluster_handlers()
         if not device.is_coordinator:
-            discovery.PROBE.discover_entities(endpoint)
+            discovery.ENDPOINT_PROBE.discover_entities(endpoint)
         return endpoint
 
     def add_all_cluster_handlers(self) -> None:
         """Create and add cluster handlers for all input clusters."""
         for cluster_id, cluster in self.zigpy_endpoint.in_clusters.items():
-            cluster_handler_classes = registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.get(
+            cluster_handler_classes = CLUSTER_HANDLER_REGISTRY.get(
                 cluster_id, {None: ClusterHandler}
             )
             quirk_id = (
@@ -151,11 +155,11 @@ class Endpoint:
                 )
                 continue
 
-            if cluster_handler.name == const.CLUSTER_HANDLER_POWER_CONFIGURATION:
+            if cluster_handler.name == CLUSTER_HANDLER_POWER_CONFIGURATION:
                 self._device.power_configuration_ch = cluster_handler
-            elif cluster_handler.name == const.CLUSTER_HANDLER_IDENTIFY:
+            elif cluster_handler.name == CLUSTER_HANDLER_IDENTIFY:
                 self._device.identify_ch = cluster_handler
-            elif cluster_handler.name == const.CLUSTER_HANDLER_BASIC:
+            elif cluster_handler.name == CLUSTER_HANDLER_BASIC:
                 self._device.basic_ch = cluster_handler
             self._all_cluster_handlers[cluster_handler.id] = cluster_handler
 
@@ -164,7 +168,7 @@ class Endpoint:
         for (
             cluster_id,
             cluster_handler_class,
-        ) in registries.CLIENT_CLUSTER_HANDLER_REGISTRY.items():
+        ) in CLIENT_CLUSTER_HANDLER_REGISTRY.items():
             cluster = self.zigpy_endpoint.out_clusters.get(cluster_id)
             if cluster is not None:
                 cluster_handler = cluster_handler_class(cluster, self)
@@ -215,28 +219,32 @@ class Endpoint:
         **kwargs: Any,
     ) -> None:
         """Create a new entity."""
-        from .device import DeviceStatus  # pylint: disable=import-outside-toplevel
+        from zha.zigbee.device import (  # pylint: disable=import-outside-toplevel
+            DeviceStatus,
+        )
 
         if self.device.status == DeviceStatus.INITIALIZED:
             return
 
-        zha_data = get_zha_data(self.device.hass)
-        zha_data.platforms[platform].append(
-            (entity_class, (unique_id, self.device, cluster_handlers), kwargs or {})
+        self.device.gateway.config.platforms[platform].append(
+            (
+                entity_class,
+                (unique_id, cluster_handlers, self, self.device),
+                kwargs or {},
+            )
         )
 
-    @callback
-    def async_send_signal(self, signal: str, *args: Any) -> None:
+    def emit_propagated_event(self, signal: str, *args: Any) -> None:
         """Send a signal through hass dispatcher."""
-        async_dispatcher_send(self.device.hass, signal, *args)
+        self.device.emit(signal, *args)
 
-    def send_event(self, signal: dict[str, Any]) -> None:
+    def emit_zha_event(self, event_data: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""
-        self.device.zha_send_event(
+        self.device.emit_zha_event(
             {
                 const.ATTR_UNIQUE_ID: self.unique_id,
                 const.ATTR_ENDPOINT_ID: self.id,
-                **signal,
+                **event_data,
             }
         )
 

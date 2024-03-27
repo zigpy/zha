@@ -1,88 +1,104 @@
-"""Support for the ZHA platform."""
+"""Support for the ZHA device tracker platform."""
 
 from __future__ import annotations
 
+from enum import StrEnum
 import functools
 import time
+from typing import TYPE_CHECKING
 
-from homeassistant.components.device_tracker import ScannerEntity, SourceType
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from zigpy.zcl.clusters.general import PowerConfiguration
 
-from .core import discovery
-from .core.const import (
+from zha.application import Platform
+from zha.application.platforms import PlatformEntity
+from zha.application.platforms.sensor import Battery
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.decorators import periodic
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
 )
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
-from .sensor import Battery
 
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.DEVICE_TRACKER)
+if TYPE_CHECKING:
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
+
+STRICT_MATCH = functools.partial(
+    PLATFORM_ENTITIES.strict_match, Platform.DEVICE_TRACKER
+)
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation device tracker from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.DEVICE_TRACKER]
+class SourceType(StrEnum):
+    """Source type for device trackers."""
 
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities, async_add_entities, entities_to_create
-        ),
-    )
-    config_entry.async_on_unload(unsub)
+    GPS = "gps"
+    ROUTER = "router"
+    BLUETOOTH = "bluetooth"
+    BLUETOOTH_LE = "bluetooth_le"
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
-class ZHADeviceScannerEntity(ScannerEntity, ZhaEntity):
+class DeviceScannerEntity(PlatformEntity):
     """Represent a tracked device."""
+
+    PLATFORM = Platform.DEVICE_TRACKER
 
     _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_name: str = "Device scanner"
+    __polling_interval: int
 
-    def __init__(self, unique_id, zha_device, cluster_handlers, **kwargs):
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs,
+    ):
         """Initialize the ZHA device tracker."""
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
-        self._battery_cluster_handler = self.cluster_handlers.get(
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._battery_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_POWER_CONFIGURATION
         )
-        self._connected = False
-        self._keepalive_interval = 60
-        self._battery_level = None
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        if self._battery_cluster_handler:
-            self.async_accept_signal(
-                self._battery_cluster_handler,
-                SIGNAL_ATTR_UPDATED,
-                self.async_battery_percentage_remaining_updated,
+        self._connected: bool = False
+        self._keepalive_interval: int = 60
+        self._should_poll: bool = True
+        self._battery_level: float | None = None
+        self._battery_cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
+        )
+        self._tracked_tasks.append(
+            device.gateway.async_create_background_task(
+                self._refresh(),
+                name=f"device_tracker_refresh_{self.unique_id}",
+                eager_start=True,
+                untracked=True,
             )
+        )
+        self.debug(
+            "started polling with refresh interval of %s",
+            getattr(self, "__polling_interval"),
+        )
 
     async def async_update(self) -> None:
         """Handle polling."""
-        if self.zha_device.last_seen is None:
+        if self.device.last_seen is None:
             self._connected = False
         else:
-            difference = time.time() - self.zha_device.last_seen
+            difference = time.time() - self.device.last_seen
             if difference > self._keepalive_interval:
                 self._connected = False
             else:
                 self._connected = True
+        self.maybe_emit_state_changed_event()
+
+    @periodic((30, 45))
+    async def _refresh(self) -> None:
+        """Refresh the state of the device tracker."""
+        await self.async_update()
 
     @property
     def is_connected(self):
@@ -94,15 +110,19 @@ class ZHADeviceScannerEntity(ScannerEntity, ZhaEntity):
         """Return the source type, eg gps or router, of the device."""
         return SourceType.ROUTER
 
-    @callback
-    def async_battery_percentage_remaining_updated(self, attr_id, attr_name, value):
+    def handle_cluster_handler_attribute_updated(
+        self, event: ClusterAttributeUpdatedEvent
+    ) -> None:
         """Handle tracking."""
-        if attr_name != "battery_percentage_remaining":
+        if (
+            event.attribute_name
+            != PowerConfiguration.AttributeDefs.battery_percentage_remaining.name
+        ):
             return
-        self.debug("battery_percentage_remaining updated: %s", value)
+        self.debug("battery_percentage_remaining updated: %s", event.attribute_value)
         self._connected = True
-        self._battery_level = Battery.formatter(value)
-        self.async_write_ha_state()
+        self._battery_level = Battery.formatter(event.attribute_value)
+        self.maybe_emit_state_changed_event()
 
     @property
     def battery_level(self):
@@ -112,20 +132,13 @@ class ZHADeviceScannerEntity(ScannerEntity, ZhaEntity):
         """
         return self._battery_level
 
-    @property  # type: ignore[misc]
-    def device_info(
-        self,
-    ) -> DeviceInfo:
-        """Return device info."""
-        # We opt ZHA device tracker back into overriding this method because
-        # it doesn't track IP-based devices.
-        # Call Super because ScannerEntity overrode it.
-        # mypy doesn't know about fget: https://github.com/python/mypy/issues/6185
-        return ZhaEntity.device_info.fget(self)  # type: ignore[attr-defined]
-
-    @property
-    def unique_id(self) -> str:
-        """Return unique ID."""
-        # Call Super because ScannerEntity overrode it.
-        # mypy doesn't know about fget: https://github.com/python/mypy/issues/6185
-        return ZhaEntity.unique_id.fget(self)  # type: ignore[attr-defined]
+    def get_state(self) -> dict:
+        """Return the state of the device."""
+        response = super().get_state()
+        response.update(
+            {
+                "connected": self._connected,
+                "battery_level": self._battery_level,
+            }
+        )
+        return response

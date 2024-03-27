@@ -2,30 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import asyncio
+from enum import IntFlag
 import functools
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Final, cast
 
-from homeassistant.components.siren import (
-    ATTR_DURATION,
-    ATTR_TONE,
-    ATTR_VOLUME_LEVEL,
-    SirenEntity,
-    SirenEntityFeature,
-)
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.event import async_call_later
 from zigpy.zcl.clusters.security import IasWd as WD
 
-from .core import discovery
-from .core.cluster_handlers.security import IasWdClusterHandler
-from .core.const import (
-    CLUSTER_HANDLER_IAS_WD,
-    SIGNAL_ADD_ENTITIES,
+from zha.application import Platform
+from zha.application.const import (
     WARNING_DEVICE_MODE_BURGLAR,
     WARNING_DEVICE_MODE_EMERGENCY,
     WARNING_DEVICE_MODE_EMERGENCY_PANIC,
@@ -38,51 +23,49 @@ from .core.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
+from zha.application.platforms import PlatformEntity
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
+from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
 
 if TYPE_CHECKING:
-    from .core.cluster_handlers import ClusterHandler
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
-MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.SIREN)
+MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SIREN)
 DEFAULT_DURATION = 5  # seconds
 
+ATTR_AVAILABLE_TONES: Final[str] = "available_tones"
+ATTR_DURATION: Final[str] = "duration"
+ATTR_VOLUME_LEVEL: Final[str] = "volume_level"
+ATTR_TONE: Final[str] = "tone"
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation siren from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.SIREN]
 
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities,
-            async_add_entities,
-            entities_to_create,
-        ),
-    )
-    config_entry.async_on_unload(unsub)
+class SirenEntityFeature(IntFlag):
+    """Supported features of the siren entity."""
+
+    TURN_ON = 1
+    TURN_OFF = 2
+    TONES = 4
+    VOLUME_SET = 8
+    DURATION = 16
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHASiren(ZhaEntity, SirenEntity):
+class Siren(PlatformEntity):
     """Representation of a ZHA siren."""
 
+    PLATFORM = Platform.SIREN
     _attr_name: str = "Siren"
 
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
-        **kwargs,
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
     ) -> None:
         """Init this siren."""
         self._attr_supported_features = (
@@ -100,17 +83,17 @@ class ZHASiren(ZhaEntity, SirenEntity):
             WARNING_DEVICE_MODE_FIRE_PANIC: "Fire Panic",
             WARNING_DEVICE_MODE_EMERGENCY_PANIC: "Emergency Panic",
         }
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
         self._cluster_handler: IasWdClusterHandler = cast(
             IasWdClusterHandler, cluster_handlers[0]
         )
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._attr_is_on: bool = False
-        self._off_listener: Callable[[], None] | None = None
+        self._off_listener: asyncio.TimerHandle | None = None
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on siren."""
         if self._off_listener:
-            self._off_listener()
+            self._off_listener.cancel()
             self._off_listener = None
         tone_cache = self._cluster_handler.data_cache.get(
             WD.Warning.WarningMode.__name__
@@ -154,24 +137,36 @@ class ZHASiren(ZhaEntity, SirenEntity):
             strobe_intensity=strobe_level,
         )
         self._attr_is_on = True
-        self._off_listener = async_call_later(
-            self._zha_device.hass, siren_duration, self.async_set_off
+        self._off_listener = asyncio.get_running_loop().call_later(
+            siren_duration, self.async_set_off
         )
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn off siren."""
         await self._cluster_handler.issue_start_warning(
             mode=WARNING_DEVICE_MODE_STOP, strobe=WARNING_DEVICE_STROBE_NO
         )
         self._attr_is_on = False
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    @callback
-    def async_set_off(self, _) -> None:
+    def async_set_off(self) -> None:
         """Set is_on to False and write HA state."""
         self._attr_is_on = False
         if self._off_listener:
-            self._off_listener()
+            self._off_listener.cancel()
             self._off_listener = None
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
+
+    def to_json(self) -> dict:
+        """Return JSON representation of the siren."""
+        json = super().to_json()
+        json[ATTR_AVAILABLE_TONES] = self._attr_available_tones
+        json["supported_features"] = self._attr_supported_features
+        return json
+
+    def get_state(self) -> dict:
+        """Get the state of the siren."""
+        response = super().get_state()
+        response["state"] = self._attr_is_on
+        return response

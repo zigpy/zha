@@ -4,20 +4,27 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.core import callback
 import zigpy.types as t
 from zigpy.zcl.clusters.closures import ConfigStatus, DoorLock, Shade, WindowCovering
 
-from .. import registries
-from ..const import REPORT_CONFIG_IMMEDIATE, SIGNAL_ATTR_UPDATED
-from . import AttrReportConfig, ClientClusterHandler, ClusterHandler
+from zha.zigbee.cluster_handlers import (
+    AttrReportConfig,
+    ClientClusterHandler,
+    ClusterAttributeUpdatedEvent,
+    ClusterHandler,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    REPORT_CONFIG_IMMEDIATE,
+)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(DoorLock.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(DoorLock.cluster_id)
 class DoorLockClusterHandler(ClusterHandler):
     """Door lock cluster handler."""
 
-    _value_attribute = 0
+    _value_attribute: str = DoorLock.AttributeDefs.lock_state.name
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=DoorLock.AttributeDefs.lock_state.name,
@@ -31,14 +38,17 @@ class DoorLockClusterHandler(ClusterHandler):
             DoorLock.AttributeDefs.lock_state.name, from_cache=True
         )
         if result is not None:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-                DoorLock.AttributeDefs.lock_state.id,
-                DoorLock.AttributeDefs.lock_state.name,
-                result,
+            self.emit(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=DoorLock.AttributeDefs.lock_state.id,
+                    attribute_name=DoorLock.AttributeDefs.lock_state.name,
+                    attribute_value=result,
+                    cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
+                ),
             )
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle a cluster command received on this cluster."""
 
@@ -51,7 +61,7 @@ class DoorLockClusterHandler(ClusterHandler):
         command_name = self._cluster.client_commands[command_id].name
 
         if command_name == DoorLock.ClientCommandDefs.operation_event_notification.name:
-            self.zha_send_event(
+            self.emit_zha_event(
                 command_name,
                 {
                     "source": args[0].name,
@@ -60,16 +70,22 @@ class DoorLockClusterHandler(ClusterHandler):
                 },
             )
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute update from lock cluster."""
         attr_name = self._get_attribute_name(attrid)
         self.debug(
             "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
         )
-        if attrid == self._value_attribute:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}", attrid, attr_name, value
+        if attr_name == self._value_attribute:
+            self.emit(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=attr_name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
+                ),
             )
 
     async def async_set_user_code(self, code_slot: int, user_code: str) -> None:
@@ -120,7 +136,7 @@ class DoorLockClusterHandler(ClusterHandler):
         return result
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Shade.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Shade.cluster_id)
 class ShadeClusterHandler(ClusterHandler):
     """Shade cluster handler."""
 
@@ -131,7 +147,7 @@ class WindowCoveringClientClusterHandler(ClientClusterHandler):
 
 
 @registries.BINDABLE_CLUSTERS.register(WindowCovering.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(WindowCovering.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(WindowCovering.cluster_id)
 class WindowCoveringClusterHandler(ClusterHandler):
     """Window cluster handler."""
 
@@ -178,8 +194,7 @@ class WindowCoveringClusterHandler(ClusterHandler):
             is not None
         ):
             # the 100 - value is because we need to invert the value before giving it to the entity
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
+            self.attribute_updated(
                 WindowCovering.AttributeDefs.current_position_lift_percentage.id,
                 WindowCovering.AttributeDefs.current_position_lift_percentage.name,
                 100
@@ -195,8 +210,7 @@ class WindowCoveringClusterHandler(ClusterHandler):
             is not None
         ):
             # the 100 - value is because we need to invert the value before giving it to the entity
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
+            self.attribute_updated(
                 WindowCovering.AttributeDefs.current_position_tilt_percentage.id,
                 WindowCovering.AttributeDefs.current_position_tilt_percentage.name,
                 100

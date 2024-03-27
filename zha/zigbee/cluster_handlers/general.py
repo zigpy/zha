@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Coroutine
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Final
 
-from homeassistant.core import callback
-from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.event import async_call_later
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 import zigpy.exceptions
 import zigpy.types as t
@@ -44,37 +43,48 @@ from zigpy.zcl.clusters.general import (
 )
 from zigpy.zcl.foundation import Status
 
-from .. import registries
-from ..const import (
+from zha.exceptions import ZHAException
+from zha.zigbee.cluster_handlers import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    AttrReportConfig,
+    ClientClusterHandler,
+    ClusterAttributeUpdatedEvent,
+    ClusterHandler,
+    parse_and_log_command,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_BATTERY_SAVE,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
-    SIGNAL_ATTR_UPDATED,
     SIGNAL_MOVE_LEVEL,
     SIGNAL_SET_LEVEL,
     SIGNAL_UPDATE_DEVICE,
 )
-from . import (
-    AttrReportConfig,
-    ClientClusterHandler,
-    ClusterHandler,
-    parse_and_log_command,
-)
-from .helpers import is_hue_motion_sensor
+from zha.zigbee.cluster_handlers.helpers import is_hue_motion_sensor
 
 if TYPE_CHECKING:
-    from ..endpoint import Endpoint
+    from zha.zigbee.endpoint import Endpoint
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Alarms.cluster_id)
+@dataclass(frozen=True, kw_only=True)
+class LevelChangeEvent:
+    """Event to signal that a cluster attribute has been updated."""
+
+    level: int
+    event: str
+    event_type: Final[str] = "cluster_handler_event"
+
+
+@registries.CLUSTER_HANDLER_REGISTRY.register(Alarms.cluster_id)
 class AlarmsClusterHandler(ClusterHandler):
     """Alarms cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(AnalogInput.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogInput.cluster_id)
 class AnalogInputClusterHandler(ClusterHandler):
     """Analog Input cluster handler."""
 
@@ -87,7 +97,7 @@ class AnalogInputClusterHandler(ClusterHandler):
 
 
 @registries.BINDABLE_CLUSTERS.register(AnalogOutput.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(AnalogOutput.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogOutput.cluster_id)
 class AnalogOutputClusterHandler(ClusterHandler):
     """Analog Output cluster handler."""
 
@@ -153,8 +163,14 @@ class AnalogOutputClusterHandler(ClusterHandler):
             {AnalogOutput.AttributeDefs.present_value.name: value}
         )
 
+    async def async_update(self):
+        """Update cluster value attribute."""
+        await self.get_attribute_value(
+            AnalogOutput.AttributeDefs.present_value.name, from_cache=False
+        )
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(AnalogValue.cluster_id)
+
+@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogValue.cluster_id)
 class AnalogValueClusterHandler(ClusterHandler):
     """Analog Value cluster handler."""
 
@@ -166,13 +182,13 @@ class AnalogValueClusterHandler(ClusterHandler):
     )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(ApplianceControl.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceControl.cluster_id)
 class ApplianceControlClusterHandler(ClusterHandler):
     """Appliance Control cluster handler."""
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(Basic.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Basic.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Basic.cluster_id)
 class BasicClusterHandler(ClusterHandler):
     """Cluster handler to interact with the basic cluster."""
 
@@ -207,7 +223,7 @@ class BasicClusterHandler(ClusterHandler):
             self.ZCL_INIT_ATTRS["power_source"] = True
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(BinaryInput.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(BinaryInput.cluster_id)
 class BinaryInputClusterHandler(ClusterHandler):
     """Binary Input cluster handler."""
 
@@ -219,7 +235,7 @@ class BinaryInputClusterHandler(ClusterHandler):
     )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(BinaryOutput.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(BinaryOutput.cluster_id)
 class BinaryOutputClusterHandler(ClusterHandler):
     """Binary Output cluster handler."""
 
@@ -231,7 +247,7 @@ class BinaryOutputClusterHandler(ClusterHandler):
     )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(BinaryValue.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(BinaryValue.cluster_id)
 class BinaryValueClusterHandler(ClusterHandler):
     """Binary Value cluster handler."""
 
@@ -243,12 +259,12 @@ class BinaryValueClusterHandler(ClusterHandler):
     )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Commissioning.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Commissioning.cluster_id)
 class CommissioningClusterHandler(ClusterHandler):
     """Commissioning cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(DeviceTemperature.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(DeviceTemperature.cluster_id)
 class DeviceTemperatureClusterHandler(ClusterHandler):
     """Device Temperature cluster handler."""
 
@@ -260,33 +276,32 @@ class DeviceTemperatureClusterHandler(ClusterHandler):
     )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(GreenPowerProxy.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(GreenPowerProxy.cluster_id)
 class GreenPowerProxyClusterHandler(ClusterHandler):
     """Green Power Proxy cluster handler."""
 
     BIND: bool = False
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Groups.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Groups.cluster_id)
 class GroupsClusterHandler(ClusterHandler):
     """Groups cluster handler."""
 
     BIND: bool = False
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Identify.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Identify.cluster_id)
 class IdentifyClusterHandler(ClusterHandler):
     """Identify cluster handler."""
 
     BIND: bool = False
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle commands received to this cluster."""
         cmd = parse_and_log_command(self, tsn, command_id, args)
 
         if cmd == Identify.ServerCommandDefs.trigger_effect.name:
-            self.async_send_signal(f"{self.unique_id}_{cmd}", args[0])
+            self.emit_propagated_event(f"{self.unique_id}_{cmd}", args[0])
 
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(LevelControl.cluster_id)
@@ -295,7 +310,7 @@ class LevelControlClientClusterHandler(ClientClusterHandler):
 
 
 @registries.BINDABLE_CLUSTERS.register(LevelControl.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(LevelControl.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(LevelControl.cluster_id)
 class LevelControlClusterHandler(ClusterHandler):
     """Cluster handler for the LevelControl Zigbee cluster."""
 
@@ -320,7 +335,6 @@ class LevelControlClusterHandler(ClusterHandler):
         """Return cached value of the current_level attribute."""
         return self.cluster.get(LevelControl.AttributeDefs.current_level.name)
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle commands received to this cluster."""
         cmd = parse_and_log_command(self, tsn, command_id, args)
@@ -348,7 +362,6 @@ class LevelControlClusterHandler(ClusterHandler):
                 SIGNAL_MOVE_LEVEL, -args[1] if args[0] else args[1]
             )
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
         self.debug("received attribute: %s update with value: %s", attrid, value)
@@ -357,10 +370,16 @@ class LevelControlClusterHandler(ClusterHandler):
 
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
-        self.async_send_signal(f"{self.unique_id}_{command}", level)
+        self.emit(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            LevelChangeEvent(
+                level=level,
+                event=f"cluster_handler_{command}",
+            ),
+        )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(MultistateInput.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(MultistateInput.cluster_id)
 class MultistateInputClusterHandler(ClusterHandler):
     """Multistate Input cluster handler."""
 
@@ -372,7 +391,7 @@ class MultistateInputClusterHandler(ClusterHandler):
     )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
 class MultistateOutputClusterHandler(ClusterHandler):
     """Multistate Output cluster handler."""
 
@@ -384,7 +403,7 @@ class MultistateOutputClusterHandler(ClusterHandler):
     )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(MultistateValue.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(MultistateValue.cluster_id)
 class MultistateValueClusterHandler(ClusterHandler):
     """Multistate Value cluster handler."""
 
@@ -402,7 +421,7 @@ class OnOffClientClusterHandler(ClientClusterHandler):
 
 
 @registries.BINDABLE_CLUSTERS.register(OnOff.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(OnOff.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(OnOff.cluster_id)
 class OnOffClusterHandler(ClusterHandler):
     """Cluster handler for the OnOff Zigbee cluster."""
 
@@ -418,7 +437,7 @@ class OnOffClusterHandler(ClusterHandler):
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize OnOffClusterHandler."""
         super().__init__(cluster, endpoint)
-        self._off_listener = None
+        self._off_listener: asyncio.TimerHandle | None = None
 
         if endpoint.device.quirk_id == TUYA_PLUG_ONOFF:
             self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
@@ -444,17 +463,16 @@ class OnOffClusterHandler(ClusterHandler):
         """Turn the on off cluster on."""
         result = await self.on()
         if result[1] is not Status.SUCCESS:
-            raise HomeAssistantError(f"Failed to turn on: {result[1]}")
+            raise ZHAException(f"Failed to turn on: {result[1]}")
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.true)
 
     async def turn_off(self) -> None:
         """Turn the on off cluster off."""
         result = await self.off()
         if result[1] is not Status.SUCCESS:
-            raise HomeAssistantError(f"Failed to turn off: {result[1]}")
+            raise ZHAException(f"Failed to turn off: {result[1]}")
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
 
-    @callback
     def cluster_command(self, tsn, command_id, args):
         """Handle commands received to this cluster."""
         cmd = parse_and_log_command(self, tsn, command_id, args)
@@ -475,13 +493,13 @@ class OnOffClusterHandler(ClusterHandler):
             # 0 is always accept 1 is only accept when already on
             if should_accept == 0 or (should_accept == 1 and bool(self.on_off)):
                 if self._off_listener is not None:
-                    self._off_listener()
+                    self._off_listener.cancel()
                     self._off_listener = None
                 self.cluster.update_attribute(
                     OnOff.AttributeDefs.on_off.id, t.Bool.true
                 )
                 if on_time > 0:
-                    self._off_listener = async_call_later(
+                    self._off_listener = asyncio.get_running_loop().call_later(
                         self._endpoint.device.hass,
                         (on_time / 10),  # value is in 10ths of a second
                         self.set_to_off,
@@ -491,21 +509,23 @@ class OnOffClusterHandler(ClusterHandler):
                 OnOff.AttributeDefs.on_off.id, not bool(self.on_off)
             )
 
-    @callback
     def set_to_off(self, *_):
         """Set the state to off."""
         self._off_listener = None
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
 
-    @callback
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
         if attrid == OnOff.AttributeDefs.on_off.id:
-            self.async_send_signal(
-                f"{self.unique_id}_{SIGNAL_ATTR_UPDATED}",
-                attrid,
-                OnOff.AttributeDefs.on_off.name,
-                value,
+            self.emit(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                ClusterAttributeUpdatedEvent(
+                    attribute_id=attrid,
+                    attribute_name=OnOff.AttributeDefs.on_off.name,
+                    attribute_value=value,
+                    cluster_handler_unique_id=self.unique_id,
+                    cluster_id=self.cluster.cluster_id,
+                ),
             )
 
     async def async_update(self):
@@ -515,17 +535,16 @@ class OnOffClusterHandler(ClusterHandler):
         from_cache = not self._endpoint.device.is_mains_powered
         self.debug("attempting to update onoff state - from cache: %s", from_cache)
         await self.get_attribute_value(
-            OnOff.AttributeDefs.on_off.id, from_cache=from_cache
+            OnOff.AttributeDefs.on_off.name, from_cache=from_cache
         )
-        await super().async_update()
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(OnOffConfiguration.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(OnOffConfiguration.cluster_id)
 class OnOffConfigurationClusterHandler(ClusterHandler):
     """OnOff Configuration cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Ota.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Ota.cluster_id)
 class OtaClusterHandler(ClusterHandler):
     """OTA cluster handler."""
 
@@ -557,7 +576,6 @@ class OtaClientClusterHandler(ClientClusterHandler):
         """Return cached value of current_file_version attribute."""
         return self.cluster.get(Ota.AttributeDefs.current_file_version.name)
 
-    @callback
     def cluster_command(
         self, tsn: int, command_id: int, args: list[Any] | None
     ) -> None:
@@ -575,18 +593,18 @@ class OtaClientClusterHandler(ClientClusterHandler):
             self.cluster.update_attribute(
                 Ota.AttributeDefs.current_file_version.id, current_file_version
             )
-            self.async_send_signal(
+            self.emit_propagated_event(
                 SIGNAL_UPDATE_DEVICE.format(signal_id), current_file_version
             )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Partition.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Partition.cluster_id)
 class PartitionClusterHandler(ClusterHandler):
     """Partition cluster handler."""
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(PollControl.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(PollControl.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(PollControl.cluster_id)
 class PollControlClusterHandler(ClusterHandler):
     """Poll Control cluster handler."""
 
@@ -603,7 +621,6 @@ class PollControlClusterHandler(ClusterHandler):
             {PollControl.AttributeDefs.checkin_interval.name: self.CHECKIN_INTERVAL}
         )
 
-    @callback
     def cluster_command(
         self, tsn: int, command_id: int, args: list[Any] | None
     ) -> None:
@@ -614,7 +631,7 @@ class PollControlClusterHandler(ClusterHandler):
             cmd_name = command_id
 
         self.debug("Received %s tsn command '%s': %s", tsn, cmd_name, args)
-        self.zha_send_event(cmd_name, args)
+        self.emit_zha_event(cmd_name, args)
         if cmd_name == PollControl.ClientCommandDefs.checkin.name:
             self.cluster.create_catching_task(self.check_in_response(tsn))
 
@@ -625,13 +642,12 @@ class PollControlClusterHandler(ClusterHandler):
             await self.set_long_poll_interval(self.LONG_POLL)
         await self.fast_poll_stop()
 
-    @callback
     def skip_manufacturer_id(self, manufacturer_code: int) -> None:
         """Block a specific manufacturer id from changing default polling."""
         self._IGNORED_MANUFACTURER_ID.add(manufacturer_code)
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(PowerConfiguration.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(PowerConfiguration.cluster_id)
 class PowerConfigurationClusterHandler(ClusterHandler):
     """Cluster handler for the zigbee power configuration cluster."""
 
@@ -657,12 +673,12 @@ class PowerConfigurationClusterHandler(ClusterHandler):
         )
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(PowerProfile.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(PowerProfile.cluster_id)
 class PowerProfileClusterHandler(ClusterHandler):
     """Power Profile cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(RSSILocation.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(RSSILocation.cluster_id)
 class RSSILocationClusterHandler(ClusterHandler):
     """RSSI Location cluster handler."""
 
@@ -672,11 +688,11 @@ class ScenesClientClusterHandler(ClientClusterHandler):
     """Scenes cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Scenes.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Scenes.cluster_id)
 class ScenesClusterHandler(ClusterHandler):
     """Scenes cluster handler."""
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Time.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Time.cluster_id)
 class TimeClusterHandler(ClusterHandler):
     """Time cluster handler."""

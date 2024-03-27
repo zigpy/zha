@@ -3,98 +3,83 @@
 from __future__ import annotations
 
 import functools
-from typing import Any
+import logging
+from typing import TYPE_CHECKING
 
-from homeassistant.components.binary_sensor import (
+from zigpy.quirks.v2 import BinarySensorMetadata
+
+from zha.application import Platform
+from zha.application.const import ATTR_DEVICE_CLASS, ENTITY_METADATA
+from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms.binary_sensor.const import (
+    IAS_ZONE_CLASS_MAPPING,
     BinarySensorDeviceClass,
-    BinarySensorEntity,
 )
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ON, EntityCategory, Platform
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from zigpy.quirks.v2 import BinarySensorMetadata, EntityMetadata
-import zigpy.types as t
-from zigpy.zcl.clusters.general import OnOff
-from zigpy.zcl.clusters.security import IasZone
-
-from .core import discovery
-from .core.const import (
+from zha.application.platforms.helpers import validate_device_class
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ACCELEROMETER,
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BINARY_INPUT,
     CLUSTER_HANDLER_HUE_OCCUPANCY,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_ZONE,
-    QUIRK_METADATA,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
 )
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
 
-# Zigbee Cluster Library Zone Type to Home Assistant device class
-IAS_ZONE_CLASS_MAPPING = {
-    IasZone.ZoneType.Motion_Sensor: BinarySensorDeviceClass.MOTION,
-    IasZone.ZoneType.Contact_Switch: BinarySensorDeviceClass.OPENING,
-    IasZone.ZoneType.Fire_Sensor: BinarySensorDeviceClass.SMOKE,
-    IasZone.ZoneType.Water_Sensor: BinarySensorDeviceClass.MOISTURE,
-    IasZone.ZoneType.Carbon_Monoxide_Sensor: BinarySensorDeviceClass.GAS,
-    IasZone.ZoneType.Vibration_Movement_Sensor: BinarySensorDeviceClass.VIBRATION,
-}
+if TYPE_CHECKING:
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(ZHA_ENTITIES.strict_match, Platform.BINARY_SENSOR)
-MULTI_MATCH = functools.partial(ZHA_ENTITIES.multipass_match, Platform.BINARY_SENSOR)
+
+STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.BINARY_SENSOR)
+MULTI_MATCH = functools.partial(
+    PLATFORM_ENTITIES.multipass_match, Platform.BINARY_SENSOR
+)
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
 )
+_LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation binary sensor from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.BINARY_SENSOR]
-
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities, async_add_entities, entities_to_create
-        ),
-    )
-    config_entry.async_on_unload(unsub)
-
-
-class BinarySensor(ZhaEntity, BinarySensorEntity):
+class BinarySensor(PlatformEntity):
     """ZHA BinarySensor."""
 
+    _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
+    PLATFORM: Platform = Platform.BINARY_SENSOR
 
-    def __init__(self, unique_id, zha_device, cluster_handlers, **kwargs) -> None:
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs,
+    ) -> None:
         """Initialize the ZHA binary sensor."""
         self._cluster_handler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
+        )
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
-        binary_sensor_metadata: BinarySensorMetadata = entity_metadata.entity_metadata
-        self._attribute_name = binary_sensor_metadata.attribute_name
-
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
-        )
+        self._attribute_name = entity_metadata.attribute_name
+        if entity_metadata.device_class is not None:
+            self._attr_device_class = validate_device_class(
+                BinarySensorDeviceClass,
+                entity_metadata.device_class,
+                Platform.BINARY_SENSOR.value,
+                _LOGGER,
+            )
 
     @property
     def is_on(self) -> bool:
@@ -104,10 +89,43 @@ class BinarySensor(ZhaEntity, BinarySensorEntity):
             return False
         return self.parse(raw_state)
 
-    @callback
-    def async_set_state(self, attr_id, attr_name, value):
-        """Set the state."""
-        self.async_write_ha_state()
+    @property
+    def device_class(self) -> BinarySensorDeviceClass | None:
+        """Return the class of this entity."""
+        return self._attr_device_class
+
+    def get_state(self) -> dict:
+        """Return the state of the binary sensor."""
+        response = super().get_state()
+        response["state"] = self.is_on
+        return response
+
+    def handle_cluster_handler_attribute_updated(
+        self, event: ClusterAttributeUpdatedEvent
+    ) -> None:
+        """Handle attribute updates from the cluster handler."""
+        if self._attribute_name is None or self._attribute_name != event.attribute_name:
+            return
+        self._state = bool(event.attribute_value)
+        self.maybe_emit_state_changed_event()
+
+    async def async_update(self) -> None:
+        """Attempt to retrieve on off state from the binary sensor."""
+        await super().async_update()
+        attribute = getattr(self._cluster_handler, "value_attribute", "on_off")
+        # this is a cached read to get the value for state mgt so there is no double read
+        attr_value = await self._cluster_handler.get_attribute_value(attribute)
+        if attr_value is not None:
+            self._state = attr_value
+            self.maybe_emit_state_changed_event()
+
+    def to_json(self) -> dict:
+        """Return a JSON representation of the binary sensor."""
+        json = super().to_json()
+        json["sensor_attribute"] = self._attribute_name
+        if hasattr(self, ATTR_DEVICE_CLASS):
+            json[ATTR_DEVICE_CLASS] = self._attr_device_class
+        return json
 
     @staticmethod
     def parse(value: bool | int) -> bool:
@@ -146,15 +164,18 @@ class Opening(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
 
+    # pylint: disable=pointless-string-statement
+    """TODO
     # Client/out cluster attributes aren't stored in the zigpy database, but are properly stored in the runtime cache.
     # We need to manually restore the last state from the sensor state to the runtime cache for now.
-    @callback
+
     def async_restore_last_state(self, last_state):
-        """Restore previous state to zigpy cache."""
+        #Restore previous state to zigpy cache.
         self._cluster_handler.cluster.update_attribute(
             OnOff.attributes_by_name[self._attribute_name].id,
             t.Bool.true if last_state.state == STATE_ON else t.Bool.false,
         )
+    """
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -189,6 +210,19 @@ class IASZone(BinarySensor):
 
     _attribute_name = "zone_status"
 
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs,
+    ) -> None:
+        """Initialize the ZHA binary sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._attr_device_class = self.device_class
+        self._attr_translation_key = self.translation_key
+
     @property
     def translation_key(self) -> str | None:
         """Return the name of the sensor."""
@@ -208,35 +242,9 @@ class IASZone(BinarySensor):
         """Parse the raw attribute into a bool state."""
         return BinarySensor.parse(value & 3)  # use only bit 0 and 1 for alarm state
 
-    # temporary code to migrate old IasZone sensors to update attribute cache state once
-    # remove in 2024.4.0
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return state attributes."""
-        return {"migrated_to_cache": True}  # writing new state means we're migrated
-
-    # temporary migration code
-    @callback
-    def async_restore_last_state(self, last_state):
-        """Restore previous state."""
-        # trigger migration if extra state attribute is not present
-        if "migrated_to_cache" not in last_state.attributes:
-            self.migrate_to_zigpy_cache(last_state)
-
-    # temporary migration code
-    @callback
-    def migrate_to_zigpy_cache(self, last_state):
-        """Save old IasZone sensor state to attribute cache."""
-        # previous HA versions did not update the attribute cache for IasZone sensors, so do it once here
-        # a HA state write is triggered shortly afterwards and writes the "migrated_to_cache" extra state attribute
-        if last_state.state == STATE_ON:
-            migrated_state = IasZone.ZoneStatus.Alarm_1
-        else:
-            migrated_state = IasZone.ZoneStatus(0)
-
-        self._cluster_handler.cluster.update_attribute(
-            IasZone.attributes_by_name[self._attribute_name].id, migrated_state
-        )
+    async def async_update(self) -> None:
+        """Attempt to retrieve on off state from the IAS Zone sensor."""
+        await PlatformEntity.async_update(self)
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE, models={"WL4200", "WL4200S"})

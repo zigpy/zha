@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
-from homeassistant.backports.functools import cached_property
+from functools import cached_property
+
 from zigpy.zcl.clusters.lighting import Ballast, Color
 
-from .. import registries
-from ..const import REPORT_CONFIG_DEFAULT
-from . import AttrReportConfig, ClientClusterHandler, ClusterHandler
+from zha.zigbee.cluster_handlers import (
+    AttrReportConfig,
+    ClientClusterHandler,
+    ClusterHandler,
+    registries,
+)
+from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_DEFAULT
 
 
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Ballast.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Ballast.cluster_id)
 class BallastClusterHandler(ClusterHandler):
     """Ballast cluster handler."""
 
@@ -21,7 +26,7 @@ class ColorClientClusterHandler(ClientClusterHandler):
 
 
 @registries.BINDABLE_CLUSTERS.register(Color.cluster_id)
-@registries.ZIGBEE_CLUSTER_HANDLER_REGISTRY.register(Color.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(Color.cluster_id)
 class ColorClusterHandler(ClusterHandler):
     """Color cluster handler."""
 

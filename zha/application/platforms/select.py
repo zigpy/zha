@@ -7,71 +7,44 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
 
-from homeassistant.components.select import SelectEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_UNKNOWN, EntityCategory, Platform
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER, TUYA_PLUG_ONOFF
 from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCluster
 from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
-from zigpy.quirks.v2 import EntityMetadata, ZCLEnumMetadata
+from zigpy.quirks.v2 import ZCLEnumMetadata
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.clusters.security import IasWd
 
-from .core import discovery
-from .core.const import (
+from zha.application import Platform
+from zha.application.const import ENTITY_METADATA, Strobe
+from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.registries import PLATFORM_ENTITIES
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_HUE_OCCUPANCY,
     CLUSTER_HANDLER_IAS_WD,
     CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_ON_OFF,
-    QUIRK_METADATA,
-    SIGNAL_ADD_ENTITIES,
-    SIGNAL_ATTR_UPDATED,
-    Strobe,
 )
-from .core.helpers import get_zha_data
-from .core.registries import ZHA_ENTITIES
-from .entity import ZhaEntity
 
 if TYPE_CHECKING:
-    from .core.cluster_handlers import ClusterHandler
-    from .core.device import ZHADevice
+    from zha.zigbee.cluster_handlers import ClusterHandler
+    from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
 
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    ZHA_ENTITIES.config_diagnostic_match, Platform.SELECT
+    PLATFORM_ENTITIES.config_diagnostic_match, Platform.SELECT
 )
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the Zigbee Home Automation siren from config entry."""
-    zha_data = get_zha_data(hass)
-    entities_to_create = zha_data.platforms[Platform.SELECT]
-
-    unsub = async_dispatcher_connect(
-        hass,
-        SIGNAL_ADD_ENTITIES,
-        functools.partial(
-            discovery.async_add_entities,
-            async_add_entities,
-            entities_to_create,
-        ),
-    )
-    config_entry.async_on_unload(unsub)
-
-
-class ZHAEnumSelectEntity(ZhaEntity, SelectEntity):
+class EnumSelectEntity(PlatformEntity):
     """Representation of a ZHA select entity."""
 
+    PLATFORM = Platform.SELECT
     _attr_entity_category = EntityCategory.CONFIG
     _attribute_name: str
     _enum: type[Enum]
@@ -79,15 +52,16 @@ class ZHAEnumSelectEntity(ZhaEntity, SelectEntity):
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attribute_name = self._enum.__name__
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
     def current_option(self) -> str | None:
@@ -102,18 +76,23 @@ class ZHAEnumSelectEntity(ZhaEntity, SelectEntity):
         self._cluster_handler.data_cache[self._attribute_name] = self._enum[
             option.replace(" ", "_")
         ]
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    @callback
-    def async_restore_last_state(self, last_state) -> None:
-        """Restore previous state."""
-        if last_state.state and last_state.state != STATE_UNKNOWN:
-            self._cluster_handler.data_cache[self._attribute_name] = self._enum[
-                last_state.state.replace(" ", "_")
-            ]
+    def to_json(self) -> dict:
+        """Return a JSON representation of the select."""
+        json = super().to_json()
+        json["enum"] = self._enum.__name__
+        json["options"] = self._attr_options
+        return json
+
+    def get_state(self) -> dict:
+        """Return the state of the select."""
+        response = super().get_state()
+        response["state"] = self.current_option
+        return response
 
 
-class ZHANonZCLSelectEntity(ZHAEnumSelectEntity):
+class NonZCLSelectEntity(EnumSelectEntity):
     """Representation of a ZHA select entity with no ZCL interaction."""
 
     @property
@@ -123,7 +102,7 @@ class ZHANonZCLSelectEntity(ZHAEnumSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultToneSelectEntity(ZHANonZCLSelectEntity):
+class DefaultToneSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren tone select entity."""
 
     _unique_id_suffix = IasWd.Warning.WarningMode.__name__
@@ -132,7 +111,7 @@ class ZHADefaultToneSelectEntity(ZHANonZCLSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultSirenLevelSelectEntity(ZHANonZCLSelectEntity):
+class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren level select entity."""
 
     _unique_id_suffix = IasWd.Warning.SirenLevel.__name__
@@ -141,7 +120,7 @@ class ZHADefaultSirenLevelSelectEntity(ZHANonZCLSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultStrobeLevelSelectEntity(ZHANonZCLSelectEntity):
+class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren strobe level select entity."""
 
     _unique_id_suffix = IasWd.StrobeLevel.__name__
@@ -150,7 +129,7 @@ class ZHADefaultStrobeLevelSelectEntity(ZHANonZCLSelectEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class ZHADefaultStrobeSelectEntity(ZHANonZCLSelectEntity):
+class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren strobe select entity."""
 
     _unique_id_suffix = Strobe.__name__
@@ -158,19 +137,21 @@ class ZHADefaultStrobeSelectEntity(ZHANonZCLSelectEntity):
     _attr_translation_key: str = "default_strobe"
 
 
-class ZCLEnumSelectEntity(ZhaEntity, SelectEntity):
+class ZCLEnumSelectEntity(PlatformEntity):
     """Representation of a ZHA ZCL enum select entity."""
 
+    PLATFORM = Platform.SELECT
     _attribute_name: str
     _attr_entity_category = EntityCategory.CONFIG
     _enum: type[Enum]
 
     @classmethod
-    def create_entity(
-        cls,
+    def create_platform_entity(
+        cls: type[Self],
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> Self | None:
         """Entity Factory.
@@ -178,7 +159,7 @@ class ZCLEnumSelectEntity(ZhaEntity, SelectEntity):
         Return entity if it is a supported configuration, otherwise return None
         """
         cluster_handler = cluster_handlers[0]
-        if QUIRK_METADATA not in kwargs and (
+        if ENTITY_METADATA not in kwargs and (
             cls._attribute_name in cluster_handler.cluster.unsupported_attributes
             or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
             or cluster_handler.cluster.get(cls._attribute_name) is None
@@ -190,28 +171,32 @@ class ZCLEnumSelectEntity(ZhaEntity, SelectEntity):
             )
             return None
 
-        return cls(unique_id, zha_device, cluster_handlers, **kwargs)
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def __init__(
         self,
         unique_id: str,
-        zha_device: ZHADevice,
         cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if QUIRK_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[QUIRK_METADATA])
+        if ENTITY_METADATA in kwargs:
+            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
-        super().__init__(unique_id, zha_device, cluster_handlers, **kwargs)
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
+        )
 
-    def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
+    def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
-        zcl_enum_metadata: ZCLEnumMetadata = entity_metadata.entity_metadata
-        self._attribute_name = zcl_enum_metadata.attribute_name
-        self._enum = zcl_enum_metadata.enum
+        self._attribute_name = entity_metadata.attribute_name
+        self._enum = entity_metadata.enum
 
     @property
     def current_option(self) -> str | None:
@@ -227,23 +212,32 @@ class ZCLEnumSelectEntity(ZhaEntity, SelectEntity):
         await self._cluster_handler.write_attributes_safe(
             {self._attribute_name: self._enum[option.replace(" ", "_")]}
         )
-        self.async_write_ha_state()
+        self.maybe_emit_state_changed_event()
 
-    async def async_added_to_hass(self) -> None:
-        """Run when about to be added to hass."""
-        await super().async_added_to_hass()
-        self.async_accept_signal(
-            self._cluster_handler, SIGNAL_ATTR_UPDATED, self.async_set_state
-        )
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle value update from cluster handler."""
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
 
-    @callback
-    def async_set_state(self, attr_id: int, attr_name: str, value: Any):
-        """Handle state update from cluster handler."""
-        self.async_write_ha_state()
+    def to_json(self) -> dict:
+        """Return a JSON representation of the select."""
+        json = super().to_json()
+        json["enum"] = self._enum.__name__
+        json["options"] = self._attr_options
+        return json
+
+    def get_state(self) -> dict:
+        """Return the state of the select."""
+        response = super().get_state()
+        response["state"] = self.current_option
+        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
-class ZHAStartupOnOffSelectEntity(ZCLEnumSelectEntity):
+class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA startup onoff select entity."""
 
     _unique_id_suffix = OnOff.StartUpOnOff.__name__
