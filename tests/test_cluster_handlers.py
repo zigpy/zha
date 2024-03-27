@@ -7,9 +7,11 @@ import logging
 import math
 from types import NoneType
 from unittest import mock
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
+from zhaquirks.centralite.cl_3130 import CentraLite3130
+from zhaquirks.xiaomi.aqara.sensor_switch_aq3 import BUTTON_DEVICE_TYPE, SwitchAQ3
 from zigpy.device import Device as ZigpyDevice
 from zigpy.endpoint import Endpoint as ZigpyEndpoint
 import zigpy.profiles.zha
@@ -18,10 +20,21 @@ import zigpy.types as t
 from zigpy.zcl import foundation
 import zigpy.zcl.clusters
 from zigpy.zcl.clusters import CLUSTERS_BY_ID
-from zigpy.zcl.clusters.general import OnOff
+from zigpy.zcl.clusters.general import (
+    Basic,
+    Identify,
+    LevelControl,
+    MultistateInput,
+    OnOff,
+    Ota,
+    PollControl,
+    PowerConfiguration,
+)
+from zigpy.zcl.clusters.homeautomation import Diagnostic
+from zigpy.zcl.clusters.measurement import TemperatureMeasurement
 import zigpy.zdo.types as zdo_t
 
-from tests.common import make_zcl_header
+from tests.common import make_zcl_header, send_attributes_report
 from zha.application.const import ATTR_QUIRK_ID
 from zha.application.gateway import Gateway
 from zha.exceptions import ZHAException
@@ -391,15 +404,19 @@ async def test_write_attributes_safe_key_error(
     )
 
     cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
-    cluster.write_attributes.side_effect = zigpy.exceptions.ZigbeeException
+    cluster.write_attributes = AsyncMock(
+        return_value=[
+            foundation.WriteAttributesResponse.deserialize(b"\x01\x10\x00")[0]
+        ]
+    )
 
     cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
         OnOff.cluster_id, {None, ClusterHandler}
     ).get(None)
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
-    with pytest.raises(ZHAException):
-        await cluster_handler.write_attributes_safe({"foo": "bar"})
+    with pytest.raises(ZHAException, match="Failed to write attribute 0x0010=unknown"):
+        await cluster_handler.write_attributes_safe({0x0010: "bar"})
 
 
 async def test_get_attributes_error(
@@ -1226,3 +1243,159 @@ def test_parse_and_log_command(poll_control_ch):  # noqa: F811
 def test_parse_and_log_command_unknown(poll_control_ch):  # noqa: F811
     """Test that `parse_and_log_command` correctly parses an unknown command."""
     assert parse_and_log_command(poll_control_ch, 0x00, 0xAB, []) == "0xAB"
+
+
+async def test_zha_send_event_from_quirk(
+    zha_gateway: Gateway,
+    zigpy_device_mock: Callable[..., ZigpyDevice],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+):
+    """Test that a quirk can send an event."""
+    zigpy_device = zigpy_device_mock(
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    Basic.cluster_id,
+                    PowerConfiguration.cluster_id,
+                    OnOff.cluster_id,
+                    MultistateInput.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [Basic.cluster_id],
+                SIG_EP_TYPE: BUTTON_DEVICE_TYPE,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        model="lumi.sensor_switch.aq3",
+        manufacturer="LUMI",
+        quirk=SwitchAQ3,
+    )
+
+    assert isinstance(zigpy_device, SwitchAQ3)
+
+    zha_device = await device_joined(zigpy_device)
+
+    ms_input_ch = zha_device.endpoints[1].all_cluster_handlers["1:0x0012"]
+    assert ms_input_ch is not None
+
+    ms_input_ch.zha_send_event = MagicMock(wraps=ms_input_ch.zha_send_event)
+
+    await send_attributes_report(zha_gateway, ms_input_ch.cluster, {0x0055: 0x01})
+
+    assert ms_input_ch.zha_send_event.call_count == 1
+    assert ms_input_ch.zha_send_event.mock_calls == [
+        call(
+            "single",
+            {
+                "value": 1.0,
+            },
+        )
+    ]
+
+    zigpy_device = zigpy_device_mock(
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    Basic.cluster_id,
+                    PowerConfiguration.cluster_id,
+                    Identify.cluster_id,
+                    PollControl.cluster_id,
+                    TemperatureMeasurement.cluster_id,
+                    Diagnostic.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [
+                    Identify.cluster_id,
+                    OnOff.cluster_id,
+                    LevelControl.cluster_id,
+                    Ota.cluster_id,
+                ],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.LEVEL_CONTROL_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        model="LIGHTIFY Dimming Switch",
+        manufacturer="OSRAM",
+        quirk=CentraLite3130,
+        ieee="00:15:8e:01:01:02:03:04",
+    )
+
+    assert isinstance(zigpy_device, CentraLite3130)
+
+    zha_device = await device_joined(zigpy_device)
+
+    on_off_ch = zha_device.endpoints[1].client_cluster_handlers["1:0x0006"]
+    assert on_off_ch is not None
+
+    on_off_ch.emit_zha_event = MagicMock(wraps=on_off_ch.emit_zha_event)
+    on_off_ch.emit_zha_event.reset_mock()
+
+    on_off_ch.cluster_command(1, OnOff.ServerCommandDefs.on.id, [])
+
+    assert on_off_ch.emit_zha_event.call_count == 1
+    assert on_off_ch.emit_zha_event.mock_calls == [call("on", [])]
+    on_off_ch.emit_zha_event.reset_mock()
+
+    await send_attributes_report(
+        zha_gateway, on_off_ch.cluster, {OnOff.AttributeDefs.on_off.name: 0x01}
+    )
+
+    assert on_off_ch.emit_zha_event.call_count == 1
+    assert on_off_ch.emit_zha_event.mock_calls == [
+        call(
+            "attribute_updated",
+            {"attribute_id": 0, "attribute_name": "on_off", "attribute_value": True},
+        )
+    ]
+
+    on_off_ch.emit_zha_event.reset_mock()
+
+    await send_attributes_report(zha_gateway, on_off_ch.cluster, {0x25: "Bar"})
+
+    assert on_off_ch.emit_zha_event.call_count == 1
+    assert on_off_ch.emit_zha_event.mock_calls == [
+        call(
+            "attribute_updated",
+            {
+                "attribute_id": 0x25,
+                "attribute_name": "Unknown",
+                "attribute_value": "Bar",
+            },
+        )
+    ]
+
+
+async def test_zdo_cluster_handler(
+    zigpy_device_mock: Callable[..., ZigpyDevice],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+):
+    """Test that a quirk can send an event."""
+    zigpy_device = zigpy_device_mock(
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    Basic.cluster_id,
+                    PowerConfiguration.cluster_id,
+                    OnOff.cluster_id,
+                    MultistateInput.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [Basic.cluster_id],
+                SIG_EP_TYPE: BUTTON_DEVICE_TYPE,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        model="lumi.sensor_switch.aq3",
+        manufacturer="LUMI",
+        quirk=SwitchAQ3,
+    )
+
+    assert isinstance(zigpy_device, SwitchAQ3)
+
+    zha_device = await device_joined(zigpy_device)
+
+    assert zha_device.zdo_cluster_handler is not None
+    assert zha_device.zdo_cluster_handler.status == ClusterHandlerStatus.INITIALIZED
+    assert zha_device.zdo_cluster_handler.cluster is not None
+    assert zha_device.zdo_cluster_handler.cluster == zigpy_device.endpoints[0]
+    assert (
+        zha_device.zdo_cluster_handler.unique_id
+        == f"{str(zha_device.ieee)}:{zha_device.name}_ZDO"
+    )
