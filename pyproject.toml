@@ -26,7 +26,7 @@ dependencies = [
     "universal-silabs-flasher==0.0.18",
     "pyserial-asyncio-fast==0.11",
     "python-slugify==8.0.4",
-    "awesomeversion==21.1.4",
+    "awesomeversion==24.2.0",
 ]
 
 [tool.setuptools.packages.find]

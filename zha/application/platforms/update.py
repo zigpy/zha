@@ -8,8 +8,7 @@ import logging
 import math
 from typing import TYPE_CHECKING, Any, Final, final
 
-from awesomeversion import AwesomeVersion
-from awesomeversion.exceptions import AwesomeVersionCompareException
+from awesomeversion import AwesomeVersion, AwesomeVersionCompareException
 from zigpy.ota import OtaImageWithMetadata
 from zigpy.zcl.clusters.general import Ota
 from zigpy.zcl.foundation import Status
