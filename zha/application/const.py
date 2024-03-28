@@ -1,9 +1,8 @@
-"""All constants related to the ZHA component."""
+"""Constants for ZHA."""
 
 from __future__ import annotations
 
 import enum
-import logging
 from numbers import Number
 from typing import Any, Final
 
@@ -187,26 +186,6 @@ DATA_ZHA_CONFIG = "config"
 DATA_ZHA_CORE_EVENTS = "zha_core_events"
 DATA_ZHA_DEVICE_TRIGGER_CACHE = "zha_device_trigger_cache"
 DATA_ZHA_GATEWAY = "zha_gateway"
-
-DEBUG_COMP_BELLOWS = "bellows"
-DEBUG_COMP_ZHA = "homeassistant.components.zha"
-DEBUG_COMP_ZIGPY = "zigpy"
-DEBUG_COMP_ZIGPY_ZNP = "zigpy_znp"
-DEBUG_COMP_ZIGPY_DECONZ = "zigpy_deconz"
-DEBUG_COMP_ZIGPY_XBEE = "zigpy_xbee"
-DEBUG_COMP_ZIGPY_ZIGATE = "zigpy_zigate"
-DEBUG_LEVEL_CURRENT = "current"
-DEBUG_LEVEL_ORIGINAL = "original"
-DEBUG_LEVELS = {
-    DEBUG_COMP_BELLOWS: logging.DEBUG,
-    DEBUG_COMP_ZHA: logging.DEBUG,
-    DEBUG_COMP_ZIGPY: logging.DEBUG,
-    DEBUG_COMP_ZIGPY_ZNP: logging.DEBUG,
-    DEBUG_COMP_ZIGPY_DECONZ: logging.DEBUG,
-    DEBUG_COMP_ZIGPY_XBEE: logging.DEBUG,
-    DEBUG_COMP_ZIGPY_ZIGATE: logging.DEBUG,
-}
-DEBUG_RELAY_LOGGERS = [DEBUG_COMP_ZHA, DEBUG_COMP_ZIGPY]
 
 DEFAULT_RADIO_TYPE = "ezsp"
 DEFAULT_BAUDRATE = 57600

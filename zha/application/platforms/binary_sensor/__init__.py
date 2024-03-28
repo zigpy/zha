@@ -233,7 +233,7 @@ class IASZone(BinarySensor):
 
     @property
     def device_class(self) -> BinarySensorDeviceClass | None:
-        """Return device class from component DEVICE_CLASSES."""
+        """Return device class from platform DEVICE_CLASSES."""
         zone_type = self._cluster_handler.cluster.get("zone_type")
         return IAS_ZONE_CLASS_MAPPING.get(zone_type)
 
