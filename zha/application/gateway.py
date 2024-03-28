@@ -329,10 +329,12 @@ class Gateway(AsyncUtilMixin, EventBase):
                 str(device.ieee),
             )
             self._device_init_tasks[device.ieee].cancel()
-        self._device_init_tasks[device.ieee] = asyncio.create_task(
+        self._device_init_tasks[device.ieee] = init_task = self.async_create_task(
             self.async_device_initialized(device),
             name=f"device_initialized_task_{str(device.ieee)}:0x{device.nwk:04x}",
+            eager_start=True,
         )
+        init_task.add_done_callback(lambda _: self._device_init_tasks.pop(device.ieee))
 
     def device_left(self, device: zigpy.device.Device) -> None:
         """Handle device leaving the network."""
