@@ -22,7 +22,11 @@ from zigpy.quirks.v2 import CustomDeviceV2
 from zigpy.types.named import EUI64, NWK
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Groups, Identify
-from zigpy.zcl.foundation import Status as ZclStatus, ZCLCommandDef
+from zigpy.zcl.foundation import (
+    Status as ZclStatus,
+    WriteAttributesResponse,
+    ZCLCommandDef,
+)
 import zigpy.zdo.types as zdo_types
 
 from zha.application import discovery
@@ -780,13 +784,13 @@ class Device(LogMixin, EventBase):
 
     async def write_zigbee_attribute(
         self,
-        endpoint_id,
-        cluster_id,
-        attribute,
-        value,
-        cluster_type=CLUSTER_TYPE_IN,
-        manufacturer=None,
-    ):
+        endpoint_id: int,
+        cluster_id: int,
+        attribute: int | str,
+        value: Any,
+        cluster_type: str = CLUSTER_TYPE_IN,
+        manufacturer: int | None = None,
+    ) -> WriteAttributesResponse | None:
         """Write a value to a zigbee attribute for a cluster in this entity."""
         try:
             cluster: Cluster = self.async_get_cluster(

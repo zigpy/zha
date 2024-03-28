@@ -177,41 +177,6 @@ class Group(LogMixin):
             if member_ieee in self._gateway.devices
         ]
 
-    # pylint: disable=pointless-string-statement
-    """ TODO verify
-    async def async_add_members(self, members: list[GroupMemberReference]) -> None:
-        #Add members to this group.
-        if len(members) > 1:
-            tasks = []
-            for member in members:
-                tasks.append(
-                    self._gateway.devices[member.ieee].async_add_endpoint_to_group(
-                        member.endpoint_id, self.group_id
-                    )
-                )
-            await asyncio.gather(*tasks)
-        else:
-            await self._gateway.devices[members[0].ieee].async_add_endpoint_to_group(
-                members[0].endpoint_id, self.group_id
-            )
-
-    async def async_remove_members(self, members: list[GroupMemberReference]) -> None:
-        #Remove members from this group.
-        if len(members) > 1:
-            tasks = []
-            for member in members:
-                tasks.append(
-                    self._gateway.devices[member.ieee].async_remove_endpoint_from_group(
-                        member.endpoint_id, self.group_id
-                    )
-                )
-            await asyncio.gather(*tasks)
-        else:
-            await self._gateway.devices[
-                members[0].ieee
-            ].async_remove_endpoint_from_group(members[0].endpoint_id, self.group_id)
-    """
-
     def register_group_entity(self, group_entity: GroupEntity) -> None:
         """Register a group entity."""
         if group_entity.unique_id not in self._group_entities:
