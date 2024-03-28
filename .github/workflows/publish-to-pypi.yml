@@ -7,6 +7,8 @@ on:
 
 jobs:
   shared-build-and-publish:
-    uses: zigpy/workflows/.github/workflows/publish-to-pypi.yml@dm/update-ci-03272024
+    uses: zigpy/workflows/.github/workflows/publish-to-pypi.yml@main
     with:
       PYTHON_VERSION_DEFAULT: 3.12
+    secrets:
+      PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
