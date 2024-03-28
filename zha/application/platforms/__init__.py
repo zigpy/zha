@@ -29,12 +29,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class EntityCategory(StrEnum):
-    """Category of an entity.
-
-    An entity with a category will:
-    - Not be exposed to cloud, Alexa, or Google Assistant components
-    - Not be included in indirect service calls to devices or areas
-    """
+    """Category of an entity."""
 
     # Config: An entity which allows changing the configuration of a device.
     CONFIG = "config"

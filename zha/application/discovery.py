@@ -427,7 +427,7 @@ class EndpointProbe:
         cluster_handler: ClusterHandler,
         endpoint: Endpoint,
     ) -> None:
-        """Probe specified cluster for specific component."""
+        """Probe specified cluster for specific platform."""
         if platform is None or platform not in PLATFORMS:
             return
         cluster_handler_list = [cluster_handler]
@@ -544,7 +544,7 @@ class EndpointProbe:
 
 
 class GroupProbe:
-    """Determine the appropriate component for a group."""
+    """Determine the appropriate platform for a group."""
 
     def __init__(self) -> None:
         """Initialize instance."""

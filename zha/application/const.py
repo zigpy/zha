@@ -1,4 +1,4 @@
-"""All constants related to the ZHA component."""
+"""Constants for ZHA."""
 
 from __future__ import annotations
 
@@ -189,7 +189,7 @@ DATA_ZHA_DEVICE_TRIGGER_CACHE = "zha_device_trigger_cache"
 DATA_ZHA_GATEWAY = "zha_gateway"
 
 DEBUG_COMP_BELLOWS = "bellows"
-DEBUG_COMP_ZHA = "homeassistant.components.zha"
+DEBUG_COMP_ZHA = "zha"
 DEBUG_COMP_ZIGPY = "zigpy"
 DEBUG_COMP_ZIGPY_ZNP = "zigpy_znp"
 DEBUG_COMP_ZIGPY_DECONZ = "zigpy_deconz"
