@@ -2,7 +2,7 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
 from slugify import slugify
@@ -12,6 +12,7 @@ from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types
+from zigpy.zdo.types import LogicalType, NodeDescriptor
 
 from tests.common import async_find_group_entity_id, find_entity_id
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -175,6 +176,7 @@ async def test_gateway_group_methods(
     device_light_1,  # pylint: disable=redefined-outer-name
     device_light_2,  # pylint: disable=redefined-outer-name
     coordinator,  # pylint: disable=redefined-outer-name
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test creating a group with 2 members."""
 
@@ -285,8 +287,15 @@ async def test_gateway_group_methods(
         for member in zha_group.members:
             assert member.device.ieee in [device_light_1.ieee]
 
+    await zha_gateway.async_remove_zigpy_group(23)
+    await zha_gateway.async_block_till_done()
+    assert "Group: 0x0017 could not be found" in caplog.text
 
-async def test_gateway_create_group_with_id(
+    assert zha_gateway.get_group(zha_group.group_id) is not None
+    assert zha_gateway.get_group(zha_group.group_id) == zha_group
+
+
+async def test_gateway_create_group_with_id_without_id(
     zha_gateway: Gateway,
     device_light_1,  # pylint: disable=redefined-outer-name
     coordinator,  # pylint: disable=redefined-outer-name
@@ -308,6 +317,26 @@ async def test_gateway_create_group_with_id(
     assert len(zha_group.members) == 1
     assert zha_group.members[0].device is device_light_1
     assert zha_group.group_id == 0x1234
+
+    # create group with no group id passed in
+    zha_group2 = await zha_gateway.async_create_zigpy_group(
+        "Test Group2",
+        [GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1)],
+    )
+
+    assert len(zha_group2.members) == 1
+    assert zha_group2.members[0].device is device_light_1
+    assert zha_group2.group_id == 0x0002
+
+    # create group with no group id passed in
+    zha_group3 = await zha_gateway.async_create_zigpy_group(
+        "Test Group3",
+        [GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1)],
+    )
+
+    assert len(zha_group3.members) == 1
+    assert zha_group3.members[0].device is device_light_1
+    assert zha_group3.group_id == 0x0003
 
 
 @patch(
@@ -450,3 +479,105 @@ async def test_startup_concurrency_limit(
         assert 1 <= max(concurrencies) < zha_gw.radio_concurrency
     else:
         assert 1 == max(concurrencies) == zha_gw.radio_concurrency
+
+
+async def test_gateway_device_removed(
+    zha_gateway: Gateway,
+    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
+    zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test ZHA device removal."""
+
+    zha_gateway.device_removed(zigpy_dev_basic)
+    await zha_gateway.async_block_till_done()
+    assert zha_dev_basic.ieee not in zha_gateway.devices
+
+
+async def test_gateway_device_initialized(
+    zha_gateway: Gateway,
+    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test ZHA device initialization."""
+
+    zha_gateway.async_device_initialized = AsyncMock(
+        wraps=zha_gateway.async_device_initialized
+    )
+    zha_gateway.device_initialized(zigpy_dev_basic)
+    await zha_gateway.async_block_till_done()
+
+    assert (
+        "Cancelling previous initialization task for device 00:0d:6f:00:0a:90:69:e7"
+        not in caplog.text
+    )
+
+    assert zha_gateway.async_device_initialized.await_count == 1
+    assert zha_gateway.async_device_initialized.await_args == call(zigpy_dev_basic)
+
+    zha_gateway.async_device_initialized.reset_mock()
+
+    # call 2x to make sure cancellation of the task happens
+    zha_gateway.device_initialized(zigpy_dev_basic)
+    assert (
+        "Cancelling previous initialization task for device 00:0d:6f:00:0a:90:69:e7"
+        not in caplog.text
+    )
+    zha_gateway.device_initialized(zigpy_dev_basic)
+    await zha_gateway.async_block_till_done()
+
+    assert (
+        "Cancelling previous initialization task for device 00:0d:6f:00:0a:90:69:e7"
+        in caplog.text
+    )
+
+
+def test_gateway_raw_device_initialized(
+    zha_gateway: Gateway,
+    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test Zigpy raw device initialized."""
+
+    zha_gateway.emit = MagicMock(wraps=zha_gateway.emit)
+    zha_gateway.raw_device_initialized(zigpy_dev_basic)
+
+    assert zha_gateway.emit.call_count == 1
+    assert zha_gateway.emit.call_args == call(
+        "raw_device_initialized",
+        {
+            "type": "zha_gateway_message",
+            "device_info": {
+                "nwk": 0xB79C,
+                "ieee": "00:0d:6f:00:0a:90:69:e7",
+                "pairing_status": "INTERVIEW_COMPLETE",
+                "model": "FakeModel",
+                "manufacturer": "FakeManufacturer",
+                "signature": {
+                    "manufacturer": "FakeManufacturer",
+                    "model": "FakeModel",
+                    "node_desc": {
+                        "logical_type": LogicalType.EndDevice,
+                        "complex_descriptor_available": 0,
+                        "user_descriptor_available": 0,
+                        "reserved": 0,
+                        "aps_flags": 0,
+                        "frequency_band": NodeDescriptor.FrequencyBand.Freq2400MHz,
+                        "mac_capability_flags": NodeDescriptor.MACCapabilityFlags.AllocateAddress,
+                        "manufacturer_code": 4151,
+                        "maximum_buffer_size": 127,
+                        "maximum_incoming_transfer_size": 100,
+                        "server_mask": 10752,
+                        "maximum_outgoing_transfer_size": 100,
+                        "descriptor_capability_field": NodeDescriptor.DescriptorCapability.NONE,
+                    },
+                    "endpoints": {
+                        1: {
+                            "profile_id": 260,
+                            "device_type": zha.DeviceType.ON_OFF_SWITCH,
+                            "input_clusters": [0],
+                            "output_clusters": [],
+                        }
+                    },
+                },
+            },
+        },
+    )
