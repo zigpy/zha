@@ -357,9 +357,12 @@ def color_xy_brightness_to_RGB(
     b = X * 0.051713 - Y * 0.121364 + Z * 1.011530
 
     # Apply reverse gamma correction.
-    r, g, b = ((12.92 * x)
+    r, g, b = (
+        (12.92 * x)
         if (x <= 0.0031308)
-        else ((1.0 + 0.055) * cast(float, pow(x, (1.0 / 2.4))) - 0.055) for x in [r, g, b])
+        else ((1.0 + 0.055) * cast(float, pow(x, (1.0 / 2.4))) - 0.055)
+        for x in [r, g, b]
+    )
 
     # Bring all negative components to zero.
     r, g, b = (max(0, x) for x in [r, g, b])
@@ -468,10 +471,7 @@ def match_max_scale(
     """Match the maximum value of the output to the input."""
     max_in = max(input_colors)
     max_out = max(output_colors)
-    if max_out == 0:
-        factor = 0.0
-    else:
-        factor = max_in / max_out
+    factor = 0.0 if max_out == 0 else max_in / max_out
     return tuple(int(round(i * factor)) for i in output_colors)
 
 
