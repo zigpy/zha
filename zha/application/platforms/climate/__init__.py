@@ -333,12 +333,12 @@ class Thermostat(PlatformEntity):
         if (
             event.attribute_name in (ATTR_OCCP_COOL_SETPT, ATTR_OCCP_HEAT_SETPT)
             and self.preset_mode == Preset.AWAY
+            and await self._thermostat_cluster_handler.get_occupancy() is True
         ):
             # occupancy attribute is an unreportable attribute, but if we get
             # an attribute update for an "occupied" setpoint, there's a chance
             # occupancy has changed
-            if await self._thermostat_cluster_handler.get_occupancy() is True:
-                self._preset = Preset.NONE
+            self._preset = Preset.NONE
 
         self.debug(
             "Attribute '%s' = %s update", event.attribute_name, event.attribute_value
@@ -351,10 +351,7 @@ class Thermostat(PlatformEntity):
             self.warning("Unsupported '%s' fan mode", fan_mode)
             return
 
-        if fan_mode == FAN_ON:
-            mode = FanMode.On
-        else:
-            mode = FanMode.Auto
+        mode = FanMode.On if fan_mode == FAN_ON else FanMode.Auto
 
         await self._fan_cluster_handler.async_set_speed(mode)
 

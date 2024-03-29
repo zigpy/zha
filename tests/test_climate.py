@@ -197,11 +197,7 @@ def device_climate_mock(
     """Test regular thermostat device."""
 
     async def _dev(clusters, plug=None, manuf=None, quirk=None):
-        if plug is None:
-            plugged_attrs = ZCL_ATTR_PLUG
-        else:
-            plugged_attrs = {**ZCL_ATTR_PLUG, **plug}
-
+        plugged_attrs = ZCL_ATTR_PLUG if plug is None else {**ZCL_ATTR_PLUG, **plug}
         zigpy_device = zigpy_device_mock(clusters, manufacturer=manuf, quirk=quirk)
         zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
         zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = plugged_attrs

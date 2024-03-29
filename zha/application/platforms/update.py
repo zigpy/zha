@@ -198,8 +198,7 @@ class FirmwareUpdateEntity(PlatformEntity):
             return False
 
         try:
-            newer = _version_is_newer(latest_version, installed_version)
-            return True if newer else False
+            return _version_is_newer(latest_version, installed_version)
         except AwesomeVersionCompareException:
             # Can't compare versions, already tried exact match
             return True
