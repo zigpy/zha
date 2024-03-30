@@ -678,7 +678,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
     power_source_entity = get_entity(zha_device, power_source_entity_id)
     assert power_source_entity is not None
     assert (
-        power_source_entity.get_state()["state"]
+        power_source_entity.state["state"]
         == BasicCluster.PowerSource.Mains_single_phase.name
     )
 
@@ -690,7 +690,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
     assert hook_state_entity_id is not None
     hook_state_entity = get_entity(zha_device, hook_state_entity_id)
     assert hook_state_entity is not None
-    assert hook_state_entity.get_state()["state"] == AqaraE1HookState.Unlocked.name
+    assert hook_state_entity.state["state"] == AqaraE1HookState.Unlocked.name
 
     error_detected_entity_id = find_entity_id(
         Platform.BINARY_SENSOR,
@@ -699,7 +699,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
     assert error_detected_entity_id is not None
     error_detected_entity = get_entity(zha_device, error_detected_entity_id)
     assert error_detected_entity is not None
-    assert error_detected_entity.get_state()["state"] is False
+    assert error_detected_entity.state["state"] is False
 
 
 def _get_test_device(

@@ -142,7 +142,7 @@ async def test_check_available_success(
     assert zha_device.available is True
     await _send_time_changed(zha_gateway, zha_device.consider_unavailable_time + 2)
     assert zha_device.available is False
-    assert basic_ch.read_attributes.await_count == 0  # type: ignore[unreachable]
+    assert basic_ch.read_attributes.await_count == 0
 
     device_with_basic_cluster_handler.last_seen = (
         time.time() - zha_device.consider_unavailable_time - 100
@@ -244,7 +244,7 @@ async def test_check_available_no_basic_cluster_handler(
     await _send_time_changed(zha_gateway, zha_device.__polling_interval + 1)
 
     assert zha_device.available is False
-    assert "does not have a mandatory basic cluster" in caplog.text  # type: ignore[unreachable]
+    assert "does not have a mandatory basic cluster" in caplog.text
 
 
 async def test_device_is_active_coordinator(

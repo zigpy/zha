@@ -110,23 +110,23 @@ async def test_number(
     assert cluster.read_attributes.call_count == 3
 
     # test that the state is 15.0
-    assert entity.get_state()["state"] == 15.0
+    assert entity.state["state"] == 15.0
 
     # test attributes
-    assert entity.to_json()["min_value"] == 1.0
-    assert entity.to_json()["max_value"] == 100.0
-    assert entity.to_json()["step"] == 1.1
+    assert entity.info_object.min_value == 1.0
+    assert entity.info_object.max_value == 100.0
+    assert entity.info_object.step == 1.1
 
     # change value from device
     assert cluster.read_attributes.call_count == 3
     await send_attributes_report(zha_gateway, cluster, {0x0055: 15})
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["state"] == 15.0
+    assert entity.state["state"] == 15.0
 
     # update value from device
     await send_attributes_report(zha_gateway, cluster, {0x0055: 20})
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["state"] == 20.0
+    assert entity.state["state"] == 20.0
 
     # change value from client
     await entity.async_set_value(30.0)
@@ -136,11 +136,11 @@ async def test_number(
     assert cluster.write_attributes.call_args == call(
         {"present_value": 30.0}, manufacturer=None
     )
-    assert entity.get_state()["state"] == 30.0
+    assert entity.state["state"] == 30.0
 
     # test updating entity state from client
     cluster.read_attributes.reset_mock()
-    assert entity.get_state()["state"] == 30.0
+    assert entity.state["state"] == 30.0
     cluster.PLUGGED_ATTR_READS = {"present_value": 20}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -148,7 +148,7 @@ async def test_number(
     assert cluster.read_attributes.await_args == call(
         ["present_value"], allow_cache=False, only_cache=False, manufacturer=None
     )
-    assert entity.get_state()["state"] == 20.0
+    assert entity.state["state"] == 20.0
 
 
 def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
@@ -225,7 +225,7 @@ async def test_level_control_number(
 
     entity = get_entity(zha_device, entity_id)
     assert entity
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
     await entity.async_set_native_value(new_value)
@@ -233,12 +233,12 @@ async def test_level_control_number(
         call({attr: new_value}, manufacturer=None)
     ]
 
-    assert entity.get_state()["state"] == new_value
+    assert entity.state["state"] == new_value
 
     level_control_cluster.read_attributes.reset_mock()
     await entity.async_update()
     # the mocking doesn't update the attr cache so this flips back to initial value
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
     assert level_control_cluster.read_attributes.mock_calls == [
         call(
             [attr],
@@ -259,11 +259,11 @@ async def test_level_control_number(
         call({attr: new_value}, manufacturer=None),
         call({attr: new_value}, manufacturer=None),
     ]
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
 
     # test updating entity state from client
     level_control_cluster.read_attributes.reset_mock()
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
     level_control_cluster.PLUGGED_ATTR_READS = {attr: new_value}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -278,7 +278,7 @@ async def test_level_control_number(
             manufacturer=None,
         ),
     ]
-    assert entity.get_state()["state"] == new_value
+    assert entity.state["state"] == new_value
 
 
 @pytest.mark.parametrize(
@@ -328,7 +328,7 @@ async def test_color_number(
     entity = get_entity(zha_device, entity_id)
     assert entity
 
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
     await entity.async_set_native_value(new_value)
@@ -337,12 +337,12 @@ async def test_color_number(
         attr: new_value,
     }
 
-    assert entity.get_state()["state"] == new_value
+    assert entity.state["state"] == new_value
 
     color_cluster.read_attributes.reset_mock()
     await entity.async_update()
     # the mocking doesn't update the attr cache so this flips back to initial value
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
     assert color_cluster.read_attributes.call_count == 1
     assert (
         call(
@@ -365,11 +365,11 @@ async def test_color_number(
         call({attr: new_value}, manufacturer=None),
         call({attr: new_value}, manufacturer=None),
     ]
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
 
     # test updating entity state from client
     color_cluster.read_attributes.reset_mock()
-    assert entity.get_state()["state"] == initial_value
+    assert entity.state["state"] == initial_value
     color_cluster.PLUGGED_ATTR_READS = {attr: new_value}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -384,4 +384,4 @@ async def test_color_number(
             manufacturer=None,
         ),
     ]
-    assert entity.get_state()["state"] == new_value
+    assert entity.state["state"] == new_value

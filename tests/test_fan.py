@@ -21,7 +21,6 @@ from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
-    ATTR_PERCENTAGE_STEP,
     ATTR_PRESET_MODE,
     PRESET_MODE_AUTO,
     PRESET_MODE_ON,
@@ -151,15 +150,15 @@ async def test_fan(
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on at fan
     await send_attributes_report(zha_gateway, cluster, {1: 2, 0: 1, 2: 3})
-    assert entity.get_state()["is_on"] is True
+    assert entity.state["is_on"] is True
 
     # turn off at fan
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on from client
     cluster.write_attributes.reset_mock()
@@ -168,7 +167,7 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 2}, manufacturer=None
     )
-    assert entity.get_state()["is_on"] is True
+    assert entity.state["is_on"] is True
 
     # turn off from client
     cluster.write_attributes.reset_mock()
@@ -177,7 +176,7 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 0}, manufacturer=None
     )
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # change speed from client
     cluster.write_attributes.reset_mock()
@@ -186,8 +185,8 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 3}, manufacturer=None
     )
-    assert entity.get_state()["is_on"] is True
-    assert entity.get_state()["speed"] == SPEED_HIGH
+    assert entity.state["is_on"] is True
+    assert entity.state["speed"] == SPEED_HIGH
 
     # change preset_mode from client
     cluster.write_attributes.reset_mock()
@@ -196,8 +195,8 @@ async def test_fan(
     assert cluster.write_attributes.call_args == call(
         {"fan_mode": 4}, manufacturer=None
     )
-    assert entity.get_state()["is_on"] is True
-    assert entity.get_state()["preset_mode"] == PRESET_MODE_ON
+    assert entity.state["is_on"] is True
+    assert entity.state["preset_mode"] == PRESET_MODE_ON
 
     # test set percentage from client
     cluster.write_attributes.reset_mock()
@@ -208,8 +207,8 @@ async def test_fan(
         {"fan_mode": 2}, manufacturer=None
     )
     # this is converted to a ranged value
-    assert entity.get_state()["percentage"] == 66
-    assert entity.get_state()["is_on"] is True
+    assert entity.state["percentage"] == 66
+    assert entity.state["is_on"] is True
 
     # set invalid preset_mode from client
     cluster.write_attributes.reset_mock()
@@ -221,14 +220,14 @@ async def test_fan(
     # test percentage in turn on command
     await entity.async_turn_on(percentage=25)
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["percentage"] == 33  # this is converted to a ranged value
-    assert entity.get_state()["speed"] == SPEED_LOW
+    assert entity.state["percentage"] == 33  # this is converted to a ranged value
+    assert entity.state["speed"] == SPEED_LOW
 
     # test speed in turn on command
     await entity.async_turn_on(speed=SPEED_HIGH)
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["percentage"] == 100
-    assert entity.get_state()["speed"] == SPEED_HIGH
+    assert entity.state["percentage"] == 100
+    assert entity.state["speed"] == SPEED_HIGH
 
 
 async def async_turn_on(
@@ -318,7 +317,7 @@ async def test_zha_group_fan_entity(
     dev2_fan_cluster = device_fan_2.device.endpoints[1].fan
 
     # test that the fan group entity was created and is off
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on from client
     group_fan_cluster.write_attributes.reset_mock()
@@ -362,19 +361,19 @@ async def test_zha_group_fan_entity(
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
 
     # test that group fan is off
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 2})
     await zha_gateway.async_block_till_done()
 
     # test that group fan is speed medium
-    assert entity.get_state()["is_on"] is True
+    assert entity.state["is_on"] is True
 
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # test that group fan is now off
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
 
 @patch(
@@ -418,7 +417,7 @@ async def test_zha_group_fan_entity_failure_state(
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
 
     # test that the fan group entity was created and is off
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on from client
     group_fan_cluster.write_attributes.reset_mock()
@@ -460,10 +459,10 @@ async def test_fan_init(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_on"] == expected_state
-    assert entity.get_state()["speed"] == expected_speed
-    assert entity.get_state()["percentage"] == expected_percentage
-    assert entity.get_state()["preset_mode"] is None
+    assert entity.state["is_on"] == expected_state
+    assert entity.state["speed"] == expected_speed
+    assert entity.state["percentage"] == expected_percentage
+    assert entity.state["preset_mode"] is None
 
 
 async def test_fan_update_entity(
@@ -482,26 +481,26 @@ async def test_fan_update_entity(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_on"] is False
-    assert entity.get_state()["speed"] == SPEED_OFF
-    assert entity.get_state()["percentage"] == 0
-    assert entity.get_state()["preset_mode"] is None
+    assert entity.state["is_on"] is False
+    assert entity.state["speed"] == SPEED_OFF
+    assert entity.state["percentage"] == 0
+    assert entity.state["preset_mode"] is None
     assert entity.percentage_step == 100 / 3
     assert cluster.read_attributes.await_count == 2
 
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["is_on"] is False
-    assert entity.get_state()["speed"] == SPEED_OFF
+    assert entity.state["is_on"] is False
+    assert entity.state["speed"] == SPEED_OFF
     assert cluster.read_attributes.await_count == 3
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["is_on"] is True
-    assert entity.get_state()["percentage"] == 33
-    assert entity.get_state()["speed"] == SPEED_LOW
-    assert entity.get_state()["preset_mode"] is None
+    assert entity.state["is_on"] is True
+    assert entity.state["percentage"] == 33
+    assert entity.state["speed"] == SPEED_LOW
+    assert entity.state["preset_mode"] is None
     assert entity.percentage_step == 100 / 3
     assert cluster.read_attributes.await_count == 4
 
@@ -545,15 +544,15 @@ async def test_fan_ikea(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on at fan
     await send_attributes_report(zha_gateway, cluster, {6: 1})
-    assert entity.get_state()["is_on"] is True
+    assert entity.state["is_on"] is True
 
     # turn off at fan
     await send_attributes_report(zha_gateway, cluster, {6: 0})
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on from HA
     cluster.write_attributes.reset_mock()
@@ -633,9 +632,9 @@ async def test_fan_ikea_init(
     assert entity_id is not None
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert entity.get_state()["is_on"] == ikea_expected_state
-    assert entity.get_state()["percentage"] == ikea_expected_percentage
-    assert entity.get_state()["preset_mode"] == ikea_preset_mode
+    assert entity.state["is_on"] == ikea_expected_state
+    assert entity.state["percentage"] == ikea_expected_percentage
+    assert entity.state["preset_mode"] == ikea_preset_mode
 
 
 async def test_fan_ikea_update_entity(
@@ -653,20 +652,20 @@ async def test_fan_ikea_update_entity(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_on"] is False
-    assert entity.get_state()[ATTR_PERCENTAGE] == 0
-    assert entity.get_state()[ATTR_PRESET_MODE] is None
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 10
+    assert entity.state["is_on"] is False
+    assert entity.state[ATTR_PERCENTAGE] == 0
+    assert entity.state[ATTR_PRESET_MODE] is None
+    assert entity.percentage_step == 100 / 10
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
 
     await entity.async_update()
     await zha_gateway.async_block_till_done()
 
-    assert entity.get_state()["is_on"] is True
-    assert entity.get_state()[ATTR_PERCENTAGE] == 10
-    assert entity.get_state()[ATTR_PRESET_MODE] is PRESET_MODE_AUTO
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 10
+    assert entity.state["is_on"] is True
+    assert entity.state[ATTR_PERCENTAGE] == 10
+    assert entity.state[ATTR_PRESET_MODE] is PRESET_MODE_AUTO
+    assert entity.percentage_step == 100 / 10
 
 
 @pytest.fixture
@@ -708,15 +707,15 @@ async def test_fan_kof(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on at fan
     await send_attributes_report(zha_gateway, cluster, {1: 2, 0: 1, 2: 3})
-    assert entity.get_state()["is_on"] is True
+    assert entity.state["is_on"] is True
 
     # turn off at fan
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
-    assert entity.get_state()["is_on"] is False
+    assert entity.state["is_on"] is False
 
     # turn on from HA
     cluster.write_attributes.reset_mock()
@@ -784,9 +783,9 @@ async def test_fan_kof_init(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_on"] is expected_state
-    assert entity.get_state()[ATTR_PERCENTAGE] == expected_percentage
-    assert entity.get_state()[ATTR_PRESET_MODE] == expected_preset
+    assert entity.state["is_on"] is expected_state
+    assert entity.state[ATTR_PERCENTAGE] == expected_percentage
+    assert entity.state[ATTR_PRESET_MODE] == expected_preset
 
 
 async def test_fan_kof_update_entity(
@@ -805,17 +804,17 @@ async def test_fan_kof_update_entity(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_on"] is False
-    assert entity.get_state()[ATTR_PERCENTAGE] == 0
-    assert entity.get_state()[ATTR_PRESET_MODE] is None
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 4
+    assert entity.state["is_on"] is False
+    assert entity.state[ATTR_PERCENTAGE] == 0
+    assert entity.state[ATTR_PRESET_MODE] is None
+    assert entity.percentage_step == 100 / 4
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
 
     await entity.async_update()
     await zha_gateway.async_block_till_done()
 
-    assert entity.get_state()["is_on"] is True
-    assert entity.get_state()[ATTR_PERCENTAGE] == 25
-    assert entity.get_state()[ATTR_PRESET_MODE] is None
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 4
+    assert entity.state["is_on"] is True
+    assert entity.state[ATTR_PERCENTAGE] == 25
+    assert entity.state[ATTR_PRESET_MODE] is None
+    assert entity.percentage_step == 100 / 4

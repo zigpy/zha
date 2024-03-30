@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING
@@ -10,7 +11,7 @@ from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
 from zha.application.const import ATTR_DEVICE_CLASS, ENTITY_METADATA
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
     BinarySensorDeviceClass,
@@ -44,6 +45,14 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True, kw_only=True)
+class BinarySensorEntityInfo(PlatformEntityInfo):
+    """Binary sensor entity info."""
+
+    attribute_name: str
+    device_class: BinarySensorDeviceClass | None
+
+
 class BinarySensor(PlatformEntity):
     """ZHA BinarySensor."""
 
@@ -64,6 +73,7 @@ class BinarySensor(PlatformEntity):
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._state: bool = self.is_on
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
@@ -81,24 +91,38 @@ class BinarySensor(PlatformEntity):
                 _LOGGER,
             )
 
+    @functools.cached_property
+    def info_object(self) -> dict:
+        """Return a representation of the binary sensor."""
+        return BinarySensorEntityInfo(
+            **super().info_object.__dict__,
+            attribute_name=self._attribute_name,
+            device_class=self._attr_device_class
+            if hasattr(self, ATTR_DEVICE_CLASS)
+            else None,
+        )
+
+    @property
+    def state(self) -> dict:
+        """Return the state of the binary sensor."""
+        response = super().state
+        response["state"] = self.is_on
+        return response
+
     @property
     def is_on(self) -> bool:
         """Return True if the switch is on based on the state machine."""
-        raw_state = self._cluster_handler.cluster.get(self._attribute_name)
+        self._state = raw_state = self._cluster_handler.cluster.get(
+            self._attribute_name
+        )
         if raw_state is None:
             return False
         return self.parse(raw_state)
 
-    @property
+    @functools.cached_property
     def device_class(self) -> BinarySensorDeviceClass | None:
         """Return the class of this entity."""
         return self._attr_device_class
-
-    def get_state(self) -> dict:
-        """Return the state of the binary sensor."""
-        response = super().get_state()
-        response["state"] = self.is_on
-        return response
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -118,14 +142,6 @@ class BinarySensor(PlatformEntity):
         if attr_value is not None:
             self._state = attr_value
             self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the binary sensor."""
-        json = super().to_json()
-        json["sensor_attribute"] = self._attribute_name
-        if hasattr(self, ATTR_DEVICE_CLASS):
-            json[ATTR_DEVICE_CLASS] = self._attr_device_class
-        return json
 
     @staticmethod
     def parse(value: bool | int) -> bool:
@@ -223,7 +239,7 @@ class IASZone(BinarySensor):
         self._attr_device_class = self.device_class
         self._attr_translation_key = self.translation_key
 
-    @property
+    @functools.cached_property
     def translation_key(self) -> str | None:
         """Return the name of the sensor."""
         zone_type = self._cluster_handler.cluster.get("zone_type")
@@ -231,7 +247,7 @@ class IASZone(BinarySensor):
             return None
         return "ias_zone"
 
-    @property
+    @functools.cached_property
     def device_class(self) -> BinarySensorDeviceClass | None:
         """Return device class from platform DEVICE_CLASSES."""
         zone_type = self._cluster_handler.cluster.get("zone_type")

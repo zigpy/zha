@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import Enum
 import functools
 import logging
@@ -17,7 +18,7 @@ from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA, Strobe
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -39,6 +40,14 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.SELECT
 )
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class EnumSelectInfo(PlatformEntityInfo):
+    """Enum select entity info."""
+
+    enum: str
+    options: list[str]
 
 
 class EnumSelectEntity(PlatformEntity):
@@ -63,6 +72,22 @@ class EnumSelectEntity(PlatformEntity):
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
+    @functools.cached_property
+    def info_object(self) -> EnumSelectInfo:
+        """Return a representation of the select."""
+        return EnumSelectInfo(
+            **super().info_object.__dict__,
+            enum=self._enum.__name__,
+            options=self._attr_options,
+        )
+
+    @property
+    def state(self) -> dict:
+        """Return the state of the select."""
+        response = super().state
+        response["state"] = self.current_option
+        return response
+
     @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
@@ -77,19 +102,6 @@ class EnumSelectEntity(PlatformEntity):
             option.replace(" ", "_")
         ]
         self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the select."""
-        json = super().to_json()
-        json["enum"] = self._enum.__name__
-        json["options"] = self._attr_options
-        return json
-
-    def get_state(self) -> dict:
-        """Return the state of the select."""
-        response = super().get_state()
-        response["state"] = self.current_option
-        return response
 
 
 class NonZCLSelectEntity(EnumSelectEntity):
@@ -198,6 +210,22 @@ class ZCLEnumSelectEntity(PlatformEntity):
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
 
+    @functools.cached_property
+    def info_object(self) -> EnumSelectInfo:
+        """Return a representation of the select."""
+        return EnumSelectInfo(
+            **super().info_object.__dict__,
+            enum=self._enum.__name__,
+            options=self._attr_options,
+        )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the select."""
+        response = super().state
+        response["state"] = self.current_option
+        return response
+
     @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
@@ -221,19 +249,6 @@ class ZCLEnumSelectEntity(PlatformEntity):
         """Handle value update from cluster handler."""
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the select."""
-        json = super().to_json()
-        json["enum"] = self._enum.__name__
-        json["options"] = self._attr_options
-        return json
-
-    def get_state(self) -> dict:
-        """Return the state of the select."""
-        response = super().get_state()
-        response["state"] = self.current_option
-        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)

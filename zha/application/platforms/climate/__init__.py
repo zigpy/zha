@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import datetime as dt
 import functools
 from typing import TYPE_CHECKING, Any
@@ -9,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.climate.const import (
     ATTR_HVAC_MODE,
     ATTR_OCCP_COOL_SETPT,
@@ -52,6 +53,18 @@ if TYPE_CHECKING:
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.CLIMATE)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.CLIMATE)
+
+
+@dataclass(frozen=True, kw_only=True)
+class ThermostatEntityInfo(PlatformEntityInfo):
+    """Thermostat entity info."""
+
+    max_temp: float
+    min_temp: float
+    supported_features: ClimateEntityFeature
+    fan_modes: list[str] | None
+    preset_modes: list[str] | None
+    hvac_modes: list[HVACMode]
 
 
 @MULTI_MATCH(
@@ -98,6 +111,34 @@ class Thermostat(PlatformEntity):
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
         )
+
+    @functools.cached_property
+    def info_object(self) -> ThermostatEntityInfo:
+        """Return a representation of the thermostat."""
+        return ThermostatEntityInfo(
+            **super().info_object.__dict__,
+            max_temp=self.max_temp,
+            min_temp=self.min_temp,
+            supported_features=self.supported_features,
+            fan_modes=self.fan_modes,
+            preset_modes=self.preset_modes,
+            hvac_modes=self.hvac_modes,
+        )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the lock."""
+        response = super().state
+        response["current_temperature"] = self.current_temperature
+        response["target_temperature"] = self.target_temperature
+        response["target_temperature_high"] = self.target_temperature_high
+        response["target_temperature_low"] = self.target_temperature_low
+        response["hvac_action"] = self.hvac_action
+        response["hvac_mode"] = self.hvac_mode
+        response["preset_mode"] = self.preset_mode
+        response["fan_mode"] = self.fan_mode
+        response.update(self.extra_state_attributes)
+        return response
 
     @property
     def current_temperature(self):
@@ -163,7 +204,7 @@ class Thermostat(PlatformEntity):
             return FAN_ON
         return FAN_AUTO
 
-    @property
+    @functools.cached_property
     def fan_modes(self) -> list[str] | None:
         """Return supported FAN modes."""
         if not self._fan_cluster_handler:
@@ -226,7 +267,7 @@ class Thermostat(PlatformEntity):
         """Return HVAC operation mode."""
         return SYSTEM_MODE_2_HVAC.get(self._thermostat_cluster_handler.system_mode)
 
-    @property
+    @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
         """Return the list of available HVAC operation modes."""
         return SEQ_OF_OPERATION.get(
@@ -238,12 +279,12 @@ class Thermostat(PlatformEntity):
         """Return current preset mode."""
         return self._preset
 
-    @property
+    @functools.cached_property
     def preset_modes(self) -> list[str] | None:
         """Return supported preset modes."""
         return self._presets
 
-    @property
+    @functools.cached_property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
         features = self._supported_flags
@@ -437,31 +478,6 @@ class Thermostat(PlatformEntity):
         handler = getattr(self, f"async_preset_handler_{preset}")
         await handler(enable)
 
-    def to_json(self) -> dict:
-        """Return a JSON representation of the thermostat."""
-        json = super().to_json()
-        json["hvac_modes"] = self.hvac_modes
-        json["fan_modes"] = self.fan_modes
-        json["preset_modes"] = self.preset_modes
-        json["supported_features"] = self.supported_features
-        json["max_temp"] = self.max_temp
-        json["min_temp"] = self.min_temp
-        return json
-
-    def get_state(self) -> dict:
-        """Get the state of the lock."""
-        response = super().get_state()
-        response["current_temperature"] = self.current_temperature
-        response["target_temperature"] = self.target_temperature
-        response["target_temperature_high"] = self.target_temperature_high
-        response["target_temperature_low"] = self.target_temperature_low
-        response["hvac_action"] = self.hvac_action
-        response["hvac_mode"] = self.hvac_mode
-        response["preset_mode"] = self.preset_mode
-        response["fan_mode"] = self.fan_mode
-        response.update(self.extra_state_attributes)
-        return response
-
 
 @MULTI_MATCH(
     cluster_handler_names={CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"},
@@ -610,7 +626,7 @@ class MoesThermostat(Thermostat):
         ]
         self._supported_flags |= ClimateEntityFeature.PRESET_MODE
 
-    @property
+    @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]
@@ -698,7 +714,7 @@ class BecaThermostat(Thermostat):
         ]
         self._supported_flags |= ClimateEntityFeature.PRESET_MODE
 
-    @property
+    @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]
@@ -760,7 +776,7 @@ class BecaThermostat(Thermostat):
 class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
 
-    @property
+    @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]

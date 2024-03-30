@@ -3,14 +3,22 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+import dataclasses
+from dataclasses import dataclass
 import functools
 import math
 from typing import TYPE_CHECKING, Any
 
+from zigpy.types import EUI64
 from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
+from zha.application.platforms import (
+    BaseEntity,
+    BaseEntityInfo,
+    GroupEntity,
+    PlatformEntity,
+)
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
     ATTR_PRESET_MODE,
@@ -36,6 +44,7 @@ from zha.application.platforms.fan.helpers import (
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import (
     ClusterAttributeUpdatedEvent,
+    ClusterHandlerInfo,
     wrap_zigpy_exceptions,
 )
 from zha.zigbee.cluster_handlers.const import (
@@ -54,6 +63,28 @@ GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
 
 
+@dataclass(frozen=True, kw_only=True)
+class FanEntityInfo(BaseEntityInfo):
+    """Fan entity info."""
+
+    # combination of PlatformEntityInfo and GroupEntityInfo
+    unique_id: str
+    platform: str
+    class_name: str
+
+    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
+    device_ieee: EUI64 | None = dataclasses.field(default=None)
+    endpoint_id: int | None = dataclasses.field(default=None)
+    group_id: int | None = dataclasses.field(default=None)
+    name: str | None = dataclasses.field(default=None)
+    available: bool | None = dataclasses.field(default=None)
+
+    preset_modes: list[str]
+    supported_features: int
+    speed_count: int
+    speed_list: list[str]
+
+
 class BaseFan(BaseEntity):
     """Base representation of a ZHA fan."""
 
@@ -62,37 +93,37 @@ class BaseFan(BaseEntity):
     _attr_supported_features = FanEntityFeature.SET_SPEED
     _attr_translation_key: str = "fan"
 
-    @property
+    @functools.cached_property
     def preset_modes(self) -> list[str]:
         """Return the available preset modes."""
         return list(self.preset_modes_to_name.values())
 
-    @property
+    @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return PRESET_MODES_TO_NAME
 
-    @property
+    @functools.cached_property
     def preset_name_to_mode(self) -> dict[str, int]:
         """Return a dict from preset name to mode."""
         return {v: k for k, v in self.preset_modes_to_name.items()}
 
-    @property
+    @functools.cached_property
     def default_on_percentage(self) -> int:
         """Return the default on percentage."""
         return DEFAULT_ON_PERCENTAGE
 
-    @property
+    @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
         """Return the range of speeds the fan supports. Off is not included."""
         return SPEED_RANGE
 
-    @property
+    @functools.cached_property
     def speed_count(self) -> int:
         """Return the number of speeds the fan supports."""
         return int_states_in_range(self.speed_range)
 
-    @property
+    @functools.cached_property
     def supported_features(self) -> int:
         """Flag supported features."""
         return SUPPORT_SET_SPEED
@@ -102,12 +133,12 @@ class BaseFan(BaseEntity):
         """Return true if the entity is on."""
         return self.speed not in [SPEED_OFF, None]  # pylint: disable=no-member
 
-    @property
+    @functools.cached_property
     def percentage_step(self) -> float:
         """Return the step size for percentage."""
         return 100 / self.speed_count
 
-    @property
+    @functools.cached_property
     def speed_list(self) -> list[str]:
         """Get the list of available speeds."""
         speeds = [SPEED_OFF, *LEGACY_SPEED_LIST]
@@ -177,17 +208,6 @@ class BaseFan(BaseEntity):
             return SPEED_OFF
         return percentage_to_ordered_list_item(LEGACY_SPEED_LIST, percentage)
 
-    def to_json(self) -> dict:
-        """Return a JSON representation of the binary sensor."""
-        json = super().to_json()
-        json["preset_modes"] = self.preset_modes
-        json["supported_features"] = self.supported_features
-        json["speed_count"] = self.speed_count
-        json["speed_list"] = self.speed_list
-        json["percentage_step"] = self.percentage_step
-        json["default_on_percentage"] = self.default_on_percentage
-        return json
-
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_FAN)
 class Fan(PlatformEntity, BaseFan):
@@ -211,6 +231,31 @@ class Fan(PlatformEntity, BaseFan):
                 CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 self.handle_cluster_handler_attribute_updated,
             )
+
+    @functools.cached_property
+    def info_object(self) -> FanEntityInfo:
+        """Return a representation of the binary sensor."""
+        return FanEntityInfo(
+            **super().info_object.__dict__,
+            preset_modes=self.preset_modes,
+            supported_features=self.supported_features,
+            speed_count=self.speed_count,
+            speed_list=self.speed_list,
+        )
+
+    @property
+    def state(self) -> dict:
+        """Return the state of the fan."""
+        response = super().state
+        response.update(
+            {
+                "preset_mode": self.preset_mode,
+                "percentage": self.percentage,
+                "is_on": self.is_on,
+                "speed": self.speed,
+            }
+        )
+        return response
 
     @property
     def percentage(self) -> int | None:
@@ -240,19 +285,6 @@ class Fan(PlatformEntity, BaseFan):
             return None
         return self.percentage_to_speed(percentage)
 
-    def get_state(self) -> dict:
-        """Return the state of the fan."""
-        response = super().get_state()
-        response.update(
-            {
-                "preset_mode": self.preset_mode,
-                "percentage": self.percentage,
-                "is_on": self.is_on,
-                "speed": self.speed,
-            }
-        )
-        return response
-
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
         await self._fan_cluster_handler.async_set_speed(fan_mode)
@@ -272,6 +304,34 @@ class FanGroup(GroupEntity, BaseFan):
         self._available: bool = False
         self._percentage = None
         self._preset_mode = None
+        if hasattr(self, "info_object"):
+            delattr(self, "info_object")
+        self.update()
+
+    @functools.cached_property
+    def info_object(self) -> FanEntityInfo:
+        """Return a representation of the binary sensor."""
+        return FanEntityInfo(
+            **super().info_object.__dict__,
+            preset_modes=self.preset_modes,
+            supported_features=self.supported_features,
+            speed_count=self.speed_count,
+            speed_list=self.speed_list,
+        )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the fan."""
+        response = super().state
+        response.update(
+            {
+                "preset_mode": self.preset_mode,
+                "percentage": self.percentage,
+                "is_on": self.is_on,
+                "speed": self.speed,
+            }
+        )
+        return response
 
     @property
     def percentage(self) -> int | None:
@@ -292,19 +352,6 @@ class FanGroup(GroupEntity, BaseFan):
             return None
         return self.percentage_to_speed(percentage)
 
-    def get_state(self) -> dict:
-        """Return the state of the fan."""
-        response = super().get_state()
-        response.update(
-            {
-                "preset_mode": self.preset_mode,
-                "percentage": self.percentage,
-                "is_on": self.is_on,
-                "speed": self.speed,
-            }
-        )
-        return response
-
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the group."""
 
@@ -317,8 +364,7 @@ class FanGroup(GroupEntity, BaseFan):
         """Attempt to retrieve on off state from the fan."""
         self.debug("Updating fan group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_entities = [entity.to_json() for entity in platform_entities]
-        all_states = [entity["state"] for entity in all_entities]
+        all_states = [entity.state for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
@@ -384,12 +430,12 @@ class IkeaFan(Fan):
             self.handle_cluster_handler_attribute_updated,
         )
 
-    @property
+    @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return IKEA_PRESET_MODES_TO_NAME
 
-    @property
+    @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
         """Return the range of speeds the fan supports. Off is not included."""
         return IKEA_SPEED_RANGE
@@ -411,12 +457,12 @@ class KofFan(Fan):
 
     _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE
 
-    @property
+    @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
         """Return the range of speeds the fan supports. Off is not included."""
         return (1, 4)
 
-    @property
+    @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return {6: PRESET_MODE_SMART}

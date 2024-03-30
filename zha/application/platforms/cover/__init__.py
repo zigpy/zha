@@ -83,11 +83,66 @@ class Cover(PlatformEntity):
         )
         self._target_lift_position: int | None = None
         self._target_tilt_position: int | None = None
+        self._state: str
         self._determine_initial_state()
         self._cover_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
         )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the cover."""
+        response = super().state
+        response.update(
+            {
+                ATTR_CURRENT_POSITION: self.current_cover_position,
+                "state": self._state,
+                "is_opening": self.is_opening,
+                "is_closing": self.is_closing,
+                "is_closed": self.is_closed,
+            }
+        )
+        return response
+
+    @property
+    def is_closed(self) -> bool | None:
+        """Return True if the cover is closed.
+
+        In HA None is unknown, 0 is closed, 100 is fully open.
+        In ZCL 0 is fully open, 100 is fully closed.
+        Keep in mind the values have already been flipped to match HA
+        in the WindowCovering cluster handler
+        """
+        if self.current_cover_position is None:
+            return None
+        return self.current_cover_position == 0
+
+    @property
+    def is_opening(self) -> bool:
+        """Return if the cover is opening or not."""
+        return self._state == STATE_OPENING
+
+    @property
+    def is_closing(self) -> bool:
+        """Return if the cover is closing or not."""
+        return self._state == STATE_CLOSING
+
+    @property
+    def current_cover_position(self) -> int | None:
+        """Return the current position of ZHA cover.
+
+        In HA None is unknown, 0 is closed, 100 is fully open.
+        In ZCL 0 is fully open, 100 is fully closed.
+        Keep in mind the values have already been flipped to match HA
+        in the WindowCovering cluster handler
+        """
+        return self._cover_cluster_handler.current_position_lift_percentage
+
+    @property
+    def current_cover_tilt_position(self) -> int | None:
+        """Return the current tilt position of the cover."""
+        return self._cover_cluster_handler.current_position_tilt_percentage
 
     def _determine_supported_features(self) -> CoverEntityFeature:
         """Determine the supported cover features."""
@@ -167,45 +222,6 @@ class Cover(PlatformEntity):
             # we are mid transition and shouldn't update the state
             return
         self._state = STATE_OPEN
-
-    @property
-    def is_closed(self) -> bool | None:
-        """Return True if the cover is closed.
-
-        In HA None is unknown, 0 is closed, 100 is fully open.
-        In ZCL 0 is fully open, 100 is fully closed.
-        Keep in mind the values have already been flipped to match HA
-        in the WindowCovering cluster handler
-        """
-        if self.current_cover_position is None:
-            return None
-        return self.current_cover_position == 0
-
-    @property
-    def is_opening(self) -> bool:
-        """Return if the cover is opening or not."""
-        return self._state == STATE_OPENING
-
-    @property
-    def is_closing(self) -> bool:
-        """Return if the cover is closing or not."""
-        return self._state == STATE_CLOSING
-
-    @property
-    def current_cover_position(self) -> int | None:
-        """Return the current position of ZHA cover.
-
-        In HA None is unknown, 0 is closed, 100 is fully open.
-        In ZCL 0 is fully open, 100 is fully closed.
-        Keep in mind the values have already been flipped to match HA
-        in the WindowCovering cluster handler
-        """
-        return self._cover_cluster_handler.current_position_lift_percentage
-
-    @property
-    def current_cover_tilt_position(self) -> int | None:
-        """Return the current tilt position of the cover."""
-        return self._cover_cluster_handler.current_position_tilt_percentage
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -315,20 +331,6 @@ class Cover(PlatformEntity):
         self._determine_state(self.current_cover_tilt_position, is_lift_update=False)
         self.maybe_emit_state_changed_event()
 
-    def get_state(self) -> dict:
-        """Get the state of the cover."""
-        response = super().get_state()
-        response.update(
-            {
-                ATTR_CURRENT_POSITION: self.current_cover_position,
-                "state": self._state,
-                "is_opening": self.is_opening,
-                "is_closing": self.is_closing,
-                "is_closed": self.is_closed,
-            }
-        )
-        return response
-
 
 @MULTI_MATCH(
     cluster_handler_names={
@@ -374,6 +376,23 @@ class Shade(PlatformEntity):
         self._level_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED, self.handle_cluster_handler_set_level
         )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the cover."""
+        if (closed := self.is_closed) is None:
+            state = None
+        else:
+            state = STATE_CLOSED if closed else STATE_OPEN
+        response = super().state
+        response.update(
+            {
+                ATTR_CURRENT_POSITION: self.current_cover_position,
+                "is_closed": self.is_closed,
+                "state": state,
+            }
+        )
+        return response
 
     @property
     def current_cover_position(self) -> int | None:
@@ -443,22 +462,6 @@ class Shade(PlatformEntity):
         res = await self._level_cluster_handler.stop()
         if res[1] != Status.SUCCESS:
             raise ZHAException(f"Failed to stop cover: {res[1]}")
-
-    def get_state(self) -> dict:
-        """Get the state of the cover."""
-        if (closed := self.is_closed) is None:
-            state = None
-        else:
-            state = STATE_CLOSED if closed else STATE_OPEN
-        response = super().get_state()
-        response.update(
-            {
-                ATTR_CURRENT_POSITION: self.current_cover_position,
-                "is_closed": self.is_closed,
-                "state": state,
-            }
-        )
-        return response
 
 
 @MULTI_MATCH(

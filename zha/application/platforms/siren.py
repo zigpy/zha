@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 from enum import IntFlag
 import functools
 from typing import TYPE_CHECKING, Any, Final, cast
@@ -23,7 +24,7 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, PlatformEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
 from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
@@ -52,6 +53,14 @@ class SirenEntityFeature(IntFlag):
     DURATION = 16
 
 
+@dataclass(frozen=True, kw_only=True)
+class SirenEntityInfo(PlatformEntityInfo):
+    """Siren entity info."""
+
+    available_tones: dict[int, str]
+    supported_features: SirenEntityFeature
+
+
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
 class Siren(PlatformEntity):
     """Representation of a ZHA siren."""
@@ -75,7 +84,7 @@ class Siren(PlatformEntity):
             | SirenEntityFeature.VOLUME_SET
             | SirenEntityFeature.TONES
         )
-        self._attr_available_tones: list[int | str] | dict[int, str] | None = {
+        self._attr_available_tones: dict[int, str] = {
             WARNING_DEVICE_MODE_BURGLAR: "Burglar",
             WARNING_DEVICE_MODE_FIRE: "Fire",
             WARNING_DEVICE_MODE_EMERGENCY: "Emergency",
@@ -89,6 +98,22 @@ class Siren(PlatformEntity):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._attr_is_on: bool = False
         self._off_listener: asyncio.TimerHandle | None = None
+
+    @functools.cached_property
+    def info_object(self) -> SirenEntityInfo:
+        """Return representation of the siren."""
+        return SirenEntityInfo(
+            **super().info_object.__dict__,
+            available_tones=self._attr_available_tones,
+            supported_features=self._attr_supported_features,
+        )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the siren."""
+        response = super().state
+        response["state"] = self._attr_is_on
+        return response
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on siren."""
@@ -157,16 +182,3 @@ class Siren(PlatformEntity):
             self._off_listener.cancel()
             self._off_listener = None
         self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return JSON representation of the siren."""
-        json = super().to_json()
-        json[ATTR_AVAILABLE_TONES] = self._attr_available_tones
-        json["supported_features"] = self._attr_supported_features
-        return json
-
-    def get_state(self) -> dict:
-        """Get the state of the siren."""
-        response = super().get_state()
-        response["state"] = self._attr_is_on
-        return response

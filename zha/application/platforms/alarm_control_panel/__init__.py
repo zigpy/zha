@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl.clusters.security import IasAce
 
@@ -16,7 +17,7 @@ from zha.application.const import (
     ZHA_ALARM_OPTIONS,
 )
 from zha.application.helpers import async_get_zha_config_value
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.alarm_control_panel.const import (
     IAS_ACE_STATE_MAP,
     SUPPORT_ALARM_ARM_AWAY,
@@ -46,6 +47,16 @@ STRICT_MATCH = functools.partial(
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class AlarmControlPanelEntityInfo(PlatformEntityInfo):
+    """Alarm control panel entity info."""
+
+    code_arm_required: bool
+    code_format: CodeFormat
+    supported_features: int
+    translation_key: str
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_ACE)
@@ -80,27 +91,57 @@ class AlarmControlPanel(PlatformEntity):
             CLUSTER_HANDLER_STATE_CHANGED, self._handle_event_protocol
         )
 
-    def handle_cluster_handler_state_changed(
-        self,
-        event: ClusterHandlerStateChangedEvent,  # pylint: disable=unused-argument
-    ) -> None:
-        """Handle state changed on cluster."""
-        self.maybe_emit_state_changed_event()
+    @functools.cached_property
+    def info_object(self) -> AlarmControlPanelEntityInfo:
+        """Return a representation of the alarm control panel."""
+        return AlarmControlPanelEntityInfo(
+            **super().info_object.__dict__,
+            code_arm_required=self.code_arm_required,
+            code_format=self.code_format,
+            supported_features=self.supported_features,
+            translation_key=self.translation_key,
+        )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the alarm control panel."""
+        response = super().state
+        response["state"] = IAS_ACE_STATE_MAP.get(
+            self._cluster_handler.armed_state, AlarmState.UNKNOWN
+        )
+        return response
 
     @property
     def code_arm_required(self) -> bool:
         """Whether the code is required for arm actions."""
         return self._cluster_handler.code_required_arm_actions
 
-    @property
+    @functools.cached_property
     def code_format(self) -> CodeFormat:
         """Code format or None if no code is required."""
         return CodeFormat.NUMBER
 
-    @property
+    @functools.cached_property
     def translation_key(self) -> str:
         """Return the translation key."""
         return self._attr_translation_key
+
+    @functools.cached_property
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+        return (
+            SUPPORT_ALARM_ARM_HOME
+            | SUPPORT_ALARM_ARM_AWAY
+            | SUPPORT_ALARM_ARM_NIGHT
+            | SUPPORT_ALARM_TRIGGER
+        )
+
+    def handle_cluster_handler_state_changed(
+        self,
+        event: ClusterHandlerStateChangedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle state changed on cluster."""
+        self.maybe_emit_state_changed_event()
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
@@ -126,35 +167,3 @@ class AlarmControlPanel(PlatformEntity):
         """Send alarm trigger command."""
         self._cluster_handler.panic()
         self.maybe_emit_state_changed_event()
-
-    @property
-    def supported_features(self) -> int:
-        """Return the list of supported features."""
-        return (
-            SUPPORT_ALARM_ARM_HOME
-            | SUPPORT_ALARM_ARM_AWAY
-            | SUPPORT_ALARM_ARM_NIGHT
-            | SUPPORT_ALARM_TRIGGER
-        )
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the alarm control panel."""
-        json = super().to_json()
-        json["supported_features"] = self.supported_features
-        json["code_arm_required"] = self.code_arm_required
-        json["code_format"] = self.code_format
-        json["translation_key"] = self.translation_key
-        return json
-
-    @property
-    def state(self) -> str:
-        """Return the state of the entity."""
-        return IAS_ACE_STATE_MAP.get(
-            self._cluster_handler.armed_state, AlarmState.UNKNOWN
-        )
-
-    def get_state(self) -> dict:
-        """Get the state of the alarm control panel."""
-        response = super().get_state()
-        response["state"] = self.state
-        return response

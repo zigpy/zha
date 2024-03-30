@@ -31,36 +31,19 @@ import zigpy.zdo.types as zdo_types
 
 from zha.application import discovery
 from zha.application.const import (
-    ATTR_ACTIVE_COORDINATOR,
     ATTR_ARGS,
     ATTR_ATTRIBUTE,
-    ATTR_AVAILABLE,
     ATTR_CLUSTER_ID,
     ATTR_CLUSTER_TYPE,
     ATTR_COMMAND,
     ATTR_COMMAND_TYPE,
-    ATTR_DEVICE_TYPE,
     ATTR_ENDPOINT_ID,
-    ATTR_ENDPOINT_NAMES,
     ATTR_ENDPOINTS,
-    ATTR_IEEE,
-    ATTR_LAST_SEEN,
-    ATTR_LQI,
     ATTR_MANUFACTURER,
-    ATTR_MANUFACTURER_CODE,
     ATTR_MODEL,
-    ATTR_NAME,
-    ATTR_NEIGHBORS,
     ATTR_NODE_DESCRIPTOR,
-    ATTR_NWK,
     ATTR_PARAMS,
-    ATTR_POWER_SOURCE,
-    ATTR_QUIRK_APPLIED,
-    ATTR_QUIRK_CLASS,
     ATTR_QUIRK_ID,
-    ATTR_ROUTES,
-    ATTR_RSSI,
-    ATTR_SIGNATURE,
     ATTR_VALUE,
     CLUSTER_COMMAND_SERVER,
     CLUSTER_COMMANDS_CLIENT,
@@ -83,7 +66,7 @@ from zha.application.const import (
     ZHA_OPTIONS,
 )
 from zha.application.helpers import async_get_zha_config_value, convert_to_zcl_values
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, PlatformEntityInfo
 from zha.decorators import periodic
 from zha.event import EventBase
 from zha.exceptions import ZHAException
@@ -145,6 +128,73 @@ class ClusterHandlerConfigurationComplete:
     unique_id: str
     event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
     event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
+
+
+@dataclass(kw_only=True, frozen=True)
+class DeviceInfo:
+    """Describes a device."""
+
+    ieee: str
+    nwk: int
+    manufacturer: str
+    model: str
+    name: str
+    quirk_applied: bool
+    quirk_class: str
+    quirk_id: str | None
+    manufacturer_code: int | None
+    power_source: str
+    lqi: int
+    rssi: int
+    last_seen: str
+    available: bool
+    device_type: str
+    signature: dict[str, Any]
+
+
+@dataclass(kw_only=True, frozen=True)
+class NeighborInfo:
+    """Describes a neighbor."""
+
+    device_type: str
+    rx_on_when_idle: str
+    relationship: str
+    extended_pan_id: str
+    ieee: str
+    nwk: str
+    permit_joining: str
+    depth: str
+    lqi: str
+
+
+@dataclass(kw_only=True, frozen=True)
+class RouteInfo:
+    """Describes a route."""
+
+    dest_nwk: str
+    route_status: str
+    memory_constrained: bool
+    many_to_one: bool
+    route_record_required: bool
+    next_hop: str
+
+
+@dataclass(kw_only=True, frozen=True)
+class EndpointNameInfo:
+    """Describes an endpoint name."""
+
+    name: str
+
+
+@dataclass(kw_only=True, frozen=True)
+class ExtendedDeviceInfo(DeviceInfo):
+    """Describes a ZHA device."""
+
+    active_coordinator: bool
+    entities: dict[str, PlatformEntityInfo]
+    neighbors: list[NeighborInfo]
+    routes: list[RouteInfo]
+    endpoint_names: list[EndpointNameInfo]
 
 
 class Device(LogMixin, EventBase):
@@ -220,36 +270,36 @@ class Device(LogMixin, EventBase):
                 getattr(self, "__polling_interval"),
             )
 
-    @property
+    @cached_property
     def device(self) -> zigpy.device.Device:
         """Return underlying Zigpy device."""
         return self._zigpy_device
 
-    @property
+    @cached_property
     def name(self) -> str:
         """Return device name."""
         return f"{self.manufacturer} {self.model}"
 
-    @property
+    @cached_property
     def ieee(self) -> EUI64:
         """Return ieee address for device."""
         return self._zigpy_device.ieee
 
-    @property
+    @cached_property
     def manufacturer(self) -> str:
         """Return manufacturer for device."""
         if self._zigpy_device.manufacturer is None:
             return UNKNOWN_MANUFACTURER
         return self._zigpy_device.manufacturer
 
-    @property
+    @cached_property
     def model(self) -> str:
         """Return model for device."""
         if self._zigpy_device.model is None:
             return UNKNOWN_MODEL
         return self._zigpy_device.model
 
-    @property
+    @cached_property
     def manufacturer_code(self) -> int | None:
         """Return the manufacturer code for the device."""
         if self._zigpy_device.node_desc is None:
@@ -257,7 +307,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.manufacturer_code
 
-    @property
+    @cached_property
     def nwk(self) -> NWK:
         """Return nwk for device."""
         return self._zigpy_device.nwk
@@ -277,7 +327,7 @@ class Device(LogMixin, EventBase):
         """Return last_seen for device."""
         return self._zigpy_device.last_seen
 
-    @property
+    @cached_property
     def is_mains_powered(self) -> bool | None:
         """Return true if device is mains powered."""
         if self._zigpy_device.node_desc is None:
@@ -285,7 +335,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.is_mains_powered
 
-    @property
+    @cached_property
     def device_type(self) -> str:
         """Return the logical device type for the device."""
         if self._zigpy_device.node_desc is None:
@@ -300,7 +350,7 @@ class Device(LogMixin, EventBase):
             POWER_MAINS_POWERED if self.is_mains_powered else POWER_BATTERY_OR_UNKNOWN
         )
 
-    @property
+    @cached_property
     def is_router(self) -> bool | None:
         """Return true if this is a routing capable device."""
         if self._zigpy_device.node_desc is None:
@@ -308,7 +358,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.is_router
 
-    @property
+    @cached_property
     def is_coordinator(self) -> bool | None:
         """Return true if this device represents a coordinator."""
         if self._zigpy_device.node_desc is None:
@@ -324,7 +374,7 @@ class Device(LogMixin, EventBase):
 
         return self.ieee == self.gateway.state.node_info.ieee
 
-    @property
+    @cached_property
     def is_end_device(self) -> bool | None:
         """Return true if this device is an end device."""
         if self._zigpy_device.node_desc is None:
@@ -339,12 +389,12 @@ class Device(LogMixin, EventBase):
             self.available and bool(self.async_get_groupable_endpoints())
         )
 
-    @property
+    @cached_property
     def skip_configuration(self) -> bool:
         """Return true if the device should not issue configuration related commands."""
         return self._zigpy_device.skip_configuration or bool(self.is_coordinator)
 
-    @property
+    @cached_property
     def gateway(self):
         """Return the gateway for this device."""
         return self._gateway
@@ -406,7 +456,7 @@ class Device(LogMixin, EventBase):
         if self._identify_ch is None:
             self._identify_ch = cluster_handler
 
-    @property
+    @cached_property
     def zdo_cluster_handler(self) -> ZDOClusterHandler:
         """Return ZDO cluster handler."""
         return self._zdo_handler
@@ -416,7 +466,7 @@ class Device(LogMixin, EventBase):
         """Return the endpoints for this device."""
         return self._endpoints
 
-    @property
+    @cached_property
     def zigbee_signature(self) -> dict[str, Any]:
         """Get zigbee signature for this device."""
         return {
@@ -572,29 +622,86 @@ class Device(LogMixin, EventBase):
             platform_entity.maybe_emit_state_changed_event()
 
     @property
-    def device_info(self) -> dict[str, Any]:
+    def device_info(self) -> DeviceInfo:
         """Return a device description for device."""
         ieee = str(self.ieee)
         time_struct = time.localtime(self.last_seen)
         update_time = time.strftime("%Y-%m-%dT%H:%M:%S", time_struct)
-        return {
-            ATTR_IEEE: ieee,
-            ATTR_NWK: self.nwk,
-            ATTR_MANUFACTURER: self.manufacturer,
-            ATTR_MODEL: self.model,
-            ATTR_NAME: self.name or ieee,
-            ATTR_QUIRK_APPLIED: self.quirk_applied,
-            ATTR_QUIRK_CLASS: self.quirk_class,
-            ATTR_QUIRK_ID: self.quirk_id,
-            ATTR_MANUFACTURER_CODE: self.manufacturer_code,
-            ATTR_POWER_SOURCE: self.power_source,
-            ATTR_LQI: self.lqi,
-            ATTR_RSSI: self.rssi,
-            ATTR_LAST_SEEN: update_time,
-            ATTR_AVAILABLE: self.available,
-            ATTR_DEVICE_TYPE: self.device_type,
-            ATTR_SIGNATURE: self.zigbee_signature,
-        }
+        return DeviceInfo(
+            ieee=ieee,
+            nwk=self.nwk,
+            manufacturer=self.manufacturer,
+            model=self.model,
+            name=self.name,
+            quirk_applied=self.quirk_applied,
+            quirk_class=self.quirk_class,
+            quirk_id=self.quirk_id,
+            manufacturer_code=self.manufacturer_code,
+            power_source=self.power_source,
+            lqi=self.lqi,
+            rssi=self.rssi,
+            last_seen=update_time,
+            available=self.available,
+            device_type=self.device_type,
+            signature=self.zigbee_signature,
+        )
+
+    @property
+    def extended_device_info(self) -> ExtendedDeviceInfo:
+        """Get extended device information."""
+        topology = self.gateway.application_controller.topology
+        names: list[EndpointNameInfo] = []
+        for endpoint in (ep for epid, ep in self.device.endpoints.items() if epid):
+            profile = PROFILES.get(endpoint.profile_id)
+            if profile and endpoint.device_type is not None:
+                # DeviceType provides undefined enums
+                names.append(
+                    EndpointNameInfo(name=profile.DeviceType(endpoint.device_type).name)
+                )
+            else:
+                names.append(
+                    EndpointNameInfo(
+                        name=(
+                            f"unknown {endpoint.device_type} device_type "
+                            f"of 0x{(endpoint.profile_id or 0xFFFF):04x} profile id"
+                        )
+                    )
+                )
+
+        return ExtendedDeviceInfo(
+            **self.device_info.__dict__,
+            active_coordinator=self.is_active_coordinator,
+            entities={
+                unique_id: platform_entity.info_object
+                for unique_id, platform_entity in self.platform_entities.items()
+            },
+            neighbors=[
+                NeighborInfo(
+                    device_type=neighbor.device_type.name,
+                    rx_on_when_idle=neighbor.rx_on_when_idle.name,
+                    relationship=neighbor.relationship.name,
+                    extended_pan_id=str(neighbor.extended_pan_id),
+                    ieee=str(neighbor.ieee),
+                    nwk=str(neighbor.nwk),
+                    permit_joining=neighbor.permit_joining.name,
+                    depth=str(neighbor.depth),
+                    lqi=str(neighbor.lqi),
+                )
+                for neighbor in topology.neighbors[self.ieee]
+            ],
+            routes=[
+                RouteInfo(
+                    dest_nwk=str(route.DstNWK),
+                    route_status=route.RouteStatus.name,
+                    memory_constrained=bool(route.MemoryConstrained),
+                    many_to_one=bool(route.ManyToOne),
+                    route_record_required=bool(route.RouteRecordRequired),
+                    next_hop=str(route.NextHop),
+                )
+                for route in topology.routes[self.ieee]
+            ],
+            endpoint_names=names,
+        )
 
     async def async_configure(self) -> None:
         """Configure the device."""
@@ -664,64 +771,6 @@ class Device(LogMixin, EventBase):
             await asyncio.gather(*tasks, return_exceptions=True)
         for platform_entity in self._platform_entities.values():
             await platform_entity.on_remove()
-
-    @property
-    def zha_device_info(self) -> dict[str, Any]:
-        """Get ZHA device information."""
-        device_info: dict[str, Any] = {}
-        device_info.update(self.device_info)
-        device_info[ATTR_ACTIVE_COORDINATOR] = self.is_active_coordinator
-        device_info["entities"] = {
-            unique_id: platform_entity.to_json()
-            for unique_id, platform_entity in self.platform_entities.items()
-        }
-
-        topology = self.gateway.application_controller.topology
-        device_info[ATTR_NEIGHBORS] = [
-            {
-                "device_type": neighbor.device_type.name,
-                "rx_on_when_idle": neighbor.rx_on_when_idle.name,
-                "relationship": neighbor.relationship.name,
-                "extended_pan_id": str(neighbor.extended_pan_id),
-                "ieee": str(neighbor.ieee),
-                "nwk": str(neighbor.nwk),
-                "permit_joining": neighbor.permit_joining.name,
-                "depth": str(neighbor.depth),
-                "lqi": str(neighbor.lqi),
-            }
-            for neighbor in topology.neighbors[self.ieee]
-        ]
-
-        device_info[ATTR_ROUTES] = [
-            {
-                "dest_nwk": str(route.DstNWK),
-                "route_status": str(route.RouteStatus.name),
-                "memory_constrained": bool(route.MemoryConstrained),
-                "many_to_one": bool(route.ManyToOne),
-                "route_record_required": bool(route.RouteRecordRequired),
-                "next_hop": str(route.NextHop),
-            }
-            for route in topology.routes[self.ieee]
-        ]
-
-        # Return endpoint device type Names
-        names: list[dict[str, str]] = []
-        for endpoint in (ep for epid, ep in self.device.endpoints.items() if epid):
-            profile = PROFILES.get(endpoint.profile_id)
-            if profile and endpoint.device_type is not None:
-                # DeviceType provides undefined enums
-                names.append({ATTR_NAME: profile.DeviceType(endpoint.device_type).name})
-            else:
-                names.append(
-                    {
-                        ATTR_NAME: (
-                            f"unknown {endpoint.device_type} device_type "
-                            f"of 0x{(endpoint.profile_id or 0xFFFF):04x} profile id"
-                        )
-                    }
-                )
-        device_info[ATTR_ENDPOINT_NAMES] = names
-        return device_info
 
     def async_get_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get all clusters for this device."""

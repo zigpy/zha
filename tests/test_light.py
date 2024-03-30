@@ -295,7 +295,7 @@ async def test_light_refresh(
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     on_off_cluster.read_attributes.reset_mock()
 
@@ -304,7 +304,7 @@ async def test_light_refresh(
     await zha_gateway.async_block_till_done()
     assert on_off_cluster.read_attributes.call_count == 0
     assert on_off_cluster.read_attributes.await_count == 0
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     # 1 interval - at least 1 call
     on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 1}
@@ -312,7 +312,7 @@ async def test_light_refresh(
     await zha_gateway.async_block_till_done()
     assert on_off_cluster.read_attributes.call_count >= 1
     assert on_off_cluster.read_attributes.await_count >= 1
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
 
     # 2 intervals - at least 2 calls
     on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 0}
@@ -320,7 +320,7 @@ async def test_light_refresh(
     await zha_gateway.async_block_till_done()
     assert on_off_cluster.read_attributes.call_count >= 2
     assert on_off_cluster.read_attributes.await_count >= 2
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
 
 # TODO reporting is not checked
@@ -384,7 +384,7 @@ async def test_light(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     # test turning the lights on and off from the light
     await async_test_on_off_from_light(zha_gateway, cluster_on_off, entity)
@@ -429,13 +429,13 @@ async def test_light(
 
     if cluster_color:
         # test color temperature from the client with transition
-        assert entity.get_state()["brightness"] != 50
-        assert entity.get_state()["color_temp"] != 200
+        assert entity.state["brightness"] != 50
+        assert entity.state["color_temp"] != 200
         await entity.async_turn_on(brightness=50, transition=10, color_temp=200)
         await zha_gateway.async_block_till_done()
-        assert entity.get_state()["brightness"] == 50
-        assert entity.get_state()["color_temp"] == 200
-        assert bool(entity.get_state()["on"]) is True
+        assert entity.state["brightness"] == 50
+        assert entity.state["color_temp"] == 200
+        assert bool(entity.state["on"]) is True
         assert cluster_color.request.call_count == 1
         assert cluster_color.request.await_count == 1
         assert cluster_color.request.call_args == call(
@@ -451,11 +451,11 @@ async def test_light(
         cluster_color.request.reset_mock()
 
         # test color xy from the client
-        assert entity.get_state()["xy_color"] != [13369, 18087]
+        assert entity.state["xy_color"] != [13369, 18087]
         await entity.async_turn_on(brightness=50, xy_color=[13369, 18087])
         await zha_gateway.async_block_till_done()
-        assert entity.get_state()["brightness"] == 50
-        assert entity.get_state()["xy_color"] == [13369, 18087]
+        assert entity.state["brightness"] == 50
+        assert entity.state["xy_color"] == [13369, 18087]
         assert cluster_color.request.call_count == 1
         assert cluster_color.request.await_count == 1
         assert cluster_color.request.call_args == call(
@@ -482,12 +482,12 @@ async def async_test_on_off_from_light(
     # turn on at light
     await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 3})
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
 
     # turn off at light
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 3})
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
 
 async def async_test_on_from_light(
@@ -501,7 +501,7 @@ async def async_test_on_from_light(
         zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off.id: 1}
     )
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
 
 
 async def async_test_on_off_from_client(
@@ -514,7 +514,7 @@ async def async_test_on_off_from_client(
     cluster.request.reset_mock()
     await entity.async_turn_on()
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
     assert cluster.request.call_count == 1
     assert cluster.request.await_count == 1
     assert cluster.request.call_args == call(
@@ -540,7 +540,7 @@ async def async_test_off_from_client(
     cluster.request.reset_mock()
     await entity.async_turn_off()
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
     assert cluster.request.call_count == 1
     assert cluster.request.await_count == 1
     assert cluster.request.call_args == call(
@@ -575,7 +575,7 @@ async def async_test_level_on_off_from_client(
         await zha_gateway.async_block_till_done()
         on_off_cluster.request.reset_mock()
         level_cluster.request.reset_mock()
-        assert bool(entity.get_state()["on"]) is False
+        assert bool(entity.state["on"]) is False
 
     await _reset_light()
     await _async_shift_time(zha_gateway)
@@ -583,7 +583,7 @@ async def async_test_level_on_off_from_client(
     # turn on via UI
     await entity.async_turn_on()
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
     assert on_off_cluster.request.call_count == 1
     assert on_off_cluster.request.await_count == 1
     assert level_cluster.request.call_count == 0
@@ -602,7 +602,7 @@ async def async_test_level_on_off_from_client(
 
     await entity.async_turn_on(transition=10)
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
     assert on_off_cluster.request.call_count == 0
     assert on_off_cluster.request.await_count == 0
     assert level_cluster.request.call_count == 1
@@ -622,7 +622,7 @@ async def async_test_level_on_off_from_client(
 
     await entity.async_turn_on(brightness=10)
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
     # the onoff cluster is now not used when brightness is present by default
     assert on_off_cluster.request.call_count == 0
     assert on_off_cluster.request.await_count == 0
@@ -657,12 +657,12 @@ async def async_test_dimmer_from_light(
         zha_gateway, cluster, {1: level + 10, 0: level, 2: level - 10 or 22}
     )
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["on"] == expected_state
+    assert entity.state["on"] == expected_state
     # hass uses None for brightness of 0 in state attributes
     if level == 0:
-        assert entity.get_state()["brightness"] is None
+        assert entity.state["brightness"] is None
     else:
-        assert entity.get_state()["brightness"] == level
+        assert entity.state["brightness"] == level
 
 
 async def async_test_flash_from_client(
@@ -676,7 +676,7 @@ async def async_test_flash_from_client(
     cluster.request.reset_mock()
     await entity.async_turn_on(flash=flash)
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
     assert cluster.request.call_count == 1
     assert cluster.request.await_count == 1
     assert cluster.request.call_args == call(
@@ -785,7 +785,7 @@ async def test_zha_group_light_entity(
     dev1_cluster_level = device_light_1.device.endpoints[1].level
 
     # test that the lights were created and are off
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     # test turning the lights on and off from the client
     await async_test_on_off_from_client(zha_gateway, group_cluster_on_off, entity)
@@ -829,40 +829,40 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
 
     # test that group light is on
-    assert device_1_light_entity.get_state()["on"] is True
-    assert device_2_light_entity.get_state()["on"] is True
-    assert bool(entity.get_state()["on"]) is True
+    assert device_1_light_entity.state["on"] is True
+    assert device_2_light_entity.state["on"] is True
+    assert bool(entity.state["on"]) is True
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # test that group light is still on
-    assert device_1_light_entity.get_state()["on"] is False
-    assert device_2_light_entity.get_state()["on"] is True
-    assert bool(entity.get_state()["on"]) is True
+    assert device_1_light_entity.state["on"] is False
+    assert device_2_light_entity.state["on"] is True
+    assert bool(entity.state["on"]) is True
 
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # test that group light is now off
-    assert device_1_light_entity.get_state()["on"] is False
-    assert device_2_light_entity.get_state()["on"] is False
-    assert bool(entity.get_state()["on"]) is False
+    assert device_1_light_entity.state["on"] is False
+    assert device_2_light_entity.state["on"] is False
+    assert bool(entity.state["on"]) is False
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
 
     # test that group light is now back on
-    assert device_1_light_entity.get_state()["on"] is True
-    assert device_2_light_entity.get_state()["on"] is False
-    assert bool(entity.get_state()["on"]) is True
+    assert device_1_light_entity.state["on"] is True
+    assert device_2_light_entity.state["on"] is False
+    assert bool(entity.state["on"]) is True
 
     # turn it off to test a new member add being tracked
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
-    assert device_1_light_entity.get_state()["on"] is False
-    assert device_2_light_entity.get_state()["on"] is False
-    assert bool(entity.get_state()["on"]) is False
+    assert device_1_light_entity.state["on"] is False
+    assert device_2_light_entity.state["on"] is False
+    assert bool(entity.state["on"]) is False
 
     # add a new member and test that his state is also tracked
     await zha_group.async_add_members(
@@ -876,10 +876,10 @@ async def test_zha_group_light_entity(
     await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
 
-    assert device_1_light_entity.get_state()["on"] is False
-    assert device_2_light_entity.get_state()["on"] is False
-    assert device_3_light_entity.get_state()["on"] is True
-    assert bool(entity.get_state()["on"]) is True
+    assert device_1_light_entity.state["on"] is False
+    assert device_2_light_entity.state["on"] is False
+    assert device_3_light_entity.state["on"] is True
+    assert bool(entity.state["on"]) is True
 
     # make the group have only 1 member and now there should be no entity
     await zha_group.async_remove_members(
@@ -908,14 +908,14 @@ async def test_zha_group_light_entity(
     assert entity is not None
     await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
 
     # add a 3rd member and ensure we still have an entity and we track the new member
     # First we turn the lights currently in the group off
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
     await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     # this will test that _reprobe_group is used correctly
     await zha_group.async_add_members(
@@ -930,7 +930,7 @@ async def test_zha_group_light_entity(
     assert entity is not None
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
 
     await zha_group.async_remove_members(
         [GroupMemberReference(ieee=coordinator.ieee, endpoint_id=1)]
@@ -938,7 +938,7 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     entity = get_group_entity(zha_group, group_entity_id)
     assert entity is not None
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(entity.state["on"]) is True
     assert len(zha_group.members) == 3
 
     # remove the group and ensure that there is no entity and that the entity registry is cleaned up
@@ -1116,9 +1116,9 @@ async def test_transitions(
     eWeLink_cluster_color = eWeLink_light.device.endpoints[1].light_color
 
     # test that the lights were created and are off
-    assert bool(entity.get_state()["on"]) is False
-    assert bool(device_1_light_entity.get_state()["on"]) is False
-    assert bool(device_2_light_entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
+    assert bool(device_1_light_entity.state["on"]) is False
+    assert bool(device_2_light_entity.state["on"]) is False
 
     # first test 0 length transition with no color and no brightness provided
     dev1_cluster_on_off.request.reset_mock()
@@ -1142,8 +1142,8 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_1_light_entity.get_state()["on"]) is True
-    assert device_1_light_entity.get_state()["brightness"] == 254
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert device_1_light_entity.state["brightness"] == 254
 
     # test 0 length transition with no color and no brightness provided again, but for "force on" lights
     eWeLink_cluster_on_off.request.reset_mock()
@@ -1176,8 +1176,8 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(eWeLink_light_entity.get_state()["on"]) is True
-    assert eWeLink_light_entity.get_state()["brightness"] == 254
+    assert bool(eWeLink_light_entity.state["on"]) is True
+    assert eWeLink_light_entity.state["brightness"] == 254
 
     eWeLink_cluster_on_off.request.reset_mock()
     eWeLink_cluster_level.request.reset_mock()
@@ -1204,8 +1204,8 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_1_light_entity.get_state()["on"]) is True
-    assert device_1_light_entity.get_state()["brightness"] == 50
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert device_1_light_entity.state["brightness"] == 50
 
     dev1_cluster_level.request.reset_mock()
 
@@ -1241,10 +1241,10 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_1_light_entity.get_state()["on"]) is True
-    assert device_1_light_entity.get_state()["brightness"] == 18
-    assert device_1_light_entity.get_state()["color_temp"] == 432
-    assert device_1_light_entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert device_1_light_entity.state["brightness"] == 18
+    assert device_1_light_entity.state["color_temp"] == 432
+    assert device_1_light_entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
     dev1_cluster_level.request.reset_mock()
     dev1_cluster_color.request.reset_mock()
@@ -1269,7 +1269,7 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_1_light_entity.get_state()["on"]) is False
+    assert bool(device_1_light_entity.state["on"]) is False
 
     dev1_cluster_level.request.reset_mock()
 
@@ -1317,10 +1317,10 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_1_light_entity.get_state()["on"]) is True
-    assert device_1_light_entity.get_state()["brightness"] == 25
-    assert device_1_light_entity.get_state()["color_temp"] == 235
-    assert device_1_light_entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert device_1_light_entity.state["brightness"] == 25
+    assert device_1_light_entity.state["color_temp"] == 235
+    assert device_1_light_entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
     dev1_cluster_level.request.reset_mock()
     dev1_cluster_color.request.reset_mock()
@@ -1335,7 +1335,7 @@ async def test_transitions(
     assert dev1_cluster_level.request.call_count == 0
     assert dev1_cluster_level.request.await_count == 0
 
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     dev1_cluster_on_off.request.reset_mock()
     dev1_cluster_color.request.reset_mock()
@@ -1383,10 +1383,10 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_1_light_entity.get_state()["on"]) is True
-    assert device_1_light_entity.get_state()["brightness"] == 25
-    assert device_1_light_entity.get_state()["color_temp"] == 236
-    assert device_1_light_entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert device_1_light_entity.state["brightness"] == 25
+    assert device_1_light_entity.state["color_temp"] == 236
+    assert device_1_light_entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
     dev1_cluster_level.request.reset_mock()
     dev1_cluster_color.request.reset_mock()
@@ -1400,7 +1400,7 @@ async def test_transitions(
     assert dev1_cluster_color.request.await_count == 0
     assert dev1_cluster_level.request.call_count == 0
     assert dev1_cluster_level.request.await_count == 0
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     dev1_cluster_on_off.request.reset_mock()
     dev1_cluster_color.request.reset_mock()
@@ -1436,10 +1436,10 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_1_light_entity.get_state()["on"]) is True
-    assert device_1_light_entity.get_state()["brightness"] == 25
-    assert device_1_light_entity.get_state()["color_temp"] == 236
-    assert device_1_light_entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert device_1_light_entity.state["brightness"] == 25
+    assert device_1_light_entity.state["color_temp"] == 236
+    assert device_1_light_entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
     dev1_cluster_on_off.request.reset_mock()
     dev1_cluster_color.request.reset_mock()
@@ -1453,7 +1453,7 @@ async def test_transitions(
     assert dev1_cluster_color.request.await_count == 0
     assert dev1_cluster_level.request.call_count == 0
     assert dev1_cluster_level.request.await_count == 0
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     dev1_cluster_on_off.request.reset_mock()
     dev1_cluster_color.request.reset_mock()
@@ -1483,8 +1483,8 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_2_light_entity.get_state()["on"]) is True
-    assert device_2_light_entity.get_state()["brightness"] == 100
+    assert bool(device_2_light_entity.state["on"]) is True
+    assert device_2_light_entity.state["brightness"] == 100
 
     dev2_cluster_level.request.reset_mock()
 
@@ -1497,7 +1497,7 @@ async def test_transitions(
     assert dev2_cluster_color.request.await_count == 0
     assert dev2_cluster_level.request.call_count == 0
     assert dev2_cluster_level.request.await_count == 0
-    assert bool(device_2_light_entity.get_state()["on"]) is False
+    assert bool(device_2_light_entity.state["on"]) is False
 
     dev2_cluster_on_off.request.reset_mock()
 
@@ -1545,10 +1545,10 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_2_light_entity.get_state()["on"]) is True
-    assert device_2_light_entity.get_state()["brightness"] == 25
-    assert device_2_light_entity.get_state()["color_temp"] == 235
-    assert device_2_light_entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(device_2_light_entity.state["on"]) is True
+    assert device_2_light_entity.state["brightness"] == 25
+    assert device_2_light_entity.state["color_temp"] == 235
+    assert device_2_light_entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
     dev2_cluster_level.request.reset_mock()
     dev2_cluster_color.request.reset_mock()
@@ -1562,7 +1562,7 @@ async def test_transitions(
     assert dev2_cluster_color.request.await_count == 0
     assert dev2_cluster_level.request.call_count == 0
     assert dev2_cluster_level.request.await_count == 0
-    assert bool(device_2_light_entity.get_state()["on"]) is False
+    assert bool(device_2_light_entity.state["on"]) is False
 
     dev2_cluster_on_off.request.reset_mock()
 
@@ -1602,10 +1602,10 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(entity.get_state()["on"]) is True
-    assert entity.get_state()["brightness"] == 25
-    assert entity.get_state()["color_temp"] == 235
-    assert entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(entity.state["on"]) is True
+    assert entity.state["brightness"] == 25
+    assert entity.state["color_temp"] == 235
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
     group_on_off_cluster_handler.request.reset_mock()
     group_color_cluster_handler.request.reset_mock()
@@ -1620,7 +1620,7 @@ async def test_transitions(
     assert dev2_cluster_color.request.await_count == 0
     assert dev2_cluster_level.request.call_count == 0
     assert dev2_cluster_level.request.await_count == 0
-    assert bool(device_2_light_entity.get_state()["on"]) is True
+    assert bool(device_2_light_entity.state["on"]) is True
 
     dev2_cluster_on_off.request.reset_mock()
 
@@ -1644,7 +1644,7 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_2_light_entity.get_state()["on"]) is False
+    assert bool(device_2_light_entity.state["on"]) is False
 
     dev2_cluster_level.request.reset_mock()
 
@@ -1668,7 +1668,7 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(device_2_light_entity.get_state()["on"]) is True
+    assert bool(device_2_light_entity.state["on"]) is True
 
     dev2_cluster_level.request.reset_mock()
     eWeLink_cluster_on_off.request.reset_mock()
@@ -1705,11 +1705,11 @@ async def test_transitions(
         tsn=None,
     )
 
-    assert bool(eWeLink_light_entity.get_state()["on"]) is True
-    assert eWeLink_light_entity.get_state()["color_temp"] == 235
-    assert eWeLink_light_entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
-    assert eWeLink_light_entity.to_json()["min_mireds"] == 153
-    assert eWeLink_light_entity.to_json()["max_mireds"] == 500
+    assert bool(eWeLink_light_entity.state["on"]) is True
+    assert eWeLink_light_entity.state["color_temp"] == 235
+    assert eWeLink_light_entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert eWeLink_light_entity.min_mireds == 153
+    assert eWeLink_light_entity.max_mireds == 500
 
 
 @patch(
@@ -1777,9 +1777,9 @@ async def test_on_with_off_color(
         tsn=None,
     )
 
-    assert bool(entity.get_state()["on"]) is True
-    assert entity.get_state()["color_temp"] == 235
-    assert entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(entity.state["on"]) is True
+    assert entity.state["color_temp"] == 235
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
     # now let's turn off the Execute_if_off option and see if the old behavior is restored
     dev1_cluster_color.PLUGGED_ATTR_READS = {"options": 0}
@@ -1834,10 +1834,10 @@ async def test_on_with_off_color(
         tsn=None,
     )
 
-    assert bool(entity.get_state()["on"]) is True
-    assert entity.get_state()["color_temp"] == 240
-    assert entity.get_state()["brightness"] == 254
-    assert entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
+    assert bool(entity.state["on"]) is True
+    assert entity.state["color_temp"] == 240
+    assert entity.state["brightness"] == 254
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
 
 
 @patch(
@@ -1906,7 +1906,7 @@ async def test_group_member_assume_state(
     group_cluster_on_off = zha_group.endpoint[general.OnOff.cluster_id]
 
     # test that the lights were created and are off
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(entity.state["on"]) is False
 
     group_cluster_on_off.request.reset_mock()
     await asyncio.sleep(11)
@@ -1916,15 +1916,15 @@ async def test_group_member_assume_state(
     await zha_gateway.async_block_till_done()
 
     # members also instantly assume STATE_ON
-    assert bool(device_1_light_entity.get_state()["on"]) is True
-    assert bool(device_2_light_entity.get_state()["on"]) is True
-    assert bool(entity.get_state()["on"]) is True
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert bool(device_2_light_entity.state["on"]) is True
+    assert bool(entity.state["on"]) is True
 
     # turn off via UI
     await entity.async_turn_off()
     await zha_gateway.async_block_till_done()
 
     # members also instantly assume STATE_OFF
-    assert bool(device_1_light_entity.get_state()["on"]) is False
-    assert bool(device_2_light_entity.get_state()["on"]) is False
-    assert bool(entity.get_state()["on"]) is False
+    assert bool(device_1_light_entity.state["on"]) is False
+    assert bool(device_2_light_entity.state["on"]) is False
+    assert bool(entity.state["on"]) is False

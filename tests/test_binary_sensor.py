@@ -53,7 +53,7 @@ async def async_test_binary_sensor_occupancy(
     assert entity.is_on is False
 
     # test refresh
-    cluster.read_attributes.reset_mock()  # type: ignore[unreachable]
+    cluster.read_attributes.reset_mock()
     assert entity.is_on is False
     cluster.PLUGGED_ATTR_READS = plugs
     update_attribute_cache(cluster)
@@ -84,7 +84,7 @@ async def async_test_iaszone_on_off(
     assert entity.is_on is False
 
     # check that binary sensor remains off when non-alarm bits change
-    cluster.listener_event("cluster_command", 1, 0, [0b1111111100])  # type: ignore[unreachable]
+    cluster.listener_event("cluster_command", 1, 0, [0b1111111100])
     await zha_gateway.async_block_till_done()
     assert entity.is_on is False
 

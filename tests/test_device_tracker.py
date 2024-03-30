@@ -63,7 +63,7 @@ async def test_device_tracker(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["connected"] is False
+    assert entity.state["connected"] is False
 
     # turn state flip
     await send_attributes_report(
@@ -76,7 +76,7 @@ async def test_device_tracker(
     await zha_gateway.async_block_till_done()
     assert entity.async_update.await_count == 1
 
-    assert entity.get_state()["connected"] is True
+    assert entity.state["connected"] is True
     assert entity.is_connected is True
     assert entity.source_type == SourceType.ROUTER
     assert entity.battery_level == 100
@@ -85,19 +85,19 @@ async def test_device_tracker(
     zigpy_device_dt.last_seen = time.time() - 90
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["connected"] is False
+    assert entity.state["connected"] is False
     assert entity.is_connected is False
 
     # bring it back
-    zigpy_device_dt.last_seen = time.time()  # type: ignore[unreachable]
+    zigpy_device_dt.last_seen = time.time()
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["connected"] is True
+    assert entity.state["connected"] is True
     assert entity.is_connected is True
 
     # knock it offline by setting last seen None
     zigpy_device_dt.last_seen = None
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["connected"] is False
+    assert entity.state["connected"] is False
     assert entity.is_connected is False
