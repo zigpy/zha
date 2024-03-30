@@ -93,37 +93,37 @@ class BaseFan(BaseEntity):
     _attr_supported_features = FanEntityFeature.SET_SPEED
     _attr_translation_key: str = "fan"
 
-    @property
+    @functools.cached_property
     def preset_modes(self) -> list[str]:
         """Return the available preset modes."""
         return list(self.preset_modes_to_name.values())
 
-    @property
+    @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return PRESET_MODES_TO_NAME
 
-    @property
+    @functools.cached_property
     def preset_name_to_mode(self) -> dict[str, int]:
         """Return a dict from preset name to mode."""
         return {v: k for k, v in self.preset_modes_to_name.items()}
 
-    @property
+    @functools.cached_property
     def default_on_percentage(self) -> int:
         """Return the default on percentage."""
         return DEFAULT_ON_PERCENTAGE
 
-    @property
+    @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
         """Return the range of speeds the fan supports. Off is not included."""
         return SPEED_RANGE
 
-    @property
+    @functools.cached_property
     def speed_count(self) -> int:
         """Return the number of speeds the fan supports."""
         return int_states_in_range(self.speed_range)
 
-    @property
+    @functools.cached_property
     def supported_features(self) -> int:
         """Flag supported features."""
         return SUPPORT_SET_SPEED
@@ -133,12 +133,12 @@ class BaseFan(BaseEntity):
         """Return true if the entity is on."""
         return self.speed not in [SPEED_OFF, None]  # pylint: disable=no-member
 
-    @property
+    @functools.cached_property
     def percentage_step(self) -> float:
         """Return the step size for percentage."""
         return 100 / self.speed_count
 
-    @property
+    @functools.cached_property
     def speed_list(self) -> list[str]:
         """Get the list of available speeds."""
         speeds = [SPEED_OFF, *LEGACY_SPEED_LIST]
@@ -430,12 +430,12 @@ class IkeaFan(Fan):
             self.handle_cluster_handler_attribute_updated,
         )
 
-    @property
+    @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return IKEA_PRESET_MODES_TO_NAME
 
-    @property
+    @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
         """Return the range of speeds the fan supports. Off is not included."""
         return IKEA_SPEED_RANGE
@@ -457,12 +457,12 @@ class KofFan(Fan):
 
     _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE
 
-    @property
+    @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
         """Return the range of speeds the fan supports. Off is not included."""
         return (1, 4)
 
-    @property
+    @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return {6: PRESET_MODE_SMART}

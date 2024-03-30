@@ -91,29 +91,15 @@ class AlarmControlPanel(PlatformEntity):
             CLUSTER_HANDLER_STATE_CHANGED, self._handle_event_protocol
         )
 
-    @property
-    def code_arm_required(self) -> bool:
-        """Whether the code is required for arm actions."""
-        return self._cluster_handler.code_required_arm_actions
-
-    @property
-    def code_format(self) -> CodeFormat:
-        """Code format or None if no code is required."""
-        return CodeFormat.NUMBER
-
-    @property
-    def translation_key(self) -> str:
-        """Return the translation key."""
-        return self._attr_translation_key
-
-    @property
-    def supported_features(self) -> int:
-        """Return the list of supported features."""
-        return (
-            SUPPORT_ALARM_ARM_HOME
-            | SUPPORT_ALARM_ARM_AWAY
-            | SUPPORT_ALARM_ARM_NIGHT
-            | SUPPORT_ALARM_TRIGGER
+    @functools.cached_property
+    def info_object(self) -> AlarmControlPanelEntityInfo:
+        """Return a representation of the alarm control panel."""
+        return AlarmControlPanelEntityInfo(
+            **super().info_object.__dict__,
+            code_arm_required=self.code_arm_required,
+            code_format=self.code_format,
+            supported_features=self.supported_features,
+            translation_key=self.translation_key,
         )
 
     @property
@@ -125,15 +111,29 @@ class AlarmControlPanel(PlatformEntity):
         )
         return response
 
+    @property
+    def code_arm_required(self) -> bool:
+        """Whether the code is required for arm actions."""
+        return self._cluster_handler.code_required_arm_actions
+
     @functools.cached_property
-    def info_object(self) -> AlarmControlPanelEntityInfo:
-        """Return a representation of the alarm control panel."""
-        return AlarmControlPanelEntityInfo(
-            **super().info_object.__dict__,
-            code_arm_required=self.code_arm_required,
-            code_format=self.code_format,
-            supported_features=self.supported_features,
-            translation_key=self.translation_key,
+    def code_format(self) -> CodeFormat:
+        """Code format or None if no code is required."""
+        return CodeFormat.NUMBER
+
+    @functools.cached_property
+    def translation_key(self) -> str:
+        """Return the translation key."""
+        return self._attr_translation_key
+
+    @functools.cached_property
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+        return (
+            SUPPORT_ALARM_ARM_HOME
+            | SUPPORT_ALARM_ARM_AWAY
+            | SUPPORT_ALARM_ARM_NIGHT
+            | SUPPORT_ALARM_TRIGGER
         )
 
     def handle_cluster_handler_state_changed(

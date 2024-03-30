@@ -8,6 +8,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
+from functools import cached_property
 import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
@@ -301,7 +302,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                     )
             self.config.platforms[platform].clear()
 
-    @property
+    @cached_property
     def radio_concurrency(self) -> int:
         """Maximum configured radio concurrency."""
         return self.application_controller._concurrent_requests_semaphore.max_value  # pylint: disable=protected-access

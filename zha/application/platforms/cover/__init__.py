@@ -90,6 +90,60 @@ class Cover(PlatformEntity):
             self.handle_cluster_handler_attribute_updated,
         )
 
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the cover."""
+        response = super().state
+        response.update(
+            {
+                ATTR_CURRENT_POSITION: self.current_cover_position,
+                "state": self._state,
+                "is_opening": self.is_opening,
+                "is_closing": self.is_closing,
+                "is_closed": self.is_closed,
+            }
+        )
+        return response
+
+    @property
+    def is_closed(self) -> bool | None:
+        """Return True if the cover is closed.
+
+        In HA None is unknown, 0 is closed, 100 is fully open.
+        In ZCL 0 is fully open, 100 is fully closed.
+        Keep in mind the values have already been flipped to match HA
+        in the WindowCovering cluster handler
+        """
+        if self.current_cover_position is None:
+            return None
+        return self.current_cover_position == 0
+
+    @property
+    def is_opening(self) -> bool:
+        """Return if the cover is opening or not."""
+        return self._state == STATE_OPENING
+
+    @property
+    def is_closing(self) -> bool:
+        """Return if the cover is closing or not."""
+        return self._state == STATE_CLOSING
+
+    @property
+    def current_cover_position(self) -> int | None:
+        """Return the current position of ZHA cover.
+
+        In HA None is unknown, 0 is closed, 100 is fully open.
+        In ZCL 0 is fully open, 100 is fully closed.
+        Keep in mind the values have already been flipped to match HA
+        in the WindowCovering cluster handler
+        """
+        return self._cover_cluster_handler.current_position_lift_percentage
+
+    @property
+    def current_cover_tilt_position(self) -> int | None:
+        """Return the current tilt position of the cover."""
+        return self._cover_cluster_handler.current_position_tilt_percentage
+
     def _determine_supported_features(self) -> CoverEntityFeature:
         """Determine the supported cover features."""
         supported_features: CoverEntityFeature = (
@@ -168,60 +222,6 @@ class Cover(PlatformEntity):
             # we are mid transition and shouldn't update the state
             return
         self._state = STATE_OPEN
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Get the state of the cover."""
-        response = super().state
-        response.update(
-            {
-                ATTR_CURRENT_POSITION: self.current_cover_position,
-                "state": self._state,
-                "is_opening": self.is_opening,
-                "is_closing": self.is_closing,
-                "is_closed": self.is_closed,
-            }
-        )
-        return response
-
-    @property
-    def is_closed(self) -> bool | None:
-        """Return True if the cover is closed.
-
-        In HA None is unknown, 0 is closed, 100 is fully open.
-        In ZCL 0 is fully open, 100 is fully closed.
-        Keep in mind the values have already been flipped to match HA
-        in the WindowCovering cluster handler
-        """
-        if self.current_cover_position is None:
-            return None
-        return self.current_cover_position == 0
-
-    @property
-    def is_opening(self) -> bool:
-        """Return if the cover is opening or not."""
-        return self._state == STATE_OPENING
-
-    @property
-    def is_closing(self) -> bool:
-        """Return if the cover is closing or not."""
-        return self._state == STATE_CLOSING
-
-    @property
-    def current_cover_position(self) -> int | None:
-        """Return the current position of ZHA cover.
-
-        In HA None is unknown, 0 is closed, 100 is fully open.
-        In ZCL 0 is fully open, 100 is fully closed.
-        Keep in mind the values have already been flipped to match HA
-        in the WindowCovering cluster handler
-        """
-        return self._cover_cluster_handler.current_position_lift_percentage
-
-    @property
-    def current_cover_tilt_position(self) -> int | None:
-        """Return the current tilt position of the cover."""
-        return self._cover_cluster_handler.current_position_tilt_percentage
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent

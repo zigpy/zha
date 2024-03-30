@@ -50,7 +50,7 @@ class Endpoint:
         self._client_cluster_handlers: dict[str, ClientClusterHandler] = {}
         self._unique_id: str = f"{str(device.ieee)}-{zigpy_endpoint.endpoint_id}"
 
-    @property
+    @functools.cached_property
     def device(self) -> Device:
         """Return the device this endpoint belongs to."""
         return self._device
@@ -70,17 +70,17 @@ class Endpoint:
         """Return a dict of client cluster handlers."""
         return self._client_cluster_handlers
 
-    @property
+    @functools.cached_property
     def zigpy_endpoint(self) -> ZigpyEndpoint:
         """Return endpoint of zigpy device."""
         return self._zigpy_endpoint
 
-    @property
+    @functools.cached_property
     def id(self) -> int:
         """Return endpoint id."""
         return self._zigpy_endpoint.endpoint_id
 
-    @property
+    @functools.cached_property
     def unique_id(self) -> str:
         """Return the unique id for this endpoint."""
         return self._unique_id

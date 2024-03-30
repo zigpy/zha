@@ -91,21 +91,6 @@ class BinarySensor(PlatformEntity):
                 _LOGGER,
             )
 
-    @property
-    def is_on(self) -> bool:
-        """Return True if the switch is on based on the state machine."""
-        self._state = raw_state = self._cluster_handler.cluster.get(
-            self._attribute_name
-        )
-        if raw_state is None:
-            return False
-        return self.parse(raw_state)
-
-    @functools.cached_property
-    def device_class(self) -> BinarySensorDeviceClass | None:
-        """Return the class of this entity."""
-        return self._attr_device_class
-
     @functools.cached_property
     def info_object(self) -> dict:
         """Return a representation of the binary sensor."""
@@ -123,6 +108,21 @@ class BinarySensor(PlatformEntity):
         response = super().state
         response["state"] = self.is_on
         return response
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if the switch is on based on the state machine."""
+        self._state = raw_state = self._cluster_handler.cluster.get(
+            self._attribute_name
+        )
+        if raw_state is None:
+            return False
+        return self.parse(raw_state)
+
+    @functools.cached_property
+    def device_class(self) -> BinarySensorDeviceClass | None:
+        """Return the class of this entity."""
+        return self._attr_device_class
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -239,7 +239,7 @@ class IASZone(BinarySensor):
         self._attr_device_class = self.device_class
         self._attr_translation_key = self.translation_key
 
-    @property
+    @functools.cached_property
     def translation_key(self) -> str | None:
         """Return the name of the sensor."""
         zone_type = self._cluster_handler.cluster.get("zone_type")
@@ -247,7 +247,7 @@ class IASZone(BinarySensor):
             return None
         return "ias_zone"
 
-    @property
+    @functools.cached_property
     def device_class(self) -> BinarySensorDeviceClass | None:
         """Return device class from platform DEVICE_CLASSES."""
         zone_type = self._cluster_handler.cluster.get("zone_type")

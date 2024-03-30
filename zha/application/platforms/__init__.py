@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, Optional
+from typing import TYPE_CHECKING, Any, Final, Optional, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
@@ -123,7 +123,8 @@ class BaseEntity(LogMixin, EventBase):
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
 
-    @property
+    @final
+    @cached_property
     def unique_id(self) -> str:
         """Return the unique id."""
         return self._unique_id
@@ -253,31 +254,6 @@ class PlatformEntity(BaseEntity):
         else:
             self._attr_entity_category = None
 
-    @property
-    def device(self) -> Device:
-        """Return the device."""
-        return self._device
-
-    @property
-    def endpoint(self) -> Endpoint:
-        """Return the endpoint."""
-        return self._endpoint
-
-    @property
-    def should_poll(self) -> bool:
-        """Return True if we need to poll for state changes."""
-        return False
-
-    @property
-    def available(self) -> bool:
-        """Return true if the device this entity belongs to is available."""
-        return self.device.available
-
-    @property
-    def name(self) -> str:
-        """Return the name of the platform entity."""
-        return self._name
-
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
@@ -301,6 +277,31 @@ class PlatformEntity(BaseEntity):
             endpoint_id=self._endpoint.id,
             available=self.available,
         )
+
+    @cached_property
+    def device(self) -> Device:
+        """Return the device."""
+        return self._device
+
+    @cached_property
+    def endpoint(self) -> Endpoint:
+        """Return the endpoint."""
+        return self._endpoint
+
+    @cached_property
+    def should_poll(self) -> bool:
+        """Return True if we need to poll for state changes."""
+        return False
+
+    @property
+    def available(self) -> bool:
+        """Return true if the device this entity belongs to is available."""
+        return self.device.available
+
+    @property
+    def name(self) -> str:
+        """Return the name of the platform entity."""
+        return self._name
 
     @property
     def state(self) -> dict[str, Any]:
@@ -335,21 +336,6 @@ class GroupEntity(BaseEntity):
         self._group: Group = group
         self._group.register_group_entity(self)
 
-    @property
-    def name(self) -> str:
-        """Return the name of the group entity."""
-        return self._name
-
-    @property
-    def group_id(self) -> int:
-        """Return the group id."""
-        return self._group.group_id
-
-    @property
-    def group(self) -> Group:
-        """Return the group."""
-        return self._group
-
     @cached_property
     def identifiers(self) -> GroupEntityIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
@@ -358,10 +344,6 @@ class GroupEntity(BaseEntity):
             platform=self.PLATFORM,
             group_id=self.group_id,
         )
-
-    @abstractmethod
-    def update(self, _: Any | None = None) -> None:
-        """Update the state of this group entity."""
 
     @cached_property
     def info_object(self) -> GroupEntityInfo:
@@ -373,3 +355,22 @@ class GroupEntity(BaseEntity):
             name=self._name,
             group_id=self.group_id,
         )
+
+    @property
+    def name(self) -> str:
+        """Return the name of the group entity."""
+        return self._name
+
+    @property
+    def group_id(self) -> int:
+        """Return the group id."""
+        return self._group.group_id
+
+    @cached_property
+    def group(self) -> Group:
+        """Return the group."""
+        return self._group
+
+    @abstractmethod
+    def update(self, _: Any | None = None) -> None:
+        """Update the state of this group entity."""

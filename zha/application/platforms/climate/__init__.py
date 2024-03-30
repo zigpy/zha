@@ -776,7 +776,7 @@ class BecaThermostat(Thermostat):
 class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
 
-    @property
+    @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]

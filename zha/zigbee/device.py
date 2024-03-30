@@ -270,36 +270,36 @@ class Device(LogMixin, EventBase):
                 getattr(self, "__polling_interval"),
             )
 
-    @property
+    @cached_property
     def device(self) -> zigpy.device.Device:
         """Return underlying Zigpy device."""
         return self._zigpy_device
 
-    @property
+    @cached_property
     def name(self) -> str:
         """Return device name."""
         return f"{self.manufacturer} {self.model}"
 
-    @property
+    @cached_property
     def ieee(self) -> EUI64:
         """Return ieee address for device."""
         return self._zigpy_device.ieee
 
-    @property
+    @cached_property
     def manufacturer(self) -> str:
         """Return manufacturer for device."""
         if self._zigpy_device.manufacturer is None:
             return UNKNOWN_MANUFACTURER
         return self._zigpy_device.manufacturer
 
-    @property
+    @cached_property
     def model(self) -> str:
         """Return model for device."""
         if self._zigpy_device.model is None:
             return UNKNOWN_MODEL
         return self._zigpy_device.model
 
-    @property
+    @cached_property
     def manufacturer_code(self) -> int | None:
         """Return the manufacturer code for the device."""
         if self._zigpy_device.node_desc is None:
@@ -307,7 +307,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.manufacturer_code
 
-    @property
+    @cached_property
     def nwk(self) -> NWK:
         """Return nwk for device."""
         return self._zigpy_device.nwk
@@ -327,7 +327,7 @@ class Device(LogMixin, EventBase):
         """Return last_seen for device."""
         return self._zigpy_device.last_seen
 
-    @property
+    @cached_property
     def is_mains_powered(self) -> bool | None:
         """Return true if device is mains powered."""
         if self._zigpy_device.node_desc is None:
@@ -335,7 +335,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.is_mains_powered
 
-    @property
+    @cached_property
     def device_type(self) -> str:
         """Return the logical device type for the device."""
         if self._zigpy_device.node_desc is None:
@@ -350,7 +350,7 @@ class Device(LogMixin, EventBase):
             POWER_MAINS_POWERED if self.is_mains_powered else POWER_BATTERY_OR_UNKNOWN
         )
 
-    @property
+    @cached_property
     def is_router(self) -> bool | None:
         """Return true if this is a routing capable device."""
         if self._zigpy_device.node_desc is None:
@@ -358,7 +358,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.is_router
 
-    @property
+    @cached_property
     def is_coordinator(self) -> bool | None:
         """Return true if this device represents a coordinator."""
         if self._zigpy_device.node_desc is None:
@@ -374,7 +374,7 @@ class Device(LogMixin, EventBase):
 
         return self.ieee == self.gateway.state.node_info.ieee
 
-    @property
+    @cached_property
     def is_end_device(self) -> bool | None:
         """Return true if this device is an end device."""
         if self._zigpy_device.node_desc is None:
@@ -389,12 +389,12 @@ class Device(LogMixin, EventBase):
             self.available and bool(self.async_get_groupable_endpoints())
         )
 
-    @property
+    @cached_property
     def skip_configuration(self) -> bool:
         """Return true if the device should not issue configuration related commands."""
         return self._zigpy_device.skip_configuration or bool(self.is_coordinator)
 
-    @property
+    @cached_property
     def gateway(self):
         """Return the gateway for this device."""
         return self._gateway
@@ -456,7 +456,7 @@ class Device(LogMixin, EventBase):
         if self._identify_ch is None:
             self._identify_ch = cluster_handler
 
-    @property
+    @cached_property
     def zdo_cluster_handler(self) -> ZDOClusterHandler:
         """Return ZDO cluster handler."""
         return self._zdo_handler
@@ -466,7 +466,7 @@ class Device(LogMixin, EventBase):
         """Return the endpoints for this device."""
         return self._endpoints
 
-    @property
+    @cached_property
     def zigbee_signature(self) -> dict[str, Any]:
         """Get zigbee signature for this device."""
         return {

@@ -95,6 +95,18 @@ class Number(PlatformEntity):
             self.handle_cluster_handler_attribute_updated,
         )
 
+    @functools.cached_property
+    def info_object(self) -> NumberEntityInfo:
+        """Return a representation of the number entity."""
+        return NumberEntityInfo(
+            **super().info_object.__dict__,
+            engineering_units=self._analog_output_cluster_handler.engineering_units,
+            application_type=self._analog_output_cluster_handler.application_type,
+            min_value=self.native_min_value,
+            max_value=self.native_max_value,
+            step=self.native_step,
+        )
+
     @property
     def state(self) -> dict[str, Any]:
         """Return the state of the entity."""
@@ -128,7 +140,7 @@ class Number(PlatformEntity):
         """Return the value step."""
         return self._analog_output_cluster_handler.resolution
 
-    @property
+    @functools.cached_property
     def name(self) -> str | None:
         """Return the name of the number entity."""
         description = self._analog_output_cluster_handler.description
@@ -136,7 +148,7 @@ class Number(PlatformEntity):
             return f"{super().name} {description}"
         return super().name
 
-    @property
+    @functools.cached_property
     def icon(self) -> str | None:
         """Return the icon to be used for this entity."""
         application_type = self._analog_output_cluster_handler.application_type
@@ -144,13 +156,13 @@ class Number(PlatformEntity):
             return ICONS.get(application_type >> 16, None)
         return None
 
-    @property
+    @functools.cached_property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         engineering_units = self._analog_output_cluster_handler.engineering_units
         return UNITS.get(engineering_units)
 
-    @property
+    @functools.cached_property
     def mode(self) -> NumberMode:
         """Return the mode of the entity."""
         return self._attr_mode
@@ -172,18 +184,6 @@ class Number(PlatformEntity):
         num_value = float(value)
         if await self._analog_output_cluster_handler.async_set_present_value(num_value):
             self.maybe_emit_state_changed_event()
-
-    @functools.cached_property
-    def info_object(self) -> NumberEntityInfo:
-        """Return a representation of the number entity."""
-        return NumberEntityInfo(
-            **super().info_object.__dict__,
-            engineering_units=self._analog_output_cluster_handler.engineering_units,
-            application_type=self._analog_output_cluster_handler.application_type,
-            min_value=self.native_min_value,
-            max_value=self.native_max_value,
-            step=self.native_step,
-        )
 
 
 class NumberConfigurationEntity(PlatformEntity):
@@ -314,19 +314,19 @@ class NumberConfigurationEntity(PlatformEntity):
         """Return the value step."""
         return self._attr_native_step
 
-    @property
+    @functools.cached_property
     def icon(self) -> str | None:
         """Return the icon to be used for this entity."""
         return self._attr_icon
 
-    @property
+    @functools.cached_property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         if hasattr(self, "_attr_native_unit_of_measurement"):
             return self._attr_native_unit_of_measurement
         return None
 
-    @property
+    @functools.cached_property
     def mode(self) -> NumberMode:
         """Return the mode of the entity."""
         return self._attr_mode

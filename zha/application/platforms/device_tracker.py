@@ -100,7 +100,7 @@ class DeviceScannerEntity(PlatformEntity):
         """Return true if the device is connected to the network."""
         return self._connected
 
-    @property
+    @functools.cached_property
     def source_type(self) -> SourceType:
         """Return the source type, eg gps or router, of the device."""
         return SourceType.ROUTER

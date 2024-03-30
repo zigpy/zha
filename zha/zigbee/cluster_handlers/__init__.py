@@ -216,36 +216,6 @@ class ClusterHandler(LogMixin, EventBase):
         """Filter the cluster match for specific devices."""
         return True
 
-    @property
-    def id(self) -> str:
-        """Return cluster handler id unique for this device only."""
-        return self._id
-
-    @property
-    def generic_id(self) -> str:
-        """Return the generic id for this cluster handler."""
-        return self._generic_id
-
-    @property
-    def unique_id(self) -> str:
-        """Return the unique id for this cluster handler."""
-        return self._unique_id
-
-    @property
-    def cluster(self) -> zigpy.zcl.Cluster:
-        """Return the zigpy cluster for this cluster handler."""
-        return self._cluster
-
-    @property
-    def name(self) -> str:
-        """Return friendly name."""
-        return self.cluster.ep_attribute or self._generic_id
-
-    @property
-    def status(self) -> ClusterHandlerStatus:
-        """Return the status of the cluster handler."""
-        return self._status
-
     @functools.cached_property
     def info_object(self) -> ClusterHandlerInfo:
         """Return info about this cluster handler."""
@@ -264,6 +234,36 @@ class ClusterHandler(LogMixin, EventBase):
             status=self._status.name,
             value_attribute=getattr(self, "value_attribute", None),
         )
+
+    @functools.cached_property
+    def id(self) -> str:
+        """Return cluster handler id unique for this device only."""
+        return self._id
+
+    @functools.cached_property
+    def generic_id(self) -> str:
+        """Return the generic id for this cluster handler."""
+        return self._generic_id
+
+    @functools.cached_property
+    def unique_id(self) -> str:
+        """Return the unique id for this cluster handler."""
+        return self._unique_id
+
+    @functools.cached_property
+    def cluster(self) -> zigpy.zcl.Cluster:
+        """Return the zigpy cluster for this cluster handler."""
+        return self._cluster
+
+    @functools.cached_property
+    def name(self) -> str:
+        """Return friendly name."""
+        return self.cluster.ep_attribute or self._generic_id
+
+    @property
+    def status(self) -> ClusterHandlerStatus:
+        """Return the status of the cluster handler."""
+        return self._status
 
     def __hash__(self) -> int:
         """Make this a hashable."""
