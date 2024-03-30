@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING
@@ -10,7 +11,7 @@ from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
 from zha.application.const import ATTR_DEVICE_CLASS, ENTITY_METADATA
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
     BinarySensorDeviceClass,
@@ -42,6 +43,14 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
 )
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class BinarySensorEntityInfo(PlatformEntityInfo):
+    """Binary sensor entity info."""
+
+    attribute_name: str
+    device_class: BinarySensorDeviceClass | None
 
 
 class BinarySensor(PlatformEntity):
@@ -89,10 +98,21 @@ class BinarySensor(PlatformEntity):
             return False
         return self.parse(raw_state)
 
-    @property
+    @functools.cached_property
     def device_class(self) -> BinarySensorDeviceClass | None:
         """Return the class of this entity."""
         return self._attr_device_class
+
+    @functools.cached_property
+    def info_object(self) -> dict:
+        """Return a representation of the binary sensor."""
+        return BinarySensorEntityInfo(
+            **super().info_object.__dict__,
+            attribute_name=self._attribute_name,
+            device_class=self._attr_device_class
+            if hasattr(self, ATTR_DEVICE_CLASS)
+            else None,
+        )
 
     def get_state(self) -> dict:
         """Return the state of the binary sensor."""
@@ -118,14 +138,6 @@ class BinarySensor(PlatformEntity):
         if attr_value is not None:
             self._state = attr_value
             self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the binary sensor."""
-        json = super().to_json()
-        json["sensor_attribute"] = self._attribute_name
-        if hasattr(self, ATTR_DEVICE_CLASS):
-            json[ATTR_DEVICE_CLASS] = self._attr_device_class
-        return json
 
     @staticmethod
     def parse(value: bool | int) -> bool:

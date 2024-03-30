@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import IntFlag, StrEnum
 import functools
 import logging
@@ -14,7 +15,7 @@ from zigpy.zcl.clusters.general import Ota
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import callback
 from zha.exceptions import ZHAException
@@ -99,6 +100,15 @@ ATTR_RELEASE_URL: Final = "release_url"
 ATTR_VERSION: Final = "version"
 
 
+@dataclass(frozen=True, kw_only=True)
+class UpdateEntityInfo(PlatformEntityInfo):
+    """Update entity info."""
+
+    supported_features: UpdateEntityFeature
+    device_class: UpdateDeviceClass
+    entity_category: EntityCategory
+
+
 # old base classes: CoordinatorEntity[ZHAFirmwareUpdateCoordinator], UpdateEntity
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
 class FirmwareUpdateEntity(PlatformEntity):
@@ -143,6 +153,16 @@ class FirmwareUpdateEntity(PlatformEntity):
         self._ota_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
+        )
+
+    @functools.cached_property
+    def info_object(self) -> UpdateEntityInfo:
+        """Return a representation of the entity."""
+        return UpdateEntityInfo(
+            **super().info_object.__dict__,
+            supported_features=self.supported_features,
+            device_class=self._attr_device_class,
+            entity_category=self._attr_entity_category,
         )
 
     @property
@@ -342,15 +362,6 @@ class FirmwareUpdateEntity(PlatformEntity):
         """Get the state for the entity."""
         response = super().get_state()
         response["state"] = self.state
-        response.update(self.state_attributes)
-        return response
-
-    def to_json(self):
-        """Return entity in JSON format."""
-        response = super().to_json()
-        response["entity_category"] = self._attr_entity_category
-        response["device_class"] = self._attr_device_class
-        response["supported_features"] = self._attr_supported_features
         response.update(self.state_attributes)
         return response
 

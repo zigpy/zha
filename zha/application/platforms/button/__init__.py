@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
@@ -10,7 +11,7 @@ from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetada
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
@@ -27,6 +28,23 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class CommandButtonEntityInfo(PlatformEntityInfo):
+    """Command button entity info."""
+
+    command: str
+    args: list[Any]
+    kwargs: dict[str, Any]
+
+
+@dataclass(frozen=True, kw_only=True)
+class WriteAttributeButtonEntityInfo(PlatformEntityInfo):
+    """Write attribute button entity info."""
+
+    attribute_name: str
+    attribute_value: Any
 
 
 class Button(PlatformEntity):
@@ -61,26 +79,32 @@ class Button(PlatformEntity):
         self._args = entity_metadata.args
         self._kwargs = entity_metadata.kwargs
 
-    def get_args(self) -> list[Any]:
+    @functools.cached_property
+    def info_object(self) -> CommandButtonEntityInfo:
+        """Return a representation of the button."""
+        return CommandButtonEntityInfo(
+            **super().info_object.__dict__,
+            command=self._command_name,
+            args=self._args,
+            kwargs=self._kwargs,
+        )
+
+    @functools.cached_property
+    def args(self) -> list[Any]:
         """Return the arguments to use in the command."""
         return list(self._args) if self._args else []
 
-    def get_kwargs(self) -> dict[str, Any]:
+    @functools.cached_property
+    def kwargs(self) -> dict[str, Any]:
         """Return the keyword arguments to use in the command."""
         return self._kwargs
 
     async def async_press(self) -> None:
         """Send out a update command."""
         command = getattr(self._cluster_handler, self._command_name)
-        arguments = self.get_args() or []
-        kwargs = self.get_kwargs() or {}
+        arguments = self.args or []
+        kwargs = self.kwargs or {}
         await command(*arguments, **kwargs)
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the button."""
-        json = super().to_json()
-        json["command"] = self._command_name
-        return json
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IDENTIFY)
@@ -142,6 +166,15 @@ class WriteAttributeButton(PlatformEntity):
         super()._init_from_quirks_metadata(entity_metadata)
         self._attribute_name = entity_metadata.attribute_name
         self._attribute_value = entity_metadata.attribute_value
+
+    @functools.cached_property
+    def info_object(self) -> WriteAttributeButtonEntityInfo:
+        """Return a representation of the button."""
+        return WriteAttributeButtonEntityInfo(
+            **super().info_object.__dict__,
+            attribute_name=self._attribute_name,
+            attribute_value=self._attribute_value,
+        )
 
     async def async_press(self) -> None:
         """Write attribute with defined value."""

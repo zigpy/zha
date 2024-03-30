@@ -17,10 +17,14 @@ from zigpy.zdo.types import LogicalType, NodeDescriptor
 from tests.common import async_find_group_entity_id, find_entity_id
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
-from zha.application.gateway import Gateway
+from zha.application.gateway import (
+    Gateway,
+    RawDeviceInitializedDeviceInfo,
+    RawDeviceInitializedEvent,
+)
 from zha.application.helpers import ZHAData
 from zha.application.platforms import GroupEntity, PlatformEntity
-from zha.application.platforms.light.const import ColorMode, LightEntityFeature
+from zha.application.platforms.light.const import LightEntityFeature
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -211,35 +215,16 @@ async def test_gateway_group_methods(
     assert isinstance(entity, GroupEntity)
     assert entity is not None
 
-    assert entity.to_json() == {
-        "class_name": "LightGroup",
-        "effect_list": None,
-        "group_id": zha_group.group_id,
-        "max_mireds": 500,
-        "min_mireds": 153,
-        "name": "Test Group_0x0002",
-        "platform": Platform.LIGHT,
-        "state": {
-            "brightness": None,
-            "class_name": "LightGroup",
-            "color_mode": ColorMode.UNKNOWN,
-            "color_temp": None,
-            "effect": None,
-            "hs_color": None,
-            "off_brightness": None,
-            "off_with_transition": False,
-            "on": False,
-            "supported_color_modes": {
-                ColorMode.BRIGHTNESS,
-                ColorMode.ONOFF,
-                ColorMode.XY,
-            },
-            "supported_features": LightEntityFeature.TRANSITION,
-            "xy_color": None,
-        },
-        "supported_features": LightEntityFeature.TRANSITION,
-        "unique_id": "light.0x0002",
-    }
+    info = entity.info_object
+    assert info.class_name == "LightGroup"
+    assert info.platform == Platform.LIGHT
+    assert info.unique_id == "light.0x0002"
+    assert info.name == "Test Group_0x0002"
+    assert info.group_id == zha_group.group_id
+    assert info.supported_features == LightEntityFeature.TRANSITION
+    assert info.min_mireds == 153
+    assert info.max_mireds == 500
+    assert info.effect_list is None
 
     device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
     device_2_entity_id = find_entity_id(Platform.LIGHT, device_light_2)
@@ -543,15 +528,14 @@ def test_gateway_raw_device_initialized(
     assert zha_gateway.emit.call_count == 1
     assert zha_gateway.emit.call_args == call(
         "raw_device_initialized",
-        {
-            "type": "zha_gateway_message",
-            "device_info": {
-                "nwk": 0xB79C,
-                "ieee": "00:0d:6f:00:0a:90:69:e7",
-                "pairing_status": "INTERVIEW_COMPLETE",
-                "model": "FakeModel",
-                "manufacturer": "FakeManufacturer",
-                "signature": {
+        RawDeviceInitializedEvent(
+            device_info=RawDeviceInitializedDeviceInfo(
+                ieee="00:0d:6f:00:0a:90:69:e7",
+                nwk=0xB79C,
+                pairing_status="INTERVIEW_COMPLETE",
+                model="FakeModel",
+                manufacturer="FakeManufacturer",
+                signature={
                     "manufacturer": "FakeManufacturer",
                     "model": "FakeModel",
                     "node_desc": {
@@ -578,6 +562,8 @@ def test_gateway_raw_device_initialized(
                         }
                     },
                 },
-            },
-        },
+            ),
+            event_type="zha_gateway_message",
+            event="raw_device_initialized",
+        ),
     )

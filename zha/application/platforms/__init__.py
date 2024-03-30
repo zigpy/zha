@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import abc
+from abc import abstractmethod
 import asyncio
 from contextlib import suppress
 from dataclasses import dataclass
 from enum import StrEnum
+from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any, Final, Optional
 
@@ -17,6 +18,7 @@ from zha.application import Platform
 from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.mixins import LogMixin
+from zha.zigbee.cluster_handlers import ClusterHandlerInfo
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -37,6 +39,57 @@ class EntityCategory(StrEnum):
     # Diagnostic: An entity exposing some configuration parameter,
     # or diagnostics of a device.
     DIAGNOSTIC = "diagnostic"
+
+
+@dataclass(frozen=True, kw_only=True)
+class BaseEntityInfo:
+    """Information about a base entity."""
+
+    unique_id: str
+    platform: str
+    class_name: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class BaseIdentifiers:
+    """Identifiers for the base entity."""
+
+    unique_id: str
+    platform: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class PlatformEntityIdentifiers(BaseIdentifiers):
+    """Identifiers for the platform entity."""
+
+    device_ieee: EUI64
+    endpoint_id: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class GroupEntityIdentifiers(BaseIdentifiers):
+    """Identifiers for the group entity."""
+
+    group_id: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class PlatformEntityInfo(BaseEntityInfo):
+    """Information about a platform entity."""
+
+    name: str
+    cluster_handlers: list[ClusterHandlerInfo]
+    device_ieee: EUI64
+    endpoint_id: int
+    available: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class GroupEntityInfo(BaseEntityInfo):
+    """Information about a group entity."""
+
+    name: str
+    group_id: int
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -76,9 +129,22 @@ class BaseEntity(LogMixin, EventBase):
         """Return the unique id."""
         return self._unique_id
 
-    @abc.abstractmethod
-    def get_identifiers(self) -> dict[str, str | int]:
+    @cached_property
+    def identifiers(self) -> BaseIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
+        return BaseIdentifiers(
+            unique_id=self.unique_id,
+            platform=self.PLATFORM,
+        )
+
+    @cached_property
+    def info_object(self) -> BaseEntityInfo:
+        """Return a representation of the platform entity."""
+        return BaseEntityInfo(
+            unique_id=self._unique_id,
+            platform=self.PLATFORM,
+            class_name=self.__class__.__name__,
+        )
 
     def get_state(self) -> dict:
         """Return the arguments to use in the command."""
@@ -102,17 +168,10 @@ class BaseEntity(LogMixin, EventBase):
         """Send the state of this platform entity."""
         state = self.get_state()
         if self._previous_state != state:
-            self.emit(STATE_CHANGED, EntityStateChangedEvent(**self.get_identifiers()))
+            self.emit(
+                STATE_CHANGED, EntityStateChangedEvent(**self.identifiers.__dict__)
+            )
             self._previous_state = state
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the platform entity."""
-        return {
-            "unique_id": self._unique_id,
-            "platform": self.PLATFORM,
-            "class_name": self.__class__.__name__,
-            "state": self.get_state(),
-        }
 
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
@@ -222,24 +281,29 @@ class PlatformEntity(BaseEntity):
         """Return the name of the platform entity."""
         return self._name
 
-    def get_identifiers(self) -> dict[str, str | int]:
+    @cached_property
+    def identifiers(self) -> PlatformEntityIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
-        return {
-            "unique_id": self.unique_id,
-            "platform": self.PLATFORM,
-            "device_ieee": self.device.ieee,
-            "endpoint_id": self.endpoint.id,
-        }
+        return PlatformEntityIdentifiers(
+            unique_id=self.unique_id,
+            platform=self.PLATFORM,
+            device_ieee=self.device.ieee,
+            endpoint_id=self.endpoint.id,
+        )
 
-    def to_json(self) -> dict:
-        """Return a JSON representation of the platform entity."""
-        json = super().to_json()
-        json["name"] = self._name
-        json["cluster_handlers"] = [ch.to_json() for ch in self._cluster_handlers]
-        json["device_ieee"] = str(self._device.ieee)
-        json["endpoint_id"] = self._endpoint.id
-        json["available"] = self.available
-        return json
+    @cached_property
+    def info_object(self) -> PlatformEntityInfo:
+        """Return a representation of the platform entity."""
+        return PlatformEntityInfo(
+            unique_id=self._unique_id,
+            platform=self.PLATFORM,
+            class_name=self.__class__.__name__,
+            name=self._name,
+            cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
+            device_ieee=self._device.ieee,
+            endpoint_id=self._endpoint.id,
+            available=self.available,
+        )
 
     def get_state(self) -> dict:
         """Return the arguments to use in the command."""
@@ -272,7 +336,6 @@ class GroupEntity(BaseEntity):
         self._name: str = f"{group.name}_0x{group.group_id:04x}"
         self._group: Group = group
         self._group.register_group_entity(self)
-        self.update()
 
     @property
     def name(self) -> str:
@@ -289,20 +352,26 @@ class GroupEntity(BaseEntity):
         """Return the group."""
         return self._group
 
-    def get_identifiers(self) -> dict[str, str | int]:
+    @cached_property
+    def identifiers(self) -> GroupEntityIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
-        return {
-            "unique_id": self.unique_id,
-            "platform": self.PLATFORM,
-            "group_id": self.group.group_id,
-        }
+        return GroupEntityIdentifiers(
+            unique_id=self.unique_id,
+            platform=self.PLATFORM,
+            group_id=self.group_id,
+        )
 
+    @abstractmethod
     def update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
 
-    def to_json(self) -> dict[str, Any]:
-        """Return a JSON representation of the group."""
-        json = super().to_json()
-        json["name"] = self._name
-        json["group_id"] = self.group_id
-        return json
+    @cached_property
+    def info_object(self) -> GroupEntityInfo:
+        """Return a representation of the group."""
+        return GroupEntityInfo(
+            unique_id=self._unique_id,
+            platform=self.PLATFORM,
+            class_name=self.__class__.__name__,
+            name=self._name,
+            group_id=self.group_id,
+        )

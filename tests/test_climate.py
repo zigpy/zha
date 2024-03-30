@@ -384,7 +384,6 @@ async def test_climate_hvac_action_running_state(
 @pytest.mark.looptime
 async def test_sinope_time(
     device_climate_sinope: Device,
-    zha_gateway: Gateway,
 ):
     """Test hvac action via running state."""
 

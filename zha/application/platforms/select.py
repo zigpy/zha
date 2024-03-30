@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import Enum
 import functools
 import logging
@@ -17,7 +18,7 @@ from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA, Strobe
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -39,6 +40,14 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.SELECT
 )
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class EnumSelectInfo(PlatformEntityInfo):
+    """Enum select entity info."""
+
+    enum: str
+    options: list[str]
 
 
 class EnumSelectEntity(PlatformEntity):
@@ -71,19 +80,21 @@ class EnumSelectEntity(PlatformEntity):
             return None
         return option.name.replace("_", " ")
 
+    @functools.cached_property
+    def info_object(self) -> EnumSelectInfo:
+        """Return a representation of the select."""
+        return EnumSelectInfo(
+            **super().info_object.__dict__,
+            enum=self._enum.__name__,
+            options=self._attr_options,
+        )
+
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         self._cluster_handler.data_cache[self._attribute_name] = self._enum[
             option.replace(" ", "_")
         ]
         self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the select."""
-        json = super().to_json()
-        json["enum"] = self._enum.__name__
-        json["options"] = self._attr_options
-        return json
 
     def get_state(self) -> dict:
         """Return the state of the select."""
@@ -207,6 +218,15 @@ class ZCLEnumSelectEntity(PlatformEntity):
         option = self._enum(option)
         return option.name.replace("_", " ")
 
+    @functools.cached_property
+    def info_object(self) -> EnumSelectInfo:
+        """Return a representation of the select."""
+        return EnumSelectInfo(
+            **super().info_object.__dict__,
+            enum=self._enum.__name__,
+            options=self._attr_options,
+        )
+
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         await self._cluster_handler.write_attributes_safe(
@@ -221,13 +241,6 @@ class ZCLEnumSelectEntity(PlatformEntity):
         """Handle value update from cluster handler."""
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the select."""
-        json = super().to_json()
-        json["enum"] = self._enum.__name__
-        json["options"] = self._attr_options
-        return json
 
     def get_state(self) -> dict:
         """Return the state of the select."""

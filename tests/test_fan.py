@@ -21,7 +21,6 @@ from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
-    ATTR_PERCENTAGE_STEP,
     ATTR_PRESET_MODE,
     PRESET_MODE_AUTO,
     PRESET_MODE_ON,
@@ -656,7 +655,7 @@ async def test_fan_ikea_update_entity(
     assert entity.get_state()["is_on"] is False
     assert entity.get_state()[ATTR_PERCENTAGE] == 0
     assert entity.get_state()[ATTR_PRESET_MODE] is None
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 10
+    assert entity.percentage_step == 100 / 10
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
 
@@ -666,7 +665,7 @@ async def test_fan_ikea_update_entity(
     assert entity.get_state()["is_on"] is True
     assert entity.get_state()[ATTR_PERCENTAGE] == 10
     assert entity.get_state()[ATTR_PRESET_MODE] is PRESET_MODE_AUTO
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 10
+    assert entity.percentage_step == 100 / 10
 
 
 @pytest.fixture
@@ -808,7 +807,7 @@ async def test_fan_kof_update_entity(
     assert entity.get_state()["is_on"] is False
     assert entity.get_state()[ATTR_PERCENTAGE] == 0
     assert entity.get_state()[ATTR_PRESET_MODE] is None
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 4
+    assert entity.percentage_step == 100 / 4
 
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
 
@@ -818,4 +817,4 @@ async def test_fan_kof_update_entity(
     assert entity.get_state()["is_on"] is True
     assert entity.get_state()[ATTR_PERCENTAGE] == 25
     assert entity.get_state()[ATTR_PRESET_MODE] is None
-    assert entity.to_json()[ATTR_PERCENTAGE_STEP] == 100 / 4
+    assert entity.percentage_step == 100 / 4

@@ -3,14 +3,22 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+import dataclasses
+from dataclasses import dataclass
 import functools
 import math
 from typing import TYPE_CHECKING, Any
 
+from zigpy.types import EUI64
 from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
+from zha.application.platforms import (
+    BaseEntity,
+    BaseEntityInfo,
+    GroupEntity,
+    PlatformEntity,
+)
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
     ATTR_PRESET_MODE,
@@ -36,6 +44,7 @@ from zha.application.platforms.fan.helpers import (
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import (
     ClusterAttributeUpdatedEvent,
+    ClusterHandlerInfo,
     wrap_zigpy_exceptions,
 )
 from zha.zigbee.cluster_handlers.const import (
@@ -52,6 +61,28 @@ if TYPE_CHECKING:
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.FAN)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
+
+
+@dataclass(frozen=True, kw_only=True)
+class FanEntityInfo(BaseEntityInfo):
+    """Fan entity info."""
+
+    # combination of PlatformEntityInfo and GroupEntityInfo
+    unique_id: str
+    platform: str
+    class_name: str
+
+    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
+    device_ieee: EUI64 | None = dataclasses.field(default=None)
+    endpoint_id: int | None = dataclasses.field(default=None)
+    group_id: int | None = dataclasses.field(default=None)
+    name: str | None = dataclasses.field(default=None)
+    available: bool | None = dataclasses.field(default=None)
+
+    preset_modes: list[str]
+    supported_features: int
+    speed_count: int
+    speed_list: list[str]
 
 
 class BaseFan(BaseEntity):
@@ -177,17 +208,6 @@ class BaseFan(BaseEntity):
             return SPEED_OFF
         return percentage_to_ordered_list_item(LEGACY_SPEED_LIST, percentage)
 
-    def to_json(self) -> dict:
-        """Return a JSON representation of the binary sensor."""
-        json = super().to_json()
-        json["preset_modes"] = self.preset_modes
-        json["supported_features"] = self.supported_features
-        json["speed_count"] = self.speed_count
-        json["speed_list"] = self.speed_list
-        json["percentage_step"] = self.percentage_step
-        json["default_on_percentage"] = self.default_on_percentage
-        return json
-
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_FAN)
 class Fan(PlatformEntity, BaseFan):
@@ -211,6 +231,17 @@ class Fan(PlatformEntity, BaseFan):
                 CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 self.handle_cluster_handler_attribute_updated,
             )
+
+    @functools.cached_property
+    def info_object(self) -> FanEntityInfo:
+        """Return a representation of the binary sensor."""
+        return FanEntityInfo(
+            **super().info_object.__dict__,
+            preset_modes=self.preset_modes,
+            supported_features=self.supported_features,
+            speed_count=self.speed_count,
+            speed_list=self.speed_list,
+        )
 
     @property
     def percentage(self) -> int | None:
@@ -272,6 +303,20 @@ class FanGroup(GroupEntity, BaseFan):
         self._available: bool = False
         self._percentage = None
         self._preset_mode = None
+        if hasattr(self, "info_object"):
+            delattr(self, "info_object")
+        self.update()
+
+    @functools.cached_property
+    def info_object(self) -> FanEntityInfo:
+        """Return a representation of the binary sensor."""
+        return FanEntityInfo(
+            **super().info_object.__dict__,
+            preset_modes=self.preset_modes,
+            supported_features=self.supported_features,
+            speed_count=self.speed_count,
+            speed_list=self.speed_list,
+        )
 
     @property
     def percentage(self) -> int | None:
@@ -317,8 +362,7 @@ class FanGroup(GroupEntity, BaseFan):
         """Attempt to retrieve on off state from the fan."""
         self.debug("Updating fan group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_entities = [entity.to_json() for entity in platform_entities]
-        all_states = [entity["state"] for entity in all_entities]
+        all_states = [entity.get_state() for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )

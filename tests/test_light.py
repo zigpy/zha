@@ -1708,8 +1708,8 @@ async def test_transitions(
     assert bool(eWeLink_light_entity.get_state()["on"]) is True
     assert eWeLink_light_entity.get_state()["color_temp"] == 235
     assert eWeLink_light_entity.get_state()["color_mode"] == ColorMode.COLOR_TEMP
-    assert eWeLink_light_entity.to_json()["min_mireds"] == 153
-    assert eWeLink_light_entity.to_json()["max_mireds"] == 500
+    assert eWeLink_light_entity.min_mireds == 153
+    assert eWeLink_light_entity.max_mireds == 500
 
 
 @patch(

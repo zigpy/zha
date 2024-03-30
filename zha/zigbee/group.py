@@ -5,15 +5,21 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any
 
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.platforms import EntityStateChangedEvent, PlatformEntity
+from zha.application.platforms import (
+    EntityStateChangedEvent,
+    PlatformEntity,
+    PlatformEntityInfo,
+)
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
+from zha.zigbee.device import ExtendedDeviceInfo
 
 if TYPE_CHECKING:
     from zigpy.group import Group as ZigpyGroup, GroupEndpoint
@@ -42,6 +48,26 @@ class GroupEntityReference:
     original_name: str | None = None
 
 
+@dataclass(frozen=True, kw_only=True)
+class GroupMemberInfo:
+    """Describes a group member."""
+
+    ieee: EUI64
+    endpoint_id: int
+    device_info: ExtendedDeviceInfo
+    entities: dict[str, PlatformEntityInfo]
+
+
+@dataclass(frozen=True, kw_only=True)
+class GroupInfo:
+    """Describes a group."""
+
+    group_id: int
+    name: str
+    members: list[GroupMemberInfo]
+    entities: dict[str, PlatformEntityInfo]
+
+
 class GroupMember(LogMixin):
     """Composite object that represents a device endpoint in a Zigbee group."""
 
@@ -51,36 +77,40 @@ class GroupMember(LogMixin):
         self._device: Device = device
         self._endpoint_id: int = endpoint_id
 
-    @property
+    @cached_property
     def group(self) -> Group:
         """Return the group this member belongs to."""
         return self._group
 
-    @property
+    @cached_property
     def endpoint_id(self) -> int:
         """Return the endpoint id for this group member."""
         return self._endpoint_id
 
-    @property
+    @cached_property
     def endpoint(self) -> GroupEndpoint:
         """Return the endpoint for this group member."""
         return self._device.device.endpoints.get(self.endpoint_id)
 
-    @property
+    @cached_property
     def device(self) -> Device:
         """Return the ZHA device for this group member."""
         return self._device
 
-    @property
-    def member_info(self) -> dict[str, Any]:
+    @cached_property
+    def member_info(self) -> GroupMemberInfo:
         """Get ZHA group info."""
-        member_info: dict[str, Any] = {}
-        member_info["endpoint_id"] = self.endpoint_id
-        member_info["device"] = self.device.zha_device_info
-        member_info["entities"] = self.associated_entities
-        return member_info
+        return GroupMemberInfo(
+            ieee=self.device.ieee,
+            endpoint_id=self.endpoint_id,
+            device_info=self.device.extended_device_info,
+            entities={
+                entity.unique_id: entity.info_object
+                for entity in self.associated_entities
+            },
+        )
 
-    @property
+    @cached_property
     def associated_entities(self) -> list[PlatformEntity]:
         """Return the list of entities that were derived from this endpoint."""
         return [
@@ -106,16 +136,6 @@ class GroupMember(LogMixin):
                 self._group.group_id,
                 str(ex),
             )
-
-    def to_json(self) -> dict[str, Any]:
-        """Get group info."""
-        member_info: dict[str, Any] = {}
-        member_info["endpoint_id"] = self.endpoint_id
-        member_info["device"] = self.device.zha_device_info
-        member_info["entities"] = {
-            entity.unique_id: entity.to_json() for entity in self.associated_entities
-        }
-        return member_info
 
     def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
         """Log a message."""
@@ -143,32 +163,32 @@ class Group(LogMixin):
         """Return group name."""
         return self._zigpy_group.name
 
-    @property
+    @cached_property
     def group_id(self) -> int:
         """Return group name."""
         return self._zigpy_group.group_id
 
-    @property
+    @cached_property
     def endpoint(self) -> zigpy.endpoint.Endpoint:
         """Return the endpoint for this group."""
         return self._zigpy_group.endpoint
 
-    @property
+    @cached_property
     def group_entities(self) -> dict[str, GroupEntity]:
         """Return the platform entities of the group."""
         return self._group_entities
 
-    @property
+    @cached_property
     def zigpy_group(self) -> ZigpyGroup:
         """Return the zigpy group."""
         return self._zigpy_group
 
-    @property
+    @cached_property
     def gateway(self) -> Gateway:
         """Return the gateway for this group."""
         return self._gateway
 
-    @property
+    @cached_property
     def members(self) -> list[GroupMember]:
         """Return the ZHA devices that are members of this group."""
         return [
@@ -176,6 +196,29 @@ class Group(LogMixin):
             for (member_ieee, endpoint_id) in self._zigpy_group.members
             if member_ieee in self._gateway.devices
         ]
+
+    @cached_property
+    def info_object(self) -> GroupInfo:
+        """Get ZHA group info."""
+        return GroupInfo(
+            group_id=self.group_id,
+            name=self.name,
+            members=[member.member_info for member in self.members],
+            entities={
+                unique_id: entity.info_object
+                for unique_id, entity in self._group_entities.items()
+            },
+        )
+
+    @cached_property
+    def all_member_entity_unique_ids(self) -> list[str]:
+        """Return all platform entities unique ids for the members of this group."""
+        all_entity_unique_ids: list[str] = []
+        for member in self.members:
+            entities = member.associated_entities
+            for entity in entities:
+                all_entity_unique_ids.append(entity.unique_id)
+        return all_entity_unique_ids
 
     def register_group_entity(self, group_entity: GroupEntity) -> None:
         """Register a group entity."""
@@ -187,15 +230,6 @@ class Group(LogMixin):
             )
         self.update_entity_subscriptions()
 
-    @property
-    def group_info(self) -> dict[str, Any]:
-        """Get ZHA group info."""
-        group_info: dict[str, Any] = {}
-        group_info["group_id"] = self.group_id
-        group_info["name"] = self.name
-        group_info["members"] = [member.member_info for member in self.members]
-        return group_info
-
     async def _maybe_update_group_members(self, event: EntityStateChangedEvent) -> None:
         """Update the state of the entities that make up the group if they are marked as should poll."""
         tasks = []
@@ -205,6 +239,17 @@ class Group(LogMixin):
                 tasks.append(platform_entity.async_update())
         if tasks:
             await asyncio.gather(*tasks)
+
+    def clear_caches(self) -> None:
+        """Clear cached properties."""
+        if hasattr(self, "all_member_entity_unique_ids"):
+            delattr(self, "all_member_entity_unique_ids")
+        if hasattr(self, "info_object"):
+            delattr(self, "info_object")
+        if hasattr(self, "members"):
+            delattr(self, "members")
+        if hasattr(self, "group_entities"):
+            delattr(self, "group_entities")
 
     def update_entity_subscriptions(self) -> None:
         """Update the entity event subscriptions.
@@ -216,6 +261,8 @@ class Group(LogMixin):
         for group entities and the platrom entities that we processed. Then we loop over all of the unsub ids and we
         execute the unsubscribe method for each one that isn't in the combined list.
         """
+        self.clear_caches()
+
         group_entity_ids = list(self._group_entities.keys())
         processed_platform_entity_ids = []
         for group_entity in self._group_entities.values():
@@ -277,16 +324,6 @@ class Group(LogMixin):
             )
         self.update_entity_subscriptions()
 
-    @property
-    def all_member_entity_unique_ids(self) -> list[str]:
-        """Return all platform entities unique ids for the members of this group."""
-        all_entity_unique_ids: list[str] = []
-        for member in self.members:
-            entities = member.associated_entities
-            for entity in entities:
-                all_entity_unique_ids.append(entity.unique_id)
-        return all_entity_unique_ids
-
     def get_platform_entities(self, platform: str) -> list[PlatformEntity]:
         """Return entities belonging to the specified platform for this group."""
         platform_entities: list[PlatformEntity] = []
@@ -298,20 +335,6 @@ class Group(LogMixin):
                     platform_entities.append(entity)
 
         return platform_entities
-
-    def to_json(self) -> dict[str, Any]:
-        """Get ZHA group info."""
-        group_info: dict[str, Any] = {}
-        group_info["id"] = self.group_id
-        group_info["name"] = self.name
-        group_info["members"] = {
-            str(member.device.ieee): member.to_json() for member in self.members
-        }
-        group_info["entities"] = {
-            unique_id: entity.to_json()
-            for unique_id, entity in self._group_entities.items()
-        }
-        return group_info
 
     def log(self, level: int, msg: str, *args: Any, **kwargs) -> None:
         """Log a message."""

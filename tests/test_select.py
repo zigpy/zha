@@ -80,7 +80,7 @@ async def test_select(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
     assert entity.get_state()["state"] is None  # unknown in HA
-    assert entity.to_json()["options"] == [
+    assert entity.info_object.options == [
         "Stop",
         "Burglar",
         "Fire",

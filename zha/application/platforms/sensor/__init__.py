@@ -18,7 +18,14 @@ from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import BaseEntity, EntityCategory, PlatformEntity
+from zha.application.platforms import (
+    BaseEntity,
+    BaseEntityInfo,
+    BaseIdentifiers,
+    EntityCategory,
+    PlatformEntity,
+    PlatformEntityInfo,
+)
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
@@ -98,6 +105,39 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 
+@dataclass(frozen=True, kw_only=True)
+class SensorEntityInfo(PlatformEntityInfo):
+    """Sensor entity info."""
+
+    attribute: str
+    decimals: int
+    divisor: int
+    multiplier: int
+    unit: str | None = None
+    device_class: SensorDeviceClass | None = None
+    state_class: SensorStateClass | None = None
+
+
+@dataclass(frozen=True, kw_only=True)
+class DeviceCounterEntityInfo(BaseEntityInfo):
+    """Device counter entity info."""
+
+    name: str
+    device_ieee: str
+    available: bool
+    counter: str
+    counter_value: int
+    counter_groups: str
+    counter_group: str
+
+
+@dataclass(frozen=True, kw_only=True)
+class DeviceCounterSensorIdentifiers(BaseIdentifiers):
+    """Device counter sensor identifiers."""
+
+    device_ieee: str
+
+
 class Sensor(PlatformEntity):
     """Base ZHA sensor."""
 
@@ -175,6 +215,20 @@ class Sensor(PlatformEntity):
                 entity_metadata.unit
             ).value
 
+    @functools.cached_property
+    def info_object(self) -> SensorEntityInfo:
+        """Return a representation of the sensor."""
+        return SensorEntityInfo(
+            **super().info_object.__dict__,
+            attribute=self._attribute_name,
+            decimals=self._decimals,
+            divisor=self._divisor,
+            multiplier=self._multiplier,
+            unit=self._attr_native_unit_of_measurement,
+            device_class=self._attr_device_class,
+            state_class=self._attr_state_class,
+        )
+
     @property
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
@@ -198,18 +252,6 @@ class Sensor(PlatformEntity):
         """Handle attribute updates from the cluster handler."""
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the sensor."""
-        json = super().to_json()
-        json["attribute"] = self._attribute_name
-        json["decimals"] = self._decimals
-        json["divisor"] = self._divisor
-        json["multiplier"] = self._multiplier
-        json["unit"] = self._attr_native_unit_of_measurement
-        json["device_class"] = self._attr_device_class
-        json["state_class"] = self._attr_state_class
-        return json
 
     def formatter(self, value: int | enum.IntEnum) -> int | float | str | None:
         """Numeric pass-through formatter."""
@@ -337,6 +379,27 @@ class DeviceCounterSensor(BaseEntity):
         if self.unique_id not in self._device.platform_entities:
             self._device.platform_entities[self.unique_id] = self
 
+    @functools.cached_property
+    def identifiers(self) -> DeviceCounterSensorIdentifiers:
+        """Return a dict with the information necessary to identify this entity."""
+        return DeviceCounterSensorIdentifiers(
+            **super().identifiers.__dict__, device_ieee=str(self._device.ieee)
+        )
+
+    @functools.cached_property
+    def info_object(self) -> DeviceCounterEntityInfo:
+        """Return a representation of the platform entity."""
+        return DeviceCounterEntityInfo(
+            **super().info_object.__dict__,
+            name=self._attr_name,
+            device_ieee=str(self._device.ieee),
+            available=self.available,
+            counter=self._zigpy_counter.name,
+            counter_value=self._zigpy_counter.value,
+            counter_groups=self._zigpy_counter_groups,
+            counter_group=self._zigpy_counter_group,
+        )
+
     @property
     def name(self) -> str:
         """Return the name of the platform entity."""
@@ -352,7 +415,7 @@ class DeviceCounterSensor(BaseEntity):
         """Return entity availability."""
         return self._device.available
 
-    @property
+    @functools.cached_property
     def device(self) -> Device:
         """Return the device."""
         return self._device
@@ -374,31 +437,11 @@ class DeviceCounterSensor(BaseEntity):
                 self._device.gateway.config.allow_polling,
             )
 
-    def get_identifiers(self) -> dict[str, str | int]:
-        """Return a dict with the information necessary to identify this entity."""
-        return {
-            "unique_id": self.unique_id,
-            "platform": self.PLATFORM,
-            "device_ieee": self._device.ieee,
-        }
-
     def get_state(self) -> dict[str, Any]:
         """Return the state for this sensor."""
         response = super().get_state()
         response["state"] = self._zigpy_counter.value
         return response
-
-    def to_json(self) -> dict:
-        """Return a JSON representation of the platform entity."""
-        json = super().to_json()
-        json["name"] = self._attr_name
-        json["device_ieee"] = str(self._device.ieee)
-        json["available"] = self.available
-        json["counter"] = self._zigpy_counter.name
-        json["counter_value"] = self._zigpy_counter.value
-        json["counter_groups"] = self._zigpy_counter_groups
-        json["counter_group"] = self._zigpy_counter_group
-        return json
 
 
 class EnumSensor(Sensor):

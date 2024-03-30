@@ -158,6 +158,30 @@ class ClusterConfigureReportingEvent:
     event: Final[str] = ZHA_CLUSTER_HANDLER_MSG_CFG_RPT
 
 
+@dataclass(kw_only=True, frozen=True)
+class ClusterInfo:
+    """Cluster information."""
+
+    id: int
+    name: str
+    type: str
+    commands: dict[int, str]
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterHandlerInfo:
+    """Cluster handler information."""
+
+    class_name: str
+    generic_id: str
+    endpoint_id: str
+    cluster: ClusterInfo
+    id: str
+    unique_id: str
+    status: ClusterHandlerStatus
+    value_attribute: str | None = None
+
+
 class ClusterHandler(LogMixin, EventBase):
     """Base cluster handler for a Zigbee cluster."""
 
@@ -221,6 +245,25 @@ class ClusterHandler(LogMixin, EventBase):
     def status(self) -> ClusterHandlerStatus:
         """Return the status of the cluster handler."""
         return self._status
+
+    @functools.cached_property
+    def info_object(self) -> ClusterHandlerInfo:
+        """Return info about this cluster handler."""
+        return ClusterHandlerInfo(
+            class_name=self.__class__.__name__,
+            generic_id=self._generic_id,
+            endpoint_id=self._endpoint.id,
+            cluster=ClusterInfo(
+                id=self._cluster.cluster_id,
+                name=self._cluster.name,
+                type="client" if self._cluster.is_client else "server",
+                commands=self._cluster.commands,
+            ),
+            id=self._id,
+            unique_id=self._unique_id,
+            status=self._status.name,
+            value_attribute=getattr(self, "value_attribute", None),
+        )
 
     def __hash__(self) -> int:
         """Make this a hashable."""
@@ -584,28 +627,6 @@ class ClusterHandler(LogMixin, EventBase):
                 raise ZHAException(
                     f"Failed to write attribute {name}={value}: {record.status}",
                 )
-
-    def to_json(self) -> dict:
-        """Return JSON representation of this cluster handler."""
-        json = {
-            "class_name": self.__class__.__name__,
-            "generic_id": self._generic_id,
-            "endpoint_id": self._endpoint.id,
-            "cluster": {
-                "id": self._cluster.cluster_id,
-                "name": self._cluster.name,
-                "type": "client" if self._cluster.is_client else "server",
-                "commands": self._cluster.commands,
-            },
-            "id": self._id,
-            "unique_id": self._unique_id,
-            "status": self._status.name,
-        }
-
-        if hasattr(self, "value_attribute"):
-            json["value_attribute"] = self.value_attribute
-
-        return json
 
     def log(self, level, msg, *args, **kwargs) -> None:
         """Log a message."""

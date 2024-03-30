@@ -113,9 +113,9 @@ async def test_number(
     assert entity.get_state()["state"] == 15.0
 
     # test attributes
-    assert entity.to_json()["min_value"] == 1.0
-    assert entity.to_json()["max_value"] == 100.0
-    assert entity.to_json()["step"] == 1.1
+    assert entity.info_object.min_value == 1.0
+    assert entity.info_object.max_value == 100.0
+    assert entity.info_object.step == 1.1
 
     # change value from device
     assert cluster.read_attributes.call_count == 3

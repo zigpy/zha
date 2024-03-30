@@ -17,7 +17,7 @@ from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smart
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from zha.application import Platform
-from zha.application.const import ATTR_DEVICE_CLASS, ZHA_CLUSTER_HANDLER_READS_PER_REQ
+from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.sensor import UnitOfMass
@@ -177,7 +177,7 @@ async def async_test_smart_energy_summation_delivered(
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
     assert entity.get_state()["status"] == "NO_ALARMS"
     assert entity.get_state()["device_type"] == "Electric Metering"
-    assert entity.to_json()[ATTR_DEVICE_CLASS] == SensorDeviceClass.ENERGY
+    assert entity.info_object.device_class == SensorDeviceClass.ENERGY
 
 
 async def async_test_smart_energy_summation_received(
@@ -191,7 +191,7 @@ async def async_test_smart_energy_summation_received(
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
     assert entity.get_state()["status"] == "NO_ALARMS"
     assert entity.get_state()["device_type"] == "Electric Metering"
-    assert entity.to_json()[ATTR_DEVICE_CLASS] == SensorDeviceClass.ENERGY
+    assert entity.info_object.device_class == SensorDeviceClass.ENERGY
 
 
 async def async_test_smart_energy_summation(

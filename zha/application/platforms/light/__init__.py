@@ -8,11 +8,14 @@ from abc import ABC
 import asyncio
 from collections import Counter
 from collections.abc import Callable
+import dataclasses
+from dataclasses import dataclass
 import functools
 import itertools
 import logging
 from typing import TYPE_CHECKING, Any
 
+from zigpy.types import EUI64
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
@@ -27,7 +30,12 @@ from zha.application.const import (
     ZHA_OPTIONS,
 )
 from zha.application.helpers import async_get_zha_config_value
-from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
+from zha.application.platforms import (
+    BaseEntity,
+    BaseEntityInfo,
+    GroupEntity,
+    PlatformEntity,
+)
 from zha.application.platforms.helpers import (
     find_state_attributes,
     mean_tuple,
@@ -67,7 +75,7 @@ from zha.application.platforms.light.helpers import (
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandlerInfo
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COLOR,
@@ -86,6 +94,28 @@ _LOGGER = logging.getLogger(__name__)
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.LIGHT)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.LIGHT)
+
+
+@dataclass(frozen=True, kw_only=True)
+class LightEntityInfo(BaseEntityInfo):
+    """Light entity info."""
+
+    # combination of PlatformEntityInfo and GroupEntityInfo
+    unique_id: str
+    platform: str
+    class_name: str
+
+    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
+    device_ieee: EUI64 | None = dataclasses.field(default=None)
+    endpoint_id: int | None = dataclasses.field(default=None)
+    group_id: int | None = dataclasses.field(default=None)
+    name: str | None = dataclasses.field(default=None)
+    available: bool | None = dataclasses.field(default=None)
+
+    effect_list: list[str] | None = dataclasses.field(default=None)
+    supported_features: LightEntityFeature
+    min_mireds: int
+    max_mireds: int
 
 
 class BaseLight(BaseEntity, ABC):
@@ -125,61 +155,6 @@ class BaseLight(BaseEntity, ABC):
         self._transitioning_individual: bool = False
         self._transitioning_group: bool = False
         self._transition_listener: Callable[[], None] | None = None
-
-    def get_state(self) -> dict[str, Any]:
-        """Return the state of the light."""
-        response = super().get_state()
-        response["on"] = self.is_on
-        response["brightness"] = self.brightness
-        response["hs_color"] = self.hs_color
-        response["xy_color"] = self.xy_color
-        response["color_temp"] = self.color_temp
-        response["effect"] = self.effect
-        response["off_brightness"] = self._off_brightness
-        response["off_with_transition"] = self._off_with_transition
-        response["supported_features"] = self.supported_features
-        response["color_mode"] = self.color_mode
-        response["supported_color_modes"] = self._supported_color_modes
-        return response
-
-    @property
-    def is_on(self) -> bool:
-        """Return true if entity is on."""
-        if self._state is None:
-            return False
-        return self._state
-
-    @property
-    def brightness(self) -> int | None:
-        """Return the brightness of this light."""
-        return self._brightness
-
-    @property
-    def min_mireds(self) -> int | None:
-        """Return the coldest color_temp that this light supports."""
-        return self._min_mireds
-
-    @property
-    def max_mireds(self) -> int | None:
-        """Return the warmest color_temp that this light supports."""
-        return self._max_mireds
-
-    def handle_cluster_handler_set_level(self, event: LevelChangeEvent) -> None:
-        """Set the brightness of this light between 0..254.
-
-        brightness level 255 is a special value instructing the device to come
-        on at `on_level` Zigbee attribute value, regardless of the last set
-        level
-        """
-        if self.is_transitioning:
-            self.debug(
-                "received level change event %s while transitioning - skipping update",
-                event,
-            )
-            return
-        value = max(0, min(254, event.level))
-        self._brightness = value
-        self.maybe_emit_state_changed_event()
 
     @property
     def hs_color(self) -> tuple[float, float] | None:
@@ -221,14 +196,60 @@ class BaseLight(BaseEntity, ABC):
         """Flag supported color modes."""
         return self._supported_color_modes
 
-    def to_json(self) -> dict:
-        """Return a JSON representation of the select."""
-        json = super().to_json()
-        json["supported_features"] = self.supported_features
-        json["effect_list"] = self.effect_list
-        json["min_mireds"] = self.min_mireds
-        json["max_mireds"] = self.max_mireds
-        return json
+    @property
+    def is_on(self) -> bool:
+        """Return true if entity is on."""
+        if self._state is None:
+            return False
+        return self._state
+
+    @property
+    def brightness(self) -> int | None:
+        """Return the brightness of this light."""
+        return self._brightness
+
+    @property
+    def min_mireds(self) -> int | None:
+        """Return the coldest color_temp that this light supports."""
+        return self._min_mireds
+
+    @property
+    def max_mireds(self) -> int | None:
+        """Return the warmest color_temp that this light supports."""
+        return self._max_mireds
+
+    def get_state(self) -> dict[str, Any]:
+        """Return the state of the light."""
+        response = super().get_state()
+        response["on"] = self.is_on
+        response["brightness"] = self.brightness
+        response["hs_color"] = self.hs_color
+        response["xy_color"] = self.xy_color
+        response["color_temp"] = self.color_temp
+        response["effect"] = self.effect
+        response["off_brightness"] = self._off_brightness
+        response["off_with_transition"] = self._off_with_transition
+        response["supported_features"] = self.supported_features
+        response["color_mode"] = self.color_mode
+        response["supported_color_modes"] = self._supported_color_modes
+        return response
+
+    def handle_cluster_handler_set_level(self, event: LevelChangeEvent) -> None:
+        """Set the brightness of this light between 0..254.
+
+        brightness level 255 is a special value instructing the device to come
+        on at `on_level` Zigbee attribute value, regardless of the last set
+        level
+        """
+        if self.is_transitioning:
+            self.debug(
+                "received level change event %s while transitioning - skipping update",
+                event,
+            )
+            return
+        value = max(0, min(254, event.level))
+        self._brightness = value
+        self.maybe_emit_state_changed_event()
 
     def set_level(self, value: int) -> None:
         """Set the brightness of this light between 0..254.
@@ -844,6 +865,17 @@ class Light(PlatformEntity, BaseLight):
             getattr(self, "__polling_interval"),
         )
 
+    @functools.cached_property
+    def info_object(self) -> LightEntityInfo:
+        """Return a representation of the select."""
+        return LightEntityInfo(
+            **super().info_object.__dict__,
+            effect_list=self.effect_list,
+            supported_features=self.supported_features,
+            min_mireds=self.min_mireds,
+            max_mireds=self.max_mireds,
+        )
+
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self) -> None:
         """Call async_get_state at an interval."""
@@ -1176,7 +1208,20 @@ class LightGroup(GroupEntity, BaseLight):
             function=self._force_member_updates,
         )
         self._debounced_member_refresh = force_refresh_debouncer
+        if hasattr(self, "info_object"):
+            delattr(self, "info_object")
         self.update()
+
+    @functools.cached_property
+    def info_object(self) -> LightEntityInfo:
+        """Return a representation of the select."""
+        return LightEntityInfo(
+            **super().info_object.__dict__,
+            effect_list=self.effect_list,
+            supported_features=self.supported_features,
+            min_mireds=self.min_mireds,
+            max_mireds=self.max_mireds,
+        )
 
     # remove this when all ZHA platforms and base entities are updated
     @property

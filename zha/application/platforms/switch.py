@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from abc import ABC
+import dataclasses
+from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self, cast
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 from zigpy.quirks.v2 import SwitchMetadata
+from zigpy.types import EUI64
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
@@ -22,7 +25,7 @@ from zha.application.platforms import (
     PlatformEntity,
 )
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandlerInfo
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
@@ -45,6 +48,29 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True, kw_only=True)
+class SwitchConfigurationEntityInfo:
+    """Switch configuration entity info."""
+
+    # combination of PlatformEntityInfo and GroupEntityInfo
+    unique_id: str
+    platform: str
+    class_name: str
+
+    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
+    device_ieee: EUI64 | None = dataclasses.field(default=None)
+    endpoint_id: int | None = dataclasses.field(default=None)
+    group_id: int | None = dataclasses.field(default=None)
+    name: str | None = dataclasses.field(default=None)
+    available: bool | None = dataclasses.field(default=None)
+
+    attribute_name: str
+    invert_attribute_name: str | None
+    force_inverted: bool
+    off_value: int
+    on_value: int
 
 
 class BaseSwitch(BaseEntity, ABC):
@@ -128,6 +154,8 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         super().__init__(group)
         self._state: bool
         self._on_off_cluster_handler = group.zigpy_group.endpoint[OnOff.cluster_id]
+        if hasattr(self, "info_object"):
+            delattr(self, "info_object")
         self.update()
 
     @property
@@ -155,8 +183,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         """Query all members and determine the light group state."""
         self.debug("Updating switch group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_entities = [entity.to_json() for entity in platform_entities]
-        all_states = [entity["state"] for entity in all_entities]
+        all_states = [entity.get_state() for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
@@ -237,13 +264,17 @@ class SwitchConfigurationEntity(PlatformEntity):
         self._off_value = entity_metadata.off_value
         self._on_value = entity_metadata.on_value
 
-    def handle_cluster_handler_attribute_updated(
-        self,
-        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
-    ) -> None:
-        """Handle state update from cluster handler."""
-        if event.attribute_name == self._attribute_name:
-            self.maybe_emit_state_changed_event()
+    @functools.cached_property
+    def info_object(self) -> SwitchConfigurationEntityInfo:
+        """Return representation of the switch configuration entity."""
+        return SwitchConfigurationEntityInfo(
+            **super().info_object.__dict__,
+            attribute_name=self._attribute_name,
+            invert_attribute_name=self._inverter_attribute_name,
+            force_inverted=self._force_inverted,
+            off_value=self._off_value,
+            on_value=self._on_value,
+        )
 
     @property
     def inverted(self) -> bool:
@@ -263,6 +294,14 @@ class SwitchConfigurationEntity(PlatformEntity):
         else:
             val = bool(self._cluster_handler.cluster.get(self._attribute_name))
         return (not val) if self.inverted else val
+
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle state update from cluster handler."""
+        if event.attribute_name == self._attribute_name:
+            self.maybe_emit_state_changed_event()
 
     async def async_turn_on_off(self, state: bool) -> None:
         """Turn the entity on or off."""
