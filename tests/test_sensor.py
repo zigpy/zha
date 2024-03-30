@@ -643,15 +643,16 @@ async def test_electrical_measurement_init(
     assert cluster_handler.ac_power_multiplier == 1
     assert entity.state["state"] == 4.0
 
-    zha_device.available = False
+    zha_device.on_network = False
 
-    await asyncio.sleep(70)
+    await asyncio.sleep(entity.__polling_interval + 1)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert (
         "1-2820: skipping polling for updated state, available: False, allow polled requests: True"
         in caplog.text
     )
 
-    zha_device.available = True
+    zha_device.on_network = True
 
     await send_attributes_report(
         zha_gateway,
@@ -1173,13 +1174,14 @@ async def test_device_counter_sensors(
         "counter_1"
     ].increment()
 
-    await entity.async_update()
-    await zha_gateway.async_block_till_done()
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert entity.state["state"] == 2
 
     coordinator.available = False
     await asyncio.sleep(120)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert (
         "counter_1: skipping polling for updated state, available: False, allow polled requests: True"

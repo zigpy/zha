@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 import binascii
 import collections
+from collections.abc import Callable
 import dataclasses
 from dataclasses import dataclass
 import enum
@@ -25,7 +27,8 @@ from zha.application.const import (
     CLUSTER_TYPE_OUT,
     CUSTOM_CONFIGURATION,
 )
-from zha.decorators import SetRegistry
+from zha.async_ import gather_with_limited_concurrency
+from zha.decorators import SetRegistry, callback, periodic
 
 # from zha.zigbee.cluster_handlers.registries import BINDABLE_CLUSTERS
 BINDABLE_CLUSTERS = SetRegistry()
@@ -277,3 +280,116 @@ class ZHAData:
         default_factory=dict
     )
     allow_polling: bool = dataclasses.field(default=False)
+
+
+class GlobalUpdater:
+    """Global updater for ZHA.
+
+    This class is used to update all listeners at a regular interval. The listeners
+    are `Callable` objects that are registered with the `register_update_listener` method.
+    """
+
+    _REFRESH_INTERVAL = (30, 45)
+    __polling_interval: int
+
+    def __init__(self, gateway: Gateway):
+        """Initialize the GlobalUpdater."""
+        self._updater_task_handle: asyncio.Task = None
+        self._update_listeners: list[Callable] = []
+        self._gateway: Gateway = gateway
+
+    def start(self):
+        """Start the global updater."""
+        self._updater_task_handle = self._gateway.async_create_background_task(
+            self.update_listeners(),
+            name=f"global-updater_{self.__class__.__name__}",
+            eager_start=True,
+            untracked=True,
+        )
+        _LOGGER.debug(
+            "started global updater with an interval of %s seconds",
+            getattr(self, "__polling_interval"),
+        )
+
+    def stop(self):
+        """Stop the global updater."""
+        _LOGGER.debug("stopping global updater")
+        if self._updater_task_handle:
+            self._updater_task_handle.cancel()
+            self._updater_task_handle = None
+        _LOGGER.debug("global updater stopped")
+
+    def register_update_listener(self, listener: Callable):
+        """Register an update listener."""
+        self._update_listeners.append(listener)
+
+    def remove_update_listener(self, listener: Callable):
+        """Remove an update listener."""
+        self._update_listeners.remove(listener)
+
+    @callback
+    @periodic(_REFRESH_INTERVAL)
+    async def update_listeners(self):
+        """Update all listeners."""
+        _LOGGER.debug("Global updater interval starting")
+        if self._gateway.config.allow_polling:
+            for listener in self._update_listeners:
+                _LOGGER.debug("Global updater running update callback")
+                listener()
+        else:
+            _LOGGER.debug("Global updater pass skipped")
+        _LOGGER.debug("Global updater interval finished")
+
+
+class DeviceAvailabilityChecker:
+    """Device availability checker for ZHA."""
+
+    _REFRESH_INTERVAL = (30, 45)
+    __polling_interval: int
+
+    def __init__(self, gateway: Gateway):
+        """Initialize the DeviceAvailabilityChecker."""
+        self._gateway: Gateway = gateway
+        self._device_availability_task_handle: asyncio.Task = None
+
+    def start(self):
+        """Start the device availability checker."""
+        self._device_availability_task_handle = (
+            self._gateway.async_create_background_task(
+                self.check_device_availability(),
+                name=f"device-availability-checker_{self.__class__.__name__}",
+                eager_start=True,
+                untracked=True,
+            )
+        )
+        _LOGGER.debug(
+            "started device availability checker with an interval of %s seconds",
+            getattr(self, "__polling_interval"),
+        )
+
+    def stop(self):
+        """Stop the device availability checker."""
+        _LOGGER.debug("stopping device availability checker")
+        if self._device_availability_task_handle:
+            self._device_availability_task_handle.cancel()
+            self._device_availability_task_handle = None
+        _LOGGER.debug("device availability checker stopped")
+
+    @periodic(_REFRESH_INTERVAL)
+    async def check_device_availability(self):
+        """Check device availability."""
+        _LOGGER.debug("Global updater device availability checker starting")
+        if self._gateway.config.allow_polling:
+            _LOGGER.debug("Global updater checking device availability")
+            # 20 because most devices will not make remote calls
+            await gather_with_limited_concurrency(
+                20,
+                *(
+                    dev._check_available()
+                    for dev in self._gateway.devices.values()
+                    if not dev.is_coordinator
+                ),
+            )
+            _LOGGER.debug("Global updater device availability checker finished")
+        else:
+            _LOGGER.debug("Global updater device availability checker skipped")
