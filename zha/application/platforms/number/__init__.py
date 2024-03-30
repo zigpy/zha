@@ -96,6 +96,13 @@ class Number(PlatformEntity):
         )
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the entity."""
+        response = super().state
+        response["state"] = self.native_value
+        return response
+
+    @property
     def native_value(self) -> float | None:
         """Return the current value."""
         return self._analog_output_cluster_handler.present_value
@@ -177,12 +184,6 @@ class Number(PlatformEntity):
             max_value=self.native_max_value,
             step=self.native_step,
         )
-
-    def get_state(self) -> dict:
-        """Return the state of the entity."""
-        response = super().get_state()
-        response["state"] = self.native_value
-        return response
 
 
 class NumberConfigurationEntity(PlatformEntity):
@@ -284,6 +285,13 @@ class NumberConfigurationEntity(PlatformEntity):
         )
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the entity."""
+        response = super().state
+        response["state"] = self.native_value
+        return response
+
+    @property
     def native_value(self) -> float:
         """Return the current value."""
         value = self._cluster_handler.cluster.get(self._attribute_name)
@@ -347,12 +355,6 @@ class NumberConfigurationEntity(PlatformEntity):
         """Handle value update from cluster handler."""
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Return the state of the entity."""
-        response = super().get_state()
-        response["state"] = self.native_value
-        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(

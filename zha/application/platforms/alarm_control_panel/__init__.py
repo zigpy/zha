@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl.clusters.security import IasAce
 
@@ -117,11 +117,13 @@ class AlarmControlPanel(PlatformEntity):
         )
 
     @property
-    def state(self) -> str:
-        """Return the state of the entity."""
-        return IAS_ACE_STATE_MAP.get(
+    def state(self) -> dict[str, Any]:
+        """Get the state of the alarm control panel."""
+        response = super().state
+        response["state"] = IAS_ACE_STATE_MAP.get(
             self._cluster_handler.armed_state, AlarmState.UNKNOWN
         )
+        return response
 
     @functools.cached_property
     def info_object(self) -> AlarmControlPanelEntityInfo:
@@ -165,9 +167,3 @@ class AlarmControlPanel(PlatformEntity):
         """Send alarm trigger command."""
         self._cluster_handler.panic()
         self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Get the state of the alarm control panel."""
-        response = super().get_state()
-        response["state"] = self.state
-        return response

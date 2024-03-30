@@ -120,8 +120,7 @@ class BaseEntity(LogMixin, EventBase):
         self._unique_id: str = unique_id
         if self._unique_id_suffix:
             self._unique_id += f"-{self._unique_id_suffix}"
-        self._state: Any = None
-        self._previous_state: Any = None
+        self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
 
     @property
@@ -146,14 +145,12 @@ class BaseEntity(LogMixin, EventBase):
             class_name=self.__class__.__name__,
         )
 
-    def get_state(self) -> dict:
+    @property
+    def state(self) -> dict[str, Any]:
         """Return the arguments to use in the command."""
         return {
             "class_name": self.__class__.__name__,
         }
-
-    async def async_update(self) -> None:
-        """Retrieve latest state."""
 
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
@@ -166,12 +163,12 @@ class BaseEntity(LogMixin, EventBase):
 
     def maybe_emit_state_changed_event(self) -> None:
         """Send the state of this platform entity."""
-        state = self.get_state()
-        if self._previous_state != state:
+        state = self.state
+        if self.__previous_state != state:
             self.emit(
                 STATE_CHANGED, EntityStateChangedEvent(**self.identifiers.__dict__)
             )
-            self._previous_state = state
+            self.__previous_state = state
 
     def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
         """Log a message."""
@@ -305,9 +302,10 @@ class PlatformEntity(BaseEntity):
             available=self.available,
         )
 
-    def get_state(self) -> dict:
+    @property
+    def state(self) -> dict[str, Any]:
         """Return the arguments to use in the command."""
-        state = super().get_state()
+        state = super().state
         state["available"] = self.available
         return state
 

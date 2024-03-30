@@ -69,15 +69,15 @@ async def test_lock(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["is_locked"] is False
+    assert entity.state["is_locked"] is False
 
     # set state to locked
     await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 2})
-    assert entity.get_state()["is_locked"] is True
+    assert entity.state["is_locked"] is True
 
     # set state to unlocked
     await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 2, 2: 3})
-    assert entity.get_state()["is_locked"] is False
+    assert entity.state["is_locked"] is False
 
     # lock from HA
     await async_lock(zha_gateway, cluster, entity)
@@ -99,13 +99,13 @@ async def test_lock(
 
     # test updating entity state from client
     cluster.read_attributes.reset_mock()
-    assert entity.get_state()["is_locked"] is False
+    assert entity.state["is_locked"] is False
     cluster.PLUGGED_ATTR_READS = {"lock_state": 1}
     update_attribute_cache(cluster)
     await entity.async_update()
     await zha_gateway.async_block_till_done()
     assert cluster.read_attributes.call_count == 1
-    assert entity.get_state()["is_locked"] is True
+    assert entity.state["is_locked"] is True
 
 
 async def async_lock(
@@ -117,7 +117,7 @@ async def async_lock(
     with patch("zigpy.zcl.Cluster.request", return_value=[zcl_f.Status.SUCCESS]):
         await entity.async_lock()
         await zha_gateway.async_block_till_done()
-        assert entity.get_state()["is_locked"] is True
+        assert entity.state["is_locked"] is True
         assert cluster.request.call_count == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == LOCK_DOOR
@@ -127,7 +127,7 @@ async def async_lock(
     with patch("zigpy.zcl.Cluster.request", return_value=[zcl_f.Status.FAILURE]):
         await entity.async_unlock()
         await zha_gateway.async_block_till_done()
-        assert entity.get_state()["is_locked"] is True
+        assert entity.state["is_locked"] is True
         assert cluster.request.call_count == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == UNLOCK_DOOR
@@ -143,7 +143,7 @@ async def async_unlock(
     with patch("zigpy.zcl.Cluster.request", return_value=[zcl_f.Status.SUCCESS]):
         await entity.async_unlock()
         await zha_gateway.async_block_till_done()
-        assert entity.get_state()["is_locked"] is False
+        assert entity.state["is_locked"] is False
         assert cluster.request.call_count == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == UNLOCK_DOOR
@@ -153,7 +153,7 @@ async def async_unlock(
     with patch("zigpy.zcl.Cluster.request", return_value=[zcl_f.Status.FAILURE]):
         await entity.async_lock()
         await zha_gateway.async_block_till_done()
-        assert entity.get_state()["is_locked"] is False
+        assert entity.state["is_locked"] is False
         assert cluster.request.call_count == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == LOCK_DOOR

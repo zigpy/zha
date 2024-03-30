@@ -72,14 +72,6 @@ class EnumSelectEntity(PlatformEntity):
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
-    @property
-    def current_option(self) -> str | None:
-        """Return the selected entity option to represent the entity state."""
-        option = self._cluster_handler.data_cache.get(self._attribute_name)
-        if option is None:
-            return None
-        return option.name.replace("_", " ")
-
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:
         """Return a representation of the select."""
@@ -89,18 +81,27 @@ class EnumSelectEntity(PlatformEntity):
             options=self._attr_options,
         )
 
+    @property
+    def state(self) -> dict:
+        """Return the state of the select."""
+        response = super().state
+        response["state"] = self.current_option
+        return response
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the selected entity option to represent the entity state."""
+        option = self._cluster_handler.data_cache.get(self._attribute_name)
+        if option is None:
+            return None
+        return option.name.replace("_", " ")
+
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         self._cluster_handler.data_cache[self._attribute_name] = self._enum[
             option.replace(" ", "_")
         ]
         self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Return the state of the select."""
-        response = super().get_state()
-        response["state"] = self.current_option
-        return response
 
 
 class NonZCLSelectEntity(EnumSelectEntity):
@@ -209,15 +210,6 @@ class ZCLEnumSelectEntity(PlatformEntity):
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
 
-    @property
-    def current_option(self) -> str | None:
-        """Return the selected entity option to represent the entity state."""
-        option = self._cluster_handler.cluster.get(self._attribute_name)
-        if option is None:
-            return None
-        option = self._enum(option)
-        return option.name.replace("_", " ")
-
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:
         """Return a representation of the select."""
@@ -226,6 +218,22 @@ class ZCLEnumSelectEntity(PlatformEntity):
             enum=self._enum.__name__,
             options=self._attr_options,
         )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the select."""
+        response = super().state
+        response["state"] = self.current_option
+        return response
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the selected entity option to represent the entity state."""
+        option = self._cluster_handler.cluster.get(self._attribute_name)
+        if option is None:
+            return None
+        option = self._enum(option)
+        return option.name.replace("_", " ")
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
@@ -241,12 +249,6 @@ class ZCLEnumSelectEntity(PlatformEntity):
         """Handle value update from cluster handler."""
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Return the state of the select."""
-        response = super().get_state()
-        response["state"] = self.current_option
-        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)

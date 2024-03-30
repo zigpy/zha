@@ -79,7 +79,7 @@ async def test_select(
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert entity.get_state()["state"] is None  # unknown in HA
+    assert entity.state["state"] is None  # unknown in HA
     assert entity.info_object.options == [
         "Stop",
         "Burglar",
@@ -94,9 +94,7 @@ async def test_select(
     # change value from client
     await entity.async_select_option(security.IasWd.Warning.WarningMode.Burglar.name)
     await zha_gateway.async_block_till_done()
-    assert (
-        entity.get_state()["state"] == security.IasWd.Warning.WarningMode.Burglar.name
-    )
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
 
 
 class MotionSensitivityQuirk(CustomDevice):
@@ -176,13 +174,13 @@ async def test_on_off_select_attribute_report(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert entity.get_state()["state"] == AqaraMotionSensitivities.Medium.name
+    assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
 
     # send attribute report from device
     await send_attributes_report(
         zha_gateway, cluster, {"motion_sensitivity": AqaraMotionSensitivities.Low}
     )
-    assert entity.get_state()["state"] == AqaraMotionSensitivities.Low.name
+    assert entity.state["state"] == AqaraMotionSensitivities.Low.name
 
 
 (
@@ -248,13 +246,13 @@ async def test_on_off_select_attribute_report_v2(
     assert entity is not None
 
     # test that the state is in default medium state
-    assert entity.get_state()["state"] == AqaraMotionSensitivities.Medium.name
+    assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
 
     # send attribute report from device
     await send_attributes_report(
         zha_gateway, cluster, {"motion_sensitivity": AqaraMotionSensitivities.Low}
     )
-    assert entity.get_state()["state"] == AqaraMotionSensitivities.Low.name
+    assert entity.state["state"] == AqaraMotionSensitivities.Low.name
 
     assert entity._attr_entity_category == EntityCategory.CONFIG
     # TODO assert entity._attr_entity_registry_enabled_default is True
@@ -262,7 +260,7 @@ async def test_on_off_select_attribute_report_v2(
 
     await entity.async_select_option(AqaraMotionSensitivities.Medium.name)
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["state"] == AqaraMotionSensitivities.Medium.name
+    assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
     assert cluster.write_attributes.call_count == 1
     assert cluster.write_attributes.call_args == call(
         {"motion_sensitivity": AqaraMotionSensitivities.Medium}, manufacturer=None

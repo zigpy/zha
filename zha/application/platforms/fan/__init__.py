@@ -244,6 +244,20 @@ class Fan(PlatformEntity, BaseFan):
         )
 
     @property
+    def state(self) -> dict:
+        """Return the state of the fan."""
+        response = super().state
+        response.update(
+            {
+                "preset_mode": self.preset_mode,
+                "percentage": self.percentage,
+                "is_on": self.is_on,
+                "speed": self.speed,
+            }
+        )
+        return response
+
+    @property
     def percentage(self) -> int | None:
         """Return the current speed percentage."""
         if (
@@ -270,19 +284,6 @@ class Fan(PlatformEntity, BaseFan):
         if (percentage := self.percentage) is None:
             return None
         return self.percentage_to_speed(percentage)
-
-    def get_state(self) -> dict:
-        """Return the state of the fan."""
-        response = super().get_state()
-        response.update(
-            {
-                "preset_mode": self.preset_mode,
-                "percentage": self.percentage,
-                "is_on": self.is_on,
-                "speed": self.speed,
-            }
-        )
-        return response
 
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the fan."""
@@ -319,6 +320,20 @@ class FanGroup(GroupEntity, BaseFan):
         )
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the fan."""
+        response = super().state
+        response.update(
+            {
+                "preset_mode": self.preset_mode,
+                "percentage": self.percentage,
+                "is_on": self.is_on,
+                "speed": self.speed,
+            }
+        )
+        return response
+
+    @property
     def percentage(self) -> int | None:
         """Return the current speed percentage."""
         return self._percentage
@@ -337,19 +352,6 @@ class FanGroup(GroupEntity, BaseFan):
             return None
         return self.percentage_to_speed(percentage)
 
-    def get_state(self) -> dict:
-        """Return the state of the fan."""
-        response = super().get_state()
-        response.update(
-            {
-                "preset_mode": self.preset_mode,
-                "percentage": self.percentage,
-                "is_on": self.is_on,
-                "speed": self.speed,
-            }
-        )
-        return response
-
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the group."""
 
@@ -362,7 +364,7 @@ class FanGroup(GroupEntity, BaseFan):
         """Attempt to retrieve on off state from the fan."""
         self.debug("Updating fan group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_states = [entity.get_state() for entity in platform_entities]
+        all_states = [entity.state for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )

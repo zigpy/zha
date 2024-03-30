@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 import functools
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zigpy.zcl.clusters.general import PowerConfiguration
 
@@ -83,6 +83,41 @@ class DeviceScannerEntity(PlatformEntity):
             getattr(self, "__polling_interval"),
         )
 
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the device."""
+        response = super().state
+        response.update(
+            {
+                "connected": self._connected,
+                "battery_level": self._battery_level,
+            }
+        )
+        return response
+
+    @property
+    def is_connected(self):
+        """Return true if the device is connected to the network."""
+        return self._connected
+
+    @property
+    def source_type(self) -> SourceType:
+        """Return the source type, eg gps or router, of the device."""
+        return SourceType.ROUTER
+
+    @property
+    def battery_level(self):
+        """Return the battery level of the device.
+
+        Percentage from 0-100.
+        """
+        return self._battery_level
+
+    @periodic((30, 45))
+    async def _refresh(self) -> None:
+        """Refresh the state of the device tracker."""
+        await self.async_update()
+
     async def async_update(self) -> None:
         """Handle polling."""
         if self.device.last_seen is None:
@@ -94,21 +129,6 @@ class DeviceScannerEntity(PlatformEntity):
             else:
                 self._connected = True
         self.maybe_emit_state_changed_event()
-
-    @periodic((30, 45))
-    async def _refresh(self) -> None:
-        """Refresh the state of the device tracker."""
-        await self.async_update()
-
-    @property
-    def is_connected(self):
-        """Return true if the device is connected to the network."""
-        return self._connected
-
-    @property
-    def source_type(self) -> SourceType:
-        """Return the source type, eg gps or router, of the device."""
-        return SourceType.ROUTER
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -123,22 +143,3 @@ class DeviceScannerEntity(PlatformEntity):
         self._connected = True
         self._battery_level = Battery.formatter(event.attribute_value)
         self.maybe_emit_state_changed_event()
-
-    @property
-    def battery_level(self):
-        """Return the battery level of the device.
-
-        Percentage from 0-100.
-        """
-        return self._battery_level
-
-    def get_state(self) -> dict:
-        """Return the state of the device."""
-        response = super().get_state()
-        response.update(
-            {
-                "connected": self._connected,
-                "battery_level": self._battery_level,
-            }
-        )
-        return response

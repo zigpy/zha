@@ -108,6 +108,13 @@ class Siren(PlatformEntity):
             supported_features=self._attr_supported_features,
         )
 
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the siren."""
+        response = super().state
+        response["state"] = self._attr_is_on
+        return response
+
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on siren."""
         if self._off_listener:
@@ -175,9 +182,3 @@ class Siren(PlatformEntity):
             self._off_listener.cancel()
             self._off_listener = None
         self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Get the state of the siren."""
-        response = super().get_state()
-        response["state"] = self._attr_is_on
-        return response

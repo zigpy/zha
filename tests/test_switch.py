@@ -141,15 +141,15 @@ async def test_switch(
     entity: PlatformEntity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert bool(bool(entity.get_state()["state"])) is False
+    assert bool(bool(entity.state["state"])) is False
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 2})
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 2})
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn on from client
     with patch(
@@ -158,7 +158,7 @@ async def test_switch(
     ):
         await entity.async_turn_on()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.get_state()["state"]) is True
+        assert bool(entity.state["state"]) is True
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -179,7 +179,7 @@ async def test_switch(
     ):
         await entity.async_turn_off()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.get_state()["state"]) is True
+        assert bool(entity.state["state"]) is True
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -197,7 +197,7 @@ async def test_switch(
     ):
         await entity.async_turn_off()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.get_state()["state"]) is False
+        assert bool(entity.state["state"]) is False
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -218,7 +218,7 @@ async def test_switch(
     ):
         await entity.async_turn_on()
         await zha_gateway.async_block_till_done()
-        assert bool(entity.get_state()["state"]) is False
+        assert bool(entity.state["state"]) is False
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args == call(
             False,
@@ -231,7 +231,7 @@ async def test_switch(
 
     # test updating entity state from client
     cluster.read_attributes.reset_mock()
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
     cluster.PLUGGED_ATTR_READS = {"on_off": True}
     await entity.async_update()
     await zha_gateway.async_block_till_done()
@@ -239,7 +239,7 @@ async def test_switch(
     assert cluster.read_attributes.await_args == call(
         ["on_off"], allow_cache=False, only_cache=False, manufacturer=None
     )
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
 
 async def test_zha_group_switch_entity(
@@ -279,7 +279,7 @@ async def test_zha_group_switch_entity(
     dev2_cluster_on_off = device_switch_2.device.endpoints[1].on_off
 
     # test that the lights were created and are off
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn on from HA
     with patch(
@@ -298,7 +298,7 @@ async def test_zha_group_switch_entity(
             manufacturer=None,
             tsn=None,
         )
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn off from HA
     with patch(
@@ -317,7 +317,7 @@ async def test_zha_group_switch_entity(
             manufacturer=None,
             tsn=None,
         )
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # test some of the group logic to make sure we key off states correctly
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
@@ -325,25 +325,25 @@ async def test_zha_group_switch_entity(
     await zha_gateway.async_block_till_done()
 
     # test that group light is on
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # test that group light is still on
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
 
     # test that group light is now off
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
 
     # test that group light is now back on
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
 
 def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
@@ -434,19 +434,19 @@ async def test_switch_configurable(
     assert entity is not None
 
     # test that the state has changed from unavailable to off
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn on at switch
     await send_attributes_report(
         zha_gateway, cluster, {"window_detection_function": True}
     )
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn off at switch
     await send_attributes_report(
         zha_gateway, cluster, {"window_detection_function": False}
     )
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn on from HA
     with patch(
@@ -566,15 +566,15 @@ async def test_switch_configurable_custom_on_off_values(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 3})
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 5})
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn on from HA
     with patch(
@@ -645,15 +645,15 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 3})
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 5})
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn on from HA
     with patch(
@@ -727,15 +727,15 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
 
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn on at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 3})
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # turn off at switch
     await send_attributes_report(zha_gateway, cluster, {"window_detection_function": 5})
-    assert bool(entity.get_state()["state"]) is True
+    assert bool(entity.state["state"]) is True
 
     # turn on from HA
     with patch(
@@ -812,13 +812,13 @@ async def test_cover_inversion_switch(
     await entity.async_update()
     await zha_gateway.async_block_till_done()
     assert cluster.read_attributes.call_count == prev_call_count + 1
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     # test to see the state remains after tilting to 0%
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
     )
-    assert bool(entity.get_state()["state"]) is False
+    assert bool(entity.state["state"]) is False
 
     with patch(
         "zigpy.zcl.Cluster.write_attributes", return_value=[0x1, zcl_f.Status.SUCCESS]
@@ -839,7 +839,7 @@ async def test_cover_inversion_switch(
             manufacturer=None,
         )
 
-        assert bool(entity.get_state()["state"]) is True
+        assert bool(entity.state["state"]) is True
 
         cluster.write_attributes.reset_mock()
 
@@ -855,7 +855,7 @@ async def test_cover_inversion_switch(
             manufacturer=None,
         )
 
-        assert bool(entity.get_state()["state"]) is False
+        assert bool(entity.state["state"]) is False
 
         cluster.write_attributes.reset_mock()
 
@@ -864,7 +864,7 @@ async def test_cover_inversion_switch(
         await zha_gateway.async_block_till_done()
         assert cluster.write_attributes.call_count == 0
 
-        assert bool(entity.get_state()["state"]) is False
+        assert bool(entity.state["state"]) is False
 
 
 async def test_cover_inversion_switch_not_created(

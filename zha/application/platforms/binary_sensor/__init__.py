@@ -73,6 +73,7 @@ class BinarySensor(PlatformEntity):
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._state: bool = self.is_on
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
@@ -93,7 +94,9 @@ class BinarySensor(PlatformEntity):
     @property
     def is_on(self) -> bool:
         """Return True if the switch is on based on the state machine."""
-        raw_state = self._cluster_handler.cluster.get(self._attribute_name)
+        self._state = raw_state = self._cluster_handler.cluster.get(
+            self._attribute_name
+        )
         if raw_state is None:
             return False
         return self.parse(raw_state)
@@ -114,9 +117,10 @@ class BinarySensor(PlatformEntity):
             else None,
         )
 
-    def get_state(self) -> dict:
+    @property
+    def state(self) -> dict:
         """Return the state of the binary sensor."""
-        response = super().get_state()
+        response = super().state
         response["state"] = self.is_on
         return response
 

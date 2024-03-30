@@ -126,6 +126,21 @@ class Thermostat(PlatformEntity):
         )
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the lock."""
+        response = super().state
+        response["current_temperature"] = self.current_temperature
+        response["target_temperature"] = self.target_temperature
+        response["target_temperature_high"] = self.target_temperature_high
+        response["target_temperature_low"] = self.target_temperature_low
+        response["hvac_action"] = self.hvac_action
+        response["hvac_mode"] = self.hvac_mode
+        response["preset_mode"] = self.preset_mode
+        response["fan_mode"] = self.fan_mode
+        response.update(self.extra_state_attributes)
+        return response
+
+    @property
     def current_temperature(self):
         """Return the current temperature."""
         if self._thermostat_cluster_handler.local_temperature is None:
@@ -462,20 +477,6 @@ class Thermostat(PlatformEntity):
 
         handler = getattr(self, f"async_preset_handler_{preset}")
         await handler(enable)
-
-    def get_state(self) -> dict:
-        """Get the state of the lock."""
-        response = super().get_state()
-        response["current_temperature"] = self.current_temperature
-        response["target_temperature"] = self.target_temperature
-        response["target_temperature_high"] = self.target_temperature_high
-        response["target_temperature_low"] = self.target_temperature_low
-        response["hvac_action"] = self.hvac_action
-        response["hvac_mode"] = self.hvac_mode
-        response["preset_mode"] = self.preset_mode
-        response["fan_mode"] = self.fan_mode
-        response.update(self.extra_state_attributes)
-        return response
 
 
 @MULTI_MATCH(

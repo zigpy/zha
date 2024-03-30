@@ -37,7 +37,7 @@ async def test_immediate_works(zha_gateway: Gateway) -> None:
     assert len(calls) == 1
     assert debouncer._timer_task is not None
     assert debouncer._execute_at_end_of_timer is True
-    assert debouncer._job.target == debouncer.function  # type: ignore[unreachable]
+    assert debouncer._job.target == debouncer.function
 
     # Canceling debounce in cooldown
     debouncer.async_cancel()
@@ -94,7 +94,7 @@ async def test_immediate_works_with_schedule_call(zha_gateway: Gateway) -> None:
     assert len(calls) == 1
     assert debouncer._timer_task is not None
     assert debouncer._execute_at_end_of_timer is True
-    assert debouncer._job.target == debouncer.function  # type: ignore[unreachable]
+    assert debouncer._job.target == debouncer.function
 
     # Canceling debounce in cooldown
     debouncer.async_cancel()
@@ -202,7 +202,7 @@ async def test_immediate_works_with_passed_callback_function_raises(
     assert len(calls) == 1
     assert debouncer._timer_task is not None
     assert debouncer._execute_at_end_of_timer is True
-    assert debouncer._job.target == debouncer.function  # type: ignore[unreachable]
+    assert debouncer._job.target == debouncer.function
 
     # Canceling debounce in cooldown
     debouncer.async_cancel()
@@ -266,7 +266,7 @@ async def test_immediate_works_with_passed_coroutine_raises(
     assert len(calls) == 1
     assert debouncer._timer_task is not None
     assert debouncer._execute_at_end_of_timer is True
-    assert debouncer._job.target == debouncer.function  # type: ignore[unreachable]
+    assert debouncer._job.target == debouncer.function
 
     # Canceling debounce in cooldown
     debouncer.async_cancel()
@@ -325,7 +325,7 @@ async def test_not_immediate_works(zha_gateway: Gateway) -> None:
     # Canceling while on cooldown
     debouncer.async_cancel()
     assert debouncer._timer_task is None
-    assert debouncer._execute_at_end_of_timer is False  # type: ignore[unreachable]
+    assert debouncer._execute_at_end_of_timer is False
 
     # Call and let timer run out
     await debouncer.async_call()
@@ -379,7 +379,7 @@ async def test_not_immediate_works_schedule_call(zha_gateway: Gateway) -> None:
     # Canceling while on cooldown
     debouncer.async_cancel()
     assert debouncer._timer_task is None
-    assert debouncer._execute_at_end_of_timer is False  # type: ignore[unreachable]
+    assert debouncer._execute_at_end_of_timer is False
 
     # Call and let timer run out
     debouncer.async_schedule_call()
@@ -434,7 +434,7 @@ async def test_immediate_works_with_function_swapped(zha_gateway: Gateway) -> No
     assert len(calls) == 1
     assert debouncer._timer_task is not None
     assert debouncer._execute_at_end_of_timer is True
-    assert debouncer._job.target == debouncer.function  # type: ignore[unreachable]
+    assert debouncer._job.target == debouncer.function
 
     # Canceling debounce in cooldown
     debouncer.async_cancel()

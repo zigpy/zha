@@ -166,6 +166,14 @@ class FirmwareUpdateEntity(PlatformEntity):
         )
 
     @property
+    def state(self):
+        """Get the state for the entity."""
+        response = super().state
+        response["state"] = self._state
+        response.update(self.state_attributes)
+        return response
+
+    @property
     def installed_version(self) -> str | None:
         """Version installed and in use."""
         return self._attr_installed_version
@@ -207,7 +215,7 @@ class FirmwareUpdateEntity(PlatformEntity):
 
     @property
     @final
-    def state(self) -> bool | None:
+    def _state(self) -> bool | None:
         """Return the entity state."""
         if (installed_version := self.installed_version) is None or (
             latest_version := self.latest_version
@@ -357,13 +365,6 @@ class FirmwareUpdateEntity(PlatformEntity):
         """Update the entity."""
         # await CoordinatorEntity.async_update(self)
         await super().async_update()
-
-    def get_state(self):
-        """Get the state for the entity."""
-        response = super().get_state()
-        response["state"] = self.state
-        response.update(self.state_attributes)
-        return response
 
 
 @functools.lru_cache(maxsize=256)

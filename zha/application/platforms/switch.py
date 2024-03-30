@@ -88,6 +88,13 @@ class BaseSwitch(BaseEntity, ABC):
         super().__init__(*args, **kwargs)
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the switch."""
+        response = super().state
+        response["state"] = self.is_on
+        return response
+
+    @property
     def is_on(self) -> bool:
         """Return if the switch is on based on the statemachine."""
         if self._on_off_cluster_handler.on_off is None:
@@ -104,12 +111,6 @@ class BaseSwitch(BaseEntity, ABC):
         """Turn the entity off."""
         await self._on_off_cluster_handler.turn_off()
         self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Return the state of the switch."""
-        response = super().get_state()
-        response["state"] = self.is_on
-        return response
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
@@ -183,7 +184,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         """Query all members and determine the light group state."""
         self.debug("Updating switch group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_states = [entity.get_state() for entity in platform_entities]
+        all_states = [entity.state for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
@@ -277,6 +278,14 @@ class SwitchConfigurationEntity(PlatformEntity):
         )
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the switch."""
+        response = super().state
+        response["state"] = self.is_on
+        response["inverted"] = self.inverted
+        return response
+
+    @property
     def inverted(self) -> bool:
         """Return True if the switch is inverted."""
         if self._inverter_attribute_name:
@@ -339,13 +348,6 @@ class SwitchConfigurationEntity(PlatformEntity):
 
         self.debug("read values=%s", results)
         self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Return the state of the switch."""
-        response = super().get_state()
-        response["state"] = self.is_on
-        response["inverted"] = self.inverted
-        return response
 
 
 @CONFIG_DIAGNOSTIC_MATCH(

@@ -230,6 +230,14 @@ class Sensor(PlatformEntity):
         )
 
     @property
+    def state(self) -> dict:
+        """Return the state for this sensor."""
+        response = super().state
+        native_value = self.native_value
+        response["state"] = native_value
+        return response
+
+    @property
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
         assert self._attribute_name is not None
@@ -237,13 +245,6 @@ class Sensor(PlatformEntity):
         if raw_state is None:
             return None
         return self.formatter(raw_state)
-
-    def get_state(self) -> dict:
-        """Return the state for this sensor."""
-        response = super().get_state()
-        native_value = self.native_value
-        response["state"] = native_value
-        return response
 
     def handle_cluster_handler_attribute_updated(
         self,
@@ -401,6 +402,13 @@ class DeviceCounterSensor(BaseEntity):
         )
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the state for this sensor."""
+        response = super().state
+        response["state"] = self._zigpy_counter.value
+        return response
+
+    @property
     def name(self) -> str:
         """Return the name of the platform entity."""
         return self._name
@@ -436,12 +444,6 @@ class DeviceCounterSensor(BaseEntity):
                 self._device.available,
                 self._device.gateway.config.allow_polling,
             )
-
-    def get_state(self) -> dict[str, Any]:
-        """Return the state for this sensor."""
-        response = super().get_state()
-        response["state"] = self._zigpy_counter.value
-        return response
 
 
 class EnumSensor(Sensor):
@@ -524,9 +526,10 @@ class Battery(Sensor):
         value = round(value / 2)
         return value
 
-    def get_state(self) -> dict[str, Any]:
+    @property
+    def state(self) -> dict[str, Any]:
         """Return the state for battery sensors."""
-        response = super().get_state()
+        response = super().state
         battery_size = self._cluster_handler.cluster.get("battery_size")
         if battery_size is not None:
             response["battery_size"] = BATTERY_SIZES.get(battery_size, "Unknown")
@@ -554,9 +557,10 @@ class ElectricalMeasurement(PollableSensor):
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _div_mul_prefix: str | None = "ac_power"
 
-    def get_state(self) -> dict[str, Any]:
+    @property
+    def state(self) -> dict[str, Any]:
         """Return the state for this sensor."""
-        response = super().get_state()
+        response = super().state
         if self._cluster_handler.measurement_type is not None:
             response["measurement_type"] = self._cluster_handler.measurement_type
 
@@ -815,13 +819,10 @@ class SmartEnergyMetering(PollableSensor):
             self._attr_device_class = entity_description.device_class
             self._attr_state_class = entity_description.state_class
 
-    def formatter(self, value: int) -> int | float:
-        """Pass through cluster handler formatter."""
-        return self._cluster_handler.demand_formatter(value)
-
-    def get_state(self) -> dict[str, Any]:
+    @property
+    def state(self) -> dict[str, Any]:
         """Return state for this sensor."""
-        response = super().get_state()
+        response = super().state
         if self._cluster_handler.device_type is not None:
             response["device_type"] = self._cluster_handler.device_type
         if (status := self._cluster_handler.metering_status) is not None:
@@ -833,6 +834,10 @@ class SmartEnergyMetering(PollableSensor):
                 response["status"] = str(status)[len(status.__class__.__name__) + 1 :]
         response["zcl_unit_of_measurement"] = self._cluster_handler.unit_of_measurement
         return response
+
+    def formatter(self, value: int) -> int | float:
+        """Pass through cluster handler formatter."""
+        return self._cluster_handler.demand_formatter(value)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1190,6 +1195,19 @@ class ThermostatHVACAction(Sensor):
         return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
+    def state(self) -> dict:
+        """Return the current HVAC action."""
+        response = super().state
+        if (
+            self._cluster_handler.pi_heating_demand is None
+            and self._cluster_handler.pi_cooling_demand is None
+        ):
+            response["state"] = self._rm_rs_action
+        else:
+            response["state"] = self._pi_demand_action
+        return response
+
+    @property
     def native_value(self) -> str | None:
         """Return the current HVAC action."""
         if (
@@ -1250,18 +1268,6 @@ class ThermostatHVACAction(Sensor):
         if self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off:
             return HVACAction.IDLE
         return HVACAction.OFF
-
-    def get_state(self) -> dict:
-        """Return the current HVAC action."""
-        response = super().get_state()
-        if (
-            self._cluster_handler.pi_heating_demand is None
-            and self._cluster_handler.pi_cooling_demand is None
-        ):
-            response["state"] = self._rm_rs_action
-        else:
-            response["state"] = self._pi_demand_action
-        return response
 
 
 @MULTI_MATCH(
@@ -1329,15 +1335,16 @@ class RSSISensor(Sensor):
         return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @property
+    def state(self) -> dict:
+        """Return the state of the sensor."""
+        response = super().state
+        response["state"] = getattr(self.device.device, self._unique_id_suffix)
+        return response
+
+    @property
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
         return getattr(self._device.device, self._unique_id_suffix)
-
-    def get_state(self) -> dict:
-        """Return the state of the sensor."""
-        response = super().get_state()
-        response["state"] = getattr(self.device.device, self._unique_id_suffix)
-        return response
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BASIC)

@@ -157,6 +157,23 @@ class BaseLight(BaseEntity, ABC):
         self._transition_listener: Callable[[], None] | None = None
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the light."""
+        response = super().state
+        response["on"] = self.is_on
+        response["brightness"] = self.brightness
+        response["hs_color"] = self.hs_color
+        response["xy_color"] = self.xy_color
+        response["color_temp"] = self.color_temp
+        response["effect"] = self.effect
+        response["off_brightness"] = self._off_brightness
+        response["off_with_transition"] = self._off_with_transition
+        response["supported_features"] = self.supported_features
+        response["color_mode"] = self.color_mode
+        response["supported_color_modes"] = self._supported_color_modes
+        return response
+
+    @property
     def hs_color(self) -> tuple[float, float] | None:
         """Return the hs color value [int, int]."""
         return self._hs_color
@@ -217,22 +234,6 @@ class BaseLight(BaseEntity, ABC):
     def max_mireds(self) -> int | None:
         """Return the warmest color_temp that this light supports."""
         return self._max_mireds
-
-    def get_state(self) -> dict[str, Any]:
-        """Return the state of the light."""
-        response = super().get_state()
-        response["on"] = self.is_on
-        response["brightness"] = self.brightness
-        response["hs_color"] = self.hs_color
-        response["xy_color"] = self.xy_color
-        response["color_temp"] = self.color_temp
-        response["effect"] = self.effect
-        response["off_brightness"] = self._off_brightness
-        response["off_with_transition"] = self._off_with_transition
-        response["supported_features"] = self.supported_features
-        response["color_mode"] = self.color_mode
-        response["supported_color_modes"] = self._supported_color_modes
-        return response
 
     def handle_cluster_handler_set_level(self, event: LevelChangeEvent) -> None:
         """Set the brightness of this light between 0..254.
@@ -1263,7 +1264,7 @@ class LightGroup(GroupEntity, BaseLight):
         """Query all members and determine the light group state."""
         self.debug("Updating light group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_states = [entity.get_state() for entity in platform_entities]
+        all_states = [entity.state for entity in platform_entities]
         states: list = list(filter(None, all_states))
         self.debug(
             "All platform entity states for group entity members: %s", all_states

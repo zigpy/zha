@@ -83,6 +83,7 @@ class Cover(PlatformEntity):
         )
         self._target_lift_position: int | None = None
         self._target_tilt_position: int | None = None
+        self._state: str
         self._determine_initial_state()
         self._cover_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -167,6 +168,21 @@ class Cover(PlatformEntity):
             # we are mid transition and shouldn't update the state
             return
         self._state = STATE_OPEN
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the cover."""
+        response = super().state
+        response.update(
+            {
+                ATTR_CURRENT_POSITION: self.current_cover_position,
+                "state": self._state,
+                "is_opening": self.is_opening,
+                "is_closing": self.is_closing,
+                "is_closed": self.is_closed,
+            }
+        )
+        return response
 
     @property
     def is_closed(self) -> bool | None:
@@ -315,20 +331,6 @@ class Cover(PlatformEntity):
         self._determine_state(self.current_cover_tilt_position, is_lift_update=False)
         self.maybe_emit_state_changed_event()
 
-    def get_state(self) -> dict:
-        """Get the state of the cover."""
-        response = super().get_state()
-        response.update(
-            {
-                ATTR_CURRENT_POSITION: self.current_cover_position,
-                "state": self._state,
-                "is_opening": self.is_opening,
-                "is_closing": self.is_closing,
-                "is_closed": self.is_closed,
-            }
-        )
-        return response
-
 
 @MULTI_MATCH(
     cluster_handler_names={
@@ -374,6 +376,23 @@ class Shade(PlatformEntity):
         self._level_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED, self.handle_cluster_handler_set_level
         )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the cover."""
+        if (closed := self.is_closed) is None:
+            state = None
+        else:
+            state = STATE_CLOSED if closed else STATE_OPEN
+        response = super().state
+        response.update(
+            {
+                ATTR_CURRENT_POSITION: self.current_cover_position,
+                "is_closed": self.is_closed,
+                "state": state,
+            }
+        )
+        return response
 
     @property
     def current_cover_position(self) -> int | None:
@@ -443,22 +462,6 @@ class Shade(PlatformEntity):
         res = await self._level_cluster_handler.stop()
         if res[1] != Status.SUCCESS:
             raise ZHAException(f"Failed to stop cover: {res[1]}")
-
-    def get_state(self) -> dict:
-        """Get the state of the cover."""
-        if (closed := self.is_closed) is None:
-            state = None
-        else:
-            state = STATE_CLOSED if closed else STATE_OPEN
-        response = super().get_state()
-        response.update(
-            {
-                ATTR_CURRENT_POSITION: self.current_cover_position,
-                "is_closed": self.is_closed,
-                "state": state,
-            }
-        )
-        return response
 
 
 @MULTI_MATCH(

@@ -50,13 +50,20 @@ class DoorLock(PlatformEntity):
         self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_DOORLOCK
         )
-        self._state = VALUE_TO_STATE.get(
+        self._state: str | None = VALUE_TO_STATE.get(
             self._doorlock_cluster_handler.cluster.get("lock_state"), None
         )
         self._doorlock_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
         )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the lock."""
+        response = super().state
+        response["is_locked"] = self.is_locked
+        return response
 
     @property
     def is_locked(self) -> bool:
@@ -117,9 +124,3 @@ class DoorLock(PlatformEntity):
             return
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
         self.maybe_emit_state_changed_event()
-
-    def get_state(self) -> dict:
-        """Get the state of the lock."""
-        response = super().get_state()
-        response["is_locked"] = self.is_locked
-        return response

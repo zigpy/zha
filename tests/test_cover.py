@@ -162,7 +162,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    state = entity.get_state()
+    state = entity.state
     assert state["state"] == STATE_OPEN
     assert state[ATTR_CURRENT_POSITION] == 100
 
@@ -177,8 +177,8 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     await entity.async_update()
     assert cluster.read_attributes.call_count == prev_call_count + 1
 
-    assert entity.get_state()["state"] == STATE_CLOSED
-    assert entity.get_state()[ATTR_CURRENT_POSITION] == 0
+    assert entity.state["state"] == STATE_CLOSED
+    assert entity.state[ATTR_CURRENT_POSITION] == 0
 
 
 async def test_cover(
@@ -225,31 +225,31 @@ async def test_cover(
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 100}
     )
-    assert entity.get_state()["state"] == STATE_CLOSED
+    assert entity.state["state"] == STATE_CLOSED
 
     # test to see if it opens
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
     )
-    assert entity.get_state()["state"] == STATE_OPEN
+    assert entity.state["state"] == STATE_OPEN
 
     # test that the state remains after tilting to 100%
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
     )
-    assert entity.get_state()["state"] == STATE_OPEN
+    assert entity.state["state"] == STATE_OPEN
 
     # test to see the state remains after tilting to 0%
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
     )
-    assert entity.get_state()["state"] == STATE_OPEN
+    assert entity.state["state"] == STATE_OPEN
 
     cluster.PLUGGED_ATTR_READS = {1: 100}
     update_attribute_cache(cluster)
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["state"] == STATE_OPEN
+    assert entity.state["state"] == STATE_OPEN
 
     # close from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
@@ -261,13 +261,13 @@ async def test_cover(
         assert cluster.request.call_args[0][2].command.name == WCCmds.down_close.name
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.get_state()["state"] == STATE_CLOSING
+        assert entity.state["state"] == STATE_CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 100}
         )
 
-        assert entity.get_state()["state"] == STATE_CLOSED
+        assert entity.state["state"] == STATE_CLOSED
 
     # tilt close from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
@@ -283,13 +283,13 @@ async def test_cover(
         assert cluster.request.call_args[0][3] == 100
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.get_state()["state"] == STATE_CLOSING
+        assert entity.state["state"] == STATE_CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
         )
 
-        assert entity.get_state()["state"] == STATE_CLOSED
+        assert entity.state["state"] == STATE_CLOSED
 
     # open from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x0, zcl_f.Status.SUCCESS]):
@@ -301,13 +301,13 @@ async def test_cover(
         assert cluster.request.call_args[0][2].command.name == WCCmds.up_open.name
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.get_state()["state"] == STATE_OPENING
+        assert entity.state["state"] == STATE_OPENING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
         )
 
-        assert entity.get_state()["state"] == STATE_OPEN
+        assert entity.state["state"] == STATE_OPEN
 
     # open tilt from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x0, zcl_f.Status.SUCCESS]):
@@ -323,13 +323,13 @@ async def test_cover(
         assert cluster.request.call_args[0][3] == 0
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.get_state()["state"] == STATE_OPENING
+        assert entity.state["state"] == STATE_OPENING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
         )
 
-        assert entity.get_state()["state"] == STATE_OPEN
+        assert entity.state["state"] == STATE_OPEN
 
     # set position UI
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
@@ -342,19 +342,19 @@ async def test_cover(
         assert cluster.request.call_args[0][3] == 53
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.get_state()["state"] == STATE_CLOSING
+        assert entity.state["state"] == STATE_CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 35}
         )
 
-        assert entity.get_state()["state"] == STATE_CLOSING
+        assert entity.state["state"] == STATE_CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 53}
         )
 
-        assert entity.get_state()["state"] == STATE_OPEN
+        assert entity.state["state"] == STATE_OPEN
 
     # set tilt position UI
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
@@ -370,19 +370,19 @@ async def test_cover(
         assert cluster.request.call_args[0][3] == 53
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.get_state()["state"] == STATE_CLOSING
+        assert entity.state["state"] == STATE_CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 35}
         )
 
-        assert entity.get_state()["state"] == STATE_CLOSING
+        assert entity.state["state"] == STATE_CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 53}
         )
 
-        assert entity.get_state()["state"] == STATE_OPEN
+        assert entity.state["state"] == STATE_OPEN
 
     # stop from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x2, zcl_f.Status.SUCCESS]):
@@ -429,7 +429,7 @@ async def test_cover_failures(
         zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 0}
     )
 
-    assert entity.get_state()["state"] == STATE_OPEN
+    assert entity.state["state"] == STATE_OPEN
 
     # close from UI
     with patch(
@@ -447,7 +447,7 @@ async def test_cover_failures(
             cluster.request.call_args[0][1]
             == closures.WindowCovering.ServerCommandDefs.down_close.id
         )
-        assert entity.get_state()["state"] == STATE_OPEN
+        assert entity.state["state"] == STATE_OPEN
 
     with patch(
         "zigpy.zcl.Cluster.request",
@@ -587,17 +587,17 @@ async def test_shade(
     await send_attributes_report(
         zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off.id: 0}
     )
-    assert entity.get_state()["state"] == STATE_CLOSED
+    assert entity.state["state"] == STATE_CLOSED
 
     # test to see if it opens
     await send_attributes_report(
         zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off.id: 1}
     )
-    assert entity.get_state()["state"] == STATE_OPEN
+    assert entity.state["state"] == STATE_OPEN
 
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["state"] == STATE_OPEN
+    assert entity.state["state"] == STATE_OPEN
 
     # close from client command fails
     with (
@@ -615,7 +615,7 @@ async def test_shade(
         assert cluster_on_off.request.call_count == 1
         assert cluster_on_off.request.call_args[0][0] is False
         assert cluster_on_off.request.call_args[0][1] == 0x0000
-        assert entity.get_state()["state"] == STATE_OPEN
+        assert entity.state["state"] == STATE_OPEN
 
     with patch(
         "zigpy.zcl.Cluster.request", AsyncMock(return_value=[0x1, zcl_f.Status.SUCCESS])
@@ -625,11 +625,11 @@ async def test_shade(
         assert cluster_on_off.request.call_count == 1
         assert cluster_on_off.request.call_args[0][0] is False
         assert cluster_on_off.request.call_args[0][1] == 0x0000
-        assert entity.get_state()["state"] == STATE_CLOSED
+        assert entity.state["state"] == STATE_CLOSED
 
     # open from client command fails
     await send_attributes_report(zha_gateway, cluster_level, {0: 0})
-    assert entity.get_state()["state"] == STATE_CLOSED
+    assert entity.state["state"] == STATE_CLOSED
 
     with (
         patch(
@@ -646,7 +646,7 @@ async def test_shade(
         assert cluster_on_off.request.call_count == 1
         assert cluster_on_off.request.call_args[0][0] is False
         assert cluster_on_off.request.call_args[0][1] == 0x0001
-        assert entity.get_state()["state"] == STATE_CLOSED
+        assert entity.state["state"] == STATE_CLOSED
 
     # open from client succeeds
     with patch(
@@ -657,7 +657,7 @@ async def test_shade(
         assert cluster_on_off.request.call_count == 1
         assert cluster_on_off.request.call_args[0][0] is False
         assert cluster_on_off.request.call_args[0][1] == 0x0001
-        assert entity.get_state()["state"] == STATE_OPEN
+        assert entity.state["state"] == STATE_OPEN
 
     # set position UI command fails
     with (
@@ -676,7 +676,7 @@ async def test_shade(
         assert cluster_level.request.call_args[0][0] is False
         assert cluster_level.request.call_args[0][1] == 0x0004
         assert int(cluster_level.request.call_args[0][3] * 100 / 255) == 47
-        assert entity.get_state()["current_position"] == 0
+        assert entity.state["current_position"] == 0
 
     # set position UI success
     with patch(
@@ -688,11 +688,11 @@ async def test_shade(
         assert cluster_level.request.call_args[0][0] is False
         assert cluster_level.request.call_args[0][1] == 0x0004
         assert int(cluster_level.request.call_args[0][3] * 100 / 255) == 47
-        assert entity.get_state()["current_position"] == 47
+        assert entity.state["current_position"] == 47
 
     # report position change
     await send_attributes_report(zha_gateway, cluster_level, {8: 0, 0: 100, 1: 1})
-    assert entity.get_state()["current_position"] == int(100 * 100 / 255)
+    assert entity.state["current_position"] == int(100 * 100 / 255)
 
     # stop command fails
     with (
@@ -740,11 +740,11 @@ async def test_keen_vent(
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(zha_gateway, cluster_on_off, {8: 0, 0: False, 1: 1})
-    assert entity.get_state()["state"] == STATE_CLOSED
+    assert entity.state["state"] == STATE_CLOSED
 
     await entity.async_update()
     await zha_gateway.async_block_till_done()
-    assert entity.get_state()["state"] == STATE_CLOSED
+    assert entity.state["state"] == STATE_CLOSED
 
     # open from client command fails
     p1 = patch.object(cluster_on_off, "request", side_effect=asyncio.TimeoutError)
@@ -760,7 +760,7 @@ async def test_keen_vent(
         assert cluster_on_off.request.call_args[0][0] is False
         assert cluster_on_off.request.call_args[0][1] == 0x0001
         assert cluster_level.request.call_count == 1
-        assert entity.get_state()["state"] == STATE_CLOSED
+        assert entity.state["state"] == STATE_CLOSED
 
     # open from client command success
     p1 = patch.object(cluster_on_off, "request", AsyncMock(return_value=[1, 0]))
@@ -773,8 +773,8 @@ async def test_keen_vent(
         assert cluster_on_off.request.call_args[0][0] is False
         assert cluster_on_off.request.call_args[0][1] == 0x0001
         assert cluster_level.request.call_count == 1
-        assert entity.get_state()["state"] == STATE_OPEN
-        assert entity.get_state()["current_position"] == 100
+        assert entity.state["state"] == STATE_OPEN
+        assert entity.state["current_position"] == 100
 
 
 async def test_cover_remote(
