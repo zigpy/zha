@@ -401,7 +401,7 @@ class Device(LogMixin, EventBase):
     @property
     def available(self):
         """Return True if device is available."""
-        return self._available and self._on_network
+        return self._available and self.on_network
 
     @available.setter
     def available(self, new_availability: bool) -> None:
@@ -411,7 +411,7 @@ class Device(LogMixin, EventBase):
     @property
     def on_network(self):
         """Return True if device is currently on the network."""
-        return self._on_network
+        return self.is_active_coordinator or self._on_network
 
     @on_network.setter
     def on_network(self, new_on_network: bool) -> None:
