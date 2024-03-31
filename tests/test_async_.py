@@ -653,3 +653,43 @@ def test_ZHAJob_passing_job_type():
         ZHAJob(not_callback_func, job_type=ZHAJobType.Callback).job_type
         == ZHAJobType.Callback
     )
+
+
+async def test_async_add_executor_job_background(zha_gateway: Gateway) -> None:
+    """Test running an executor job in the background."""
+    calls = []
+
+    def job():
+        time.sleep(0.01)
+        calls.append(1)
+
+    async def _async_add_executor_job():
+        await zha_gateway.async_add_executor_job(job)
+
+    task = zha_gateway.async_create_background_task(
+        _async_add_executor_job(), "background", eager_start=True
+    )
+    await zha_gateway.async_block_till_done()
+    assert len(calls) == 0
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+    assert len(calls) == 1
+    await task
+
+
+async def test_async_add_executor_job(zha_gateway: Gateway) -> None:
+    """Test running an executor job."""
+    calls = []
+
+    def job():
+        time.sleep(0.01)
+        calls.append(1)
+
+    async def _async_add_executor_job():
+        await zha_gateway.async_add_executor_job(job)
+
+    task = zha_gateway.async_create_task(
+        _async_add_executor_job(), "background", eager_start=True
+    )
+    await zha_gateway.async_block_till_done()
+    assert len(calls) == 1
+    await task

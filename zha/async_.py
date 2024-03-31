@@ -1,5 +1,7 @@
 """Async utilities for Zigbee Home Automation."""
 
+from __future__ import annotations
+
 import asyncio
 from asyncio import AbstractEventLoop, Future, Semaphore, Task, gather, get_running_loop
 from collections.abc import Awaitable, Callable, Collection, Coroutine, Iterable
@@ -231,7 +233,7 @@ class AsyncUtilMixin:
             target = cast(Callable[..., Any], target)
         self.loop.call_soon_threadsafe(
             functools.partial(
-                self.async_add_job, ZHAJob(target), *args, eager_start=True
+                self.async_add_zha_job, ZHAJob(target), *args, eager_start=True
             )
         )
 
@@ -466,20 +468,23 @@ class AsyncUtilMixin:
     ) -> asyncio.Future[_T]:
         """Add an executor job from within the event loop."""
         task = self.loop.run_in_executor(None, target, *args)
-        self._tracked_completable_tasks.add(task)
-        task.add_done_callback(self._tracked_completable_tasks.remove)
-
+        tracked = asyncio.current_task() in self._tracked_completable_tasks
+        task_bucket = (
+            self._tracked_completable_tasks if tracked else self._background_tasks
+        )
+        task_bucket.add(task)
+        task.add_done_callback(task_bucket.remove)
         return task
 
     @callback
     def async_add_import_executor_job(
         self, target: Callable[..., _T], *args: Any
     ) -> asyncio.Future[_T]:
-        """Add an import executor job from within the event loop."""
-        task = self.loop.run_in_executor(self.import_executor, target, *args)
-        self._tracked_completable_tasks.add(task)
-        task.add_done_callback(self._tracked_completable_tasks.remove)
-        return task
+        """Add an import executor job from within the event loop.
+
+        The future returned from this method must be awaited in the event loop.
+        """
+        return self.loop.run_in_executor(self.import_executor, target, *args)
 
     @overload
     @callback
