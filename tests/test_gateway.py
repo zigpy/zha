@@ -173,6 +173,7 @@ async def test_device_left(
     zha_gateway.device_left(zigpy_dev_basic)
     await zha_gateway.async_block_till_done()
     assert zha_dev_basic.available is False
+    assert zha_dev_basic.on_network is False
 
 
 async def test_gateway_group_methods(
@@ -390,6 +391,7 @@ async def test_gateway_force_multi_pan_channel(
 
 
 @pytest.mark.parametrize("radio_concurrency", [1, 2, 8])
+@pytest.mark.looptime
 async def test_startup_concurrency_limit(
     radio_concurrency: int,
     zigpy_app_controller: ControllerApplication,
@@ -567,3 +569,30 @@ def test_gateway_raw_device_initialized(
             event="raw_device_initialized",
         ),
     )
+
+
+@pytest.mark.looptime
+async def test_pollers_skip(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test pollers skip when they should."""
+
+    assert "Global updater interval skipped" not in caplog.text
+    assert "Device availability checker interval skipped" not in caplog.text
+
+    assert zha_gateway.config.allow_polling is True
+    zha_gateway.config.allow_polling = False
+    assert zha_gateway.config.allow_polling is False
+
+    sleep_time = max(
+        zha_gateway.global_updater.__polling_interval,
+        zha_gateway._device_availability_checker.__polling_interval,
+    )
+    sleep_time += 2
+
+    await asyncio.sleep(sleep_time)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert "Global updater interval skipped" in caplog.text
+    assert "Device availability checker interval skipped" in caplog.text

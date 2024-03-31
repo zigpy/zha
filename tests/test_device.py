@@ -178,6 +178,7 @@ async def test_check_available_success(
     assert basic_ch.read_attributes.await_count == 2
     assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
+    assert zha_device.on_network is True
 
 
 @patch(

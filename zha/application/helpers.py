@@ -337,7 +337,7 @@ class GlobalUpdater:
                 _LOGGER.debug("Global updater running update callback")
                 listener()
         else:
-            _LOGGER.debug("Global updater pass skipped")
+            _LOGGER.debug("Global updater interval skipped")
         _LOGGER.debug("Global updater interval finished")
 
 
@@ -378,9 +378,9 @@ class DeviceAvailabilityChecker:
     @periodic(_REFRESH_INTERVAL)
     async def check_device_availability(self):
         """Check device availability."""
-        _LOGGER.debug("Global updater device availability checker starting")
+        _LOGGER.debug("Device availability checker interval starting")
         if self._gateway.config.allow_polling:
-            _LOGGER.debug("Global updater checking device availability")
+            _LOGGER.debug("Checking device availability")
             # 20 because most devices will not make remote calls
             await gather_with_limited_concurrency(
                 20,
@@ -390,6 +390,6 @@ class DeviceAvailabilityChecker:
                     if not dev.is_coordinator
                 ),
             )
-            _LOGGER.debug("Global updater device availability checker finished")
+            _LOGGER.debug("Device availability checker interval finished")
         else:
-            _LOGGER.debug("Global updater device availability checker skipped")
+            _LOGGER.debug("Device availability checker interval skipped")
