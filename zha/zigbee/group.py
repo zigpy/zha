@@ -116,7 +116,8 @@ class GroupMember(LogMixin):
         return [
             platform_entity
             for platform_entity in self._device.platform_entities.values()
-            if platform_entity.endpoint.id == self.endpoint_id
+            if hasattr(platform_entity, "endpoint")
+            and platform_entity.endpoint.id == self.endpoint_id
         ]
 
     async def async_remove_from_group(self) -> None:
