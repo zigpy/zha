@@ -319,9 +319,6 @@ class DeviceCounterSensor(BaseEntity):
     """Device counter sensor."""
 
     PLATFORM = Platform.SENSOR
-    _REFRESH_INTERVAL = (30, 45)
-    __polling_interval: int
-    _use_custom_polling: bool = True
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
@@ -364,18 +361,7 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_groups: str = counter_groups
         self._zigpy_counter_group: str = counter_group
         self._attr_name: str = self._zigpy_counter.name
-        self._tracked_tasks.append(
-            self._device.gateway.async_create_background_task(
-                self._refresh(),
-                name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
-                eager_start=True,
-                untracked=True,
-            )
-        )
-        self.debug(
-            "started polling with refresh interval of %s",
-            getattr(self, "__polling_interval"),
-        )
+        self._device.gateway.global_updater.register_update_listener(self.update)
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
         if self.unique_id not in self._device.platform_entities:
             self._device.platform_entities[self.unique_id] = self
@@ -428,22 +414,22 @@ class DeviceCounterSensor(BaseEntity):
         """Return the device."""
         return self._device
 
-    async def async_update(self) -> None:
-        """Retrieve latest state."""
-        self.maybe_emit_state_changed_event()
-
-    @periodic(_REFRESH_INTERVAL)
-    async def _refresh(self):
+    def update(self):
         """Call async_update at a constrained random interval."""
         if self._device.available and self._device.gateway.config.allow_polling:
             self.debug("polling for updated state")
-            await self.async_update()
+            self.maybe_emit_state_changed_event()
         else:
             self.debug(
                 "skipping polling for updated state, available: %s, allow polled requests: %s",
                 self._device.available,
                 self._device.gateway.config.allow_polling,
             )
+
+    async def on_remove(self) -> None:
+        """Cancel tasks this entity owns."""
+        self._device.gateway.global_updater.remove_update_listener(self.update)
+        await super().on_remove()
 
 
 class EnumSensor(Sensor):
@@ -1313,7 +1299,6 @@ class RSSISensor(Sensor):
     _attr_native_unit_of_measurement: str | None = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
-    _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_translation_key: str = "rssi"
 
     @classmethod
@@ -1334,6 +1319,18 @@ class RSSISensor(Sensor):
             return None
         return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self.device.gateway.global_updater.register_update_listener(self.update)
+
     @property
     def state(self) -> dict:
         """Return the state of the sensor."""
@@ -1345,6 +1342,23 @@ class RSSISensor(Sensor):
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
         return getattr(self._device.device, self._unique_id_suffix)
+
+    def update(self):
+        """Call async_update at a constrained random interval."""
+        if self._device.available and self._device.gateway.config.allow_polling:
+            self.debug("polling for updated state")
+            self.maybe_emit_state_changed_event()
+        else:
+            self.debug(
+                "skipping polling for updated state, available: %s, allow polled requests: %s",
+                self._device.available,
+                self._device.gateway.config.allow_polling,
+            )
+
+    async def on_remove(self) -> None:
+        """Cancel tasks this entity owns."""
+        self._device.gateway.global_updater.remove_update_listener(self.update)
+        await super().on_remove()
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BASIC)

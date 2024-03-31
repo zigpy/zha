@@ -67,7 +67,6 @@ from zha.application.const import (
 )
 from zha.application.helpers import async_get_zha_config_value, convert_to_zcl_values
 from zha.application.platforms import PlatformEntity, PlatformEntityInfo
-from zha.decorators import periodic
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -200,7 +199,6 @@ class ExtendedDeviceInfo(DeviceInfo):
 class Device(LogMixin, EventBase):
     """ZHA Zigbee device object."""
 
-    __polling_interval: int
     _ha_device_id: str
 
     def __init__(
@@ -244,6 +242,7 @@ class Device(LogMixin, EventBase):
             and time.time() - self.last_seen < self.consider_unavailable_time
         )
         self._checkins_missed_count: int = 0
+        self._on_network: bool = False
 
         self._platform_entities: dict[str, PlatformEntity] = {}
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
@@ -255,20 +254,6 @@ class Device(LogMixin, EventBase):
         for ep_id, endpoint in zigpy_device.endpoints.items():
             if ep_id != 0:
                 self._endpoints[ep_id] = Endpoint.new(endpoint, self)
-
-        if not self.is_coordinator:
-            self._tracked_tasks.append(
-                self.gateway.async_create_background_task(
-                    self._check_available(),
-                    name=f"device_check_alive_{self.ieee}",
-                    eager_start=True,
-                    untracked=True,
-                )
-            )
-            self.debug(
-                "starting availability checks - interval: %s",
-                getattr(self, "__polling_interval"),
-            )
 
     @cached_property
     def device(self) -> zigpy.device.Device:
@@ -416,12 +401,23 @@ class Device(LogMixin, EventBase):
     @property
     def available(self):
         """Return True if device is available."""
-        return self._available
+        return self._available and self._on_network
 
     @available.setter
     def available(self, new_availability: bool) -> None:
         """Set device availability."""
         self._available = new_availability
+
+    @property
+    def on_network(self):
+        """Return True if device is currently on the network."""
+        return self._on_network
+
+    @on_network.setter
+    def on_network(self, new_on_network: bool) -> None:
+        """Set device on_network flag."""
+        self._on_network = new_on_network
+        self.update_available(new_on_network)
 
     @property
     def power_configuration_ch(self) -> ClusterHandler | None:
@@ -523,10 +519,13 @@ class Device(LogMixin, EventBase):
         """Update device sw version."""
         self._sw_build_id = sw_version
 
-    @periodic(_UPDATE_ALIVE_INTERVAL)
     async def _check_available(self, *_: Any) -> None:
         # don't flip the availability state of the coordinator
         if self.is_coordinator:
+            return
+        if not self._on_network:
+            self.debug("Device is not on the network, marking unavailable")
+            self.update_available(False)
             return
         if self.last_seen is None:
             self.debug("last_seen is None, marking the device unavailable")
@@ -592,8 +591,10 @@ class Device(LogMixin, EventBase):
                 "Device availability changed and device became available,"
                 " reinitializing cluster handlers"
             )
-            self._gateway.track_task(
-                asyncio.create_task(self._async_became_available())
+            self._gateway.async_create_task(
+                self._async_became_available(),
+                name=f"({self.nwk},{self.model})_async_became_available",
+                eager_start=True,
             )
             return
         if availability_changed and not available:

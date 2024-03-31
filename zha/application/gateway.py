@@ -42,7 +42,7 @@ from zha.application.const import (
     ZHA_GW_MSG_RAW_INIT,
     RadioType,
 )
-from zha.application.helpers import ZHAData
+from zha.application.helpers import DeviceAvailabilityChecker, GlobalUpdater, ZHAData
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
@@ -162,6 +162,10 @@ class Gateway(AsyncUtilMixin, EventBase):
             setup_quirks(
                 custom_quirks_path=config.yaml_config.get(CONF_CUSTOM_QUIRKS_PATH)
             )
+        self.global_updater: GlobalUpdater = GlobalUpdater(self)
+        self._device_availability_checker: DeviceAvailabilityChecker = (
+            DeviceAvailabilityChecker(self)
+        )
         self.config.gateway = self
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
@@ -224,6 +228,8 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         self.application_controller.add_listener(self)
         self.application_controller.groups.add_listener(self)
+        self.global_updater.start()
+        self._device_availability_checker.start()
 
     def connection_lost(self, exc: Exception) -> None:
         """Handle connection lost event."""
@@ -408,7 +414,10 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     def device_left(self, device: zigpy.device.Device) -> None:
         """Handle device leaving the network."""
-        self.async_update_device(device, False)
+        zha_device: Device = self._devices.get(device.ieee)
+        if zha_device is not None:
+            zha_device.on_network = False
+        self.async_update_device(device, available=False)
 
     def group_member_removed(
         self, zigpy_group: zigpy.group.Group, endpoint: zigpy.endpoint.Endpoint
@@ -522,7 +531,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         return zha_group
 
     def async_update_device(
-        self, sender: zigpy.device.Device, available: bool = True
+        self,
+        sender: zigpy.device.Device,
+        available: bool = True,
     ) -> None:
         """Update device that has just become available."""
         if sender.ieee in self.devices:
@@ -569,6 +580,7 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     async def _async_device_joined(self, zha_device: Device) -> None:
         zha_device.available = True
+        zha_device.on_network = True
         await zha_device.async_configure()
         device_info = ExtendedDeviceInfoWithPairingStatus(
             pairing_status=DevicePairingStatus.CONFIGURED.name,
@@ -600,7 +612,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         # force async_initialize() to fire so don't explicitly call it
         zha_device.available = False
-        zha_device.update_available(True)
+        zha_device.on_network = True
 
     async def async_create_zigpy_group(
         self,
@@ -660,6 +672,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             _LOGGER.debug("Ignoring duplicate shutdown event")
             return
 
+        self.global_updater.stop()
+        self._device_availability_checker.stop()
+
         async def _cancel_tasks(tasks_to_cancel: Iterable) -> None:
             tasks = [t for t in tasks_to_cancel if not (t.done() or t.cancelled())]
             for task in tasks:
@@ -696,4 +711,5 @@ class Gateway(AsyncUtilMixin, EventBase):
     ) -> None:
         """Handle message from a device Event handler."""
         if sender.ieee in self.devices and not self.devices[sender.ieee].available:
+            self.devices[sender.ieee].on_network = True
             self.async_update_device(sender, available=True)
