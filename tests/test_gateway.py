@@ -596,3 +596,30 @@ async def test_pollers_skip(
 
     assert "Global updater interval skipped" in caplog.text
     assert "Device availability checker interval skipped" in caplog.text
+
+
+async def test_gateway_handle_message(
+    zha_gateway: Gateway,
+    zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test handle message."""
+
+    assert zha_dev_basic.available is True
+    assert zha_dev_basic.on_network is True
+
+    zha_dev_basic.on_network = False
+
+    assert zha_dev_basic.available is False
+    assert zha_dev_basic.on_network is False
+
+    zha_gateway.handle_message(
+        zha_dev_basic.device,
+        zha.PROFILE_ID,
+        general.Basic.cluster_id,
+        1,
+        1,
+        b"",
+    )
+
+    assert zha_dev_basic.available is True
+    assert zha_dev_basic.on_network is True

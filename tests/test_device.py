@@ -132,10 +132,14 @@ async def test_check_available_success(
     zha_gateway: Gateway,
     device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability success on 1st try."""
     zha_device = await device_joined(device_with_basic_cluster_handler)
     basic_ch = device_with_basic_cluster_handler.endpoints[3].basic
+
+    assert not zha_device.is_coordinator
+    assert not zha_device.is_active_coordinator
 
     basic_ch.read_attributes.reset_mock()
     device_with_basic_cluster_handler.last_seen = None
@@ -179,6 +183,23 @@ async def test_check_available_success(
     assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
     assert zha_device.on_network is True
+
+    assert "Device is not on the network, marking unavailable" not in caplog.text
+    zha_device.on_network = False
+
+    assert zha_device.available is False
+    assert zha_device.on_network is False
+
+    sleep_time = max(
+        zha_gateway.global_updater.__polling_interval,
+        zha_gateway._device_availability_checker.__polling_interval,
+    )
+    sleep_time += 2
+
+    await asyncio.sleep(sleep_time)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert "Device is not on the network, marking unavailable" in caplog.text
 
 
 @patch(
