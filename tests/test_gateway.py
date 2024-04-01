@@ -532,7 +532,7 @@ def test_gateway_raw_device_initialized(
         "raw_device_initialized",
         RawDeviceInitializedEvent(
             device_info=RawDeviceInitializedDeviceInfo(
-                ieee="00:0d:6f:00:0a:90:69:e7",
+                ieee=zigpy.types.EUI64.convert("00:0d:6f:00:0a:90:69:e7"),
                 nwk=0xB79C,
                 pairing_status="INTERVIEW_COMPLETE",
                 model="FakeModel",
