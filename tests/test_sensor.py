@@ -1154,9 +1154,7 @@ async def test_last_feeding_size_sensor_v2(
 
 
 @pytest.mark.looptime
-async def test_device_counter_sensors(
-    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
-) -> None:
+async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     """Test quirks defined sensor."""
 
     coordinator = zha_gateway.coordinator_zha_device
@@ -1179,11 +1177,36 @@ async def test_device_counter_sensors(
 
     assert entity.state["state"] == 2
 
-    coordinator.available = False
-    await asyncio.sleep(120)
+
+@pytest.mark.looptime
+async def test_device_unavailable_skips_entity_polling(
+    zha_gateway: Gateway,
+    elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test quirks defined sensor."""
+
+    assert not elec_measurement_zha_dev.is_coordinator
+    assert not elec_measurement_zha_dev.is_active_coordinator
+    entity_id = "sensor.fakemanufacturer_fakemodel_e769900a_basic_rssi"
+    entity = get_entity(elec_measurement_zha_dev, entity_id)
+    assert entity is not None
+
+    assert entity.state["state"] is None
+
+    # simulate counter increment on application
+    elec_measurement_zha_dev.device.rssi = 60
+
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.state["state"] == 60
+
+    elec_measurement_zha_dev.on_network = False
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval * 2)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert (
-        "counter_1: skipping polling for updated state, available: False, allow polled requests: True"
-        in caplog.text
+        "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "
+        "available: False, allow polled requests: True" in caplog.text
     )

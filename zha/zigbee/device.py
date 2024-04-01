@@ -238,7 +238,7 @@ class Device(LogMixin, EventBase):
                 CONF_CONSIDER_UNAVAILABLE_BATTERY,
                 CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
             )
-        self._available: bool = self.is_coordinator or (
+        self._available: bool = self.is_active_coordinator or (
             self.last_seen is not None
             and time.time() - self.last_seen < self.consider_unavailable_time
         )
@@ -371,14 +371,14 @@ class Device(LogMixin, EventBase):
     @property
     def is_groupable(self) -> bool:
         """Return true if this device has a group cluster."""
-        return self.is_coordinator or (
+        return self.is_active_coordinator or (
             self.available and bool(self.async_get_groupable_endpoints())
         )
 
     @cached_property
     def skip_configuration(self) -> bool:
         """Return true if the device should not issue configuration related commands."""
-        return self._zigpy_device.skip_configuration or bool(self.is_coordinator)
+        return self._zigpy_device.skip_configuration or bool(self.is_active_coordinator)
 
     @cached_property
     def gateway(self):
@@ -402,7 +402,7 @@ class Device(LogMixin, EventBase):
     @property
     def available(self):
         """Return True if device is available."""
-        return self._available and self.on_network
+        return self.is_active_coordinator or (self._available and self.on_network)
 
     @available.setter
     def available(self, new_availability: bool) -> None:
@@ -522,7 +522,7 @@ class Device(LogMixin, EventBase):
 
     async def _check_available(self, *_: Any) -> None:
         # don't flip the availability state of the coordinator
-        if self.is_coordinator:
+        if self.is_active_coordinator:
             return
         if not self._on_network:
             self.debug("Device is not on the network, marking unavailable")
