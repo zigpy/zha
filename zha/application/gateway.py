@@ -384,7 +384,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 device_info=DeviceJoinedDeviceInfo(
                     ieee=device.ieee,
                     nwk=device.nwk,
-                    pairing_status=DevicePairingStatus.PAIRED.name,
+                    pairing_status=DevicePairingStatus.PAIRED,
                 )
             ),
         )
@@ -398,7 +398,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 device_info=RawDeviceInitializedDeviceInfo(
                     ieee=device.ieee,
                     nwk=device.nwk,
-                    pairing_status=DevicePairingStatus.INTERVIEW_COMPLETE.name,
+                    pairing_status=DevicePairingStatus.INTERVIEW_COMPLETE,
                     model=device.model if device.model else UNKNOWN_MODEL,
                     manufacturer=device.manufacturer
                     if device.manufacturer
@@ -584,7 +584,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             await self._async_device_joined(zha_device)
 
         device_info = ExtendedDeviceInfoWithPairingStatus(
-            pairing_status=DevicePairingStatus.INITIALIZED.name,
+            pairing_status=DevicePairingStatus.INITIALIZED,
             **zha_device.extended_device_info.__dict__,
         )
         self.emit(
@@ -597,15 +597,15 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_device.on_network = True
         await zha_device.async_configure()
         device_info = ExtendedDeviceInfoWithPairingStatus(
-            pairing_status=DevicePairingStatus.CONFIGURED.name,
+            pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
+        await zha_device.async_initialize(from_cache=False)
+        self.create_platform_entities()
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
             DeviceFullInitEvent(device_info=device_info),
         )
-        await zha_device.async_initialize(from_cache=False)
-        self.create_platform_entities()
 
     async def _async_device_rejoined(self, zha_device: Device) -> None:
         _LOGGER.debug(
@@ -617,7 +617,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         # but we don't have a way to tell currently
         await zha_device.async_configure()
         device_info = ExtendedDeviceInfoWithPairingStatus(
-            pairing_status=DevicePairingStatus.CONFIGURED.name,
+            pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
         self.emit(

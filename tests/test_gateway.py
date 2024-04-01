@@ -18,6 +18,7 @@ from tests.common import async_find_group_entity_id, find_entity_id
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import (
+    DevicePairingStatus,
     Gateway,
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
@@ -534,7 +535,7 @@ def test_gateway_raw_device_initialized(
             device_info=RawDeviceInitializedDeviceInfo(
                 ieee=zigpy.types.EUI64.convert("00:0d:6f:00:0a:90:69:e7"),
                 nwk=0xB79C,
-                pairing_status="INTERVIEW_COMPLETE",
+                pairing_status=DevicePairingStatus.INTERVIEW_COMPLETE,
                 model="FakeModel",
                 manufacturer="FakeManufacturer",
                 signature={
