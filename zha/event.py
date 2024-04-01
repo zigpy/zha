@@ -50,31 +50,32 @@ class EventBase:
 
     def once(self, event_name: str, callback: Callable) -> Callable:
         """Listen for an event exactly once."""
+        if inspect.iscoroutinefunction(callback):
+
+            async def async_event_listener(data: dict) -> None:
+                unsub()
+                task = asyncio.create_task(callback(data))
+                self._event_tasks.append(task)
+                task.add_done_callback(self._event_tasks.remove)
+
+            unsub = self.on_event(event_name, async_event_listener)
+            return unsub
 
         def event_listener(data: dict) -> None:
             unsub()
             callback(data)
 
         unsub = self.on_event(event_name, event_listener)
-
         return unsub
 
     def emit(self, event_name: str, data=None) -> None:
         """Run all callbacks for an event."""
         for listener in [*self._listeners.get(event_name, []), *self._golbal_listeners]:
             if inspect.iscoroutinefunction(listener):
-                if data is None:
-                    task = asyncio.create_task(listener())
-                    self._event_tasks.append(task)
-                    task.add_done_callback(self._event_tasks.remove)
-                else:
-                    task = asyncio.create_task(listener(data))
-                    self._event_tasks.append(task)
-                    task.add_done_callback(self._event_tasks.remove)
-            elif data is None:
-                listener()
-            else:
-                listener(data)
+                task = asyncio.create_task(listener(data))
+                self._event_tasks.append(task)
+                task.add_done_callback(self._event_tasks.remove)
+            listener(data)
 
     def _handle_event_protocol(self, event) -> None:
         """Process an event based on event protocol."""
