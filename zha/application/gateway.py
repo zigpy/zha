@@ -34,6 +34,7 @@ from zha.application.const import (
     ZHA_GW_MSG,
     ZHA_GW_MSG_DEVICE_FULL_INIT,
     ZHA_GW_MSG_DEVICE_JOINED,
+    ZHA_GW_MSG_DEVICE_LEFT,
     ZHA_GW_MSG_DEVICE_REMOVED,
     ZHA_GW_MSG_GROUP_ADDED,
     ZHA_GW_MSG_GROUP_MEMBER_ADDED,
@@ -96,6 +97,16 @@ class DeviceJoinedEvent:
     device_info: DeviceJoinedDeviceInfo
     event_type: Final[str] = ZHA_GW_MSG
     event: Final[str] = ZHA_GW_MSG_DEVICE_JOINED
+
+
+@dataclass(kw_only=True, frozen=True)
+class DeviceLeftEvent:
+    """Event to signal that a device has joined the network."""
+
+    ieee: EUI64
+    nwk: int
+    event_type: Final[str] = ZHA_GW_MSG
+    event: Final[str] = ZHA_GW_MSG_DEVICE_LEFT
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -371,7 +382,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             ZHA_GW_MSG_DEVICE_JOINED,
             DeviceJoinedEvent(
                 device_info=DeviceJoinedDeviceInfo(
-                    ieee=str(device.ieee),
+                    ieee=device.ieee,
                     nwk=device.nwk,
                     pairing_status=DevicePairingStatus.PAIRED.name,
                 )
@@ -385,7 +396,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             ZHA_GW_MSG_RAW_INIT,
             RawDeviceInitializedEvent(
                 device_info=RawDeviceInitializedDeviceInfo(
-                    ieee=str(device.ieee),
+                    ieee=device.ieee,
                     nwk=device.nwk,
                     pairing_status=DevicePairingStatus.INTERVIEW_COMPLETE.name,
                     model=device.model if device.model else UNKNOWN_MODEL,
@@ -418,6 +429,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         if zha_device is not None:
             zha_device.on_network = False
         self.async_update_device(device, available=False)
+        self.emit(
+            ZHA_GW_MSG_DEVICE_LEFT, DeviceLeftEvent(ieee=device.ieee, nwk=device.nwk)
+        )
 
     def group_member_removed(
         self, zigpy_group: zigpy.group.Group, endpoint: zigpy.endpoint.Endpoint
