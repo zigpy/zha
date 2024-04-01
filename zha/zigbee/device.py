@@ -13,13 +13,13 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, Final, Self
 
-from zigpy import types
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 import zigpy.quirks
 from zigpy.quirks.v2 import CustomDeviceV2
-from zigpy.types.named import EUI64, NWK
+from zigpy.types import uint1_t, uint8_t, uint16_t
+from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Groups, Identify
 from zigpy.zcl.foundation import (
@@ -28,6 +28,7 @@ from zigpy.zcl.foundation import (
     ZCLCommandDef,
 )
 import zigpy.zdo.types as zdo_types
+from zigpy.zdo.types import RouteStatus, _NeighborEnums
 
 from zha.application import discovery
 from zha.application.const import (
@@ -112,7 +113,7 @@ class DeviceStatus(Enum):
 class ZHAEvent:
     """Event generated when a device wishes to send an arbitrary event."""
 
-    device_ieee: str
+    device_ieee: EUI64
     unique_id: str
     data: dict[str, Any]
     event_type: Final[str] = ZHA_EVENT
@@ -123,7 +124,7 @@ class ZHAEvent:
 class ClusterHandlerConfigurationComplete:
     """Event generated when all cluster handlers are configured."""
 
-    device_ieee: str
+    device_ieee: EUI64
     unique_id: str
     event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
     event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
@@ -133,8 +134,8 @@ class ClusterHandlerConfigurationComplete:
 class DeviceInfo:
     """Describes a device."""
 
-    ieee: str
-    nwk: int
+    ieee: EUI64
+    nwk: NWK
     manufacturer: str
     model: str
     name: str
@@ -155,27 +156,27 @@ class DeviceInfo:
 class NeighborInfo:
     """Describes a neighbor."""
 
-    device_type: str
-    rx_on_when_idle: str
-    relationship: str
-    extended_pan_id: str
-    ieee: str
-    nwk: str
-    permit_joining: str
-    depth: str
-    lqi: str
+    device_type: _NeighborEnums.DeviceType
+    rx_on_when_idle: _NeighborEnums.RxOnWhenIdle
+    relationship: _NeighborEnums.Relationship
+    extended_pan_id: ExtendedPanId
+    ieee: EUI64
+    nwk: NWK
+    permit_joining: _NeighborEnums.PermitJoins
+    depth: uint8_t
+    lqi: uint8_t
 
 
 @dataclass(kw_only=True, frozen=True)
 class RouteInfo:
     """Describes a route."""
 
-    dest_nwk: str
-    route_status: str
-    memory_constrained: bool
-    many_to_one: bool
-    route_record_required: bool
-    next_hop: str
+    dest_nwk: NWK
+    route_status: RouteStatus
+    memory_constrained: uint1_t
+    many_to_one: uint1_t
+    route_record_required: uint1_t
+    next_hop: NWK
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -466,7 +467,7 @@ class Device(LogMixin, EventBase):
     def zigbee_signature(self) -> dict[str, Any]:
         """Get zigbee signature for this device."""
         return {
-            ATTR_NODE_DESCRIPTOR: str(self._zigpy_device.node_desc),
+            ATTR_NODE_DESCRIPTOR: self._zigpy_device.node_desc,
             ATTR_ENDPOINTS: {
                 signature[0]: signature[1]
                 for signature in [
@@ -610,7 +611,7 @@ class Device(LogMixin, EventBase):
         self.emit(
             ZHA_EVENT,
             ZHAEvent(
-                device_ieee=str(self.ieee),
+                device_ieee=self.ieee,
                 unique_id=str(self.ieee),
                 data=event_data,
             ),
@@ -625,7 +626,7 @@ class Device(LogMixin, EventBase):
     @property
     def device_info(self) -> DeviceInfo:
         """Return a device description for device."""
-        ieee = str(self.ieee)
+        ieee = self.ieee
         time_struct = time.localtime(self.last_seen)
         update_time = time.strftime("%Y-%m-%dT%H:%M:%S", time_struct)
         return DeviceInfo(
@@ -681,23 +682,23 @@ class Device(LogMixin, EventBase):
                     device_type=neighbor.device_type.name,
                     rx_on_when_idle=neighbor.rx_on_when_idle.name,
                     relationship=neighbor.relationship.name,
-                    extended_pan_id=str(neighbor.extended_pan_id),
-                    ieee=str(neighbor.ieee),
-                    nwk=str(neighbor.nwk),
+                    extended_pan_id=neighbor.extended_pan_id,
+                    ieee=neighbor.ieee,
+                    nwk=neighbor.nwk,
                     permit_joining=neighbor.permit_joining.name,
-                    depth=str(neighbor.depth),
-                    lqi=str(neighbor.lqi),
+                    depth=neighbor.depth,
+                    lqi=neighbor.lqi,
                 )
                 for neighbor in topology.neighbors[self.ieee]
             ],
             routes=[
                 RouteInfo(
-                    dest_nwk=str(route.DstNWK),
+                    dest_nwk=route.DstNWK,
                     route_status=route.RouteStatus.name,
-                    memory_constrained=bool(route.MemoryConstrained),
-                    many_to_one=bool(route.ManyToOne),
-                    route_record_required=bool(route.RouteRecordRequired),
-                    next_hop=str(route.NextHop),
+                    memory_constrained=route.MemoryConstrained,
+                    many_to_one=route.ManyToOne,
+                    route_record_required=route.RouteRecordRequired,
+                    next_hop=route.NextHop,
                 )
                 for route in topology.routes[self.ieee]
             ],
@@ -725,8 +726,8 @@ class Device(LogMixin, EventBase):
         self.emit(
             ZHA_CLUSTER_HANDLER_CFG_DONE,
             ClusterHandlerConfigurationComplete(
-                device_ieee=str(self.ieee),
-                unique_id=str(self.ieee),
+                device_ieee=self.ieee,
+                unique_id=self.ieee,
             ),
         )
 
@@ -1025,8 +1026,8 @@ class Device(LogMixin, EventBase):
         zdo = self._zigpy_device.zdo
         op_msg = "0x%04x: %s %s, ep: %s, cluster: %s to group: 0x%04x"
         destination_address = zdo_types.MultiAddress()
-        destination_address.addrmode = types.uint8_t(1)
-        destination_address.nwk = types.uint16_t(group_id)
+        destination_address.addrmode = uint8_t(1)
+        destination_address.nwk = uint16_t(group_id)
 
         tasks = []
 
