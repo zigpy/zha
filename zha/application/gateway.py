@@ -132,6 +132,7 @@ class DeviceFullInitEvent:
     """Event to signal that a device has been fully initialized."""
 
     device_info: ExtendedDeviceInfoWithPairingStatus
+    new_join: bool = False
     event_type: Final[str] = ZHA_GW_MSG
     event: Final[str] = ZHA_GW_MSG_DEVICE_FULL_INIT
 
@@ -604,7 +605,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.create_platform_entities()
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info),
+            DeviceFullInitEvent(device_info=device_info, new_join=True),
         )
 
     async def _async_device_rejoined(self, zha_device: Device) -> None:
