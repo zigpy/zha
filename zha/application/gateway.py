@@ -170,10 +170,6 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
 
-        if config.yaml_config.get(CONF_ENABLE_QUIRKS, True):
-            setup_quirks(
-                custom_quirks_path=config.yaml_config.get(CONF_CUSTOM_QUIRKS_PATH)
-            )
         self.global_updater: GlobalUpdater = GlobalUpdater(self)
         self._device_availability_checker: DeviceAvailabilityChecker = (
             DeviceAvailabilityChecker(self)
@@ -212,6 +208,11 @@ class Gateway(AsyncUtilMixin, EventBase):
         discovery.DEVICE_PROBE.initialize(self)
         discovery.ENDPOINT_PROBE.initialize(self)
         discovery.GROUP_PROBE.initialize(self)
+
+        if self.config.yaml_config.get(CONF_ENABLE_QUIRKS, True):
+            self.async_add_import_executor_job(
+                setup_quirks, self.config.yaml_config.get(CONF_CUSTOM_QUIRKS_PATH)
+            )
 
         self.shutting_down = False
 
@@ -701,7 +702,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         await _cancel_tasks(self._background_tasks)
         await _cancel_tasks(self._tracked_completable_tasks)
         await _cancel_tasks(self._device_init_tasks.values())
-        self._cancel_cancellable_timers()
+        super().async_shutdown()
 
         for device in self._devices.values():
             await device.on_remove()
