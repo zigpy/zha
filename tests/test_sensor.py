@@ -1155,7 +1155,7 @@ async def test_last_feeding_size_sensor_v2(
 
 @pytest.mark.looptime
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
-    """Test quirks defined sensor."""
+    """Test coordinator counter sensor."""
 
     coordinator = zha_gateway.coordinator_zha_device
     assert coordinator.is_coordinator
@@ -1184,7 +1184,7 @@ async def test_device_unavailable_skips_entity_polling(
     elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    """Test quirks defined sensor."""
+    """Test polling is skipped for unavailable devices."""
 
     assert not elec_measurement_zha_dev.is_coordinator
     assert not elec_measurement_zha_dev.is_active_coordinator
@@ -1194,7 +1194,6 @@ async def test_device_unavailable_skips_entity_polling(
 
     assert entity.state["state"] is None
 
-    # simulate counter increment on application
     elec_measurement_zha_dev.device.rssi = 60
 
     await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)

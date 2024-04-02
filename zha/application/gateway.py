@@ -101,7 +101,7 @@ class DeviceJoinedEvent:
 
 @dataclass(kw_only=True, frozen=True)
 class DeviceLeftEvent:
-    """Event to signal that a device has joined the network."""
+    """Event to signal that a device has left the network."""
 
     ieee: EUI64
     nwk: int
