@@ -588,7 +588,7 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     attribute report it received correctly.
     """
     assert entity.state["state"] == state
-    # TODO assert entity._attr_native_unit_of_measurement == unit_of_measurement
+    assert entity.info_object.unit == unit_of_measurement
 
 
 @pytest.mark.looptime
@@ -814,13 +814,13 @@ async def test_unsupported_attributes_sensor(
             3,
             2340,
             0.23,
-            UnitOfVolume.CUBIC_METERS,
+            UnitOfVolume.CUBIC_FEET,
         ),
         (
             3,
             2360,
             0.24,
-            UnitOfVolume.CUBIC_METERS,
+            UnitOfVolume.CUBIC_FEET,
         ),
         (
             8,

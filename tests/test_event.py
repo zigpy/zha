@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from zha.application.gateway import Gateway
 from zha.event import EventBase
 
 
@@ -113,7 +113,7 @@ def test_event_base_emit_data():
     assert not event._golbal_listeners
 
 
-async def test_event_base_emit_coro(zha_gateway: Gateway):
+async def test_event_base_emit_coro():
     """Test event base class."""
     event = EventGenerator()
     assert not event._listeners
@@ -123,41 +123,48 @@ async def test_event_base_emit_coro(zha_gateway: Gateway):
 
     event.once("test", callback)
     event.emit("test", "data")
-    await zha_gateway.async_block_till_done()
-    await zha_gateway.async_block_till_done()
+
+    await asyncio.gather(*event._event_tasks)
+
     assert callback.await_count == 1
     assert callback.await_args[0] == ("data",)
+    assert not event._event_tasks
 
     callback.reset_mock()
 
     unsub = event.on_event("test", callback)
     event.emit("test", "data")
-    await zha_gateway.async_block_till_done()
-    await zha_gateway.async_block_till_done()
+
+    await asyncio.gather(*event._event_tasks)
+
     assert callback.await_count == 1
     assert callback.await_args[0] == ("data",)
     unsub()
+    assert not event._event_tasks
 
     callback.reset_mock()
 
     unsub = event.on_all_events(callback)
     event.emit("test", "data")
-    await zha_gateway.async_block_till_done()
-    await zha_gateway.async_block_till_done()
+
+    await asyncio.gather(*event._event_tasks)
+
     assert callback.await_count == 1
     assert callback.await_args[0] == ("data",)
     unsub()
+    assert not event._event_tasks
 
     test_event = Event()
     event.on_event(test_event.event, event._handle_event_protocol)
     event.handle_test = AsyncMock()
 
     event.emit(test_event.event, test_event)
-    await zha_gateway.async_block_till_done()
-    await zha_gateway.async_block_till_done()
+
+    await asyncio.gather(*event._event_tasks)
 
     assert event.handle_test.await_count == 1
     assert event.handle_test.await_args[0] == (test_event,)
+    assert not event._event_tasks
 
 
 def test_handle_event_protocol():

@@ -224,7 +224,10 @@ class Sensor(PlatformEntity):
             decimals=self._decimals,
             divisor=self._divisor,
             multiplier=self._multiplier,
-            unit=self._attr_native_unit_of_measurement,
+            unit=getattr(self, "entity_description").native_unit_of_measurement
+            if hasattr(self, "entity_description")
+            and getattr(self, "entity_description") is not None
+            else self._attr_native_unit_of_measurement,
             device_class=self._attr_device_class,
             state_class=self._attr_state_class,
         )

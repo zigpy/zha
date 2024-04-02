@@ -227,9 +227,13 @@ class Group(LogMixin):
             self._group_entities[group_entity.unique_id] = group_entity
             self._entity_unsubs[group_entity.unique_id] = group_entity.on_event(
                 STATE_CHANGED,
-                self._maybe_update_group_members,
+                self._handle_maybe_update_group_members,
             )
         self.update_entity_subscriptions()
+
+    def _handle_maybe_update_group_members(self, event: EntityStateChangedEvent):
+        """Handle the maybe update group members event."""
+        self.gateway.async_create_task(self._maybe_update_group_members(event))
 
     async def _maybe_update_group_members(self, event: EntityStateChangedEvent) -> None:
         """Update the state of the entities that make up the group if they are marked as should poll."""
