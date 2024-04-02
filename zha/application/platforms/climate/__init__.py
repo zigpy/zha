@@ -367,7 +367,15 @@ class Thermostat(PlatformEntity):
             return self.DEFAULT_MIN_TEMP
         return round(min(temps) / ZCL_TEMP, 1)
 
-    async def handle_cluster_handler_attribute_updated(
+    def handle_cluster_handler_attribute_updated(
+        self, event: ClusterAttributeUpdatedEvent
+    ) -> None:
+        """Handle attribute update from device."""
+        self.device.gateway.async_create_task(
+            self._handle_cluster_handler_attribute_updated(event)
+        )
+
+    async def _handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Handle attribute update from device."""
@@ -631,7 +639,7 @@ class MoesThermostat(Thermostat):
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]
 
-    async def handle_cluster_handler_attribute_updated(
+    def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Handle attribute update from device."""
@@ -650,7 +658,7 @@ class MoesThermostat(Thermostat):
                 self._preset = Preset.BOOST
             if event.attribute_value == 6:
                 self._preset = Preset.COMPLEX
-        await super().handle_cluster_handler_attribute_updated(event)
+        super().handle_cluster_handler_attribute_updated(event)
 
     async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
         """Set the preset mode."""
@@ -719,7 +727,7 @@ class BecaThermostat(Thermostat):
         """Return only the heat mode, because the device can't be turned off."""
         return [HVACMode.HEAT]
 
-    async def handle_cluster_handler_attribute_updated(
+    def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Handle attribute update from device."""
@@ -736,7 +744,7 @@ class BecaThermostat(Thermostat):
                 self._preset = Preset.BOOST
             if event.attribute_value == 7:
                 self._preset = Preset.TEMP_MANUAL
-        await super().handle_cluster_handler_attribute_updated(event)
+        super().handle_cluster_handler_attribute_updated(event)
 
     async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
         """Set the preset mode."""
@@ -823,7 +831,7 @@ class ZONNSMARTThermostat(Thermostat):
         ]
         self._supported_flags |= ClimateEntityFeature.PRESET_MODE
 
-    async def handle_cluster_handler_attribute_updated(
+    def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
     ) -> None:
         """Handle attribute update from device."""
@@ -836,7 +844,7 @@ class ZONNSMARTThermostat(Thermostat):
                 self._preset = self.PRESET_HOLIDAY
             if event.attribute_value == 4:
                 self._preset = self.PRESET_FROST
-        await super().handle_cluster_handler_attribute_updated(event)
+        super().handle_cluster_handler_attribute_updated(event)
 
     async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
         """Set the preset mode."""
