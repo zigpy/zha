@@ -39,6 +39,10 @@ _R_co = TypeVar("_R_co", covariant=True)
 _P = ParamSpec("_P")
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 
+MAX_LOG_ATTEMPTS = 2
+_JOIN_ATTEMPTS = 10
+EXECUTOR_SHUTDOWN_TIMEOUT = 10
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -154,11 +158,6 @@ def get_zhajob_callable_job_type(target: Callable[..., Any]) -> ZHAJobType:
 def is_callback(func: Callable[..., Any]) -> bool:
     """Check if function is safe to be called in the event loop."""
     return getattr(func, "_zha_callback", False) is True
-
-
-MAX_LOG_ATTEMPTS = 2
-_JOIN_ATTEMPTS = 10
-EXECUTOR_SHUTDOWN_TIMEOUT = 10
 
 
 def async_raise(tid: int, exctype: Any) -> None:
