@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable
 from contextlib import suppress
 from dataclasses import dataclass
 from datetime import timedelta
@@ -688,31 +687,21 @@ class Gateway(AsyncUtilMixin, EventBase):
             _LOGGER.debug("Ignoring duplicate shutdown event")
             return
 
+        self.shutting_down = True
+
         self.global_updater.stop()
         self._device_availability_checker.stop()
-
-        async def _cancel_tasks(tasks_to_cancel: Iterable) -> None:
-            tasks = [t for t in tasks_to_cancel if not (t.done() or t.cancelled())]
-            for task in tasks:
-                _LOGGER.debug("Cancelling task: %s", task)
-                task.cancel()
-            with suppress(asyncio.CancelledError):
-                await asyncio.gather(*tasks, return_exceptions=True)
-
-        await _cancel_tasks(self._background_tasks)
-        await _cancel_tasks(self._tracked_completable_tasks)
-        await _cancel_tasks(self._device_init_tasks.values())
-        super().async_shutdown()
 
         for device in self._devices.values():
             await device.on_remove()
 
         _LOGGER.debug("Shutting down ZHA ControllerApplication")
-        self.shutting_down = True
-
         await self.application_controller.shutdown()
         self.application_controller = None
         await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
+
+        await super().shutdown()
+
         self._devices.clear()
         self._groups.clear()
 
