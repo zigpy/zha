@@ -3,15 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from asyncio import (
-    AbstractEventLoop,
-    Future,
-    Semaphore,
-    Task,
-    gather,
-    get_running_loop,
-    timeout as async_timeout,
-)
+from asyncio import AbstractEventLoop, Future, Semaphore, Task, gather, get_running_loop
 from collections.abc import Awaitable, Callable, Collection, Coroutine, Iterable
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
@@ -386,6 +378,13 @@ class AsyncUtilMixin:
     async def shutdown(self) -> None:
         """Shutdown the executor."""
 
+        # Prevent run_callback_threadsafe from scheduling any additional
+        # callbacks in the event loop as callbacks created on the futures
+        # it returns will never run after the final `self.async_block_till_done`
+        # which will cause the futures to block forever when waiting for
+        # the `result()` which will cause a deadlock when shutting down the executor.
+        shutdown_run_callback_threadsafe(self.loop)
+
         async def _cancel_tasks(tasks_to_cancel: Iterable) -> None:
             tasks = [t for t in tasks_to_cancel if not (t.done() or t.cancelled())]
             for task in tasks:
@@ -398,25 +397,9 @@ class AsyncUtilMixin:
         await _cancel_tasks(self._tracked_completable_tasks)
         await _cancel_tasks(self._device_init_tasks.values())
         await _cancel_tasks(self._untracked_background_tasks)
-
-        # Prevent run_callback_threadsafe from scheduling any additional
-        # callbacks in the event loop as callbacks created on the futures
-        # it returns will never run after the final `self.async_block_till_done`
-        # which will cause the futures to block forever when waiting for
-        # the `result()` which will cause a deadlock when shutting down the executor.
-        shutdown_run_callback_threadsafe(self.loop)
-
-        try:
-            async with async_timeout(30):
-                await self.async_block_till_done()
-        except TimeoutError:
-            _LOGGER.warning(
-                "Timed out waiting for tasks to be processed, the shutdown will continue"
-            )
-            for task in self._tasks:
-                _LOGGER.warning("Shutdown: task still running: %s", task)
         self._cancel_cancellable_timers()
         self.import_executor.shutdown()
+        self.import_executor = None
 
     async def async_block_till_done(self, wait_background_tasks: bool = False) -> None:
         """Block until all pending work is done."""

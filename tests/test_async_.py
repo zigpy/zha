@@ -3,7 +3,6 @@
 import asyncio
 import functools
 import time
-from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -564,56 +563,6 @@ async def test_background_task(zha_gateway: Gateway, eager_start: bool) -> None:
     assert result.result() == "Foo"
 
 
-async def test_shutdown_does_not_block_on_normal_tasks(
-    zha_gateway: Gateway,
-) -> None:
-    """Ensure shutdown does not block on normal tasks."""
-    result = asyncio.Future()
-    unshielded_task = asyncio.sleep(10)
-
-    async def test_task():
-        try:
-            await unshielded_task
-        except asyncio.CancelledError:
-            result.set_result("Foo")
-
-    start = time.monotonic()
-    task = zha_gateway.async_create_task(test_task())
-    await asyncio.sleep(0)
-    await zha_gateway.shutdown()
-    await asyncio.sleep(0)
-    assert result.done()
-    assert task.done()
-    assert time.monotonic() - start < 0.5
-
-
-async def test_shutdown_does_not_block_on_shielded_tasks(
-    zha_gateway: Gateway,
-) -> None:
-    """Ensure shutdown does not block on shielded tasks."""
-    result = asyncio.Future()
-    sleep_task = asyncio.ensure_future(asyncio.sleep(10))
-    shielded_task = asyncio.shield(sleep_task)
-
-    async def test_task():
-        try:
-            await shielded_task
-        except asyncio.CancelledError:
-            result.set_result("Foo")
-
-    start = time.monotonic()
-    task = zha_gateway.async_create_task(test_task())
-    await asyncio.sleep(0)
-    await zha_gateway.shutdown()
-    await asyncio.sleep(0)
-    assert result.done()
-    assert task.done()
-    assert time.monotonic() - start < 0.5
-
-    # Cleanup lingering task after test is done
-    sleep_task.cancel()
-
-
 @pytest.mark.parametrize("eager_start", [True, False])
 async def test_cancellable_ZHAJob(zha_gateway: Gateway, eager_start: bool) -> None:
     """Simulate a shutdown, ensure cancellable jobs are cancelled."""
@@ -773,6 +722,28 @@ async def test_run_callback_threadsafe(zha_gateway: Gateway) -> None:
     assert it_ran is True
 
 
+async def test_run_callback_threadsafe_exception(zha_gateway: Gateway) -> None:
+    """Test run_callback_threadsafe runs code in the event loop."""
+    it_ran = False
+
+    def callback_fn():
+        nonlocal it_ran
+        it_ran = True
+        raise ValueError("Test")
+
+    future = zha_async.run_callback_threadsafe(zha_gateway.loop, callback_fn)
+    assert future
+    assert it_ran is False
+
+    # Verify that async_block_till_done will flush
+    # out the callback
+    await zha_gateway.async_block_till_done()
+    assert it_ran is True
+
+    with pytest.raises(ValueError):
+        future.result()
+
+
 async def test_callback_is_always_scheduled(zha_gateway: Gateway) -> None:
     """Test run_callback_threadsafe always calls call_soon_threadsafe before checking for shutdown."""
     # We have to check the shutdown state AFTER the callback is scheduled otherwise
@@ -815,30 +786,3 @@ async def test_create_eager_task_312(zha_gateway: Gateway) -> None:  # pylint: d
     assert events == ["eager", "normal"]
     await task1
     await task2
-
-
-async def test_shutdown_calls_block_till_done_after_shutdown_run_callback_threadsafe(
-    zha_gateway: Gateway,
-) -> None:
-    """Ensure shutdown_run_callback_threadsafe is called before the final async_block_till_done."""
-    stop_calls: list[Any] = []
-
-    async def _record_block_till_done(wait_background_tasks: bool = False):  # pylint: disable=unused-argument
-        nonlocal stop_calls
-        stop_calls.append("async_block_till_done")
-
-    def _record_shutdown_run_callback_threadsafe(loop):
-        nonlocal stop_calls
-        stop_calls.append(("shutdown_run_callback_threadsafe", loop))
-
-    with (
-        patch.object(zha_gateway, "async_block_till_done", _record_block_till_done),
-        patch(
-            "zha.async_.shutdown_run_callback_threadsafe",
-            _record_shutdown_run_callback_threadsafe,
-        ),
-    ):
-        await zha_gateway.shutdown()
-
-    assert stop_calls[-2] == ("shutdown_run_callback_threadsafe", zha_gateway.loop)
-    assert stop_calls[-1] == "async_block_till_done"
