@@ -269,10 +269,6 @@ class ClusterHandler(LogMixin, EventBase):
         """Make this a hashable."""
         return hash(self._unique_id)
 
-    def emit_propagated_event(self, signal: str, *args: Any) -> None:
-        """Send a signal through dispatcher."""
-        self._endpoint.emit_propagated_event(signal, *args)
-
     async def bind(self) -> None:
         """Bind a zigbee cluster.
 

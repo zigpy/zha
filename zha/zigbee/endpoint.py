@@ -234,10 +234,6 @@ class Endpoint:
             )
         )
 
-    def emit_propagated_event(self, signal: str, *args: Any) -> None:
-        """Send a signal through hass dispatcher."""
-        self.device.emit(signal, *args)
-
     def emit_zha_event(self, event_data: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""
         self.device.emit_zha_event(
