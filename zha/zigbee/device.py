@@ -78,7 +78,6 @@ if TYPE_CHECKING:
     from zha.application.gateway import Gateway
 
 _LOGGER = logging.getLogger(__name__)
-_UPDATE_ALIVE_INTERVAL = (60, 90)
 _CHECKIN_GRACE_PERIODS = 2
 
 
@@ -483,6 +482,11 @@ class Device(LogMixin, EventBase):
         """Return the software version for this device."""
         return self._sw_build_id
 
+    @sw_version.setter
+    def sw_version(self, sw_build_id) -> None:
+        """Set the software version for this device."""
+        self._sw_build_id = sw_build_id
+
     @property
     def platform_entities(self) -> dict[str, PlatformEntity]:
         """Return the platform entities for this device."""
@@ -503,16 +507,6 @@ class Device(LogMixin, EventBase):
     ) -> Self:
         """Create new device."""
         zha_dev = cls(zigpy_dev, gateway)
-        # pylint: disable=pointless-string-statement
-        """TODO verify
-        zha_dev.unsubs.append(
-            async_dispatcher_connect(
-                hass,
-                SIGNAL_UPDATE_DEVICE.format(str(zha_dev.ieee)),
-                zha_dev.async_update_sw_build_id,
-            )
-        )
-        """
         discovery.DEVICE_PROBE.discover_device_entities(zha_dev)
         return zha_dev
 

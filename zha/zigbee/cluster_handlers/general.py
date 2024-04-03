@@ -62,7 +62,6 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_MIN_INT,
     SIGNAL_MOVE_LEVEL,
     SIGNAL_SET_LEVEL,
-    SIGNAL_UPDATE_DEVICE,
 )
 from zha.zigbee.cluster_handlers.helpers import is_hue_motion_sensor
 
@@ -301,7 +300,7 @@ class IdentifyClusterHandler(ClusterHandler):
         cmd = parse_and_log_command(self, tsn, command_id, args)
 
         if cmd == Identify.ServerCommandDefs.trigger_effect.name:
-            self.emit_propagated_event(f"{self.unique_id}_{cmd}", args[0])
+            self.emit_zha_event(f"{self.unique_id}_{cmd}", args[0])
 
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(LevelControl.cluster_id)
@@ -590,7 +589,6 @@ class OtaClientClusterHandler(ClientClusterHandler):
         if command_id not in self.cluster.server_commands:
             return
 
-        signal_id = self._endpoint.unique_id.split("-")[0]
         cmd_name = self.cluster.server_commands[command_id].name
 
         if cmd_name == Ota.ServerCommandDefs.query_next_image.name:
@@ -600,9 +598,7 @@ class OtaClientClusterHandler(ClientClusterHandler):
             self.cluster.update_attribute(
                 Ota.AttributeDefs.current_file_version.id, current_file_version
             )
-            self.emit_propagated_event(
-                SIGNAL_UPDATE_DEVICE.format(signal_id), current_file_version
-            )
+            self._endpoint.device.sw_version = current_file_version
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Partition.cluster_id)

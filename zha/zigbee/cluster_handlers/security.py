@@ -107,9 +107,9 @@ class IasAceClusterHandler(ClusterHandler):
         if self.invalid_tries >= self.max_invalid_tries:
             self.alarm_status = AceCluster.AlarmStatus.Emergency
             self.armed_state = AceCluster.PanelStatus.In_Alarm
-            self.emit_propagated_event(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}")
+            self.emit_zha_event(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}", [])
         else:
-            self.emit_propagated_event(f"{self.unique_id}_{SIGNAL_ARMED_STATE_CHANGED}")
+            self.emit_zha_event(f"{self.unique_id}_{SIGNAL_ARMED_STATE_CHANGED}", [])
         self._emit_panel_status_changed()
 
     def _disarm(self, code: str):
