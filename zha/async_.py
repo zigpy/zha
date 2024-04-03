@@ -5,12 +5,21 @@ from __future__ import annotations
 import asyncio
 from asyncio import AbstractEventLoop, Future, Semaphore, Task, gather, get_running_loop
 from collections.abc import Awaitable, Callable, Collection, Coroutine, Iterable
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
+import contextlib
+import ctypes
 from dataclasses import dataclass
 import enum
 import functools
 from functools import cached_property
+import inspect
 import logging
+import sys
+import threading
+from threading import Thread
 import time
+import traceback
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -18,6 +27,7 @@ from typing import (
     Generic,
     ParamSpec,
     TypeVar,
+    TypeVarTuple,
     cast,
     overload,
 )
@@ -30,7 +40,15 @@ _T = TypeVar("_T")
 _R = TypeVar("_R")
 _R_co = TypeVar("_R_co", covariant=True)
 _P = ParamSpec("_P")
+_Ts = TypeVarTuple("_Ts")
 BLOCK_LOG_TIMEOUT: Final[int] = 60
+
+MAX_LOG_ATTEMPTS = 2
+_JOIN_ATTEMPTS = 10
+EXECUTOR_SHUTDOWN_TIMEOUT = 10
+_SHUTDOWN_RUN_CALLBACK_THREADSAFE = "_zha_shutdown_run_callback_threadsafe"
+THREADING_SHUTDOWN_TIMEOUT = 10
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +85,72 @@ async def gather_with_limited_concurrency(
         *(create_eager_task(sem_task(task)) for task in tasks),
         return_exceptions=return_exceptions,
     )
+
+
+def run_callback_threadsafe(
+    loop: AbstractEventLoop, callback_fn: Callable[[*_Ts], _T], *args: *_Ts
+) -> concurrent.futures.Future[_T]:
+    """Submit a callback object to a given event loop.
+
+    Return a concurrent.futures.Future to access the result.
+    """
+    ident = loop.__dict__.get("_thread_ident")
+    if ident is not None and ident == threading.get_ident():
+        raise RuntimeError("Cannot be called from within the event loop")
+
+    future: concurrent.futures.Future[_T] = concurrent.futures.Future()
+
+    def run_callback() -> None:
+        """Run callback and store result."""
+        try:
+            future.set_result(callback_fn(*args))
+        except Exception as exc:  # pylint: disable=broad-except
+            if future.set_running_or_notify_cancel():
+                future.set_exception(exc)
+            else:
+                _LOGGER.warning("Exception on lost future: ", exc_info=True)
+
+    loop.call_soon_threadsafe(run_callback)
+
+    if hasattr(loop, _SHUTDOWN_RUN_CALLBACK_THREADSAFE):
+        #
+        # If the final `Gateway.async_block_till_done` in
+        # `Gateway.shutdown` has already been called, the callback
+        # will never run and, `future.result()` will block forever which
+        # will prevent the thread running this code from shutting down which
+        # will result in a deadlock when the main thread attempts to shutdown
+        # the executor and `.join()` the thread running this code.
+        #
+        # To prevent this deadlock we do the following on shutdown:
+        #
+        # 1. Set the _SHUTDOWN_RUN_CALLBACK_THREADSAFE attr on this function
+        #    by calling `shutdown_run_callback_threadsafe`
+        # 2. Call `zha_gateway.async_block_till_done` at least once after shutdown
+        #    to ensure all callbacks have run
+        # 3. Raise an exception here to ensure `future.result()` can never be
+        #    called and hit the deadlock since once `shutdown_run_callback_threadsafe`
+        #    we cannot promise the callback will be executed.
+        #
+        raise RuntimeError("The event loop is in the process of shutting down.")
+
+    return future
+
+
+def shutdown_run_callback_threadsafe(loop: AbstractEventLoop) -> None:
+    """Call when run_callback_threadsafe should prevent creating new futures.
+
+    We must finish all callbacks before the executor is shutdown
+    or we can end up in a deadlock state where:
+
+    `executor.result()` is waiting for its `._condition`
+    and the executor shutdown is trying to `.join()` the
+    executor thread.
+
+    This function is considered irreversible and should only ever
+    be called when ZHA is going to shutdown and
+    python is going to exit.
+    """
+    setattr(loop, _SHUTDOWN_RUN_CALLBACK_THREADSAFE, True)
 
 
 def cancelling(task: Future[Any]) -> bool:
@@ -149,6 +233,133 @@ def is_callback(func: Callable[..., Any]) -> bool:
     return getattr(func, "_zha_callback", False) is True
 
 
+def async_raise(tid: int, exctype: Any) -> None:
+    """Raise an exception in the threads with id tid."""
+    if not inspect.isclass(exctype):
+        raise TypeError("Only types can be raised (not instances)")
+
+    c_tid = ctypes.c_ulong(tid)  # changed in python 3.7+
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(c_tid, ctypes.py_object(exctype))
+
+    if res == 1:
+        return
+
+    # "if it returns a number greater than one, you're in trouble,
+    # and you should call it again with exc=NULL to revert the effect"
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(c_tid, None)
+    raise SystemError("PyThreadState_SetAsyncExc failed")
+
+
+def _log_thread_running_at_shutdown(name: str, ident: int) -> None:
+    """Log the stack of a thread that was still running at shutdown."""
+    frames = sys._current_frames()  # pylint: disable=protected-access
+    stack = frames.get(ident)
+    formatted_stack = traceback.format_stack(stack)
+    _LOGGER.warning(
+        "Thread[%s] is still running at shutdown: %s",
+        name,
+        "".join(formatted_stack).strip(),
+    )
+
+
+def join_or_interrupt_threads(
+    threads: set[Thread], timeout: float, log: bool
+) -> set[Thread]:
+    """Attempt to join or interrupt a set of threads."""
+    joined = set()
+    timeout_per_thread = timeout / len(threads)
+
+    for thread in threads:
+        thread.join(timeout=timeout_per_thread)
+
+        if not thread.is_alive() or thread.ident is None:
+            joined.add(thread)
+            continue
+
+        if log:
+            _log_thread_running_at_shutdown(thread.name, thread.ident)
+
+        with contextlib.suppress(SystemError):
+            # SystemError at this stage is usually a race condition
+            # where the thread happens to die right before we force
+            # it to raise the exception
+            async_raise(thread.ident, SystemExit)
+
+    return joined
+
+
+def deadlock_safe_shutdown() -> None:
+    """Shutdown that will not deadlock."""
+    # threading._shutdown can deadlock forever
+    # see https://github.com/justengel/continuous_threading#shutdown-update
+    # for additional detail
+    remaining_threads = [
+        thread
+        for thread in threading.enumerate()
+        if thread is not threading.main_thread()
+        and not thread.daemon
+        and thread.is_alive()
+    ]
+
+    if not remaining_threads:
+        return
+
+    timeout_per_thread = THREADING_SHUTDOWN_TIMEOUT / len(remaining_threads)
+    for thread in remaining_threads:
+        try:
+            thread.join(timeout_per_thread)
+        except Exception as err:  # pylint: disable=broad-except
+            _LOGGER.warning("Failed to join thread: %s", err)
+
+
+class ThreadWithException(Thread):
+    """A thread class that supports raising exception in the thread from another thread.
+
+    Based on
+    https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread/49877671
+
+    """
+
+    def raise_exc(self, exctype: Any) -> None:
+        """Raise the given exception type in the context of this thread."""
+        assert self.ident
+        async_raise(self.ident, exctype)
+
+
+class InterruptibleThreadPoolExecutor(ThreadPoolExecutor):
+    """A ThreadPoolExecutor instance that will not deadlock on shutdown."""
+
+    def shutdown(self, *args: Any, **kwargs: Any) -> None:  # pylint: disable=[unused-argument]
+        """Shutdown with interrupt support added."""
+        super().shutdown(wait=False, cancel_futures=True)
+        self.join_threads_or_timeout()
+
+    def join_threads_or_timeout(self) -> None:
+        """Join threads or timeout."""
+        remaining_threads = set(self._threads)
+        start_time = time.monotonic()
+        timeout_remaining: float = EXECUTOR_SHUTDOWN_TIMEOUT
+        attempt = 0
+
+        while True:
+            if not remaining_threads:
+                return
+
+            attempt += 1
+
+            remaining_threads -= join_or_interrupt_threads(
+                remaining_threads,
+                timeout_remaining / _JOIN_ATTEMPTS,
+                attempt <= MAX_LOG_ATTEMPTS,
+            )
+
+            timeout_remaining = EXECUTOR_SHUTDOWN_TIMEOUT - (
+                time.monotonic() - start_time
+            )
+            if timeout_remaining <= 0:
+                return
+
+
 class AsyncUtilMixin:
     """Mixin for dealing with async stuff."""
 
@@ -159,7 +370,36 @@ class AsyncUtilMixin:
         self._device_init_tasks: dict[EUI64, asyncio.Task] = {}
         self._background_tasks: set[asyncio.Future[Any]] = set()
         self._untracked_background_tasks: set[asyncio.Future[Any]] = set()
+        self.import_executor = InterruptibleThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="ImportExecutor"
+        )
         super().__init__(*args, **kw_args)
+
+    async def shutdown(self) -> None:
+        """Shutdown the executor."""
+
+        # Prevent run_callback_threadsafe from scheduling any additional
+        # callbacks in the event loop as callbacks created on the futures
+        # it returns will never run after the final `self.async_block_till_done`
+        # which will cause the futures to block forever when waiting for
+        # the `result()` which will cause a deadlock when shutting down the executor.
+        shutdown_run_callback_threadsafe(self.loop)
+
+        async def _cancel_tasks(tasks_to_cancel: Iterable) -> None:
+            tasks = [t for t in tasks_to_cancel if not (t.done() or t.cancelled())]
+            for task in tasks:
+                _LOGGER.debug("Cancelling task: %s", task)
+                task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await asyncio.gather(*tasks, return_exceptions=True)
+
+        await _cancel_tasks(self._background_tasks)
+        await _cancel_tasks(self._tracked_completable_tasks)
+        await _cancel_tasks(self._device_init_tasks.values())
+        await _cancel_tasks(self._untracked_background_tasks)
+        self._cancel_cancellable_timers()
+        self.import_executor.shutdown()
+        self.import_executor = None
 
     async def async_block_till_done(self, wait_background_tasks: bool = False) -> None:
         """Block until all pending work is done."""
@@ -433,7 +673,7 @@ class AsyncUtilMixin:
         """Create a task from within the event loop.
 
         This type of task is for background tasks that usually run for
-        the lifetime of Home Assistant or an integration's setup.
+        the lifetime of ZHA or an integration's setup.
 
         A background task is different from a normal task:
 

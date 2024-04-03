@@ -924,7 +924,9 @@ async def test_poll_control_ikea(poll_control_device: Device) -> None:
     poll_control_ch = poll_control_device._endpoints[1].all_cluster_handlers["1:0x0020"]
     cluster = poll_control_ch.cluster
 
+    delattr(poll_control_device, "manufacturer_code")
     poll_control_device.device.node_desc.manufacturer_code = 4476
+
     with mock.patch.object(cluster, "set_long_poll_interval", set_long_poll_mock):
         await poll_control_ch.check_in_response(33)
 
