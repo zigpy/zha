@@ -179,7 +179,7 @@ class DeviceProbe:
             device.name,
         )
 
-        if device.is_coordinator:
+        if device.is_active_coordinator:
             self.discover_coordinator_device_entities(device)
             return
 
