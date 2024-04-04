@@ -220,7 +220,7 @@ async def test_gateway_group_methods(
     info = entity.info_object
     assert info.class_name == "LightGroup"
     assert info.platform == Platform.LIGHT
-    assert info.unique_id == "light.0x0002"
+    assert info.unique_id == "light_zha_group_0x0002"
     assert info.name == "Test Group_0x0002"
     assert info.group_id == zha_group.group_id
     assert info.supported_features == LightEntityFeature.TRANSITION
