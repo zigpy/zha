@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import asyncio
-from contextlib import suppress
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -199,8 +198,6 @@ class ExtendedDeviceInfo(DeviceInfo):
 class Device(LogMixin, EventBase):
     """ZHA Zigbee device object."""
 
-    _ha_device_id: str
-
     def __init__(
         self,
         zigpy_device: zigpy.device.Device,
@@ -246,7 +243,6 @@ class Device(LogMixin, EventBase):
 
         self._platform_entities: dict[str, PlatformEntity] = {}
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
-        self._tracked_tasks: list[asyncio.Task] = []
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
         self.status: DeviceStatus = DeviceStatus.CREATED
 
@@ -496,7 +492,7 @@ class Device(LogMixin, EventBase):
         """Get a platform entity by unique id."""
         entity = self._platform_entities.get(unique_id)
         if entity is None:
-            raise ValueError(f"Entity {unique_id} not found")
+            raise KeyError(f"Entity {unique_id} not found")
         return entity
 
     @classmethod
@@ -759,12 +755,6 @@ class Device(LogMixin, EventBase):
 
     async def on_remove(self) -> None:
         """Cancel tasks this device owns."""
-        tasks = [t for t in self._tracked_tasks if not (t.done() or t.cancelled())]
-        for task in tasks:
-            self.debug("Cancelling task: %s", task)
-            task.cancel()
-        with suppress(asyncio.CancelledError):
-            await asyncio.gather(*tasks, return_exceptions=True)
         for platform_entity in self._platform_entities.values():
             await platform_entity.on_remove()
 
@@ -810,18 +800,13 @@ class Device(LogMixin, EventBase):
         self, endpoint_id, cluster_id, cluster_type=CLUSTER_TYPE_IN
     ):
         """Get zigbee attributes for specified cluster."""
-        cluster = self.async_get_cluster(endpoint_id, cluster_id, cluster_type)
-        if cluster is None:
-            return None
-        return cluster.attributes
+        return self.async_get_cluster(endpoint_id, cluster_id, cluster_type).attributes
 
     def async_get_cluster_commands(
         self, endpoint_id, cluster_id, cluster_type=CLUSTER_TYPE_IN
     ):
         """Get zigbee commands for specified cluster."""
         cluster = self.async_get_cluster(endpoint_id, cluster_id, cluster_type)
-        if cluster is None:
-            return None
         return {
             CLUSTER_COMMANDS_CLIENT: cluster.client_commands,
             CLUSTER_COMMANDS_SERVER: cluster.server_commands,
