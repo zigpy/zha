@@ -1780,6 +1780,13 @@ async def test_on_with_off_color(
     assert bool(entity.state["on"]) is True
     assert entity.state["color_temp"] == 235
     assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.supported_color_modes == {ColorMode.COLOR_TEMP, ColorMode.XY}
+    assert entity._supported_color_modes == {
+        ColorMode.COLOR_TEMP,
+        ColorMode.XY,
+        ColorMode.ONOFF,
+        ColorMode.BRIGHTNESS,
+    }
 
     # now let's turn off the Execute_if_off option and see if the old behavior is restored
     dev1_cluster_color.PLUGGED_ATTR_READS = {"options": 0}
