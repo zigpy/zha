@@ -198,9 +198,9 @@ class PlatformEntity(BaseEntity):
         super().__init__(unique_id, **kwargs)
         ieeetail = "".join([f"{o:02x}" for o in device.ieee[:4]])
         ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
-        self._name: str = f"{device.name} {ieeetail} {ch_names}"
+        self._attr_name: str = f"{device.name} {ieeetail} {ch_names}"
         if self._unique_id_suffix:
-            self._name += f" {self._unique_id_suffix}"
+            self._attr_name += f" {self._unique_id_suffix}"
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
         for cluster_handler in cluster_handlers:
@@ -271,7 +271,7 @@ class PlatformEntity(BaseEntity):
             unique_id=self._unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
-            name=self._name,
+            name=self._attr_name,
             cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
@@ -301,7 +301,7 @@ class PlatformEntity(BaseEntity):
     @property
     def name(self) -> str:
         """Return the name of the platform entity."""
-        return self._name
+        return self._attr_name
 
     @property
     def state(self) -> dict[str, Any]:
@@ -332,7 +332,7 @@ class GroupEntity(BaseEntity):
     ) -> None:
         """Initialize a group."""
         super().__init__(f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
-        self._name: str = f"{group.name}_0x{group.group_id:04x}"
+        self._attr_name: str = f"{group.name}_0x{group.group_id:04x}"
         self._group: Group = group
         self._group.register_group_entity(self)
 
@@ -352,14 +352,14 @@ class GroupEntity(BaseEntity):
             unique_id=self._unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
-            name=self._name,
+            name=self._attr_name,
             group_id=self.group_id,
         )
 
     @property
     def name(self) -> str:
         """Return the name of the group entity."""
-        return self._name
+        return self._attr_name
 
     @property
     def group_id(self) -> int:
