@@ -332,7 +332,7 @@ class GroupEntity(BaseEntity):
     ) -> None:
         """Initialize a group."""
         super().__init__(f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
-        self._attr_name: str = f"{group.name}_0x{group.group_id:04x}"
+        self._attr_name: str = group.name
         self._group: Group = group
         self._group.register_group_entity(self)
 
