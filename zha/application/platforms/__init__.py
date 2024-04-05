@@ -198,9 +198,9 @@ class PlatformEntity(BaseEntity):
         super().__init__(unique_id, **kwargs)
         ieeetail = "".join([f"{o:02x}" for o in device.ieee[:4]])
         ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
-        self._attr_name: str = f"{device.name} {ieeetail} {ch_names}"
+        self._name: str = f"{device.name} {ieeetail} {ch_names}"
         if self._unique_id_suffix:
-            self._attr_name += f" {self._unique_id_suffix}"
+            self._name += f" {self._unique_id_suffix}"
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
         for cluster_handler in cluster_handlers:
@@ -271,7 +271,7 @@ class PlatformEntity(BaseEntity):
             unique_id=self._unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
-            name=self._attr_name,
+            name=self._name,
             cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
@@ -301,7 +301,7 @@ class PlatformEntity(BaseEntity):
     @property
     def name(self) -> str:
         """Return the name of the platform entity."""
-        return self._attr_name
+        return self._name
 
     @property
     def state(self) -> dict[str, Any]:
