@@ -23,10 +23,13 @@ from zha.application.const import (
     CLUSTER_COMMANDS_SERVER,
     CLUSTER_TYPE_IN,
     CLUSTER_TYPE_OUT,
+    UNKNOWN,
 )
 from zha.application.gateway import Gateway
+from zha.application.platforms.sensor import LQISensor, RSSISensor
+from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ClusterBinding, Device
+from zha.zigbee.device import ClusterBinding, Device, get_device_automation_triggers
 from zha.zigbee.group import Group
 
 
@@ -399,6 +402,12 @@ async def test_async_get_cluster_attributes(
         == zigpy_dev.endpoints[3].on_off.attributes
     )
 
+    with pytest.raises(KeyError):
+        assert (
+            zha_device.async_get_cluster_attributes(3, general.BinaryValue.cluster_id)
+            is None
+        )
+
 
 async def test_async_get_cluster_commands(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
@@ -620,3 +629,93 @@ async def test_async_bind_to_group(
 
     m1 = "0xb79c: Unbind_req 00:0d:7f:00:0a:90:69:e8, ep: 3, cluster: 6"
     assert f"{m1} to group: 0x1001 completed: [<Status.SUCCESS: 0>]" in caplog.text
+
+
+async def test_device_automation_triggers(
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test device automation triggers."""
+    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zha_device = await device_joined(zigpy_dev)
+
+    assert get_device_automation_triggers(zha_device) == {
+        ("device_offline", "device_offline"): {"device_event_type": "device_offline"}
+    }
+
+    assert zha_device.device_automation_commands == {}
+    assert zha_device.device_automation_triggers == {
+        ("device_offline", "device_offline"): {"device_event_type": "device_offline"}
+    }
+
+
+async def test_device_properties(
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test device properties."""
+    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zha_device = await device_joined(zigpy_dev)
+
+    assert zha_device.is_mains_powered is False
+    assert zha_device.is_end_device is True
+    assert zha_device.is_router is False
+    assert zha_device.is_coordinator is False
+    assert zha_device.is_active_coordinator is False
+    assert zha_device.device_type == "EndDevice"
+    assert zha_device.power_source == "Battery or Unknown"
+    assert zha_device.available is True
+    assert zha_device.on_network is True
+    assert zha_device.last_seen is not None
+    assert zha_device.last_seen < time.time()
+
+    assert zha_device.ieee == zigpy_dev.ieee
+    assert zha_device.nwk == zigpy_dev.nwk
+    assert zha_device.manufacturer_code == 0x1037
+    assert zha_device.name == "FakeManufacturer FakeModel"
+    assert zha_device.manufacturer == "FakeManufacturer"
+    assert zha_device.model == "FakeModel"
+    assert zha_device.is_groupable is False
+
+    assert zha_device.power_configuration_ch is None
+    assert zha_device.basic_ch is not None
+    assert zha_device.sw_version is None
+
+    assert len(zha_device.platform_entities) == 3
+    assert "00:0d:6f:00:0a:90:69:e7-3-0-lqi" in zha_device.platform_entities
+    assert "00:0d:6f:00:0a:90:69:e7-3-0-rssi" in zha_device.platform_entities
+    assert "00:0d:6f:00:0a:90:69:e7-3-6" in zha_device.platform_entities
+
+    assert isinstance(
+        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-0-lqi"], LQISensor
+    )
+    assert isinstance(
+        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-0-rssi"], RSSISensor
+    )
+    assert isinstance(
+        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-6"], Switch
+    )
+
+    assert zha_device.get_platform_entity("00:0d:6f:00:0a:90:69:e7-3-0-lqi") is not None
+    assert isinstance(
+        zha_device.get_platform_entity("00:0d:6f:00:0a:90:69:e7-3-0-lqi"), LQISensor
+    )
+
+    with pytest.raises(KeyError, match="Entity foo not found"):
+        zha_device.get_platform_entity("foo")
+
+    # test things are none when they aren't returned by Zigpy
+    zigpy_dev.node_desc = None
+    delattr(zha_device, "manufacturer_code")
+    delattr(zha_device, "is_mains_powered")
+    delattr(zha_device, "device_type")
+    delattr(zha_device, "is_router")
+    delattr(zha_device, "is_end_device")
+    delattr(zha_device, "is_coordinator")
+
+    assert zha_device.manufacturer_code is None
+    assert zha_device.is_mains_powered is None
+    assert zha_device.device_type is UNKNOWN
+    assert zha_device.is_router is None
+    assert zha_device.is_end_device is None
+    assert zha_device.is_coordinator is None

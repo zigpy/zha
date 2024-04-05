@@ -44,6 +44,7 @@ async def test_alarm_control_panel(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test zhaws alarm control panel platform."""
     zha_device: Device = await device_joined(zigpy_device)
@@ -184,6 +185,14 @@ async def test_alarm_control_panel(
     await zha_gateway.async_block_till_done()
     assert alarm_entity.state["state"] == AlarmState.DISARMED
 
+    # disarm when already disarmed
+    cluster.listener_event(
+        "cluster_command", 1, 0, [security.IasAce.ArmMode.Disarm, "4321", 0]
+    )
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert "IAS ACE already disarmed" in caplog.text
+
     # panic from panel
     cluster.listener_event("cluster_command", 1, 4, [])
     await zha_gateway.async_block_till_done()
@@ -216,6 +225,12 @@ async def test_alarm_control_panel(
     # reset the panel
     await reset_alarm_panel(zha_gateway, cluster, alarm_entity)
     assert alarm_entity.state["state"] == AlarmState.DISARMED
+
+    alarm_entity._cluster_handler.code_required_arm_actions = True
+    await alarm_entity.async_alarm_arm_away()
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+    assert "Invalid code supplied to IAS ACE" in caplog.text
 
 
 async def reset_alarm_panel(

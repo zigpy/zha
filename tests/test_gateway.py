@@ -17,7 +17,10 @@ from zigpy.zdo.types import LogicalType, NodeDescriptor
 from tests.common import async_find_group_entity_id, find_entity_id
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
+from zha.application.const import RadioType
 from zha.application.gateway import (
+    DeviceJoinedDeviceInfo,
+    DeviceJoinedEvent,
     DevicePairingStatus,
     Gateway,
     RawDeviceInitializedDeviceInfo,
@@ -572,6 +575,28 @@ def test_gateway_raw_device_initialized(
     )
 
 
+def test_gateway_device_joined(
+    zha_gateway: Gateway,
+    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test Zigpy raw device initialized."""
+
+    zha_gateway.emit = MagicMock(wraps=zha_gateway.emit)
+    zha_gateway.device_joined(zigpy_dev_basic)
+
+    assert zha_gateway.emit.call_count == 1
+    assert zha_gateway.emit.call_args == call(
+        "device_joined",
+        DeviceJoinedEvent(
+            device_info=DeviceJoinedDeviceInfo(
+                ieee=zigpy.types.EUI64.convert("00:0d:6f:00:0a:90:69:e7"),
+                nwk=0xB79C,
+                pairing_status=DevicePairingStatus.PAIRED,
+            )
+        ),
+    )
+
+
 @pytest.mark.looptime
 async def test_pollers_skip(
     zha_gateway: Gateway,
@@ -624,3 +649,29 @@ async def test_gateway_handle_message(
 
     assert zha_dev_basic.available is True
     assert zha_dev_basic.on_network is True
+
+
+def test_radio_type():
+    """Test radio type."""
+
+    assert RadioType.list() == [
+        "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis",
+        "ZNP = Texas Instruments Z-Stack ZNP protocol: CC253x, CC26x2, CC13x2",
+        "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
+        "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
+        "XBee = Digi XBee Zigbee radios: Digi XBee Series 2, 2C, 3",
+    ]
+
+    assert (
+        RadioType.get_by_description(
+            "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis"
+        )
+        == RadioType.ezsp
+    )
+
+    assert RadioType.ezsp.description == (
+        "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis"
+    )
+
+    with pytest.raises(ValueError):
+        RadioType.get_by_description("Invalid description")

@@ -242,6 +242,10 @@ class NumberConfigurationEntity(PlatformEntity):
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
+        )
 
     def _init_from_quirks_metadata(self, entity_metadata: NumberMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -267,10 +271,6 @@ class NumberConfigurationEntity(PlatformEntity):
             self._attr_native_unit_of_measurement = validate_unit(
                 entity_metadata.unit
             ).value
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
-        )
 
     @functools.cached_property
     def info_object(self) -> NumberConfigurationEntityInfo:
