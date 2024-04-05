@@ -144,6 +144,7 @@ class BaseLight(BaseEntity, ABC):
         self._effect_list: list[str] | None = None
         self._effect: str | None = None
         self._supported_color_modes: set[ColorMode] = set()
+        self._external_supported_color_modes: set[ColorMode] = set()
         self._zha_config_transition: int = self._DEFAULT_MIN_TRANSITION_TIME
         self._zha_config_enhanced_light_transition: bool = False
         self._zha_config_enable_light_transitioning_flag: bool = True
@@ -211,7 +212,7 @@ class BaseLight(BaseEntity, ABC):
     @property
     def supported_color_modes(self) -> set[ColorMode]:
         """Flag supported color modes."""
-        return self._supported_color_modes
+        return self._external_supported_color_modes
 
     @property
     def is_on(self) -> bool:
@@ -710,6 +711,7 @@ class Light(PlatformEntity, BaseLight):
     """Representation of a ZHA or ZLL light."""
 
     _supported_color_modes: set[ColorMode]
+    _external_supported_color_modes: set[ColorMode]
     _attr_translation_key: str = "light"
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
@@ -803,8 +805,8 @@ class Light(PlatformEntity, BaseLight):
                 effect_list.append(EFFECT_COLORLOOP)
                 if self._color_cluster_handler.color_loop_active == 1:
                     self._effect = EFFECT_COLORLOOP
-        supported_color_modes: set[ColorMode] = filter_supported_color_modes(
-            self._supported_color_modes
+        self._external_supported_color_modes = supported_color_modes = (
+            filter_supported_color_modes(self._supported_color_modes)
         )
         if len(supported_color_modes) == 1:
             self._color_mode = next(iter(supported_color_modes))
@@ -1320,8 +1322,8 @@ class LightGroup(GroupEntity, BaseLight):
 
         if all_supported_color_modes:
             # Merge all color modes.
-            supported_color_modes = filter_supported_color_modes(
-                set().union(*all_supported_color_modes)
+            self._external_supported_color_modes = supported_color_modes = (
+                filter_supported_color_modes(set().union(*all_supported_color_modes))
             )
 
         self._color_mode = ColorMode.UNKNOWN

@@ -9,22 +9,14 @@ from typing import NamedTuple, cast
 
 import attr
 
-from zha.application.platforms.light.const import (
-    COLOR_MODES_BRIGHTNESS,
-    COLOR_MODES_COLOR,
-    ColorMode,
-)
+from zha.application.platforms.light.const import COLOR_MODES_BRIGHTNESS, ColorMode
 from zha.exceptions import ZHAException
 
 
 def filter_supported_color_modes(color_modes: Iterable[ColorMode]) -> set[ColorMode]:
     """Filter the given color modes."""
     color_modes = set(color_modes)
-    if (
-        not color_modes
-        or ColorMode.UNKNOWN in color_modes
-        or (ColorMode.WHITE in color_modes and not color_supported(color_modes))
-    ):
+    if not color_modes or ColorMode.UNKNOWN in color_modes:
         raise ZHAException
 
     if ColorMode.ONOFF in color_modes and len(color_modes) > 1:
@@ -34,41 +26,11 @@ def filter_supported_color_modes(color_modes: Iterable[ColorMode]) -> set[ColorM
     return color_modes
 
 
-def valid_supported_color_modes(
-    color_modes: Iterable[ColorMode | str],
-) -> set[ColorMode | str]:
-    """Validate the given color modes."""
-    color_modes = set(color_modes)
-    if (
-        not color_modes
-        or ColorMode.UNKNOWN in color_modes
-        or (ColorMode.BRIGHTNESS in color_modes and len(color_modes) > 1)
-        or (ColorMode.ONOFF in color_modes and len(color_modes) > 1)
-        or (ColorMode.WHITE in color_modes and not color_supported(color_modes))
-    ):
-        raise ZHAException(f"Invalid supported_color_modes {sorted(color_modes)}")
-    return color_modes
-
-
 def brightness_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
     """Test if brightness is supported."""
     if not color_modes:
         return False
     return not COLOR_MODES_BRIGHTNESS.isdisjoint(color_modes)
-
-
-def color_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
-    """Test if color is supported."""
-    if not color_modes:
-        return False
-    return not COLOR_MODES_COLOR.isdisjoint(color_modes)
-
-
-def color_temp_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
-    """Test if color temperature is supported."""
-    if not color_modes:
-        return False
-    return ColorMode.COLOR_TEMP in color_modes
 
 
 class RGBColor(NamedTuple):
