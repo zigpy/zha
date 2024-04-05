@@ -1,4 +1,4 @@
-"""Test zha analog output."""
+"""Test zha number platform."""
 
 from collections.abc import Awaitable, Callable
 from unittest.mock import call
@@ -14,6 +14,7 @@ from zigpy.zcl.clusters import general, lighting
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms.number.const import NumberMode
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 
@@ -117,6 +118,13 @@ async def test_number(
     assert entity.info_object.max_value == 100.0
     assert entity.info_object.step == 1.1
 
+    assert entity.icon == "mdi:percent"
+    assert entity.native_unit_of_measurement == "%"
+    assert entity.mode == NumberMode.AUTO
+    assert entity.native_min_value == 1.0
+    assert entity.native_max_value == 100.0
+    assert entity.native_step == 1.1
+
     # change value from device
     assert cluster.read_attributes.call_count == 3
     await send_attributes_report(zha_gateway, cluster, {0x0055: 15})
@@ -150,6 +158,14 @@ async def test_number(
     )
     assert entity.state["state"] == 20.0
 
+    await entity.async_set_native_value(30)
+    await zha_gateway.async_block_till_done()
+    assert len(cluster.write_attributes.mock_calls) == 2
+    assert cluster.write_attributes.call_args == call(
+        {"present_value": 30}, manufacturer=None
+    )
+    assert entity.state["state"] == 30.0
+
 
 def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
@@ -161,14 +177,14 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 
 @pytest.mark.parametrize(
-    ("attr", "initial_value", "new_value"),
+    ("attr", "initial_value", "new_value", "max_value"),
     (
-        ("on_off_transition_time", 20, 5),
-        ("on_level", 255, 50),
-        ("on_transition_time", 5, 1),
-        ("off_transition_time", 5, 1),
-        ("default_move_rate", 1, 5),
-        ("start_up_current_level", 254, 125),
+        ("on_off_transition_time", 20, 5, 65535),
+        ("on_level", 255, 50, 255),
+        ("on_transition_time", 5, 1, 65534),
+        ("off_transition_time", 5, 1, 65534),
+        ("default_move_rate", 1, 5, 254),
+        ("start_up_current_level", 254, 125, 255),
     ),
 )
 async def test_level_control_number(
@@ -178,6 +194,7 @@ async def test_level_control_number(
     attr: str,
     initial_value: int,
     new_value: int,
+    max_value: int,
 ) -> None:
     """Test ZHA level control number entities - new join."""
 
@@ -227,6 +244,13 @@ async def test_level_control_number(
     assert entity
     assert entity.state["state"] == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
+
+    assert entity.icon is None
+    assert entity.native_unit_of_measurement is None
+    assert entity.mode == NumberMode.AUTO
+    assert entity.native_min_value == 0
+    assert entity.native_max_value == max_value
+    assert entity.native_step == 1.0
 
     await entity.async_set_native_value(new_value)
     assert level_control_cluster.write_attributes.mock_calls == [
@@ -279,6 +303,15 @@ async def test_level_control_number(
         ),
     ]
     assert entity.state["state"] == new_value
+
+    # update value from device
+    await send_attributes_report(
+        zha_gateway,
+        level_control_cluster,
+        {level_control_cluster.attributes_by_name[attr].id: initial_value},
+    )
+    await zha_gateway.async_block_till_done()
+    assert entity.state["state"] == initial_value
 
 
 @pytest.mark.parametrize(
@@ -385,3 +418,12 @@ async def test_color_number(
         ),
     ]
     assert entity.state["state"] == new_value
+
+    # update value from device
+    await send_attributes_report(
+        zha_gateway,
+        color_cluster,
+        {color_cluster.attributes_by_name[attr].id: initial_value},
+    )
+    await zha_gateway.async_block_till_done()
+    assert entity.state["state"] == initial_value
