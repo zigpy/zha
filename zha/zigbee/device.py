@@ -242,7 +242,7 @@ class Device(LogMixin, EventBase):
             and time.time() - self.last_seen < self.consider_unavailable_time
         )
         self._checkins_missed_count: int = 0
-        self._on_network: bool = False
+        self._on_network: bool = True
 
         self._platform_entities: dict[str, PlatformEntity] = {}
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
