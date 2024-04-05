@@ -87,7 +87,6 @@ CONF_DEFAULT_LIGHT_TRANSITION = "default_light_transition"
 CONF_DEVICE_CONFIG = "device_config"
 CONF_ENABLE_ENHANCED_LIGHT_TRANSITION = "enhanced_light_transition"
 CONF_ENABLE_LIGHT_TRANSITIONING_FLAG = "light_transitioning_flag"
-CONF_ALWAYS_PREFER_XY_COLOR_MODE = "always_prefer_xy_color_mode"
 CONF_GROUP_MEMBERS_ASSUME_STATE = "group_members_assume_state"
 CONF_ENABLE_IDENTIFY_ON_JOIN = "enable_identify_on_join"
 CONF_ENABLE_QUIRKS = "enable_quirks"
@@ -156,7 +155,6 @@ CONF_ZHA_OPTIONS_SCHEMA = vol.Schema(
         ),
         vol.Required(CONF_ENABLE_ENHANCED_LIGHT_TRANSITION, default=False): boolean,
         vol.Required(CONF_ENABLE_LIGHT_TRANSITIONING_FLAG, default=True): boolean,
-        vol.Required(CONF_ALWAYS_PREFER_XY_COLOR_MODE, default=True): boolean,
         vol.Required(CONF_GROUP_MEMBERS_ASSUME_STATE, default=True): boolean,
         vol.Required(CONF_ENABLE_IDENTIFY_ON_JOIN, default=True): boolean,
         vol.Optional(
