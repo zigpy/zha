@@ -742,6 +742,7 @@ async def test_zha_group_light_entity(
 
     assert isinstance(entity, GroupEntity)
     assert entity.group_id == zha_group.group_id
+    assert entity.name == zha_group.name
 
     device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
     assert device_1_entity_id is not None

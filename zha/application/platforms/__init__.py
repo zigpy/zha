@@ -332,7 +332,7 @@ class GroupEntity(BaseEntity):
     ) -> None:
         """Initialize a group."""
         super().__init__(f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
-        self._name: str = f"{group.name}_0x{group.group_id:04x}"
+        self._attr_name: str = group.name
         self._group: Group = group
         self._group.register_group_entity(self)
 
@@ -352,14 +352,14 @@ class GroupEntity(BaseEntity):
             unique_id=self._unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
-            name=self._name,
+            name=self._attr_name,
             group_id=self.group_id,
         )
 
     @property
     def name(self) -> str:
         """Return the name of the group entity."""
-        return self._name
+        return self._attr_name
 
     @property
     def group_id(self) -> int:

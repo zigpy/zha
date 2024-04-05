@@ -245,7 +245,7 @@ def find_entity_ids(
 
 def async_find_group_entity_id(domain: str, group: Group) -> Optional[str]:
     """Find the group entity id under test."""
-    entity_id = f"{domain}.{group.name.lower().replace(' ','_')}_0x{group.group_id:04x}"
+    entity_id = f"{domain}.{group.name.lower().replace(' ','_')}"
 
     entity_ids = [
         f"{entity.PLATFORM}.{slugify(entity.name, separator='_')}"
