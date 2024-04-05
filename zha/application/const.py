@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 import enum
-from numbers import Number
-from typing import Any, Final
+from typing import Final
 
 import bellows.zigbee.application
-import voluptuous as vol
-from voluptuous.schema_builder import _compile_scalar
 import zigpy.application
 import zigpy.types as t
 import zigpy_deconz.zigbee.application
@@ -100,83 +97,6 @@ CONF_CONSIDER_UNAVAILABLE_MAINS = "consider_unavailable_mains"
 CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS = 60 * 60 * 2  # 2 hours
 CONF_CONSIDER_UNAVAILABLE_BATTERY = "consider_unavailable_battery"
 CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY = 60 * 60 * 6  # 6 hours
-
-
-def boolean(value: Any) -> bool:
-    """Validate and coerce a boolean value."""
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, str):
-        value = value.lower().strip()
-        if value in ("1", "true", "yes", "on", "enable"):
-            return True
-        if value in ("0", "false", "no", "off", "disable"):
-            return False
-    elif isinstance(value, Number):
-        # type ignore: https://github.com/python/mypy/issues/3186
-        return value != 0  # type: ignore[comparison-overlap]
-    raise vol.Invalid(f"invalid boolean value {value}")
-
-
-positive_int = vol.All(vol.Coerce(int), vol.Range(min=0))
-
-
-def string(value: Any) -> str:
-    """Coerce value to string, except for None."""
-    if value is None:
-        raise vol.Invalid("string value is None")
-
-    # This is expected to be the most common case, so check it first.
-    if (
-        type(value) is str  # noqa: E721
-        or type(value) is NodeStrClass  # noqa: E721
-        or isinstance(value, str)
-    ):
-        return value
-
-    elif isinstance(value, (list, dict)):
-        raise vol.Invalid("value should be a string")
-
-    return str(value)
-
-
-class NodeStrClass(str):
-    """Wrapper class to be able to add attributes on a string."""
-
-    def __voluptuous_compile__(self, schema: vol.Schema) -> Any:  # pylint: disable=unused-argument
-        """Needed because vol.Schema.compile does not handle str subclasses."""
-        return _compile_scalar(self)
-
-
-# TODO make these dataclasses
-CONF_ZHA_OPTIONS_SCHEMA = vol.Schema(
-    {
-        vol.Optional(CONF_DEFAULT_LIGHT_TRANSITION, default=0): vol.All(
-            vol.Coerce(float), vol.Range(min=0, max=2**16 / 10)
-        ),
-        vol.Required(CONF_ENABLE_ENHANCED_LIGHT_TRANSITION, default=False): boolean,
-        vol.Required(CONF_ENABLE_LIGHT_TRANSITIONING_FLAG, default=True): boolean,
-        vol.Required(CONF_ALWAYS_PREFER_XY_COLOR_MODE, default=True): boolean,
-        vol.Required(CONF_GROUP_MEMBERS_ASSUME_STATE, default=True): boolean,
-        vol.Required(CONF_ENABLE_IDENTIFY_ON_JOIN, default=True): boolean,
-        vol.Optional(
-            CONF_CONSIDER_UNAVAILABLE_MAINS,
-            default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
-        ): positive_int,
-        vol.Optional(
-            CONF_CONSIDER_UNAVAILABLE_BATTERY,
-            default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
-        ): positive_int,
-    }
-)
-
-CONF_ZHA_ALARM_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_ALARM_MASTER_CODE, default="1234"): string,
-        vol.Required(CONF_ALARM_FAILED_TRIES, default=3): positive_int,
-        vol.Required(CONF_ALARM_ARM_REQUIRES_CODE, default=False): boolean,
-    }
-)
 
 CUSTOM_CONFIGURATION = "custom_configuration"
 
