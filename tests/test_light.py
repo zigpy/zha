@@ -19,7 +19,6 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
 from zha.application.const import (
-    CONF_ALWAYS_PREFER_XY_COLOR_MODE,
     CONF_GROUP_MEMBERS_ASSUME_STATE,
     CUSTOM_CONFIGURATION,
     ZHA_OPTIONS,
@@ -958,7 +957,7 @@ async def test_zha_group_light_entity(
                     lighting.Color.ColorCapabilities.Hue_and_saturation
                 ),
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
         # HS light with cached hue
@@ -969,7 +968,7 @@ async def test_zha_group_light_entity(
                 ),
                 "current_hue": 100,
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
         # HS light with cached saturation
@@ -980,7 +979,7 @@ async def test_zha_group_light_entity(
                 ),
                 "current_saturation": 100,
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
         # HS light with both
@@ -992,7 +991,7 @@ async def test_zha_group_light_entity(
                 "current_hue": 100,
                 "current_saturation": 100,
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
     ],
