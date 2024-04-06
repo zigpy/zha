@@ -17,7 +17,7 @@ from zigpy.zdo.types import LogicalType, NodeDescriptor
 from tests.common import async_find_group_entity_id, find_entity_id
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
-from zha.application.const import RadioType
+from zha.application.const import CONF_USE_THREAD, RadioType
 from zha.application.gateway import (
     DeviceJoinedDeviceInfo,
     DeviceJoinedEvent,
@@ -353,8 +353,8 @@ async def test_gateway_initialize_bellows_thread(
     zha_data: ZHAData,
 ) -> None:
     """Test ZHA disabling the UART thread when connecting to a TCP coordinator."""
-    zha_data.config_entry_data["data"]["device"]["path"] = device_path
-    zha_data.yaml_config["zigpy_config"] = config_override
+    zha_data.config.coordinator_configuration.path = device_path
+    zha_data.zigpy_config = config_override
 
     with patch(
         "bellows.zigbee.application.ControllerApplication.new",
@@ -362,7 +362,7 @@ async def test_gateway_initialize_bellows_thread(
     ) as mock_new:
         zha_gw = Gateway(zha_data)
         await zha_gw.async_initialize()
-        assert mock_new.mock_calls[-1].kwargs["config"]["use_thread"] is thread_state
+        assert mock_new.mock_calls[-1].kwargs["config"][CONF_USE_THREAD] is thread_state
         await zha_gw.shutdown()
 
 

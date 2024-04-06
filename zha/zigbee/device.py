@@ -50,11 +50,6 @@ from zha.application.const import (
     CLUSTER_COMMANDS_SERVER,
     CLUSTER_TYPE_IN,
     CLUSTER_TYPE_OUT,
-    CONF_CONSIDER_UNAVAILABLE_BATTERY,
-    CONF_CONSIDER_UNAVAILABLE_MAINS,
-    CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
-    CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
-    CONF_ENABLE_IDENTIFY_ON_JOIN,
     POWER_BATTERY_OR_UNKNOWN,
     POWER_MAINS_POWERED,
     UNKNOWN,
@@ -63,9 +58,8 @@ from zha.application.const import (
     ZHA_CLUSTER_HANDLER_CFG_DONE,
     ZHA_CLUSTER_HANDLER_MSG,
     ZHA_EVENT,
-    ZHA_OPTIONS,
 )
-from zha.application.helpers import async_get_zha_config_value, convert_to_zcl_values
+from zha.application.helpers import convert_to_zcl_values
 from zha.application.platforms import PlatformEntity, PlatformEntityInfo
 from zha.event import EventBase
 from zha.exceptions import ZHAException
@@ -220,20 +214,13 @@ class Device(LogMixin, EventBase):
         self._basic_ch: ClusterHandler | None = None
         self._sw_build_id: int | None = None
 
+        device_options = _gateway.config.config.device_options
         if self.is_mains_powered:
-            self.consider_unavailable_time: int = async_get_zha_config_value(
-                self._gateway.config,
-                ZHA_OPTIONS,
-                CONF_CONSIDER_UNAVAILABLE_MAINS,
-                CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
+            self.consider_unavailable_time: int = (
+                device_options.consider_unavailable_mains
             )
         else:
-            self.consider_unavailable_time = async_get_zha_config_value(
-                self._gateway.config,
-                ZHA_OPTIONS,
-                CONF_CONSIDER_UNAVAILABLE_BATTERY,
-                CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
-            )
+            self.consider_unavailable_time = device_options.consider_unavailable_battery
         self._available: bool = self.is_active_coordinator or (
             self.last_seen is not None
             and time.time() - self.last_seen < self.consider_unavailable_time
@@ -697,11 +684,8 @@ class Device(LogMixin, EventBase):
 
     async def async_configure(self) -> None:
         """Configure the device."""
-        should_identify = async_get_zha_config_value(
-            self._gateway.config,
-            ZHA_OPTIONS,
-            CONF_ENABLE_IDENTIFY_ON_JOIN,
-            True,
+        should_identify = (
+            self.gateway.config.config.device_options.enable_identify_on_join
         )
         self.debug("started configuration")
         await self._zdo_handler.async_configure()

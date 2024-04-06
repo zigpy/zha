@@ -6,6 +6,7 @@ import asyncio
 import binascii
 import collections
 from collections.abc import Callable
+from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass
 import enum
@@ -25,7 +26,8 @@ from zha.application import Platform
 from zha.application.const import (
     CLUSTER_TYPE_IN,
     CLUSTER_TYPE_OUT,
-    CUSTOM_CONFIGURATION,
+    CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
+    CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import SetRegistry, callback, periodic
@@ -182,12 +184,11 @@ def async_get_zha_config_value(
     zha_data: ZHAData, section: str, config_key: str, default: _T
 ) -> _T:
     """Get the value for the specified configuration from the ZHA config entry."""
-    return (
-        zha_data.config_entry_data.get("options", {})
-        .get(CUSTOM_CONFIGURATION, {})
-        .get(section, {})
-        .get(config_key, default)
-    )
+    with suppress(KeyError):
+        config_value = zha_data.config[section][config_key]
+    if config_value is None:
+        return default
+    return config_value
 
 
 def convert_install_code(value: str) -> zigpy.types.KeyData:
@@ -266,12 +267,90 @@ def qr_to_install_code(qr_code: str) -> tuple[zigpy.types.EUI64, zigpy.types.Key
     raise vol.Invalid(f"couldn't convert qr code: {qr_code}")
 
 
+@dataclass(kw_only=True, slots=True)
+class LightOptions:
+    """ZHA light options."""
+
+    default_light_transition: float = dataclasses.field(default=0)
+    enable_enhanced_light_transition: bool = dataclasses.field(default=False)
+    enable_light_transitioning_flag: bool = dataclasses.field(default=True)
+    always_prefer_xy_color_mode: bool = dataclasses.field(default=True)
+    group_members_assume_state: bool = dataclasses.field(default=True)
+
+
+@dataclass(kw_only=True, slots=True)
+class DeviceOptions:
+    """ZHA device options."""
+
+    enable_identify_on_join: bool = dataclasses.field(default=True)
+    consider_unavailable_mains: int = dataclasses.field(
+        default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS
+    )
+    consider_unavailable_battery: int = dataclasses.field(
+        default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY
+    )
+
+
+@dataclass(kw_only=True, slots=True)
+class AlarmControlPanelOptions:
+    """ZHA alarm control panel options."""
+
+    master_code: str = dataclasses.field(default="1234")
+    failed_tries: int = dataclasses.field(default=3)
+    arm_requires_code: bool = dataclasses.field(default=False)
+
+
+@dataclass(kw_only=True, slots=True)
+class CoordinatorConfiguration:
+    """ZHA coordinator configuration."""
+
+    path: str
+    baudrate: int = dataclasses.field(default=115200)
+    flow_control: str = dataclasses.field(default="hardware")
+    radio_type: str = dataclasses.field(default="ezsp")
+
+
+@dataclass(kw_only=True, slots=True)
+class QuirksConfiguration:
+    """ZHA quirks configuration."""
+
+    enabled: bool = dataclasses.field(default=True)
+    custom_quirks_path: str | None = dataclasses.field(default=None)
+
+
+@dataclass(kw_only=True, slots=True)
+class DeviceOverridesConfiguration:
+    """ZHA device overrides configuration."""
+
+    type: Platform
+
+
+@dataclass(kw_only=True, slots=True)
+class ZHAConfiguration:
+    """ZHA configuration."""
+
+    coordinator_configuration: CoordinatorConfiguration = dataclasses.field(
+        default_factory=CoordinatorConfiguration
+    )
+    quirks_configuration: QuirksConfiguration = dataclasses.field(
+        default_factory=QuirksConfiguration
+    )
+    device_overrides: dict[str, DeviceOverridesConfiguration] = dataclasses.field(
+        default_factory=dict
+    )
+    light_options: LightOptions = dataclasses.field(default_factory=LightOptions)
+    device_options: DeviceOptions = dataclasses.field(default_factory=DeviceOptions)
+    alarm_control_panel_options: AlarmControlPanelOptions = dataclasses.field(
+        default_factory=AlarmControlPanelOptions
+    )
+
+
 @dataclasses.dataclass(kw_only=True, slots=True)
 class ZHAData:
     """ZHA data stored in `gateway.data`."""
 
-    yaml_config: dict[str, Any] = dataclasses.field(default_factory=dict)
-    config_entry_data: dict[str, Any] = dataclasses.field(default_factory=dict)
+    config: ZHAConfiguration
+    zigpy_config: dict[str, Any] = dataclasses.field(default_factory=dict)
     platforms: collections.defaultdict[Platform, list] = dataclasses.field(
         default_factory=lambda: collections.defaultdict(list)
     )

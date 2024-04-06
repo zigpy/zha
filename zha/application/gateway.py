@@ -14,7 +14,13 @@ from typing import Any, Final, Self, TypeVar, cast
 
 from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
-from zigpy.config import CONF_DEVICE, CONF_DEVICE_PATH, CONF_NWK_VALIDATE_SETTINGS
+from zigpy.config import (
+    CONF_DEVICE,
+    CONF_DEVICE_BAUDRATE,
+    CONF_DEVICE_FLOW_CONTROL,
+    CONF_DEVICE_PATH,
+    CONF_NWK_VALIDATE_SETTINGS,
+)
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
@@ -23,11 +29,7 @@ from zigpy.types.named import EUI64
 
 from zha.application import discovery
 from zha.application.const import (
-    CONF_CUSTOM_QUIRKS_PATH,
-    CONF_ENABLE_QUIRKS,
-    CONF_RADIO_TYPE,
     CONF_USE_THREAD,
-    CONF_ZIGPY,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
     ZHA_GW_MSG,
@@ -177,9 +179,13 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
-        radio_type = RadioType[self.config.config_entry_data["data"][CONF_RADIO_TYPE]]
-        app_config = self.config.yaml_config.get(CONF_ZIGPY, {})
-        app_config[CONF_DEVICE] = self.config.config_entry_data["data"][CONF_DEVICE]
+        radio_type = RadioType[self.config.config.coordinator_configuration.radio_type]
+        app_config = self.config.zigpy_config
+        app_config[CONF_DEVICE] = {
+            CONF_DEVICE_PATH: self.config.config.coordinator_configuration.path,
+            CONF_DEVICE_BAUDRATE: self.config.config.coordinator_configuration.baudrate,
+            CONF_DEVICE_FLOW_CONTROL: self.config.config.coordinator_configuration.flow_control,
+        }
 
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
             app_config[CONF_NWK_VALIDATE_SETTINGS] = True
@@ -208,9 +214,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         discovery.ENDPOINT_PROBE.initialize(self)
         discovery.GROUP_PROBE.initialize(self)
 
-        if self.config.yaml_config.get(CONF_ENABLE_QUIRKS, True):
+        if self.config.config.quirks_configuration.enabled:
             await self.async_add_import_executor_job(
-                setup_quirks, self.config.yaml_config.get(CONF_CUSTOM_QUIRKS_PATH)
+                setup_quirks, self.config.config.quirks_configuration.custom_quirks_path
             )
 
         self.shutting_down = False

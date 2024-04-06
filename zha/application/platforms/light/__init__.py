@@ -21,15 +21,6 @@ from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.const import (
-    CONF_ALWAYS_PREFER_XY_COLOR_MODE,
-    CONF_DEFAULT_LIGHT_TRANSITION,
-    CONF_ENABLE_ENHANCED_LIGHT_TRANSITION,
-    CONF_ENABLE_LIGHT_TRANSITIONING_FLAG,
-    CONF_GROUP_MEMBERS_ASSUME_STATE,
-    ZHA_OPTIONS,
-)
-from zha.application.helpers import async_get_zha_config_value
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -743,11 +734,9 @@ class Light(PlatformEntity, BaseLight):
         self._cancel_refresh_handle: Callable | None = None
         effect_list = []
 
-        self._zha_config_always_prefer_xy_color_mode = async_get_zha_config_value(
-            device.gateway.config,
-            ZHA_OPTIONS,
-            CONF_ALWAYS_PREFER_XY_COLOR_MODE,
-            True,
+        light_options = device.gateway.config.config.light_options
+        self._zha_config_always_prefer_xy_color_mode = (
+            light_options.always_prefer_xy_color_mode
         )
 
         self._supported_color_modes = {ColorMode.ONOFF}
@@ -826,23 +815,12 @@ class Light(PlatformEntity, BaseLight):
         if effect_list:
             self._effect_list = effect_list
 
-        self._zha_config_transition = async_get_zha_config_value(
-            device.gateway.config,
-            ZHA_OPTIONS,
-            CONF_DEFAULT_LIGHT_TRANSITION,
-            0,
+        self._zha_config_transition = light_options.default_light_transition
+        self._zha_config_enhanced_light_transition = (
+            light_options.enable_enhanced_light_transition
         )
-        self._zha_config_enhanced_light_transition = async_get_zha_config_value(
-            device.gateway.config,
-            ZHA_OPTIONS,
-            CONF_ENABLE_ENHANCED_LIGHT_TRANSITION,
-            False,
-        )
-        self._zha_config_enable_light_transitioning_flag = async_get_zha_config_value(
-            device.gateway.config,
-            ZHA_OPTIONS,
-            CONF_ENABLE_LIGHT_TRANSITIONING_FLAG,
-            True,
+        self._zha_config_enable_light_transitioning_flag = (
+            light_options.enable_light_transitioning_flag
         )
 
         self._on_off_cluster_handler.on_event(
@@ -1172,29 +1150,16 @@ class LightGroup(GroupEntity, BaseLight):
             ClusterHandler
         ) = group.zigpy_group.endpoint[Identify.cluster_id]
         self._debounced_member_refresh: Debouncer | None = None
-        self._zha_config_transition = async_get_zha_config_value(
-            group.gateway.config,
-            ZHA_OPTIONS,
-            CONF_DEFAULT_LIGHT_TRANSITION,
-            0,
+        light_options = group.gateway.config.config.light_options
+        self._zha_config_transition = light_options.default_light_transition
+        self._zha_config_enable_light_transitioning_flag = (
+            light_options.enable_light_transitioning_flag
         )
-        self._zha_config_enable_light_transitioning_flag = async_get_zha_config_value(
-            group.gateway.config,
-            ZHA_OPTIONS,
-            CONF_ENABLE_LIGHT_TRANSITIONING_FLAG,
-            True,
+        self._zha_config_always_prefer_xy_color_mode = (
+            light_options.always_prefer_xy_color_mode
         )
-        self._zha_config_always_prefer_xy_color_mode = async_get_zha_config_value(
-            group.gateway.config,
-            ZHA_OPTIONS,
-            CONF_ALWAYS_PREFER_XY_COLOR_MODE,
-            True,
-        )
-        self._zha_config_group_members_assume_state = async_get_zha_config_value(
-            group.gateway.config,
-            ZHA_OPTIONS,
-            CONF_GROUP_MEMBERS_ASSUME_STATE,
-            True,
+        self._zha_config_group_members_assume_state = (
+            light_options.group_members_assume_state
         )
         if self._zha_config_group_members_assume_state:
             self._update_group_from_child_delay = ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
