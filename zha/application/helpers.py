@@ -6,7 +6,6 @@ import asyncio
 import binascii
 import collections
 from collections.abc import Callable
-from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass
 import enum
@@ -178,17 +177,6 @@ def async_is_bindable_target(source_zha_device: Device, target_zha_device: Devic
             if any(bindable in BINDABLE_CLUSTERS for bindable in matches):
                 return True
     return False
-
-
-def async_get_zha_config_value(
-    zha_data: ZHAData, section: str, config_key: str, default: _T
-) -> _T:
-    """Get the value for the specified configuration from the ZHA config entry."""
-    with suppress(KeyError):
-        config_value = zha_data.config[section][config_key]
-    if config_value is None:
-        return default
-    return config_value
 
 
 def convert_install_code(value: str) -> zigpy.types.KeyData:
