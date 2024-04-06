@@ -253,23 +253,6 @@ class BaseLight(BaseEntity, ABC):
         self._brightness = value
         self.maybe_emit_state_changed_event()
 
-    def set_level(self, value: int) -> None:
-        """Set the brightness of this light between 0..254.
-
-        brightness level 255 is a special value instructing the device to come
-        on at `on_level` Zigbee attribute value, regardless of the last set
-        level
-        """
-        if self.is_transitioning:
-            self.debug(
-                "received level %s while transitioning - skipping update",
-                value,
-            )
-            return
-        value = max(0, min(254, value))
-        self._brightness = value
-        self.maybe_emit_state_changed_event()
-
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
         transition = kwargs.get(ATTR_TRANSITION)
