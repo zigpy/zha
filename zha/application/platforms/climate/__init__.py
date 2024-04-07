@@ -287,12 +287,11 @@ class Thermostat(PlatformEntity):
     @functools.cached_property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
-        features = self._supported_flags
         if HVACMode.HEAT_COOL in self.hvac_modes:
-            features |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
+            self._supported_flags |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
         if self._fan_cluster_handler is not None:
             self._supported_flags |= ClimateEntityFeature.FAN_MODE
-        return features
+        return self._supported_flags
 
     @property
     def target_temperature(self):
