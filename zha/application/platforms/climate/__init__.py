@@ -96,11 +96,7 @@ class Thermostat(PlatformEntity):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._preset = Preset.NONE
         self._presets = []
-        self._supported_flags = (
-            ClimateEntityFeature.TARGET_TEMPERATURE
-            | ClimateEntityFeature.TURN_OFF
-            | ClimateEntityFeature.TURN_ON
-        )
+
         self._thermostat_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_THERMOSTAT
         )
@@ -111,6 +107,16 @@ class Thermostat(PlatformEntity):
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
         )
+
+        self._supported_features = (
+            ClimateEntityFeature.TARGET_TEMPERATURE
+            | ClimateEntityFeature.TURN_OFF
+            | ClimateEntityFeature.TURN_ON
+        )
+        if HVACMode.HEAT_COOL in self.hvac_modes:
+            self._supported_features |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
+        if self._fan_cluster_handler is not None:
+            self._supported_features |= ClimateEntityFeature.FAN_MODE
 
     @functools.cached_property
     def info_object(self) -> ThermostatEntityInfo:
@@ -287,12 +293,7 @@ class Thermostat(PlatformEntity):
     @functools.cached_property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
-        features = self._supported_flags
-        if HVACMode.HEAT_COOL in self.hvac_modes:
-            features |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
-        if self._fan_cluster_handler is not None:
-            self._supported_flags |= ClimateEntityFeature.FAN_MODE
-        return features
+        return self._supported_features
 
     @property
     def target_temperature(self):
@@ -509,7 +510,7 @@ class SinopeTechnologiesThermostat(Thermostat):
         """Initialize ZHA Thermostat instance."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._presets = [Preset.AWAY, Preset.NONE]
-        self._supported_flags |= ClimateEntityFeature.PRESET_MODE
+        self._supported_features |= ClimateEntityFeature.PRESET_MODE
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
 
         self._tracked_tasks.append(
@@ -632,7 +633,7 @@ class MoesThermostat(Thermostat):
             Preset.BOOST,
             Preset.COMPLEX,
         ]
-        self._supported_flags |= ClimateEntityFeature.PRESET_MODE
+        self._supported_features |= ClimateEntityFeature.PRESET_MODE
 
     @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
@@ -720,7 +721,7 @@ class BecaThermostat(Thermostat):
             Preset.BOOST,
             Preset.TEMP_MANUAL,
         ]
-        self._supported_flags |= ClimateEntityFeature.PRESET_MODE
+        self._supported_features |= ClimateEntityFeature.PRESET_MODE
 
     @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
@@ -829,7 +830,7 @@ class ZONNSMARTThermostat(Thermostat):
             Preset.SCHEDULE,
             self.PRESET_FROST,
         ]
-        self._supported_flags |= ClimateEntityFeature.PRESET_MODE
+        self._supported_features |= ClimateEntityFeature.PRESET_MODE
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
