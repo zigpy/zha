@@ -18,12 +18,7 @@ from zigpy.zcl.clusters import general, lighting
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
-from zha.application.const import (
-    CONF_ALWAYS_PREFER_XY_COLOR_MODE,
-    CONF_GROUP_MEMBERS_ASSUME_STATE,
-    CUSTOM_CONFIGURATION,
-    ZHA_OPTIONS,
-)
+from zha.application.const import CONF_ALWAYS_PREFER_XY_COLOR_MODE
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.light.const import (
@@ -1015,10 +1010,9 @@ async def test_light_initialization(
     # mock attribute reads
     zigpy_device.endpoints[1].light_color.PLUGGED_ATTR_READS = plugged_attr_reads
 
+    light_options = zha_gateway.config.config.light_options
     for key in config_override:
-        zha_gateway.config.config_entry_data["options"][CUSTOM_CONFIGURATION][
-            ZHA_OPTIONS
-        ][key] = config_override[key]
+        setattr(light_options, key, config_override[key])
     zha_device = await device_joined(zigpy_device)
     entity_id = find_entity_id(Platform.LIGHT, zha_device)
     assert entity_id is not None
@@ -1865,9 +1859,7 @@ async def test_group_member_assume_state(
 ) -> None:
     """Test the group members assume state function."""
 
-    zha_gateway.config.config_entry_data["options"][CUSTOM_CONFIGURATION][ZHA_OPTIONS][
-        CONF_GROUP_MEMBERS_ASSUME_STATE
-    ] = True
+    zha_gateway.config.config.light_options.group_members_assume_state = True
 
     zha_gateway.coordinator_zha_device = coordinator
     coordinator._zha_gateway = zha_gateway

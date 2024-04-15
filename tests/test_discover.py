@@ -44,6 +44,7 @@ import zigpy.zcl.foundation as zcl_f
 from zha.application import Platform, discovery
 from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
 from zha.application.gateway import Gateway
+from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity
 from zha.application.registries import (
     PLATFORM_ENTITIES,
@@ -191,9 +192,7 @@ async def test_devices(
         no_tail_id = NO_TAIL_ID.sub("", ent_info[DEV_SIG_ENT_MAP_ID])
         message1 = f"No entity found for platform[{platform}] unique_id[{unique_id}] no_tail_id[{no_tail_id}]"
 
-        if not contains_ignored_suffix(
-            unique_id
-        ):  # TODO remove this when update is fixed
+        if not contains_ignored_suffix(unique_id):
             assert unique_id in created_entities, message1
             entity = created_entities[unique_id]
             unhandled_entities.remove(unique_id)
@@ -275,7 +274,7 @@ def test_discover_by_device_type_override() -> None:
     ep_mock.return_value.device_type = 0x0100
     type(endpoint).zigpy_endpoint = ep_mock
 
-    overrides = {endpoint.unique_id: {"type": Platform.SWITCH}}
+    overrides = {endpoint.unique_id: DeviceOverridesConfiguration(type=Platform.SWITCH)}
     get_entity_mock = mock.MagicMock(
         return_value=(mock.sentinel.entity_cls, mock.sentinel.claimed)
     )
@@ -328,8 +327,8 @@ def test_discover_probe_single_cluster() -> None:
 @pytest.mark.parametrize("device_info", DEVICES)
 async def test_discover_endpoint(
     device_info: dict[str, Any],
-    zha_device_mock: Callable[..., Device],
-    zha_gateway: Gateway,
+    zha_device_mock: Callable[..., Device],  # pylint: disable=redefined-outer-name
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test device discovery."""
 
@@ -367,20 +366,17 @@ async def test_discover_endpoint(
 
         test_ent_class = ent_info[DEV_SIG_ENT_MAP_CLASS]
         test_unique_id_head = UNIQUE_ID_HD.match(unique_id).group(0)
-        if (
-            test_ent_class != "FirmwareUpdateEntity"
-        ):  # TODO remove this when update is fixed
-            assert (test_unique_id_head, test_ent_class) in ha_ent_info
+        assert (test_unique_id_head, test_ent_class) in ha_ent_info
 
-            entity_platform, entity_unique_id, entity_cluster_handlers = ha_ent_info[
-                (test_unique_id_head, test_ent_class)
-            ]
-            assert platform is entity_platform.value
-            # unique_id used for discover is the same for "multi entities"
-            assert unique_id.startswith(entity_unique_id)
-            assert {ch.name for ch in entity_cluster_handlers} == set(
-                ent_info[DEV_SIG_CLUSTER_HANDLERS]
-            )
+        entity_platform, entity_unique_id, entity_cluster_handlers = ha_ent_info[
+            (test_unique_id_head, test_ent_class)
+        ]
+        assert platform is entity_platform.value
+        # unique_id used for discover is the same for "multi entities"
+        assert unique_id.startswith(entity_unique_id)
+        assert {ch.name for ch in entity_cluster_handlers} == set(
+            ent_info[DEV_SIG_CLUSTER_HANDLERS]
+        )
 
 
 def _ch_mock(cluster):
@@ -409,8 +405,6 @@ def _test_single_input_cluster_device_class(probe_mock):
 
     class QuirkedIAS(zigpy.quirks.CustomCluster, zigpy.zcl.clusters.security.IasZone):
         """Quirked IAS Zone cluster."""
-
-        pass
 
     ias_ch = _ch_mock(QuirkedIAS)
 
@@ -485,8 +479,10 @@ async def test_device_override(
     )
 
     if override is not None:
-        override = {"device_config": {"00:11:22:33:44:55:66:77-1": {"type": override}}}
-        zha_gateway.config.yaml_config = override
+        overrides = {
+            "00:11:22:33:44:55:66:77-1": DeviceOverridesConfiguration(type=override)
+        }
+        zha_gateway.config.config.device_overrides = overrides
         discovery.ENDPOINT_PROBE.initialize(zha_gateway)
 
     await zha_gateway.async_device_initialized(zigpy_device)
@@ -502,7 +498,7 @@ async def test_device_override(
 
 
 async def test_quirks_v2_entity_discovery(
-    zha_gateway: Gateway,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
 ) -> None:
@@ -566,7 +562,7 @@ async def test_quirks_v2_entity_discovery(
 
 
 async def test_quirks_v2_entity_discovery_e1_curtain(
-    zha_gateway: Gateway,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
 ) -> None:
@@ -778,7 +774,7 @@ def _get_test_device(
 
 
 async def test_quirks_v2_entity_no_metadata(
-    zha_gateway: Gateway,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
     caplog: pytest.LogCaptureFixture,
@@ -797,7 +793,7 @@ async def test_quirks_v2_entity_no_metadata(
 
 
 async def test_quirks_v2_entity_discovery_errors(
-    zha_gateway: Gateway,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
     caplog: pytest.LogCaptureFixture,
@@ -846,7 +842,7 @@ def validate_device_class_unit(
     quirk: QuirksV2RegistryEntry,
     entity_metadata: EntityMetadata,
     platform: Platform,
-    translations: dict,
+    translations: dict,  # pylint: disable=unused-argument
 ) -> None:
     """Ensure device class and unit are used correctly."""
     if (
@@ -887,7 +883,7 @@ def validate_translation_keys_device_class(
     quirk: QuirksV2RegistryEntry,
     entity_metadata: EntityMetadata,
     platform: Platform,
-    translations: dict,
+    translations: dict,  # pylint: disable=unused-argument
 ) -> None:
     """Validate translation keys and device class usage."""
     if isinstance(entity_metadata, ZCLCommandButtonMetadata):
@@ -960,7 +956,7 @@ def validate_metadata(validator: Callable) -> None:
     ],
 )
 async def test_quirks_v2_metadata_errors(
-    zha_gateway: Gateway,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
     augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
@@ -1063,7 +1059,7 @@ ERROR_ROOT = "Quirks provided an invalid device class"
     ],
 )
 async def test_quirks_v2_metadata_bad_device_classes(
-    zha_gateway: Gateway,
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined,
     caplog: pytest.LogCaptureFixture,

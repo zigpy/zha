@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from slugify import slugify
 from zigpy.quirks.v2 import (
@@ -23,6 +23,7 @@ from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
 from zha.application import Platform, const as zha_const
+from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     alarm_control_panel,
     binary_sensor,
@@ -348,7 +349,7 @@ class EndpointProbe:
 
     def __init__(self) -> None:
         """Initialize instance."""
-        self._device_configs: dict[str, Any] = {}
+        self._device_configs: dict[str, DeviceOverridesConfiguration] = {}
 
     def discover_entities(self, endpoint: Endpoint) -> None:
         """Process an endpoint on a zigpy device."""
@@ -368,7 +369,9 @@ class EndpointProbe:
 
         unique_id = endpoint.unique_id
 
-        platform: str | None = self._device_configs.get(unique_id, {}).get("type")
+        platform: str | None = None
+        if unique_id in self._device_configs:
+            platform = self._device_configs.get(unique_id).type
         if platform is None:
             ep_profile_id = endpoint.zigpy_endpoint.profile_id
             ep_device_type = endpoint.zigpy_endpoint.device_type
@@ -538,8 +541,7 @@ class EndpointProbe:
 
     def initialize(self, gateway: Gateway) -> None:
         """Update device overrides config."""
-        zha_config = gateway.config.yaml_config
-        if overrides := zha_config.get(zha_const.CONF_DEVICE_CONFIG):
+        if overrides := gateway.config.config.device_overrides:
             self._device_configs.update(overrides)
 
 

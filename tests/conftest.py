@@ -25,19 +25,14 @@ from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
 from tests import common
-from zha.application.const import (
-    CONF_ALARM_ARM_REQUIRES_CODE,
-    CONF_ALARM_FAILED_TRIES,
-    CONF_ALARM_MASTER_CODE,
-    CONF_ENABLE_ENHANCED_LIGHT_TRANSITION,
-    CONF_GROUP_MEMBERS_ASSUME_STATE,
-    CONF_RADIO_TYPE,
-    CUSTOM_CONFIGURATION,
-    ZHA_ALARM_OPTIONS,
-    ZHA_OPTIONS,
-)
 from zha.application.gateway import Gateway
-from zha.application.helpers import ZHAData
+from zha.application.helpers import (
+    AlarmControlPanelOptions,
+    CoordinatorConfiguration,
+    LightOptions,
+    ZHAConfiguration,
+    ZHAData,
+)
 from zha.zigbee.device import Device
 
 FIXTURE_GRP_ID = 0x1001
@@ -185,29 +180,23 @@ def caplog_fixture(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture
 @pytest.fixture
 def zha_data() -> ZHAData:
     """Fixture representing zha configuration data."""
+
     return ZHAData(
-        yaml_config={},
-        config_entry_data={
-            "data": {
-                zigpy.config.CONF_DEVICE: {
-                    zigpy.config.CONF_DEVICE_PATH: "/dev/ttyUSB0"
-                },
-                CONF_RADIO_TYPE: "ezsp",
-            },
-            "options": {
-                CUSTOM_CONFIGURATION: {
-                    ZHA_OPTIONS: {
-                        CONF_ENABLE_ENHANCED_LIGHT_TRANSITION: True,
-                        CONF_GROUP_MEMBERS_ASSUME_STATE: False,
-                    },
-                    ZHA_ALARM_OPTIONS: {
-                        CONF_ALARM_ARM_REQUIRES_CODE: False,
-                        CONF_ALARM_MASTER_CODE: "4321",
-                        CONF_ALARM_FAILED_TRIES: 2,
-                    },
-                }
-            },
-        },
+        config=ZHAConfiguration(
+            coordinator_configuration=CoordinatorConfiguration(
+                radio_type="ezsp",
+                path="/dev/ttyUSB0",
+            ),
+            light_options=LightOptions(
+                enable_enhanced_light_transition=True,
+                group_members_assume_state=False,
+            ),
+            alarm_control_panel_options=AlarmControlPanelOptions(
+                arm_requires_code=False,
+                master_code="4321",
+                failed_tries=2,
+            ),
+        )
     )
 
 

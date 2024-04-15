@@ -10,13 +10,6 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
-from zha.application.const import (
-    CONF_ALARM_ARM_REQUIRES_CODE,
-    CONF_ALARM_FAILED_TRIES,
-    CONF_ALARM_MASTER_CODE,
-    ZHA_ALARM_OPTIONS,
-)
-from zha.application.helpers import async_get_zha_config_value
 from zha.application.platforms import PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.alarm_control_panel.const import (
     IAS_ACE_STATE_MAP,
@@ -76,17 +69,13 @@ class AlarmControlPanel(PlatformEntity):
     ) -> None:
         """Initialize the ZHA alarm control device."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        config = device.gateway.config
+        alarm_options = device.gateway.config.config.alarm_control_panel_options
         self._cluster_handler: IasAceClusterHandler = cluster_handlers[0]
-        self._cluster_handler.panel_code = async_get_zha_config_value(
-            config, ZHA_ALARM_OPTIONS, CONF_ALARM_MASTER_CODE, "1234"
+        self._cluster_handler.panel_code = alarm_options.master_code
+        self._cluster_handler.code_required_arm_actions = (
+            alarm_options.arm_requires_code
         )
-        self._cluster_handler.code_required_arm_actions = async_get_zha_config_value(
-            config, ZHA_ALARM_OPTIONS, CONF_ALARM_ARM_REQUIRES_CODE, False
-        )
-        self._cluster_handler.max_invalid_tries = async_get_zha_config_value(
-            config, ZHA_ALARM_OPTIONS, CONF_ALARM_FAILED_TRIES, 3
-        )
+        self._cluster_handler.max_invalid_tries = alarm_options.failed_tries
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_STATE_CHANGED, self._handle_event_protocol
         )
