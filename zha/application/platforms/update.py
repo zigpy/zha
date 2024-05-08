@@ -273,6 +273,8 @@ class FirmwareUpdateEntity(PlatformEntity):
                 progress_callback=self._update_progress,
             )
         except Exception as ex:
+            self._attr_in_progress = False
+            self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {ex}") from ex
 
         # If we tried to install firmware that is no longer compatible with the device,
@@ -284,6 +286,8 @@ class FirmwareUpdateEntity(PlatformEntity):
 
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
+            self._attr_in_progress = False
+            self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {result}")
 
         # Clear the state
