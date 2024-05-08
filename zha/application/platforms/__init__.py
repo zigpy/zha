@@ -115,7 +115,9 @@ class BaseEntity(LogMixin, EventBase):
     _unique_id_suffix: str | None = None
 
     _attr_name: str | None
+    _attr_icon: str | None
     _attr_translation_key: str | None
+    _attr_entity_category: EntityCategory | None
 
     def __init__(self, unique_id: str, **kwargs: Any) -> None:
         """Initialize the platform entity."""
@@ -128,9 +130,16 @@ class BaseEntity(LogMixin, EventBase):
 
     @property
     def name(self) -> str | None:
-        """Return the translation key."""
+        """Return the entity name."""
         if hasattr(self, "_attr_name"):
             return self._attr_name
+        return None
+
+    @property
+    def icon(self) -> str | None:
+        """Return the entity icon."""
+        if hasattr(self, "_attr_icon"):
+            return self._attr_icon
         return None
 
     @property
@@ -138,6 +147,13 @@ class BaseEntity(LogMixin, EventBase):
         """Return the translation key."""
         if hasattr(self, "_attr_translation_key"):
             return self._attr_translation_key
+        return None
+
+    @property
+    def entity_category(self) -> EntityCategory | None:
+        """Return the entity category."""
+        if hasattr(self, "_attr_entity_category"):
+            return self._attr_entity_category
         return None
 
     @final
@@ -200,7 +216,6 @@ class PlatformEntity(BaseEntity):
 
     _attr_entity_registry_enabled_default: bool
     _attr_unit_of_measurement: str | None
-    _attr_entity_category: EntityCategory | None
 
     def __init__(
         self,
