@@ -132,7 +132,6 @@ class IdentifyButton(Button):
 
     _attr_device_class = ButtonDeviceClass.IDENTIFY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_translation_key = "identify"
     _command_name = "identify"
     _kwargs = {}
     _args = [DEFAULT_DURATION]
