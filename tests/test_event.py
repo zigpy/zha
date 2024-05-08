@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from zha.event import EventBase
+from zha.event import EventBase, EventListener
 
 
 class EventGenerator(EventBase):
@@ -30,12 +30,12 @@ def test_event_base_unsubs():
     callback = MagicMock()
 
     unsub = event.on_event("test", callback)
-    assert event._listeners == {"test": [callback]}
+    assert event._listeners == {"test": [EventListener(callback=callback, with_context=False)]}
     unsub()
     assert event._listeners == {"test": []}
 
     unsub = event.on_all_events(callback)
-    assert event._global_listeners == [callback]
+    assert event._global_listeners == [EventListener(callback=callback, with_context=False)]
     unsub()
     assert not event._global_listeners
 
@@ -165,6 +165,23 @@ async def test_event_base_emit_coro():
     assert event.handle_test.await_count == 1
     assert event.handle_test.await_args[0] == (test_event,)
     assert not event._event_tasks
+
+
+async def test_event_emit_with_context():
+    """Test event emitting with context."""
+
+    event = EventGenerator()
+    async_callback = AsyncMock()
+    sync_callback = MagicMock()
+
+    event.once("test", sync_callback, with_context=True)
+    event.once("test", async_callback, with_context=True)
+    event.emit("test", "data")
+
+    await asyncio.gather(*event._event_tasks)
+
+    sync_callback.assert_called_once_with("test", "data")
+    async_callback.assert_awaited_once_with("test", "data")
 
 
 def test_handle_event_protocol():
