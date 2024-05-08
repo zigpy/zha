@@ -110,9 +110,12 @@ class BaseEntity(LogMixin, EventBase):
 
     PLATFORM: Platform = Platform.UNKNOWN
 
+    # suffix to add to the unique_id of the entity. Used for multi
+    # entities using the same cluster handler/cluster id for the entity.
     _unique_id_suffix: str | None = None
-    """suffix to add to the unique_id of the entity. Used for multi
-       entities using the same cluster handler/cluster id for the entity."""
+
+    _attr_name: str | None
+    _attr_translation_key: str | None
 
     def __init__(self, unique_id: str, **kwargs: Any) -> None:
         """Initialize the platform entity."""
@@ -122,6 +125,20 @@ class BaseEntity(LogMixin, EventBase):
             self._unique_id += f"-{self._unique_id_suffix}"
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
+
+    @property
+    def name(self) -> str | None:
+        """Return the translation key."""
+        if hasattr(self, "_attr_name"):
+            return self._attr_name
+        return None
+
+    @property
+    def translation_key(self) -> str | None:
+        """Return the translation key."""
+        if hasattr(self, "_attr_translation_key"):
+            return self._attr_translation_key
+        return None
 
     @final
     @cached_property
@@ -182,7 +199,6 @@ class PlatformEntity(BaseEntity):
     """Class that represents an entity for a device platform."""
 
     _attr_entity_registry_enabled_default: bool
-    _attr_translation_key: str | None
     _attr_unit_of_measurement: str | None
     _attr_entity_category: EntityCategory | None
 
@@ -299,11 +315,6 @@ class PlatformEntity(BaseEntity):
         return self.device.available
 
     @property
-    def name(self) -> str:
-        """Return the name of the platform entity."""
-        return self._name
-
-    @property
     def state(self) -> dict[str, Any]:
         """Return the arguments to use in the command."""
         state = super().state
@@ -325,6 +336,8 @@ class PlatformEntity(BaseEntity):
 
 class GroupEntity(BaseEntity):
     """A base class for group entities."""
+
+    _attr_name: str | None
 
     def __init__(
         self,
@@ -355,11 +368,6 @@ class GroupEntity(BaseEntity):
             name=self._attr_name,
             group_id=self.group_id,
         )
-
-    @property
-    def name(self) -> str:
-        """Return the name of the group entity."""
-        return self._attr_name
 
     @property
     def group_id(self) -> int:

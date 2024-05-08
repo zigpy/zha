@@ -111,11 +111,6 @@ class AlarmControlPanel(PlatformEntity):
         return CodeFormat.NUMBER
 
     @functools.cached_property
-    def translation_key(self) -> str:
-        """Return the translation key."""
-        return self._attr_translation_key
-
-    @functools.cached_property
     def supported_features(self) -> int:
         """Return the list of supported features."""
         return (
