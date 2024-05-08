@@ -133,7 +133,6 @@ class FirmwareUpdateEntity(PlatformEntity):
     def state(self):
         """Get the state for the entity."""
         response = super().state
-        response["state"] = self._state
         response.update(self.state_attributes)
         return response
 
