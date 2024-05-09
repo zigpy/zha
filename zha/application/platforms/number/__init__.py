@@ -314,11 +314,6 @@ class NumberConfigurationEntity(PlatformEntity):
         return self._attr_native_step
 
     @functools.cached_property
-    def icon(self) -> str | None:
-        """Return the icon to be used for this entity."""
-        return self._attr_icon
-
-    @functools.cached_property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         if hasattr(self, "_attr_native_unit_of_measurement"):

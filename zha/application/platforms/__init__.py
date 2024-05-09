@@ -115,7 +115,6 @@ class BaseEntity(LogMixin, EventBase):
     _unique_id_suffix: str | None = None
 
     _attr_name: str | None
-    _attr_icon: str | None
     _attr_translation_key: str | None
     _attr_entity_category: EntityCategory | None
 
@@ -138,8 +137,6 @@ class BaseEntity(LogMixin, EventBase):
     @property
     def icon(self) -> str | None:
         """Return the entity icon."""
-        if hasattr(self, "_attr_icon"):
-            return self._attr_icon
         return None
 
     @property

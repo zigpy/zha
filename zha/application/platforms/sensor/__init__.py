@@ -1386,7 +1386,6 @@ class TimeLeft(Sensor):
     _attribute_name = "timer_time_left"
     _unique_id_suffix = "time_left"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_icon = "mdi:timer"
     _attr_translation_key: str = "timer_time_left"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
 
@@ -1398,7 +1397,6 @@ class IkeaDeviceRunTime(Sensor):
     _attribute_name = "device_run_time"
     _unique_id_suffix = "device_run_time"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_icon = "mdi:timer"
     _attr_translation_key: str = "device_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
@@ -1411,7 +1409,6 @@ class IkeaFilterRunTime(Sensor):
     _attribute_name = "filter_run_time"
     _unique_id_suffix = "filter_run_time"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_icon = "mdi:timer"
     _attr_translation_key: str = "filter_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
@@ -1431,7 +1428,6 @@ class AqaraPetFeederLastFeedingSource(EnumSensor):
     _attribute_name = "last_feeding_source"
     _unique_id_suffix = "last_feeding_source"
     _attr_translation_key: str = "last_feeding_source"
-    _attr_icon = "mdi:devices"
     _enum = AqaraFeedingSource
 
 
@@ -1541,7 +1537,6 @@ class WindowCoveringTypeSensor(EnumSensor):
     _unique_id_suffix: str = WindowCovering.AttributeDefs.window_covering_type.name
     _attr_translation_key: str = WindowCovering.AttributeDefs.window_covering_type.name
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_icon = "mdi:curtains"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -1555,7 +1550,6 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
     _unique_id_suffix: str = Basic.AttributeDefs.power_source.name
     _attr_translation_key: str = Basic.AttributeDefs.power_source.name
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_icon = "mdi:battery-positive"
 
 
 class AqaraE1HookState(types.enum8):
