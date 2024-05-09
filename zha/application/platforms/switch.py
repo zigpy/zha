@@ -567,7 +567,6 @@ class AqaraPetFeederLEDIndicator(SwitchConfigurationEntity):
     _attribute_name = "disable_led_indicator"
     _attr_translation_key = "led_indicator"
     _force_inverted = True
-    _attr_icon: str = "mdi:led-on"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -579,7 +578,6 @@ class AqaraPetFeederChildLock(SwitchConfigurationEntity):
     _unique_id_suffix = "child_lock"
     _attribute_name = "child_lock"
     _attr_translation_key = "child_lock"
-    _attr_icon: str = "mdi:account-lock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -591,7 +589,6 @@ class TuyaChildLockSwitch(SwitchConfigurationEntity):
     _unique_id_suffix = "child_lock"
     _attribute_name = "child_lock"
     _attr_translation_key = "child_lock"
-    _attr_icon: str = "mdi:account-lock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -625,7 +622,6 @@ class AqaraThermostatChildLock(SwitchConfigurationEntity):
     _unique_id_suffix = "child_lock"
     _attribute_name = "child_lock"
     _attr_translation_key = "child_lock"
-    _attr_icon: str = "mdi:account-lock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -637,7 +633,6 @@ class AqaraHeartbeatIndicator(SwitchConfigurationEntity):
     _unique_id_suffix = "heartbeat_indicator"
     _attribute_name = "heartbeat_indicator"
     _attr_translation_key = "heartbeat_indicator"
-    _attr_icon: str = "mdi:heart-flash"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -649,7 +644,6 @@ class AqaraLinkageAlarm(SwitchConfigurationEntity):
     _unique_id_suffix = "linkage_alarm"
     _attribute_name = "linkage_alarm"
     _attr_translation_key = "linkage_alarm"
-    _attr_icon: str = "mdi:shield-link-variant"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -661,7 +655,6 @@ class AqaraBuzzerManualMute(SwitchConfigurationEntity):
     _unique_id_suffix = "buzzer_manual_mute"
     _attribute_name = "buzzer_manual_mute"
     _attr_translation_key = "buzzer_manual_mute"
-    _attr_icon: str = "mdi:volume-off"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -673,7 +666,6 @@ class AqaraBuzzerManualAlarm(SwitchConfigurationEntity):
     _unique_id_suffix = "buzzer_manual_alarm"
     _attribute_name = "buzzer_manual_alarm"
     _attr_translation_key = "buzzer_manual_alarm"
-    _attr_icon: str = "mdi:bullhorn"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
@@ -686,7 +678,6 @@ class WindowCoveringInversionSwitch(SwitchConfigurationEntity):
     _unique_id_suffix = "inverted"
     _attribute_name = WindowCovering.AttributeDefs.config_status.name
     _attr_translation_key = "inverted"
-    _attr_icon: str = "mdi:arrow-up-down"
 
     @classmethod
     def create_platform_entity(
@@ -781,4 +772,3 @@ class AqaraE1CurtainMotorHooksLockedSwitch(SwitchConfigurationEntity):
     _unique_id_suffix = "hooks_lock"
     _attribute_name = "hooks_lock"
     _attr_translation_key = "hooks_locked"
-    _attr_icon: str = "mdi:lock"

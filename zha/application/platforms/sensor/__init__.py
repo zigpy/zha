@@ -1442,7 +1442,6 @@ class AqaraPetFeederLastFeedingSize(Sensor):
     _attribute_name = "last_feeding_size"
     _unique_id_suffix = "last_feeding_size"
     _attr_translation_key: str = "last_feeding_size"
-    _attr_icon: str = "mdi:counter"
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
@@ -1453,7 +1452,6 @@ class AqaraPetFeederPortionsDispensed(Sensor):
     _unique_id_suffix = "portions_dispensed"
     _attr_translation_key: str = "portions_dispensed_today"
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _attr_icon: str = "mdi:counter"
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
@@ -1465,7 +1463,6 @@ class AqaraPetFeederWeightDispensed(Sensor):
     _attr_translation_key: str = "weight_dispensed_today"
     _attr_native_unit_of_measurement = UnitOfMass.GRAMS
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _attr_icon: str = "mdi:weight-gram"
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"})
@@ -1477,7 +1474,6 @@ class AqaraSmokeDensityDbm(Sensor):
     _attr_translation_key: str = "smoke_density"
     _attr_native_unit_of_measurement = "dB/m"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_icon: str = "mdi:google-circles-communities"
     _attr_suggested_display_precision: int = 3
 
 
@@ -1495,7 +1491,6 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
     _attribute_name = "last_illumination_state"
     _unique_id_suffix = "last_illumination"
     _attr_translation_key: str = "last_illumination_state"
-    _attr_icon: str = "mdi:theme-light-dark"
     _enum = SonoffIlluminationStates
 
 
@@ -1509,7 +1504,6 @@ class PiHeatingDemand(Sensor):
     _unique_id_suffix = "pi_heating_demand"
     _attribute_name = "pi_heating_demand"
     _attr_translation_key: str = "pi_heating_demand"
-    _attr_icon: str = "mdi:radiator"
     _attr_native_unit_of_measurement = PERCENTAGE
     _decimals = 0
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
@@ -1534,7 +1528,6 @@ class SetpointChangeSource(EnumSensor):
     _unique_id_suffix = "setpoint_change_source"
     _attribute_name = "setpoint_change_source"
     _attr_translation_key: str = "setpoint_change_source"
-    _attr_icon: str = "mdi:thermostat"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _enum = SetpointChangeSourceEnum
 
@@ -1584,5 +1577,4 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     _enum = AqaraE1HookState
     _unique_id_suffix = "hooks_state"
     _attr_translation_key: str = "hooks_state"
-    _attr_icon: str = "mdi:hook"
     _attr_entity_category = EntityCategory.DIAGNOSTIC

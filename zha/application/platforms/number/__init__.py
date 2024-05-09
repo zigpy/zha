@@ -197,7 +197,6 @@ class NumberConfigurationEntity(PlatformEntity):
     _attr_native_step: float = 1.0
     _attr_multiplier: float = 1
     _attribute_name: str
-    _attr_icon: str | None = None
     _attr_mode: NumberMode = NumberMode.AUTO
 
     @classmethod
@@ -473,7 +472,6 @@ class TimerDurationMinutes(NumberConfigurationEntity):
 
     _unique_id_suffix = "timer_duration"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[14]
     _attr_native_min_value: float = 0x00
     _attr_native_max_value: float = 0x257
     _attr_native_unit_of_measurement: str | None = UNITS[72]
@@ -487,7 +485,6 @@ class FilterLifeTime(NumberConfigurationEntity):
 
     _unique_id_suffix = "filter_life_time"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[14]
     _attr_native_min_value: float = 0x00
     _attr_native_max_value: float = 0xFFFFFFFF
     _attr_native_unit_of_measurement: str | None = UNITS[72]
@@ -516,7 +513,6 @@ class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
 
     _unique_id_suffix = "dimming_speed_up_remote"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 126
     _attribute_name = "dimming_speed_up_remote"
@@ -529,7 +525,6 @@ class InovelliButtonDelay(NumberConfigurationEntity):
 
     _unique_id_suffix = "button_delay"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 9
     _attribute_name = "button_delay"
@@ -542,7 +537,6 @@ class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
 
     _unique_id_suffix = "dimming_speed_up_local"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 127
     _attribute_name = "dimming_speed_up_local"
@@ -555,7 +549,6 @@ class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
 
     _unique_id_suffix = "ramp_rate_off_to_on_local"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 127
     _attribute_name = "ramp_rate_off_to_on_local"
@@ -568,7 +561,6 @@ class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
 
     _unique_id_suffix = "ramp_rate_off_to_on_remote"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 127
     _attribute_name = "ramp_rate_off_to_on_remote"
@@ -581,7 +573,6 @@ class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
 
     _unique_id_suffix = "dimming_speed_down_remote"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 127
     _attribute_name = "dimming_speed_down_remote"
@@ -594,7 +585,6 @@ class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
 
     _unique_id_suffix = "dimming_speed_down_local"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 127
     _attribute_name = "dimming_speed_down_local"
@@ -607,7 +597,6 @@ class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
 
     _unique_id_suffix = "ramp_rate_on_to_off_local"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 127
     _attribute_name = "ramp_rate_on_to_off_local"
@@ -620,7 +609,6 @@ class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
 
     _unique_id_suffix = "ramp_rate_on_to_off_remote"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 127
     _attribute_name = "ramp_rate_on_to_off_remote"
@@ -633,7 +621,6 @@ class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
 
     _unique_id_suffix = "minimum_level"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[16]
     _attr_native_min_value: float = 1
     _attr_native_max_value: float = 254
     _attribute_name = "minimum_level"
@@ -646,7 +633,6 @@ class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
 
     _unique_id_suffix = "maximum_level"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[16]
     _attr_native_min_value: float = 2
     _attr_native_max_value: float = 255
     _attribute_name = "maximum_level"
@@ -659,7 +645,6 @@ class InovelliAutoShutoffTimer(NumberConfigurationEntity):
 
     _unique_id_suffix = "auto_off_timer"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[14]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 32767
     _attribute_name = "auto_off_timer"
@@ -674,7 +659,6 @@ class InovelliQuickStartTime(NumberConfigurationEntity):
 
     _unique_id_suffix = "quick_start_time"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[3]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 10
     _attribute_name = "quick_start_time"
@@ -687,7 +671,6 @@ class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
 
     _unique_id_suffix = "load_level_indicator_timeout"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[14]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 11
     _attribute_name = "load_level_indicator_timeout"
@@ -700,7 +683,6 @@ class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
 
     _unique_id_suffix = "led_color_when_on"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[15]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 255
     _attribute_name = "led_color_when_on"
@@ -713,7 +695,6 @@ class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
 
     _unique_id_suffix = "led_color_when_off"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[15]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 255
     _attribute_name = "led_color_when_off"
@@ -726,7 +707,6 @@ class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
 
     _unique_id_suffix = "led_intensity_when_on"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[16]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 100
     _attribute_name = "led_intensity_when_on"
@@ -739,7 +719,6 @@ class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
 
     _unique_id_suffix = "led_intensity_when_off"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[16]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 100
     _attribute_name = "led_intensity_when_off"
@@ -752,7 +731,6 @@ class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
 
     _unique_id_suffix = "double_tap_up_level"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[16]
     _attr_native_min_value: float = 2
     _attr_native_max_value: float = 254
     _attribute_name = "double_tap_up_level"
@@ -765,7 +743,6 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
 
     _unique_id_suffix = "double_tap_down_level"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon: str = ICONS[16]
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 254
     _attribute_name = "double_tap_down_level"
@@ -786,7 +763,6 @@ class AqaraPetFeederServingSize(NumberConfigurationEntity):
     _attr_translation_key: str = "serving_size"
 
     _attr_mode: NumberMode = NumberMode.BOX
-    _attr_icon: str = "mdi:counter"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -804,7 +780,6 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
 
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfMass.GRAMS
-    _attr_icon: str = "mdi:weight-gram"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -823,7 +798,6 @@ class AqaraThermostatAwayTemp(NumberConfigurationEntity):
 
     _attr_mode: NumberMode = NumberMode.SLIDER
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
-    _attr_icon: str = ICONS[0]
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -843,7 +817,6 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
 
     _attr_mode: NumberMode = NumberMode.SLIDER
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
-    _attr_icon: str = ICONS[0]
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -873,7 +846,6 @@ class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
     _attr_translation_key: str = "presence_detection_timeout"
 
     _attr_mode: NumberMode = NumberMode.BOX
-    _attr_icon: str = "mdi:timer-edit"
 
 
 class ZCLTemperatureEntity(NumberConfigurationEntity):
@@ -888,7 +860,6 @@ class ZCLTemperatureEntity(NumberConfigurationEntity):
 class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
     """Min or max heat setpoint setting on thermostats."""
 
-    _attr_icon: str = "mdi:thermostat"
     _attr_native_step: float = 0.5
 
     _min_source = Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name
