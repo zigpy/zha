@@ -117,6 +117,8 @@ class BaseEntity(LogMixin, EventBase):
     _attr_name: str | None
     _attr_translation_key: str | None
     _attr_entity_category: EntityCategory | None
+    _attr_device_class: str | None
+    _attr_state_class: str | None
 
     def __init__(self, unique_id: str, **kwargs: Any) -> None:
         """Initialize the platform entity."""
@@ -151,6 +153,20 @@ class BaseEntity(LogMixin, EventBase):
         """Return the entity category."""
         if hasattr(self, "_attr_entity_category"):
             return self._attr_entity_category
+        return None
+
+    @property
+    def device_class(self) -> EntityCategory | None:
+        """Return the device class."""
+        if hasattr(self, "_attr_device_class"):
+            return self._attr_device_class
+        return None
+
+    @property
+    def state_class(self) -> EntityCategory | None:
+        """Return the state class."""
+        if hasattr(self, "_attr_state_class"):
+            return self._attr_state_class
         return None
 
     @final
