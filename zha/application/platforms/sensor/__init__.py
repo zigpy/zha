@@ -224,10 +224,14 @@ class Sensor(PlatformEntity):
             decimals=self._decimals,
             divisor=self._divisor,
             multiplier=self._multiplier,
-            unit=getattr(self, "entity_description").native_unit_of_measurement
-            if hasattr(self, "entity_description")
-            and getattr(self, "entity_description") is not None
-            else self._attr_native_unit_of_measurement,
+            unit=(
+                getattr(self, "entity_description").native_unit_of_measurement
+                if (
+                    hasattr(self, "entity_description")
+                    and getattr(self, "entity_description") is not None
+                )
+                else self._attr_native_unit_of_measurement
+            ),
             device_class=self._attr_device_class,
             state_class=self._attr_state_class,
         )
@@ -455,7 +459,9 @@ class EnumSensor(Sensor):
 
     def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
         """Init this entity from the quirks metadata."""
-        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
+        PlatformEntity._init_from_quirks_metadata(
+            self, entity_metadata
+        )  # pylint: disable=protected-access
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
 
