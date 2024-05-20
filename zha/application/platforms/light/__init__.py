@@ -896,7 +896,7 @@ class Light(PlatformEntity, BaseLight):
             )
             # check if transition started whilst waiting for polled state
             if self.is_transitioning:
-                return  # type: ignore #TODO figure this out
+                return  # type: ignore[unreachable]
 
             if state is not None:
                 self._state = state
@@ -910,7 +910,7 @@ class Light(PlatformEntity, BaseLight):
             )
             # check if transition started whilst waiting for polled state
             if self.is_transitioning:
-                return  # type: ignore #TODO figure this out
+                return  # type: ignore[unreachable]
             if level is not None:
                 self._brightness = level
 
@@ -946,7 +946,7 @@ class Light(PlatformEntity, BaseLight):
             # for the polled attributes, so abort if we are transitioning,
             # as that state will not be accurate
             if self.is_transitioning:
-                return  # type: ignore #TODO figure this out
+                return  # type: ignore[unreachable]
 
             if (color_mode := results.get("color_mode")) is not None:
                 if color_mode == Color.ColorMode.Color_temperature:
