@@ -22,6 +22,7 @@ from zha.application.platforms.update import (
     ATTR_IN_PROGRESS,
     ATTR_INSTALLED_VERSION,
     ATTR_LATEST_VERSION,
+    ATTR_PROGRESS,
 )
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
@@ -109,7 +110,11 @@ async def test_firmware_update_notification_from_zigpy(
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert entity.state["state"] is False
+    assert (
+        entity.state["latest_version"]
+        == entity.state["installed_version"]
+        == f"0x{installed_fw_version:08x}"
+    )
 
     # simulate an image available notification
     await cluster._handle_query_next_image(
@@ -126,66 +131,12 @@ async def test_firmware_update_notification_from_zigpy(
     )
 
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] is True
     assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
-    assert not entity.state[ATTR_IN_PROGRESS]
+    assert entity.state[ATTR_IN_PROGRESS] is False
     assert (
         entity.state[ATTR_LATEST_VERSION]
         == f"0x{fw_image.firmware.header.file_version:08x}"
     )
-
-
-async def test_firmware_update_notification_from_service_call(
-    zha_gateway: Gateway,
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> None:
-    """Test ZHA update platform - firmware update manual check."""
-    zha_device, cluster, fw_image, installed_fw_version = await setup_test_data(
-        device_joined, zigpy_device
-    )
-
-    entity_id = find_entity_id(Platform.UPDATE, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
-    assert entity.state["state"] is False
-
-    # pylint: disable=pointless-string-statement
-    """TODO
-    async def _async_image_notify_side_effect(*args, **kwargs):
-        await cluster._handle_query_next_image(
-            foundation.ZCLHeader.cluster(
-                tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
-            ),
-            general.QueryNextImageCommand(
-                fw_image.firmware.header.field_control,
-                zha_device.manufacturer_code,
-                fw_image.firmware.header.image_type,
-                installed_fw_version,
-                fw_image.firmware.header.header_version,
-            ),
-        )
-
-    await _async_image_notify_side_effect()
-
-    assert cluster.endpoint.device.application.ota.broadcast_notify.await_count == 1
-    assert cluster.endpoint.device.application.ota.broadcast_notify.call_args_list[
-        0
-    ] == call(
-        jitter=100,
-    )
-
-    await zha_gateway.async_block_till_done()
-    assert entity.state["state"] is True
-    assert entity.get_state()[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
-    assert not entity.get_state()[ATTR_IN_PROGRESS]
-    assert (
-        entity.get_state()[ATTR_LATEST_VERSION]
-        == f"0x{fw_image.firmware.header.file_version:08x}"
-    )
-    """
 
 
 def make_packet(
@@ -239,7 +190,6 @@ async def test_firmware_update_success(
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert entity.state["state"] is False
 
     # simulate an image available notification
     await cluster._handle_query_next_image(
@@ -255,9 +205,8 @@ async def test_firmware_update_success(
     )
 
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] is True
     assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
-    assert not entity.state[ATTR_IN_PROGRESS]
+    assert entity.state[ATTR_IN_PROGRESS] is False
     assert (
         entity.state[ATTR_LATEST_VERSION]
         == f"0x{fw_image.firmware.header.file_version:08x}"
@@ -340,12 +289,13 @@ async def test_firmware_update_success(
                     assert cmd.image_data == fw_image.firmware.serialize()[40:70]
 
                     # make sure the state machine gets progress reports
-                    assert entity.state["state"] is True
+
                     assert (
                         entity.state[ATTR_INSTALLED_VERSION]
                         == f"0x{installed_fw_version:08x}"
                     )
-                    assert entity.state[ATTR_IN_PROGRESS] == 58
+                    assert entity.state[ATTR_IN_PROGRESS] is True
+                    assert entity.state[ATTR_PROGRESS] == 57
                     assert (
                         entity.state[ATTR_LATEST_VERSION]
                         == f"0x{fw_image.firmware.header.file_version:08x}"
@@ -393,8 +343,6 @@ async def test_firmware_update_success(
     await entity.async_install(fw_image.firmware.header.file_version, False)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["state"] is False
-
     assert (
         entity.state[ATTR_INSTALLED_VERSION]
         == f"0x{fw_image.firmware.header.file_version:08x}"
@@ -406,7 +354,6 @@ async def test_firmware_update_success(
     entity._update_progress(50, 100, 0.50)
 
     assert not entity.state[ATTR_IN_PROGRESS]
-    assert entity.state["state"] is False
 
 
 async def test_firmware_update_raises(
@@ -424,7 +371,6 @@ async def test_firmware_update_raises(
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert entity.state["state"] is False
 
     # simulate an image available notification
     await cluster._handle_query_next_image(
@@ -441,7 +387,6 @@ async def test_firmware_update_raises(
     )
 
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] is True
     assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
     assert not entity.state[ATTR_IN_PROGRESS]
     assert (
@@ -506,7 +451,6 @@ async def test_firmware_update_no_longer_compatible(
 
     entity = get_entity(zha_device, entity_id)
     assert entity is not None
-    assert entity.state["state"] is False
 
     # simulate an image available notification
     await cluster._handle_query_next_image(
@@ -523,7 +467,6 @@ async def test_firmware_update_no_longer_compatible(
     )
 
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] is True
     assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
     assert not entity.state[ATTR_IN_PROGRESS]
     assert (
@@ -557,7 +500,6 @@ async def test_firmware_update_no_longer_compatible(
         await zha_gateway.async_block_till_done()
 
     # We updated the currently installed firmware version, as it is no longer valid
-    assert entity.state["state"] is False
     assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{new_version:08x}"
     assert not entity.state[ATTR_IN_PROGRESS]
     assert entity.state[ATTR_LATEST_VERSION] == f"0x{new_version:08x}"
