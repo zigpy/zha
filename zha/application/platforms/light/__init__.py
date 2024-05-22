@@ -71,6 +71,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COLOR,
     CLUSTER_HANDLER_LEVEL,
+    CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
 )
 from zha.zigbee.cluster_handlers.general import LevelChangeEvent
@@ -813,7 +814,7 @@ class Light(PlatformEntity, BaseLight):
 
         if self._level_cluster_handler:
             self._level_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED, self.handle_cluster_handler_set_level
+                CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
             )
 
         self._tracked_tasks.append(

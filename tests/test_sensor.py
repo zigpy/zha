@@ -1031,7 +1031,7 @@ async def test_elec_measurement_skip_unsupported_attribute(
     zha_dev = elec_measurement_zha_dev
 
     entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
+        entity.PLATFORM + "." + slugify(entity.info_object.name, separator="_"): entity
         for entity in zha_dev.platform_entities.values()
     }
     entity = entities[entity_id]
