@@ -1151,10 +1151,7 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
 
     coordinator = zha_gateway.coordinator_zha_device
     assert coordinator.is_coordinator
-    entity_id = (
-        "sensor.coordinator_manufacturer_coordinator_model_ezsp_counters_counter_1"
-    )
-    entity = get_entity(coordinator, entity_id)
+    entity = get_entity(coordinator, "sensor.counter_1")
     assert entity is not None
 
     assert entity.state["state"] == 1
