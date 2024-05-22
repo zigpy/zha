@@ -86,7 +86,15 @@ class EventBase:
 
     def emit(self, event_name: str, data=None) -> None:
         """Run all callbacks for an event."""
-        for listener in [*self._listeners.get(event_name, []), *self._global_listeners]:
+        listeners = [*self._listeners.get(event_name, []), *self._global_listeners]
+        _LOGGER.debug(
+            "Emitting event %s with data %r (%d listeners)",
+            event_name,
+            data,
+            len(listeners),
+        )
+
+        for listener in listeners:
             if listener.with_context:
                 call = listener.callback(event_name, data)
             else:
