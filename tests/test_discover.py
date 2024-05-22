@@ -87,9 +87,6 @@ def contains_ignored_suffix(unique_id: str) -> bool:
     return any(suffix.lower() in unique_id.lower() for suffix in IGNORE_SUFFIXES)
 
 
-
-
-
 @pytest.fixture
 def zha_device_mock(
     zigpy_device_mock: Callable[..., zigpy.device.Device],

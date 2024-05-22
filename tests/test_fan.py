@@ -117,9 +117,6 @@ async def device_fan_2(
     return zha_device
 
 
-
-
-
 async def test_fan(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,

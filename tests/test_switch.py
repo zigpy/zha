@@ -346,9 +346,6 @@ async def test_zha_group_switch_entity(
     assert bool(entity.state["state"]) is True
 
 
-
-
-
 class WindowDetectionFunctionQuirk(CustomDevice):
     """Quirk with window detection function attribute."""
 

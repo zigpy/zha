@@ -459,9 +459,7 @@ class EnumSensor(Sensor):
 
     def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
         """Init this entity from the quirks metadata."""
-        PlatformEntity._init_from_quirks_metadata(
-            self, entity_metadata
-        )  # pylint: disable=protected-access
+        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
 

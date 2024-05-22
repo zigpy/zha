@@ -47,9 +47,6 @@ async def lock(
     return zha_device, zigpy_device.endpoints[1].door_lock
 
 
-
-
-
 async def test_lock(
     lock: tuple[Device, closures.DoorLock],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,

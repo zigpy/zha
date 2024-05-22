@@ -254,9 +254,6 @@ async def eWeLink_light(
     return zha_device
 
 
-
-
-
 @pytest.mark.looptime
 async def test_light_refresh(
     zigpy_device_mock: Callable[..., ZigpyDevice],

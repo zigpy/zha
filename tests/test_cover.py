@@ -116,9 +116,6 @@ WCT = closures.WindowCovering.WindowCoveringType
 WCCS = closures.WindowCovering.ConfigStatus
 
 
-
-
-
 async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     zha_gateway: Gateway,
     device_joined,

@@ -573,9 +573,6 @@ async def test_sensor(
     await test_func(zha_gateway, cluster, entity)
 
 
-
-
-
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
     """Check that the state is what is expected.
 

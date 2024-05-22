@@ -36,9 +36,6 @@ def zigpy_device_dt(zigpy_device_mock):
     return zigpy_device_mock(endpoints)
 
 
-
-
-
 @pytest.mark.looptime
 async def test_device_tracker(
     zha_gateway: Gateway,

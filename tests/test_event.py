@@ -30,12 +30,16 @@ def test_event_base_unsubs():
     callback = MagicMock()
 
     unsub = event.on_event("test", callback)
-    assert event._listeners == {"test": [EventListener(callback=callback, with_context=False)]}
+    assert event._listeners == {
+        "test": [EventListener(callback=callback, with_context=False)]
+    }
     unsub()
     assert event._listeners == {"test": []}
 
     unsub = event.on_all_events(callback)
-    assert event._global_listeners == [EventListener(callback=callback, with_context=False)]
+    assert event._global_listeners == [
+        EventListener(callback=callback, with_context=False)
+    ]
     unsub()
     assert not event._global_listeners
 

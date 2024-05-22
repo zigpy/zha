@@ -42,9 +42,6 @@ def zigpy_device(zigpy_device_mock):
     )
 
 
-
-
-
 async def setup_test_data(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name

@@ -150,9 +150,6 @@ async def device_light_2(
     return zha_device
 
 
-
-
-
 async def test_device_left(
     zha_gateway: Gateway,
     zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name

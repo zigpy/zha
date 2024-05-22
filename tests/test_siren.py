@@ -42,9 +42,6 @@ async def siren(
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
-
-
-
 async def test_siren(
     siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,

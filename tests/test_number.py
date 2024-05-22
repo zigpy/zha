@@ -167,9 +167,6 @@ async def test_number(
     assert entity.state["state"] == 30.0
 
 
-
-
-
 @pytest.mark.parametrize(
     ("attr", "initial_value", "new_value", "max_value"),
     (

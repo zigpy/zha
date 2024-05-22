@@ -265,6 +265,7 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     }
     return entities[entity_id]
 
+
 def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
     """Get entity."""
     entities = {
