@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.const import ATTR_DEVICE_CLASS, ENTITY_METADATA
+from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
@@ -97,9 +97,6 @@ class BinarySensor(PlatformEntity):
         return BinarySensorEntityInfo(
             **super().info_object.__dict__,
             attribute_name=self._attribute_name,
-            device_class=self._attr_device_class
-            if hasattr(self, ATTR_DEVICE_CLASS)
-            else None,
         )
 
     @property
@@ -118,11 +115,6 @@ class BinarySensor(PlatformEntity):
         if raw_state is None:
             return False
         return self.parse(raw_state)
-
-    @functools.cached_property
-    def device_class(self) -> BinarySensorDeviceClass | None:
-        """Return the class of this entity."""
-        return self._attr_device_class
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent

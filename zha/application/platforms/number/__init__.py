@@ -280,7 +280,6 @@ class NumberConfigurationEntity(PlatformEntity):
             max_value=self._attr_native_max_value,
             step=self._attr_native_step,
             multiplier=self._attr_multiplier,
-            device_class=self._attr_device_class,
         )
 
     @property

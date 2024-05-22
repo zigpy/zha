@@ -226,14 +226,9 @@ class Sensor(PlatformEntity):
             multiplier=self._multiplier,
             unit=(
                 getattr(self, "entity_description").native_unit_of_measurement
-                if (
-                    hasattr(self, "entity_description")
-                    and getattr(self, "entity_description") is not None
-                )
+                if getattr(self, "entity_description", None) is not None
                 else self._attr_native_unit_of_measurement
             ),
-            device_class=self._attr_device_class,
-            state_class=self._attr_state_class,
         )
 
     @property
@@ -359,7 +354,6 @@ class DeviceCounterSensor(BaseEntity):
     ) -> None:
         """Init this sensor."""
         super().__init__(unique_id, **kwargs)
-        self._name = f"{zha_device.name} {counter_group} {counter}"
         self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
@@ -367,8 +361,12 @@ class DeviceCounterSensor(BaseEntity):
         )
         self._zigpy_counter_groups: str = counter_groups
         self._zigpy_counter_group: str = counter_group
+
         self._attr_name: str = self._zigpy_counter.name
+        self._internal_name = f"{zha_device.name} {counter_group} {counter}"
+
         self._device.gateway.global_updater.register_update_listener(self.update)
+
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
         if self.unique_id not in self._device.platform_entities:
             self._device.platform_entities[self.unique_id] = self
@@ -385,7 +383,6 @@ class DeviceCounterSensor(BaseEntity):
         """Return a representation of the platform entity."""
         return DeviceCounterEntityInfo(
             **super().info_object.__dict__,
-            name=self._attr_name,
             device_ieee=str(self._device.ieee),
             available=self.available,
             counter=self._zigpy_counter.name,
@@ -400,11 +397,6 @@ class DeviceCounterSensor(BaseEntity):
         response = super().state
         response["state"] = self._zigpy_counter.value
         return response
-
-    @property
-    def name(self) -> str:
-        """Return the name of the platform entity."""
-        return self._name
 
     @property
     def native_value(self) -> int | None:

@@ -45,9 +45,15 @@ class EntityCategory(StrEnum):
 class BaseEntityInfo:
     """Information about a base entity."""
 
+    name: str
+    internal_name: str
     unique_id: str
     platform: str
     class_name: str
+    translation_key: str | None
+    device_class: str | None
+    state_class: str | None
+    entity_category: str | None
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -77,7 +83,6 @@ class GroupEntityIdentifiers(BaseIdentifiers):
 class PlatformEntityInfo(BaseEntityInfo):
     """Information about a platform entity."""
 
-    name: str
     cluster_handlers: list[ClusterHandlerInfo]
     device_ieee: EUI64
     endpoint_id: int
@@ -88,7 +93,6 @@ class PlatformEntityInfo(BaseEntityInfo):
 class GroupEntityInfo(BaseEntityInfo):
     """Information about a group entity."""
 
-    name: str
     group_id: int
 
 
@@ -123,9 +127,12 @@ class BaseEntity(LogMixin, EventBase):
     def __init__(self, unique_id: str, **kwargs: Any) -> None:
         """Initialize the platform entity."""
         super().__init__()
+
+        self._internal_name: str | None = None
         self._unique_id: str = unique_id
         if self._unique_id_suffix:
             self._unique_id += f"-{self._unique_id_suffix}"
+
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
 
@@ -186,10 +193,17 @@ class BaseEntity(LogMixin, EventBase):
     @cached_property
     def info_object(self) -> BaseEntityInfo:
         """Return a representation of the platform entity."""
+
         return BaseEntityInfo(
+            internal_name=self._internal_name,
             unique_id=self._unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
+            name=self.name,
+            translation_key=self.translation_key,
+            device_class=self.device_class,
+            state_class=self.state_class,
+            entity_category=self.entity_category,
         )
 
     @property
@@ -240,11 +254,14 @@ class PlatformEntity(BaseEntity):
     ):
         """Initialize the platform entity."""
         super().__init__(unique_id, **kwargs)
+
         ieeetail = "".join([f"{o:02x}" for o in device.ieee[:4]])
         ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
-        self._name: str = f"{device.name} {ieeetail} {ch_names}"
+
+        self._internal_name: str = f"{device.name} {ieeetail} {ch_names}"
         if self._unique_id_suffix:
-            self._name += f" {self._unique_id_suffix}"
+            self._internal_name += f" {self._unique_id_suffix}"
+
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
         for cluster_handler in cluster_handlers:
@@ -312,10 +329,7 @@ class PlatformEntity(BaseEntity):
     def info_object(self) -> PlatformEntityInfo:
         """Return a representation of the platform entity."""
         return PlatformEntityInfo(
-            unique_id=self._unique_id,
-            platform=self.PLATFORM,
-            class_name=self.__class__.__name__,
-            name=self._name,
+            **super().info_object.__dict__,
             cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
@@ -365,14 +379,13 @@ class PlatformEntity(BaseEntity):
 class GroupEntity(BaseEntity):
     """A base class for group entities."""
 
-    _attr_name: str | None
-
     def __init__(
         self,
         group: Group,
     ) -> None:
         """Initialize a group."""
         super().__init__(f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
+        self._internal_name = f"group 0x{group.group_id:04x}"
         self._attr_name: str = group.name
         self._group: Group = group
         self._group.register_group_entity(self)
@@ -390,10 +403,7 @@ class GroupEntity(BaseEntity):
     def info_object(self) -> GroupEntityInfo:
         """Return a representation of the group."""
         return GroupEntityInfo(
-            unique_id=self._unique_id,
-            platform=self.PLATFORM,
-            class_name=self.__class__.__name__,
-            name=self._attr_name,
+            **super().info_object.__dict__,
             group_id=self.group_id,
         )
 

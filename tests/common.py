@@ -219,7 +219,7 @@ def find_entity_ids(
     head = f"{domain}.{slugify(f'{zha_device.name} {ieeetail}', separator='_')}"
 
     entity_ids = [
-        f"{entity.PLATFORM}.{slugify(entity.info_object.name, separator='_')}"
+        f"{entity.PLATFORM}.{slugify(entity.info_object.internal_name, separator='_')}"
         for entity in zha_device.platform_entities.values()
     ]
 
@@ -245,22 +245,30 @@ def find_entity_ids(
 
 def async_find_group_entity_id(domain: str, group: Group) -> Optional[str]:
     """Find the group entity id under test."""
-    entity_id = f"{domain}.{group.name.lower().replace(' ','_')}"
 
-    entity_ids = [
-        f"{entity.PLATFORM}.{slugify(entity.name, separator='_')}"
-        for entity in group.group_entities.values()
+    candidates = [
+        e for e in group.group_entities.values() if e.info_object.platform == domain
     ]
 
-    if entity_id in entity_ids:
-        return entity_id
-    return None
+    if len(candidates) > 1:
+        raise RuntimeError(
+            f"Multiple entities exist for domain {domain!r}: {candidates}"
+        )
+
+    if not candidates:
+        raise RuntimeError(f"No entities exist for domain {domain!r}")
+        return None
+
+    entity = candidates[0]
+    return f"{domain}.{entity.unique_id}"
 
 
 def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
     """Get entity."""
     entities = {
-        entity.PLATFORM + "." + slugify(entity.info_object.name, separator="_"): entity
+        entity.PLATFORM
+        + "."
+        + slugify(entity.info_object.internal_name, separator="_"): entity
         for entity in zha_dev.platform_entities.values()
     }
     return entities[entity_id]
@@ -268,9 +276,12 @@ def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
 
 def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
     """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.info_object.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
 
-    return entities.get(entity_id)
+    for entity in group.group_entities.values():
+        if (
+            entity.info_object.platform + "." + entity.info_object.unique_id
+            == entity_id
+        ):
+            return entity
+
+    return None

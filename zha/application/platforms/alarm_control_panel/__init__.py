@@ -88,7 +88,6 @@ class AlarmControlPanel(PlatformEntity):
             code_arm_required=self.code_arm_required,
             code_format=self.code_format,
             supported_features=self.supported_features,
-            translation_key=self.translation_key,
         )
 
     @property

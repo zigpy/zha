@@ -125,8 +125,6 @@ class FirmwareUpdateEntity(PlatformEntity):
         return UpdateEntityInfo(
             **super().info_object.__dict__,
             supported_features=self.supported_features,
-            device_class=self._attr_device_class,
-            entity_category=self._attr_entity_category,
         )
 
     @property

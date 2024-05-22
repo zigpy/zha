@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC
-import dataclasses
 from dataclasses import dataclass
 import functools
 import logging
@@ -11,7 +10,6 @@ from typing import TYPE_CHECKING, Any, Self, cast
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 from zigpy.quirks.v2 import SwitchMetadata
-from zigpy.types import EUI64
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
@@ -23,9 +21,10 @@ from zha.application.platforms import (
     EntityCategory,
     GroupEntity,
     PlatformEntity,
+    PlatformEntityInfo,
 )
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandlerInfo
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
@@ -51,20 +50,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class SwitchConfigurationEntityInfo:
+class SwitchConfigurationEntityInfo(PlatformEntityInfo):
     """Switch configuration entity info."""
-
-    # combination of PlatformEntityInfo and GroupEntityInfo
-    unique_id: str
-    platform: str
-    class_name: str
-
-    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
-    device_ieee: EUI64 | None = dataclasses.field(default=None)
-    endpoint_id: int | None = dataclasses.field(default=None)
-    group_id: int | None = dataclasses.field(default=None)
-    name: str | None = dataclasses.field(default=None)
-    available: bool | None = dataclasses.field(default=None)
 
     attribute_name: str
     invert_attribute_name: str | None
