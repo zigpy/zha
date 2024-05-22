@@ -11,12 +11,12 @@ from typing import Any
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
-from slugify import slugify
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity, get_group_entity
 from zha.application import Platform
 from zha.application.const import CONF_ALWAYS_PREFER_XY_COLOR_MODE
 from zha.application.gateway import Gateway
@@ -254,23 +254,7 @@ async def eWeLink_light(
     return zha_device
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
 
-
-def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
-
-    return entities.get(entity_id)
 
 
 @pytest.mark.looptime

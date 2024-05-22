@@ -5,7 +5,6 @@ from typing import Final
 from unittest.mock import call, patch
 
 import pytest
-from slugify import slugify
 from zhaquirks.const import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -24,7 +23,13 @@ from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import find_entity, find_entity_id, mock_coro, update_attribute_cache
+from tests.common import (
+    find_entity,
+    find_entity_id,
+    get_entity,
+    mock_coro,
+    update_attribute_cache,
+)
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -135,15 +140,6 @@ async def test_button(
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
         assert cluster.request.call_args[0][3] == 5  # duration in seconds
-
-
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
 
 
 async def test_frost_unlock(

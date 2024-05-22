@@ -9,7 +9,6 @@ from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from slugify import slugify
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
 from zhaquirks.xiaomi import (
     BasicCluster,
@@ -41,6 +40,7 @@ import zigpy.zcl.clusters.general
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity
 from zha.application import Platform, discovery
 from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
 from zha.application.gateway import Gateway
@@ -87,13 +87,7 @@ def contains_ignored_suffix(unique_id: str) -> bool:
     return any(suffix.lower() in unique_id.lower() for suffix in IGNORE_SUFFIXES)
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+
 
 
 @pytest.fixture

@@ -4,12 +4,12 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import patch
 
 import pytest
-from slugify import slugify
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
@@ -47,13 +47,7 @@ async def lock(
     return zha_device, zigpy_device.endpoints[1].door_lock
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+
 
 
 async def test_lock(

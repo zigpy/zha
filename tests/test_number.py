@@ -4,13 +4,13 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import call
 
 import pytest
-from slugify import slugify
 from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
 
+from tests.common import get_entity
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
@@ -167,13 +167,7 @@ async def test_number(
     assert entity.state["state"] == 30.0
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+
 
 
 @pytest.mark.parametrize(

@@ -4,7 +4,6 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import call
 
 import pytest
-from slugify import slugify
 from zhaquirks import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -21,9 +20,10 @@ import zigpy.types as t
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
+from tests.common import get_entity
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import EntityCategory, PlatformEntity
+from zha.application.platforms import EntityCategory
 from zha.application.platforms.select import AqaraMotionSensitivities
 from zha.zigbee.device import Device
 
@@ -53,13 +53,7 @@ async def siren(
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+
 
 
 async def test_select(

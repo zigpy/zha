@@ -5,16 +5,15 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import patch
 
 import pytest
-from slugify import slugify
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
 from zha.zigbee.device import Device
 
 from .common import find_entity_id, mock_coro
@@ -43,13 +42,7 @@ async def siren(
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+
 
 
 async def test_siren(

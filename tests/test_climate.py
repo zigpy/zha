@@ -8,7 +8,6 @@ import logging
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
-from slugify import slugify
 import zhaquirks.sinope.thermostat
 from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
 import zhaquirks.tuya.ts0601_trv
@@ -18,6 +17,7 @@ import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import Thermostat
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity
 from zha.application import Platform
 from zha.application.const import (
     PRESET_AWAY,
@@ -275,22 +275,6 @@ async def device_climate_zonnsmart(device_climate_mock):
     )
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> ThermostatEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
-
-
-def get_sensor_entity(zha_dev: Device, entity_id: str) -> Sensor:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
 
 
 def test_sequence_mappings():

@@ -5,7 +5,6 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
-from slugify import slugify
 from zigpy.application import ControllerApplication
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
@@ -14,7 +13,12 @@ from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types
 from zigpy.zdo.types import LogicalType, NodeDescriptor
 
-from tests.common import async_find_group_entity_id, find_entity_id
+from tests.common import (
+    async_find_group_entity_id,
+    find_entity_id,
+    get_entity,
+    get_group_entity,
+)
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import CONF_USE_THREAD, RadioType
@@ -27,7 +31,7 @@ from zha.application.gateway import (
     RawDeviceInitializedEvent,
 )
 from zha.application.helpers import ZHAData
-from zha.application.platforms import GroupEntity, PlatformEntity
+from zha.application.platforms import GroupEntity
 from zha.application.platforms.light.const import LightEntityFeature
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
@@ -146,23 +150,7 @@ async def device_light_2(
     return zha_device
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
 
-
-def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
-
-    return entities.get(entity_id)
 
 
 async def test_device_left(

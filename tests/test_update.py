@@ -4,7 +4,6 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from slugify import slugify
 from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import DeliveryError
 from zigpy.ota import OtaImageWithMetadata
@@ -15,11 +14,10 @@ import zigpy.types as t
 from zigpy.zcl import Cluster, foundation
 from zigpy.zcl.clusters import general
 
-from tests.common import find_entity_id, update_attribute_cache
+from tests.common import find_entity_id, get_entity, update_attribute_cache
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
 from zha.application.platforms.update import (
     ATTR_IN_PROGRESS,
     ATTR_INSTALLED_VERSION,
@@ -44,13 +42,7 @@ def zigpy_device(zigpy_device_mock):
     )
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+
 
 
 async def setup_test_data(

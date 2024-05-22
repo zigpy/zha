@@ -5,18 +5,15 @@ import time
 from unittest.mock import AsyncMock
 
 import pytest
-from slugify import slugify
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general
 
-from tests.common import find_entity_id, send_attributes_report
+from tests.common import find_entity_id, get_entity, send_attributes_report
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
 from zha.application.platforms.device_tracker import SourceType
 from zha.application.registries import SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
-from zha.zigbee.device import Device
 
 
 @pytest.fixture
@@ -39,13 +36,7 @@ def zigpy_device_dt(zigpy_device_mock):
     return zigpy_device_mock(endpoints)
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+
 
 
 @pytest.mark.looptime

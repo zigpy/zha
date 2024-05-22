@@ -2,11 +2,9 @@
 
 from collections.abc import Awaitable, Callable
 import logging
-from typing import Optional
 from unittest.mock import call, patch
 
 import pytest
-from slugify import slugify
 from zhaquirks.const import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -24,6 +22,7 @@ from zigpy.zcl.clusters import closures, general
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity, get_group_entity
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
@@ -268,7 +267,7 @@ async def test_zha_group_switch_entity(
     entity_id = async_find_group_entity_id(Platform.SWITCH, zha_group)
     assert entity_id is not None
 
-    entity: GroupEntity = get_group_entity(zha_group, entity_id)  # type: ignore
+    entity: GroupEntity = get_group_entity(zha_group, entity_id)
     assert entity is not None
 
     assert isinstance(entity, GroupEntity)
@@ -347,23 +346,7 @@ async def test_zha_group_switch_entity(
     assert bool(entity.state["state"]) is True
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
 
-
-def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
-
-    return entities.get(entity_id)
 
 
 class WindowDetectionFunctionQuirk(CustomDevice):

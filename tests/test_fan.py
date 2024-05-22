@@ -8,7 +8,6 @@ from typing import Optional
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
-from slugify import slugify
 import zhaquirks
 from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
@@ -16,6 +15,7 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, hvac
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity, get_group_entity
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
@@ -117,23 +117,7 @@ async def device_fan_2(
     return zha_device
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
 
-
-def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
-
-    return entities.get(entity_id)
 
 
 async def test_fan(
@@ -304,7 +288,7 @@ async def test_zha_group_fan_entity(
     entity_id = async_find_group_entity_id(Platform.FAN, zha_group)
     assert entity_id is not None
 
-    entity: GroupEntity = get_group_entity(zha_group, entity_id)  # type: ignore
+    entity: GroupEntity = get_group_entity(zha_group, entity_id)
     assert entity is not None
 
     assert entity.group_id == zha_group.group_id
@@ -408,7 +392,7 @@ async def test_zha_group_fan_entity_failure_state(
     entity_id = async_find_group_entity_id(Platform.FAN, zha_group)
     assert entity_id is not None
 
-    entity: GroupEntity = get_group_entity(zha_group, entity_id)  # type: ignore
+    entity: GroupEntity = get_group_entity(zha_group, entity_id)
     assert entity is not None
 
     assert isinstance(entity, GroupEntity)

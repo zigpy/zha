@@ -13,7 +13,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
 
@@ -219,7 +219,7 @@ def find_entity_ids(
     head = f"{domain}.{slugify(f'{zha_device.name} {ieeetail}', separator='_')}"
 
     entity_ids = [
-        f"{entity.PLATFORM}.{slugify(entity.name, separator='_')}"
+        f"{entity.PLATFORM}.{slugify(entity.info_object.name, separator='_')}"
         for entity in zha_device.platform_entities.values()
     ]
 
@@ -255,3 +255,21 @@ def async_find_group_entity_id(domain: str, group: Group) -> Optional[str]:
     if entity_id in entity_ids:
         return entity_id
     return None
+
+
+def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
+    """Get entity."""
+    entities = {
+        entity.PLATFORM + "." + slugify(entity.info_object.name, separator="_"): entity
+        for entity in zha_dev.platform_entities.values()
+    }
+    return entities[entity_id]
+
+def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
+    """Get entity."""
+    entities = {
+        entity.PLATFORM + "." + slugify(entity.info_object.name, separator="_"): entity
+        for entity in group.group_entities.values()
+    }
+
+    return entities.get(entity_id)
