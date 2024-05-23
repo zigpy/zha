@@ -122,7 +122,6 @@ class SensorEntityInfo(PlatformEntityInfo):
 class DeviceCounterEntityInfo(BaseEntityInfo):
     """Device counter entity info."""
 
-    name: str
     device_ieee: str
     available: bool
     counter: str
@@ -363,7 +362,7 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
-        self._internal_name = f"{zha_device.name} {counter_group} {counter}"
+        self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
 
         self._device.gateway.global_updater.register_update_listener(self.update)
 

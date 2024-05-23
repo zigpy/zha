@@ -46,7 +46,6 @@ class BaseEntityInfo:
     """Information about a base entity."""
 
     fallback_name: str
-    internal_name: str
     unique_id: str
     platform: str
     class_name: str
@@ -124,11 +123,10 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None
     _attr_state_class: str | None
 
-    def __init__(self, unique_id: str, **kwargs: Any) -> None:
+    def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
         super().__init__()
 
-        self._internal_name: str | None = None
         self._unique_id: str = unique_id
         if self._unique_id_suffix:
             self._unique_id += f"-{self._unique_id_suffix}"
@@ -195,7 +193,6 @@ class BaseEntity(LogMixin, EventBase):
         """Return a representation of the platform entity."""
 
         return BaseEntityInfo(
-            internal_name=self._internal_name,
             unique_id=self._unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
@@ -254,13 +251,6 @@ class PlatformEntity(BaseEntity):
     ):
         """Initialize the platform entity."""
         super().__init__(unique_id, **kwargs)
-
-        ieeetail = "".join([f"{o:02x}" for o in device.ieee[:4]])
-        ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
-
-        self._internal_name: str = f"{device.name} {ieeetail} {ch_names}"
-        if self._unique_id_suffix:
-            self._internal_name += f" {self._unique_id_suffix}"
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
@@ -384,8 +374,7 @@ class GroupEntity(BaseEntity):
         group: Group,
     ) -> None:
         """Initialize a group."""
-        super().__init__(f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
-        self._internal_name = f"group 0x{group.group_id:04x}"
+        super().__init__(unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
         self._attr_fallback_name: str = group.name
         self._group: Group = group
         self._group.register_group_entity(self)
