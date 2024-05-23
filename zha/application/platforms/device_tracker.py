@@ -46,7 +46,7 @@ class DeviceScannerEntity(PlatformEntity):
     PLATFORM = Platform.DEVICE_TRACKER
 
     _attr_should_poll = True  # BaseZhaEntity defaults to False
-    _attr_name: str = "Device scanner"
+    _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
 
     def __init__(

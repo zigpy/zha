@@ -66,7 +66,7 @@ class Siren(PlatformEntity):
     """Representation of a ZHA siren."""
 
     PLATFORM = Platform.SIREN
-    _attr_name: str = "Siren"
+    _attr_fallback_name: str = "Siren"
 
     def __init__(
         self,

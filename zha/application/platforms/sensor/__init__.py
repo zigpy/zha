@@ -362,7 +362,7 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_groups: str = counter_groups
         self._zigpy_counter_group: str = counter_group
 
-        self._attr_name: str = self._zigpy_counter.name
+        self._attr_fallback_name: str = self._zigpy_counter.name
         self._internal_name = f"{zha_device.name} {counter_group} {counter}"
 
         self._device.gateway.global_updater.register_update_listener(self.update)

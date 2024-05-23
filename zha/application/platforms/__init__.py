@@ -45,7 +45,7 @@ class EntityCategory(StrEnum):
 class BaseEntityInfo:
     """Information about a base entity."""
 
-    name: str
+    fallback_name: str
     internal_name: str
     unique_id: str
     platform: str
@@ -118,7 +118,7 @@ class BaseEntity(LogMixin, EventBase):
     # entities using the same cluster handler/cluster id for the entity.
     _unique_id_suffix: str | None = None
 
-    _attr_name: str | None
+    _attr_fallback_name: str | None
     _attr_translation_key: str | None
     _attr_entity_category: EntityCategory | None
     _attr_device_class: str | None
@@ -137,10 +137,10 @@ class BaseEntity(LogMixin, EventBase):
         self._tracked_tasks: list[asyncio.Task] = []
 
     @property
-    def name(self) -> str | None:
-        """Return the entity name."""
-        if hasattr(self, "_attr_name"):
-            return self._attr_name
+    def fallback_name(self) -> str | None:
+        """Return the entity fallback name for when a translation key is unavailable."""
+        if hasattr(self, "_attr_fallback_name"):
+            return self._attr_fallback_name
         return None
 
     @property
@@ -199,7 +199,7 @@ class BaseEntity(LogMixin, EventBase):
             unique_id=self._unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
-            name=self.name,
+            fallback_name=self.fallback_name,
             translation_key=self.translation_key,
             device_class=self.device_class,
             state_class=self.state_class,
@@ -386,7 +386,7 @@ class GroupEntity(BaseEntity):
         """Initialize a group."""
         super().__init__(f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
         self._internal_name = f"group 0x{group.group_id:04x}"
-        self._attr_name: str = group.name
+        self._attr_fallback_name: str = group.name
         self._group: Group = group
         self._group.register_group_entity(self)
 
