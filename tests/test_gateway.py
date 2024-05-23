@@ -209,7 +209,7 @@ async def test_gateway_group_methods(
     assert info.class_name == "LightGroup"
     assert info.platform == Platform.LIGHT
     assert info.unique_id == "light_zha_group_0x0002"
-    assert info.name == "Test Group"
+    assert info.fallback_name == "Test Group"
     assert info.group_id == zha_group.group_id
     assert info.supported_features == LightEntityFeature.TRANSITION
     assert info.min_mireds == 153
@@ -238,8 +238,8 @@ async def test_gateway_group_methods(
     assert zha_gateway.get_group(zha_group.name) is None
 
     # the group entity should be cleaned up
-    entity = get_group_entity(zha_group, entity_id)
-    assert entity is None
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, entity_id)
 
     # test creating a group with 1 member
     zha_group = await zha_gateway.async_create_zigpy_group(
@@ -253,8 +253,8 @@ async def test_gateway_group_methods(
         assert member.device.ieee in [device_light_1.ieee]
 
     # no entity should be created for a group with a single member
-    entity = get_group_entity(zha_group, entity_id)
-    assert entity is None
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, entity_id)
 
     with patch("zigpy.zcl.Cluster.request", side_effect=TimeoutError):
         await zha_group.members[0].async_remove_from_group()

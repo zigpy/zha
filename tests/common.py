@@ -1,19 +1,18 @@
 """Common test objects."""
 
 import asyncio
-from collections.abc import Awaitable
+from collections.abc import Awaitable, Iterable
 import logging
 from typing import Any, Optional
 from unittest.mock import AsyncMock, Mock
 
-from slugify import slugify
 import zigpy.types as t
 import zigpy.zcl
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms import GroupEntity, PlatformEntity
+from zha.application.platforms import BaseEntity, GroupEntity, PlatformEntity
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
 
@@ -167,12 +166,15 @@ def reset_clusters(clusters: list[zigpy.zcl.Cluster]) -> None:
         cluster.write_attributes.reset_mock()
 
 
-def find_entity(device: Device, platform: Platform) -> Optional[PlatformEntity]:
+def find_entity(device: Device, platform: Platform) -> PlatformEntity:
     """Find an entity for the specified platform on the given device."""
     for entity in device.platform_entities.values():
         if platform == entity.PLATFORM:
             return entity
-    return None
+
+    raise KeyError(
+        f"No entity found for platform {platform!r} on device {device}: {device.platform_entities}"
+    )
 
 
 def mock_coro(
@@ -196,15 +198,15 @@ def find_entity_id(
     machine so that we can test state changes.
     """
     entities = find_entity_ids(domain, zha_device)
-    if not entities:
-        return None
-    if qualifier:
-        for entity_id in entities:
-            if qualifier in entity_id:
-                return entity_id
-        return None
-    else:
+
+    if not qualifier:
         return entities[0]
+
+    for entity_id in entities:
+        if qualifier in entity_id:
+            return entity_id
+
+    raise KeyError(f"No entity found with qualifier {qualifier!r}: {entities}")
 
 
 def find_entity_ids(
@@ -243,37 +245,36 @@ def async_find_group_entity_id(domain: str, group: Group) -> Optional[str]:
     ]
 
     if len(candidates) > 1:
-        raise RuntimeError(
-            f"Multiple entities exist for domain {domain!r}: {candidates}"
-        )
+        raise KeyError(f"Multiple entities exist for domain {domain!r}: {candidates}")
 
     if not candidates:
-        raise RuntimeError(f"No entities exist for domain {domain!r}")
+        raise KeyError(f"No entities exist for domain {domain!r}")
         return None
 
     entity = candidates[0]
-    return f"{domain}.{entity.unique_id}"
+    return f"{domain}.{entity.info_object.entity_id}"
+
+
+def _get_entity(entities_lst: Iterable[BaseEntity], entity_id: str) -> Any:
+    """Get entity."""
+    entities = {
+        entity.PLATFORM + "." + entity.info_object.entity_id: entity
+        for entity in entities_lst
+    }
+
+    try:
+        return entities[entity_id]
+    except KeyError as exc:
+        raise KeyError(f"Entity {entity_id!r} not found in {entities}") from exc
 
 
 def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM
-        + "."
-        + slugify(entity.info_object.internal_name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
+    """Get a platform entity."""
+
+    return _get_entity(zha_dev.platform_entities.values(), entity_id)
 
 
 def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
-    """Get entity."""
+    """Get a group entity."""
 
-    for entity in group.group_entities.values():
-        if (
-            entity.info_object.platform + "." + entity.info_object.unique_id
-            == entity_id
-        ):
-            return entity
-
-    return None
+    return _get_entity(group.group_entities.values(), entity_id)

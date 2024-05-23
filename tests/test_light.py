@@ -718,7 +718,7 @@ async def test_zha_group_light_entity(
 
     assert isinstance(entity, GroupEntity)
     assert entity.group_id == zha_group.group_id
-    assert entity.name == zha_group.name
+    assert entity.info_object.fallback_name == zha_group.name
 
     device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
     assert device_1_entity_id is not None
@@ -871,8 +871,8 @@ async def test_zha_group_light_entity(
     assert device_3_light_entity.unique_id not in zha_group.all_member_entity_unique_ids
     # assert entity.unique_id not in group_proxy.group_model.entities
 
-    entity = get_group_entity(zha_group, group_entity_id)
-    assert entity is None
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, group_entity_id)
 
     # add a member back and ensure that the group entity was created again
     await zha_group.async_add_members(
@@ -921,8 +921,9 @@ async def test_zha_group_light_entity(
     # remove the group and ensure that there is no entity and that the entity registry is cleaned up
     await zha_gateway.async_remove_zigpy_group(zha_group.group_id)
     await zha_gateway.async_block_till_done()
-    entity = get_group_entity(zha_group, group_entity_id)
-    assert entity is None
+
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, group_entity_id)
 
 
 @pytest.mark.parametrize(

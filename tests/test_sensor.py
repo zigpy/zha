@@ -6,7 +6,6 @@ import math
 from typing import Any, Optional
 
 import pytest
-from slugify import slugify
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, get_device
@@ -780,11 +779,17 @@ async def test_unsupported_attributes_sensor(
 
     zha_device = await device_joined(zigpy_device)
 
-    present_entity_ids = set(
-        find_entity_ids(Platform.SENSOR, zha_device, omit=["lqi", "rssi"])
-    )
-    assert present_entity_ids == entity_ids
-    assert missing_entity_ids not in present_entity_ids  # type: ignore[comparison-overlap]
+    if not entity_ids:
+        with pytest.raises(KeyError):
+            present_entity_ids = set(
+                find_entity_ids(Platform.SENSOR, zha_device, omit=["lqi", "rssi"])
+            )
+    else:
+        present_entity_ids = set(
+            find_entity_ids(Platform.SENSOR, zha_device, omit=["lqi", "rssi"])
+        )
+        assert present_entity_ids == entity_ids
+        assert not missing_entity_ids & present_entity_ids
 
 
 @pytest.mark.parametrize(
@@ -1030,14 +1035,6 @@ async def test_elec_measurement_skip_unsupported_attribute(
     entity_id = ENTITY_ID_PREFIX.format("electrical_measurement")
     zha_dev = elec_measurement_zha_dev
 
-    entities = {
-        entity.PLATFORM
-        + "."
-        + slugify(entity.info_object.internal_name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    entity = entities[entity_id]
-
     cluster = zha_dev.device.endpoints[1].electrical_measurement
 
     all_attrs = {
@@ -1056,6 +1053,7 @@ async def test_elec_measurement_skip_unsupported_attribute(
         cluster.add_unsupported_attribute(attr)
     cluster.read_attributes.reset_mock()
 
+    entity = get_entity(zha_dev, entity_id)
     await entity.async_update()
     await zha_dev.gateway.async_block_till_done()
     assert cluster.read_attributes.call_count == math.ceil(

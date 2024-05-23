@@ -272,7 +272,7 @@ async def test_zha_group_switch_entity(
 
     assert isinstance(entity, GroupEntity)
     assert entity.group_id == zha_group.group_id
-    assert entity.name == zha_group.name
+    assert entity.info_object.fallback_name == zha_group.name
 
     group_cluster_on_off = zha_group.zigpy_group.endpoint[general.OnOff.cluster_id]
     dev1_cluster_on_off = device_switch_1.device.endpoints[1].on_off
@@ -875,5 +875,5 @@ async def test_cover_inversion_switch_not_created(
     )
 
     # entity should not be created when mode or config status aren't present
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is None
+    with pytest.raises(KeyError):
+        find_entity_id(Platform.SWITCH, zha_device)
