@@ -11,6 +11,7 @@ from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any, Final, Optional, final
 
+from slugify import slugify
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
@@ -46,6 +47,7 @@ class BaseEntityInfo:
     """Information about a base entity."""
 
     fallback_name: str
+    entity_id: str
     unique_id: str
     platform: str
     class_name: str
@@ -113,23 +115,18 @@ class BaseEntity(LogMixin, EventBase):
 
     PLATFORM: Platform = Platform.UNKNOWN
 
-    # suffix to add to the unique_id of the entity. Used for multi
-    # entities using the same cluster handler/cluster id for the entity.
-    _unique_id_suffix: str | None = None
-
     _attr_fallback_name: str | None
     _attr_translation_key: str | None
     _attr_entity_category: EntityCategory | None
     _attr_device_class: str | None
     _attr_state_class: str | None
 
-    def __init__(self, unique_id: str) -> None:
+    def __init__(self, unique_id: str, entity_id: str) -> None:
         """Initialize the platform entity."""
         super().__init__()
 
+        self._entity_id: str = slugify(entity_id, separator="_")
         self._unique_id: str = unique_id
-        if self._unique_id_suffix:
-            self._unique_id += f"-{self._unique_id_suffix}"
 
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
@@ -193,7 +190,8 @@ class BaseEntity(LogMixin, EventBase):
         """Return a representation of the platform entity."""
 
         return BaseEntityInfo(
-            unique_id=self._unique_id,
+            entity_id=self._entity_id,
+            unique_id=self.unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
             fallback_name=self.fallback_name,
@@ -241,16 +239,35 @@ class PlatformEntity(BaseEntity):
     _attr_entity_registry_enabled_default: bool
     _attr_unit_of_measurement: str | None
 
+    # suffix to add to the unique_id of the entity. Used for multi
+    # entities using the same cluster handler/cluster id for the entity.
+    _unique_id_suffix: str | None = None
+
     def __init__(
         self,
         unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
+        entity_metadata: EntityMetadata | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
-        super().__init__(unique_id, **kwargs)
+        if entity_metadata is not None:
+            self._init_from_quirks_metadata(entity_metadata)
+
+        # Build the entity ID
+        ieeetail = "".join([f"{o:02x}" for o in device.ieee[:4]])
+        ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
+        entity_id = f"{device.name} {ieeetail} {ch_names}"
+
+        if self._unique_id_suffix:
+            unique_id += f"-{self._unique_id_suffix}"
+            entity_id += f" {self._unique_id_suffix}"
+
+        # XXX: The ordering here matters: `_init_from_quirks_metadata` affects how
+        # the `unique_id` is computed!
+        super().__init__(unique_id=unique_id, entity_id=entity_id, **kwargs)
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
@@ -261,6 +278,13 @@ class PlatformEntity(BaseEntity):
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
         if self.unique_id not in self._device.platform_entities:
             self._device.platform_entities[self.unique_id] = self
+        else:
+            _LOGGER.debug(
+                "Not registering entity %r, unique id %r already exists: %r",
+                self,
+                self.unique_id,
+                self._device.platform_entities[self.unique_id],
+            )
 
     @classmethod
     def create_platform_entity(
@@ -285,19 +309,20 @@ class PlatformEntity(BaseEntity):
         has_device_class = hasattr(entity_metadata, "device_class")
         has_attribute_name = hasattr(entity_metadata, "attribute_name")
         has_command_name = hasattr(entity_metadata, "command_name")
-        if not has_device_class or (
-            has_device_class and entity_metadata.device_class is None
-        ):
+
+        if not has_device_class or entity_metadata.device_class is None:
             if entity_metadata.translation_key:
                 self._attr_translation_key = entity_metadata.translation_key
             elif has_attribute_name:
                 self._attr_translation_key = entity_metadata.attribute_name
             elif has_command_name:
                 self._attr_translation_key = entity_metadata.command_name
+
         if has_attribute_name:
             self._unique_id_suffix = entity_metadata.attribute_name
         elif has_command_name:
             self._unique_id_suffix = entity_metadata.command_name
+
         if entity_metadata.entity_type is EntityType.CONFIG:
             self._attr_entity_category = EntityCategory.CONFIG
         elif entity_metadata.entity_type is EntityType.DIAGNOSTIC:
@@ -369,12 +394,12 @@ class PlatformEntity(BaseEntity):
 class GroupEntity(BaseEntity):
     """A base class for group entities."""
 
-    def __init__(
-        self,
-        group: Group,
-    ) -> None:
+    def __init__(self, group: Group) -> None:
         """Initialize a group."""
-        super().__init__(unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
+        super().__init__(
+            unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}",
+            entity_id=f"{group.name}",
+        )
         self._attr_fallback_name: str = group.name
         self._group: Group = group
         self._group.register_group_entity(self)

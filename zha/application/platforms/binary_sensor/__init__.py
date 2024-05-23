@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
@@ -70,8 +69,6 @@ class BinarySensor(PlatformEntity):
     ) -> None:
         """Initialize the ZHA binary sensor."""
         self._cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._state: bool = self.is_on
         self._cluster_handler.on_event(

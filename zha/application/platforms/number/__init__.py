@@ -238,8 +238,6 @@ class NumberConfigurationEntity(PlatformEntity):
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attr_device_class: NumberDeviceClass | None = None
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,

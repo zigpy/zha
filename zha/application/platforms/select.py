@@ -194,11 +194,9 @@ class ZCLEnumSelectEntity(PlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
-        self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
-        self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._cluster_handler: ClusterHandler = cluster_handlers[0]
+        self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,

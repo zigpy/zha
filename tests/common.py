@@ -215,32 +215,24 @@ def find_entity_ids(
     This is used to get the entity id in order to get the state from the state
     machine so that we can test state changes.
     """
-    ieeetail = "".join([f"{o:02x}" for o in zha_device.ieee[:4]])
-    head = f"{domain}.{slugify(f'{zha_device.name} {ieeetail}', separator='_')}"
 
-    entity_ids = [
-        f"{entity.PLATFORM}.{slugify(entity.info_object.internal_name, separator='_')}"
-        for entity in zha_device.platform_entities.values()
-    ]
+    results = []
 
-    matches = []
-    res = []
-    for entity_id in entity_ids:
-        if entity_id.startswith(head):
-            matches.append(entity_id)
+    for entity in zha_device.platform_entities.values():
+        if domain != entity.PLATFORM:
+            continue
 
-    if omit:
-        for entity_id in matches:
-            skip = False
-            for o in omit:
-                if o in entity_id:
-                    skip = True
-                    break
-            if not skip:
-                res.append(entity_id)
-    else:
-        res = matches
-    return res
+        if omit and any(entry in entity.info_object.entity_id for entry in omit):
+            continue
+
+        results.append(f"{entity.PLATFORM}.{entity.info_object.entity_id}")
+
+    if not results:
+        raise KeyError(
+            f"No entities exist for domain {domain!r} and device {zha_device}, omitting {omit}"
+        )
+
+    return results
 
 
 def async_find_group_entity_id(domain: str, group: Group) -> Optional[str]:

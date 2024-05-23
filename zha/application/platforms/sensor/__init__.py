@@ -186,8 +186,6 @@ class Sensor(PlatformEntity):
     ) -> None:
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -327,7 +325,6 @@ class DeviceCounterSensor(BaseEntity):
     @classmethod
     def create_platform_entity(
         cls,
-        unique_id: str,
         zha_device: Device,
         counter_groups: str,
         counter_group: str,
@@ -338,13 +335,10 @@ class DeviceCounterSensor(BaseEntity):
 
         Return entity if it is a supported configuration, otherwise return None
         """
-        return cls(
-            unique_id, zha_device, counter_groups, counter_group, counter, **kwargs
-        )
+        return cls(zha_device, counter_groups, counter_group, counter, **kwargs)
 
     def __init__(
         self,
-        unique_id: str,
         zha_device: Device,
         counter_groups: str,
         counter_group: str,
@@ -352,7 +346,11 @@ class DeviceCounterSensor(BaseEntity):
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, **kwargs)
+        super().__init__(
+            unique_id=f"{counter_groups}_{counter_group}_{counter}",
+            entity_id=counter,
+            **kwargs,
+        )
         self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
@@ -448,11 +446,15 @@ class EnumSensor(Sensor):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
+        # XXX: This class is not meant to be initialized directly, as `unique_id`
+        # depends on the value of `_attribute_name`
+
     def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
         """Init this entity from the quirks metadata."""
-        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
+
+        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
