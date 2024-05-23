@@ -360,7 +360,11 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
-        self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
+
+        # TODO: why do entities get created with " None" as a name suffix instead of
+        # falling back to `fallback_name`? We should be able to provide translation keys
+        # even if they do not exist.
+        # self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
 
         self._device.gateway.global_updater.register_update_listener(self.update)
 
