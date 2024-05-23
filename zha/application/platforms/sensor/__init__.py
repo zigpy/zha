@@ -347,7 +347,7 @@ class DeviceCounterSensor(BaseEntity):
     ) -> None:
         """Init this sensor."""
         super().__init__(
-            unique_id=f"{counter_groups}_{counter_group}_{counter}",
+            unique_id=f"{zha_device.unique_id}_{counter_groups}_{counter_group}_{counter}",
             entity_id=counter,
             **kwargs,
         )
