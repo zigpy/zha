@@ -346,8 +346,11 @@ class DeviceCounterSensor(BaseEntity):
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
+        # XXX: ZHA uses the IEEE address of the device passed through `slugify`!
+        slugified_device_id = zha_device.unique_id.replace(":", "-")
+
         super().__init__(
-            unique_id=f"{zha_device.unique_id}_{counter_groups}_{counter_group}_{counter}",
+            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
             entity_id=counter,
             **kwargs,
         )
