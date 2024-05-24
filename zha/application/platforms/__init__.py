@@ -47,7 +47,7 @@ class BaseEntityInfo:
     """Information about a base entity."""
 
     fallback_name: str
-    entity_id: str
+    entity_id: str  # TODO: remove this, it's only used in unit tests!
     unique_id: str
     platform: str
     class_name: str
