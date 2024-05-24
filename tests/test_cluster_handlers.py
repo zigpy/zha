@@ -567,9 +567,6 @@ def test_cluster_handler_registry() -> None:
                             all_quirk_ids[cluster_id] = {None}
                         all_quirk_ids[cluster_id].add(quirk_id)
 
-    # TODO make sure this is needed
-    del quirk, model_quirk_list, manufacturer  # pylint: disable=undefined-loop-variable
-
     for (
         cluster_id,
         cluster_handler_classes,

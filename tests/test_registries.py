@@ -559,8 +559,6 @@ def test_quirk_classes() -> None:
                 quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
                 if quirk_id is not None and quirk_id not in all_quirk_ids:
                     all_quirk_ids.append(quirk_id)
-    # TODO make sure this is needed
-    del quirk, model_quirk_list, manufacturer  # pylint: disable=undefined-loop-variable
 
     # validate all quirk IDs used in component match rules
     for rule, _ in iter_all_rules():

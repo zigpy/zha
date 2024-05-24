@@ -169,19 +169,6 @@ class Opening(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
 
-    # pylint: disable=pointless-string-statement
-    """TODO
-    # Client/out cluster attributes aren't stored in the zigpy database, but are properly stored in the runtime cache.
-    # We need to manually restore the last state from the sensor state to the runtime cache for now.
-
-    def async_restore_last_state(self, last_state):
-        #Restore previous state to zigpy cache.
-        self._cluster_handler.cluster.update_attribute(
-            OnOff.attributes_by_name[self._attribute_name].id,
-            t.Bool.true if last_state.state == STATE_ON else t.Bool.false,
-        )
-    """
-
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
 class BinaryInput(BinarySensor):

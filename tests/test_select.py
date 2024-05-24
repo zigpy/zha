@@ -228,7 +228,7 @@ async def test_on_off_select_attribute_report_v2(
     assert entity.state["state"] == AqaraMotionSensitivities.Low.name
 
     assert entity._attr_entity_category == EntityCategory.CONFIG
-    # TODO assert entity._attr_entity_registry_enabled_default is True
+    assert entity._attr_entity_registry_enabled_default is True
     assert entity._attr_translation_key == "motion_sensitivity"
 
     await entity.async_select_option(AqaraMotionSensitivities.Medium.name)
