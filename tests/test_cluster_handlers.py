@@ -35,6 +35,7 @@ from zigpy.zcl.clusters.measurement import TemperatureMeasurement
 import zigpy.zdo.types as zdo_t
 
 from tests.common import make_zcl_header, send_attributes_report
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application.const import ATTR_QUIRK_ID
 from zha.application.gateway import Gateway
 from zha.exceptions import ZHAException
@@ -60,8 +61,6 @@ from zha.zigbee.cluster_handlers.registries import (
 )
 from zha.zigbee.device import Device
 from zha.zigbee.endpoint import Endpoint
-
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 
 @pytest.fixture

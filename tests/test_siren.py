@@ -11,13 +11,11 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity
+from tests.common import get_entity, mock_coro
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.zigbee.device import Device
-
-from .common import find_entity_id, mock_coro
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 
 
 @pytest.fixture
@@ -50,11 +48,8 @@ async def test_siren(
 
     zha_device, cluster = siren
     assert cluster is not None
-    entity_id = find_entity_id(Platform.SIREN, zha_device)
-    assert entity_id is not None
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SIREN)
 
     assert entity.state["state"] is False
 
@@ -125,11 +120,7 @@ async def test_siren_timed_off(
     zha_device, cluster = siren
     assert cluster is not None
 
-    entity_id = find_entity_id(Platform.SIREN, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SIREN)
 
     assert entity.state["state"] is False
 

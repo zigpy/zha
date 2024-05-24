@@ -10,21 +10,14 @@ from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
 
-from tests.common import get_entity
+from tests.common import get_entity, send_attributes_report, update_attribute_cache
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.number.const import NumberMode
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
-
-from .common import (
-    find_entity,
-    find_entity_id,
-    send_attributes_report,
-    update_attribute_cache,
-)
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 
 @pytest.fixture
@@ -104,8 +97,7 @@ async def test_number(
     assert "engineering_units" in attr_reads
     assert "application_type" in attr_reads
 
-    entity: PlatformEntity = find_entity(zha_device, Platform.NUMBER)  # type: ignore
-    assert entity is not None
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
     assert isinstance(entity, PlatformEntity)
 
     assert cluster.read_attributes.call_count == 3
@@ -195,12 +187,7 @@ async def test_level_control_number(
     }
     zha_device = await device_joined(light)
 
-    entity_id = find_entity_id(
-        Platform.NUMBER,
-        zha_device,
-        qualifier=attr,
-    )
-    assert entity_id is not None
+    entity = get_entity(zha_device, platform=Platform.NUMBER, qualifier=attr)
 
     assert level_control_cluster.read_attributes.mock_calls == [
         call(
@@ -231,8 +218,6 @@ async def test_level_control_number(
         ),
     ]
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity
     assert entity.state["state"] == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
@@ -325,12 +310,7 @@ async def test_color_number(
     }
     zha_device = await device_joined(light)
 
-    entity_id = find_entity_id(
-        Platform.NUMBER,
-        zha_device,
-        qualifier=attr,
-    )
-    assert entity_id is not None
+    entity = get_entity(zha_device, platform=Platform.NUMBER, qualifier=attr)
 
     assert color_cluster.read_attributes.call_count == 3
     assert (
@@ -348,9 +328,6 @@ async def test_color_number(
         )
         in color_cluster.read_attributes.call_args_list
     )
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity
 
     assert entity.state["state"] == initial_value
     assert entity._attr_entity_category == EntityCategory.CONFIG

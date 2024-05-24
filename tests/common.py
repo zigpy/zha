@@ -1,7 +1,7 @@
 """Common test objects."""
 
 import asyncio
-from collections.abc import Awaitable, Iterable
+from collections.abc import Awaitable, Callable
 import logging
 from typing import Any, Optional
 from unittest.mock import AsyncMock, Mock
@@ -189,92 +189,57 @@ def mock_coro(
     return fut
 
 
-def find_entity_id(
-    domain: str, zha_device: Device, qualifier: Optional[str] = None
-) -> Optional[str]:
-    """Find the entity id under the testing.
-
-    This is used to get the entity id in order to get the state from the state
-    machine so that we can test state changes.
-    """
-    entities = find_entity_ids(domain, zha_device)
-
-    if not qualifier:
-        return entities[0]
-
-    for entity_id in entities:
-        if qualifier in entity_id:
-            return entity_id
-
-    raise KeyError(f"No entity found with qualifier {qualifier!r}: {entities}")
-
-
-def find_entity_ids(
-    domain: str, zha_device: Device, omit: Optional[list[str]] = None
-) -> list[str]:
-    """Find the entity ids under the testing.
-
-    This is used to get the entity id in order to get the state from the state
-    machine so that we can test state changes.
-    """
-
-    results = []
-
-    for entity in zha_device.platform_entities.values():
-        if domain != entity.PLATFORM:
+def get_group_entity(
+    group: Group,
+    platform: Platform,
+    entity_type: type[BaseEntity] = BaseEntity,
+    qualifier: str | None = None,
+) -> GroupEntity:
+    """Get the first entity of the specified platform on the given group."""
+    for entity in group.group_entities.values():
+        if platform != entity.PLATFORM:
             continue
 
-        if omit and any(entry in entity.info_object.entity_id for entry in omit):
+        if not isinstance(entity, entity_type):
             continue
 
-        results.append(f"{entity.PLATFORM}.{entity.info_object.entity_id}")
+        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+            continue
 
-    if not results:
-        raise KeyError(
-            f"No entities exist for domain {domain!r} and device {zha_device}, omitting {omit}"
-        )
+        return entity
 
-    return results
-
-
-def async_find_group_entity_id(domain: str, group: Group) -> Optional[str]:
-    """Find the group entity id under test."""
-
-    candidates = [
-        e for e in group.group_entities.values() if e.info_object.platform == domain
-    ]
-
-    if len(candidates) > 1:
-        raise KeyError(f"Multiple entities exist for domain {domain!r}: {candidates}")
-
-    if not candidates:
-        raise KeyError(f"No entities exist for domain {domain!r}")
-        return None
-
-    entity = candidates[0]
-    return f"{domain}.{entity.info_object.entity_id}"
+    raise KeyError(
+        f"No {entity_type} entity found for platform {platform!r} on group {group}: {group.group_entities}"
+    )
 
 
-def _get_entity(entities_lst: Iterable[BaseEntity], entity_id: str) -> Any:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + entity.info_object.entity_id: entity
-        for entity in entities_lst
-    }
+def get_entity(
+    device: Device,
+    platform: Platform,
+    entity_type: type[BaseEntity] = BaseEntity,
+    exact_entity_type: type[BaseEntity] | None = None,
+    qualifier: str | None = None,
+    qualifier_func: Callable[[BaseEntity], bool] = lambda e: True,
+) -> PlatformEntity:
+    """Get the first entity of the specified platform on the given device."""
+    for entity in device.platform_entities.values():
+        if platform != entity.PLATFORM:
+            continue
 
-    try:
-        return entities[entity_id]
-    except KeyError as exc:
-        raise KeyError(f"Entity {entity_id!r} not found in {entities}") from exc
+        if not isinstance(entity, entity_type):
+            continue
 
+        if exact_entity_type is not None and type(entity) is not exact_entity_type:
+            continue
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get a platform entity."""
+        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+            continue
 
-    return _get_entity(zha_dev.platform_entities.values(), entity_id)
+        if not qualifier_func(entity):
+            continue
 
+        return entity
 
-def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
-    """Get a group entity."""
-
-    return _get_entity(group.group_entities.values(), entity_id)
+    raise KeyError(
+        f"No {entity_type} entity found for platform {platform!r} on device {device}: {device.platform_entities}"
+    )

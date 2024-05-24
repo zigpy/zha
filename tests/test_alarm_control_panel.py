@@ -10,12 +10,11 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application.gateway import Gateway
 from zha.application.platforms.alarm_control_panel import AlarmControlPanel
 from zha.application.platforms.alarm_control_panel.const import AlarmState
 from zha.zigbee.device import Device
-
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 _LOGGER = logging.getLogger(__name__)
 

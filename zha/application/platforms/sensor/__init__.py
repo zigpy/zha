@@ -351,7 +351,6 @@ class DeviceCounterSensor(BaseEntity):
 
         super().__init__(
             unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
-            entity_id=counter,
             **kwargs,
         )
         self._device: Device = zha_device

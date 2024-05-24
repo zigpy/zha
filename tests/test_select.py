@@ -20,15 +20,13 @@ import zigpy.types as t
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
-from tests.common import get_entity
+from tests.common import get_entity, send_attributes_report
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory
 from zha.application.platforms.select import AqaraMotionSensitivities
 from zha.zigbee.device import Device
-
-from .common import find_entity_id, send_attributes_report
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 
 
 @pytest.fixture
@@ -61,15 +59,8 @@ async def test_select(
     zha_device, cluster = siren
     assert cluster is not None
     select_name = security.IasWd.Warning.WarningMode.__name__
-    entity_id = find_entity_id(
-        Platform.SELECT,
-        zha_device,
-        qualifier=select_name.lower(),
-    )
-    assert entity_id is not None
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SELECT, qualifier=select_name)
     assert entity.state["state"] is None  # unknown in HA
     assert entity.info_object.options == [
         "Stop",
@@ -159,12 +150,8 @@ async def test_on_off_select_attribute_report(
 
     zha_device = await device_joined(zigpy_device_aqara_sensor)
     cluster = zigpy_device_aqara_sensor.endpoints.get(1).opple_cluster
-    entity_id = find_entity_id(Platform.SELECT, zha_device)
-    assert entity_id is not None
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
-
+    entity = get_entity(zha_device, platform=Platform.SELECT)
     assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
 
     # send attribute report from device
@@ -228,13 +215,8 @@ async def test_on_off_select_attribute_report_v2(
 
     zha_device, cluster = zigpy_device_aqara_sensor_v2
     assert isinstance(zha_device.device, CustomDeviceV2)
-    entity_id = find_entity_id(
-        Platform.SELECT, zha_device, qualifier="motion_sensitivity"
-    )
-    assert entity_id is not None
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SELECT)
 
     # test that the state is in default medium state
     assert entity.state["state"] == AqaraMotionSensitivities.Medium.name

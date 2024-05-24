@@ -13,12 +13,7 @@ from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types
 from zigpy.zdo.types import LogicalType, NodeDescriptor
 
-from tests.common import (
-    async_find_group_entity_id,
-    find_entity_id,
-    get_entity,
-    get_group_entity,
-)
+from tests.common import get_entity, get_group_entity
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import CONF_USE_THREAD, RadioType
@@ -196,13 +191,7 @@ async def test_gateway_group_methods(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.LIGHT, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity | None = get_group_entity(zha_group, entity_id)
-    assert entity is not None
-
-    assert isinstance(entity, GroupEntity)
+    entity: GroupEntity | None = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
 
     info = entity.info_object
@@ -216,13 +205,9 @@ async def test_gateway_group_methods(
     assert info.max_mireds == 500
     assert info.effect_list is None
 
-    device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
-    device_2_entity_id = find_entity_id(Platform.LIGHT, device_light_2)
-
-    assert device_1_entity_id != device_2_entity_id
-
-    device_1_light_entity = get_entity(device_light_1, device_1_entity_id)
-    device_2_light_entity = get_entity(device_light_2, device_2_entity_id)
+    device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
+    assert device_1_light_entity != device_2_light_entity
 
     assert device_1_light_entity is not None
     assert device_2_light_entity is not None
@@ -239,7 +224,7 @@ async def test_gateway_group_methods(
 
     # the group entity should be cleaned up
     with pytest.raises(KeyError):
-        get_group_entity(zha_group, entity_id)
+        get_group_entity(zha_group, platform=Platform.LIGHT)
 
     # test creating a group with 1 member
     zha_group = await zha_gateway.async_create_zigpy_group(
@@ -254,7 +239,7 @@ async def test_gateway_group_methods(
 
     # no entity should be created for a group with a single member
     with pytest.raises(KeyError):
-        get_group_entity(zha_group, entity_id)
+        get_group_entity(zha_group, platform=Platform.LIGHT)
 
     with patch("zigpy.zcl.Cluster.request", side_effect=TimeoutError):
         await zha_group.members[0].async_remove_from_group()

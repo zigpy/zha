@@ -11,7 +11,6 @@ from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any, Final, Optional, final
 
-from slugify import slugify
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
@@ -47,7 +46,6 @@ class BaseEntityInfo:
     """Information about a base entity."""
 
     fallback_name: str
-    entity_id: str  # TODO: remove this, it's only used in unit tests!
     unique_id: str
     platform: str
     class_name: str
@@ -123,11 +121,10 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None
     _attr_state_class: str | None
 
-    def __init__(self, unique_id: str, entity_id: str) -> None:
+    def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
         super().__init__()
 
-        self._entity_id: str = slugify(entity_id, separator="_")
         self._unique_id: str = unique_id
 
         self.__previous_state: Any = None
@@ -197,7 +194,6 @@ class BaseEntity(LogMixin, EventBase):
         """Return a representation of the platform entity."""
 
         return BaseEntityInfo(
-            entity_id=self._entity_id,
             unique_id=self.unique_id,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
@@ -261,18 +257,12 @@ class PlatformEntity(BaseEntity):
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
 
-        # Build the entity ID
-        ieeetail = "".join([f"{o:02x}" for o in device.ieee[:4]])
-        ch_names = ", ".join(sorted(ch.name for ch in cluster_handlers))
-        entity_id = f"{device.name} {ieeetail} {ch_names}"
-
         if self._unique_id_suffix:
             unique_id += f"-{self._unique_id_suffix}"
-            entity_id += f" {self._unique_id_suffix}"
 
         # XXX: The ordering here matters: `_init_from_quirks_metadata` affects how
         # the `unique_id` is computed!
-        super().__init__(unique_id=unique_id, entity_id=entity_id, **kwargs)
+        super().__init__(unique_id=unique_id, **kwargs)
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
@@ -401,10 +391,7 @@ class GroupEntity(BaseEntity):
 
     def __init__(self, group: Group) -> None:
         """Initialize a group."""
-        super().__init__(
-            unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}",
-            entity_id=f"{group.name}",
-        )
+        super().__init__(unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
         self._attr_fallback_name: str = group.name
         self._group: Group = group
         self._group.register_group_entity(self)

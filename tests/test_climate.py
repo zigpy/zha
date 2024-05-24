@@ -17,7 +17,8 @@ import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import Thermostat
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity
+from tests.common import get_entity, send_attributes_report
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import (
     PRESET_AWAY,
@@ -40,9 +41,6 @@ from zha.application.platforms.sensor import (
 )
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
-
-from .common import find_entity_id, send_attributes_report
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -291,12 +289,9 @@ async def test_climate_local_temperature(
     """Test local temperature."""
 
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
     assert entity.state["current_temperature"] is None
 
     await send_attributes_report(zha_gateway, thrm_cluster, {0: 2100})
@@ -310,18 +305,13 @@ async def test_climate_hvac_action_running_state(
     """Test hvac action via running state."""
 
     thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_sinope)
-    sensor_entity_id = find_entity_id(Platform.SENSOR, device_climate_sinope, "hvac")
-    assert entity_id is not None
-    assert sensor_entity_id is not None
 
-    entity: ThermostatEntity = get_entity(device_climate_sinope, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
-
-    sensor_entity: Sensor = get_entity(device_climate_sinope, sensor_entity_id)
-    assert sensor_entity is not None
-    assert isinstance(sensor_entity, SinopeHVACAction)
+    entity: ThermostatEntity = get_entity(
+        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+    sensor_entity: SinopeHVACAction = get_entity(
+        device_climate_sinope, platform=Platform.SENSOR, entity_type=SinopeHVACAction
+    )
 
     assert entity.state["hvac_action"] == "off"
     assert sensor_entity.state["state"] == "off"
@@ -372,10 +362,9 @@ async def test_sinope_time(
     mfg_cluster = device_climate_sinope.device.endpoints[1].sinope_manufacturer_specific
     assert mfg_cluster is not None
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_sinope)
-    entity: ThermostatEntity = get_entity(device_climate_sinope, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     entity._async_update_time = AsyncMock(wraps=entity._async_update_time)
 
@@ -393,17 +382,14 @@ async def test_climate_hvac_action_running_state_zen(
     """Test Zen hvac action via running state."""
 
     thrm_cluster = device_climate_zen.device.endpoints[1].thermostat
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_zen)
-    sensor_entity_id = find_entity_id(Platform.SENSOR, device_climate_zen, "hvac")
-    assert entity_id is not None
-    assert sensor_entity_id is not None
 
-    entity: ThermostatEntity = get_entity(device_climate_zen, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_zen, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
-    sensor_entity: Sensor = get_entity(device_climate_zen, sensor_entity_id)
-    assert sensor_entity is not None
+    sensor_entity: Sensor = get_entity(
+        device_climate_zen, platform=Platform.SENSOR, entity_type=ThermostatHVACAction
+    )
     assert isinstance(sensor_entity, ThermostatHVACAction)
 
     assert entity.state["hvac_action"] is None
@@ -471,12 +457,9 @@ async def test_climate_hvac_action_pi_demand(
     """Test hvac action based on pi_heating/cooling_demand attrs."""
 
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
-    assert entity_id is not None
-
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_action"] is None
 
@@ -522,12 +505,9 @@ async def test_hvac_mode(
     """Test HVAC mode."""
 
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
-    assert entity_id is not None
-
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_mode"] == "off"
 
@@ -566,11 +546,9 @@ async def test_hvac_modes(  # pylint: disable=unused-argument
     dev_climate = await device_climate_mock(
         CLIMATE, {"ctrl_sequence_of_oper": seq_of_op}
     )
-    entity_id = find_entity_id(Platform.CLIMATE, dev_climate)
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(dev_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        dev_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
     assert set(entity.hvac_modes) == modes
 
 
@@ -604,11 +582,9 @@ async def test_target_temperature(
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
     )
-    entity_id = find_entity_id(Platform.CLIMATE, dev_climate)
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(dev_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        dev_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
     if preset:
         await entity.async_set_preset_mode(preset)
         await zha_gateway.async_block_till_done()
@@ -643,11 +619,9 @@ async def test_target_temperature_high(
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
     )
-    entity_id = find_entity_id(Platform.CLIMATE, dev_climate)
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(dev_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        dev_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
     if preset:
         await entity.async_set_preset_mode(preset)
         await zha_gateway.async_block_till_done()
@@ -682,11 +656,9 @@ async def test_target_temperature_low(
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
     )
-    entity_id = find_entity_id(Platform.CLIMATE, dev_climate)
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(dev_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        dev_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
     if preset:
         await entity.async_set_preset_mode(preset)
         await zha_gateway.async_block_till_done()
@@ -714,11 +686,9 @@ async def test_set_hvac_mode(
     """Test setting hvac mode."""
 
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_mode"] == "off"
 
@@ -753,12 +723,10 @@ async def test_preset_setting(
 ):
     """Test preset setting."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_sinope)
     thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate_sinope, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["preset_mode"] == "none"
 
@@ -836,13 +804,10 @@ async def test_preset_setting_invalid(
 ):
     """Test invalid preset setting."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_sinope)
     thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
-    assert entity_id is not None
-
-    entity: ThermostatEntity = get_entity(device_climate_sinope, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["preset_mode"] == "none"
     await entity.async_set_preset_mode("invalid_preset")
@@ -858,13 +823,10 @@ async def test_set_temperature_hvac_mode(
 ):
     """Test setting HVAC mode in temperature service call."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    assert entity_id is not None
-
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_mode"] == "off"
     await entity.async_set_temperature(hvac_mode="heat_cool", temperature=20)
@@ -895,12 +857,10 @@ async def test_set_temperature_heat_cool(
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
     )
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_mode"] == "heat_cool"
 
@@ -960,12 +920,10 @@ async def test_set_temperature_heat(
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
     )
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_mode"] == "heat"
 
@@ -1022,12 +980,10 @@ async def test_set_temperature_cool(
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
     )
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_mode"] == "cool"
 
@@ -1088,12 +1044,10 @@ async def test_set_temperature_wrong_mode(
             },
             manuf=MANUF_SINOPE,
         )
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["hvac_mode"] == "dry"
 
@@ -1112,12 +1066,10 @@ async def test_occupancy_reset(
 ):
     """Test away preset reset."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_sinope)
     thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate_sinope, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["preset_mode"] == "none"
 
@@ -1141,12 +1093,10 @@ async def test_fan_mode(
 ):
     """Test fan mode."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_fan)
     thrm_cluster = device_climate_fan.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate_fan, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert set(entity.fan_modes) == {FanState.AUTO, FanState.ON}
     assert entity.state["fan_mode"] == FanState.AUTO
@@ -1177,12 +1127,10 @@ async def test_set_fan_mode_not_supported(
 ):
     """Test fan setting unsupported mode."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_fan)
     fan_cluster = device_climate_fan.device.endpoints[1].fan
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate_fan, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     await entity.async_set_fan_mode(FanState.LOW)
     await zha_gateway.async_block_till_done()
@@ -1195,12 +1143,10 @@ async def test_set_fan_mode(
 ):
     """Test fan mode setting."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_fan)
     fan_cluster = device_climate_fan.device.endpoints[1].fan
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate_fan, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["fan_mode"] == FanState.AUTO
 
@@ -1220,12 +1166,10 @@ async def test_set_fan_mode(
 async def test_set_moes_preset(device_climate_moes: Device, zha_gateway: Gateway):
     """Test setting preset for moes trv."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_moes)
     thrm_cluster = device_climate_moes.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate_moes, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_moes, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     assert entity.state["preset_mode"] == "none"
 
@@ -1312,12 +1256,10 @@ async def test_set_moes_operation_mode(
 ):
     """Test setting preset for moes trv."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_moes)
     thrm_cluster = device_climate_moes.device.endpoints[1].thermostat
-    assert entity_id is not None
-    entity: ThermostatEntity = get_entity(device_climate_moes, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_moes, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 0})
 
@@ -1371,11 +1313,10 @@ async def test_beca_operation_mode_update(
 ) -> None:
     """Test beca trv operation mode attribute update."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_beca)
     thrm_cluster = device_climate_beca.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(device_climate_beca, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_beca, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
 
     # Test sending an attribute report
     await send_attributes_report(
@@ -1400,11 +1341,12 @@ async def test_set_zonnsmart_preset(
 ) -> None:
     """Test setting preset from homeassistant for zonnsmart trv."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_zonnsmart)
     thrm_cluster = device_climate_zonnsmart.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(device_climate_zonnsmart, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_zonnsmart,
+        platform=Platform.CLIMATE,
+        entity_type=ThermostatEntity,
+    )
 
     assert entity.state[ATTR_PRESET_MODE] == PRESET_NONE
 
@@ -1456,11 +1398,12 @@ async def test_set_zonnsmart_operation_mode(
 ) -> None:
     """Test setting preset from trv for zonnsmart trv."""
 
-    entity_id = find_entity_id(Platform.CLIMATE, device_climate_zonnsmart)
     thrm_cluster = device_climate_zonnsmart.device.endpoints[1].thermostat
-    entity: ThermostatEntity = get_entity(device_climate_zonnsmart, entity_id)
-    assert entity is not None
-    assert isinstance(entity, ThermostatEntity)
+    entity: ThermostatEntity = get_entity(
+        device_climate_zonnsmart,
+        platform=Platform.CLIMATE,
+        entity_type=ThermostatEntity,
+    )
 
     await send_attributes_report(zha_gateway, thrm_cluster, {"operation_preset": 0})
 

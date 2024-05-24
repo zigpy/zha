@@ -9,14 +9,12 @@ import zigpy.profiles.zha
 from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity
+from tests.common import get_entity, send_attributes_report, update_attribute_cache
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.zigbee.device import Device
-
-from .common import find_entity_id, send_attributes_report, update_attribute_cache
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 LOCK_DOOR = 0
 UNLOCK_DOOR = 1
@@ -54,11 +52,7 @@ async def test_lock(
     """Test zha lock platform."""
 
     zha_device, cluster = lock
-    entity_id = find_entity_id(Platform.LOCK, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.LOCK)
 
     assert entity.state["is_locked"] is False
 

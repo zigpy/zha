@@ -23,13 +23,7 @@ from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import (
-    find_entity,
-    find_entity_id,
-    get_entity,
-    mock_coro,
-    update_attribute_cache,
-)
+from tests.common import get_entity, mock_coro, update_attribute_cache
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -125,8 +119,7 @@ async def test_button(
 
     zha_device, cluster = contact_sensor
     assert cluster is not None
-    entity: PlatformEntity = find_entity(zha_device, Platform.BUTTON)  # type: ignore
-    assert entity is not None
+    entity: PlatformEntity = get_entity(zha_device, Platform.BUTTON)
     assert isinstance(entity, Button)
     assert entity.PLATFORM == Platform.BUTTON
 
@@ -150,11 +143,9 @@ async def test_frost_unlock(
 
     zha_device, cluster = tuya_water_valve
     assert cluster is not None
-    entity_id = find_entity_id(
-        Platform.BUTTON, zha_device, qualifier="reset_frost_lock"
+    entity: PlatformEntity = get_entity(
+        zha_device, platform=Platform.BUTTON, entity_type=WriteAttributeButton
     )
-    entity: PlatformEntity = get_entity(zha_device, entity_id)
-    assert entity is not None
     assert isinstance(entity, WriteAttributeButton)
 
     assert entity._attr_device_class == ButtonDeviceClass.RESTART
@@ -254,10 +245,7 @@ async def test_quirks_command_button(
 
     zha_device, cluster = custom_button_device
     assert cluster is not None
-    entity_id = find_entity_id(Platform.BUTTON, zha_device)
-    entity: PlatformEntity = get_entity(zha_device, entity_id)
-    assert isinstance(entity, Button)
-    assert entity is not None
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.BUTTON)
 
     with patch(
         "zigpy.zcl.Cluster.request",
@@ -279,10 +267,9 @@ async def test_quirks_write_attr_button(
 
     zha_device, cluster = custom_button_device
     assert cluster is not None
-    entity_id = find_entity_id(Platform.BUTTON, zha_device, qualifier="feed")
-    entity: PlatformEntity = get_entity(zha_device, entity_id)
-    assert isinstance(entity, WriteAttributeButton)
-    assert entity is not None
+    entity: PlatformEntity = get_entity(
+        zha_device, platform=Platform.BUTTON, entity_type=WriteAttributeButton
+    )
 
     assert cluster.get(cluster.AttributeDefs.feed.name) == 0
 

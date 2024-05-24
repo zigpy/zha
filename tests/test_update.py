@@ -14,7 +14,7 @@ import zigpy.types as t
 from zigpy.zcl import Cluster, foundation
 from zigpy.zcl.clusters import general
 
-from tests.common import find_entity_id, get_entity, update_attribute_cache
+from tests.common import get_entity, update_attribute_cache
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -105,11 +105,7 @@ async def test_firmware_update_notification_from_zigpy(
         zigpy_device,
     )
 
-    entity_id = find_entity_id(Platform.UPDATE, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
     assert (
         entity.state["latest_version"]
         == entity.state["installed_version"]
@@ -185,11 +181,7 @@ async def test_firmware_update_success(
 
     assert installed_fw_version < fw_image.firmware.header.file_version
 
-    entity_id = find_entity_id(Platform.UPDATE, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
 
     # simulate an image available notification
     await cluster._handle_query_next_image(
@@ -337,8 +329,7 @@ async def test_firmware_update_success(
 
     cluster.endpoint.reply = AsyncMock(side_effect=endpoint_reply)
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
 
     await entity.async_install(fw_image.firmware.header.file_version, False)
     await zha_gateway.async_block_till_done()
@@ -366,11 +357,7 @@ async def test_firmware_update_raises(
         device_joined, zigpy_device
     )
 
-    entity_id = find_entity_id(Platform.UPDATE, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
 
     # simulate an image available notification
     await cluster._handle_query_next_image(
@@ -446,11 +433,7 @@ async def test_firmware_update_no_longer_compatible(
         device_joined, zigpy_device
     )
 
-    entity_id = find_entity_id(Platform.UPDATE, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
 
     # simulate an image available notification
     await cluster._handle_query_next_image(

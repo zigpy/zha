@@ -22,21 +22,19 @@ from zigpy.zcl.clusters import closures, general
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, get_group_entity
+from tests.common import (
+    get_entity,
+    get_group_entity,
+    send_attributes_report,
+    update_attribute_cache,
+)
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
-
-from .common import (
-    async_find_group_entity_id,
-    find_entity_id,
-    send_attributes_report,
-    update_attribute_cache,
-)
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 ON = 1
 OFF = 0
@@ -134,11 +132,7 @@ async def test_switch(
     """Test zha switch platform."""
     zha_device = await device_joined(zigpy_device)
     cluster = zigpy_device.endpoints.get(1).on_off
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is not None
-
-    entity: PlatformEntity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity: PlatformEntity = get_entity(zha_device, Platform.SWITCH)
 
     assert bool(bool(entity.state["state"])) is False
 
@@ -264,13 +258,7 @@ async def test_zha_group_switch_entity(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.SWITCH, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity = get_group_entity(zha_group, entity_id)
-    assert entity is not None
-
-    assert isinstance(entity, GroupEntity)
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.SWITCH)
     assert entity.group_id == zha_group.group_id
     assert entity.info_object.fallback_name == zha_group.name
 
@@ -409,10 +397,7 @@ async def test_switch_configurable(
 
     zha_device = await device_joined(zigpy_device_tuya)
     cluster = zigpy_device_tuya.endpoints[1].tuya_manufacturer
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     # test that the state has changed from unavailable to off
     assert bool(entity.state["state"]) is False
@@ -542,10 +527,7 @@ async def test_switch_configurable_custom_on_off_values(
 
     zha_device = await device_joined(zigpy_device_)
 
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     assert bool(entity.state["state"]) is False
 
@@ -621,10 +603,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
 
     zha_device = await device_joined(zigpy_device_)
 
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     assert bool(entity.state["state"]) is True
 
@@ -703,10 +682,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
 
     zha_device = await device_joined(zigpy_device_)
 
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     assert bool(entity.state["state"]) is True
 
@@ -783,10 +759,7 @@ async def test_cover_inversion_switch(
         in cluster.read_attributes.call_args[0][0]
     )
 
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     # test update
     prev_call_count = cluster.read_attributes.call_count
@@ -876,4 +849,4 @@ async def test_cover_inversion_switch_not_created(
 
     # entity should not be created when mode or config status aren't present
     with pytest.raises(KeyError):
-        find_entity_id(Platform.SWITCH, zha_device)
+        get_entity(zha_device, platform=Platform.SWITCH)
