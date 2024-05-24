@@ -55,6 +55,7 @@ class BaseEntityInfo:
     device_class: str | None
     state_class: str | None
     entity_category: str | None
+    entity_registry_enabled_default: bool
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -118,6 +119,7 @@ class BaseEntity(LogMixin, EventBase):
     _attr_fallback_name: str | None
     _attr_translation_key: str | None
     _attr_entity_category: EntityCategory | None
+    _attr_entity_registry_enabled_default: bool = True
     _attr_device_class: str | None
     _attr_state_class: str | None
 
@@ -156,6 +158,11 @@ class BaseEntity(LogMixin, EventBase):
         if hasattr(self, "_attr_entity_category"):
             return self._attr_entity_category
         return None
+
+    @property
+    def entity_registry_enabled_default(self) -> bool:
+        """Return the entity category."""
+        return self._attr_entity_registry_enabled_default
 
     @property
     def device_class(self) -> EntityCategory | None:
@@ -199,6 +206,7 @@ class BaseEntity(LogMixin, EventBase):
             device_class=self.device_class,
             state_class=self.state_class,
             entity_category=self.entity_category,
+            entity_registry_enabled_default=self.entity_registry_enabled_default,
         )
 
     @property
@@ -235,9 +243,6 @@ class BaseEntity(LogMixin, EventBase):
 
 class PlatformEntity(BaseEntity):
     """Class that represents an entity for a device platform."""
-
-    _attr_entity_registry_enabled_default: bool
-    _attr_unit_of_measurement: str | None
 
     # suffix to add to the unique_id of the entity. Used for multi
     # entities using the same cluster handler/cluster id for the entity.
