@@ -71,6 +71,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COLOR,
     CLUSTER_HANDLER_LEVEL,
+    CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
 )
 from zha.zigbee.cluster_handlers.general import LevelChangeEvent
@@ -813,7 +814,7 @@ class Light(PlatformEntity, BaseLight):
 
         if self._level_cluster_handler:
             self._level_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED, self.handle_cluster_handler_set_level
+                CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
             )
 
         self._tracked_tasks.append(
@@ -896,7 +897,7 @@ class Light(PlatformEntity, BaseLight):
             )
             # check if transition started whilst waiting for polled state
             if self.is_transitioning:
-                return  # type: ignore #TODO figure this out
+                return  # type: ignore[unreachable]
 
             if state is not None:
                 self._state = state
@@ -910,7 +911,7 @@ class Light(PlatformEntity, BaseLight):
             )
             # check if transition started whilst waiting for polled state
             if self.is_transitioning:
-                return  # type: ignore #TODO figure this out
+                return  # type: ignore[unreachable]
             if level is not None:
                 self._brightness = level
 
@@ -946,7 +947,7 @@ class Light(PlatformEntity, BaseLight):
             # for the polled attributes, so abort if we are transitioning,
             # as that state will not be accurate
             if self.is_transitioning:
-                return  # type: ignore #TODO figure this out
+                return  # type: ignore[unreachable]
 
             if (color_mode := results.get("color_mode")) is not None:
                 if color_mode == Color.ColorMode.Color_temperature:

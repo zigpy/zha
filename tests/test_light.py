@@ -11,12 +11,18 @@ from typing import Any
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
-from slugify import slugify
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import (
+    get_entity,
+    get_group_entity,
+    send_attributes_report,
+    update_attribute_cache,
+)
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import CONF_ALWAYS_PREFER_XY_COLOR_MODE
 from zha.application.gateway import Gateway
@@ -29,14 +35,6 @@ from zha.application.platforms.light.const import (
 )
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
-
-from .common import (
-    async_find_group_entity_id,
-    find_entity_id,
-    send_attributes_report,
-    update_attribute_cache,
-)
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 ON = 1
 OFF = 0
@@ -254,25 +252,6 @@ async def eWeLink_light(
     return zha_device
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
-
-
-def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
-
-    return entities.get(entity_id)
-
-
 @pytest.mark.looptime
 async def test_light_refresh(
     zigpy_device_mock: Callable[..., ZigpyDevice],
@@ -285,11 +264,7 @@ async def test_light_refresh(
     on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 0}
     zha_device = await device_joined(zigpy_device)
 
-    entity_id = find_entity_id(Platform.LIGHT, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
     assert bool(entity.state["on"]) is False
 
     on_off_cluster.read_attributes.reset_mock()
@@ -365,9 +340,6 @@ async def test_light(
         update_attribute_cache(cluster_color)
     zha_device = await device_joined(zigpy_device)
 
-    entity_id = find_entity_id(Platform.LIGHT, zha_device)
-    assert entity_id is not None
-
     cluster_on_off: general.OnOff = zigpy_device.endpoints[1].on_off
     cluster_level: general.LevelControl = getattr(
         zigpy_device.endpoints[1], "level", None
@@ -376,9 +348,7 @@ async def test_light(
         zigpy_device.endpoints[1], "identify", None
     )
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
-
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
     assert bool(entity.state["on"]) is False
 
     # test turning the lights on and off from the light
@@ -729,39 +699,16 @@ async def test_zha_group_light_entity(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.LIGHT, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity | None = get_group_entity(zha_group, entity_id)
-    assert entity is not None
-
-    assert isinstance(entity, GroupEntity)
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity.group_id == zha_group.group_id
-    assert entity.name == zha_group.name
+    assert entity.info_object.fallback_name == zha_group.name
 
-    device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
-    assert device_1_entity_id is not None
-    device_2_entity_id = find_entity_id(Platform.LIGHT, device_light_2)
-    assert device_2_entity_id is not None
-    device_3_entity_id = find_entity_id(Platform.LIGHT, device_light_3)
-    assert device_3_entity_id is not None
+    device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
+    device_3_light_entity = get_entity(device_light_3, platform=Platform.LIGHT)
 
-    device_1_light_entity = get_entity(device_light_1, device_1_entity_id)
-    assert device_1_light_entity is not None
-
-    device_2_light_entity = get_entity(device_light_2, device_2_entity_id)
-    assert device_2_light_entity is not None
-
-    device_3_light_entity = get_entity(device_light_3, device_3_entity_id)
-    assert device_3_light_entity is not None
-
-    assert device_1_entity_id not in (device_2_entity_id, device_3_entity_id)
-    assert device_2_entity_id != device_3_entity_id
-
-    group_entity_id = async_find_group_entity_id(Platform.LIGHT, zha_group)
-    assert group_entity_id is not None
-    entity = get_group_entity(zha_group, group_entity_id)
-    assert entity is not None
+    assert device_1_light_entity not in (device_2_light_entity, device_3_light_entity)
+    assert device_2_light_entity != device_3_light_entity
 
     assert device_1_light_entity.unique_id in zha_group.all_member_entity_unique_ids
     assert device_2_light_entity.unique_id in zha_group.all_member_entity_unique_ids
@@ -867,7 +814,7 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     assert device_3_light_entity.unique_id in zha_group.all_member_entity_unique_ids
     assert len(zha_group.members) == 3
-    entity = get_group_entity(zha_group, group_entity_id)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
     await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
@@ -890,8 +837,8 @@ async def test_zha_group_light_entity(
     assert device_3_light_entity.unique_id not in zha_group.all_member_entity_unique_ids
     # assert entity.unique_id not in group_proxy.group_model.entities
 
-    entity = get_group_entity(zha_group, group_entity_id)
-    assert entity is None
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, platform=Platform.LIGHT)
 
     # add a member back and ensure that the group entity was created again
     await zha_group.async_add_members(
@@ -900,7 +847,7 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     assert len(zha_group.members) == 2
 
-    entity = get_group_entity(zha_group, group_entity_id)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
     await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
@@ -922,7 +869,7 @@ async def test_zha_group_light_entity(
     )
     await zha_gateway.async_block_till_done()
     assert len(zha_group.members) == 4
-    entity = get_group_entity(zha_group, group_entity_id)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
@@ -932,7 +879,7 @@ async def test_zha_group_light_entity(
         [GroupMemberReference(ieee=coordinator.ieee, endpoint_id=1)]
     )
     await zha_gateway.async_block_till_done()
-    entity = get_group_entity(zha_group, group_entity_id)
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
     assert bool(entity.state["on"]) is True
     assert len(zha_group.members) == 3
@@ -940,8 +887,9 @@ async def test_zha_group_light_entity(
     # remove the group and ensure that there is no entity and that the entity registry is cleaned up
     await zha_gateway.async_remove_zigpy_group(zha_group.group_id)
     await zha_gateway.async_block_till_done()
-    entity = get_group_entity(zha_group, group_entity_id)
-    assert entity is None
+
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, platform=Platform.LIGHT)
 
 
 @pytest.mark.parametrize(
@@ -1014,8 +962,7 @@ async def test_light_initialization(
     for key in config_override:
         setattr(light_options, key, config_override[key])
     zha_device = await device_joined(zigpy_device)
-    entity_id = find_entity_id(Platform.LIGHT, zha_device)
-    assert entity_id is not None
+    _entity = get_entity(zha_device, platform=Platform.LIGHT)
 
     # TODO ensure hue and saturation are properly set on startup
 
@@ -1061,39 +1008,17 @@ async def test_transitions(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.LIGHT, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity | None = get_group_entity(zha_group, entity_id)
-    assert entity is not None
-
-    assert isinstance(entity, GroupEntity)
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity.group_id == zha_group.group_id
 
-    device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
-    assert device_1_entity_id is not None
-    device_2_entity_id = find_entity_id(Platform.LIGHT, device_light_2)
-    assert device_2_entity_id is not None
-    device_3_entity_id = find_entity_id(Platform.LIGHT, eWeLink_light)
-    assert device_3_entity_id is not None
+    device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
+    eWeLink_light_entity = get_entity(eWeLink_light, platform=Platform.LIGHT)
 
-    device_1_light_entity = get_entity(device_light_1, device_1_entity_id)
-    assert device_1_light_entity is not None
+    assert device_1_light_entity not in (device_2_light_entity, eWeLink_light_entity)
+    assert device_2_light_entity != eWeLink_light_entity
 
-    device_2_light_entity = get_entity(device_light_2, device_2_entity_id)
-    assert device_2_light_entity is not None
-
-    eWeLink_light_entity = get_entity(eWeLink_light, device_3_entity_id)
-    assert eWeLink_light_entity is not None
-
-    assert device_1_entity_id not in (device_2_entity_id, device_3_entity_id)
-    assert device_2_entity_id != device_3_entity_id
-
-    group_entity_id = async_find_group_entity_id(Platform.LIGHT, zha_group)
-    assert group_entity_id is not None
-    entity = get_group_entity(zha_group, group_entity_id)
-    assert entity is not None
-
+    entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert device_1_light_entity.unique_id in zha_group.all_member_entity_unique_ids
     assert device_2_light_entity.unique_id in zha_group.all_member_entity_unique_ids
     assert eWeLink_light_entity.unique_id not in zha_group.all_member_entity_unique_ids
@@ -1724,14 +1649,11 @@ async def test_on_with_off_color(
     device_light_1,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test turning on the light and sending color commands before on/level commands for supporting lights."""
-
-    device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
     dev1_cluster_on_off = device_light_1.device.endpoints[1].on_off
     dev1_cluster_level = device_light_1.device.endpoints[1].level
     dev1_cluster_color = device_light_1.device.endpoints[1].light_color
 
-    entity = get_entity(device_light_1, device_1_entity_id)
-    assert entity is not None
+    entity = get_entity(device_light_1, platform=Platform.LIGHT)
 
     # Execute_if_off will override the "enhanced turn on from an off-state" config option that's enabled here
     dev1_cluster_color.PLUGGED_ATTR_READS = {
@@ -1883,25 +1805,11 @@ async def test_group_member_assume_state(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.LIGHT, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity | None = get_group_entity(zha_group, entity_id)
-    assert entity is not None
-
-    assert isinstance(entity, GroupEntity)
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity.group_id == zha_group.group_id
 
-    device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
-    device_2_entity_id = find_entity_id(Platform.LIGHT, device_light_2)
-
-    assert device_1_entity_id != device_2_entity_id
-
-    device_1_light_entity = get_entity(device_light_1, device_1_entity_id)
-    device_2_light_entity = get_entity(device_light_2, device_2_entity_id)
-
-    assert device_1_light_entity is not None
-    assert device_2_light_entity is not None
+    device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
 
     group_cluster_on_off = zha_group.endpoint[general.OnOff.cluster_id]
 

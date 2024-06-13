@@ -90,6 +90,7 @@ VOC_LEVEL_CLUSTER: Final[int] = 0x042E
 CLUSTER_HANDLER_EVENT: Final[str] = "cluster_handler_event"
 CLUSTER_HANDLER_ATTRIBUTE_UPDATED: Final[str] = "cluster_handler_attribute_updated"
 CLUSTER_HANDLER_STATE_CHANGED: Final[str] = "cluster_handler_state_changed"
+CLUSTER_HANDLER_LEVEL_CHANGED: Final[str] = "cluster_handler_level_changed"
 
 ATTRIBUTE_ID: Final[str] = "attribute_id"
 ATTRIBUTE_NAME: Final[str] = "attribute_name"

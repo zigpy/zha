@@ -122,7 +122,6 @@ class SensorEntityInfo(PlatformEntityInfo):
 class DeviceCounterEntityInfo(BaseEntityInfo):
     """Device counter entity info."""
 
-    name: str
     device_ieee: str
     available: bool
     counter: str
@@ -187,8 +186,6 @@ class Sensor(PlatformEntity):
     ) -> None:
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -224,12 +221,11 @@ class Sensor(PlatformEntity):
             decimals=self._decimals,
             divisor=self._divisor,
             multiplier=self._multiplier,
-            unit=getattr(self, "entity_description").native_unit_of_measurement
-            if hasattr(self, "entity_description")
-            and getattr(self, "entity_description") is not None
-            else self._attr_native_unit_of_measurement,
-            device_class=self._attr_device_class,
-            state_class=self._attr_state_class,
+            unit=(
+                getattr(self, "entity_description").native_unit_of_measurement
+                if getattr(self, "entity_description", None) is not None
+                else self._attr_native_unit_of_measurement
+            ),
         )
 
     @property
@@ -329,7 +325,6 @@ class DeviceCounterSensor(BaseEntity):
     @classmethod
     def create_platform_entity(
         cls,
-        unique_id: str,
         zha_device: Device,
         counter_groups: str,
         counter_group: str,
@@ -340,13 +335,10 @@ class DeviceCounterSensor(BaseEntity):
 
         Return entity if it is a supported configuration, otherwise return None
         """
-        return cls(
-            unique_id, zha_device, counter_groups, counter_group, counter, **kwargs
-        )
+        return cls(zha_device, counter_groups, counter_group, counter, **kwargs)
 
     def __init__(
         self,
-        unique_id: str,
         zha_device: Device,
         counter_groups: str,
         counter_group: str,
@@ -354,8 +346,13 @@ class DeviceCounterSensor(BaseEntity):
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, **kwargs)
-        self._name = f"{zha_device.name} {counter_group} {counter}"
+        # XXX: ZHA uses the IEEE address of the device passed through `slugify`!
+        slugified_device_id = zha_device.unique_id.replace(":", "-")
+
+        super().__init__(
+            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
+            **kwargs,
+        )
         self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
@@ -363,8 +360,16 @@ class DeviceCounterSensor(BaseEntity):
         )
         self._zigpy_counter_groups: str = counter_groups
         self._zigpy_counter_group: str = counter_group
-        self._attr_name: str = self._zigpy_counter.name
+
+        self._attr_fallback_name: str = self._zigpy_counter.name
+
+        # TODO: why do entities get created with " None" as a name suffix instead of
+        # falling back to `fallback_name`? We should be able to provide translation keys
+        # even if they do not exist.
+        # self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
+
         self._device.gateway.global_updater.register_update_listener(self.update)
+
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
         if self.unique_id not in self._device.platform_entities:
             self._device.platform_entities[self.unique_id] = self
@@ -381,7 +386,6 @@ class DeviceCounterSensor(BaseEntity):
         """Return a representation of the platform entity."""
         return DeviceCounterEntityInfo(
             **super().info_object.__dict__,
-            name=self._attr_name,
             device_ieee=str(self._device.ieee),
             available=self.available,
             counter=self._zigpy_counter.name,
@@ -396,11 +400,6 @@ class DeviceCounterSensor(BaseEntity):
         response = super().state
         response["state"] = self._zigpy_counter.value
         return response
-
-    @property
-    def name(self) -> str:
-        """Return the name of the platform entity."""
-        return self._name
 
     @property
     def native_value(self) -> int | None:
@@ -453,11 +452,15 @@ class EnumSensor(Sensor):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
+        # XXX: This class is not meant to be initialized directly, as `unique_id`
+        # depends on the value of `_attribute_name`
+
     def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
         """Init this entity from the quirks metadata."""
-        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
+
+        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
@@ -1386,7 +1389,6 @@ class TimeLeft(Sensor):
     _attribute_name = "timer_time_left"
     _unique_id_suffix = "time_left"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_icon = "mdi:timer"
     _attr_translation_key: str = "timer_time_left"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
 
@@ -1398,7 +1400,6 @@ class IkeaDeviceRunTime(Sensor):
     _attribute_name = "device_run_time"
     _unique_id_suffix = "device_run_time"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_icon = "mdi:timer"
     _attr_translation_key: str = "device_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
@@ -1411,7 +1412,6 @@ class IkeaFilterRunTime(Sensor):
     _attribute_name = "filter_run_time"
     _unique_id_suffix = "filter_run_time"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
-    _attr_icon = "mdi:timer"
     _attr_translation_key: str = "filter_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
@@ -1431,7 +1431,6 @@ class AqaraPetFeederLastFeedingSource(EnumSensor):
     _attribute_name = "last_feeding_source"
     _unique_id_suffix = "last_feeding_source"
     _attr_translation_key: str = "last_feeding_source"
-    _attr_icon = "mdi:devices"
     _enum = AqaraFeedingSource
 
 
@@ -1442,7 +1441,6 @@ class AqaraPetFeederLastFeedingSize(Sensor):
     _attribute_name = "last_feeding_size"
     _unique_id_suffix = "last_feeding_size"
     _attr_translation_key: str = "last_feeding_size"
-    _attr_icon: str = "mdi:counter"
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
@@ -1453,7 +1451,6 @@ class AqaraPetFeederPortionsDispensed(Sensor):
     _unique_id_suffix = "portions_dispensed"
     _attr_translation_key: str = "portions_dispensed_today"
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _attr_icon: str = "mdi:counter"
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
@@ -1465,7 +1462,6 @@ class AqaraPetFeederWeightDispensed(Sensor):
     _attr_translation_key: str = "weight_dispensed_today"
     _attr_native_unit_of_measurement = UnitOfMass.GRAMS
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
-    _attr_icon: str = "mdi:weight-gram"
 
 
 @MULTI_MATCH(cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"})
@@ -1477,7 +1473,6 @@ class AqaraSmokeDensityDbm(Sensor):
     _attr_translation_key: str = "smoke_density"
     _attr_native_unit_of_measurement = "dB/m"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_icon: str = "mdi:google-circles-communities"
     _attr_suggested_display_precision: int = 3
 
 
@@ -1495,7 +1490,6 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
     _attribute_name = "last_illumination_state"
     _unique_id_suffix = "last_illumination"
     _attr_translation_key: str = "last_illumination_state"
-    _attr_icon: str = "mdi:theme-light-dark"
     _enum = SonoffIlluminationStates
 
 
@@ -1509,7 +1503,6 @@ class PiHeatingDemand(Sensor):
     _unique_id_suffix = "pi_heating_demand"
     _attribute_name = "pi_heating_demand"
     _attr_translation_key: str = "pi_heating_demand"
-    _attr_icon: str = "mdi:radiator"
     _attr_native_unit_of_measurement = PERCENTAGE
     _decimals = 0
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
@@ -1534,7 +1527,6 @@ class SetpointChangeSource(EnumSensor):
     _unique_id_suffix = "setpoint_change_source"
     _attribute_name = "setpoint_change_source"
     _attr_translation_key: str = "setpoint_change_source"
-    _attr_icon: str = "mdi:thermostat"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _enum = SetpointChangeSourceEnum
 
@@ -1548,7 +1540,6 @@ class WindowCoveringTypeSensor(EnumSensor):
     _unique_id_suffix: str = WindowCovering.AttributeDefs.window_covering_type.name
     _attr_translation_key: str = WindowCovering.AttributeDefs.window_covering_type.name
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_icon = "mdi:curtains"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -1562,7 +1553,6 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
     _unique_id_suffix: str = Basic.AttributeDefs.power_source.name
     _attr_translation_key: str = Basic.AttributeDefs.power_source.name
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_icon = "mdi:battery-positive"
 
 
 class AqaraE1HookState(types.enum8):
@@ -1584,5 +1574,4 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     _enum = AqaraE1HookState
     _unique_id_suffix = "hooks_state"
     _attr_translation_key: str = "hooks_state"
-    _attr_icon: str = "mdi:hook"
     _attr_entity_category = EntityCategory.DIAGNOSTIC

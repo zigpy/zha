@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.const import ATTR_DEVICE_CLASS, ENTITY_METADATA
 from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
@@ -70,8 +69,6 @@ class BinarySensor(PlatformEntity):
     ) -> None:
         """Initialize the ZHA binary sensor."""
         self._cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._state: bool = self.is_on
         self._cluster_handler.on_event(
@@ -97,9 +94,6 @@ class BinarySensor(PlatformEntity):
         return BinarySensorEntityInfo(
             **super().info_object.__dict__,
             attribute_name=self._attribute_name,
-            device_class=self._attr_device_class
-            if hasattr(self, ATTR_DEVICE_CLASS)
-            else None,
         )
 
     @property
@@ -118,11 +112,6 @@ class BinarySensor(PlatformEntity):
         if raw_state is None:
             return False
         return self.parse(raw_state)
-
-    @functools.cached_property
-    def device_class(self) -> BinarySensorDeviceClass | None:
-        """Return the class of this entity."""
-        return self._attr_device_class
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -179,19 +168,6 @@ class Opening(BinarySensor):
 
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
-
-    # pylint: disable=pointless-string-statement
-    """TODO
-    # Client/out cluster attributes aren't stored in the zigpy database, but are properly stored in the runtime cache.
-    # We need to manually restore the last state from the sensor state to the runtime cache for now.
-
-    def async_restore_last_state(self, last_state):
-        #Restore previous state to zigpy cache.
-        self._cluster_handler.cluster.update_attribute(
-            OnOff.attributes_by_name[self._attribute_name].id,
-            t.Bool.true if last_state.state == STATE_ON else t.Bool.false,
-        )
-    """
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -381,5 +357,4 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
     _unique_id_suffix = "hand_open"
     _attribute_name = "hand_open"
     _attr_translation_key = "hand_open"
-    _attr_icon = "mdi:hand-wave"
     _attr_entity_category = EntityCategory.DIAGNOSTIC

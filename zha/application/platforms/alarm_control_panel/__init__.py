@@ -88,7 +88,6 @@ class AlarmControlPanel(PlatformEntity):
             code_arm_required=self.code_arm_required,
             code_format=self.code_format,
             supported_features=self.supported_features,
-            translation_key=self.translation_key,
         )
 
     @property
@@ -109,11 +108,6 @@ class AlarmControlPanel(PlatformEntity):
     def code_format(self) -> CodeFormat:
         """Code format or None if no code is required."""
         return CodeFormat.NUMBER
-
-    @functools.cached_property
-    def translation_key(self) -> str:
-        """Return the translation key."""
-        return self._attr_translation_key
 
     @functools.cached_property
     def supported_features(self) -> int:

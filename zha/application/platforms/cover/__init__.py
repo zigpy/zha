@@ -34,6 +34,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COVER,
     CLUSTER_HANDLER_LEVEL,
+    CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_SHADE,
 )
@@ -238,8 +239,9 @@ class Cover(PlatformEntity):
             )
             self._determine_state(
                 value,
-                is_lift_update=event.attribute_id
-                == WCAttrs.current_position_lift_percentage.id,
+                is_lift_update=(
+                    event.attribute_id == WCAttrs.current_position_lift_percentage.id
+                ),
             )
         self.maybe_emit_state_changed_event()
 
@@ -374,7 +376,7 @@ class Shade(PlatformEntity):
             self.handle_cluster_handler_attribute_updated,
         )
         self._level_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED, self.handle_cluster_handler_set_level
+            CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
         )
 
     @property

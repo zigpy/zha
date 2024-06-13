@@ -6,10 +6,8 @@ from dataclasses import dataclass
 from enum import IntFlag, StrEnum
 import functools
 import logging
-import math
 from typing import TYPE_CHECKING, Any, Final, final
 
-from awesomeversion import AwesomeVersion, AwesomeVersionCompareException
 from zigpy.ota import OtaImageWithMetadata
 from zigpy.zcl.clusters.general import Ota
 from zigpy.zcl.foundation import Status
@@ -38,40 +36,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.UPDATE
 )
 
-# pylint: disable=unused-argument
-# pylint: disable=pointless-string-statement
-"""TODO do this in discovery?
-zha_data = get_zha_data(hass)
-entities_to_create = zha_data.platforms[Platform.UPDATE]
-
-coordinator = ZHAFirmwareUpdateCoordinator(
-    hass, get_zha_gateway(hass).application_controller
-)
-"""
-
-# pylint: disable=pointless-string-statement
-"""TODO find a solution for this
-class ZHAFirmwareUpdateCoordinator(DataUpdateCoordinator[None]):  # pylint: disable=hass-enforce-coordinator-module
-    #Firmware update coordinator that broadcasts updates network-wide.
-
-    def __init__(
-        self, hass: HomeAssistant, controller_application: ControllerApplication
-    ) -> None:
-        #Initialize the coordinator.
-        super().__init__(
-            hass,
-            _LOGGER,
-            name="ZHA firmware update coordinator",
-            update_method=self.async_update_data,
-        )
-        self.controller_application = controller_application
-
-    async def async_update_data(self) -> None:
-        #Fetch the latest firmware update data.
-        # Broadcast to all devices
-        await self.controller_application.ota.broadcast_notify(jitter=100)
-"""
-
 
 class UpdateDeviceClass(StrEnum):
     """Device class for update."""
@@ -94,6 +58,7 @@ SERVICE_INSTALL: Final = "install"
 ATTR_BACKUP: Final = "backup"
 ATTR_INSTALLED_VERSION: Final = "installed_version"
 ATTR_IN_PROGRESS: Final = "in_progress"
+ATTR_PROGRESS: Final = "progress"
 ATTR_LATEST_VERSION: Final = "latest_version"
 ATTR_RELEASE_SUMMARY: Final = "release_summary"
 ATTR_RELEASE_URL: Final = "release_url"
@@ -109,7 +74,6 @@ class UpdateEntityInfo(PlatformEntityInfo):
     entity_category: EntityCategory
 
 
-# old base classes: CoordinatorEntity[ZHAFirmwareUpdateCoordinator], UpdateEntity
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
 class FirmwareUpdateEntity(PlatformEntity):
     """Representation of a ZHA firmware update entity."""
@@ -125,7 +89,8 @@ class FirmwareUpdateEntity(PlatformEntity):
         | UpdateEntityFeature.SPECIFIC_VERSION
     )
     _attr_installed_version: str | None = None
-    _attr_in_progress: bool | int = False
+    _attr_in_progress: bool = False
+    _attr_progress: int = 0
     _attr_latest_version: str | None = None
     _attr_release_summary: str | None = None
     _attr_release_url: str | None = None
@@ -140,7 +105,6 @@ class FirmwareUpdateEntity(PlatformEntity):
     ) -> None:
         """Initialize the ZHA update entity."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        # CoordinatorEntity.__init__(self, coordinator)
 
         self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_OTA
@@ -161,15 +125,12 @@ class FirmwareUpdateEntity(PlatformEntity):
         return UpdateEntityInfo(
             **super().info_object.__dict__,
             supported_features=self.supported_features,
-            device_class=self._attr_device_class,
-            entity_category=self._attr_entity_category,
         )
 
     @property
     def state(self):
         """Get the state for the entity."""
         response = super().state
-        response["state"] = self._state
         response.update(self.state_attributes)
         return response
 
@@ -179,15 +140,24 @@ class FirmwareUpdateEntity(PlatformEntity):
         return self._attr_installed_version
 
     @property
-    def in_progress(self) -> bool | int | None:
+    def in_progress(self) -> bool | None:
         """Update installation progress.
 
         Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
 
-        Can either return a boolean (True if in progress, False if not)
-        or an integer to indicate the progress in from 0 to 100%.
+        Returns a boolean (True if in progress, False if not).
         """
         return self._attr_in_progress
+
+    @property
+    def progress(self) -> int | None:
+        """Update installation progress.
+
+        Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
+
+        Returns an integer indicating the progress from 0 to 100%.
+        """
+        return self._attr_progress
 
     @property
     def latest_version(self) -> str | None:
@@ -213,24 +183,6 @@ class FirmwareUpdateEntity(PlatformEntity):
         """Flag supported features."""
         return self._attr_supported_features
 
-    @property
-    @final
-    def _state(self) -> bool | None:
-        """Return the entity state."""
-        if (installed_version := self.installed_version) is None or (
-            latest_version := self.latest_version
-        ) is None:
-            return None
-
-        if latest_version == installed_version:
-            return False
-
-        try:
-            return _version_is_newer(latest_version, installed_version)
-        except AwesomeVersionCompareException:
-            # Can't compare versions, already tried exact match
-            return True
-
     @final
     @property
     def state_attributes(self) -> dict[str, Any] | None:
@@ -238,20 +190,11 @@ class FirmwareUpdateEntity(PlatformEntity):
         if (release_summary := self.release_summary) is not None:
             release_summary = release_summary[:255]
 
-        # If entity supports progress, return the in_progress value.
-        # Otherwise, we use the internal progress value.
-        if UpdateEntityFeature.PROGRESS in self.supported_features:
-            in_progress = self.in_progress
-        else:
-            in_progress = self._attr_in_progress
-
-        installed_version = self.installed_version
-        latest_version = self.latest_version
-
         return {
-            ATTR_INSTALLED_VERSION: installed_version,
-            ATTR_IN_PROGRESS: in_progress,
-            ATTR_LATEST_VERSION: latest_version,
+            ATTR_INSTALLED_VERSION: self.installed_version,
+            ATTR_IN_PROGRESS: self.in_progress,
+            ATTR_PROGRESS: self.progress,
+            ATTR_LATEST_VERSION: self.latest_version,
             ATTR_RELEASE_SUMMARY: release_summary,
             ATTR_RELEASE_URL: self.release_url,
         }
@@ -265,10 +208,6 @@ class FirmwareUpdateEntity(PlatformEntity):
         Handles setting the in_progress state in case the entity doesn't
         support it natively.
         """
-        if UpdateEntityFeature.PROGRESS not in self.supported_features:
-            self._attr_in_progress = True
-            self.maybe_emit_state_changed_event()
-
         try:
             await self.async_install(version, backup)
         finally:
@@ -286,7 +225,7 @@ class FirmwareUpdateEntity(PlatformEntity):
 
     def handle_cluster_handler_attribute_updated(
         self,
-        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+        event: ClusterAttributeUpdatedEvent,
     ) -> None:
         """Handle attribute updates on the OTA cluster."""
         if event.attribute_id == Ota.AttributeDefs.current_file_version.id:
@@ -310,11 +249,10 @@ class FirmwareUpdateEntity(PlatformEntity):
     def _update_progress(self, current: int, total: int, progress: float) -> None:
         """Update install progress on event."""
         # If we are not supposed to be updating, do nothing
-        if self._attr_in_progress is False:
+        if not self._attr_in_progress:
             return
 
-        # Remap progress to 2-100 to avoid 0 and 1
-        self._attr_in_progress = int(math.ceil(2 + 98 * progress / 100))
+        self._attr_progress = int(progress)
         self.maybe_emit_state_changed_event()
 
     async def async_install(
@@ -323,8 +261,8 @@ class FirmwareUpdateEntity(PlatformEntity):
         """Install an update."""
         assert self._latest_firmware is not None
 
-        # Set the progress to an indeterminate state
         self._attr_in_progress = True
+        self._attr_progress = 0
         self.maybe_emit_state_changed_event()
 
         try:
@@ -333,6 +271,8 @@ class FirmwareUpdateEntity(PlatformEntity):
                 progress_callback=self._update_progress,
             )
         except Exception as ex:
+            self._attr_in_progress = False
+            self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {ex}") from ex
 
         # If we tried to install firmware that is no longer compatible with the device,
@@ -344,6 +284,8 @@ class FirmwareUpdateEntity(PlatformEntity):
 
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
+            self._attr_in_progress = False
+            self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {result}")
 
         # Clear the state
@@ -355,14 +297,3 @@ class FirmwareUpdateEntity(PlatformEntity):
         """Call when entity will be removed."""
         await super().on_remove()
         self._attr_in_progress = False
-
-    async def async_update(self) -> None:
-        """Update the entity."""
-        # await CoordinatorEntity.async_update(self)
-        await super().async_update()
-
-
-@functools.lru_cache(maxsize=256)
-def _version_is_newer(latest_version: str, installed_version: str) -> bool:
-    """Return True if version is newer."""
-    return AwesomeVersion(latest_version) > installed_version

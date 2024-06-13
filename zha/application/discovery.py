@@ -6,7 +6,6 @@ from collections import Counter
 import logging
 from typing import TYPE_CHECKING, cast
 
-from slugify import slugify
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
     CustomDeviceV2,
@@ -291,10 +290,10 @@ class DeviceProbe:
                     cluster_handler.__dict__[zha_const.ZCL_INIT_ATTRS] = init_attrs
 
                 endpoint.async_new_entity(
-                    platform,
-                    entity_class,
-                    endpoint.unique_id,
-                    [cluster_handler],
+                    platform=platform,
+                    entity_class=entity_class,
+                    unique_id=endpoint.unique_id,
+                    cluster_handlers=[cluster_handler],
                     entity_metadata=entity_metadata,
                 )
 
@@ -322,7 +321,6 @@ class DeviceProbe:
                         (
                             sensor.DeviceCounterSensor,
                             (
-                                f"{slugify(str(device.ieee))}_{counter_groups}_{counter_group}_{counter}",
                                 device,
                                 counter_groups,
                                 counter_group,
@@ -519,8 +517,7 @@ class EndpointProbe:
                     entity_and_handler.entity_class.__name__,
                     [ch.name for ch in entity_and_handler.claimed_cluster_handlers],
                 )
-        for platform, ent_n_handler_list in matches.items():
-            for entity_and_handler in ent_n_handler_list:
+
                 if platform == cmpt_by_dev_type:
                     # for well known device types,
                     # like thermostats we'll take only 1st class

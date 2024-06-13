@@ -559,8 +559,6 @@ def test_quirk_classes() -> None:
                 quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
                 if quirk_id is not None and quirk_id not in all_quirk_ids:
                     all_quirk_ids.append(quirk_id)
-    # TODO make sure this is needed
-    del quirk, model_quirk_list, manufacturer  # pylint: disable=undefined-loop-variable
 
     # validate all quirk IDs used in component match rules
     for rule, _ in iter_all_rules():
@@ -572,9 +570,12 @@ def test_entity_names() -> None:
 
     for _, entity_classes in iter_all_rules():
         for entity_class in entity_classes:
-            if hasattr(entity_class, "_attr_name"):
+            if hasattr(entity_class, "_attr_fallback_name"):
                 # The entity has a name
-                assert (name := entity_class._attr_name) and isinstance(name, str)
+                assert (
+                    isinstance(entity_class._attr_fallback_name, str)
+                    and entity_class._attr_fallback_name
+                )
             elif hasattr(entity_class, "_attr_translation_key"):
                 assert (
                     isinstance(entity_class._attr_translation_key, str)

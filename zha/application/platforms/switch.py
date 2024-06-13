@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC
-import dataclasses
 from dataclasses import dataclass
 import functools
 import logging
@@ -11,7 +10,6 @@ from typing import TYPE_CHECKING, Any, Self, cast
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 from zigpy.quirks.v2 import SwitchMetadata
-from zigpy.types import EUI64
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
@@ -23,9 +21,10 @@ from zha.application.platforms import (
     EntityCategory,
     GroupEntity,
     PlatformEntity,
+    PlatformEntityInfo,
 )
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandlerInfo
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
@@ -51,20 +50,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class SwitchConfigurationEntityInfo:
+class SwitchConfigurationEntityInfo(PlatformEntityInfo):
     """Switch configuration entity info."""
-
-    # combination of PlatformEntityInfo and GroupEntityInfo
-    unique_id: str
-    platform: str
-    class_name: str
-
-    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
-    device_ieee: EUI64 | None = dataclasses.field(default=None)
-    endpoint_id: int | None = dataclasses.field(default=None)
-    group_id: int | None = dataclasses.field(default=None)
-    name: str | None = dataclasses.field(default=None)
-    available: bool | None = dataclasses.field(default=None)
 
     attribute_name: str
     invert_attribute_name: str | None
@@ -246,8 +233,6 @@ class SwitchConfigurationEntity(PlatformEntity):
     ) -> None:
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -567,7 +552,6 @@ class AqaraPetFeederLEDIndicator(SwitchConfigurationEntity):
     _attribute_name = "disable_led_indicator"
     _attr_translation_key = "led_indicator"
     _force_inverted = True
-    _attr_icon: str = "mdi:led-on"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -579,7 +563,6 @@ class AqaraPetFeederChildLock(SwitchConfigurationEntity):
     _unique_id_suffix = "child_lock"
     _attribute_name = "child_lock"
     _attr_translation_key = "child_lock"
-    _attr_icon: str = "mdi:account-lock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -591,7 +574,6 @@ class TuyaChildLockSwitch(SwitchConfigurationEntity):
     _unique_id_suffix = "child_lock"
     _attribute_name = "child_lock"
     _attr_translation_key = "child_lock"
-    _attr_icon: str = "mdi:account-lock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -625,7 +607,6 @@ class AqaraThermostatChildLock(SwitchConfigurationEntity):
     _unique_id_suffix = "child_lock"
     _attribute_name = "child_lock"
     _attr_translation_key = "child_lock"
-    _attr_icon: str = "mdi:account-lock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -637,7 +618,6 @@ class AqaraHeartbeatIndicator(SwitchConfigurationEntity):
     _unique_id_suffix = "heartbeat_indicator"
     _attribute_name = "heartbeat_indicator"
     _attr_translation_key = "heartbeat_indicator"
-    _attr_icon: str = "mdi:heart-flash"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -649,7 +629,6 @@ class AqaraLinkageAlarm(SwitchConfigurationEntity):
     _unique_id_suffix = "linkage_alarm"
     _attribute_name = "linkage_alarm"
     _attr_translation_key = "linkage_alarm"
-    _attr_icon: str = "mdi:shield-link-variant"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -661,7 +640,6 @@ class AqaraBuzzerManualMute(SwitchConfigurationEntity):
     _unique_id_suffix = "buzzer_manual_mute"
     _attribute_name = "buzzer_manual_mute"
     _attr_translation_key = "buzzer_manual_mute"
-    _attr_icon: str = "mdi:volume-off"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -673,7 +651,6 @@ class AqaraBuzzerManualAlarm(SwitchConfigurationEntity):
     _unique_id_suffix = "buzzer_manual_alarm"
     _attribute_name = "buzzer_manual_alarm"
     _attr_translation_key = "buzzer_manual_alarm"
-    _attr_icon: str = "mdi:bullhorn"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
@@ -686,7 +663,6 @@ class WindowCoveringInversionSwitch(SwitchConfigurationEntity):
     _unique_id_suffix = "inverted"
     _attribute_name = WindowCovering.AttributeDefs.config_status.name
     _attr_translation_key = "inverted"
-    _attr_icon: str = "mdi:arrow-up-down"
 
     @classmethod
     def create_platform_entity(
@@ -781,4 +757,3 @@ class AqaraE1CurtainMotorHooksLockedSwitch(SwitchConfigurationEntity):
     _unique_id_suffix = "hooks_lock"
     _attribute_name = "hooks_lock"
     _attr_translation_key = "hooks_locked"
-    _attr_icon: str = "mdi:lock"

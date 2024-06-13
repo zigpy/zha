@@ -192,6 +192,8 @@ class ExtendedDeviceInfo(DeviceInfo):
 class Device(LogMixin, EventBase):
     """ZHA Zigbee device object."""
 
+    unique_id: str
+
     def __init__(
         self,
         zigpy_device: zigpy.device.Device,
@@ -199,6 +201,9 @@ class Device(LogMixin, EventBase):
     ) -> None:
         """Initialize the gateway."""
         super().__init__()
+
+        self.unique_id = str(zigpy_device.ieee)
+
         self._gateway: Gateway = _gateway
         self._zigpy_device: ZigpyDevice = zigpy_device
         self.quirk_applied: bool = isinstance(

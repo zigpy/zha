@@ -8,14 +8,13 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general, measurement, security
 
+from tests.common import find_entity, send_attributes_report, update_attribute_cache
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import IASZone, Occupancy
 from zha.zigbee.device import Device
-
-from .common import find_entity, send_attributes_report, update_attribute_cache
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 DEVICE_IAS = {
     1: {

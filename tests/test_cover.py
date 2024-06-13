@@ -7,7 +7,6 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from slugify import slugify
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 import zigpy.types
@@ -15,7 +14,7 @@ from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
-    find_entity_id,
+    get_entity,
     make_zcl_header,
     send_attributes_report,
     update_attribute_cache,
@@ -24,7 +23,6 @@ from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_T
 from zha.application import Platform
 from zha.application.const import ATTR_COMMAND
 from zha.application.gateway import Gateway
-from zha.application.platforms import PlatformEntity
 from zha.application.platforms.cover import (
     ATTR_CURRENT_POSITION,
     STATE_CLOSED,
@@ -117,15 +115,6 @@ WCT = closures.WindowCovering.WindowCoveringType
 WCCS = closures.WindowCovering.ConfigStatus
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
-
-
 async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     zha_gateway: Gateway,
     device_joined,
@@ -157,11 +146,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
         in cluster.read_attributes.call_args[0][0]
     )
 
-    entity_id = find_entity_id(Platform.COVER, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.COVER)
     state = entity.state
     assert state["state"] == STATE_OPEN
     assert state[ATTR_CURRENT_POSITION] == 100
@@ -215,11 +200,7 @@ async def test_cover(
         in cluster.read_attributes.call_args[0][0]
     )
 
-    entity_id = find_entity_id(Platform.COVER, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.COVER)
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(
@@ -419,10 +400,7 @@ async def test_cover_failures(
     update_attribute_cache(cluster)
     zha_device = await device_joined(zigpy_cover_device)
 
-    entity_id = find_entity_id(Platform.COVER, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.COVER)
 
     # test to see if it opens
     await send_attributes_report(
@@ -577,11 +555,7 @@ async def test_shade(
     zha_device = await device_joined(zigpy_shade_device)
     cluster_on_off = zigpy_shade_device.endpoints.get(1).on_off
     cluster_level = zigpy_shade_device.endpoints.get(1).level
-    entity_id = find_entity_id(Platform.COVER, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.COVER)
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(
@@ -732,11 +706,7 @@ async def test_keen_vent(
     zha_device = await device_joined(zigpy_keen_vent)
     cluster_on_off = zigpy_keen_vent.endpoints.get(1).on_off
     cluster_level = zigpy_keen_vent.endpoints.get(1).level
-    entity_id = find_entity_id(Platform.COVER, zha_device)
-    assert entity_id is not None
-
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.COVER)
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(zha_gateway, cluster_on_off, {8: 0, 0: False, 1: 1})

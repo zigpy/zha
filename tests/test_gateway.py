@@ -5,7 +5,6 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
-from slugify import slugify
 from zigpy.application import ControllerApplication
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
@@ -14,7 +13,7 @@ from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types
 from zigpy.zdo.types import LogicalType, NodeDescriptor
 
-from tests.common import async_find_group_entity_id, find_entity_id
+from tests.common import get_entity, get_group_entity
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import CONF_USE_THREAD, RadioType
@@ -27,7 +26,7 @@ from zha.application.gateway import (
     RawDeviceInitializedEvent,
 )
 from zha.application.helpers import ZHAData
-from zha.application.platforms import GroupEntity, PlatformEntity
+from zha.application.platforms import GroupEntity
 from zha.application.platforms.light.const import LightEntityFeature
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
@@ -146,25 +145,6 @@ async def device_light_2(
     return zha_device
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
-
-
-def get_group_entity(group: Group, entity_id: str) -> GroupEntity | None:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
-
-    return entities.get(entity_id)
-
-
 async def test_device_left(
     zha_gateway: Gateway,
     zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
@@ -211,33 +191,23 @@ async def test_gateway_group_methods(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.LIGHT, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity | None = get_group_entity(zha_group, entity_id)
-    assert entity is not None
-
-    assert isinstance(entity, GroupEntity)
+    entity: GroupEntity | None = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
 
     info = entity.info_object
     assert info.class_name == "LightGroup"
     assert info.platform == Platform.LIGHT
     assert info.unique_id == "light_zha_group_0x0002"
-    assert info.name == "Test Group"
+    assert info.fallback_name == "Test Group"
     assert info.group_id == zha_group.group_id
     assert info.supported_features == LightEntityFeature.TRANSITION
     assert info.min_mireds == 153
     assert info.max_mireds == 500
     assert info.effect_list is None
 
-    device_1_entity_id = find_entity_id(Platform.LIGHT, device_light_1)
-    device_2_entity_id = find_entity_id(Platform.LIGHT, device_light_2)
-
-    assert device_1_entity_id != device_2_entity_id
-
-    device_1_light_entity = get_entity(device_light_1, device_1_entity_id)
-    device_2_light_entity = get_entity(device_light_2, device_2_entity_id)
+    device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
+    assert device_1_light_entity != device_2_light_entity
 
     assert device_1_light_entity is not None
     assert device_2_light_entity is not None
@@ -253,8 +223,8 @@ async def test_gateway_group_methods(
     assert zha_gateway.get_group(zha_group.name) is None
 
     # the group entity should be cleaned up
-    entity = get_group_entity(zha_group, entity_id)
-    assert entity is None
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, platform=Platform.LIGHT)
 
     # test creating a group with 1 member
     zha_group = await zha_gateway.async_create_zigpy_group(
@@ -268,8 +238,8 @@ async def test_gateway_group_methods(
         assert member.device.ieee in [device_light_1.ieee]
 
     # no entity should be created for a group with a single member
-    entity = get_group_entity(zha_group, entity_id)
-    assert entity is None
+    with pytest.raises(KeyError):
+        get_group_entity(zha_group, platform=Platform.LIGHT)
 
     with patch("zigpy.zcl.Cluster.request", side_effect=TimeoutError):
         await zha_group.members[0].async_remove_from_group()
@@ -364,34 +334,6 @@ async def test_gateway_initialize_bellows_thread(
         await zha_gw.async_initialize()
         assert mock_new.mock_calls[-1].kwargs["config"][CONF_USE_THREAD] is thread_state
         await zha_gw.shutdown()
-
-
-# pylint: disable=pointless-string-statement
-"""TODO
-@pytest.mark.parametrize(
-    ("device_path", "config_override", "expected_channel"),
-    [
-        ("/dev/ttyUSB0", {}, None),
-        ("socket://192.168.1.123:9999", {}, None),
-        ("socket://192.168.1.123:9999", {"network": {"channel": 20}}, 20),
-        ("socket://core-silabs-multiprotocol:9999", {}, 15),
-        ("socket://core-silabs-multiprotocol:9999", {"network": {"channel": 20}}, 20),
-    ],
-)
-async def test_gateway_force_multi_pan_channel(
-    device_path: str,
-    config_override: dict,
-    expected_channel: int | None,
-    zha_data: ZHAData,
-) -> None:
-    #Test ZHA disabling the UART thread when connecting to a TCP coordinator.
-    zha_data.config_entry_data["data"]["device"]["path"] = device_path
-    zha_data.yaml_config["zigpy_config"] = config_override
-    zha_gw = Gateway(zha_data)
-
-    _, config = zha_gw.get_application_controller_data()
-    assert config["network"]["channel"] == expected_channel
-"""
 
 
 @pytest.mark.parametrize("radio_concurrency", [1, 2, 8])

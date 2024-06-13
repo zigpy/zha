@@ -9,7 +9,6 @@ from unittest import mock
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from slugify import slugify
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
 from zhaquirks.xiaomi import (
     BasicCluster,
@@ -41,11 +40,13 @@ import zigpy.zcl.clusters.general
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity, update_attribute_cache
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform, discovery
 from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, binary_sensor, sensor
 from zha.application.registries import (
     PLATFORM_ENTITIES,
     SINGLE_INPUT_CLUSTER_DEVICE_CLASS,
@@ -54,8 +55,6 @@ from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.device import Device
 from zha.zigbee.endpoint import Endpoint
 
-from .common import find_entity_id, update_attribute_cache
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from .zha_devices_list import (
     DEV_SIG_ATTRIBUTES,
     DEV_SIG_CLUSTER_HANDLERS,
@@ -85,15 +84,6 @@ IGNORE_SUFFIXES = [
 def contains_ignored_suffix(unique_id: str) -> bool:
     """Return true if the unique_id ends with an ignored suffix."""
     return any(suffix.lower() in unique_id.lower() for suffix in IGNORE_SUFFIXES)
-
-
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
 
 
 @pytest.fixture
@@ -147,7 +137,7 @@ async def test_devices(
         patch_cluster=False,
     )
 
-    cluster_identify = _get_first_identify_cluster(zigpy_device)
+    cluster_identify = _get_identify_cluster(zigpy_device)
     if cluster_identify:
         cluster_identify.request.reset_mock()
 
@@ -212,7 +202,7 @@ async def test_devices(
         assert contains_ignored_suffix(unique_id)
 
 
-def _get_first_identify_cluster(zigpy_device):
+def _get_identify_cluster(zigpy_device):
     for endpoint in list(zigpy_device.endpoints.values())[1:]:
         if hasattr(endpoint, "identify"):
             return endpoint.identify
@@ -450,15 +440,9 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
         _test_single_input_cluster_device_class()
 
 
-@pytest.mark.parametrize(
-    ("override", "entity_id"),
-    [
-        (None, "light.manufacturer_model_light"),
-        ("switch", "switch.manufacturer_model_switch"),
-    ],
-)
+@pytest.mark.parametrize("override", [None, "switch"])
 async def test_device_override(
-    zha_gateway: Gateway, zigpy_device_mock, override, entity_id
+    zha_gateway: Gateway, zigpy_device_mock, override
 ) -> None:
     """Test device discovery override."""
 
@@ -489,12 +473,7 @@ async def test_device_override(
     await zha_gateway.async_block_till_done()
     zha_device = zha_gateway.get_device(zigpy_device.ieee)
 
-    entity_id = find_entity_id(
-        Platform.SWITCH if override else Platform.LIGHT,
-        zha_device,
-    )
-    assert entity_id is not None
-    assert get_entity(zha_device, entity_id) is not None
+    get_entity(zha_device, platform=Platform.SWITCH if override else Platform.LIGHT)
 
 
 async def test_quirks_v2_entity_discovery(
@@ -553,12 +532,7 @@ async def test_quirks_v2_entity_discovery(
 
     zha_device = await device_joined(zigpy_device)
 
-    entity_id = find_entity_id(
-        Platform.NUMBER,
-        zha_device,
-    )
-    assert entity_id is not None
-    assert get_entity(zha_device, entity_id) is not None
+    get_entity(zha_device, platform=Platform.NUMBER)
 
 
 async def test_quirks_v2_entity_discovery_e1_curtain(
@@ -664,37 +638,31 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
 
     zha_device = await device_joined(aqara_E1_device)
 
-    power_source_entity_id = find_entity_id(
-        Platform.SENSOR,
+    power_source_entity = get_entity(
         zha_device,
-        qualifier=BasicCluster.AttributeDefs.power_source.name,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.EnumSensor,
+        qualifier_func=lambda e: e._enum == BasicCluster.PowerSource,
     )
-    assert power_source_entity_id is not None
-
-    power_source_entity = get_entity(zha_device, power_source_entity_id)
-    assert power_source_entity is not None
     assert (
         power_source_entity.state["state"]
         == BasicCluster.PowerSource.Mains_single_phase.name
     )
 
-    hook_state_entity_id = find_entity_id(
-        Platform.SENSOR,
+    hook_state_entity = get_entity(
         zha_device,
-        qualifier="hooks_state",
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.EnumSensor,
+        qualifier_func=lambda e: e._enum == AqaraE1HookState,
     )
-    assert hook_state_entity_id is not None
-    hook_state_entity = get_entity(zha_device, hook_state_entity_id)
-    assert hook_state_entity is not None
     assert hook_state_entity.state["state"] == AqaraE1HookState.Unlocked.name
 
-    error_detected_entity_id = find_entity_id(
-        Platform.BINARY_SENSOR,
+    error_detected_entity = get_entity(
         zha_device,
+        platform=Platform.BINARY_SENSOR,
+        exact_entity_type=binary_sensor.BinarySensor,
+        qualifier_func=lambda e: e._attribute_name == "error_detected",
     )
-    assert error_detected_entity_id is not None
-    error_detected_entity = get_entity(zha_device, error_detected_entity_id)
-    assert error_detected_entity is not None
     assert error_detected_entity.state["state"] is False
 
 

@@ -8,7 +8,6 @@ from typing import Optional
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
-from slugify import slugify
 import zhaquirks
 from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
@@ -16,6 +15,8 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, hvac
 import zigpy.zcl.foundation as zcl_f
 
+from tests.common import get_entity, get_group_entity, send_attributes_report
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
@@ -34,9 +35,6 @@ from zha.application.platforms.fan.helpers import NotValidPresetModeError
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
-
-from .common import async_find_group_entity_id, find_entity_id, send_attributes_report
-from .conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 
 IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
 IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
@@ -117,25 +115,6 @@ async def device_fan_2(
     return zha_device
 
 
-def get_entity(zha_dev: Device, entity_id: str) -> PlatformEntity:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
-
-
-def get_group_entity(group: Group, entity_id: str) -> Optional[GroupEntity]:
-    """Get entity."""
-    entities = {
-        entity.PLATFORM + "." + slugify(entity.name, separator="_"): entity
-        for entity in group.group_entities.values()
-    }
-
-    return entities.get(entity_id)
-
-
 async def test_fan(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,
@@ -145,11 +124,8 @@ async def test_fan(
 
     zha_device = await device_joined(zigpy_device)
     cluster = zigpy_device.endpoints.get(1).fan
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
     assert entity.state["is_on"] is False
 
     # turn on at fan
@@ -301,15 +277,11 @@ async def test_zha_group_fan_entity(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.FAN, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity = get_group_entity(zha_group, entity_id)  # type: ignore
-    assert entity is not None
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.FAN)
 
     assert entity.group_id == zha_group.group_id
     assert isinstance(entity, GroupEntity)
-    assert entity.name == zha_group.name
+    assert entity.info_object.fallback_name == zha_group.name
 
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
 
@@ -405,13 +377,7 @@ async def test_zha_group_fan_entity_failure_state(
         assert member.group == zha_group
         assert member.endpoint is not None
 
-    entity_id = async_find_group_entity_id(Platform.FAN, zha_group)
-    assert entity_id is not None
-
-    entity: GroupEntity = get_group_entity(zha_group, entity_id)  # type: ignore
-    assert entity is not None
-
-    assert isinstance(entity, GroupEntity)
+    entity: GroupEntity = get_group_entity(zha_group, platform=Platform.FAN)
     assert entity.group_id == zha_group.group_id
 
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
@@ -453,11 +419,8 @@ async def test_fan_init(
     cluster = zigpy_device.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = plug_read
     zha_device = await device_joined(zigpy_device)
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] == expected_state
     assert entity.state["speed"] == expected_speed
@@ -475,11 +438,8 @@ async def test_fan_update_entity(
     cluster = zigpy_device.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
     zha_device = await device_joined(zigpy_device)
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
 
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is False
     assert entity.state["speed"] == SPEED_OFF
@@ -539,10 +499,7 @@ async def test_fan_ikea(
     """Test ZHA fan Ikea platform."""
     zha_device = await device_joined(zigpy_device_ikea)
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is False
 
@@ -628,10 +585,7 @@ async def test_fan_ikea_init(
     cluster.PLUGGED_ATTR_READS = ikea_plug_read
 
     zha_device = await device_joined(zigpy_device_ikea)
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
     assert entity.state["is_on"] == ikea_expected_state
     assert entity.state["percentage"] == ikea_expected_percentage
     assert entity.state["preset_mode"] == ikea_preset_mode
@@ -647,10 +601,7 @@ async def test_fan_ikea_update_entity(
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
 
     zha_device = await device_joined(zigpy_device_ikea)
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is False
     assert entity.state[ATTR_PERCENTAGE] == 0
@@ -702,10 +653,7 @@ async def test_fan_kof(
     """Test ZHA fan platform for King of Fans."""
     zha_device = await device_joined(zigpy_device_kof)
     cluster = zigpy_device_kof.endpoints.get(1).fan
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is False
 
@@ -778,10 +726,7 @@ async def test_fan_kof_init(
     cluster.PLUGGED_ATTR_READS = plug_read
 
     zha_device = await device_joined(zigpy_device_kof)
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is expected_state
     assert entity.state[ATTR_PERCENTAGE] == expected_percentage
@@ -799,10 +744,7 @@ async def test_fan_kof_update_entity(
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
 
     zha_device = await device_joined(zigpy_device_kof)
-    entity_id = find_entity_id(Platform.FAN, zha_device)
-    assert entity_id is not None
-    entity = get_entity(zha_device, entity_id)
-    assert entity is not None
+    entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is False
     assert entity.state[ATTR_PERCENTAGE] == 0

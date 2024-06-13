@@ -45,7 +45,6 @@ from zigpy.zcl.foundation import Status
 
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     AttrReportConfig,
     ClientClusterHandler,
     ClusterAttributeUpdatedEvent,
@@ -54,6 +53,8 @@ from zha.zigbee.cluster_handlers import (
     registries,
 )
 from zha.zigbee.cluster_handlers.const import (
+    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+    CLUSTER_HANDLER_LEVEL_CHANGED,
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_BATTERY_SAVE,
     REPORT_CONFIG_DEFAULT,
@@ -370,7 +371,7 @@ class LevelControlClusterHandler(ClusterHandler):
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
         self.emit(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            CLUSTER_HANDLER_LEVEL_CHANGED,
             LevelChangeEvent(
                 level=level,
                 event=f"cluster_handler_{command}",
