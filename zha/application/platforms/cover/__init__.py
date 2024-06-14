@@ -378,6 +378,12 @@ class Shade(PlatformEntity):
         self._level_cluster_handler.on_event(
             CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
         )
+        self._attr_supported_features: CoverEntityFeature = (
+            CoverEntityFeature.OPEN
+            | CoverEntityFeature.CLOSE
+            | CoverEntityFeature.STOP
+            | CoverEntityFeature.SET_POSITION
+        )
 
     @property
     def state(self) -> dict[str, Any]:

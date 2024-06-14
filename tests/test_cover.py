@@ -28,7 +28,11 @@ from zha.application.platforms.cover import (
     STATE_CLOSED,
     STATE_OPEN,
 )
-from zha.application.platforms.cover.const import STATE_CLOSING, STATE_OPENING
+from zha.application.platforms.cover.const import (
+    STATE_CLOSING,
+    STATE_OPENING,
+    CoverEntityFeature,
+)
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 
@@ -557,6 +561,13 @@ async def test_shade(
     cluster_level = zigpy_shade_device.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
 
+    assert entity._attr_supported_features == (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.SET_POSITION
+    )
+
     # test that the state has changed from unavailable to off
     await send_attributes_report(
         zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off.id: 0}
@@ -707,6 +718,13 @@ async def test_keen_vent(
     cluster_on_off = zigpy_keen_vent.endpoints.get(1).on_off
     cluster_level = zigpy_keen_vent.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
+
+    assert entity._attr_supported_features == (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.SET_POSITION
+    )
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(zha_gateway, cluster_on_off, {8: 0, 0: False, 1: 1})
