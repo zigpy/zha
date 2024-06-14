@@ -33,6 +33,7 @@ from zha.application.const import (
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
     ZHA_GW_MSG,
+    ZHA_GW_MSG_CONNECTION_LOST,
     ZHA_GW_MSG_DEVICE_FULL_INIT,
     ZHA_GW_MSG_DEVICE_JOINED,
     ZHA_GW_MSG_DEVICE_LEFT,
@@ -89,6 +90,15 @@ class DeviceJoinedDeviceInfo:
     ieee: str
     nwk: int
     pairing_status: DevicePairingStatus
+
+
+@dataclass(kw_only=True, frozen=True)
+class ConnectionLostEvent:
+    """Event to signal that the connection to the radio has been lost."""
+
+    event_type: Final[str] = ZHA_GW_MSG
+    event: Final[str] = ZHA_GW_MSG_CONNECTION_LOST
+    exception: Exception | None = None
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -252,21 +262,7 @@ class Gateway(AsyncUtilMixin, EventBase):
     def connection_lost(self, exc: Exception) -> None:
         """Handle connection lost event."""
         _LOGGER.debug("Connection to the radio was lost: %r", exc)
-
-        if self.shutting_down:
-            return
-
-        # Ensure we do not queue up multiple resets
-        if self._reload_task is not None:
-            _LOGGER.debug("Ignoring reset, one is already running")
-            return
-
-        # pylint: disable=pointless-string-statement
-        """TODO
-        self._reload_task = asyncio.create_task(
-            self.hass.config_entries.async_reload(self.config_entry.entry_id)
-        )
-        """
+        self.emit(ZHA_GW_MSG_CONNECTION_LOST, ConnectionLostEvent(exception=exc))
 
     def _find_coordinator_device(self) -> zigpy.device.Device:
         zigpy_coordinator = self.application_controller.get_device(nwk=0x0000)
