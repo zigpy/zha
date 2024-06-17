@@ -16,8 +16,14 @@ from zigpy.zdo.types import LogicalType, NodeDescriptor
 from tests.common import get_entity, get_group_entity
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
-from zha.application.const import CONF_USE_THREAD, RadioType
+from zha.application.const import (
+    CONF_USE_THREAD,
+    ZHA_GW_MSG,
+    ZHA_GW_MSG_CONNECTION_LOST,
+    RadioType,
+)
 from zha.application.gateway import (
+    ConnectionLostEvent,
     DeviceJoinedDeviceInfo,
     DeviceJoinedEvent,
     DevicePairingStatus,
@@ -535,6 +541,24 @@ def test_gateway_device_joined(
                 nwk=0xB79C,
                 pairing_status=DevicePairingStatus.PAIRED,
             )
+        ),
+    )
+
+
+def test_gateway_connection_lost(zha_gateway: Gateway) -> None:
+    """Test Zigpy raw device initialized."""
+
+    exception = Exception("Test exception")
+    zha_gateway.emit = MagicMock(wraps=zha_gateway.emit)
+    zha_gateway.connection_lost(exception)
+
+    assert zha_gateway.emit.call_count == 1
+    assert zha_gateway.emit.call_args == call(
+        ZHA_GW_MSG_CONNECTION_LOST,
+        ConnectionLostEvent(
+            exception=exception,
+            event=ZHA_GW_MSG_CONNECTION_LOST,
+            event_type=ZHA_GW_MSG,
         ),
     )
 
