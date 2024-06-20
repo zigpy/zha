@@ -6,20 +6,14 @@ import asyncio
 from asyncio import AbstractEventLoop, Future, Semaphore, Task, gather, get_running_loop
 from collections.abc import Awaitable, Callable, Collection, Coroutine, Iterable
 import concurrent.futures
-from concurrent.futures import ThreadPoolExecutor
 import contextlib
-import ctypes
 from dataclasses import dataclass
 import enum
 import functools
 from functools import cached_property
-import inspect
 import logging
-import sys
 import threading
-from threading import Thread
 import time
-import traceback
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -43,12 +37,7 @@ _P = ParamSpec("_P")
 _Ts = TypeVarTuple("_Ts")
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 
-MAX_LOG_ATTEMPTS = 2
-_JOIN_ATTEMPTS = 10
-EXECUTOR_SHUTDOWN_TIMEOUT = 10
 _SHUTDOWN_RUN_CALLBACK_THREADSAFE = "_zha_shutdown_run_callback_threadsafe"
-THREADING_SHUTDOWN_TIMEOUT = 10
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -233,133 +222,6 @@ def is_callback(func: Callable[..., Any]) -> bool:
     return getattr(func, "_zha_callback", False) is True
 
 
-def async_raise(tid: int, exctype: Any) -> None:
-    """Raise an exception in the threads with id tid."""
-    if not inspect.isclass(exctype):
-        raise TypeError("Only types can be raised (not instances)")
-
-    c_tid = ctypes.c_ulong(tid)  # changed in python 3.7+
-    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(c_tid, ctypes.py_object(exctype))
-
-    if res == 1:
-        return
-
-    # "if it returns a number greater than one, you're in trouble,
-    # and you should call it again with exc=NULL to revert the effect"
-    ctypes.pythonapi.PyThreadState_SetAsyncExc(c_tid, None)
-    raise SystemError("PyThreadState_SetAsyncExc failed")
-
-
-def _log_thread_running_at_shutdown(name: str, ident: int) -> None:
-    """Log the stack of a thread that was still running at shutdown."""
-    frames = sys._current_frames()  # pylint: disable=protected-access
-    stack = frames.get(ident)
-    formatted_stack = traceback.format_stack(stack)
-    _LOGGER.warning(
-        "Thread[%s] is still running at shutdown: %s",
-        name,
-        "".join(formatted_stack).strip(),
-    )
-
-
-def join_or_interrupt_threads(
-    threads: set[Thread], timeout: float, log: bool
-) -> set[Thread]:
-    """Attempt to join or interrupt a set of threads."""
-    joined = set()
-    timeout_per_thread = timeout / len(threads)
-
-    for thread in threads:
-        thread.join(timeout=timeout_per_thread)
-
-        if not thread.is_alive() or thread.ident is None:
-            joined.add(thread)
-            continue
-
-        if log:
-            _log_thread_running_at_shutdown(thread.name, thread.ident)
-
-        with contextlib.suppress(SystemError):
-            # SystemError at this stage is usually a race condition
-            # where the thread happens to die right before we force
-            # it to raise the exception
-            async_raise(thread.ident, SystemExit)
-
-    return joined
-
-
-def deadlock_safe_shutdown() -> None:
-    """Shutdown that will not deadlock."""
-    # threading._shutdown can deadlock forever
-    # see https://github.com/justengel/continuous_threading#shutdown-update
-    # for additional detail
-    remaining_threads = [
-        thread
-        for thread in threading.enumerate()
-        if thread is not threading.main_thread()
-        and not thread.daemon
-        and thread.is_alive()
-    ]
-
-    if not remaining_threads:
-        return
-
-    timeout_per_thread = THREADING_SHUTDOWN_TIMEOUT / len(remaining_threads)
-    for thread in remaining_threads:
-        try:
-            thread.join(timeout_per_thread)
-        except Exception as err:  # pylint: disable=broad-except
-            _LOGGER.warning("Failed to join thread: %s", err)
-
-
-class ThreadWithException(Thread):
-    """A thread class that supports raising exception in the thread from another thread.
-
-    Based on
-    https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread/49877671
-
-    """
-
-    def raise_exc(self, exctype: Any) -> None:
-        """Raise the given exception type in the context of this thread."""
-        assert self.ident
-        async_raise(self.ident, exctype)
-
-
-class InterruptibleThreadPoolExecutor(ThreadPoolExecutor):
-    """A ThreadPoolExecutor instance that will not deadlock on shutdown."""
-
-    def shutdown(self, *args: Any, **kwargs: Any) -> None:  # pylint: disable=[unused-argument]
-        """Shutdown with interrupt support added."""
-        super().shutdown(wait=False, cancel_futures=True)
-        self.join_threads_or_timeout()
-
-    def join_threads_or_timeout(self) -> None:
-        """Join threads or timeout."""
-        remaining_threads = set(self._threads)
-        start_time = time.monotonic()
-        timeout_remaining: float = EXECUTOR_SHUTDOWN_TIMEOUT
-        attempt = 0
-
-        while True:
-            if not remaining_threads:
-                return
-
-            attempt += 1
-
-            remaining_threads -= join_or_interrupt_threads(
-                remaining_threads,
-                timeout_remaining / _JOIN_ATTEMPTS,
-                attempt <= MAX_LOG_ATTEMPTS,
-            )
-
-            timeout_remaining = EXECUTOR_SHUTDOWN_TIMEOUT - (
-                time.monotonic() - start_time
-            )
-            if timeout_remaining <= 0:
-                return
-
-
 class AsyncUtilMixin:
     """Mixin for dealing with async stuff."""
 
@@ -370,9 +232,6 @@ class AsyncUtilMixin:
         self._device_init_tasks: dict[EUI64, asyncio.Task] = {}
         self._background_tasks: set[asyncio.Future[Any]] = set()
         self._untracked_background_tasks: set[asyncio.Future[Any]] = set()
-        self.import_executor = InterruptibleThreadPoolExecutor(
-            max_workers=1, thread_name_prefix="ZHALibImportExecutor"
-        )
         super().__init__(*args, **kw_args)
 
     async def shutdown(self) -> None:
@@ -398,8 +257,6 @@ class AsyncUtilMixin:
         await _cancel_tasks(self._device_init_tasks.values())
         await _cancel_tasks(self._untracked_background_tasks)
         self._cancel_cancellable_timers()
-        self.import_executor.shutdown()
-        self.import_executor = None
 
     async def async_block_till_done(self, wait_background_tasks: bool = False) -> None:
         """Block until all pending work is done."""
@@ -715,16 +572,6 @@ class AsyncUtilMixin:
         task_bucket.add(task)
         task.add_done_callback(task_bucket.remove)
         return task
-
-    @callback
-    def async_add_import_executor_job(
-        self, target: Callable[..., _T], *args: Any
-    ) -> asyncio.Future[_T]:
-        """Add an import executor job from within the event loop.
-
-        The future returned from this method must be awaited in the event loop.
-        """
-        return self.loop.run_in_executor(self.import_executor, target, *args)
 
     @overload
     @callback
