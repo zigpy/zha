@@ -371,7 +371,7 @@ class AsyncUtilMixin:
         self._background_tasks: set[asyncio.Future[Any]] = set()
         self._untracked_background_tasks: set[asyncio.Future[Any]] = set()
         self.import_executor = InterruptibleThreadPoolExecutor(
-            max_workers=1, thread_name_prefix="ImportExecutor"
+            max_workers=1, thread_name_prefix="ZHALibImportExecutor"
         )
         super().__init__(*args, **kw_args)
 
