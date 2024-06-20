@@ -225,7 +225,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         discovery.GROUP_PROBE.initialize(self)
 
         if self.config.config.quirks_configuration.enabled:
-            await self.async_add_import_executor_job(
+            await self.async_add_executor_job(
                 setup_quirks, self.config.config.quirks_configuration.custom_quirks_path
             )
 
