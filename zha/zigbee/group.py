@@ -346,3 +346,8 @@ class Group(LogMixin):
         msg = f"[%s](%s): {msg}"
         args = (self.name, self.group_id) + args
         _LOGGER.log(level, msg, *args, **kwargs)
+
+    async def on_remove(self) -> None:
+        """Cancel tasks this group owns."""
+        for group_entity in self._group_entities.values():
+            await group_entity.on_remove()
