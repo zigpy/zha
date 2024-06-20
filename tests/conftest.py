@@ -1,9 +1,13 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Callable
+from collections.abc import Callable, Generator
+from contextlib import contextmanager
 import itertools
 import logging
+import os
+import reprlib
+import threading
 import time
 from types import TracebackType
 from typing import Any, Optional
@@ -25,6 +29,7 @@ from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
 from tests import common
+from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.helpers import (
     AlarmControlPanelOptions,
@@ -33,11 +38,13 @@ from zha.application.helpers import (
     ZHAConfiguration,
     ZHAData,
 )
+from zha.async_ import ZHAJob
 from zha.zigbee.device import Device
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
 COUNTER_NAMES = ["counter_1", "counter_2", "counter_3"]
+INSTANCES = []
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -118,6 +125,105 @@ def _wrap_mock_instance(obj: Any) -> MagicMock:
             setattr(mock, attr_name, real_attr)
 
     return mock
+
+
+@contextmanager
+def long_repr_strings() -> Generator[None, None, None]:
+    """Increase reprlib maxstring and maxother to 300."""
+    arepr = reprlib.aRepr
+    original_maxstring = arepr.maxstring
+    original_maxother = arepr.maxother
+    arepr.maxstring = 300
+    arepr.maxother = 300
+    try:
+        yield
+    finally:
+        arepr.maxstring = original_maxstring
+        arepr.maxother = original_maxother
+
+
+@pytest.fixture(autouse=True)
+def expected_lingering_tasks() -> bool:
+    """Temporary ability to bypass test failures.
+
+    Parametrize to True to bypass the pytest failure.
+    @pytest.mark.parametrize("expected_lingering_tasks", [True])
+
+    This should be removed when all lingering tasks have been cleaned up.
+    """
+    return False
+
+
+@pytest.fixture(autouse=True)
+def expected_lingering_timers() -> bool:
+    """Temporary ability to bypass test failures.
+
+    Parametrize to True to bypass the pytest failure.
+    @pytest.mark.parametrize("expected_lingering_timers", [True])
+
+    This should be removed when all lingering timers have been cleaned up.
+    """
+    current_test = os.getenv("PYTEST_CURRENT_TEST")
+    if (
+        current_test
+        and current_test.startswith("tests/components/")
+        and current_test.split("/")[2] not in {platform.value for platform in Platform}
+    ):
+        # As a starting point, we ignore non-platform components
+        return True
+    return False
+
+
+@pytest.fixture(autouse=True)
+def verify_cleanup(
+    event_loop: asyncio.AbstractEventLoop,
+    expected_lingering_tasks: bool,  # pylint: disable=redefined-outer-name
+    expected_lingering_timers: bool,  # pylint: disable=redefined-outer-name
+) -> Generator[None, None, None]:
+    """Verify that the test has cleaned up resources correctly."""
+    threads_before = frozenset(threading.enumerate())
+    tasks_before = asyncio.all_tasks(event_loop)
+    yield
+
+    event_loop.run_until_complete(event_loop.shutdown_default_executor())
+
+    if len(INSTANCES) >= 2:
+        count = len(INSTANCES)
+        for inst in INSTANCES:
+            inst.stop()
+        pytest.exit(f"Detected non stopped instances ({count}), aborting test run")
+
+    # Warn and clean-up lingering tasks and timers
+    # before moving on to the next test.
+    tasks = asyncio.all_tasks(event_loop) - tasks_before
+    for task in tasks:
+        if expected_lingering_tasks:
+            _LOGGER.warning("Lingering task after test %r", task)
+        else:
+            pytest.fail(f"Lingering task after test {task!r}")
+        task.cancel()
+    if tasks:
+        event_loop.run_until_complete(asyncio.wait(tasks))
+
+    for handle in event_loop._scheduled:  # type: ignore[attr-defined]
+        if not handle.cancelled():
+            with long_repr_strings():
+                if expected_lingering_timers:
+                    _LOGGER.warning("Lingering timer after test %r", handle)
+                elif handle._args and isinstance(job := handle._args[-1], ZHAJob):
+                    if job.cancel_on_shutdown:
+                        continue
+                    pytest.fail(f"Lingering timer after job {job!r}")
+                else:
+                    pytest.fail(f"Lingering timer after test {handle!r}")
+                handle.cancel()
+
+    # Verify no threads where left behind.
+    threads = frozenset(threading.enumerate()) - threads_before
+    for thread in threads:
+        assert isinstance(thread, threading._DummyThread) or thread.name.startswith(
+            "waitpid-"
+        )
 
 
 @pytest.fixture
@@ -213,12 +319,14 @@ class TestGateway:
         self.zha_gateway = await Gateway.async_from_config(self.zha_data)
         await self.zha_gateway.async_block_till_done()
         await self.zha_gateway.async_initialize_devices_and_entities()
+        INSTANCES.append(self.zha_gateway)
         return self.zha_gateway
 
     async def __aexit__(
         self, exc_type: Exception, exc_value: str, traceback: TracebackType
     ) -> None:
         """Shutdown the ZHA gateway."""
+        INSTANCES.remove(self.zha_gateway)
         await self.zha_gateway.shutdown()
         await asyncio.sleep(0)
 
