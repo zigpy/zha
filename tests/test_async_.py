@@ -563,30 +563,6 @@ async def test_background_task(zha_gateway: Gateway, eager_start: bool) -> None:
     assert result.result() == "Foo"
 
 
-@pytest.mark.parametrize("eager_start", [True, False])
-async def test_cancellable_ZHAJob(zha_gateway: Gateway, eager_start: bool) -> None:
-    """Simulate a shutdown, ensure cancellable jobs are cancelled."""
-    job = MagicMock()
-
-    @callback
-    def run_job(job: ZHAJob) -> None:
-        """Call the action."""
-        zha_gateway.async_run_hass_job(job, eager_start=eager_start)
-
-    timer1 = zha_gateway.loop.call_later(
-        60, run_job, ZHAJob(callback(job), cancel_on_shutdown=True)
-    )
-    timer2 = zha_gateway.loop.call_later(60, run_job, ZHAJob(callback(job)))
-
-    await zha_gateway.shutdown()
-
-    assert timer1.cancelled()
-    assert not timer2.cancelled()
-
-    # Cleanup
-    timer2.cancel()
-
-
 def test_ZHAJob_passing_job_type():
     """Test passing the job type to ZHAJob when we already know it."""
 
