@@ -500,7 +500,6 @@ class OnOffClusterHandler(ClusterHandler):
                 )
                 if on_time > 0:
                     self._off_listener = asyncio.get_running_loop().call_later(
-                        self._endpoint.device.hass,
                         (on_time / 10),  # value is in 10ths of a second
                         self.set_to_off,
                     )

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from dataclasses import dataclass
 from enum import IntFlag
 import functools
@@ -165,6 +166,7 @@ class Siren(PlatformEntity):
         self._off_listener = asyncio.get_running_loop().call_later(
             siren_duration, self.async_set_off
         )
+        self._tracked_handles.append(self._off_listener)
         self.maybe_emit_state_changed_event()
 
     async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -180,5 +182,9 @@ class Siren(PlatformEntity):
         self._attr_is_on = False
         if self._off_listener:
             self._off_listener.cancel()
+
+            with contextlib.suppress(ValueError):
+                self._tracked_handles.remove(self._off_listener)
+
             self._off_listener = None
         self.maybe_emit_state_changed_event()

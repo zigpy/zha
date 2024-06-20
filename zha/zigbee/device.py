@@ -589,7 +589,7 @@ class Device(LogMixin, EventBase):
             )
 
     def emit_zha_event(self, event_data: dict[str, str | int]) -> None:  # pylint: disable=unused-argument
-        """Relay events to hass."""
+        """Relay events directly."""
         self.emit(
             ZHA_EVENT,
             ZHAEvent(

@@ -697,6 +697,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         for device in self._devices.values():
             await device.on_remove()
 
+        for group in self._groups.values():
+            await group.on_remove()
+
         _LOGGER.debug("Shutting down ZHA ControllerApplication")
         await self.application_controller.shutdown()
         self.application_controller = None
