@@ -129,6 +129,7 @@ class BaseEntity(LogMixin, EventBase):
 
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
+        self._tracked_handles: list[asyncio.Handle] = []
 
     @property
     def fallback_name(self) -> str | None:
@@ -213,7 +214,11 @@ class BaseEntity(LogMixin, EventBase):
         }
 
     async def on_remove(self) -> None:
-        """Cancel tasks this entity owns."""
+        """Cancel tasks and timers this entity owns."""
+        for handle in self._tracked_handles:
+            self.debug("Cancelling handle: %s", handle)
+            handle.cancel()
+
         tasks = [t for t in self._tracked_tasks if not (t.done() or t.cancelled())]
         for task in tasks:
             self.debug("Cancelling task: %s", task)

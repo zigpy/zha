@@ -8,6 +8,7 @@ from abc import ABC
 import asyncio
 from collections import Counter
 from collections.abc import Callable
+import contextlib
 import dataclasses
 from dataclasses import dataclass
 import functools
@@ -652,12 +653,16 @@ class BaseLight(BaseEntity, ABC):
             transition_time,
             self.async_transition_complete,
         )
+        self._tracked_handles.append(self._transition_listener)
 
     def _async_unsub_transition_listener(self) -> None:
         """Unsubscribe transition listener."""
         if self._transition_listener:
             self._transition_listener.cancel()
             self._transition_listener = None
+
+            with contextlib.suppress(ValueError):
+                self._tracked_handles.remove(self._transition_listener)
 
     def async_transition_complete(self, _=None) -> None:
         """Set _transitioning_individual to False and write HA state."""
