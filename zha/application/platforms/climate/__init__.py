@@ -83,6 +83,16 @@ class Thermostat(PlatformEntity):
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key: str = "thermostat"
     _enable_turn_on_off_backwards_compatibility = False
+    _attr_extra_state_attribute_names: set[str] = {
+        ATTR_SYS_MODE,
+        ATTR_OCCUPANCY,
+        ATTR_OCCP_COOL_SETPT,
+        ATTR_OCCP_HEAT_SETPT,
+        ATTR_PI_HEATING_DEMAND,
+        ATTR_PI_COOLING_DEMAND,
+        ATTR_UNOCCP_COOL_SETPT,
+        ATTR_UNOCCP_HEAT_SETPT,
+    }
 
     def __init__(
         self,

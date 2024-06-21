@@ -87,6 +87,7 @@ async def async_test_temperature(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test temperature sensor."""
+    assert entity.extra_state_attribute_names is None
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 2900, 2: 100})
     assert_state(entity, 29.0, "°C")
 
@@ -117,6 +118,11 @@ async def async_test_metering(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test Smart Energy metering sensor."""
+    assert entity.extra_state_attribute_names == {
+        "status",
+        "device_type",
+        "zcl_unit_of_measurement",
+    }
     await send_attributes_report(
         zha_gateway, cluster, {1025: 1, 1024: 12345, 1026: 100}
     )
@@ -166,7 +172,11 @@ async def async_test_smart_energy_summation_delivered(
     zha_gateway: Gateway, cluster, entity
 ):
     """Test SmartEnergy Summation delivered sensor."""
-
+    assert entity.extra_state_attribute_names == {
+        "status",
+        "device_type",
+        "zcl_unit_of_measurement",
+    }
     await send_attributes_report(
         zha_gateway, cluster, {1025: 1, "current_summ_delivered": 12321, 1026: 100}
     )
@@ -316,6 +326,12 @@ async def async_test_powerconfiguration(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test powerconfiguration/battery sensor."""
+    assert entity.extra_state_attribute_names == {
+        "battery_voltage",
+        "battery_quantity",
+        "battery_size",
+        "battery_voltage",
+    }
     await send_attributes_report(zha_gateway, cluster, {33: 98})
     assert_state(entity, 49, "%")
     assert entity.state["battery_voltage"] == 2.9

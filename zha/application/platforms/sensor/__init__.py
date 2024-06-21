@@ -250,7 +250,11 @@ class Sensor(PlatformEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle attribute updates from the cluster handler."""
-        if event.attribute_name == self._attribute_name:
+        if event.attribute_name == self._attribute_name or (
+            hasattr(self, "_attr_extra_state_attribute_names")
+            and event.attribute_name
+            in getattr(self, "_attr_extra_state_attribute_names")
+        ):
             self.maybe_emit_state_changed_event()
 
     def formatter(self, value: int | enum.IntEnum) -> int | float | str | None:
@@ -489,6 +493,11 @@ class Battery(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_extra_state_attribute_names: set[str] = {
+        "battery_size",
+        "battery_quantity",
+        "battery_voltage",
+    }
 
     @classmethod
     def create_platform_entity(
@@ -548,6 +557,21 @@ class ElectricalMeasurement(PollableSensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _div_mul_prefix: str | None = "ac_power"
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._attr_extra_state_attribute_names: set[str] = {
+            "measurement_type",
+            f"{self._attribute_name}_max",
+        }
 
     @property
     def state(self) -> dict[str, Any]:
@@ -734,6 +758,11 @@ class SmartEnergyMetering(PollableSensor):
     _use_custom_polling: bool = False
     _attribute_name = "instantaneous_demand"
     _attr_translation_key: str = "instantaneous_demand"
+    _attr_extra_state_attribute_names: set[str] = {
+        "device_type",
+        "status",
+        "zcl_unit_of_measurement",
+    }
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(

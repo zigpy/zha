@@ -117,6 +117,10 @@ class BaseLight(BaseEntity, ABC):
     PLATFORM = Platform.LIGHT
     _FORCE_ON = False
     _DEFAULT_MIN_TRANSITION_TIME: float = 0
+    _attr_extra_state_attribute_names: set[str] = {
+        "off_with_transition",
+        "off_brightness",
+    }
 
     def __init__(self, *args, **kwargs):
         """Initialize the light."""
