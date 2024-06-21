@@ -6,6 +6,7 @@ import math
 from typing import Any, Optional
 
 import pytest
+from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, get_device
@@ -21,7 +22,7 @@ from zha.application import Platform
 from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
-from zha.application.platforms.sensor import UnitOfMass
+from zha.application.platforms.sensor import DanfossSoftwareErrorCode, UnitOfMass
 from zha.application.platforms.sensor.const import SensorDeviceClass
 from zha.units import PERCENTAGE, UnitOfEnergy, UnitOfPressure, UnitOfVolume
 from zha.zigbee.device import Device
@@ -330,7 +331,6 @@ async def async_test_powerconfiguration(
         "battery_voltage",
         "battery_quantity",
         "battery_size",
-        "battery_voltage",
     }
     await send_attributes_report(zha_gateway, cluster, {33: 98})
     assert_state(entity, 49, "%")
@@ -1229,3 +1229,68 @@ async def test_device_unavailable_skips_entity_polling(
         "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "
         "available: False, allow polled requests: True" in caplog.text
     )
+
+
+@pytest.fixture
+async def zigpy_device_danfoss_thermostat(
+    zigpy_device_mock: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> Device:
+    """Danfoss thermostat device."""
+
+    zigpy_device = zigpy_device_mock(
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.PowerConfiguration.cluster_id,
+                    general.Identify.cluster_id,
+                    general.Time.cluster_id,
+                    general.PollControl.cluster_id,
+                    hvac.Thermostat.cluster_id,
+                    hvac.UserInterface.cluster_id,
+                    homeautomation.Diagnostic.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [general.Basic.cluster_id, general.Ota.cluster_id],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
+            }
+        },
+        manufacturer="Danfoss",
+        model="eTRV0100",
+        quirk=danfoss_thermostat.DanfossThermostat,
+    )
+
+    zha_device = await device_joined(zigpy_device)
+    return zha_device, zigpy_device
+
+
+async def test_danfoss_thermostat_sw_error(
+    zha_gateway: Gateway,
+    zigpy_device_danfoss_thermostat,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test quirks defined thermostat."""
+
+    zha_device, zigpy_device = zigpy_device_danfoss_thermostat
+
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        exact_entity_type=DanfossSoftwareErrorCode,
+        qualifier="sw_error_code",
+    )
+    assert entity is not None
+
+    cluster = zigpy_device.endpoints[1].diagnostic
+
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            danfoss_thermostat.DanfossDiagnosticCluster.AttributeDefs.sw_error_code.id: 0x0001
+        },
+    )
+
+    assert entity.state["state"] == "something"
+    assert entity.extra_state_attribute_names
+    assert "Top_pcb_sensor_error" in entity.extra_state_attribute_names
+    assert entity.state["Top_pcb_sensor_error"]

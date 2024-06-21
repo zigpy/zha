@@ -7,6 +7,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
 
+from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import NumberMetadata
 from zigpy.zcl.clusters.hvac import Thermostat
 
@@ -21,7 +22,7 @@ from zha.application.platforms.number.const import (
     NumberMode,
 )
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.units import UnitOfMass, UnitOfTemperature, validate_unit
+from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime, validate_unit
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_OUTPUT,
@@ -144,6 +145,7 @@ class Number(PlatformEntity):
     def name(self) -> str | None:
         """Return the name of the number entity."""
         description = self._analog_output_cluster_handler.description
+        # TODO what happened here?
         if description is not None and len(description) > 0:
             return f"{super().name} {description}"
         return super().name
@@ -899,3 +901,70 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     _attr_entity_category = EntityCategory.CONFIG
 
     _max_source = Thermostat.AttributeDefs.max_heat_setpoint_limit.name
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossExerciseTriggerTime(NumberConfigurationEntity):
+    """Danfoss proprietary attribute to set the time to exercise the valve."""
+
+    _unique_id_suffix = "exercise_trigger_time"
+    _attribute_name: str = "exercise_trigger_time"
+    _attr_translation_key: str = "exercise_trigger_time"
+    _attr_native_min_value: int = 0
+    _attr_native_max_value: int = 1439
+    _attr_mode: NumberMode = NumberMode.BOX
+    _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
+    _attr_icon: str = "mdi:clock"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
+    """Danfoss proprietary attribute to communicate the value of the external temperature sensor."""
+
+    _unique_id_suffix = "external_measured_room_sensor"
+    _attribute_name: str = "external_measured_room_sensor"
+    _attr_translation_key: str = "external_temperature_sensor"
+    _attr_native_min_value: float = -80
+    _attr_native_max_value: float = 35
+    _attr_icon: str = "mdi:thermometer"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossLoadRoomMean(NumberConfigurationEntity):
+    """Danfoss proprietary attribute to set a value for the load."""
+
+    _unique_id_suffix = "load_room_mean"
+    _attribute_name: str = "load_room_mean"
+    _attr_translation_key: str = "load_room_mean"
+    _attr_native_min_value: int = -8000
+    _attr_native_max_value: int = 2000
+    _attr_mode: NumberMode = NumberMode.BOX
+    _attr_icon: str = "mdi:scale-balance"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
+    """Danfoss proprietary attribute to set the regulation setpoint offset."""
+
+    _unique_id_suffix = "regulation_setpoint_offset"
+    _attribute_name: str = "regulation_setpoint_offset"
+    _attr_translation_key: str = "regulation_setpoint_offset"
+    _attr_mode: NumberMode = NumberMode.BOX
+    _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
+    _attr_icon: str = "mdi:thermostat"
+    _attr_native_min_value: float = -2.5
+    _attr_native_max_value: float = 2.5
+    _attr_native_step: float = 0.1
+    _attr_multiplier = 1 / 10
