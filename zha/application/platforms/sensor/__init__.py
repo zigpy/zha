@@ -10,6 +10,8 @@ import logging
 import numbers
 from typing import TYPE_CHECKING, Any, Self
 
+from zhaquirks.danfoss import thermostat as danfoss_thermostat
+from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
@@ -59,6 +61,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_BASIC,
     CLUSTER_HANDLER_COVER,
     CLUSTER_HANDLER_DEVICE_TEMPERATURE,
+    CLUSTER_HANDLER_DIAGNOSTIC,
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     CLUSTER_HANDLER_HUMIDITY,
     CLUSTER_HANDLER_ILLUMINANCE,
@@ -1603,4 +1606,143 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     _enum = AqaraE1HookState
     _unique_id_suffix = "hooks_state"
     _attr_translation_key: str = "hooks_state"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+class BitMapSensor(Sensor):
+    """A sensor with only state attributes.
+
+    The sensor value will be an aggregate of the state attributes.
+    """
+
+    _bitmap: types.bitmap8 | types.bitmap16
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._attr_extra_state_attribute_names: set[str] = {
+            bit.name for bit in list(self._bitmap)
+        }
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state for this sensor."""
+        response = super().state
+        response["state"] = self.native_value
+        value = self._cluster_handler.cluster.get(self._attribute_name)
+        for bit in list(self._bitmap):
+            if value is None:
+                response[bit.name] = False
+            else:
+                response[bit.name] = bit in self._bitmap(value)
+        return response
+
+    def formatter(self, _value: int) -> str:
+        """Summary of all attributes."""
+
+        value = self._cluster_handler.cluster.get(self._attribute_name)
+        state_attr = {}
+
+        for bit in list(self._bitmap):
+            if value is None:
+                state_attr[bit.name] = False
+            else:
+                state_attr[bit.name] = bit in self._bitmap(value)
+
+        binary_state_attributes = [key for (key, elem) in state_attr.items() if elem]
+
+        return "something" if binary_state_attributes else "nothing"
+
+
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossOpenWindowDetection(EnumSensor):
+    """Danfoss proprietary attribute.
+
+    Sensor that displays whether the TRV detects an open window using the temperature sensor.
+    """
+
+    _unique_id_suffix = "open_window_detection"
+    _attribute_name = "open_window_detection"
+    _attr_translation_key: str = "open_window_detected"
+    _attr_icon: str = "mdi:window-open"
+    _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossLoadEstimate(Sensor):
+    """Danfoss proprietary attribute for communicating its estimate of the radiator load."""
+
+    _unique_id_suffix = "load_estimate"
+    _attribute_name = "load_estimate"
+    _attr_translation_key: str = "load_estimate"
+    _attr_icon: str = "mdi:scale-balance"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossAdaptationRunStatus(BitMapSensor):
+    """Danfoss proprietary attribute for showing the status of the adaptation run."""
+
+    _unique_id_suffix = "adaptation_run_status"
+    _attribute_name = "adaptation_run_status"
+    _attr_translation_key: str = "adaptation_run_status"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _bitmap = danfoss_thermostat.DanfossAdaptationRunStatusBitmap
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossPreheatTime(Sensor):
+    """Danfoss proprietary attribute for communicating the time when it starts pre-heating."""
+
+    _unique_id_suffix = "preheat_time"
+    _attribute_name = "preheat_time"
+    _attr_translation_key: str = "preheat_time"
+    _attr_icon: str = "mdi:radiator"
+    _attr_entity_registry_enabled_default = False
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_DIAGNOSTIC,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossSoftwareErrorCode(BitMapSensor):
+    """Danfoss proprietary attribute for communicating the error code."""
+
+    _unique_id_suffix = "sw_error_code"
+    _attribute_name = "sw_error_code"
+    _attr_translation_key: str = "software_error"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _bitmap = danfoss_thermostat.DanfossSoftwareErrorCodeBitmap
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_DIAGNOSTIC,
+    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+)
+class DanfossMotorStepCounter(Sensor):
+    """Danfoss proprietary attribute for communicating the motor step counter."""
+
+    _unique_id_suffix = "motor_step_counter"
+    _attribute_name = "motor_step_counter"
+    _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC

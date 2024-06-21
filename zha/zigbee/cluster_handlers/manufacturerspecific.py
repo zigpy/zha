@@ -6,9 +6,15 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from zhaquirks.inovelli.types import AllLEDEffectType, SingleLEDEffectType
-from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER, XIAOMI_AQARA_VIBRATION_AQ1
+from zhaquirks.quirk_ids import (
+    DANFOSS_ALLY_THERMOSTAT,
+    TUYA_PLUG_MANUFACTURER,
+    XIAOMI_AQARA_VIBRATION_AQ1,
+)
 import zigpy.zcl
 from zigpy.zcl.clusters.closures import DoorLock
+from zigpy.zcl.clusters.homeautomation import Diagnostic
+from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
 
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
@@ -41,6 +47,9 @@ from zha.zigbee.cluster_handlers.const import (
     UNKNOWN,
 )
 from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
+
+from .homeautomation import DiagnosticClusterHandler
+from .hvac import ThermostatClusterHandler, UserInterfaceClusterHandler
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
@@ -448,3 +457,65 @@ class SonoffPresenceSenorClusterHandler(ClusterHandler):
         super().__init__(cluster, endpoint)
         if self.cluster.endpoint.model == "SNZB-06P":
             self.ZCL_INIT_ATTRS = {"last_illumination_state": True}
+
+
+@registries.CLUSTER_HANDLER_REGISTRY.register(
+    Thermostat.cluster_id, DANFOSS_ALLY_THERMOSTAT
+)
+class DanfossThermostatClusterHandler(ThermostatClusterHandler):
+    """Thermostat cluster handler for the Danfoss TRV and derivatives."""
+
+    REPORT_CONFIG = (
+        *ThermostatClusterHandler.REPORT_CONFIG,
+        AttrReportConfig(attr="open_window_detection", config=REPORT_CONFIG_DEFAULT),
+        AttrReportConfig(attr="heat_required", config=REPORT_CONFIG_ASAP),
+        AttrReportConfig(attr="mounting_mode_active", config=REPORT_CONFIG_DEFAULT),
+        AttrReportConfig(attr="load_estimate", config=REPORT_CONFIG_DEFAULT),
+        AttrReportConfig(attr="adaptation_run_status", config=REPORT_CONFIG_DEFAULT),
+        AttrReportConfig(attr="preheat_status", config=REPORT_CONFIG_DEFAULT),
+        AttrReportConfig(attr="preheat_time", config=REPORT_CONFIG_DEFAULT),
+    )
+
+    ZCL_INIT_ATTRS = {
+        **ThermostatClusterHandler.ZCL_INIT_ATTRS,
+        "external_open_window_detected": True,
+        "window_open_feature": True,
+        "exercise_day_of_week": True,
+        "exercise_trigger_time": True,
+        "mounting_mode_control": False,  # Can change
+        "orientation": True,
+        "external_measured_room_sensor": False,  # Can change
+        "radiator_covered": True,
+        "heat_available": True,
+        "load_balancing_enable": True,
+        "load_room_mean": False,  # Can change
+        "control_algorithm_scale_factor": True,
+        "regulation_setpoint_offset": True,
+        "adaptation_run_control": True,
+        "adaptation_run_settings": True,
+    }
+
+
+@registries.CLUSTER_HANDLER_REGISTRY.register(
+    UserInterface.cluster_id, DANFOSS_ALLY_THERMOSTAT
+)
+class DanfossUserInterfaceClusterHandler(UserInterfaceClusterHandler):
+    """Interface cluster handler for the Danfoss TRV and derivatives."""
+
+    ZCL_INIT_ATTRS = {
+        **UserInterfaceClusterHandler.ZCL_INIT_ATTRS,
+        "viewing_direction": True,
+    }
+
+
+@registries.CLUSTER_HANDLER_REGISTRY.register(
+    Diagnostic.cluster_id, DANFOSS_ALLY_THERMOSTAT
+)
+class DanfossDiagnosticClusterHandler(DiagnosticClusterHandler):
+    """Diagnostic cluster handler for the Danfoss TRV and derivatives."""
+
+    REPORT_CONFIG = (
+        *DiagnosticClusterHandler.REPORT_CONFIG,
+        AttrReportConfig(attr="sw_error_code", config=REPORT_CONFIG_DEFAULT),
+        AttrReportConfig(attr="motor_step_counter", config=REPORT_CONFIG_DEFAULT),
+    )
