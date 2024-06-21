@@ -213,6 +213,17 @@ class BaseEntity(LogMixin, EventBase):
             "class_name": self.__class__.__name__,
         }
 
+    @cached_property
+    def extra_state_attribute_names(self) -> set[str] | None:
+        """Return entity specific state attribute names.
+
+        Implemented by platform classes. Convention for attribute names
+        is lowercase snake_case.
+        """
+        if hasattr(self, "_attr_extra_state_attribute_names"):
+            return self._attr_extra_state_attribute_names
+        return None
+
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
         for handle in self._tracked_handles:
