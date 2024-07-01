@@ -334,8 +334,11 @@ async def test_light(
             "color_temperature": 100,
             "color_temp_physical_min": 0,
             "color_temp_physical_max": 600,
-            "color_capabilities": lighting.ColorCapabilities.XY_attributes
-            | lighting.ColorCapabilities.Color_temperature,
+            "color_capabilities": (
+                lighting.ColorCapabilities.XY_attributes
+                | lighting.ColorCapabilities.Color_temperature
+                | lighting.ColorCapabilities.Hue_and_saturation
+            ),
         }
         update_attribute_cache(cluster_color)
     zha_device = await device_joined(zigpy_device)
@@ -398,6 +401,7 @@ async def test_light(
         assert entity.state["color_temp"] != 200
         await entity.async_turn_on(brightness=50, transition=10, color_temp=200)
         await zha_gateway.async_block_till_done()
+        assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
         assert entity.state["brightness"] == 50
         assert entity.state["color_temp"] == 200
         assert bool(entity.state["on"]) is True
@@ -419,6 +423,7 @@ async def test_light(
         assert entity.state["xy_color"] != [13369, 18087]
         await entity.async_turn_on(brightness=50, xy_color=[13369, 18087])
         await zha_gateway.async_block_till_done()
+        assert entity.state["color_mode"] == ColorMode.XY
         assert entity.state["brightness"] == 50
         assert entity.state["xy_color"] == [13369, 18087]
         assert cluster_color.request.call_count == 1
@@ -436,6 +441,57 @@ async def test_light(
         )
 
         cluster_color.request.reset_mock()
+
+        # test color hs from the client
+        assert entity.state["hs_color"] != [12, 34]
+        await entity.async_turn_on(brightness=50, hs_color=[12, 34])
+        await zha_gateway.async_block_till_done()
+        assert entity.state["color_mode"] == ColorMode.HS
+        assert entity.state["brightness"] == 50
+        assert entity.state["hs_color"] == [12, 34]
+        assert cluster_color.request.call_count == 1
+        assert cluster_color.request.await_count == 1
+        assert cluster_color.request.call_args == call(
+            False,
+            6,
+            cluster_color.commands_by_name["move_to_hue_and_saturation"].schema,
+            hue=8,
+            saturation=86,
+            transition_time=0,
+            expect_reply=True,
+            manufacturer=None,
+            tsn=None,
+        )
+
+        cluster_color.request.reset_mock()
+
+        # test enhanced hue support
+        cluster_color.PLUGGED_ATTR_READS["color_capabilities"] |= (
+            lighting.ColorCapabilities.Enhanced_hue
+        )
+        update_attribute_cache(cluster_color)
+
+        assert entity.state["hs_color"] != [56, 78]
+        await entity.async_turn_on(brightness=50, hs_color=[56, 78])
+        await zha_gateway.async_block_till_done()
+        assert entity.state["color_mode"] == ColorMode.HS
+        assert entity.state["brightness"] == 50
+        assert entity.state["hs_color"] == [56, 78]
+        assert cluster_color.request.call_count == 1
+        assert cluster_color.request.await_count == 1
+        assert cluster_color.request.call_args == call(
+            False,
+            67,
+            cluster_color.commands_by_name[
+                "enhanced_move_to_hue_and_saturation"
+            ].schema,
+            enhanced_hue=10194,
+            saturation=198,
+            transition_time=0,
+            expect_reply=True,
+            manufacturer=None,
+            tsn=None,
+        )
 
 
 async def async_test_on_off_from_light(
