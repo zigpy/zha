@@ -398,6 +398,7 @@ async def test_light(
         assert entity.state["color_temp"] != 200
         await entity.async_turn_on(brightness=50, transition=10, color_temp=200)
         await zha_gateway.async_block_till_done()
+        assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
         assert entity.state["brightness"] == 50
         assert entity.state["color_temp"] == 200
         assert bool(entity.state["on"]) is True
@@ -419,6 +420,7 @@ async def test_light(
         assert entity.state["xy_color"] != [13369, 18087]
         await entity.async_turn_on(brightness=50, xy_color=[13369, 18087])
         await zha_gateway.async_block_till_done()
+        assert entity.state["color_mode"] == ColorMode.XY
         assert entity.state["brightness"] == 50
         assert entity.state["xy_color"] == [13369, 18087]
         assert cluster_color.request.call_count == 1
