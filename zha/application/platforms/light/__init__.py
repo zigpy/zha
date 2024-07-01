@@ -63,6 +63,7 @@ from zha.application.platforms.light.const import (
 from zha.application.platforms.light.helpers import (
     brightness_supported,
     filter_supported_color_modes,
+    zcl_color_mode_to_entity_color_mode,
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
@@ -788,6 +789,11 @@ class Light(PlatformEntity, BaseLight):
                 effect_list.append(EFFECT_COLORLOOP)
                 if self._color_cluster_handler.color_loop_active == 1:
                     self._effect = EFFECT_COLORLOOP
+
+            if self._color_cluster_handler.color_mode is not None:
+                self._color_mode = zcl_color_mode_to_entity_color_mode(
+                    self._color_cluster_handler.color_mode
+                )
         self._external_supported_color_modes = supported_color_modes = (
             filter_supported_color_modes(self._supported_color_modes)
         )
