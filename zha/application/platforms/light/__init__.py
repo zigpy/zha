@@ -804,7 +804,10 @@ class Light(PlatformEntity, BaseLight):
                 if self._color_cluster_handler.color_loop_active == 1:
                     self._effect = EFFECT_COLORLOOP
 
-            if self._color_cluster_handler.color_mode is not None:
+            if (
+                self._color_cluster_handler.color_mode is not None
+                and self._color_cluster_handler.color_mode in ZCL_TO_ENTITY_COLOR_MODE
+            ):
                 self._color_mode = ZCL_TO_ENTITY_COLOR_MODE[
                     self._color_cluster_handler.color_mode
                 ]
