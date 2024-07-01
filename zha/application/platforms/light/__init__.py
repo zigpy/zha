@@ -794,11 +794,11 @@ class Light(PlatformEntity, BaseLight):
                 self._color_mode = zcl_color_mode_to_entity_color_mode(
                     self._color_cluster_handler.color_mode
                 )
-        self._external_supported_color_modes = supported_color_modes = (
-            filter_supported_color_modes(self._supported_color_modes)
+        self._external_supported_color_modes = filter_supported_color_modes(
+            self._supported_color_modes
         )
-        if len(supported_color_modes) == 1:
-            self._color_mode = next(iter(supported_color_modes))
+        if len(self._external_supported_color_modes) == 1:
+            self._color_mode = next(iter(self._external_supported_color_modes))
         else:  # Light supports color_temp + hs, determine which mode the light is in
             assert self._color_cluster_handler
             if (
