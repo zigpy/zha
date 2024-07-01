@@ -235,6 +235,13 @@ class BaseLight(BaseEntity, ABC):
         """Return the warmest color_temp that this light supports."""
         return self._max_mireds
 
+    def _persist_color_mode(self, color_mode: ZclColorMode) -> None:
+        """Persist the color mode."""
+        self._color_cluster_handler.cluster.update_attribute(
+            attrid=Color.AttributeDefs.color_mode.id,
+            value=color_mode,
+        )
+
     def handle_cluster_handler_set_level(self, event: LevelChangeEvent) -> None:
         """Set the brightness of this light between 0..254.
 
@@ -583,10 +590,7 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.COLOR_TEMP
-            self._color_cluster_handler.cluster.update_attribute(
-                attrid=Color.AttributeDefs.color_mode.id,
-                value=ZclColorMode.Color_temperature,
-            )
+            self._persist_color_mode(ZclColorMode.Color_temperature)
 
             self._color_temp = temperature
             self._xy_color = None
@@ -613,10 +617,7 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.HS
-            self._color_cluster_handler.cluster.update_attribute(
-                attrid=Color.AttributeDefs.color_mode.id,
-                value=ZclColorMode.Hue_and_saturation,
-            )
+            self._persist_color_mode(ZclColorMode.Hue_and_saturation)
 
             self._hs_color = hs_color
             self._xy_color = None
@@ -633,10 +634,7 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.XY
-            self._color_cluster_handler.cluster.update_attribute(
-                attrid=Color.AttributeDefs.color_mode.id,
-                value=ZclColorMode.X_and_Y,
-            )
+            self._persist_color_mode(ZclColorMode.X_and_Y)
 
             self._xy_color = xy_color
             self._color_temp = None
@@ -1077,10 +1075,7 @@ class Light(PlatformEntity, BaseLight):
                 self._brightness = brightness
             if color_mode is not None and color_mode in supported_modes:
                 self._color_mode = color_mode
-                self._color_cluster_handler.cluster.update_attribute(
-                    attrid=Color.AttributeDefs.color_mode.id,
-                    value=ENTITY_TO_ZCL_COLOR_MODE[color_mode],
-                )
+                self._persist_color_mode(ENTITY_TO_ZCL_COLOR_MODE[color_mode])
             if color_temp is not None and ColorMode.COLOR_TEMP in supported_modes:
                 self._color_temp = color_temp
             if xy_color is not None and ColorMode.XY in supported_modes:
@@ -1220,6 +1215,12 @@ class LightGroup(GroupEntity, BaseLight):
     def available(self) -> bool:
         """Return entity availability."""
         return self._available
+
+    def _persist_color_mode(self, color_mode: ZclColorMode) -> None:
+        """Persist the color mode."""
+
+        # FIXME: Groups use raw clusters, not cluster handlers
+        pass
 
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
