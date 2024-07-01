@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 
 from zigpy.types import EUI64
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
-from zigpy.zcl.clusters.lighting import Color
+from zigpy.zcl.clusters.lighting import Color, ColorMode as ZclColorMode
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -61,6 +61,7 @@ from zha.application.platforms.light.const import (
     LightEntityFeature,
 )
 from zha.application.platforms.light.helpers import (
+    ENTITY_TO_ZCL_COLOR_MODE,
     ZCL_TO_ENTITY_COLOR_MODE,
     brightness_supported,
     filter_supported_color_modes,
@@ -582,6 +583,11 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.COLOR_TEMP
+            self._color_cluster_handler.cluster.update_attribute(
+                attrid=Color.AttributeDefs.color_mode.id,
+                value=ZclColorMode.Color_temperature,
+            )
+
             self._color_temp = temperature
             self._xy_color = None
             self._hs_color = None
@@ -607,6 +613,11 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.HS
+            self._color_cluster_handler.cluster.update_attribute(
+                attrid=Color.AttributeDefs.color_mode.id,
+                value=ZclColorMode.Hue_and_saturation,
+            )
+
             self._hs_color = hs_color
             self._xy_color = None
             self._color_temp = None
@@ -622,6 +633,11 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.XY
+            self._color_cluster_handler.cluster.update_attribute(
+                attrid=Color.AttributeDefs.color_mode.id,
+                value=ZclColorMode.X_and_Y,
+            )
+
             self._xy_color = xy_color
             self._color_temp = None
             self._hs_color = None
@@ -1061,6 +1077,10 @@ class Light(PlatformEntity, BaseLight):
                 self._brightness = brightness
             if color_mode is not None and color_mode in supported_modes:
                 self._color_mode = color_mode
+                self._color_cluster_handler.cluster.update_attribute(
+                    attrid=Color.AttributeDefs.color_mode.id,
+                    value=ENTITY_TO_ZCL_COLOR_MODE[color_mode],
+                )
             if color_temp is not None and ColorMode.COLOR_TEMP in supported_modes:
                 self._color_temp = color_temp
             if xy_color is not None and ColorMode.XY in supported_modes:
