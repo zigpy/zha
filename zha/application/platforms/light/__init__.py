@@ -713,7 +713,6 @@ class Light(PlatformEntity, BaseLight):
         self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ON_OFF
         ]
-        self._state: bool = bool(self._on_off_cluster_handler.on_off)
         self._level_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_LEVEL
         )
@@ -721,9 +720,8 @@ class Light(PlatformEntity, BaseLight):
             CLUSTER_HANDLER_COLOR
         )
         self._identify_cluster_handler: ClusterHandler = device.identify_ch
-        if self._color_cluster_handler:
-            self._min_mireds: int = self._color_cluster_handler.min_mireds
-            self._max_mireds: int = self._color_cluster_handler.max_mireds
+        self._state: bool = bool(self._on_off_cluster_handler.on_off)
+
         self._cancel_refresh_handle: Callable | None = None
         effect_list = []
 
@@ -739,6 +737,9 @@ class Light(PlatformEntity, BaseLight):
             self._brightness = self._level_cluster_handler.current_level
 
         if self._color_cluster_handler:
+            self._min_mireds: int = self._color_cluster_handler.min_mireds
+            self._max_mireds: int = self._color_cluster_handler.max_mireds
+
             if self._color_cluster_handler.color_temp_supported:
                 self._supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._color_temp = self._color_cluster_handler.color_temperature
