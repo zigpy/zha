@@ -439,6 +439,29 @@ async def test_light(
 
         cluster_color.request.reset_mock()
 
+        # test color hs from the client
+        assert entity.state["hs_color"] != [12, 34]
+        await entity.async_turn_on(brightness=50, hs_color=[12, 34])
+        await zha_gateway.async_block_till_done()
+        assert entity.state["color_mode"] == ColorMode.HS
+        assert entity.state["brightness"] == 50
+        assert entity.state["hs_color"] == [12, 34]
+        assert cluster_color.request.call_count == 1
+        assert cluster_color.request.await_count == 1
+        assert cluster_color.request.call_args == call(
+            False,
+            6,
+            cluster_color.commands_by_name["move_to_hue_and_saturation"].schema,
+            hue=8,
+            saturation=86,
+            transition_time=0,
+            expect_reply=True,
+            manufacturer=None,
+            tsn=None,
+        )
+
+        cluster_color.request.reset_mock()
+
 
 async def async_test_on_off_from_light(
     zha_gateway: Gateway,
