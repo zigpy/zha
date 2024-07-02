@@ -470,6 +470,7 @@ async def test_light(
             lighting.ColorCapabilities.Enhanced_hue
         )
         update_attribute_cache(cluster_color)
+        del entity._color_cluster_handler.color_capabilities
 
         assert entity.state["hs_color"] != [56, 78]
         await entity.async_turn_on(brightness=50, hs_color=[56, 78])

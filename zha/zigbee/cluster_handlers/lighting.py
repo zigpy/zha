@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from functools import cached_property
+
 from zigpy.zcl.clusters.lighting import Ballast, Color
 
 from zha.zigbee.cluster_handlers import (
@@ -63,7 +65,7 @@ class ColorClusterHandler(ClusterHandler):
         Color.AttributeDefs.options.name: True,
     }
 
-    @property
+    @cached_property
     def color_capabilities(self) -> Color.ColorCapabilities:
         """Return ZCL color capabilities of the light."""
         color_capabilities = self.cluster.get(
