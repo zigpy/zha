@@ -1093,6 +1093,13 @@ class Light(PlatformEntity, BaseLight):
 
             self.maybe_emit_state_changed_event()
 
+    def restore_extra_state_attributes(
+        self, *, off_with_transition: bool | None, off_brightness: int | None
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+        self._off_with_transition = off_with_transition
+        self._off_brightness = off_brightness
+
 
 @STRICT_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
