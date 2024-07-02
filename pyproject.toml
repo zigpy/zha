@@ -28,6 +28,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 exclude = ["tests", "tests.*"]
 
+[tool.setuptools.package-data]
+"*" = ["py.typed"]
+
 [project.optional-dependencies]
 testing = [
     "pytest",
