@@ -78,7 +78,13 @@ class DoorLock(PlatformEntity):
         if result[0] is not Status.SUCCESS:
             self.error("Error with lock_door: %s", result)
             return
+
         self._state = STATE_LOCKED
+        self._doorlock_cluster_handler.cluster.update_attribute(
+            attrid=DoorLockCluster.AttributeDefs.lock_state.id,
+            value=DoorLockCluster.LockState.Locked,
+        )
+
         self.maybe_emit_state_changed_event()
 
     async def async_unlock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -87,7 +93,13 @@ class DoorLock(PlatformEntity):
         if result[0] is not Status.SUCCESS:
             self.error("Error with unlock_door: %s", result)
             return
+
         self._state = STATE_UNLOCKED
+        self._doorlock_cluster_handler.cluster.update_attribute(
+            attrid=DoorLockCluster.AttributeDefs.lock_state.id,
+            value=DoorLockCluster.LockState.Unlocked,
+        )
+
         self.maybe_emit_state_changed_event()
 
     async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
@@ -124,3 +136,10 @@ class DoorLock(PlatformEntity):
             return
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
         self.maybe_emit_state_changed_event()
+
+    def _persist_lock_state(self, state: DoorLockCluster.LockState) -> None:
+        """Persist the lock state."""
+        self._doorlock_cluster_handler.cluster.update_attribute(
+            attrid=DoorLockCluster.AttributeDefs.lock_state.id,
+            value=state,
+        )
