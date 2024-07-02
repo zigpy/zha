@@ -72,7 +72,7 @@ class DoorLock(PlatformEntity):
             return False
         return self._state == STATE_LOCKED
 
-    async def async_lock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_lock(self) -> None:
         """Lock the lock."""
         result = await self._doorlock_cluster_handler.lock_door()
         if result[0] is not Status.SUCCESS:
@@ -87,7 +87,7 @@ class DoorLock(PlatformEntity):
 
         self.maybe_emit_state_changed_event()
 
-    async def async_unlock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_unlock(self) -> None:
         """Unlock the lock."""
         result = await self._doorlock_cluster_handler.unlock_door()
         if result[0] is not Status.SUCCESS:
