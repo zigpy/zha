@@ -1,6 +1,6 @@
 """Constants for Zigbee Home Automation."""
 
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import Final
 
 STATE_CHANGED: Final[str] = "state_changed"
@@ -17,3 +17,12 @@ class EventTypes(StrEnum):
     PLATFORM_ENTITY_EVENT = "platform_entity_event"
     RAW_ZCL_EVENT = "raw_zcl_event"
     DEVICE_EVENT = "device_event"
+
+
+class UndefinedType(Enum):
+    """Singleton type for use with not set sentinel values."""
+
+    _singleton = 0
+
+
+UNDEFINED = UndefinedType._singleton  # noqa: SLF001

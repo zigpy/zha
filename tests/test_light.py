@@ -1929,3 +1929,21 @@ async def test_light_state_restoration(
     assert entity.state["xy_color"] == (1, 2)
     assert entity.state["color_mode"] == ColorMode.XY
     assert entity.state["effect"] == "colorloop"
+
+    # Partial restore, utilizing "undefined" vs "None"
+    entity.restore_external_state_attributes(
+        brightness=35,
+    )
+
+    assert entity.state["on"] is True
+    assert entity.state["brightness"] == 35
+    assert entity.state["color_temp"] == 500
+    assert entity.state["xy_color"] == (1, 2)
+    assert entity.state["color_mode"] == ColorMode.XY
+    assert entity.state["effect"] == "colorloop"
+
+    # Effect can be nulled out
+    entity.restore_external_state_attributes(
+        effect=None,
+    )
+    assert entity.state["effect"] is None
