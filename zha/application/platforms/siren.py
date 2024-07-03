@@ -188,3 +188,11 @@ class Siren(PlatformEntity):
 
             self._off_listener = None
         self.maybe_emit_state_changed_event()
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        is_on: bool,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+        self._attr_is_on = is_on
