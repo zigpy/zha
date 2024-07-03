@@ -109,6 +109,15 @@ class EnumSelectEntity(PlatformEntity):
         ]
         self.maybe_emit_state_changed_event()
 
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: str,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+        value = state.replace(" ", "_")
+        self._cluster_handler.data_cache[self._attribute_name] = self._enum[value]
+
 
 class NonZCLSelectEntity(EnumSelectEntity):
     """Representation of a ZHA select entity with no ZCL interaction."""
