@@ -10,10 +10,10 @@ ATTR_CURRENT_TILT_POSITION: Final[str] = "current_tilt_position"
 ATTR_POSITION: Final[str] = "position"
 ATTR_TILT_POSITION: Final[str] = "tilt_position"
 
-STATE_OPEN: Final[str] = "open"
-STATE_OPENING: Final[str] = "opening"
-STATE_CLOSED: Final[str] = "closed"
-STATE_CLOSING: Final[str] = "closing"
+STATE_OPEN: Final = "open"
+STATE_OPENING: Final = "opening"
+STATE_CLOSED: Final = "closed"
+STATE_CLOSING: Final = "closing"
 
 
 class CoverDeviceClass(StrEnum):

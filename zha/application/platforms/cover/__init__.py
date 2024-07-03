@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
@@ -57,6 +57,10 @@ class Cover(PlatformEntity):
     PLATFORM = Platform.COVER
 
     _attr_translation_key: str = "cover"
+    _attr_extra_state_attribute_names: set[str] = {
+        "target_lift_position",
+        "target_tilt_position",
+    }
 
     def __init__(
         self,
@@ -84,7 +88,7 @@ class Cover(PlatformEntity):
         )
         self._target_lift_position: int | None = None
         self._target_tilt_position: int | None = None
-        self._state: str
+        self._state: str = STATE_OPEN
         self._determine_initial_state()
         self._cover_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -102,9 +106,25 @@ class Cover(PlatformEntity):
                 "is_opening": self.is_opening,
                 "is_closing": self.is_closing,
                 "is_closed": self.is_closed,
+                "target_lift_position": self._target_lift_position,
+                "target_tilt_position": self._target_tilt_position,
             }
         )
         return response
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: Literal[
+            "open", "opening", "closed", "closing"
+        ],  # FIXME: why must these be expanded?
+        target_lift_position: int | None,
+        target_tilt_position: int | None,
+    ):
+        """Restore external state attributes."""
+        self._state = state
+        self._target_lift_position = target_lift_position
+        self._target_tilt_position = target_tilt_position
 
     @property
     def is_closed(self) -> bool | None:
