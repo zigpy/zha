@@ -136,10 +136,3 @@ class DoorLock(PlatformEntity):
             return
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
         self.maybe_emit_state_changed_event()
-
-    def _persist_lock_state(self, state: DoorLockCluster.LockState) -> None:
-        """Persist the lock state."""
-        self._doorlock_cluster_handler.cluster.update_attribute(
-            attrid=DoorLockCluster.AttributeDefs.lock_state.id,
-            value=state,
-        )
