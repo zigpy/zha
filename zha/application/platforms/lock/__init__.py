@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
@@ -80,11 +80,6 @@ class DoorLock(PlatformEntity):
             return
 
         self._state = STATE_LOCKED
-        self._doorlock_cluster_handler.cluster.update_attribute(
-            attrid=DoorLockCluster.AttributeDefs.lock_state.id,
-            value=DoorLockCluster.LockState.Locked,
-        )
-
         self.maybe_emit_state_changed_event()
 
     async def async_unlock(self) -> None:
@@ -95,11 +90,6 @@ class DoorLock(PlatformEntity):
             return
 
         self._state = STATE_UNLOCKED
-        self._doorlock_cluster_handler.cluster.update_attribute(
-            attrid=DoorLockCluster.AttributeDefs.lock_state.id,
-            value=DoorLockCluster.LockState.Unlocked,
-        )
-
         self.maybe_emit_state_changed_event()
 
     async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
@@ -136,3 +126,9 @@ class DoorLock(PlatformEntity):
             return
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
         self.maybe_emit_state_changed_event()
+
+    def restore_external_state_attributes(
+        self, *, state: Literal["locked", "unlocked"] | None
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+        self._state = state
