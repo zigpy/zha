@@ -209,6 +209,15 @@ async def device_light_3(
         ieee=IEEE_GROUPABLE_DEVICE3,
         nwk=0xB89F,
     )
+    color_cluster = zigpy_device.endpoints[1].light_color
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": (
+            lighting.Color.ColorCapabilities.Color_temperature
+            | lighting.Color.ColorCapabilities.XY_attributes
+            | lighting.Color.ColorCapabilities.Color_loop
+        )
+    }
+
     zha_device = await device_joined(zigpy_device)
     zha_device.available = True
     return zha_device
@@ -242,8 +251,10 @@ async def eWeLink_light(
     )
     color_cluster = zigpy_device.endpoints[1].light_color
     color_cluster.PLUGGED_ATTR_READS = {
-        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature
-        | lighting.Color.ColorCapabilities.XY_attributes,
+        "color_capabilities": (
+            lighting.Color.ColorCapabilities.Color_temperature
+            | lighting.Color.ColorCapabilities.XY_attributes
+        ),
         "color_temp_physical_min": 0,
         "color_temp_physical_max": 0,
     }
@@ -1900,23 +1911,6 @@ async def test_light_state_restoration(
 ) -> None:
     """Test the light state restoration function."""
     entity = get_entity(device_light_3, platform=Platform.LIGHT)
-
-    old_state = entity.state
-    entity.restore_external_state_attributes(
-        state=None,
-        off_with_transition=None,
-        off_brightness=None,
-        brightness=None,
-        color_temp=None,
-        xy_color=None,
-        hs_color=None,
-        color_mode=None,
-        effect=None,
-    )
-
-    # None values are ignored
-    assert entity.state == old_state
-
     entity.restore_external_state_attributes(
         state=True,
         off_with_transition=False,
@@ -1926,7 +1920,7 @@ async def test_light_state_restoration(
         xy_color=(1, 2),
         hs_color=(3, 4),
         color_mode=ColorMode.XY,
-        effect=None,
+        effect="colorloop",
     )
 
     assert entity.state["on"] is True
@@ -1934,3 +1928,4 @@ async def test_light_state_restoration(
     assert entity.state["color_temp"] == 500
     assert entity.state["xy_color"] == (1, 2)
     assert entity.state["color_mode"] == ColorMode.XY
+    assert entity.state["effect"] == "colorloop"

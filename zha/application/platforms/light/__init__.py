@@ -1078,24 +1078,15 @@ class Light(PlatformEntity, BaseLight):
         effect: str | None,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
-        if state is not None:
-            self._state = state
-        if off_with_transition is not None:
-            self._off_with_transition = off_with_transition
-        if off_brightness is not None:
-            self._off_brightness = off_brightness
-        if brightness is not None:
-            self._brightness = brightness
-        if color_temp is not None:
-            self._color_temp = color_temp
-        if xy_color is not None:
-            self._xy_color = xy_color
-        if hs_color is not None:
-            self._hs_color = hs_color
-        if color_mode is not None:
-            self._color_mode = color_mode
-        if effect is not None:
-            self._effect = effect
+        self._state = state
+        self._off_with_transition = off_with_transition
+        self._off_brightness = off_brightness
+        self._brightness = brightness
+        self._color_temp = color_temp
+        self._xy_color = xy_color
+        self._hs_color = hs_color
+        self._color_mode = color_mode
+        self._effect = effect
 
 
 @STRICT_MATCH(
