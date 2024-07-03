@@ -1893,3 +1893,44 @@ async def test_group_member_assume_state(
     assert bool(device_1_light_entity.state["on"]) is False
     assert bool(device_2_light_entity.state["on"]) is False
     assert bool(entity.state["on"]) is False
+
+
+async def test_light_state_restoration(
+    device_light_3,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test the light state restoration function."""
+    entity = get_entity(device_light_3, platform=Platform.LIGHT)
+
+    old_state = entity.state
+    entity.restore_external_state_attributes(
+        state=None,
+        off_with_transition=None,
+        off_brightness=None,
+        brightness=None,
+        color_temp=None,
+        xy_color=None,
+        hs_color=None,
+        color_mode=None,
+        effect=None,
+    )
+
+    # None values are ignored
+    assert entity.state == old_state
+
+    entity.restore_external_state_attributes(
+        state=True,
+        off_with_transition=False,
+        off_brightness=12,
+        brightness=34,
+        color_temp=500,
+        xy_color=(1, 2),
+        hs_color=(3, 4),
+        color_mode=ColorMode.XY,
+        effect=None,
+    )
+
+    assert entity.state["on"] is True
+    assert entity.state["brightness"] == 34
+    assert entity.state["color_temp"] == 500
+    assert entity.state["xy_color"] == (1, 2)
+    assert entity.state["color_mode"] == ColorMode.XY
