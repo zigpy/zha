@@ -263,6 +263,14 @@ class ZCLEnumSelectEntity(PlatformEntity):
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
 
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: str,
+    ) -> None:
+        """Restore extra state attributes."""
+        # Select entities backed by the ZCL cache don't need to restore their state!
+
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
 class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
