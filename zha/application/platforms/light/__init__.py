@@ -581,7 +581,6 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.COLOR_TEMP
-
             self._color_temp = temperature
             self._xy_color = None
             self._hs_color = None
@@ -607,7 +606,6 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.HS
-
             self._hs_color = hs_color
             self._xy_color = None
             self._color_temp = None
@@ -623,7 +621,6 @@ class BaseLight(BaseEntity, ABC):
             if result[1] is not Status.SUCCESS:
                 return False
             self._color_mode = ColorMode.XY
-
             self._xy_color = xy_color
             self._color_temp = None
             self._hs_color = None
@@ -716,6 +713,7 @@ class Light(PlatformEntity, BaseLight):
         self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ON_OFF
         ]
+        self._state: bool = bool(self._on_off_cluster_handler.on_off)
         self._level_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_LEVEL
         )
@@ -723,8 +721,9 @@ class Light(PlatformEntity, BaseLight):
             CLUSTER_HANDLER_COLOR
         )
         self._identify_cluster_handler: ClusterHandler = device.identify_ch
-        self._state: bool = bool(self._on_off_cluster_handler.on_off)
-
+        if self._color_cluster_handler:
+            self._min_mireds: int = self._color_cluster_handler.min_mireds
+            self._max_mireds: int = self._color_cluster_handler.max_mireds
         self._cancel_refresh_handle: Callable | None = None
         effect_list = []
 
@@ -740,9 +739,6 @@ class Light(PlatformEntity, BaseLight):
             self._brightness = self._level_cluster_handler.current_level
 
         if self._color_cluster_handler:
-            self._min_mireds: int = self._color_cluster_handler.min_mireds
-            self._max_mireds: int = self._color_cluster_handler.max_mireds
-
             if self._color_cluster_handler.color_temp_supported:
                 self._supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._color_temp = self._color_cluster_handler.color_temperature
@@ -791,24 +787,20 @@ class Light(PlatformEntity, BaseLight):
                 effect_list.append(EFFECT_COLORLOOP)
                 if self._color_cluster_handler.color_loop_active == 1:
                     self._effect = EFFECT_COLORLOOP
-
-        self._external_supported_color_modes = filter_supported_color_modes(
-            self._supported_color_modes
+        self._external_supported_color_modes = supported_color_modes = (
+            filter_supported_color_modes(self._supported_color_modes)
         )
-
-        if self._color_mode == ColorMode.UNKNOWN:
-            if len(self._external_supported_color_modes) == 1:
-                self._color_mode = next(iter(self._external_supported_color_modes))
+        if len(supported_color_modes) == 1:
+            self._color_mode = next(iter(supported_color_modes))
+        else:  # Light supports color_temp + hs, determine which mode the light is in
+            assert self._color_cluster_handler
+            if (
+                self._color_cluster_handler.color_mode
+                == Color.ColorMode.Color_temperature
+            ):
+                self._color_mode = ColorMode.COLOR_TEMP
             else:
-                # Light supports color_temp + xy, determine which mode the light is in
-                assert self._color_cluster_handler
-                if (
-                    self._color_cluster_handler.color_mode
-                    == Color.ColorMode.Color_temperature
-                ):
-                    self._color_mode = ColorMode.COLOR_TEMP
-                else:
-                    self._color_mode = ColorMode.XY
+                self._color_mode = ColorMode.XY
 
         if self._identify_cluster_handler:
             self._supported_features |= LightEntityFeature.FLASH
