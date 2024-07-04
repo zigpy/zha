@@ -16,6 +16,7 @@ from zha.application.platforms.lock.const import (
     VALUE_TO_STATE,
 )
 from zha.application.registries import PLATFORM_ENTITIES
+from zha.const import UNDEFINED, UndefinedType
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -128,7 +129,10 @@ class DoorLock(PlatformEntity):
         self.maybe_emit_state_changed_event()
 
     def restore_external_state_attributes(
-        self, *, state: Literal["locked", "unlocked"] | None
+        self,
+        *,
+        state: Literal["locked", "unlocked"] | UndefinedType | None = UNDEFINED,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
-        self._state = state
+        if state is not UNDEFINED:
+            self._state = state
