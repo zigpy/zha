@@ -14,6 +14,7 @@ from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_T
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
+from zha.application.platforms.lock.const import STATE_LOCKED, STATE_UNLOCKED
 from zha.zigbee.device import Device
 
 LOCK_DOOR = 0
@@ -210,3 +211,20 @@ async def async_disable_user_code(
         assert cluster.request.call_args[0][1] == SET_USER_STATUS
         assert cluster.request.call_args[0][3] == 2  # user slot 3 => internal slot 2
         assert cluster.request.call_args[0][4] == closures.DoorLock.UserStatus.Disabled
+
+
+async def test_lock_state_restoration(
+    lock: tuple[Device, closures.DoorLock],  # pylint: disable=redefined-outer-name
+    zha_gateway: Gateway,
+) -> None:
+    """Test the lock state restoration."""
+    zha_device, _ = lock
+    entity = get_entity(zha_device, platform=Platform.LOCK)
+
+    assert entity.state["is_locked"] is False
+
+    entity.restore_external_state_attributes(state=STATE_LOCKED)
+    assert entity.state["is_locked"] is True
+
+    entity.restore_external_state_attributes(state=STATE_UNLOCKED)
+    assert entity.state["is_locked"] is False

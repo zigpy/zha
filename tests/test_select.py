@@ -238,3 +238,24 @@ async def test_on_off_select_attribute_report_v2(
     assert cluster.write_attributes.call_args == call(
         {"motion_sensitivity": AqaraMotionSensitivities.Medium}, manufacturer=None
     )
+
+
+async def test_non_zcl_select_state_restoration(
+    siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
+    zha_gateway: Gateway,
+) -> None:
+    """Test the non-ZCL select state restoration."""
+    zha_device, cluster = siren
+    entity = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
+
+    assert entity.state["state"] is None
+
+    entity.restore_external_state_attributes(
+        state=security.IasWd.Warning.WarningMode.Burglar.name
+    )
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
+
+    entity.restore_external_state_attributes(
+        state=security.IasWd.Warning.WarningMode.Fire.name
+    )
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name

@@ -799,3 +799,27 @@ async def test_cover_remote(
     assert zha_device.emit_zha_event.call_count == 1
     assert ATTR_COMMAND in zha_device.emit_zha_event.call_args[0][0]
     assert zha_device.emit_zha_event.call_args[0][0][ATTR_COMMAND] == "down_close"
+
+
+async def test_cover_state_restoration(
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zigpy_cover_device: ZigpyDevice,
+    zha_gateway: Gateway,
+) -> None:
+    """Test the cover state restoration."""
+    zha_device = await device_joined(zigpy_cover_device)
+    entity = get_entity(zha_device, platform=Platform.COVER)
+
+    assert entity.state["state"] != STATE_CLOSED
+    assert entity.state["target_lift_position"] != 12
+    assert entity.state["target_tilt_position"] != 34
+
+    entity.restore_external_state_attributes(
+        state=STATE_CLOSED,
+        target_lift_position=12,
+        target_tilt_position=34,
+    )
+
+    assert entity.state["state"] == STATE_CLOSED
+    assert entity.state["target_lift_position"] == 12
+    assert entity.state["target_tilt_position"] == 34
