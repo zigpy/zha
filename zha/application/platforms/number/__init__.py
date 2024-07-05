@@ -141,7 +141,7 @@ class Number(PlatformEntity):
         """Return the value step."""
         return self._analog_output_cluster_handler.resolution
 
-    @property
+    @functools.cached_property
     def name(self) -> str | None:
         """Return the name of the number entity."""
         description = self._analog_output_cluster_handler.description
