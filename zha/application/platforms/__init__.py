@@ -224,6 +224,13 @@ class BaseEntity(LogMixin, EventBase):
             return self._attr_extra_state_attribute_names
         return None
 
+    def restore_external_state_attributes(self, **kwargs: Any) -> None:
+        """Restore entity specific state attributes from an external source.
+
+        Entities implementing this must accept a keyword argument for each attribute.
+        """
+        raise NotImplementedError
+
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
         for handle in self._tracked_handles:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
@@ -72,21 +72,23 @@ class DoorLock(PlatformEntity):
             return False
         return self._state == STATE_LOCKED
 
-    async def async_lock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_lock(self) -> None:
         """Lock the lock."""
         result = await self._doorlock_cluster_handler.lock_door()
         if result[0] is not Status.SUCCESS:
             self.error("Error with lock_door: %s", result)
             return
+
         self._state = STATE_LOCKED
         self.maybe_emit_state_changed_event()
 
-    async def async_unlock(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_unlock(self) -> None:
         """Unlock the lock."""
         result = await self._doorlock_cluster_handler.unlock_door()
         if result[0] is not Status.SUCCESS:
             self.error("Error with unlock_door: %s", result)
             return
+
         self._state = STATE_UNLOCKED
         self.maybe_emit_state_changed_event()
 
@@ -124,3 +126,11 @@ class DoorLock(PlatformEntity):
             return
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
         self.maybe_emit_state_changed_event()
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: Literal["locked", "unlocked"] | None,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+        self._state = state

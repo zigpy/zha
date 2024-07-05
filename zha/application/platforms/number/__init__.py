@@ -145,10 +145,9 @@ class Number(PlatformEntity):
     def name(self) -> str | None:
         """Return the name of the number entity."""
         description = self._analog_output_cluster_handler.description
-        # TODO what happened here?
-        if description is not None and len(description) > 0:
-            return f"{super().name} {description}"
-        return super().name
+        if not description:
+            return None
+        return description
 
     @functools.cached_property
     def icon(self) -> str | None:

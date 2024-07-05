@@ -102,6 +102,8 @@ async def test_number(
 
     assert cluster.read_attributes.call_count == 3
 
+    assert entity.name == "PWM1"
+
     # test that the state is 15.0
     assert entity.state["state"] == 15.0
 

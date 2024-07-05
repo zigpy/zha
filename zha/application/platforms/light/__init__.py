@@ -1064,6 +1064,40 @@ class Light(PlatformEntity, BaseLight):
 
             self.maybe_emit_state_changed_event()
 
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: bool | None,
+        off_with_transition: bool | None,
+        off_brightness: int | None,
+        brightness: int | None,
+        color_temp: int | None,
+        xy_color: tuple[float, float] | None,
+        hs_color: tuple[float, float] | None,
+        color_mode: ColorMode | None,
+        effect: str | None,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+        if state is not None:
+            self._state = state
+        if off_with_transition is not None:
+            self._off_with_transition = off_with_transition
+        if off_brightness is not None:
+            self._off_brightness = off_brightness
+        if brightness is not None:
+            self._brightness = brightness
+        if color_temp is not None:
+            self._color_temp = color_temp
+        if xy_color is not None:
+            self._xy_color = xy_color
+        if hs_color is not None:
+            self._hs_color = hs_color
+        if color_mode is not None:
+            self._color_mode = color_mode
+
+        # Effect is always restored, as `None` indicates that no effect is active
+        self._effect = effect
+
 
 @STRICT_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ON_OFF,

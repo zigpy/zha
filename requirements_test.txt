@@ -1,4 +1,4 @@
-codecov
+coverage[toml]
 colorlog
 codespell
 mypy
