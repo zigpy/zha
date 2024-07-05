@@ -5,7 +5,7 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 import logging
-from unittest.mock import AsyncMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 import zhaquirks.sinope.thermostat
@@ -39,6 +39,7 @@ from zha.application.platforms.sensor import (
     SinopeHVACAction,
     ThermostatHVACAction,
 )
+from zha.const import STATE_CHANGED
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 
@@ -313,6 +314,10 @@ async def test_climate_hvac_action_running_state(
         device_climate_sinope, platform=Platform.SENSOR, entity_type=SinopeHVACAction
     )
 
+    subscriber = MagicMock()
+    entity.on_event(STATE_CHANGED, subscriber)
+    sensor_entity.on_event(STATE_CHANGED, subscriber)
+
     assert entity.state["hvac_action"] == "off"
     assert sensor_entity.state["state"] == "off"
 
@@ -351,6 +356,9 @@ async def test_climate_hvac_action_running_state(
     )
     assert entity.state["hvac_action"] == "fan"
     assert sensor_entity.state["state"] == "fan"
+
+    # Both entities are updated!
+    assert len(subscriber.mock_calls) == 2 * 6
 
 
 @pytest.mark.looptime
