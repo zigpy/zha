@@ -27,7 +27,6 @@ from zha.application.platforms.cover.const import (
     WCAttrs,
 )
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.const import UNDEFINED, UndefinedType
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import WindowCoveringClusterHandler
@@ -116,20 +115,16 @@ class Cover(PlatformEntity):
     def restore_external_state_attributes(
         self,
         *,
-        # FIXME: why must these be expanded?
-        state: (
-            Literal["open", "opening", "closed", "closing"] | UndefinedType
-        ) = UNDEFINED,
-        target_lift_position: int | UndefinedType | None = UNDEFINED,
-        target_tilt_position: int | UndefinedType | None = UNDEFINED,
+        state: Literal[
+            "open", "opening", "closed", "closing"
+        ],  # FIXME: why must these be expanded?
+        target_lift_position: int | None,
+        target_tilt_position: int | None,
     ):
         """Restore external state attributes."""
-        if state is not UNDEFINED:
-            self._state = state
-        if target_lift_position is not UNDEFINED:
-            self._target_lift_position = target_lift_position
-        if target_tilt_position is not UNDEFINED:
-            self._target_tilt_position = target_tilt_position
+        self._state = state
+        self._target_lift_position = target_lift_position
+        self._target_tilt_position = target_tilt_position
 
     @property
     def is_closed(self) -> bool | None:

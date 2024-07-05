@@ -65,7 +65,6 @@ from zha.application.platforms.light.helpers import (
     filter_supported_color_modes,
 )
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.const import UNDEFINED, UndefinedType
 from zha.debounce import Debouncer
 from zha.decorators import periodic
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandlerInfo
@@ -1068,35 +1067,26 @@ class Light(PlatformEntity, BaseLight):
     def restore_external_state_attributes(
         self,
         *,
-        state: bool | None | UndefinedType = UNDEFINED,
-        off_with_transition: bool | None | UndefinedType = UNDEFINED,
-        off_brightness: int | None | UndefinedType = UNDEFINED,
-        brightness: int | None | UndefinedType = UNDEFINED,
-        color_temp: int | None | UndefinedType = UNDEFINED,
-        xy_color: tuple[float, float] | None | UndefinedType = UNDEFINED,
-        hs_color: tuple[float, float] | None | UndefinedType = UNDEFINED,
-        color_mode: ColorMode | None | UndefinedType = UNDEFINED,
-        effect: str | None | UndefinedType = UNDEFINED,
+        state: bool | None,
+        off_with_transition: bool | None,
+        off_brightness: int | None,
+        brightness: int | None,
+        color_temp: int | None,
+        xy_color: tuple[float, float] | None,
+        hs_color: tuple[float, float] | None,
+        color_mode: ColorMode | None,
+        effect: str | None,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
-        if state is not UNDEFINED:
-            self._state = state
-        if off_with_transition is not UNDEFINED:
-            self._off_with_transition = off_with_transition
-        if off_brightness is not UNDEFINED:
-            self._off_brightness = off_brightness
-        if brightness is not UNDEFINED:
-            self._brightness = brightness
-        if color_temp is not UNDEFINED:
-            self._color_temp = color_temp
-        if xy_color is not UNDEFINED:
-            self._xy_color = xy_color
-        if hs_color is not UNDEFINED:
-            self._hs_color = hs_color
-        if color_mode is not UNDEFINED:
-            self._color_mode = color_mode
-        if effect is not UNDEFINED:
-            self._effect = effect
+        self._state = state
+        self._off_with_transition = off_with_transition
+        self._off_brightness = off_brightness
+        self._brightness = brightness
+        self._color_temp = color_temp
+        self._xy_color = xy_color
+        self._hs_color = hs_color
+        self._color_mode = color_mode
+        self._effect = effect
 
 
 @STRICT_MATCH(
