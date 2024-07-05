@@ -253,10 +253,14 @@ class Sensor(PlatformEntity):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle attribute updates from the cluster handler."""
-        if event.attribute_name == self._attribute_name or (
-            hasattr(self, "_attr_extra_state_attribute_names")
-            and event.attribute_name
-            in getattr(self, "_attr_extra_state_attribute_names")
+        if (
+            event.attribute_name == self._attribute_name
+            or (
+                hasattr(self, "_attr_extra_state_attribute_names")
+                and event.attribute_name
+                in getattr(self, "_attr_extra_state_attribute_names")
+            )
+            or self._attribute_name is None
         ):
             self.maybe_emit_state_changed_event()
 
