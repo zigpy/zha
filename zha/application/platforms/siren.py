@@ -113,8 +113,13 @@ class Siren(PlatformEntity):
     def state(self) -> dict[str, Any]:
         """Get the state of the siren."""
         response = super().state
-        response["state"] = self._attr_is_on
+        response["state"] = self.is_on
         return response
+
+    @property
+    def is_on(self) -> bool:
+        """Return true if the entity is on."""
+        return self._attr_is_on
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn on siren."""
