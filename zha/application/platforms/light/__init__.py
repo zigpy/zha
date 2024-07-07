@@ -164,11 +164,11 @@ class BaseLight(BaseEntity, ABC):
         response["xy_color"] = self.xy_color
         response["color_temp"] = self.color_temp
         response["effect"] = self.effect
-        response["off_brightness"] = self._off_brightness
-        response["off_with_transition"] = self._off_with_transition
         response["supported_features"] = self.supported_features
         response["color_mode"] = self.color_mode
         response["supported_color_modes"] = self._supported_color_modes
+        response["off_with_transition"] = self._off_with_transition
+        response["off_brightness"] = self._off_brightness
         return response
 
     @property
