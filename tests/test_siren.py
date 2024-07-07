@@ -15,7 +15,7 @@ from tests.common import get_entity, mock_coro
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.platforms.siren import SirenEntityFeature
+from zha.application.platforms.siren import SirenEntityFeature
 from zha.zigbee.device import Device
 
 
