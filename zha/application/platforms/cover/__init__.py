@@ -423,6 +423,11 @@ class Shade(PlatformEntity):
         return response
 
     @property
+    def supported_features(self) -> CoverEntityFeature:
+        """Return supported features."""
+        return self._attr_supported_features
+
+    @property
     def current_cover_position(self) -> int | None:
         """Return current position of cover.
 

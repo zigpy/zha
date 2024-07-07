@@ -561,7 +561,7 @@ async def test_shade(
     cluster_level = zigpy_shade_device.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
 
-    assert entity._attr_supported_features == (
+    assert entity.supported_features == (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
         | CoverEntityFeature.STOP
@@ -719,7 +719,7 @@ async def test_keen_vent(
     cluster_level = zigpy_keen_vent.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
 
-    assert entity._attr_supported_features == (
+    assert entity.supported_features == (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
         | CoverEntityFeature.STOP
