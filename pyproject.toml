@@ -37,7 +37,7 @@ testing = [
 enabled = true
 
 [tool.codespell]
-ignore-words-list = "hass"
+ignore-words-list = "hass, checkin"
 
 [tool.mypy]
 python_version = "3.12"
@@ -205,6 +205,8 @@ ignore = [
     "TRY003",
     "TRY201",
     "TRY300",
+
+    "SIM103", # Return the condition {condition} directly
 ]
 
 [tool.ruff.lint.flake8-pytest-style]
