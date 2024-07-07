@@ -142,8 +142,8 @@ class Number(PlatformEntity):
         return self._analog_output_cluster_handler.resolution
 
     @functools.cached_property
-    def name(self) -> str | None:
-        """Return the name of the number entity."""
+    def description(self) -> str | None:
+        """Return the description of the number entity."""
         description = self._analog_output_cluster_handler.description
         if not description:
             return None
@@ -310,6 +310,12 @@ class NumberConfigurationEntity(PlatformEntity):
     def native_step(self) -> float | None:
         """Return the value step."""
         return self._attr_native_step
+
+    @functools.cached_property
+    def description(self) -> str | None:
+        """Return the description of the number entity."""
+        # To maintain parity with `Number`
+        return None
 
     @functools.cached_property
     def native_unit_of_measurement(self) -> str | None:
