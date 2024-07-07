@@ -224,6 +224,7 @@ async def test_level_control_number(
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
     assert entity.icon is None
+    assert entity.description is None
     assert entity.native_unit_of_measurement is None
     assert entity.mode == NumberMode.AUTO
     assert entity.native_min_value == 0
