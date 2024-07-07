@@ -312,6 +312,12 @@ class NumberConfigurationEntity(PlatformEntity):
         return self._attr_native_step
 
     @functools.cached_property
+    def description(self) -> str | None:
+        """Return the description of the number entity."""
+        # To maintain parity with `Number`
+        return None
+
+    @functools.cached_property
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         if hasattr(self, "_attr_native_unit_of_measurement"):
