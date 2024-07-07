@@ -156,7 +156,12 @@ class Thermostat(PlatformEntity):
         response["hvac_mode"] = self.hvac_mode
         response["preset_mode"] = self.preset_mode
         response["fan_mode"] = self.fan_mode
-        response[ATTR_SYS_MODE] = f"[{thermostat.system_mode}]/{system_mode}"
+
+        response[ATTR_SYS_MODE] = (
+            f"[{thermostat.system_mode}]/{system_mode}"
+            if self.hvac_mode is not None
+            else None
+        )
         response[ATTR_OCCUPANCY] = thermostat.occupancy
         response[ATTR_OCCP_COOL_SETPT] = thermostat.occupied_cooling_setpoint
         response[ATTR_OCCP_HEAT_SETPT] = thermostat.occupied_heating_setpoint
