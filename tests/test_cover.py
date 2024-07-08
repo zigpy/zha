@@ -205,6 +205,16 @@ async def test_cover(
     )
 
     entity = get_entity(zha_device, platform=Platform.COVER)
+    assert entity.supported_features == (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.SET_POSITION
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.OPEN_TILT
+        | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.STOP_TILT
+        | CoverEntityFeature.SET_TILT_POSITION
+    )
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(
