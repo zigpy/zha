@@ -117,6 +117,11 @@ class Siren(PlatformEntity):
         return response
 
     @property
+    def supported_features(self) -> SirenEntityFeature:
+        """Return supported features."""
+        return self._attr_supported_features
+
+    @property
     def is_on(self) -> bool:
         """Return true if the entity is on."""
         return self._attr_is_on

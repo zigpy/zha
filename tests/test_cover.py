@@ -205,6 +205,16 @@ async def test_cover(
     )
 
     entity = get_entity(zha_device, platform=Platform.COVER)
+    assert entity.supported_features == (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.SET_POSITION
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.OPEN_TILT
+        | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.STOP_TILT
+        | CoverEntityFeature.SET_TILT_POSITION
+    )
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(
@@ -561,7 +571,7 @@ async def test_shade(
     cluster_level = zigpy_shade_device.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
 
-    assert entity._attr_supported_features == (
+    assert entity.supported_features == (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
         | CoverEntityFeature.STOP
@@ -719,7 +729,7 @@ async def test_keen_vent(
     cluster_level = zigpy_keen_vent.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
 
-    assert entity._attr_supported_features == (
+    assert entity.supported_features == (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
         | CoverEntityFeature.STOP
