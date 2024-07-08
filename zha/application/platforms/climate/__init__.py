@@ -144,6 +144,9 @@ class Thermostat(PlatformEntity):
     @property
     def state(self) -> dict[str, Any]:
         """Get the state of the lock."""
+        thermostat = self._thermostat_cluster_handler
+        system_mode = SYSTEM_MODE_2_HVAC.get(thermostat.system_mode, "unknown")
+
         response = super().state
         response["current_temperature"] = self.current_temperature
         response["target_temperature"] = self.target_temperature
@@ -153,7 +156,19 @@ class Thermostat(PlatformEntity):
         response["hvac_mode"] = self.hvac_mode
         response["preset_mode"] = self.preset_mode
         response["fan_mode"] = self.fan_mode
-        response.update(self.extra_state_attributes)
+
+        response[ATTR_SYS_MODE] = (
+            f"[{thermostat.system_mode}]/{system_mode}"
+            if self.hvac_mode is not None
+            else None
+        )
+        response[ATTR_OCCUPANCY] = thermostat.occupancy
+        response[ATTR_OCCP_COOL_SETPT] = thermostat.occupied_cooling_setpoint
+        response[ATTR_OCCP_HEAT_SETPT] = thermostat.occupied_heating_setpoint
+        response[ATTR_PI_HEATING_DEMAND] = thermostat.pi_heating_demand
+        response[ATTR_PI_COOLING_DEMAND] = thermostat.pi_cooling_demand
+        response[ATTR_UNOCCP_COOL_SETPT] = thermostat.unoccupied_cooling_setpoint
+        response[ATTR_UNOCCP_HEAT_SETPT] = thermostat.unoccupied_heating_setpoint
         return response
 
     @property
@@ -162,49 +177,6 @@ class Thermostat(PlatformEntity):
         if self._thermostat_cluster_handler.local_temperature is None:
             return None
         return self._thermostat_cluster_handler.local_temperature / ZCL_TEMP
-
-    @property
-    def extra_state_attributes(self):
-        """Return device specific state attributes."""
-        data = {}
-        if self.hvac_mode:
-            mode = SYSTEM_MODE_2_HVAC.get(
-                self._thermostat_cluster_handler.system_mode, "unknown"
-            )
-            data[ATTR_SYS_MODE] = (
-                f"[{self._thermostat_cluster_handler.system_mode}]/{mode}"
-            )
-        if self._thermostat_cluster_handler.occupancy is not None:
-            data[ATTR_OCCUPANCY] = self._thermostat_cluster_handler.occupancy
-        if self._thermostat_cluster_handler.occupied_cooling_setpoint is not None:
-            data[ATTR_OCCP_COOL_SETPT] = (
-                self._thermostat_cluster_handler.occupied_cooling_setpoint
-            )
-        if self._thermostat_cluster_handler.occupied_heating_setpoint is not None:
-            data[ATTR_OCCP_HEAT_SETPT] = (
-                self._thermostat_cluster_handler.occupied_heating_setpoint
-            )
-        if self._thermostat_cluster_handler.pi_heating_demand is not None:
-            data[ATTR_PI_HEATING_DEMAND] = (
-                self._thermostat_cluster_handler.pi_heating_demand
-            )
-        if self._thermostat_cluster_handler.pi_cooling_demand is not None:
-            data[ATTR_PI_COOLING_DEMAND] = (
-                self._thermostat_cluster_handler.pi_cooling_demand
-            )
-
-        unoccupied_cooling_setpoint = (
-            self._thermostat_cluster_handler.unoccupied_cooling_setpoint
-        )
-        if unoccupied_cooling_setpoint is not None:
-            data[ATTR_UNOCCP_COOL_SETPT] = unoccupied_cooling_setpoint
-
-        unoccupied_heating_setpoint = (
-            self._thermostat_cluster_handler.unoccupied_heating_setpoint
-        )
-        if unoccupied_heating_setpoint is not None:
-            data[ATTR_UNOCCP_HEAT_SETPT] = unoccupied_heating_setpoint
-        return data
 
     @property
     def fan_mode(self) -> str | None:
