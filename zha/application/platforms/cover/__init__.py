@@ -96,6 +96,11 @@ class Cover(PlatformEntity):
         )
 
     @property
+    def supported_features(self) -> CoverEntityFeature:
+        """Return supported features."""
+        return self._attr_supported_features
+
+    @property
     def state(self) -> dict[str, Any]:
         """Get the state of the cover."""
         response = super().state
