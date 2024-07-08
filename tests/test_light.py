@@ -798,6 +798,21 @@ async def test_zha_group_light_entity(
     # test that the lights were created and are off
     assert bool(entity.state["on"]) is False
 
+    # Group entities do not support state restoration
+    entity.restore_external_state_attributes(
+        state=True,
+        off_with_transition=False,
+        off_brightness=12,
+        brightness=34,
+        color_temp=500,
+        xy_color=(1, 2),
+        hs_color=(3, 4),
+        color_mode=ColorMode.XY,
+        effect="colorloop",
+    )
+
+    assert bool(entity.state["on"]) is False
+
     # test turning the lights on and off from the client
     await async_test_on_off_from_client(zha_gateway, group_cluster_on_off, entity)
     await _async_shift_time(zha_gateway)

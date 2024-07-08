@@ -1394,3 +1394,19 @@ class LightGroup(GroupEntity, BaseLight):
 
         for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
             platform_entity._assume_group_state(update_params)
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: bool | None,
+        off_with_transition: bool | None,
+        off_brightness: int | None,
+        brightness: int | None,
+        color_temp: int | None,
+        xy_color: tuple[float, float] | None,
+        hs_color: tuple[float, float] | None,
+        color_mode: ColorMode | None,
+        effect: str | None,
+    ) -> None:
+        """Restore extra state attributes."""
+        # Groups do not restore external state attributes
