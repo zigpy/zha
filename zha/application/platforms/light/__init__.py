@@ -133,7 +133,7 @@ class BaseLight(BaseEntity, ABC):
         self._xy_color: tuple[float, float] | None = None
         self._color_mode = ColorMode.UNKNOWN  # Set by subclasses
         self._color_temp: int | None = None
-        self._supported_features: int = 0
+        self._supported_features: int = LightEntityFeature(0)
         self._state: bool | None
         self._brightness: int | None = None
         self._off_with_transition: bool = False
@@ -202,7 +202,7 @@ class BaseLight(BaseEntity, ABC):
         return self._effect
 
     @property
-    def supported_features(self) -> int:
+    def supported_features(self) -> LightEntityFeature:
         """Flag supported features."""
         return self._supported_features
 
