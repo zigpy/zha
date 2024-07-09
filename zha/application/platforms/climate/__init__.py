@@ -105,7 +105,7 @@ class Thermostat(PlatformEntity):
         """Initialize ZHA Thermostat instance."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._preset = Preset.NONE
-        self._presets = []
+        self._presets: list[Preset | str] = []
 
         self._thermostat_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_THERMOSTAT

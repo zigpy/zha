@@ -8,7 +8,6 @@ import dataclasses
 from operator import attrgetter
 from typing import TYPE_CHECKING
 
-import attr
 from zigpy import zcl
 import zigpy.profiles.zha
 import zigpy.profiles.zll
@@ -97,7 +96,9 @@ DEVICE_CLASS = collections.defaultdict(dict, DEVICE_CLASS)
 WEIGHT_ATTR = attrgetter("weight")
 
 
-def set_or_callable(value) -> frozenset[str] | Callable:
+def set_or_callable(
+    value: Callable[[str], bool] | frozenset | set | list | str | None,
+) -> frozenset[str] | Callable[[str], bool]:
     """Convert single str or None to a set. Pass through callables and sets."""
     if value is None:
         return frozenset()
@@ -108,30 +109,29 @@ def set_or_callable(value) -> frozenset[str] | Callable:
     return frozenset([str(value)])
 
 
-def _get_empty_frozenset() -> frozenset[str]:
-    return frozenset()
-
-
-@attr.s(frozen=True)
+@dataclasses.dataclass(frozen=True)  # TODO: `kw_only=True`
 class MatchRule:
     """Match a ZHA Entity to a cluster handler name or generic id."""
 
-    cluster_handler_names: frozenset[str] = attr.ib(
-        factory=frozenset, converter=set_or_callable
-    )
-    generic_ids: frozenset[str] = attr.ib(factory=frozenset, converter=set_or_callable)
-    manufacturers: frozenset[str] | Callable = attr.ib(
-        factory=_get_empty_frozenset, converter=set_or_callable
-    )
-    models: frozenset[str] | Callable = attr.ib(
-        factory=_get_empty_frozenset, converter=set_or_callable
-    )
-    aux_cluster_handlers: frozenset[str] | Callable = attr.ib(
-        factory=_get_empty_frozenset, converter=set_or_callable
-    )
-    quirk_ids: frozenset[str] | Callable = attr.ib(
-        factory=_get_empty_frozenset, converter=set_or_callable
-    )
+    cluster_handler_names: frozenset[str] = frozenset()
+    generic_ids: frozenset[str] = frozenset()
+    manufacturers: frozenset[str] | Callable[[str], bool] = frozenset()
+    models: frozenset[str] | Callable[[str], bool] = frozenset()
+    aux_cluster_handlers: frozenset[str] | Callable[[str], bool] = frozenset()
+    quirk_ids: frozenset[str] | Callable[[str], bool] = frozenset()
+
+    def __post_init__(self) -> None:
+        """Convert passed arguments to a set or a callable."""
+        object.__setattr__(
+            self, "cluster_handler_names", set_or_callable(self.cluster_handler_names)
+        )
+        object.__setattr__(self, "generic_ids", set_or_callable(self.generic_ids))
+        object.__setattr__(self, "manufacturers", set_or_callable(self.manufacturers))
+        object.__setattr__(self, "models", set_or_callable(self.models))
+        object.__setattr__(
+            self, "aux_cluster_handlers", set_or_callable(self.aux_cluster_handlers)
+        )
+        object.__setattr__(self, "quirk_ids", set_or_callable(self.quirk_ids))
 
     @property
     def weight(self) -> int:
@@ -211,7 +211,16 @@ class MatchRule:
         quirk_id: str | None,
     ) -> list:
         """Return a list of field matches."""
-        if not any(attr.asdict(self).values()):
+        if not any(
+            [
+                self.cluster_handler_names,
+                self.generic_ids,
+                self.manufacturers,
+                self.models,
+                self.aux_cluster_handlers,
+                self.quirk_ids,
+            ]
+        ):
             return [False]
 
         matches = []

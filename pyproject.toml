@@ -75,7 +75,6 @@ disable_error_code = [
     "arg-type",         # 42
     "union-attr",       # 41
     "misc",             # 31
-    "var-annotated",    # 15
     "override",         # 13
 ]
 
