@@ -134,12 +134,10 @@ async def device_light_2(
             1: {
                 SIG_EP_INPUT: [
                     general.OnOff.cluster_id,
-                    general.LevelControl.cluster_id,
-                    lighting.Color.cluster_id,
                     general.Groups.cluster_id,
                 ],
                 SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zha.DeviceType.COLOR_DIMMABLE_LIGHT,
+                SIG_EP_TYPE: zha.DeviceType.ON_OFF_LIGHT,
                 SIG_EP_PROFILE: zha.PROFILE_ID,
             }
         },
@@ -197,6 +195,17 @@ async def test_gateway_group_methods(
         assert member.group == zha_group
         assert member.endpoint is not None
 
+    device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
+    assert (
+        device_1_light_entity.info_object.supported_features
+        == LightEntityFeature.TRANSITION
+    )
+
+    device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
+    assert device_2_light_entity.info_object.supported_features == LightEntityFeature(0)
+
+    assert device_1_light_entity != device_2_light_entity
+
     entity: GroupEntity | None = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
 
@@ -206,17 +215,10 @@ async def test_gateway_group_methods(
     assert info.unique_id == "light_zha_group_0x0002"
     assert info.fallback_name == "Test Group"
     assert info.group_id == zha_group.group_id
-    assert info.supported_features == LightEntityFeature.TRANSITION
+    assert info.supported_features == LightEntityFeature(0)
     assert info.min_mireds == 153
     assert info.max_mireds == 500
     assert info.effect_list is None
-
-    device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
-    device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
-    assert device_1_light_entity != device_2_light_entity
-
-    assert device_1_light_entity is not None
-    assert device_2_light_entity is not None
 
     # test get group by name
     assert zha_group == zha_gateway.get_group(zha_group.name)

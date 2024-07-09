@@ -14,6 +14,7 @@ from dataclasses import dataclass
 import functools
 import itertools
 import logging
+import operator
 from typing import TYPE_CHECKING, Any
 
 from zigpy.types import EUI64
@@ -1341,10 +1342,11 @@ class LightGroup(GroupEntity, BaseLight):
             ):  # switch to XY if all members do not support HS
                 self._color_mode = ColorMode.XY
 
-        self._supported_features = LightEntityFeature(0)
-        for support in find_state_attributes(states, ATTR_SUPPORTED_FEATURES):
-            # Support only the intersection of all supported features
-            self._supported_features &= support
+        # Support the intersection of all supported features
+        self._supported_features = functools.reduce(
+            operator.and_,
+            find_state_attributes(states, ATTR_SUPPORTED_FEATURES),
+        )
         self.maybe_emit_state_changed_event()
 
     async def _force_member_updates(self) -> None:
