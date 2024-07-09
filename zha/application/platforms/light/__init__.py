@@ -133,7 +133,7 @@ class BaseLight(BaseEntity, ABC):
         self._xy_color: tuple[float, float] | None = None
         self._color_mode = ColorMode.UNKNOWN  # Set by subclasses
         self._color_temp: int | None = None
-        self._supported_features: int = LightEntityFeature(0)
+        self._supported_features: LightEntityFeature = LightEntityFeature(0)
         self._state: bool | None
         self._brightness: int | None = None
         self._off_with_transition: bool = False
