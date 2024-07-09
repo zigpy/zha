@@ -1235,7 +1235,7 @@ async def test_device_unavailable_skips_entity_polling(
 async def zigpy_device_danfoss_thermostat(
     zigpy_device_mock: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-) -> Device:
+) -> tuple[Device, zigpy.device.Device]:
     """Danfoss thermostat device."""
 
     zigpy_device = zigpy_device_mock(

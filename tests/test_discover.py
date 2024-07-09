@@ -901,7 +901,7 @@ def validate_metadata(validator: Callable) -> None:
     all_v2_quirks = itertools.chain.from_iterable(
         zigpy.quirks._DEVICE_REGISTRY._registry_v2.values()
     )
-    translations = {}
+    translations: dict[str, dict[str, str]] = {}
     for quirk in all_v2_quirks:
         for entity_metadata in quirk.entity_metadata:
             platform = Platform(entity_metadata.entity_platform.value)

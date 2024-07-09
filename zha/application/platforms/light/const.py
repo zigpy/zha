@@ -103,14 +103,12 @@ SUPPORT_COLOR: Final[int] = 16  # Deprecated, replaced by color modes
 SUPPORT_TRANSITION: Final[int] = 32
 SUPPORT_WHITE_VALUE: Final[int] = 128  # Deprecated, replaced by color modes
 
-EFFECT_BLINK: Final[int] = 0x00
-EFFECT_BREATHE: Final[int] = 0x01
 EFFECT_OKAY: Final[int] = 0x02
 EFFECT_DEFAULT_VARIANT: Final[int] = 0x00
 
 FLASH_EFFECTS: Final[dict[str, int]] = {
-    FLASH_SHORT: EFFECT_BLINK,
-    FLASH_LONG: EFFECT_BREATHE,
+    FLASH_SHORT: Identify.EffectIdentifier.Blink,
+    FLASH_LONG: Identify.EffectIdentifier.Breathe,
 }
 
 SUPPORT_GROUP_LIGHT = (
@@ -121,11 +119,6 @@ SUPPORT_GROUP_LIGHT = (
     | SUPPORT_COLOR
     | SUPPORT_TRANSITION
 )
-
-FLASH_EFFECTS = {
-    FLASH_SHORT: Identify.EffectIdentifier.Blink,
-    FLASH_LONG: Identify.EffectIdentifier.Breathe,
-}
 
 VALID_COLOR_MODES = {
     ColorMode.ONOFF,

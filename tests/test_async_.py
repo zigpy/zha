@@ -545,7 +545,7 @@ async def test_async_run_job_starts_coro_eagerly(zha_gateway: Gateway) -> None:
 @pytest.mark.parametrize("eager_start", [True, False])
 async def test_background_task(zha_gateway: Gateway, eager_start: bool) -> None:
     """Test background tasks being quit."""
-    result = asyncio.Future()
+    result = asyncio.get_running_loop().create_future()
 
     async def test_task():
         try:

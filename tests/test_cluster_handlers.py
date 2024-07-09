@@ -5,7 +5,7 @@
 from collections.abc import Awaitable, Callable
 import logging
 import math
-from types import NoneType
+from typing import Any, cast
 from unittest import mock
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
@@ -133,7 +133,7 @@ def poll_control_ch(
 
     cluster = zigpy_dev.endpoints[1].in_clusters[cluster_id]
     cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(cluster_id).get(None)
-    return cluster_handler_class(cluster, endpoint)
+    return cast(PollControlClusterHandler, cluster_handler_class(cluster, endpoint))
 
 
 @pytest.fixture
@@ -405,7 +405,7 @@ async def test_write_attributes_safe_key_error(
     cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
     cluster.write_attributes = AsyncMock(
         return_value=[
-            foundation.WriteAttributesResponse.deserialize(b"\x01\x10\x00")[0]
+            foundation.WriteAttributesResponse.deserialize(b"\x01\x00\x00")[0]
         ]
     )
 
@@ -414,8 +414,10 @@ async def test_write_attributes_safe_key_error(
     ).get(None)
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
-    with pytest.raises(ZHAException, match="Failed to write attribute 0x0010=unknown"):
-        await cluster_handler.write_attributes_safe({0x0010: "bar"})
+    with pytest.raises(ZHAException, match="Failed to write attribute on_off=bar"):
+        await cluster_handler.write_attributes_safe(
+            {OnOff.AttributeDefs.on_off.name: "bar"}
+        )
 
 
 async def test_get_attributes_error(
@@ -550,9 +552,9 @@ def test_cluster_handler_registry() -> None:
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
                 quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
-                device_description = getattr(quirk, "replacement", None) or getattr(
-                    quirk, "signature", None
-                )
+                device_description: dict[str, dict[str, Any]] = getattr(
+                    quirk, "replacement", None
+                ) or getattr(quirk, "signature", None)
 
                 for endpoint in device_description["endpoints"].values():
                     cluster_ids = set()
@@ -576,7 +578,7 @@ def test_cluster_handler_registry() -> None:
         assert cluster_id in all_quirk_ids
         assert isinstance(cluster_handler_classes, dict)
         for quirk_id, cluster_handler in cluster_handler_classes.items():
-            assert isinstance(quirk_id, (NoneType, str))
+            assert quirk_id is None or isinstance(quirk_id, str)
             assert issubclass(cluster_handler, ClusterHandler)
             assert quirk_id in all_quirk_ids[cluster_id]
 
@@ -890,7 +892,7 @@ async def test_poll_control_cluster_command(poll_control_device: Device) -> None
 
     assert checkin_mock.call_count == 1
     assert checkin_mock.await_count == 1
-    assert checkin_mock.await_args[0][0] == tsn
+    assert checkin_mock.mock_calls == [call(tsn)]
 
     assert poll_control_ch.emit_zha_event.call_count == 1
     assert poll_control_ch.emit_zha_event.call_args_list[0] == mock.call(

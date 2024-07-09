@@ -16,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 @pytest.mark.looptime
 async def test_immediate_works(zha_gateway: Gateway) -> None:
     """Test immediate works."""
-    calls = []
+    calls: list[None] = []
     debouncer = Debouncer(
         zha_gateway,
         _LOGGER,
@@ -71,7 +71,7 @@ async def test_immediate_works(zha_gateway: Gateway) -> None:
 @pytest.mark.looptime
 async def test_immediate_works_with_schedule_call(zha_gateway: Gateway) -> None:
     """Test immediate works with scheduled calls."""
-    calls = []
+    calls: list[None] = []
     debouncer = Debouncer(
         zha_gateway,
         _LOGGER,
@@ -129,7 +129,7 @@ async def test_immediate_works_with_schedule_call(zha_gateway: Gateway) -> None:
 
 async def test_immediate_works_with_callback_function(zha_gateway: Gateway) -> None:
     """Test immediate works with callback function."""
-    calls = []
+    calls: list[None] = []
     debouncer = Debouncer(
         zha_gateway,
         _LOGGER,
@@ -150,7 +150,7 @@ async def test_immediate_works_with_callback_function(zha_gateway: Gateway) -> N
 
 async def test_immediate_works_with_executor_function(zha_gateway: Gateway) -> None:
     """Test immediate works with executor function."""
-    calls = []
+    calls: list[None] = []
     debouncer = Debouncer(
         zha_gateway,
         _LOGGER,
@@ -174,7 +174,7 @@ async def test_immediate_works_with_passed_callback_function_raises(
     zha_gateway: Gateway,
 ) -> None:
     """Test immediate works with a callback function that raises."""
-    calls = []
+    calls: list[None] = []
 
     @callback
     def _append_and_raise() -> None:
@@ -239,7 +239,7 @@ async def test_immediate_works_with_passed_coroutine_raises(
     zha_gateway: Gateway,
 ) -> None:
     """Test immediate works with a coroutine that raises."""
-    calls = []
+    calls: list[None] = []
 
     async def _append_and_raise() -> None:
         calls.append(None)
@@ -301,7 +301,7 @@ async def test_immediate_works_with_passed_coroutine_raises(
 @pytest.mark.looptime
 async def test_not_immediate_works(zha_gateway: Gateway) -> None:
     """Test immediate works."""
-    calls = []
+    calls: list[None] = []
     debouncer = Debouncer(
         zha_gateway,
         _LOGGER,
@@ -353,7 +353,7 @@ async def test_not_immediate_works(zha_gateway: Gateway) -> None:
 @pytest.mark.looptime
 async def test_not_immediate_works_schedule_call(zha_gateway: Gateway) -> None:
     """Test immediate works with schedule call."""
-    calls = []
+    calls: list[None] = []
     debouncer = Debouncer(
         zha_gateway,
         _LOGGER,
@@ -409,7 +409,7 @@ async def test_not_immediate_works_schedule_call(zha_gateway: Gateway) -> None:
 @pytest.mark.looptime
 async def test_immediate_works_with_function_swapped(zha_gateway: Gateway) -> None:
     """Test immediate works and we can change out the function."""
-    calls = []
+    calls: list[None] = []
 
     one_function = AsyncMock(side_effect=lambda: calls.append(1))
     two_function = AsyncMock(side_effect=lambda: calls.append(2))
@@ -471,8 +471,8 @@ async def test_immediate_works_with_function_swapped(zha_gateway: Gateway) -> No
 
 async def test_shutdown(zha_gateway: Gateway, caplog: pytest.LogCaptureFixture) -> None:
     """Test shutdown."""
-    calls = []
-    future = asyncio.Future()
+    calls: list[None] = []
+    future = asyncio.get_running_loop().create_future()
 
     async def _func() -> None:
         await future
@@ -506,7 +506,7 @@ async def test_shutdown(zha_gateway: Gateway, caplog: pytest.LogCaptureFixture) 
 @pytest.mark.looptime
 async def test_background(zha_gateway: Gateway) -> None:
     """Test background tasks are created when background is True."""
-    calls = []
+    calls: list[None] = []
 
     async def _func() -> None:
         await asyncio.sleep(0.5)
