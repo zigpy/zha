@@ -77,10 +77,6 @@ disable_error_code = [
     "misc",             # 31
     "var-annotated",    # 15
     "override",         # 13
-    "return-value",     # 11
-    "method-assign",    # 9
-    "index",            # 6
-    "dict-item",        # 1
 ]
 
 [[tool.mypy.overrides]]

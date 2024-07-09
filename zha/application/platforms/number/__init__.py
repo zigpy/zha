@@ -289,7 +289,7 @@ class NumberConfigurationEntity(PlatformEntity):
         return response
 
     @property
-    def native_value(self) -> float:
+    def native_value(self) -> float | None:
         """Return the current value."""
         value = self._cluster_handler.cluster.get(self._attribute_name)
         if value is None:

@@ -187,7 +187,7 @@ class BaseLight(BaseEntity, ABC):
         return self._color_temp
 
     @property
-    def color_mode(self) -> int | None:
+    def color_mode(self) -> ColorMode | None:
         """Return the color mode."""
         return self._color_mode
 

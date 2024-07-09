@@ -163,14 +163,14 @@ class BaseEntity(LogMixin, EventBase):
         return self._attr_entity_registry_enabled_default
 
     @property
-    def device_class(self) -> EntityCategory | None:
+    def device_class(self) -> str | None:
         """Return the device class."""
         if hasattr(self, "_attr_device_class"):
             return self._attr_device_class
         return None
 
     @property
-    def state_class(self) -> EntityCategory | None:
+    def state_class(self) -> str | None:
         """Return the state class."""
         if hasattr(self, "_attr_state_class"):
             return self._attr_state_class

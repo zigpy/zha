@@ -91,7 +91,7 @@ class BinarySensor(PlatformEntity):
             )
 
     @functools.cached_property
-    def info_object(self) -> dict:
+    def info_object(self) -> BinarySensorEntityInfo:
         """Return a representation of the binary sensor."""
         return BinarySensorEntityInfo(
             **super().info_object.__dict__,

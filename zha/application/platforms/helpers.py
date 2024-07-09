@@ -54,7 +54,7 @@ def reduce_attribute(
 @overload
 def validate_device_class(
     device_class_enum: type[BinarySensorDeviceClass],
-    metadata_value,
+    metadata_value: enum.Enum,
     platform: str,
     logger: logging.Logger,
 ) -> BinarySensorDeviceClass | None: ...
@@ -63,7 +63,7 @@ def validate_device_class(
 @overload
 def validate_device_class(
     device_class_enum: type[SensorDeviceClass],
-    metadata_value,
+    metadata_value: enum.Enum,
     platform: str,
     logger: logging.Logger,
 ) -> SensorDeviceClass | None: ...
@@ -72,16 +72,18 @@ def validate_device_class(
 @overload
 def validate_device_class(
     device_class_enum: type[NumberDeviceClass],
-    metadata_value,
+    metadata_value: enum.Enum,
     platform: str,
     logger: logging.Logger,
 ) -> NumberDeviceClass | None: ...
 
 
 def validate_device_class(
-    device_class_enum: type[BinarySensorDeviceClass]
-    | type[SensorDeviceClass]
-    | type[NumberDeviceClass],
+    device_class_enum: (
+        type[BinarySensorDeviceClass]
+        | type[SensorDeviceClass]
+        | type[NumberDeviceClass]
+    ),
     metadata_value: enum.Enum,
     platform: str,
     logger: logging.Logger,

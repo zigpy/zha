@@ -466,12 +466,12 @@ class Device(LogMixin, EventBase):
         }
 
     @property
-    def sw_version(self) -> str | None:
+    def sw_version(self) -> int | None:
         """Return the software version for this device."""
         return self._sw_build_id
 
     @sw_version.setter
-    def sw_version(self, sw_build_id) -> None:
+    def sw_version(self, sw_build_id: int) -> None:
         """Set the software version for this device."""
         self._sw_build_id = sw_build_id
 
