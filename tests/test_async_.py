@@ -378,53 +378,6 @@ async def test_async_run_zha_job_delegates_non_async() -> None:
     assert len(zha_gateway.async_add_zha_job.mock_calls) == 1
 
 
-async def test_pending_scheduler(zha_gateway: Gateway) -> None:
-    """Add a coro to pending tasks."""
-    call_count = []
-
-    async def test_coro():
-        """Test Coro."""
-        call_count.append("call")
-
-    for _ in range(3):
-        zha_gateway.async_add_job(test_coro())
-
-    await asyncio.wait(zha_gateway._tracked_completable_tasks)
-
-    assert len(zha_gateway._tracked_completable_tasks) == 0
-    assert len(call_count) == 3
-
-
-def test_add_job_pending_tasks_coro(zha_gateway: Gateway) -> None:
-    """Add a coro to pending tasks."""
-
-    async def test_coro():
-        """Test Coro."""
-
-    for _ in range(2):
-        zha_gateway.add_job(test_coro())
-
-    # Ensure add_job does not run immediately
-    assert len(zha_gateway._tracked_completable_tasks) == 0
-
-
-async def test_async_add_job_pending_tasks_coro(zha_gateway: Gateway) -> None:
-    """Add a coro to pending tasks."""
-    call_count = []
-
-    async def test_coro():
-        """Test Coro."""
-        call_count.append("call")
-
-    for _ in range(2):
-        zha_gateway.async_add_job(test_coro())
-
-    assert len(zha_gateway._tracked_completable_tasks) == 2
-    await zha_gateway.async_block_till_done()
-    assert len(call_count) == 2
-    assert len(zha_gateway._tracked_completable_tasks) == 0
-
-
 async def test_async_create_task_pending_tasks_coro(zha_gateway: Gateway) -> None:
     """Add a coro to pending tasks."""
     call_count = []
@@ -440,78 +393,6 @@ async def test_async_create_task_pending_tasks_coro(zha_gateway: Gateway) -> Non
     await zha_gateway.async_block_till_done()
     assert len(call_count) == 2
     assert len(zha_gateway._tracked_completable_tasks) == 0
-
-
-async def test_async_add_job_pending_tasks_executor(zha_gateway: Gateway) -> None:
-    """Run an executor in pending tasks."""
-    call_count = []
-
-    def test_executor():
-        """Test executor."""
-        call_count.append("call")
-
-    async def wait_finish_callback():
-        """Wait until all stuff is scheduled."""
-        await asyncio.sleep(0)
-        await asyncio.sleep(0)
-
-    for _ in range(2):
-        zha_gateway.async_add_job(test_executor)
-
-    await wait_finish_callback()
-
-    await zha_gateway.async_block_till_done()
-    assert len(call_count) == 2
-
-
-async def test_async_add_job_pending_tasks_callback(zha_gateway: Gateway) -> None:
-    """Run a callback in pending tasks."""
-    call_count = []
-
-    @callback
-    def test_callback():
-        """Test callback."""
-        call_count.append("call")
-
-    async def wait_finish_callback():
-        """Wait until all stuff is scheduled."""
-        await asyncio.sleep(0)
-        await asyncio.sleep(0)
-
-    for _ in range(2):
-        zha_gateway.async_add_job(test_callback)
-
-    await wait_finish_callback()
-
-    await zha_gateway.async_block_till_done()
-
-    assert len(zha_gateway._tracked_completable_tasks) == 0
-    assert len(call_count) == 2
-
-
-async def test_add_job_with_none(zha_gateway: Gateway) -> None:
-    """Try to add a job with None as function."""
-    with pytest.raises(ValueError):
-        zha_gateway.async_add_job(None, "test_arg")
-
-    with pytest.raises(ValueError):
-        zha_gateway.add_job(None, "test_arg")
-
-
-async def test_async_functions_with_callback(zha_gateway: Gateway) -> None:
-    """Test we deal with async functions accidentally marked as callback."""
-    runs = []
-
-    @callback
-    async def test():
-        runs.append(True)
-
-    await zha_gateway.async_add_job(test)
-    assert len(runs) == 1
-
-    zha_gateway.async_run_job(test)
-    await zha_gateway.async_block_till_done()
-    assert len(runs) == 2
 
 
 async def test_async_run_job_starts_tasks_eagerly(zha_gateway: Gateway) -> None:
@@ -545,7 +426,7 @@ async def test_async_run_job_starts_coro_eagerly(zha_gateway: Gateway) -> None:
 @pytest.mark.parametrize("eager_start", [True, False])
 async def test_background_task(zha_gateway: Gateway, eager_start: bool) -> None:
     """Test background tasks being quit."""
-    result = asyncio.Future()
+    result = asyncio.get_running_loop().create_future()
 
     async def test_task():
         try:

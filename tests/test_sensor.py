@@ -546,7 +546,7 @@ async def test_sensor(
     zha_gateway: Gateway,
     cluster_id: int,
     entity_type: type[PlatformEntity],
-    test_func: Callable[[Cluster, PlatformEntity], Awaitable[None]],
+    test_func: Callable[[Cluster, Cluster, PlatformEntity], Awaitable[None]],
     read_plug: Optional[dict],
     unsupported_attrs: Optional[set],
 ) -> None:
@@ -1235,7 +1235,7 @@ async def test_device_unavailable_skips_entity_polling(
 async def zigpy_device_danfoss_thermostat(
     zigpy_device_mock: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-) -> Device:
+) -> tuple[Device, zigpy.device.Device]:
     """Danfoss thermostat device."""
 
     zigpy_device = zigpy_device_mock(

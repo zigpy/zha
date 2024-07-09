@@ -5,7 +5,7 @@
 from collections.abc import Awaitable, Callable
 import logging
 import math
-from types import NoneType
+from typing import TYPE_CHECKING, Any
 from unittest import mock
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
@@ -132,7 +132,11 @@ def poll_control_ch(
     )
 
     cluster = zigpy_dev.endpoints[1].in_clusters[cluster_id]
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(cluster_id).get(None)
+    cluster_handler_class: type[PollControlClusterHandler] | None = (
+        CLUSTER_HANDLER_REGISTRY.get(cluster_id).get(None)
+    )
+    assert cluster_handler_class is not None
+
     return cluster_handler_class(cluster, endpoint)
 
 
@@ -308,12 +312,17 @@ async def test_in_cluster_handler_config(
     )
 
     cluster = zigpy_dev.endpoints[1].in_clusters[cluster_id]
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+    cluster_handler_class: type[ClusterHandler] | None = CLUSTER_HANDLER_REGISTRY.get(
         cluster_id, {None, ClusterHandler}
     ).get(None)
+    assert cluster_handler_class is not None
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
     assert cluster_handler.status == ClusterHandlerStatus.CREATED
+
+    if TYPE_CHECKING:
+        # Workaround for https://github.com/python/mypy/issues/9005
+        assert cluster_handler.status != ClusterHandlerStatus.CREATED
 
     await cluster_handler.async_configure()
 
@@ -348,9 +357,10 @@ async def test_cluster_handler_bind_error(
     cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
     cluster.bind.side_effect = zigpy.exceptions.ZigbeeException
 
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+    cluster_handler_class: type[ClusterHandler] | None = CLUSTER_HANDLER_REGISTRY.get(
         OnOff.cluster_id, {None, ClusterHandler}
     ).get(None)
+    assert cluster_handler_class is not None
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
     await cluster_handler.async_configure()
@@ -377,9 +387,10 @@ async def test_cluster_handler_configure_reporting_error(
     cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
     cluster.configure_reporting_multiple.side_effect = zigpy.exceptions.ZigbeeException
 
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+    cluster_handler_class: type[ClusterHandler] | None = CLUSTER_HANDLER_REGISTRY.get(
         OnOff.cluster_id, {None, ClusterHandler}
     ).get(None)
+    assert cluster_handler_class is not None
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
     await cluster_handler.async_configure()
@@ -405,17 +416,20 @@ async def test_write_attributes_safe_key_error(
     cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
     cluster.write_attributes = AsyncMock(
         return_value=[
-            foundation.WriteAttributesResponse.deserialize(b"\x01\x10\x00")[0]
+            foundation.WriteAttributesResponse.deserialize(b"\x01\x00\x00")[0]
         ]
     )
 
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+    cluster_handler_class: type[ClusterHandler] | None = CLUSTER_HANDLER_REGISTRY.get(
         OnOff.cluster_id, {None, ClusterHandler}
     ).get(None)
+    assert cluster_handler_class is not None
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
-    with pytest.raises(ZHAException, match="Failed to write attribute 0x0010=unknown"):
-        await cluster_handler.write_attributes_safe({0x0010: "bar"})
+    with pytest.raises(ZHAException, match="Failed to write attribute on_off=bar"):
+        await cluster_handler.write_attributes_safe(
+            {OnOff.AttributeDefs.on_off.name: "bar"}
+        )
 
 
 async def test_get_attributes_error(
@@ -435,9 +449,10 @@ async def test_get_attributes_error(
     cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
     cluster.read_attributes.side_effect = zigpy.exceptions.ZigbeeException
 
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+    cluster_handler_class: type[ClusterHandler] | None = CLUSTER_HANDLER_REGISTRY.get(
         OnOff.cluster_id, {None, ClusterHandler}
     ).get(None)
+    assert cluster_handler_class is not None
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
     await cluster_handler.get_attributes(["foo"])
@@ -465,9 +480,10 @@ async def test_get_attributes_error_raises(
     cluster: zigpy.zcl.Cluster = zigpy_dev.endpoints[1].in_clusters[OnOff.cluster_id]
     cluster.read_attributes.side_effect = zigpy.exceptions.ZigbeeException
 
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+    cluster_handler_class: type[ClusterHandler] | None = CLUSTER_HANDLER_REGISTRY.get(
         OnOff.cluster_id, {None, ClusterHandler}
     ).get(None)
+    assert cluster_handler_class is not None
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
     with pytest.raises(zigpy.exceptions.ZigbeeException):
@@ -528,9 +544,10 @@ async def test_out_cluster_handler_config(
 
     cluster = zigpy_dev.endpoints[1].out_clusters[cluster_id]
     cluster.bind_only = True
-    cluster_handler_class = CLUSTER_HANDLER_REGISTRY.get(
+    cluster_handler_class: type[ClusterHandler] | None = CLUSTER_HANDLER_REGISTRY.get(
         cluster_id, {None: ClusterHandler}
     ).get(None)
+    assert cluster_handler_class is not None
     cluster_handler = cluster_handler_class(cluster, endpoint)
 
     await cluster_handler.async_configure()
@@ -550,9 +567,9 @@ def test_cluster_handler_registry() -> None:
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
                 quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
-                device_description = getattr(quirk, "replacement", None) or getattr(
-                    quirk, "signature", None
-                )
+                device_description: dict[str, dict[str, Any]] = getattr(
+                    quirk, "replacement", None
+                ) or getattr(quirk, "signature", None)
 
                 for endpoint in device_description["endpoints"].values():
                     cluster_ids = set()
@@ -576,7 +593,7 @@ def test_cluster_handler_registry() -> None:
         assert cluster_id in all_quirk_ids
         assert isinstance(cluster_handler_classes, dict)
         for quirk_id, cluster_handler in cluster_handler_classes.items():
-            assert isinstance(quirk_id, (NoneType, str))
+            assert quirk_id is None or isinstance(quirk_id, str)
             assert issubclass(cluster_handler, ClusterHandler)
             assert quirk_id in all_quirk_ids[cluster_id]
 
@@ -890,7 +907,7 @@ async def test_poll_control_cluster_command(poll_control_device: Device) -> None
 
     assert checkin_mock.call_count == 1
     assert checkin_mock.await_count == 1
-    assert checkin_mock.await_args[0][0] == tsn
+    assert checkin_mock.mock_calls == [call(tsn)]
 
     assert poll_control_ch.emit_zha_event.call_count == 1
     assert poll_control_ch.emit_zha_event.call_args_list[0] == mock.call(
@@ -1012,7 +1029,7 @@ async def test_zll_device_groups(
 async def test_cluster_no_ep_attribute(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[..., Device],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Test cluster handlers for clusters without ep_attribute."""
 
@@ -1208,7 +1225,7 @@ async def test_quirk_id_cluster_handler(zha_gateway: Gateway) -> None:  # pylint
     ],
 )
 async def test_retry_request(
-    side_effect: Exception | None, expected_error: str | None
+    side_effect: Exception, expected_error: str | None
 ) -> None:
     """Test the `retry_request` decorator's handling of zigpy-internal exceptions."""
 

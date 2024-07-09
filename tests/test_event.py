@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, call
 
 import pytest
 
@@ -131,7 +131,7 @@ async def test_event_base_emit_coro():
     await asyncio.gather(*event._event_tasks)
 
     assert callback.await_count == 1
-    assert callback.await_args[0] == ("data",)
+    assert callback.mock_calls == [call("data")]
     assert not event._event_tasks
 
     callback.reset_mock()
@@ -142,7 +142,7 @@ async def test_event_base_emit_coro():
     await asyncio.gather(*event._event_tasks)
 
     assert callback.await_count == 1
-    assert callback.await_args[0] == ("data",)
+    assert callback.mock_calls == [call("data")]
     unsub()
     assert not event._event_tasks
 
@@ -154,7 +154,7 @@ async def test_event_base_emit_coro():
     await asyncio.gather(*event._event_tasks)
 
     assert callback.await_count == 1
-    assert callback.await_args[0] == ("data",)
+    assert callback.mock_calls == [call("data")]
     unsub()
     assert not event._event_tasks
 
@@ -167,7 +167,7 @@ async def test_event_base_emit_coro():
     await asyncio.gather(*event._event_tasks)
 
     assert event.handle_test.await_count == 1
-    assert event.handle_test.await_args[0] == (test_event,)
+    assert event.handle_test.mock_calls == [call(test_event)]
     assert not event._event_tasks
 
 

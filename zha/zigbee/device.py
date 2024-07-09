@@ -60,7 +60,7 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values
-from zha.application.platforms import PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -183,7 +183,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     """Describes a ZHA device."""
 
     active_coordinator: bool
-    entities: dict[str, PlatformEntityInfo]
+    entities: dict[str, BaseEntityInfo]
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
@@ -466,12 +466,12 @@ class Device(LogMixin, EventBase):
         }
 
     @property
-    def sw_version(self) -> str | None:
+    def sw_version(self) -> int | None:
         """Return the software version for this device."""
         return self._sw_build_id
 
     @sw_version.setter
-    def sw_version(self, sw_build_id) -> None:
+    def sw_version(self, sw_build_id: int) -> None:
         """Set the software version for this device."""
         self._sw_build_id = sw_build_id
 

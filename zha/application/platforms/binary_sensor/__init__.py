@@ -11,7 +11,7 @@ from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
     BinarySensorDeviceClass,
@@ -47,7 +47,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class BinarySensorEntityInfo(PlatformEntityInfo):
+class BinarySensorEntityInfo(BaseEntityInfo):
     """Binary sensor entity info."""
 
     attribute_name: str
@@ -91,7 +91,7 @@ class BinarySensor(PlatformEntity):
             )
 
     @functools.cached_property
-    def info_object(self) -> dict:
+    def info_object(self) -> BinarySensorEntityInfo:
         """Return a representation of the binary sensor."""
         return BinarySensorEntityInfo(
             **super().info_object.__dict__,

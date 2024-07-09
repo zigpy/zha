@@ -23,7 +23,6 @@ from typing import (
     TypeVar,
     TypeVarTuple,
     cast,
-    overload,
 )
 
 from zigpy.types.named import EUI64
@@ -308,32 +307,6 @@ class AsyncUtilMixin:
         self._tracked_completable_tasks.add(task)
         task.add_done_callback(self._tracked_completable_tasks.remove)
 
-    def add_job(
-        self, target: Callable[..., Any] | Coroutine[Any, Any, Any], *args: Any
-    ) -> None:
-        """Add a job to be executed by the event loop or by an executor.
-
-        If the job is either a coroutine or decorated with @callback, it will be
-        run by the event loop, if not it will be run by an executor.
-
-        target: target to call.
-        args: parameters for method to call.
-        """
-        if target is None:
-            raise ValueError("Don't call add_job with None")
-        if asyncio.iscoroutine(target):
-            self.loop.call_soon_threadsafe(
-                functools.partial(self.async_create_task, target, eager_start=True)
-            )
-            return
-        if TYPE_CHECKING:
-            target = cast(Callable[..., Any], target)
-        self.loop.call_soon_threadsafe(
-            functools.partial(
-                self.async_add_zha_job, ZHAJob(target), *args, eager_start=True
-            )
-        )
-
     def _cancel_cancellable_timers(self) -> None:
         """Cancel timer handles marked as cancellable."""
         # pylint: disable-next=protected-access
@@ -346,84 +319,6 @@ class AsyncUtilMixin:
                 and job.cancel_on_shutdown
             ):
                 handle.cancel()
-
-    @overload
-    @callback
-    def async_add_job(
-        self,
-        target: Callable[..., Coroutine[Any, Any, _R]],
-        *args: Any,
-        eager_start: bool = False,
-    ) -> asyncio.Future[_R] | None: ...
-
-    @overload
-    @callback
-    def async_add_job(
-        self,
-        target: Callable[..., Coroutine[Any, Any, _R] | _R],
-        *args: Any,
-        eager_start: bool = False,
-    ) -> asyncio.Future[_R] | None: ...
-
-    @overload
-    @callback
-    def async_add_job(
-        self,
-        target: Coroutine[Any, Any, _R],
-        *args: Any,
-        eager_start: bool = False,
-    ) -> asyncio.Future[_R] | None: ...
-
-    @callback
-    def async_add_job(
-        self,
-        target: Callable[..., Coroutine[Any, Any, _R] | _R] | Coroutine[Any, Any, _R],
-        *args: Any,
-        eager_start: bool = False,
-    ) -> asyncio.Future[_R] | None:
-        """Add a job to be executed by the event loop or by an executor.
-
-        If the job is either a coroutine or decorated with @callback, it will be
-        run by the event loop, if not it will be run by an executor.
-
-        This method must be run in the event loop.
-
-        target: target to call.
-        args: parameters for method to call.
-        """
-        if target is None:
-            raise ValueError("Don't call async_add_job with None")
-
-        if asyncio.iscoroutine(target):
-            return self.async_create_task(target, eager_start=eager_start)
-
-        # This code path is performance sensitive and uses
-        # if TYPE_CHECKING to avoid the overhead of constructing
-        # the type used for the cast. For history see:
-        # https://github.com/home-assistant/core/pull/71960
-        if TYPE_CHECKING:
-            target = cast(Callable[..., Coroutine[Any, Any, _R] | _R], target)
-        return self.async_add_zha_job(ZHAJob(target), *args, eager_start=eager_start)
-
-    @overload
-    @callback
-    def async_add_zha_job(
-        self,
-        zhajob: ZHAJob[..., Coroutine[Any, Any, _R]],
-        *args: Any,
-        eager_start: bool = False,
-        background: bool = False,
-    ) -> asyncio.Future[_R] | None: ...
-
-    @overload
-    @callback
-    def async_add_zha_job(
-        self,
-        zhajob: ZHAJob[..., Coroutine[Any, Any, _R] | _R],
-        *args: Any,
-        eager_start: bool = False,
-        background: bool = False,
-    ) -> asyncio.Future[_R] | None: ...
 
     @callback
     def async_add_zha_job(
@@ -573,24 +468,6 @@ class AsyncUtilMixin:
         task.add_done_callback(task_bucket.remove)
         return task
 
-    @overload
-    @callback
-    def async_run_zha_job(
-        self,
-        zhajob: ZHAJob[..., Coroutine[Any, Any, _R]],
-        *args: Any,
-        background: bool = False,
-    ) -> asyncio.Future[_R] | None: ...
-
-    @overload
-    @callback
-    def async_run_zha_job(
-        self,
-        zhajob: ZHAJob[..., Coroutine[Any, Any, _R] | _R],
-        *args: Any,
-        background: bool = False,
-    ) -> asyncio.Future[_R] | None: ...
-
     @callback
     def async_run_zha_job(
         self,
@@ -620,24 +497,6 @@ class AsyncUtilMixin:
         return self.async_add_zha_job(
             zhajob, *args, eager_start=True, background=background
         )
-
-    @overload
-    @callback
-    def async_run_job(
-        self, target: Callable[..., Coroutine[Any, Any, _R]], *args: Any
-    ) -> asyncio.Future[_R] | None: ...
-
-    @overload
-    @callback
-    def async_run_job(
-        self, target: Callable[..., Coroutine[Any, Any, _R] | _R], *args: Any
-    ) -> asyncio.Future[_R] | None: ...
-
-    @overload
-    @callback
-    def async_run_job(
-        self, target: Coroutine[Any, Any, _R], *args: Any
-    ) -> asyncio.Future[_R] | None: ...
 
     @callback
     def async_run_job(

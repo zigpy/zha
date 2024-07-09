@@ -13,7 +13,7 @@ from zigpy.zcl.clusters.general import Ota
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import callback
 from zha.exceptions import ZHAException
@@ -66,7 +66,7 @@ ATTR_VERSION: Final = "version"
 
 
 @dataclass(frozen=True, kw_only=True)
-class UpdateEntityInfo(PlatformEntityInfo):
+class UpdateEntityInfo(BaseEntityInfo):
     """Update entity info."""
 
     supported_features: UpdateEntityFeature
@@ -78,7 +78,7 @@ class UpdateEntityInfo(PlatformEntityInfo):
 class FirmwareUpdateEntity(PlatformEntity):
     """Representation of a ZHA firmware update entity."""
 
-    PLATFORM: Final = Platform.UPDATE
+    PLATFORM = Platform.UPDATE
 
     _unique_id_suffix = "firmware_update"
     _attr_entity_category = EntityCategory.CONFIG

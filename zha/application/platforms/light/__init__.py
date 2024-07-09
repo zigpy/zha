@@ -16,7 +16,6 @@ import itertools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zigpy.types import EUI64
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
@@ -67,7 +66,7 @@ from zha.application.platforms.light.helpers import (
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandlerInfo
+from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COLOR,
@@ -92,18 +91,6 @@ GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.LIGHT)
 @dataclass(frozen=True, kw_only=True)
 class LightEntityInfo(BaseEntityInfo):
     """Light entity info."""
-
-    # combination of PlatformEntityInfo and GroupEntityInfo
-    unique_id: str
-    platform: str
-    class_name: str
-
-    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
-    device_ieee: EUI64 | None = dataclasses.field(default=None)
-    endpoint_id: int | None = dataclasses.field(default=None)
-    group_id: int | None = dataclasses.field(default=None)
-    name: str | None = dataclasses.field(default=None)
-    available: bool | None = dataclasses.field(default=None)
 
     effect_list: list[str] | None = dataclasses.field(default=None)
     supported_features: LightEntityFeature
@@ -187,7 +174,7 @@ class BaseLight(BaseEntity, ABC):
         return self._color_temp
 
     @property
-    def color_mode(self) -> int | None:
+    def color_mode(self) -> ColorMode | None:
         """Return the color mode."""
         return self._color_mode
 

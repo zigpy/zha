@@ -25,7 +25,7 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
-from zha.application.platforms import PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
 from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
@@ -55,7 +55,7 @@ class SirenEntityFeature(IntFlag):
 
 
 @dataclass(frozen=True, kw_only=True)
-class SirenEntityInfo(PlatformEntityInfo):
+class SirenEntityInfo(BaseEntityInfo):
     """Siren entity info."""
 
     available_tones: dict[int, str]

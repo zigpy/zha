@@ -1,6 +1,6 @@
 """Test ZHA device discovery."""
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable, Coroutine
 import enum
 import itertools
 import re
@@ -20,6 +20,7 @@ from zhaquirks.xiaomi.aqara.driver_curtain_e1 import (
     XiaomiAqaraDriverE1,
 )
 from zigpy.const import SIG_ENDPOINTS, SIG_MANUFACTURER, SIG_MODEL, SIG_NODE_DESC
+import zigpy.device
 import zigpy.profiles.zha
 import zigpy.quirks
 from zigpy.quirks.v2 import (
@@ -89,8 +90,8 @@ def contains_ignored_suffix(unique_id: str) -> bool:
 @pytest.fixture
 def zha_device_mock(
     zigpy_device_mock: Callable[..., zigpy.device.Device],
-    device_joined: Callable[..., Device],
-) -> Callable[..., Device]:
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
+) -> Callable[..., Coroutine[Any, Any, Device]]:
     """Mock device factory."""
 
     async def _mock(
@@ -124,7 +125,7 @@ async def test_devices(
     device,
     zha_gateway: Gateway,
     zigpy_device_mock,
-    device_joined,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
 ) -> None:
     """Test device discovery."""
     zigpy_device = zigpy_device_mock(
@@ -317,7 +318,7 @@ def test_discover_probe_single_cluster() -> None:
 @pytest.mark.parametrize("device_info", DEVICES)
 async def test_discover_endpoint(
     device_info: dict[str, Any],
-    zha_device_mock: Callable[..., Device],  # pylint: disable=redefined-outer-name
+    zha_device_mock: Callable[..., Coroutine[Any, Any, Device]],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test device discovery."""
@@ -479,7 +480,7 @@ async def test_device_override(
 async def test_quirks_v2_entity_discovery(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
 ) -> None:
     """Test quirks v2 discovery."""
 
@@ -538,7 +539,7 @@ async def test_quirks_v2_entity_discovery(
 async def test_quirks_v2_entity_discovery_e1_curtain(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
 ) -> None:
     """Test quirks v2 discovery for e1 curtain motor."""
 
@@ -744,7 +745,7 @@ def _get_test_device(
 async def test_quirks_v2_entity_no_metadata(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - no metadata."""
@@ -763,7 +764,7 @@ async def test_quirks_v2_entity_no_metadata(
 async def test_quirks_v2_entity_discovery_errors(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - errors."""
@@ -901,7 +902,7 @@ def validate_metadata(validator: Callable) -> None:
     all_v2_quirks = itertools.chain.from_iterable(
         zigpy.quirks._DEVICE_REGISTRY._registry_v2.values()
     )
-    translations = {}
+    translations: dict[str, dict[str, str]] = {}
     for quirk in all_v2_quirks:
         for entity_metadata in quirk.entity_metadata:
             platform = Platform(entity_metadata.entity_platform.value)
@@ -926,7 +927,7 @@ def validate_metadata(validator: Callable) -> None:
 async def test_quirks_v2_metadata_errors(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
     validate_method: Callable,
     expected_exception_string: str,
@@ -1029,7 +1030,7 @@ ERROR_ROOT = "Quirks provided an invalid device class"
 async def test_quirks_v2_metadata_bad_device_classes(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
     augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
     expected_exception_string: str,

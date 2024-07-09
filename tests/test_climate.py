@@ -3,8 +3,9 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Coroutine
 import logging
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
@@ -13,6 +14,7 @@ from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
 import zhaquirks.tuya.ts0601_trv
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles
+import zigpy.quirks
 import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import Thermostat
 import zigpy.zcl.foundation as zcl_f
@@ -192,10 +194,23 @@ ATTR_PRESET_MODE = "preset_mode"
 def device_climate_mock(
     zigpy_device_mock: Callable[..., ZigpyDevice],
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-) -> Callable[..., Device]:
+) -> Callable[
+    [
+        dict[int, dict[str, Any]],
+        dict[str, Any] | None,
+        str | None,
+        type[zigpy.quirks.CustomDevice] | None,
+    ],
+    Coroutine[Any, Any, Device],
+]:
     """Test regular thermostat device."""
 
-    async def _dev(clusters, plug=None, manuf=None, quirk=None):
+    async def _dev(
+        clusters: dict[int, dict[str, Any]],
+        plug: dict[str, Any] | None = None,
+        manuf: str | None = None,
+        quirk: type[zigpy.quirks.CustomDevice] | None = None,
+    ) -> Device:
         plugged_attrs = ZCL_ATTR_PLUG if plug is None else {**ZCL_ATTR_PLUG, **plug}
         zigpy_device = zigpy_device_mock(clusters, manufacturer=manuf, quirk=quirk)
         zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
@@ -544,7 +559,7 @@ async def test_hvac_mode(
     ),
 )
 async def test_hvac_modes(  # pylint: disable=unused-argument
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     seq_of_op,
     modes,
@@ -570,7 +585,7 @@ async def test_hvac_modes(  # pylint: disable=unused-argument
     ),
 )
 async def test_target_temperature(
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     sys_mode,
     preset,
@@ -609,7 +624,7 @@ async def test_target_temperature(
     ),
 )
 async def test_target_temperature_high(
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     preset,
     unoccupied,
@@ -646,7 +661,7 @@ async def test_target_temperature_high(
     ),
 )
 async def test_target_temperature_low(
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     preset,
     unoccupied,
@@ -848,7 +863,7 @@ async def test_set_temperature_hvac_mode(
 
 
 async def test_set_temperature_heat_cool(
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call in heating/cooling HVAC mode."""
@@ -911,7 +926,7 @@ async def test_set_temperature_heat_cool(
 
 
 async def test_set_temperature_heat(
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call in heating HVAC mode."""
@@ -971,7 +986,7 @@ async def test_set_temperature_heat(
 
 
 async def test_set_temperature_cool(
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call in cooling HVAC mode."""
@@ -1031,7 +1046,7 @@ async def test_set_temperature_cool(
 
 
 async def test_set_temperature_wrong_mode(
-    device_climate_mock: Callable[..., Device],
+    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call for wrong HVAC mode."""

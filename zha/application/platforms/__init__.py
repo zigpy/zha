@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from contextlib import suppress
-from dataclasses import dataclass
+import dataclasses
 from enum import StrEnum
 from functools import cached_property
 import logging
@@ -41,7 +41,7 @@ class EntityCategory(StrEnum):
     DIAGNOSTIC = "diagnostic"
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class BaseEntityInfo:
     """Information about a base entity."""
 
@@ -55,8 +55,17 @@ class BaseEntityInfo:
     entity_category: str | None
     entity_registry_enabled_default: bool
 
+    # For platform entities
+    cluster_handlers: list[ClusterHandlerInfo]
+    device_ieee: EUI64 | None
+    endpoint_id: int | None
+    available: bool | None
 
-@dataclass(frozen=True, kw_only=True)
+    # For group entities
+    group_id: int | None
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class BaseIdentifiers:
     """Identifiers for the base entity."""
 
@@ -64,7 +73,7 @@ class BaseIdentifiers:
     platform: str
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class PlatformEntityIdentifiers(BaseIdentifiers):
     """Identifiers for the platform entity."""
 
@@ -72,31 +81,14 @@ class PlatformEntityIdentifiers(BaseIdentifiers):
     endpoint_id: int
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class GroupEntityIdentifiers(BaseIdentifiers):
     """Identifiers for the group entity."""
 
     group_id: int
 
 
-@dataclass(frozen=True, kw_only=True)
-class PlatformEntityInfo(BaseEntityInfo):
-    """Information about a platform entity."""
-
-    cluster_handlers: list[ClusterHandlerInfo]
-    device_ieee: EUI64
-    endpoint_id: int
-    available: bool
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupEntityInfo(BaseEntityInfo):
-    """Information about a group entity."""
-
-    group_id: int
-
-
-@dataclass(frozen=True, kw_only=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class EntityStateChangedEvent:
     """Event for when an entity state changes."""
 
@@ -163,14 +155,14 @@ class BaseEntity(LogMixin, EventBase):
         return self._attr_entity_registry_enabled_default
 
     @property
-    def device_class(self) -> EntityCategory | None:
+    def device_class(self) -> str | None:
         """Return the device class."""
         if hasattr(self, "_attr_device_class"):
             return self._attr_device_class
         return None
 
     @property
-    def state_class(self) -> EntityCategory | None:
+    def state_class(self) -> str | None:
         """Return the state class."""
         if hasattr(self, "_attr_state_class"):
             return self._attr_state_class
@@ -204,6 +196,13 @@ class BaseEntity(LogMixin, EventBase):
             state_class=self.state_class,
             entity_category=self.entity_category,
             entity_registry_enabled_default=self.entity_registry_enabled_default,
+            # Set by platform entities
+            cluster_handlers=[],
+            device_ieee=None,
+            endpoint_id=None,
+            available=None,
+            # Set by group entities
+            group_id=None,
         )
 
     @property
@@ -223,13 +222,6 @@ class BaseEntity(LogMixin, EventBase):
         if hasattr(self, "_attr_extra_state_attribute_names"):
             return self._attr_extra_state_attribute_names
         return None
-
-    def restore_external_state_attributes(self, **kwargs: Any) -> None:
-        """Restore entity specific state attributes from an external source.
-
-        Entities implementing this must accept a keyword argument for each attribute.
-        """
-        raise NotImplementedError
 
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
@@ -359,10 +351,10 @@ class PlatformEntity(BaseEntity):
         )
 
     @cached_property
-    def info_object(self) -> PlatformEntityInfo:
+    def info_object(self) -> BaseEntityInfo:
         """Return a representation of the platform entity."""
-        return PlatformEntityInfo(
-            **super().info_object.__dict__,
+        return dataclasses.replace(
+            super().info_object,
             cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
@@ -429,10 +421,10 @@ class GroupEntity(BaseEntity):
         )
 
     @cached_property
-    def info_object(self) -> GroupEntityInfo:
+    def info_object(self) -> BaseEntityInfo:
         """Return a representation of the group."""
-        return GroupEntityInfo(
-            **super().info_object.__dict__,
+        return dataclasses.replace(
+            super().info_object,
             group_id=self.group_id,
         )
 

@@ -26,7 +26,6 @@ from zha.application.platforms import (
     BaseIdentifiers,
     EntityCategory,
     PlatformEntity,
-    PlatformEntityInfo,
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
@@ -109,7 +108,7 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 
 
 @dataclass(frozen=True, kw_only=True)
-class SensorEntityInfo(PlatformEntityInfo):
+class SensorEntityInfo(BaseEntityInfo):
     """Sensor entity info."""
 
     attribute: str
@@ -397,8 +396,6 @@ class DeviceCounterSensor(BaseEntity):
         """Return a representation of the platform entity."""
         return DeviceCounterEntityInfo(
             **super().info_object.__dict__,
-            device_ieee=str(self._device.ieee),
-            available=self.available,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,
             counter_groups=self._zigpy_counter_groups,

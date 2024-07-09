@@ -3,13 +3,11 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-import dataclasses
 from dataclasses import dataclass
 import functools
 import math
 from typing import TYPE_CHECKING, Any
 
-from zigpy.types import EUI64
 from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
@@ -44,7 +42,6 @@ from zha.application.platforms.fan.helpers import (
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import (
     ClusterAttributeUpdatedEvent,
-    ClusterHandlerInfo,
     wrap_zigpy_exceptions,
 )
 from zha.zigbee.cluster_handlers.const import (
@@ -66,18 +63,6 @@ MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
 @dataclass(frozen=True, kw_only=True)
 class FanEntityInfo(BaseEntityInfo):
     """Fan entity info."""
-
-    # combination of PlatformEntityInfo and GroupEntityInfo
-    unique_id: str
-    platform: str
-    class_name: str
-
-    cluster_handlers: list[ClusterHandlerInfo] | None = dataclasses.field(default=None)
-    device_ieee: EUI64 | None = dataclasses.field(default=None)
-    endpoint_id: int | None = dataclasses.field(default=None)
-    group_id: int | None = dataclasses.field(default=None)
-    name: str | None = dataclasses.field(default=None)
-    available: bool | None = dataclasses.field(default=None)
 
     preset_modes: list[str]
     supported_features: int

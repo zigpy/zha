@@ -13,7 +13,7 @@ from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import (
     ICONS,
@@ -49,7 +49,7 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 
 
 @dataclass(frozen=True, kw_only=True)
-class NumberEntityInfo(PlatformEntityInfo):
+class NumberEntityInfo(BaseEntityInfo):
     """Number entity info."""
 
     engineering_units: int
@@ -60,7 +60,7 @@ class NumberEntityInfo(PlatformEntityInfo):
 
 
 @dataclass(frozen=True, kw_only=True)
-class NumberConfigurationEntityInfo(PlatformEntityInfo):
+class NumberConfigurationEntityInfo(BaseEntityInfo):
     """Number configuration entity info."""
 
     min_value: float | None
@@ -289,7 +289,7 @@ class NumberConfigurationEntity(PlatformEntity):
         return response
 
     @property
-    def native_value(self) -> float:
+    def native_value(self) -> float | None:
         """Return the current value."""
         value = self._cluster_handler.cluster.get(self._attribute_name)
         if value is None:

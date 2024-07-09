@@ -18,10 +18,10 @@ from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
+    BaseEntityInfo,
     EntityCategory,
     GroupEntity,
     PlatformEntity,
-    PlatformEntityInfo,
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
@@ -51,7 +51,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class SwitchConfigurationEntityInfo(PlatformEntityInfo):
+class SwitchConfigurationEntityInfo(BaseEntityInfo):
     """Switch configuration entity info."""
 
     attribute_name: str
