@@ -78,7 +78,7 @@ class UpdateEntityInfo(BaseEntityInfo):
 class FirmwareUpdateEntity(PlatformEntity):
     """Representation of a ZHA firmware update entity."""
 
-    PLATFORM: Final = Platform.UPDATE
+    PLATFORM = Platform.UPDATE
 
     _unique_id_suffix = "firmware_update"
     _attr_entity_category = EntityCategory.CONFIG
