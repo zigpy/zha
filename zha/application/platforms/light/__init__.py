@@ -51,7 +51,6 @@ from zha.application.platforms.light.const import (
     DEFAULT_ON_OFF_TRANSITION,
     EFFECT_COLORLOOP,
     FLASH_EFFECTS,
-    SUPPORT_GROUP_LIGHT,
     ColorMode,
     LightEntityFeature,
 )
@@ -1347,9 +1346,6 @@ class LightGroup(GroupEntity, BaseLight):
             # Merge supported features by emulating support for every feature
             # we find.
             self._supported_features |= support
-        # Bitwise-and the supported features with the GroupedLight's features
-        # so that we don't break in the future when a new feature is added.
-        self._supported_features &= SUPPORT_GROUP_LIGHT
         self.maybe_emit_state_changed_event()
 
     async def _force_member_updates(self) -> None:

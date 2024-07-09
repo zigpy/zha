@@ -44,11 +44,6 @@ class ColorMode(StrEnum):
     """Must *NOT* be the only supported mode"""
 
 
-COLOR_MODES_GROUP_LIGHT = {ColorMode.COLOR_TEMP, ColorMode.XY}
-SUPPORT_GROUP_LIGHT = (
-    LightEntityFeature.EFFECT | LightEntityFeature.FLASH | LightEntityFeature.TRANSITION
-)
-
 # Float that represents transition time in seconds to make change.
 ATTR_TRANSITION: Final[str] = "transition"
 
@@ -93,34 +88,6 @@ EFFECT_RANDOM: Final[str] = "random"
 EFFECT_WHITE: Final[str] = "white"
 
 ATTR_SUPPORTED_FEATURES: Final[str] = "supported_features"
-
-# Bitfield of features supported by the light entity
-SUPPORT_BRIGHTNESS: Final[int] = 1  # Deprecated, replaced by color modes
-SUPPORT_COLOR_TEMP: Final[int] = 2  # Deprecated, replaced by color modes
-SUPPORT_EFFECT: Final[int] = 4
-SUPPORT_FLASH: Final[int] = 8
-SUPPORT_COLOR: Final[int] = 16  # Deprecated, replaced by color modes
-SUPPORT_TRANSITION: Final[int] = 32
-SUPPORT_WHITE_VALUE: Final[int] = 128  # Deprecated, replaced by color modes
-
-EFFECT_BLINK: Final[int] = 0x00
-EFFECT_BREATHE: Final[int] = 0x01
-EFFECT_OKAY: Final[int] = 0x02
-EFFECT_DEFAULT_VARIANT: Final[int] = 0x00
-
-FLASH_EFFECTS: Final[dict[str, int]] = {
-    FLASH_SHORT: EFFECT_BLINK,
-    FLASH_LONG: EFFECT_BREATHE,
-}
-
-SUPPORT_GROUP_LIGHT = (
-    SUPPORT_BRIGHTNESS
-    | SUPPORT_COLOR_TEMP
-    | SUPPORT_EFFECT
-    | SUPPORT_FLASH
-    | SUPPORT_COLOR
-    | SUPPORT_TRANSITION
-)
 
 FLASH_EFFECTS = {
     FLASH_SHORT: Identify.EffectIdentifier.Blink,
