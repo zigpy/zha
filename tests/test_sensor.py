@@ -546,7 +546,7 @@ async def test_sensor(
     zha_gateway: Gateway,
     cluster_id: int,
     entity_type: type[PlatformEntity],
-    test_func: Callable[[Cluster, PlatformEntity], Awaitable[None]],
+    test_func: Callable[[Cluster, Cluster, PlatformEntity], Awaitable[None]],
     read_plug: Optional[dict],
     unsupported_attrs: Optional[set],
 ) -> None:

@@ -65,7 +65,6 @@ non_interactive = true
 disable_error_code = [
     "no-untyped-def",   # 348
     "attr-defined",     # 172
-    "call-arg",         # 112
     "no-any-return",    # 99
     "no-untyped-call",  # 81
     "assignment",       # 73
