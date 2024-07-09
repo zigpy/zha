@@ -1343,9 +1343,8 @@ class LightGroup(GroupEntity, BaseLight):
 
         self._supported_features = LightEntityFeature(0)
         for support in find_state_attributes(states, ATTR_SUPPORTED_FEATURES):
-            # Merge supported features by emulating support for every feature
-            # we find.
-            self._supported_features |= support
+            # Support only the intersection of all supported features
+            self._supported_features &= support
         self.maybe_emit_state_changed_event()
 
     async def _force_member_updates(self) -> None:
