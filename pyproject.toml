@@ -63,13 +63,13 @@ install_types = true
 non_interactive = true
 
 disable_error_code = [
-    "no-untyped-def",   # 348
-    "attr-defined",     # 172
-    "no-any-return",    # 99
-    "no-untyped-call",  # 81
-    "assignment",       # 73
-    "arg-type",         # 42
-    "union-attr",       # 41
+    "no-untyped-def",
+    "attr-defined",
+    "no-any-return",
+    "no-untyped-call",
+    "assignment",
+    "arg-type",
+    "union-attr",
 ]
 
 [[tool.mypy.overrides]]
