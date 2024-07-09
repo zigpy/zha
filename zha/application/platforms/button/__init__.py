@@ -11,7 +11,7 @@ from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetada
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
@@ -31,7 +31,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class CommandButtonEntityInfo(PlatformEntityInfo):
+class CommandButtonEntityInfo(BaseEntityInfo):
     """Command button entity info."""
 
     command: str
@@ -40,7 +40,7 @@ class CommandButtonEntityInfo(PlatformEntityInfo):
 
 
 @dataclass(frozen=True, kw_only=True)
-class WriteAttributeButtonEntityInfo(PlatformEntityInfo):
+class WriteAttributeButtonEntityInfo(BaseEntityInfo):
     """Write attribute button entity info."""
 
     attribute_name: str

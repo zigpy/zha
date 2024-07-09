@@ -23,7 +23,7 @@ from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA, Strobe
-from zha.application.platforms import EntityCategory, PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -49,7 +49,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class EnumSelectInfo(PlatformEntityInfo):
+class EnumSelectInfo(BaseEntityInfo):
     """Enum select entity info."""
 
     enum: str

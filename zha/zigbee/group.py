@@ -13,9 +13,9 @@ import zigpy.exceptions
 from zigpy.types.named import EUI64
 
 from zha.application.platforms import (
+    BaseEntityInfo,
     EntityStateChangedEvent,
     PlatformEntity,
-    PlatformEntityInfo,
 )
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
@@ -55,7 +55,7 @@ class GroupMemberInfo:
     ieee: EUI64
     endpoint_id: int
     device_info: ExtendedDeviceInfo
-    entities: dict[str, PlatformEntityInfo]
+    entities: dict[str, BaseEntityInfo]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -65,7 +65,7 @@ class GroupInfo:
     group_id: int
     name: str
     members: list[GroupMemberInfo]
-    entities: dict[str, PlatformEntityInfo]
+    entities: dict[str, BaseEntityInfo]
 
 
 class GroupMember(LogMixin):

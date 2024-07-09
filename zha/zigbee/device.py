@@ -60,7 +60,7 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values
-from zha.application.platforms import PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -183,7 +183,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     """Describes a ZHA device."""
 
     active_coordinator: bool
-    entities: dict[str, PlatformEntityInfo]
+    entities: dict[str, BaseEntityInfo]
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]

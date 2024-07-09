@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.application.platforms.alarm_control_panel.const import (
     IAS_ACE_STATE_MAP,
     SUPPORT_ALARM_ARM_AWAY,
@@ -43,7 +43,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class AlarmControlPanelEntityInfo(PlatformEntityInfo):
+class AlarmControlPanelEntityInfo(BaseEntityInfo):
     """Alarm control panel entity info."""
 
     code_arm_required: bool

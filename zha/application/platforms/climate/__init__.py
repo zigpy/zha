@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity, PlatformEntityInfo
+from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.application.platforms.climate.const import (
     ATTR_HVAC_MODE,
     ATTR_OCCP_COOL_SETPT,
@@ -56,7 +56,7 @@ MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.CLIM
 
 
 @dataclass(frozen=True, kw_only=True)
-class ThermostatEntityInfo(PlatformEntityInfo):
+class ThermostatEntityInfo(BaseEntityInfo):
     """Thermostat entity info."""
 
     max_temp: float
