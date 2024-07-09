@@ -28,11 +28,6 @@ from zha.application.platforms import (
     GroupEntity,
     PlatformEntity,
 )
-from zha.application.platforms.helpers import (
-    find_state_attributes,
-    mean_tuple,
-    reduce_attribute,
-)
 from zha.application.platforms.light.const import (
     ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY,
     ATTR_BRIGHTNESS,
@@ -63,6 +58,9 @@ from zha.application.platforms.light.const import (
 from zha.application.platforms.light.helpers import (
     brightness_supported,
     filter_supported_color_modes,
+    find_state_attributes,
+    mean_tuple,
+    reduce_attribute,
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
