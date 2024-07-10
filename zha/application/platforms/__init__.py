@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
+
 
 class EntityCategory(StrEnum):
     """Category of an entity."""
@@ -407,7 +409,9 @@ class GroupEntity(BaseEntity):
     """A base class for group entities."""
 
     def __init__(
-        self, group: Group, update_group_from_member_delay: float = 0.5
+        self,
+        group: Group,
+        update_group_from_member_delay: float = DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
     ) -> None:
         """Initialize a group."""
         super().__init__(unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")

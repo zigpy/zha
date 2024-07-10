@@ -1141,16 +1141,14 @@ class LightGroup(GroupEntity, BaseLight):
         self._zha_config_group_members_assume_state = (
             light_options.group_members_assume_state
         )
+        kwargs = {}
         if self._zha_config_group_members_assume_state:
-            update_group_from_member_delay = ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
-        else:
-            update_group_from_member_delay = 0.5
-
+            kwargs["update_group_from_member_delay"] = (
+                ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
+            )
         self._zha_config_enhanced_light_transition = False
 
-        super().__init__(
-            group, update_group_from_member_delay=update_group_from_member_delay
-        )
+        super().__init__(group, **kwargs)
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
         for member in group.members:
