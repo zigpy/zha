@@ -17,7 +17,6 @@ from zigpy.types.named import EUI64
 from zha.application import Platform
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
-from zha.decorators import callback
 from zha.event import EventBase
 from zha.mixins import LogMixin
 from zha.zigbee.cluster_handlers import ClusterHandlerInfo
@@ -453,7 +452,6 @@ class GroupEntity(BaseEntity):
         """Return the group."""
         return self._group
 
-    @callback
     def debounced_update(self, _: Any | None = None) -> None:
         """Debounce updating group entity from member entity updates."""
         # Delay to ensure that we get updates from all members before updating the group entity

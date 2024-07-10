@@ -27,8 +27,6 @@ from typing import (
 
 from zigpy.types.named import EUI64
 
-from zha.decorators import callback
-
 _T = TypeVar("_T")
 _R = TypeVar("_R")
 _R_co = TypeVar("_R_co", covariant=True)
@@ -152,7 +150,6 @@ class ZHAJobType(enum.Enum):
 
     Coroutinefunction = 1
     Callback = 2
-    Executor = 3
 
 
 class ZHAJob(Generic[_P, _R_co]):
@@ -203,22 +200,13 @@ class ZHAJobWithArgs:
 def get_zhajob_callable_job_type(target: Callable[..., Any]) -> ZHAJobType:
     """Determine the job type from the callable."""
     # Check for partials to properly determine if coroutine function
-    check_target = target
-    while isinstance(check_target, functools.partial):
-        check_target = check_target.func
+    while isinstance(target, functools.partial):
+        target = target.func
 
-    if asyncio.iscoroutinefunction(check_target):
+    if asyncio.iscoroutinefunction(target):
         return ZHAJobType.Coroutinefunction
-    if is_callback(check_target):
+    else:
         return ZHAJobType.Callback
-    if asyncio.iscoroutine(check_target):
-        raise ValueError("Coroutine not allowed to be passed to ZHAJob")
-    return ZHAJobType.Executor
-
-
-def is_callback(func: Callable[..., Any]) -> bool:
-    """Check if function is safe to be called in the event loop."""
-    return getattr(func, "_zha_callback", False) is True
 
 
 class AsyncUtilMixin:
@@ -320,14 +308,13 @@ class AsyncUtilMixin:
             ):
                 handle.cancel()
 
-    @callback
     def async_add_zha_job(
         self,
         zhajob: ZHAJob[..., Coroutine[Any, Any, _R] | _R],
         *args: Any,
         eager_start: bool = False,
         background: bool = False,
-    ) -> asyncio.Future[_R] | None:
+    ) -> asyncio.Future[_R] | asyncio.Task[_R] | None:
         """Add a ZHAJob from within the event loop.
 
         If eager_start is True, coroutine functions will be scheduled eagerly.
@@ -342,32 +329,27 @@ class AsyncUtilMixin:
         # if TYPE_CHECKING to avoid the overhead of constructing
         # the type used for the cast. For history see:
         # https://github.com/home-assistant/core/pull/71960
-        if zhajob.job_type is ZHAJobType.Coroutinefunction:
-            if TYPE_CHECKING:
-                zhajob.target = cast(
-                    Callable[..., Coroutine[Any, Any, _R]], zhajob.target
-                )
-            # Use loop.create_task
-            # to avoid the extra function call in asyncio.create_task.
-            if eager_start:
-                task = create_eager_task(
-                    zhajob.target(*args),
-                    name=zhajob.name,
-                    loop=self.loop,
-                )
-                if task.done():
-                    return task
-            else:
-                task = self.loop.create_task(zhajob.target(*args), name=zhajob.name)
-        elif zhajob.job_type is ZHAJobType.Callback:
+        if zhajob.job_type is ZHAJobType.Callback:
             if TYPE_CHECKING:
                 zhajob.target = cast(Callable[..., _R], zhajob.target)
             self.loop.call_soon(zhajob.target, *args)
             return None
+
+        if TYPE_CHECKING:
+            zhajob.target = cast(Callable[..., Coroutine[Any, Any, _R]], zhajob.target)
+
+        # Use loop.create_task
+        # to avoid the extra function call in asyncio.create_task.
+        if eager_start:
+            task = create_eager_task(
+                zhajob.target(*args),
+                name=zhajob.name,
+                loop=self.loop,
+            )
+            if task.done():
+                return task
         else:
-            if TYPE_CHECKING:
-                zhajob.target = cast(Callable[..., _R], zhajob.target)
-            task = self.loop.run_in_executor(None, zhajob.target, *args)
+            task = self.loop.create_task(zhajob.target(*args), name=zhajob.name)
 
         task_bucket = (
             self._background_tasks if background else self._tracked_completable_tasks
@@ -388,7 +370,6 @@ class AsyncUtilMixin:
             functools.partial(self.async_create_task, target, name, eager_start=True)
         )
 
-    @callback
     def async_create_task(
         self,
         target: Coroutine[Any, Any, _R],
@@ -414,7 +395,6 @@ class AsyncUtilMixin:
         task.add_done_callback(self._tracked_completable_tasks.remove)
         return task
 
-    @callback
     def async_create_background_task(
         self,
         target: Coroutine[Any, Any, _R],
@@ -454,7 +434,6 @@ class AsyncUtilMixin:
         task.add_done_callback(task_bucket.remove)
         return task
 
-    @callback
     def async_add_executor_job(
         self, target: Callable[..., _T], *args: Any
     ) -> asyncio.Future[_T]:
@@ -468,13 +447,13 @@ class AsyncUtilMixin:
         task.add_done_callback(task_bucket.remove)
         return task
 
-    @callback
     def async_run_zha_job(
         self,
         zhajob: ZHAJob[..., Coroutine[Any, Any, _R] | _R],
         *args: Any,
         background: bool = False,
-    ) -> asyncio.Future[_R] | None:
+        eager_start: bool = True,
+    ) -> asyncio.Future[_R] | asyncio.Task[_R] | None:
         """Run a ZHAJob from within the event loop.
 
         This method must be run in the event loop.
@@ -495,15 +474,17 @@ class AsyncUtilMixin:
             return None
 
         return self.async_add_zha_job(
-            zhajob, *args, eager_start=True, background=background
+            zhajob,
+            *args,
+            eager_start=eager_start,
+            background=background,
         )
 
-    @callback
     def async_run_job(
         self,
         target: Callable[..., Coroutine[Any, Any, _R] | _R] | Coroutine[Any, Any, _R],
         *args: Any,
-    ) -> asyncio.Future[_R] | None:
+    ) -> asyncio.Future[_R] | asyncio.Task[_R] | None:
         """Run a job from within the event loop.
 
         This method must be run in the event loop.

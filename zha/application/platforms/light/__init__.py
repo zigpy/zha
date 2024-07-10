@@ -65,7 +65,7 @@ from zha.application.platforms.light.helpers import (
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
-from zha.decorators import callback, periodic
+from zha.decorators import periodic
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -1246,7 +1246,6 @@ class LightGroup(GroupEntity, BaseLight):
         if self._debounced_member_refresh:
             await self._debounced_member_refresh.async_call()
 
-    @callback
     def update(self, _: Any = None) -> None:
         """Query all members and determine the light group state."""
         self.debug("Updating light group entity state")

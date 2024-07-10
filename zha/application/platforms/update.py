@@ -15,7 +15,6 @@ from zigpy.zcl.foundation import Status
 from zha.application import Platform
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.decorators import callback
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -232,7 +231,6 @@ class FirmwareUpdateEntity(PlatformEntity):
             self._attr_installed_version = f"0x{event.attribute_value:08x}"
             self.maybe_emit_state_changed_event()
 
-    @callback
     def device_ota_update_available(
         self, image: OtaImageWithMetadata, current_file_version: int
     ) -> None:

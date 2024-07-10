@@ -10,7 +10,6 @@ import pytest
 from zha import async_ as zha_async
 from zha.application.gateway import Gateway
 from zha.async_ import AsyncUtilMixin, ZHAJob, ZHAJobType, create_eager_task
-from zha.decorators import callback
 
 
 async def test_zhajob_forbid_coroutine() -> None:
@@ -33,15 +32,14 @@ async def test_cancellable_zhajob(zha_gateway: Gateway, eager_start: bool) -> No
     """Simulate a shutdown, ensure cancellable jobs are cancelled."""
     job = MagicMock()
 
-    @callback
     def run_job(job: ZHAJob) -> None:
         """Call the action."""
         zha_gateway.async_run_zha_job(job, eager_start=eager_start)
 
     timer1 = zha_gateway.loop.call_later(
-        60, run_job, ZHAJob(callback(job), cancel_on_shutdown=True)
+        60, run_job, ZHAJob(job, cancel_on_shutdown=True)
     )
-    timer2 = zha_gateway.loop.call_later(60, run_job, ZHAJob(callback(job)))
+    timer2 = zha_gateway.loop.call_later(60, run_job, ZHAJob(job))
 
     await zha_gateway.shutdown()
 
@@ -57,7 +55,7 @@ async def test_async_add_zha_job_schedule_callback() -> None:
     zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
     job = MagicMock()
 
-    AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(callback(job)))
+    AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(job))
     assert len(zha_gateway.loop.call_soon.mock_calls) == 1
     assert len(zha_gateway.loop.create_task.mock_calls) == 0
     assert len(zha_gateway.add_job.mock_calls) == 0
@@ -71,9 +69,7 @@ async def test_async_add_zha_job_eager_start_coro_suspends(
     async def job_that_suspends():
         await asyncio.sleep(0)
 
-    task = zha_gateway.async_add_zha_job(
-        ZHAJob(callback(job_that_suspends)), eager_start=True
-    )
+    task = zha_gateway.async_add_zha_job(ZHAJob(job_that_suspends), eager_start=True)
     assert not task.done()
     assert task in zha_gateway._tracked_completable_tasks
     await task
@@ -88,7 +84,7 @@ async def test_async_run_zha_job_eager_start_coro_suspends(
     async def job_that_suspends():
         await asyncio.sleep(0)
 
-    task = zha_gateway.async_run_zha_job(ZHAJob(callback(job_that_suspends)))
+    task = zha_gateway.async_run_zha_job(ZHAJob(job_that_suspends))
     assert not task.done()
     assert task in zha_gateway._tracked_completable_tasks
     await task
@@ -101,9 +97,7 @@ async def test_async_add_zha_job_background(zha_gateway: Gateway) -> None:
     async def job_that_suspends():
         await asyncio.sleep(0)
 
-    task = zha_gateway.async_add_zha_job(
-        ZHAJob(callback(job_that_suspends)), background=True
-    )
+    task = zha_gateway.async_add_zha_job(ZHAJob(job_that_suspends), background=True)
     assert not task.done()
     assert task in zha_gateway._background_tasks
     await task
@@ -116,9 +110,7 @@ async def test_async_run_zha_job_background(zha_gateway: Gateway) -> None:
     async def job_that_suspends():
         await asyncio.sleep(0)
 
-    task = zha_gateway.async_run_zha_job(
-        ZHAJob(callback(job_that_suspends)), background=True
-    )
+    task = zha_gateway.async_run_zha_job(ZHAJob(job_that_suspends), background=True)
     assert not task.done()
     assert task in zha_gateway._background_tasks
     await task
@@ -131,9 +123,7 @@ async def test_async_add_zha_job_eager_background(zha_gateway: Gateway) -> None:
     async def job_that_suspends():
         await asyncio.sleep(0)
 
-    task = zha_gateway.async_add_zha_job(
-        ZHAJob(callback(job_that_suspends)), background=True
-    )
+    task = zha_gateway.async_add_zha_job(ZHAJob(job_that_suspends), background=True)
     assert not task.done()
     assert task in zha_gateway._background_tasks
     await task
@@ -146,17 +136,17 @@ async def test_async_run_zha_job_eager_background(zha_gateway: Gateway) -> None:
     async def job_that_suspends():
         await asyncio.sleep(0)
 
-    task = zha_gateway.async_run_zha_job(
-        ZHAJob(callback(job_that_suspends)), background=True
-    )
+    task = zha_gateway.async_run_zha_job(ZHAJob(job_that_suspends), background=True)
     assert not task.done()
     assert task in zha_gateway._background_tasks
     await task
     assert task not in zha_gateway._background_tasks
 
 
-async def test_async_run_zha_job_background_synchronous(
+@pytest.mark.parametrize("background", [True, False])
+async def test_async_run_zha_job_background_no_suspend(
     zha_gateway: Gateway,
+    background: bool,
 ) -> None:
     """Test scheduling a coro as an eager background task with async_run_zha_job."""
 
@@ -164,25 +154,10 @@ async def test_async_run_zha_job_background_synchronous(
         pass
 
     task = zha_gateway.async_run_zha_job(
-        ZHAJob(callback(job_that_does_not_suspends)),
-        background=True,
+        ZHAJob(job_that_does_not_suspends),
+        background=background,
     )
-    assert task.done()
-    assert task not in zha_gateway._background_tasks
-    assert task not in zha_gateway._tracked_completable_tasks
-    await task
-
-
-async def test_async_run_zha_job_synchronous(zha_gateway: Gateway) -> None:
-    """Test scheduling a coro as an eager task with async_run_zha_job."""
-
-    async def job_that_does_not_suspends():
-        pass
-
-    task = zha_gateway.async_run_zha_job(
-        ZHAJob(callback(job_that_does_not_suspends)),
-        background=False,
-    )
+    assert task is not None
     assert task.done()
     assert task not in zha_gateway._background_tasks
     assert task not in zha_gateway._tracked_completable_tasks
@@ -219,7 +194,7 @@ async def test_async_add_zha_job_schedule_partial_callback() -> None:
     """Test that we schedule partial coros and add jobs to the job pool."""
     zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
     job = MagicMock()
-    partial = functools.partial(callback(job))
+    partial = functools.partial(job)
 
     AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(partial))
     assert len(zha_gateway.loop.call_soon.mock_calls) == 1
@@ -252,6 +227,7 @@ async def test_async_add_zha_job_schedule_corofunction_eager_start() -> None:
     ) as mock_create_eager_task:
         zha_job = ZHAJob(job)
         task = AsyncUtilMixin.async_add_zha_job(zha_gateway, zha_job, eager_start=True)
+        assert task is not None
         assert len(zha_gateway.loop.call_soon.mock_calls) == 0
         assert len(zha_gateway.add_job.mock_calls) == 0
         assert mock_create_eager_task.mock_calls
@@ -337,7 +313,7 @@ async def test_async_run_eager_zha_job_calls_callback() -> None:
         asyncio.get_running_loop()  # ensure we are in the event loop
         calls.append(1)
 
-    AsyncUtilMixin.async_run_zha_job(zha_gateway, ZHAJob(callback(job)))
+    AsyncUtilMixin.async_run_zha_job(zha_gateway, ZHAJob(job))
     assert len(calls) == 1
 
 
@@ -360,7 +336,7 @@ async def test_async_run_zha_job_calls_callback() -> None:
     def job():
         calls.append(1)
 
-    AsyncUtilMixin.async_run_zha_job(zha_gateway, ZHAJob(callback(job)))
+    AsyncUtilMixin.async_run_zha_job(zha_gateway, ZHAJob(job))
     assert len(calls) == 1
     assert len(zha_gateway.async_add_job.mock_calls) == 0
 
@@ -403,6 +379,7 @@ async def test_async_run_job_starts_tasks_eagerly(zha_gateway: Gateway) -> None:
         runs.append(True)
 
     task = zha_gateway.async_run_job(_test)
+    assert task is not None
     # No call to zha_gateway.async_block_till_done to ensure the task is run eagerly
     assert len(runs) == 1
     assert task.done()
@@ -417,6 +394,7 @@ async def test_async_run_job_starts_coro_eagerly(zha_gateway: Gateway) -> None:
         runs.append(True)
 
     task = zha_gateway.async_run_job(_test())
+    assert task is not None
     # No call to zha_gateway.async_block_till_done to ensure the task is run eagerly
     assert len(runs) == 1
     assert task.done()
@@ -447,7 +425,6 @@ async def test_background_task(zha_gateway: Gateway, eager_start: bool) -> None:
 def test_ZHAJob_passing_job_type():
     """Test passing the job type to ZHAJob when we already know it."""
 
-    @callback
     def callback_func():
         pass
 
