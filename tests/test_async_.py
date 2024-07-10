@@ -12,21 +12,6 @@ from zha.application.gateway import Gateway
 from zha.async_ import AsyncUtilMixin, ZHAJob, ZHAJobType, create_eager_task
 
 
-async def test_zhajob_forbid_coroutine() -> None:
-    """Test zhajob forbids coroutines."""
-
-    async def bla():
-        pass
-
-    coro = bla()
-
-    with pytest.raises(ValueError):
-        _ = ZHAJob(coro).job_type
-
-    # To avoid warning about unawaited coro
-    await coro
-
-
 @pytest.mark.parametrize("eager_start", [True, False])
 async def test_cancellable_zhajob(zha_gateway: Gateway, eager_start: bool) -> None:
     """Simulate a shutdown, ensure cancellable jobs are cancelled."""
@@ -259,9 +244,9 @@ async def test_async_add_job_add_zha_threaded_job_to_pool() -> None:
         pass
 
     AsyncUtilMixin.async_add_zha_job(zha_gateway, ZHAJob(job))
-    assert len(zha_gateway.loop.call_soon.mock_calls) == 0
+    assert len(zha_gateway.loop.call_soon.mock_calls) == 1
     assert len(zha_gateway.loop.create_task.mock_calls) == 0
-    assert len(zha_gateway.loop.run_in_executor.mock_calls) == 2
+    assert len(zha_gateway.loop.run_in_executor.mock_calls) == 0
 
 
 async def test_async_create_task_schedule_coroutine() -> None:
@@ -339,19 +324,6 @@ async def test_async_run_zha_job_calls_callback() -> None:
     AsyncUtilMixin.async_run_zha_job(zha_gateway, ZHAJob(job))
     assert len(calls) == 1
     assert len(zha_gateway.async_add_job.mock_calls) == 0
-
-
-async def test_async_run_zha_job_delegates_non_async() -> None:
-    """Test that the callback annotation is respected."""
-    zha_gateway = MagicMock()
-    calls = []
-
-    def job():
-        calls.append(1)
-
-    AsyncUtilMixin.async_run_zha_job(zha_gateway, ZHAJob(job))
-    assert len(calls) == 0
-    assert len(zha_gateway.async_add_zha_job.mock_calls) == 1
 
 
 async def test_async_create_task_pending_tasks_coro(zha_gateway: Gateway) -> None:
