@@ -3,7 +3,7 @@
 import asyncio
 import functools
 import time
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -425,31 +425,6 @@ async def test_async_add_executor_job(zha_gateway: Gateway) -> None:
     await task
 
 
-@patch("concurrent.futures.Future")
-@patch("threading.get_ident")
-def test_run_callback_threadsafe_from_inside_event_loop(mock_ident, _) -> None:
-    """Testing calling run_callback_threadsafe from inside an event loop."""
-    callback_fn = MagicMock()
-
-    loop = Mock(spec=["call_soon_threadsafe"])
-
-    loop._thread_ident = None
-    mock_ident.return_value = 5
-    zha_async.run_callback_threadsafe(loop, callback_fn)
-    assert len(loop.call_soon_threadsafe.mock_calls) == 1
-
-    loop._thread_ident = 5
-    mock_ident.return_value = 5
-    with pytest.raises(RuntimeError):
-        zha_async.run_callback_threadsafe(loop, callback_fn)
-    assert len(loop.call_soon_threadsafe.mock_calls) == 1
-
-    loop._thread_ident = 1
-    mock_ident.return_value = 5
-    zha_async.run_callback_threadsafe(loop, callback_fn)
-    assert len(loop.call_soon_threadsafe.mock_calls) == 2
-
-
 async def test_gather_with_limited_concurrency() -> None:
     """Test gather_with_limited_concurrency limits the number of running tasks."""
 
@@ -470,74 +445,6 @@ async def test_gather_with_limited_concurrency() -> None:
     )
 
     assert results == [2, 2, -1, -1]
-
-
-async def test_shutdown_run_callback_threadsafe(zha_gateway: Gateway) -> None:
-    """Test we can shutdown run_callback_threadsafe."""
-    zha_async.shutdown_run_callback_threadsafe(zha_gateway.loop)
-    callback_fn = MagicMock()
-
-    with pytest.raises(RuntimeError):
-        zha_async.run_callback_threadsafe(zha_gateway.loop, callback_fn)
-
-
-async def test_run_callback_threadsafe(zha_gateway: Gateway) -> None:
-    """Test run_callback_threadsafe runs code in the event loop."""
-    it_ran = False
-
-    def callback_fn():
-        nonlocal it_ran
-        it_ran = True
-
-    assert zha_async.run_callback_threadsafe(zha_gateway.loop, callback_fn)
-    assert it_ran is False
-
-    # Verify that async_block_till_done will flush
-    # out the callback
-    await zha_gateway.async_block_till_done()
-    assert it_ran is True
-
-
-async def test_run_callback_threadsafe_exception(zha_gateway: Gateway) -> None:
-    """Test run_callback_threadsafe runs code in the event loop."""
-    it_ran = False
-
-    def callback_fn():
-        nonlocal it_ran
-        it_ran = True
-        raise ValueError("Test")
-
-    future = zha_async.run_callback_threadsafe(zha_gateway.loop, callback_fn)
-    assert future
-    assert it_ran is False
-
-    # Verify that async_block_till_done will flush
-    # out the callback
-    await zha_gateway.async_block_till_done()
-    assert it_ran is True
-
-    with pytest.raises(ValueError):
-        future.result()
-
-
-async def test_callback_is_always_scheduled(zha_gateway: Gateway) -> None:
-    """Test run_callback_threadsafe always calls call_soon_threadsafe before checking for shutdown."""
-    # We have to check the shutdown state AFTER the callback is scheduled otherwise
-    # the function could continue on and the caller call `future.result()` after
-    # the point in the main thread where callbacks are no longer run.
-
-    callback_fn = MagicMock()
-    zha_async.shutdown_run_callback_threadsafe(zha_gateway.loop)
-
-    with (
-        patch.object(
-            zha_gateway.loop, "call_soon_threadsafe"
-        ) as mock_call_soon_threadsafe,
-        pytest.raises(RuntimeError),
-    ):
-        zha_async.run_callback_threadsafe(zha_gateway.loop, callback_fn)
-
-    mock_call_soon_threadsafe.assert_called_once()
 
 
 async def test_create_eager_task_312(zha_gateway: Gateway) -> None:  # pylint: disable=unused-argument
