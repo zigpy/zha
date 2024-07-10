@@ -515,11 +515,25 @@ async def async_test_on_off_from_light(
     # turn on at light
     await send_attributes_report(zha_gateway, cluster, {1: 0, 0: 1, 2: 3})
     await zha_gateway.async_block_till_done()
+
+    # group member updates are debounced
+    if isinstance(entity, GroupEntity):
+        assert bool(entity.state["on"]) is False
+        await asyncio.sleep(1)
+        await zha_gateway.async_block_till_done()
+
     assert bool(entity.state["on"]) is True
 
     # turn off at light
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0, 2: 3})
     await zha_gateway.async_block_till_done()
+
+    # group member updates are debounced
+    if isinstance(entity, GroupEntity):
+        assert bool(entity.state["on"]) is True
+        await asyncio.sleep(1)
+        await zha_gateway.async_block_till_done()
+
     assert bool(entity.state["on"]) is False
 
 
@@ -534,6 +548,13 @@ async def async_test_on_from_light(
         zha_gateway, cluster, {general.OnOff.AttributeDefs.on_off.id: 1}
     )
     await zha_gateway.async_block_till_done()
+
+    # group member updates are debounced
+    if isinstance(entity, GroupEntity):
+        assert bool(entity.state["on"]) is False
+        await asyncio.sleep(1)
+        await zha_gateway.async_block_till_done()
+
     assert bool(entity.state["on"]) is True
 
 
@@ -695,6 +716,10 @@ async def async_test_dimmer_from_light(
     if level == 0:
         assert entity.state["brightness"] is None
     else:
+        # group member updates are debounced
+        if isinstance(entity, GroupEntity):
+            await asyncio.sleep(1)
+            await zha_gateway.async_block_till_done()
         assert entity.state["brightness"] == level
 
 
@@ -873,6 +898,11 @@ async def test_zha_group_light_entity(
     # test that group light is now off
     assert device_1_light_entity.state["on"] is False
     assert device_2_light_entity.state["on"] is False
+
+    # group member updates are debounced
+    assert bool(entity.state["on"]) is True
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is False
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
@@ -881,6 +911,10 @@ async def test_zha_group_light_entity(
     # test that group light is now back on
     assert device_1_light_entity.state["on"] is True
     assert device_2_light_entity.state["on"] is False
+    # group member updates are debounced
+    assert bool(entity.state["on"]) is False
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
 
     # turn it off to test a new member add being tracked
@@ -888,6 +922,10 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     assert device_1_light_entity.state["on"] is False
     assert device_2_light_entity.state["on"] is False
+    # group member updates are debounced
+    assert bool(entity.state["on"]) is True
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is False
 
     # add a new member and test that his state is also tracked
@@ -905,6 +943,10 @@ async def test_zha_group_light_entity(
     assert device_1_light_entity.state["on"] is False
     assert device_2_light_entity.state["on"] is False
     assert device_3_light_entity.state["on"] is True
+    # group member updates are debounced
+    assert bool(entity.state["on"]) is False
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
 
     # make the group have only 1 member and now there should be no entity
@@ -941,6 +983,10 @@ async def test_zha_group_light_entity(
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
     await send_attributes_report(zha_gateway, dev3_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
+    # group member updates are debounced
+    assert bool(entity.state["on"]) is True
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is False
 
     # this will test that _reprobe_group is used correctly
@@ -955,6 +1001,10 @@ async def test_zha_group_light_entity(
     entity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity is not None
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
+    await zha_gateway.async_block_till_done()
+    # group member updates are debounced
+    assert bool(entity.state["on"]) is False
+    await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
 

@@ -277,7 +277,7 @@ class Group(LogMixin):
                     self._entity_unsubs[platform_entity.unique_id] = (
                         platform_entity.on_event(
                             STATE_CHANGED,
-                            group_entity.update,
+                            group_entity.debounced_update,
                         )
                     )
         all_ids = group_entity_ids + processed_platform_entity_ids

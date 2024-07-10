@@ -16,6 +16,8 @@ from zigpy.types.named import EUI64
 
 from zha.application import Platform
 from zha.const import STATE_CHANGED
+from zha.debounce import Debouncer
+from zha.decorators import callback
 from zha.event import EventBase
 from zha.mixins import LogMixin
 from zha.zigbee.cluster_handlers import ClusterHandlerInfo
@@ -409,6 +411,13 @@ class GroupEntity(BaseEntity):
         super().__init__(unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
         self._attr_fallback_name: str = group.name
         self._group: Group = group
+        self._change_listener_debouncer = Debouncer(
+            group.gateway,
+            _LOGGER,
+            cooldown=0.5,
+            immediate=False,
+            function=self.update,
+        )
         self._group.register_group_entity(self)
 
     @cached_property
@@ -437,6 +446,19 @@ class GroupEntity(BaseEntity):
     def group(self) -> Group:
         """Return the group."""
         return self._group
+
+    @callback
+    def debounced_update(self, _: Any | None = None) -> None:
+        """Debounce updating group entity from member entity updates."""
+        # Delay to ensure that we get updates from all members before updating the group entity
+        assert self._change_listener_debouncer
+        self.group.gateway.create_task(self._change_listener_debouncer.async_call())
+
+    async def on_remove(self) -> None:
+        """Cancel tasks this entity owns."""
+        await super().on_remove()
+        if self._change_listener_debouncer:
+            self._change_listener_debouncer.async_cancel()
 
     @abstractmethod
     def update(self, _: Any | None = None) -> None:

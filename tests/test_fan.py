@@ -2,6 +2,7 @@
 
 # pylint: disable=redefined-outer-name
 
+import asyncio
 from collections.abc import Awaitable, Callable
 import logging
 from typing import Optional
@@ -255,6 +256,7 @@ async def async_set_preset_mode(
     "zigpy.zcl.clusters.hvac.Fan.write_attributes",
     new=AsyncMock(return_value=zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]),
 )
+@pytest.mark.looptime
 async def test_zha_group_fan_entity(
     device_fan_1: Device, device_fan_2: Device, zha_gateway: Gateway
 ):
@@ -338,10 +340,23 @@ async def test_zha_group_fan_entity(
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 2})
     await zha_gateway.async_block_till_done()
 
-    # test that group fan is speed medium
+    # no update yet because of debouncing
+    assert entity.state["is_on"] is False
+
+    # member updates are debounced for .5s
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+
     assert entity.state["is_on"] is True
 
     await send_attributes_report(zha_gateway, dev2_fan_cluster, {0: 0})
+    await zha_gateway.async_block_till_done()
+
+    # no update yet because of debouncing
+    assert entity.state["is_on"] is True
+
+    # member updates are debounced for .5s
+    await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
 
     # test that group fan is now off
