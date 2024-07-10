@@ -29,7 +29,7 @@ from zha.application.const import (
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
 )
 from zha.async_ import gather_with_limited_concurrency
-from zha.decorators import SetRegistry, callback, periodic
+from zha.decorators import SetRegistry, periodic
 
 # from zha.zigbee.cluster_handlers.registries import BINDABLE_CLUSTERS
 BINDABLE_CLUSTERS = SetRegistry()
@@ -394,7 +394,6 @@ class GlobalUpdater:
         """Remove an update listener."""
         self._update_listeners.remove(listener)
 
-    @callback
     @periodic(_REFRESH_INTERVAL)
     async def update_listeners(self):
         """Update all listeners."""

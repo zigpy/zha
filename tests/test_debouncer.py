@@ -8,7 +8,6 @@ import pytest
 
 from zha.application.gateway import Gateway
 from zha.debounce import Debouncer
-from zha.decorators import callback
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -135,7 +134,7 @@ async def test_immediate_works_with_callback_function(zha_gateway: Gateway) -> N
         _LOGGER,
         cooldown=0.01,
         immediate=True,
-        function=callback(Mock(side_effect=lambda: calls.append(None))),
+        function=Mock(side_effect=lambda: calls.append(None)),
     )
 
     # Call when nothing happening
@@ -176,7 +175,6 @@ async def test_immediate_works_with_passed_callback_function_raises(
     """Test immediate works with a callback function that raises."""
     calls: list[None] = []
 
-    @callback
     def _append_and_raise() -> None:
         calls.append(None)
         raise RuntimeError("forced_raise")
