@@ -4,12 +4,11 @@ on:
   push:
     branches:
       - dev
-      - master
   pull_request: ~
 
 jobs:
   shared-ci:
-    uses: zigpy/workflows/.github/workflows/ci.yml@dm/update-ci-03272024
+    uses: zigpy/workflows/.github/workflows/ci.yml@main
     with:
       CODE_FOLDER: zha
       CACHE_VERSION: 2
