@@ -24,6 +24,7 @@ from zha.application.platforms import (
     PlatformEntity,
 )
 from zha.application.registries import PLATFORM_ENTITIES
+from zha.decorators import callback
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -168,6 +169,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self._state = False
         self.maybe_emit_state_changed_event()
 
+    @callback
     def update(self, _: Any | None = None) -> None:
         """Query all members and determine the light group state."""
         self.debug("Updating switch group entity state")

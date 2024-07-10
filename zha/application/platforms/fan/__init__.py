@@ -40,6 +40,7 @@ from zha.application.platforms.fan.helpers import (
     ranged_value_to_percentage,
 )
 from zha.application.registries import PLATFORM_ENTITIES
+from zha.decorators import callback
 from zha.zigbee.cluster_handlers import (
     ClusterAttributeUpdatedEvent,
     wrap_zigpy_exceptions,
@@ -345,6 +346,7 @@ class FanGroup(GroupEntity, BaseFan):
 
         self.maybe_emit_state_changed_event()
 
+    @callback
     def update(self, _: Any = None) -> None:
         """Attempt to retrieve on off state from the fan."""
         self.debug("Updating fan group entity state")

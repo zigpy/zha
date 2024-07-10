@@ -1,5 +1,6 @@
 """Test zha switch."""
 
+import asyncio
 from collections.abc import Awaitable, Callable
 import logging
 from unittest.mock import call, patch
@@ -235,6 +236,7 @@ async def test_switch(
     assert bool(entity.state["state"]) is True
 
 
+@pytest.mark.looptime
 async def test_zha_group_switch_entity(
     device_switch_1: Device,  # pylint: disable=redefined-outer-name
     device_switch_2: Device,  # pylint: disable=redefined-outer-name
@@ -312,6 +314,11 @@ async def test_zha_group_switch_entity(
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 1})
     await zha_gateway.async_block_till_done()
 
+    # group member updates are debounced
+    assert bool(entity.state["state"]) is False
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+
     # test that group light is on
     assert bool(entity.state["state"]) is True
 
@@ -324,10 +331,20 @@ async def test_zha_group_switch_entity(
     await send_attributes_report(zha_gateway, dev2_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()
 
+    # group member updates are debounced
+    assert bool(entity.state["state"]) is True
+    await asyncio.sleep(1)
+    await zha_gateway.async_block_till_done()
+
     # test that group light is now off
     assert bool(entity.state["state"]) is False
 
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 1})
+    await zha_gateway.async_block_till_done()
+
+    # group member updates are debounced
+    assert bool(entity.state["state"]) is False
+    await asyncio.sleep(1)
     await zha_gateway.async_block_till_done()
 
     # test that group light is now back on
