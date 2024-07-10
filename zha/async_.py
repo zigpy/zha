@@ -479,26 +479,3 @@ class AsyncUtilMixin:
             eager_start=eager_start,
             background=background,
         )
-
-    def async_run_job(
-        self,
-        target: Callable[..., Coroutine[Any, Any, _R] | _R] | Coroutine[Any, Any, _R],
-        *args: Any,
-    ) -> asyncio.Future[_R] | asyncio.Task[_R] | None:
-        """Run a job from within the event loop.
-
-        This method must be run in the event loop.
-
-        target: target to call.
-        args: parameters for method to call.
-        """
-        if asyncio.iscoroutine(target):
-            return self.async_create_task(target, eager_start=True)
-
-        # This code path is performance sensitive and uses
-        # if TYPE_CHECKING to avoid the overhead of constructing
-        # the type used for the cast. For history see:
-        # https://github.com/home-assistant/core/pull/71960
-        if TYPE_CHECKING:
-            target = cast(Callable[..., Coroutine[Any, Any, _R] | _R], target)
-        return self.async_run_zha_job(ZHAJob(target), *args)

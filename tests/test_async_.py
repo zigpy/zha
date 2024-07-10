@@ -343,36 +343,6 @@ async def test_async_create_task_pending_tasks_coro(zha_gateway: Gateway) -> Non
     assert len(zha_gateway._tracked_completable_tasks) == 0
 
 
-async def test_async_run_job_starts_tasks_eagerly(zha_gateway: Gateway) -> None:
-    """Test async_run_job starts tasks eagerly."""
-    runs = []
-
-    async def _test():
-        runs.append(True)
-
-    task = zha_gateway.async_run_job(_test)
-    assert task is not None
-    # No call to zha_gateway.async_block_till_done to ensure the task is run eagerly
-    assert len(runs) == 1
-    assert task.done()
-    await task
-
-
-async def test_async_run_job_starts_coro_eagerly(zha_gateway: Gateway) -> None:
-    """Test async_run_job starts coros eagerly."""
-    runs = []
-
-    async def _test():
-        runs.append(True)
-
-    task = zha_gateway.async_run_job(_test())
-    assert task is not None
-    # No call to zha_gateway.async_block_till_done to ensure the task is run eagerly
-    assert len(runs) == 1
-    assert task.done()
-    await task
-
-
 @pytest.mark.parametrize("eager_start", [True, False])
 async def test_background_task(zha_gateway: Gateway, eager_start: bool) -> None:
     """Test background tasks being quit."""
