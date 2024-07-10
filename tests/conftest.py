@@ -295,7 +295,7 @@ def zha_data() -> ZHAData:
             ),
             light_options=LightOptions(
                 enable_enhanced_light_transition=True,
-                group_members_assume_state=False,
+                group_members_assume_state=True,
             ),
             alarm_control_panel_options=AlarmControlPanelOptions(
                 arm_requires_code=False,

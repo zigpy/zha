@@ -406,7 +406,9 @@ class PlatformEntity(BaseEntity):
 class GroupEntity(BaseEntity):
     """A base class for group entities."""
 
-    def __init__(self, group: Group) -> None:
+    def __init__(
+        self, group: Group, update_group_from_member_delay: float = 0.5
+    ) -> None:
         """Initialize a group."""
         super().__init__(unique_id=f"{self.PLATFORM}_zha_group_0x{group.group_id:04x}")
         self._attr_fallback_name: str = group.name
@@ -414,7 +416,7 @@ class GroupEntity(BaseEntity):
         self._change_listener_debouncer = Debouncer(
             group.gateway,
             _LOGGER,
-            cooldown=0.5,
+            cooldown=update_group_from_member_delay,
             immediate=False,
             function=self.update,
         )

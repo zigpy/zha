@@ -519,7 +519,7 @@ async def async_test_on_off_from_light(
     # group member updates are debounced
     if isinstance(entity, GroupEntity):
         assert bool(entity.state["on"]) is False
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
         await zha_gateway.async_block_till_done()
 
     assert bool(entity.state["on"]) is True
@@ -531,7 +531,7 @@ async def async_test_on_off_from_light(
     # group member updates are debounced
     if isinstance(entity, GroupEntity):
         assert bool(entity.state["on"]) is True
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
         await zha_gateway.async_block_till_done()
 
     assert bool(entity.state["on"]) is False
@@ -552,7 +552,7 @@ async def async_test_on_from_light(
     # group member updates are debounced
     if isinstance(entity, GroupEntity):
         assert bool(entity.state["on"]) is False
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.1)
         await zha_gateway.async_block_till_done()
 
     assert bool(entity.state["on"]) is True
@@ -718,7 +718,7 @@ async def async_test_dimmer_from_light(
     else:
         # group member updates are debounced
         if isinstance(entity, GroupEntity):
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
             await zha_gateway.async_block_till_done()
         assert entity.state["brightness"] == level
 
@@ -901,7 +901,7 @@ async def test_zha_group_light_entity(
 
     # group member updates are debounced
     assert bool(entity.state["on"]) is True
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is False
 
@@ -913,7 +913,7 @@ async def test_zha_group_light_entity(
     assert device_2_light_entity.state["on"] is False
     # group member updates are debounced
     assert bool(entity.state["on"]) is False
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
 
@@ -924,7 +924,7 @@ async def test_zha_group_light_entity(
     assert device_2_light_entity.state["on"] is False
     # group member updates are debounced
     assert bool(entity.state["on"]) is True
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is False
 
@@ -945,7 +945,7 @@ async def test_zha_group_light_entity(
     assert device_3_light_entity.state["on"] is True
     # group member updates are debounced
     assert bool(entity.state["on"]) is False
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
 
@@ -985,7 +985,7 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     # group member updates are debounced
     assert bool(entity.state["on"]) is True
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is False
 
@@ -1004,7 +1004,7 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     # group member updates are debounced
     assert bool(entity.state["on"]) is False
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
 
