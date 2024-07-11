@@ -1401,4 +1401,9 @@ class LightGroup(GroupEntity, BaseLight):
         effect: str | None,
     ) -> None:
         """Restore extra state attributes."""
-        # Groups do not restore external state attributes
+        # Group state is calculated from the members,
+        # except for off_with_transition and off_brightness
+        if off_with_transition is not None:
+            self._off_with_transition = off_with_transition
+        if off_brightness is not None:
+            self._off_brightness = off_brightness
