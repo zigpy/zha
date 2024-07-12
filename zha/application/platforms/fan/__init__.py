@@ -291,7 +291,7 @@ class FanGroup(GroupEntity, BaseFan):
         self._preset_mode = None
         if hasattr(self, "info_object"):
             delattr(self, "info_object")
-        self.update()
+        self.async_update()
 
     @functools.cached_property
     def info_object(self) -> FanEntityInfo:
@@ -345,7 +345,7 @@ class FanGroup(GroupEntity, BaseFan):
 
         self.maybe_emit_state_changed_event()
 
-    def update(self, _: Any = None) -> None:
+    def async_update(self, _: Any = None) -> None:
         """Attempt to retrieve on off state from the fan."""
         self.debug("Updating fan group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
