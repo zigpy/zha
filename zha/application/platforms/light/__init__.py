@@ -1131,13 +1131,6 @@ class LightGroup(GroupEntity, BaseLight):
         # light groups change the update_group_from_child_delay so we need to do this
         # before calling super
         light_options = group.gateway.config.config.light_options
-        self._zha_config_transition = light_options.default_light_transition
-        self._zha_config_enable_light_transitioning_flag = (
-            light_options.enable_light_transitioning_flag
-        )
-        self._zha_config_always_prefer_xy_color_mode = (
-            light_options.always_prefer_xy_color_mode
-        )
         self._zha_config_group_members_assume_state = (
             light_options.group_members_assume_state
         )
@@ -1146,9 +1139,15 @@ class LightGroup(GroupEntity, BaseLight):
             kwargs["update_group_from_member_delay"] = (
                 ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
             )
-        self._zha_config_enhanced_light_transition = False
-
         super().__init__(group, **kwargs)
+        self._zha_config_transition = light_options.default_light_transition
+        self._zha_config_enable_light_transitioning_flag = (
+            light_options.enable_light_transitioning_flag
+        )
+        self._zha_config_always_prefer_xy_color_mode = (
+            light_options.always_prefer_xy_color_mode
+        )
+        self._zha_config_enhanced_light_transition = False
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
         for member in group.members:
