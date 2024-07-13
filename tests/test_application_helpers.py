@@ -108,5 +108,4 @@ async def test_get_matched_clusters(
     assert matches[0].target_ieee == zha_device.ieee
     assert matches[0].target_ep_id == 1
 
-    matches = await get_matched_clusters(not_bindable_zha_device, remote_zha_device)
-    assert not matches
+    assert not await get_matched_clusters(not_bindable_zha_device, remote_zha_device)
