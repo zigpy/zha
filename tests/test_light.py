@@ -1905,8 +1905,8 @@ async def test_on_with_off_color(
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
 @patch(
-    "zha.application.platforms.light.const.ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY",
-    new=0,
+    "zigpy.zcl.clusters.general.LevelControl.request",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
 @pytest.mark.looptime
 async def test_group_member_assume_state(
@@ -1958,6 +1958,7 @@ async def test_group_member_assume_state(
     # turn on via UI
     await entity.async_turn_on()
     await zha_gateway.async_block_till_done()
+    await asyncio.sleep(1)  # wait for assume debounce
 
     # members also instantly assume STATE_ON
     assert bool(device_1_light_entity.state["on"]) is True
@@ -1967,11 +1968,38 @@ async def test_group_member_assume_state(
     # turn off via UI
     await entity.async_turn_off()
     await zha_gateway.async_block_till_done()
+    await asyncio.sleep(1)
 
     # members also instantly assume STATE_OFF
     assert bool(device_1_light_entity.state["on"]) is False
     assert bool(device_2_light_entity.state["on"]) is False
     assert bool(entity.state["on"]) is False
+
+    # now test members with different state not being overridden
+    # turn on light 1 to brightness 50
+    await device_1_light_entity.async_turn_on(brightness=50)
+    await zha_gateway.async_block_till_done()
+    assert bool(device_1_light_entity.state["on"]) is True
+    assert device_1_light_entity.state["brightness"] == 50
+
+    # turn on light 2 to brightness 100
+    await device_2_light_entity.async_turn_on(brightness=100)
+    await zha_gateway.async_block_till_done()
+    assert bool(device_2_light_entity.state["on"]) is True
+    assert device_2_light_entity.state["brightness"] == 100
+
+    await asyncio.sleep(1)  # wait for assume debounce
+
+    # turn on group, but do not change brightness
+    await entity.async_turn_on(brightness=None)
+    await zha_gateway.async_block_till_done()
+    await asyncio.sleep(1)
+
+    assert entity.state["brightness"] == 75  # average
+
+    # but members do not change unchanged state
+    assert device_1_light_entity.state["brightness"] == 50
+    assert device_2_light_entity.state["brightness"] == 100
 
 
 async def test_light_state_restoration(
