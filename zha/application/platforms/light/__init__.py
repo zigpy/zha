@@ -1197,7 +1197,7 @@ class LightGroup(GroupEntity, BaseLight):
 
         if hasattr(self, "info_object"):
             delattr(self, "info_object")
-        self.update()
+        self.async_update()
 
     @functools.cached_property
     def info_object(self) -> LightEntityInfo:
@@ -1246,7 +1246,7 @@ class LightGroup(GroupEntity, BaseLight):
         if self._debounced_member_refresh:
             await self._debounced_member_refresh.async_call()
 
-    def update(self, _: Any = None) -> None:
+    def async_update(self, _: Any = None) -> None:
         """Query all members and determine the light group state."""
         self.debug("Updating light group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)

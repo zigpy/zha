@@ -421,7 +421,7 @@ class GroupEntity(BaseEntity):
             _LOGGER,
             cooldown=update_group_from_member_delay,
             immediate=False,
-            function=self.update,
+            function=self.async_update,
         )
         self._group.register_group_entity(self)
 
@@ -465,5 +465,5 @@ class GroupEntity(BaseEntity):
             self._change_listener_debouncer.async_cancel()
 
     @abstractmethod
-    def update(self, _: Any | None = None) -> None:
+    def async_update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
