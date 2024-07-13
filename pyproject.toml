@@ -19,7 +19,7 @@ dependencies = [
     "zigpy-znp==0.12.3",
     "zigpy-deconz==0.23.2",
     "zigpy-xbee==0.20.1",
-    "zigpy-zigate==0.12.1",
+    "zigpy-zigate==0.13.0",
     "zha-quirks==0.0.117",
     "pyserial==3.5",
     "pyserial-asyncio-fast",
