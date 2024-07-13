@@ -1361,27 +1361,27 @@ class LightGroup(GroupEntity, BaseLight):
 
         # check if the parameters were actually updated
         # in the service call before updating members
-        if ATTR_BRIGHTNESS in service_kwargs:  # or off brightness
+        if service_kwargs.get(ATTR_BRIGHTNESS) is not None:  # or off brightness
             update_params[ATTR_BRIGHTNESS] = self._brightness
         elif off_brightness is not None:
             # if we turn on the group light with "off brightness",
             # pass that to the members
             update_params[ATTR_BRIGHTNESS] = off_brightness
 
-        if ATTR_COLOR_TEMP in service_kwargs:
+        if service_kwargs.get(ATTR_COLOR_TEMP) is not None:
             update_params[ATTR_COLOR_MODE] = self._color_mode
             update_params[ATTR_COLOR_TEMP] = self._color_temp
 
-        if ATTR_XY_COLOR in service_kwargs:
+        if service_kwargs.get(ATTR_XY_COLOR) is not None:
             update_params[ATTR_COLOR_MODE] = self._color_mode
             update_params[ATTR_XY_COLOR] = self._xy_color
 
-        if ATTR_HS_COLOR in service_kwargs:
+        if service_kwargs.get(ATTR_HS_COLOR) is not None:
             update_params[ATTR_COLOR_MODE] = self._color_mode
             update_params[ATTR_HS_COLOR] = self._hs_color
 
-        if ATTR_EFFECT in service_kwargs:
-            update_params[ATTR_EFFECT] = self._effect
+        # we always update effect for now, as we don't know if it was set or not
+        update_params[ATTR_EFFECT] = self._effect
 
         for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
             platform_entity._assume_group_state(update_params)
