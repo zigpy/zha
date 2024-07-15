@@ -265,3 +265,9 @@ async def test_non_zcl_select_state_restoration(
         state=security.IasWd.Warning.WarningMode.Fire.name.lower()
     )
     assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name.lower()
+
+    # test workaround for existing installations updating
+    entity.restore_external_state_attributes(
+        state=security.IasWd.Warning.WarningMode.Fire.name
+    )
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name.lower()
