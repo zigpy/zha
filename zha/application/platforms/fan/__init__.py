@@ -378,27 +378,19 @@ class FanGroup(GroupEntity, BaseFan):
         self.maybe_emit_state_changed_event()
 
 
-IKEA_SPEED_RANGE = (1, 10)  # off is not included
-IKEA_PRESET_MODES_TO_NAME = {
-    1: PRESET_MODE_AUTO,
-    2: "Speed 1",
-    3: "Speed 1.5",
-    4: "Speed 2",
-    5: "Speed 2.5",
-    6: "Speed 3",
-    7: "Speed 3.5",
-    8: "Speed 4",
-    9: "Speed 4.5",
-    10: "Speed 5",
-}
-
-
 @MULTI_MATCH(
     cluster_handler_names="ikea_airpurifier",
     models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
 )
 class IkeaFan(Fan):
     """Representation of an Ikea fan."""
+
+    _attr_supported_features: FanEntityFeature = (
+        FanEntityFeature.SET_SPEED
+        | FanEntityFeature.PRESET_MODE
+        | FanEntityFeature.TURN_OFF
+        | FanEntityFeature.TURN_ON
+    )
 
     def __init__(
         self,
@@ -421,19 +413,53 @@ class IkeaFan(Fan):
     @functools.cached_property
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
-        return IKEA_PRESET_MODES_TO_NAME
+        return {1: PRESET_MODE_AUTO}
 
     @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
         """Return the range of speeds the fan supports. Off is not included."""
-        return IKEA_SPEED_RANGE
+
+        # 1 is not a speed, but auto mode and is filtered out in async_set_percentage
+        return 1, 10
 
     @property
-    def default_on_percentage(self) -> int:
-        """Return the default on percentage."""
-        return int(
-            (100 / self.speed_count) * self.preset_name_to_mode[PRESET_MODE_AUTO]
+    def percentage(self) -> int | None:
+        """Return the current speed percentage."""
+        self.debug(f"fan_speed is {self._fan_cluster_handler.fan_speed}")
+        if self._fan_cluster_handler.fan_speed is None:
+            return None
+        if self._fan_cluster_handler.fan_speed == 0:
+            return 0
+        return ranged_value_to_percentage(
+            # Starkvind has an additional fan_speed attribute that we can use to
+            # get the speed even if fan_mode is set to auto.
+            self.speed_range,
+            self._fan_cluster_handler.fan_speed,
         )
+
+    async def async_turn_on(
+        self,
+        speed: str | None = None,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Turn the entity on."""
+        # Starkvind turns on in auto mode by default.
+        if speed is None and percentage is None and preset_mode is None:
+            await self.async_set_preset_mode("auto")
+        else:
+            await super().async_turn_on(speed, percentage, preset_mode)
+
+    async def async_set_percentage(self, percentage: int) -> None:
+        """Set the speed percentage of the fan."""
+
+        self.debug(f"Set percentage {percentage}")
+        fan_mode = math.ceil(percentage_to_ranged_value(self.speed_range, percentage))
+        # 1 is a mode, not a speed, so we skip to 2 instead.
+        if fan_mode == 1:
+            fan_mode = 2
+        await self._async_set_fan_mode(fan_mode)
 
 
 @MULTI_MATCH(
