@@ -74,9 +74,13 @@ async def test_select(
     assert entity._enum == security.IasWd.Warning.WarningMode
 
     # change value from client
-    await entity.async_select_option(security.IasWd.Warning.WarningMode.Burglar.name)
+    await entity.async_select_option(
+        security.IasWd.Warning.WarningMode.Burglar.name.lower()
+    )
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
+    assert (
+        entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name.lower()
+    )
 
 
 class MotionSensitivityQuirk(CustomDevice):
@@ -251,7 +255,7 @@ async def test_non_zcl_select_state_restoration(
     assert entity.state["state"] is None
 
     entity.restore_external_state_attributes(
-        state=security.IasWd.Warning.WarningMode.Burglar.name
+        state=security.IasWd.Warning.WarningMode.Burglar.name.lower()
     )
     assert (
         entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name.lower()
