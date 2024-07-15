@@ -485,7 +485,7 @@ class AqaraT2RelaySwitchType(ZCLEnumSelectEntity):
     _unique_id_suffix = "switch_type"
     _attribute_name = "switch_type"
     _enum = T2RelayOppleCluster.SwitchType
-    _attr_translation_key: str = "switch_type"
+    _attr_translation_key: str = "relay_switch_type"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -549,7 +549,7 @@ class InovelliSwitchTypeEntity(ZCLEnumSelectEntity):
     _unique_id_suffix = "switch_type"
     _attribute_name = "switch_type"
     _enum = InovelliSwitchType
-    _attr_translation_key: str = "switch_type"
+    _attr_translation_key: str = "fan_switch_type"
 
 
 class InovelliFanSwitchType(types.enum1):
