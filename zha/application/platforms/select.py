@@ -63,6 +63,7 @@ class EnumSelectEntity(PlatformEntity):
     _attr_entity_category = EntityCategory.CONFIG
     _attribute_name: str
     _enum: type[Enum]
+    _translation_keys: dict[str, str]
 
     def __init__(
         self,
@@ -75,7 +76,10 @@ class EnumSelectEntity(PlatformEntity):
         """Init this select entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attribute_name = self._enum.__name__
-        self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
+        self._translation_keys = {
+            entry.name.lower(): entry.name for entry in self._enum
+        }
+        self._attr_options = [entry.name.lower() for entry in self._enum]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     @functools.cached_property
@@ -100,12 +104,12 @@ class EnumSelectEntity(PlatformEntity):
         option = self._cluster_handler.data_cache.get(self._attribute_name)
         if option is None:
             return None
-        return option.name.replace("_", " ")
+        return option.name.lower()
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         self._cluster_handler.data_cache[self._attribute_name] = self._enum[
-            option.replace(" ", "_")
+            self._translation_keys[option]
         ]
         self.maybe_emit_state_changed_event()
 
@@ -115,7 +119,10 @@ class EnumSelectEntity(PlatformEntity):
         state: str,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
-        value = state.replace(" ", "_")
+        try:
+            value = self._translation_keys[state]
+        except KeyError:  # workaround for existing installations updating
+            value = state.replace(" ", "_")
         self._cluster_handler.data_cache[self._attribute_name] = self._enum[value]
 
 
