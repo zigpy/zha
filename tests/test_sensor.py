@@ -372,7 +372,7 @@ async def async_test_setpoint_change_source(
         cluster,
         {hvac.Thermostat.AttributeDefs.setpoint_change_source.id: 0x01},
     )
-    assert entity.state["state"] == "Schedule"
+    assert entity.state["state"] == "schedule"
 
 
 async def async_test_pi_heating_demand(

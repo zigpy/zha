@@ -63,13 +63,13 @@ async def test_select(
     entity = get_entity(zha_device, platform=Platform.SELECT, qualifier=select_name)
     assert entity.state["state"] is None  # unknown in HA
     assert entity.info_object.options == [
-        "Stop",
-        "Burglar",
-        "Fire",
-        "Emergency",
-        "Police Panic",
-        "Fire Panic",
-        "Emergency Panic",
+        "stop",
+        "burglar",
+        "fire",
+        "emergency",
+        "police_panic",
+        "fire_panic",
+        "emergency_panic",
     ]
     assert entity._enum == security.IasWd.Warning.WarningMode
 
@@ -253,9 +253,9 @@ async def test_non_zcl_select_state_restoration(
     entity.restore_external_state_attributes(
         state=security.IasWd.Warning.WarningMode.Burglar.name
     )
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name.lower()
 
     entity.restore_external_state_attributes(
         state=security.IasWd.Warning.WarningMode.Fire.name
     )
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name.lower()
