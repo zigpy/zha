@@ -262,6 +262,6 @@ async def test_non_zcl_select_state_restoration(
     )
 
     entity.restore_external_state_attributes(
-        state=security.IasWd.Warning.WarningMode.Fire.name
+        state=security.IasWd.Warning.WarningMode.Fire.name.lower()
     )
     assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name.lower()
