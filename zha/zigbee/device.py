@@ -261,6 +261,8 @@ class Device(LogMixin, EventBase):
     @cached_property
     def manufacturer(self) -> str:
         """Return manufacturer for device."""
+        if self.is_active_coordinator:
+            return self.gateway.application_controller.state.node_info.manufacturer
         if self._zigpy_device.manufacturer is None:
             return UNKNOWN_MANUFACTURER
         return self._zigpy_device.manufacturer
@@ -268,6 +270,8 @@ class Device(LogMixin, EventBase):
     @cached_property
     def model(self) -> str:
         """Return model for device."""
+        if self.is_active_coordinator:
+            return self.gateway.application_controller.state.node_info.model
         if self._zigpy_device.model is None:
             return UNKNOWN_MODEL
         return self._zigpy_device.model
