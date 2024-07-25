@@ -355,6 +355,7 @@ async def test_remove_device_cleans_up_group_membership(
 
     assert len(zha_group.members) == 1
     assert zha_group.members[0].device.ieee == device_light_2.ieee
+    assert device_light_1.ieee not in zha_gateway.devices
 
 
 @patch(
