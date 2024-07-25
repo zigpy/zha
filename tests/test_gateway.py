@@ -305,6 +305,58 @@ async def test_gateway_create_group_with_id_without_id(
     assert zha_group3.group_id == 0x0003
 
 
+async def test_remove_device_cleans_up_group_membership(
+    zha_gateway: Gateway,
+    device_light_1,  # pylint: disable=redefined-outer-name
+    device_light_2,  # pylint: disable=redefined-outer-name
+    coordinator,  # pylint: disable=redefined-outer-name
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test group membership cleanup when removing a device in a group."""
+
+    zha_gateway.coordinator_zha_device = coordinator
+    coordinator._zha_gateway = zha_gateway
+    device_light_1._zha_gateway = zha_gateway
+    device_light_2._zha_gateway = zha_gateway
+
+    member_ieee_addresses = [device_light_1.ieee, device_light_2.ieee]
+    members = [
+        GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=device_light_2.ieee, endpoint_id=1),
+    ]
+
+    # test creating a group with 2 members
+    zha_group: Group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    assert zha_group is not None
+    assert len(zha_group.members) == 2
+    for member in zha_group.members:
+        assert member.device.ieee in member_ieee_addresses
+        assert member.group == zha_group
+        assert member.endpoint is not None
+
+    await zha_gateway.async_remove_device(coordinator.ieee)
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 2
+    assert (
+        f"Removing the active coordinator ({str(coordinator.ieee)}) is not allowed"
+        in caplog.text
+    )
+
+    non_existent_ieee = zigpy.types.EUI64.convert("01:2d:6f:70:7a:40:79:e8")
+    await zha_gateway.async_remove_device(non_existent_ieee)
+    await zha_gateway.async_block_till_done()
+    assert len(zha_group.members) == 2
+    assert f"Device: {str(non_existent_ieee)} could not be found" in caplog.text
+
+    await zha_gateway.async_remove_device(device_light_1.ieee)
+    await zha_gateway.async_block_till_done()
+
+    assert len(zha_group.members) == 1
+    assert zha_group.members[0].device.ieee == device_light_2.ieee
+
+
 @patch(
     "zha.application.gateway.Gateway.load_devices",
     MagicMock(),
