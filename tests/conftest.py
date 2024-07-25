@@ -385,6 +385,7 @@ def device_joined(
     """Return a newly joined ZHAWS device."""
 
     async def _zha_device(zigpy_dev: zigpy.device.Device) -> Device:
+        zha_gateway.application_controller.devices[zigpy_dev.ieee] = zigpy_dev
         await zha_gateway.async_device_initialized(zigpy_dev)
         await zha_gateway.async_block_till_done()
 
