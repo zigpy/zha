@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from asyncio import Task
 from dataclasses import dataclass
 import enum
 import functools
@@ -289,25 +289,41 @@ class PollableSensor(Sensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._cancel_refresh_handle: Callable | None = None
-        if self.should_poll:
-            self._tracked_tasks.append(
-                device.gateway.async_create_background_task(
-                    self._refresh(),
-                    name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
-                    eager_start=True,
-                    untracked=True,
-                )
-            )
-            self.debug(
-                "started polling with refresh interval of %s",
-                getattr(self, "__polling_interval"),
-            )
+        self._polling_task: Task | None = None
+        self.maybe_start_polling()
 
     @property
     def should_poll(self) -> bool:
         """Return True if we need to poll for state changes."""
         return self._use_custom_polling
+
+    def maybe_start_polling(self) -> None:
+        """Start polling if necessary."""
+        if self.should_poll:
+            self._polling_task = self.device.gateway.async_create_background_task(
+                self._refresh(),
+                name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
+                eager_start=True,
+                untracked=True,
+            )
+            self._tracked_tasks.append(self._polling_task)
+            self.debug(
+                "started polling with refresh interval of %s",
+                getattr(self, "__polling_interval"),
+            )
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self.maybe_start_polling()
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        if self._polling_task:
+            self._tracked_tasks.remove(self._polling_task)
+            self._polling_task.cancel()
+            self._polling_task = None
 
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self):
@@ -423,6 +439,16 @@ class DeviceCounterSensor(BaseEntity):
     def device(self) -> Device:
         """Return the device."""
         return self._device
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self._device.gateway.global_updater.register_update_listener(self.update)
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        self._device.gateway.global_updater.remove_update_listener(self.update)
 
     def update(self):
         """Call async_update at a constrained random interval."""
@@ -1381,6 +1407,16 @@ class RSSISensor(Sensor):
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
         return getattr(self._device.device, self._unique_id_suffix)
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self._device.gateway.global_updater.register_update_listener(self.update)
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        self._device.gateway.global_updater.remove_update_listener(self.update)
 
     def update(self):
         """Call async_update at a constrained random interval."""

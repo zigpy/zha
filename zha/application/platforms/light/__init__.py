@@ -711,7 +711,6 @@ class Light(PlatformEntity, BaseLight):
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
-        self._cancel_refresh_handle: Callable | None = None
         effect_list = []
 
         light_options = device.gateway.config.config.light_options
@@ -813,18 +812,8 @@ class Light(PlatformEntity, BaseLight):
                 CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
             )
 
-        self._tracked_tasks.append(
-            device.gateway.async_create_background_task(
-                self._refresh(),
-                name=f"light_refresh_{self.unique_id}",
-                eager_start=True,
-                untracked=True,
-            )
-        )
-        self.debug(
-            "started polling with refresh interval of %s",
-            getattr(self, "__polling_interval"),
-        )
+        self._refresh_task: asyncio.Task | None = None
+        self.start_polling()
 
     @functools.cached_property
     def info_object(self) -> LightEntityInfo:
@@ -836,6 +825,33 @@ class Light(PlatformEntity, BaseLight):
             min_mireds=self.min_mireds,
             max_mireds=self.max_mireds,
         )
+
+    def start_polling(self) -> None:
+        """Start polling."""
+        self._refresh_task = self.device.gateway.async_create_background_task(
+            self._refresh(),
+            name=f"light_refresh_{self.unique_id}",
+            eager_start=True,
+            untracked=True,
+        )
+        self._tracked_tasks.append(self._refresh_task)
+        self.debug(
+            "started polling with refresh interval of %s",
+            getattr(self, "__polling_interval"),
+        )
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self.start_polling()
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        if self._refresh_task:
+            self._tracked_tasks.remove(self._refresh_task)
+            self._refresh_task.cancel()
+            self._refresh_task = None
 
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self) -> None:

@@ -57,6 +57,7 @@ class BaseEntityInfo:
     state_class: str | None
     entity_category: str | None
     entity_registry_enabled_default: bool
+    enabled: bool = True
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -115,6 +116,7 @@ class BaseEntity(LogMixin, EventBase):
     _attr_entity_registry_enabled_default: bool = True
     _attr_device_class: str | None
     _attr_state_class: str | None
+    _attr_enabled: bool = True
 
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
@@ -125,6 +127,16 @@ class BaseEntity(LogMixin, EventBase):
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
         self._tracked_handles: list[asyncio.Handle] = []
+
+    @property
+    def enabled(self) -> bool:
+        """Return the entity enabled state."""
+        return self._attr_enabled
+
+    @enabled.setter
+    def enabled(self, value: bool) -> None:
+        """Set the entity enabled state."""
+        self._attr_enabled = value
 
     @property
     def fallback_name(self) -> str | None:
@@ -199,6 +211,7 @@ class BaseEntity(LogMixin, EventBase):
             state_class=self.state_class,
             entity_category=self.entity_category,
             entity_registry_enabled_default=self.entity_registry_enabled_default,
+            enabled=self.enabled,
             # Set by platform entities
             cluster_handlers=[],
             device_ieee=None,
@@ -225,6 +238,14 @@ class BaseEntity(LogMixin, EventBase):
         if hasattr(self, "_attr_extra_state_attribute_names"):
             return self._attr_extra_state_attribute_names
         return None
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        self.enabled = True
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        self.enabled = False
 
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
