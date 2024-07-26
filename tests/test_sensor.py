@@ -4,7 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 import math
 from typing import Any, Optional
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
@@ -1240,7 +1240,7 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
 
 
 @pytest.mark.looptime
-async def test_device_unavailable_skips_entity_polling(
+async def test_device_unavailable_or_disabled_skips_entity_polling(
     zha_gateway: Gateway,
     elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
@@ -1263,10 +1263,40 @@ async def test_device_unavailable_skips_entity_polling(
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert entity.state["state"] == 60
+    assert entity.enabled is True
+    assert len(zha_gateway.global_updater._update_listeners) == 5
+
+    # let's drop the normal update method from the updater
+    entity.disable()
+
+    assert entity.enabled is False
+    assert len(zha_gateway.global_updater._update_listeners) == 4
+
+    entity.update = MagicMock(wraps=entity.update)
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.update.call_count == 0
+
+    entity.enable()
+    assert len(zha_gateway.global_updater._update_listeners) == 5
+    assert entity.enabled is True
+
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.update.call_count == 1
+
+    assert (
+        "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "
+        "available: False, allow polled requests: True" not in caplog.text
+    )
 
     elec_measurement_zha_dev.on_network = False
-    await asyncio.sleep(zha_gateway.global_updater.__polling_interval * 2)
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.update.call_count == 2
 
     assert (
         "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "
