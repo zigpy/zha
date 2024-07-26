@@ -1246,8 +1246,8 @@ class LightGroup(GroupEntity, BaseLight):
             update_params[ATTR_COLOR_MODE] = self._color_mode
             update_params[ATTR_XY_COLOR] = self._xy_color
 
-        # we always update effect for now, as we don't know if it was set or not
-        update_params[ATTR_EFFECT] = self._effect
+        if service_kwargs.get(ATTR_EFFECT) is not None:
+            update_params[ATTR_EFFECT] = self._effect
 
         for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
             platform_entity._assume_group_state(update_params)
