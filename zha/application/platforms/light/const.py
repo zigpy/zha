@@ -91,7 +91,7 @@ ATTR_EFFECT: Final[str] = "effect"
 EFFECT_COLORLOOP: Final[str] = "colorloop"
 EFFECT_RANDOM: Final[str] = "random"
 EFFECT_WHITE: Final[str] = "white"
-EFFECT_NONE: Final[str] = "None"
+EFFECT_OFF: Final[str] = "off"
 
 ATTR_SUPPORTED_FEATURES: Final[str] = "supported_features"
 
