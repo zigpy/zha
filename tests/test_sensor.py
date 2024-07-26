@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 import math
 from typing import Any, Optional
+from unittest.mock import AsyncMock
 
 import pytest
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
@@ -685,6 +686,28 @@ async def test_electrical_measurement_init(
     assert cluster_handler.ac_power_divisor == 10
     assert cluster_handler.ac_power_multiplier == 20
     assert entity.state["state"] == 60.0
+
+    entity._refresh = AsyncMock(wraps=entity._refresh)
+
+    assert entity._refresh.await_count == 0
+
+    entity.disable()
+
+    assert entity.enabled is False
+
+    await asyncio.sleep(entity.__polling_interval + 1)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity._refresh.await_count == 0
+
+    entity.enable()
+
+    assert entity.enabled is True
+
+    await asyncio.sleep(entity.__polling_interval + 1)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity._refresh.await_count == 1
 
 
 @pytest.mark.parametrize(
