@@ -1195,6 +1195,26 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
 
     assert entity.state["state"] == 2
 
+    # test disabling the entity disables it and removes it from the updater
+    assert len(zha_gateway.global_updater._update_listeners) == 3
+    assert entity.enabled is True
+
+    entity.disable()
+
+    assert entity.enabled is False
+    assert len(zha_gateway.global_updater._update_listeners) == 2
+
+    # test enabling the entity enables it and adds it to the updater
+    entity.enable()
+
+    assert entity.enabled is True
+    assert len(zha_gateway.global_updater._update_listeners) == 3
+
+    # make sure we don't get multiple listeners for the same entity in the updater
+    entity.enable()
+
+    assert len(zha_gateway.global_updater._update_listeners) == 3
+
 
 @pytest.mark.looptime
 async def test_device_unavailable_skips_entity_polling(
