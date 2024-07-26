@@ -11,11 +11,14 @@ import logging
 from typing import TYPE_CHECKING, Any, Final, ParamSpec, TypedDict
 
 import zigpy.exceptions
+import zigpy.types
 import zigpy.util
 import zigpy.zcl
 from zigpy.zcl.foundation import (
     CommandSchema,
     ConfigureReportingResponseRecord,
+    DiscoverAttributesResponseRecord,
+    GeneralCommand,
     Status,
     ZCLAttributeDef,
 )
@@ -441,6 +444,10 @@ class ClusterHandler(LogMixin, EventBase):
             if ch_specific_cfg:
                 self.debug("Performing cluster handler specific configuration")
                 await ch_specific_cfg()
+
+            self.debug("Discovering available attributes")
+            await self.discover_unsupported_attributes()
+
             self.debug("finished cluster handler configuration")
         else:
             self.debug("skipping cluster handler configuration")
@@ -623,6 +630,46 @@ class ClusterHandler(LogMixin, EventBase):
                 raise ZHAException(
                     f"Failed to write attribute {name}={value}: {record.status}",
                 )
+
+    async def _discover_attributes_all(
+        self,
+    ) -> list[DiscoverAttributesResponseRecord] | None:
+        discovery_complete = zigpy.types.Bool.false
+        start_attribute_id = 0
+        attribute_info = []
+        cluster = self.cluster
+        while discovery_complete != zigpy.types.Bool.true:
+            rsp = await cluster.discover_attributes(
+                start_attribute_id=start_attribute_id, max_attribute_ids=0xFF
+            )
+            assert rsp, "Must have a response to discover request"
+
+            if rsp.command.id == GeneralCommand.Default_Response:
+                self.debug(
+                    "Ignoring attribute discovery due to unexpected default response"
+                )
+                return None
+
+            attribute_info.extend(rsp.attribute_info)
+            discovery_complete = rsp.discovery_complete
+            start_attribute_id = (
+                max((info.attrid for info in rsp.attribute_info), default=0) + 1
+            )
+        return attribute_info
+
+    async def discover_unsupported_attributes(self):
+        """Discover the list of unsupported attributes from the device."""
+        attribute_info = await self._discover_attributes_all()
+        if attribute_info is None:
+            return
+        attr_ids = {info.attrid for info in attribute_info}
+
+        cluster = self.cluster
+        for attr_id in cluster.attributes:
+            if attr_id in attr_ids:
+                cluster.remove_unsupported_attribute(attr_id)
+            else:
+                cluster.add_unsupported_attribute(attr_id)
 
     def log(self, level, msg, *args, **kwargs) -> None:
         """Log a message."""
