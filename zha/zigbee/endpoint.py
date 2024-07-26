@@ -192,7 +192,16 @@ class Endpoint:
             *self.claimed_cluster_handlers.values(),
             *self.client_cluster_handlers.values(),
         ]
-        tasks = [getattr(ch, func_name)(*args) for ch in cluster_handlers]
+
+        faults: list[Exception] = []
+
+        async def caller(ch: ClusterHandler):
+            try:
+                await getattr(ch, func_name)(*args)
+            except Exception as outcome:
+                faults.append(outcome)
+
+        tasks = [caller(ch) for ch in cluster_handlers]
 
         gather: Callable[..., Awaitable]
 
@@ -201,14 +210,9 @@ class Endpoint:
         else:
             gather = functools.partial(gather_with_limited_concurrency, max_concurrency)
 
-        results = await gather(*tasks, return_exceptions=True)
-        for cluster_handler, outcome in zip(cluster_handlers, results):
-            if isinstance(outcome, Exception):
-                cluster_handler.debug(
-                    "'%s' stage failed: %s", func_name, str(outcome), exc_info=outcome
-                )
-            else:
-                cluster_handler.debug("'%s' stage succeeded", func_name)
+        await gather(*tasks)
+        if faults:
+            raise ExceptionGroup(f"{func_name}: some clusters failed", faults)
 
     def async_new_entity(
         self,

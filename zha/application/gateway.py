@@ -23,6 +23,7 @@ from zigpy.config import (
 )
 import zigpy.device
 import zigpy.endpoint
+from zigpy.exceptions import DeliveryError
 import zigpy.group
 from zigpy.state import State
 from zigpy.types.named import EUI64
@@ -618,7 +619,11 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         # we don't have to do this on a nwk swap
         # but we don't have a way to tell currently
-        await zha_device.async_configure()
+        try:
+            await zha_device.async_configure()
+        except* (TimeoutError, DeliveryError):
+            zha_device.debug("ignoring error %s during rejoin", exc_info=True)
+
         device_info = ExtendedDeviceInfoWithPairingStatus(
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
