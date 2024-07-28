@@ -578,6 +578,10 @@ async def test_shade(
         | CoverEntityFeature.SET_POSITION
     )
 
+    # coverage (these are always False for now)
+    assert entity.is_opening is False
+    assert entity.is_closing is False
+
     # test that the state has changed from unavailable to off
     await send_attributes_report(
         zha_gateway, cluster_on_off, {cluster_on_off.AttributeDefs.on_off.id: 0}
@@ -735,6 +739,10 @@ async def test_keen_vent(
         | CoverEntityFeature.STOP
         | CoverEntityFeature.SET_POSITION
     )
+
+    # coverage (these are always False for now)
+    assert entity.is_opening is False
+    assert entity.is_closing is False
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(zha_gateway, cluster_on_off, {8: 0, 0: False, 1: 1})
