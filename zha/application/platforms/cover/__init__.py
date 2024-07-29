@@ -433,7 +433,7 @@ class Shade(PlatformEntity):
         return False
 
     @functools.cached_property
-    def is_closing(self) -> bool | None:
+    def is_closing(self) -> bool:
         """Return if the cover is closing or not."""
         return False
 
