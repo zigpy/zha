@@ -44,6 +44,18 @@ def patch_cluster(cluster: zigpy.zcl.Cluster) -> None:
                 result.append(zcl_f.ReadAttributeRecord(attr_id, zcl_f.Status.FAILURE))
         return (result,)
 
+    async def _discover_attributes(*args: Any, **kwargs: Any) -> Any:
+        schema = zcl_f.GENERAL_COMMANDS[
+            zcl_f.GeneralCommand.Discover_Attributes_rsp
+        ].schema
+        records = [
+            zcl_f.DiscoverAttributesResponseRecord.from_dict(
+                {"attrid": attr.id, "datatype": 0}
+            )
+            for attr in cluster.attributes.values()
+        ]
+        return schema(discovery_complete=t.Bool.true, attribute_info=records)
+
     cluster.bind = AsyncMock(return_value=[0])
     cluster.configure_reporting = AsyncMock(
         return_value=[
@@ -61,6 +73,7 @@ def patch_cluster(cluster: zigpy.zcl.Cluster) -> None:
     cluster._write_attributes = AsyncMock(
         return_value=[zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]]
     )
+    cluster.discover_attributes = AsyncMock(side_effect=_discover_attributes)
     if cluster.cluster_id == 4:
         cluster.add = AsyncMock(return_value=[0])
     if cluster.cluster_id == 0x1000:
