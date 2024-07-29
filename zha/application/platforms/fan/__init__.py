@@ -28,7 +28,6 @@ from zha.application.platforms.fan.const import (
     PRESET_MODES_TO_NAME,
     SPEED_OFF,
     SPEED_RANGE,
-    SUPPORT_SET_SPEED,
     FanEntityFeature,
 )
 from zha.application.platforms.fan.helpers import (
@@ -65,7 +64,7 @@ class FanEntityInfo(BaseEntityInfo):
     """Fan entity info."""
 
     preset_modes: list[str]
-    supported_features: int
+    supported_features: FanEntityFeature
     speed_count: int
     speed_list: list[str]
 
@@ -75,7 +74,11 @@ class BaseFan(BaseEntity):
 
     PLATFORM = Platform.FAN
 
-    _attr_supported_features = FanEntityFeature.SET_SPEED
+    _attr_supported_features: FanEntityFeature = (
+        FanEntityFeature.SET_SPEED
+        | FanEntityFeature.TURN_OFF
+        | FanEntityFeature.TURN_ON
+    )
     _attr_translation_key: str = "fan"
 
     @functools.cached_property
@@ -109,9 +112,9 @@ class BaseFan(BaseEntity):
         return int_states_in_range(self.speed_range)
 
     @functools.cached_property
-    def supported_features(self) -> int:
+    def supported_features(self) -> FanEntityFeature:
         """Flag supported features."""
-        return SUPPORT_SET_SPEED
+        return self._attr_supported_features
 
     @property
     def is_on(self) -> bool:
@@ -440,7 +443,12 @@ class IkeaFan(Fan):
 class KofFan(Fan):
     """Representation of a fan made by King Of Fans."""
 
-    _attr_supported_features = FanEntityFeature.SET_SPEED | FanEntityFeature.PRESET_MODE
+    _attr_supported_features = (
+        FanEntityFeature.SET_SPEED
+        | FanEntityFeature.PRESET_MODE
+        | FanEntityFeature.TURN_OFF
+        | FanEntityFeature.TURN_ON
+    )
 
     @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
