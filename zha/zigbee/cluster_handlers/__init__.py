@@ -445,7 +445,7 @@ class ClusterHandler(LogMixin, EventBase):
                 self.debug("Performing cluster handler specific configuration")
                 await ch_specific_cfg()
 
-            self.debug("Discovering available attributes")
+            self.debug("Discovering unsupported attributes")
             await self.discover_unsupported_attributes()
 
             self.debug("finished cluster handler configuration")
