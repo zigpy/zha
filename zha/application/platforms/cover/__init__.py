@@ -428,7 +428,7 @@ class Shade(PlatformEntity):
         return response
 
     @functools.cached_property
-    def is_opening(self) -> bool | None:
+    def is_opening(self) -> bool:
         """Return if the cover is opening or not."""
         return False
 
