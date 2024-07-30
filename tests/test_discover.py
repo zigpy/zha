@@ -116,10 +116,6 @@ def zha_device_mock(
     return _mock
 
 
-@patch(
-    "zigpy.zcl.clusters.general.Identify.request",
-    new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
-)
 @pytest.mark.parametrize("device", DEVICES)
 async def test_devices(
     device,
@@ -140,7 +136,9 @@ async def test_devices(
 
     cluster_identify = _get_identify_cluster(zigpy_device)
     if cluster_identify:
-        cluster_identify.request.reset_mock()
+        cluster_identify.request = AsyncMock(
+            return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]
+        )
 
     zha_dev: Device = await device_joined(zigpy_device)
     await zha_gateway.async_block_till_done()
