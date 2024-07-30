@@ -446,9 +446,6 @@ class ClusterHandler(LogMixin, EventBase):
                 self.debug("Performing cluster handler specific configuration")
                 await ch_specific_cfg()
 
-            self.debug("Discovering unsupported attributes")
-            await self.discover_unsupported_attributes()
-
             self.debug("finished cluster handler configuration")
         else:
             self.debug("skipping cluster handler configuration")
@@ -465,6 +462,9 @@ class ClusterHandler(LogMixin, EventBase):
         cached = [a for a, cached in self.ZCL_INIT_ATTRS.items() if cached]
         uncached = [a for a, cached in self.ZCL_INIT_ATTRS.items() if not cached]
         uncached.extend([cfg["attr"] for cfg in self.REPORT_CONFIG])
+
+        self.debug("discovering unsupported attributes")
+        await self.discover_unsupported_attributes()
 
         if cached:
             self.debug("initializing cached cluster handler attributes: %s", cached)

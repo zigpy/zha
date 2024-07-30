@@ -146,16 +146,6 @@ async def test_devices(
     if cluster_identify and not zha_dev.skip_configuration:
         assert cluster_identify.request.mock_calls == [
             mock.call(
-                True,
-                zcl_f.GeneralCommand.Discover_Attributes,
-                zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Discover_Attributes].schema,
-                manufacturer=None,
-                expect_reply=True,
-                tsn=None,
-                start_attribute_id=0,
-                max_attribute_ids=255,
-            ),
-            mock.call(
                 False,
                 cluster_identify.commands_by_name["trigger_effect"].id,
                 cluster_identify.commands_by_name["trigger_effect"].schema,
@@ -166,6 +156,16 @@ async def test_devices(
                 effect_variant=(
                     zigpy.zcl.clusters.general.Identify.EffectVariant.Default
                 ),
+            ),
+            mock.call(
+                True,
+                zcl_f.GeneralCommand.Discover_Attributes,
+                zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Discover_Attributes].schema,
+                manufacturer=None,
+                expect_reply=True,
+                tsn=None,
+                start_attribute_id=0,
+                max_attribute_ids=255,
             ),
         ]
 
