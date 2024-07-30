@@ -117,9 +117,9 @@ def _wrap_mock_instance(obj: Any) -> MagicMock:
             continue
 
         real_attr = getattr(obj, attr_name)
-        mock_attr = getattr(mock, attr_name)
 
         if callable(real_attr) and not hasattr(real_attr, "__aenter__"):
+            mock_attr = getattr(mock, attr_name)
             mock_attr.side_effect = real_attr
         else:
             setattr(mock, attr_name, real_attr)
@@ -267,13 +267,19 @@ async def zigpy_app_controller():
     ep.add_input_cluster(Groups.cluster_id)
 
     with patch("zigpy.device.Device.request", return_value=[Status.SUCCESS]):
-        # The mock wrapping accesses deprecated attributes, so we suppress the warnings
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            mock_app = _wrap_mock_instance(app)
-            mock_app.backups = _wrap_mock_instance(app.backups)
+        yield app
 
-        yield mock_app
+
+@pytest.fixture
+async def zigpy_app_controller_mock(zigpy_app_controller):
+    """Zigpy ApplicationController fixture."""
+    # The mock wrapping accesses deprecated attributes, so we suppress the warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        mock_app = _wrap_mock_instance(zigpy_app_controller)
+        mock_app.backups = _wrap_mock_instance(zigpy_app_controller.backups)
+
+    yield mock_app
 
 
 @pytest.fixture(name="caplog")
