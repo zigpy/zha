@@ -15,6 +15,7 @@ import zigpy.types
 import zigpy.util
 import zigpy.zcl
 from zigpy.zcl.foundation import (
+    GENERAL_COMMANDS,
     CommandSchema,
     ConfigureReportingResponseRecord,
     DiscoverAttributesResponseRecord,
@@ -642,11 +643,12 @@ class ClusterHandler(LogMixin, EventBase):
             rsp = await cluster.discover_attributes(
                 start_attribute_id=start_attribute_id, max_attribute_ids=0xFF
             )
-            assert rsp, "Must have a response to discover request"
-
-            if rsp.command.id == GeneralCommand.Default_Response:
+            if not isinstance(
+                rsp, GENERAL_COMMANDS[GeneralCommand.Discover_Attributes_rsp].schema
+            ):
                 self.debug(
-                    "Ignoring attribute discovery due to unexpected default response"
+                    "Ignoring attribute discovery due to unexpected default response: %r",
+                    rsp,
                 )
                 return None
 
