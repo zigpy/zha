@@ -6,7 +6,7 @@ import itertools
 import re
 from typing import Any, Final
 from unittest import mock
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
