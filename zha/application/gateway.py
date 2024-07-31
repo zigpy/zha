@@ -670,6 +670,21 @@ class Gateway(AsyncUtilMixin, EventBase):
                 await asyncio.gather(*tasks)
         return self.groups.get(group_id)
 
+    async def async_remove_device(self, ieee: EUI64) -> None:
+        """Remove a device from ZHA."""
+        if not (device := self.devices.get(ieee)):
+            _LOGGER.debug("Device: %s could not be found", ieee)
+            return
+        if device.is_active_coordinator:
+            _LOGGER.info("Removing the active coordinator (%s) is not allowed", ieee)
+            return
+        for group_id, group in self.groups.items():
+            for member_ieee_endpoint_id in list(group.zigpy_group.members.keys()):
+                if member_ieee_endpoint_id[0] == ieee:
+                    await device.async_remove_from_group(group_id)
+
+        await self.application_controller.remove(ieee)
+
     async def async_remove_zigpy_group(self, group_id: int) -> None:
         """Remove a Zigbee group from Zigpy."""
         if not (group := self.groups.get(group_id)):

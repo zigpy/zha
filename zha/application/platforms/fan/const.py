@@ -31,8 +31,6 @@ ATTR_DIRECTION: Final[str] = "direction"
 ATTR_PRESET_MODE: Final[str] = "preset_mode"
 ATTR_PRESET_MODES: Final[str] = "preset_modes"
 
-SUPPORT_SET_SPEED: Final[int] = 1
-
 SPEED_OFF: Final[str] = "off"
 SPEED_LOW: Final[str] = "low"
 SPEED_MEDIUM: Final[str] = "medium"
@@ -49,3 +47,5 @@ class FanEntityFeature(IntFlag):
     OSCILLATE = 2
     DIRECTION = 4
     PRESET_MODE = 8
+    TURN_OFF = 16
+    TURN_ON = 32

@@ -427,7 +427,17 @@ class Shade(PlatformEntity):
         )
         return response
 
-    @property
+    @functools.cached_property
+    def is_opening(self) -> bool:
+        """Return if the cover is opening or not."""
+        return False
+
+    @functools.cached_property
+    def is_closing(self) -> bool:
+        """Return if the cover is closing or not."""
+        return False
+
+    @functools.cached_property
     def supported_features(self) -> CoverEntityFeature:
         """Return supported features."""
         return self._attr_supported_features
