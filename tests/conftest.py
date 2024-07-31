@@ -226,8 +226,8 @@ def verify_cleanup(
         )
 
 
-@pytest.fixture
-async def zigpy_app_controller():
+@pytest.fixture(name="zigpy_app_controller")
+async def zigpy_app_controller_fixture():
     """Zigpy ApplicationController fixture."""
     app = _FakeApp(
         {
@@ -289,8 +289,8 @@ def caplog_fixture(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture
     return caplog
 
 
-@pytest.fixture
-def zha_data() -> ZHAData:
+@pytest.fixture(name="zha_data")
+def zha_data_fixture() -> ZHAData:
     """Fixture representing zha configuration data."""
 
     return ZHAData(
@@ -339,8 +339,8 @@ class TestGateway:
 
 @pytest.fixture
 async def zha_gateway(
-    zha_data: ZHAData,  # pylint: disable=redefined-outer-name
-    zigpy_app_controller,  # pylint: disable=redefined-outer-name
+    zha_data: ZHAData,
+    zigpy_app_controller,
     caplog,  # pylint: disable=unused-argument
 ):
     """Set up ZHA component."""
@@ -422,7 +422,7 @@ def cluster_handler() -> Callable:
 
 @pytest.fixture
 def zigpy_device_mock(
-    zigpy_app_controller: ControllerApplication,  # pylint: disable=redefined-outer-name
+    zigpy_app_controller: ControllerApplication,
 ) -> Callable[..., zigpy.device.Device]:
     """Make a fake device using the specified cluster classes."""
 
