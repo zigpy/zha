@@ -429,6 +429,7 @@ def zigpy_device_mock(
         patch_cluster: bool = True,
         quirk: Optional[Callable] = None,
         attributes: dict[int, dict[str, dict[str, Any]]] = None,
+        unsupported_attr: dict[int, set[str]] | None = None,
     ) -> zigpy.device.Device:
         """Make a fake device using the specified cluster classes."""
         device = zigpy.device.Device(
@@ -457,12 +458,16 @@ def zigpy_device_mock(
             device = get_device(device)
 
         if patch_cluster:
+            if unsupported_attr is None:
+                unsupported_attr = {}
             for endpoint in (ep for epid, ep in device.endpoints.items() if epid):
                 endpoint.request = AsyncMock(return_value=[0])
                 for cluster in itertools.chain(
                     endpoint.in_clusters.values(), endpoint.out_clusters.values()
                 ):
-                    common.patch_cluster(cluster)
+                    common.patch_cluster(
+                        cluster, unsupported_attr.get(endpoint.endpoint_id, set())
+                    )
 
         if attributes is not None:
             for ep_id, clusters in attributes.items():

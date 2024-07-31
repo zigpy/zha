@@ -798,14 +798,12 @@ async def test_unsupported_attributes_sensor(
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
                 SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
-        }
+        },
+        unsupported_attr={1: unsupported_attributes},
     )
-    cluster = zigpy_device.endpoints[1].in_clusters[cluster_id]
     if cluster_id == smartenergy.Metering.cluster_id:
         # this one is mains powered
         zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
-    for attr in unsupported_attributes:
-        cluster.add_unsupported_attribute(attr)
 
     zha_device = await device_joined(zigpy_device)
 

@@ -19,9 +19,14 @@ from zha.zigbee.group import Group
 _LOGGER = logging.getLogger(__name__)
 
 
-def patch_cluster(cluster: zigpy.zcl.Cluster) -> None:
+def patch_cluster(
+    cluster: zigpy.zcl.Cluster, unsupported_attr: set[str] | None = None
+) -> None:
     """Patch a cluster for testing."""
     cluster.PLUGGED_ATTR_READS = {}
+
+    if unsupported_attr is None:
+        unsupported_attr = set()
 
     async def _read_attribute_raw(attributes: Any, *args: Any, **kwargs: Any) -> Any:
         result = []
@@ -53,6 +58,7 @@ def patch_cluster(cluster: zigpy.zcl.Cluster) -> None:
                 {"attrid": attr.id, "datatype": 0}
             )
             for attr in cluster.attributes.values()
+            if attr.name not in unsupported_attr
         ]
         return schema(discovery_complete=t.Bool.true, attribute_info=records)
 
