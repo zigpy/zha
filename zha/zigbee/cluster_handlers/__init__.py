@@ -463,8 +463,9 @@ class ClusterHandler(LogMixin, EventBase):
         uncached = [a for a, cached in self.ZCL_INIT_ATTRS.items() if not cached]
         uncached.extend([cfg["attr"] for cfg in self.REPORT_CONFIG])
 
-        self.debug("discovering unsupported attributes")
-        await self.discover_unsupported_attributes()
+        if not from_cache:
+            self.debug("discovering unsupported attributes")
+            await self.discover_unsupported_attributes()
 
         if cached:
             self.debug("initializing cached cluster handler attributes: %s", cached)
