@@ -108,25 +108,6 @@ class _FakeApp(ControllerApplication):
         pass
 
 
-def _wrap_mock_instance(obj: Any) -> MagicMock:
-    """Auto-mock every attribute and method in an object."""
-    mock = create_autospec(obj, spec_set=True, instance=True)
-
-    for attr_name in dir(obj):
-        if attr_name.startswith("__") and attr_name not in {"__getitem__"}:
-            continue
-
-        real_attr = getattr(obj, attr_name)
-
-        if callable(real_attr) and not hasattr(real_attr, "__aenter__"):
-            mock_attr = getattr(mock, attr_name)
-            mock_attr.side_effect = real_attr
-        else:
-            setattr(mock, attr_name, real_attr)
-
-    return mock
-
-
 @contextmanager
 def long_repr_strings() -> Generator[None, None, None]:
     """Increase reprlib maxstring and maxother to 300."""
@@ -268,18 +249,6 @@ async def zigpy_app_controller():
 
     with patch("zigpy.device.Device.request", return_value=[Status.SUCCESS]):
         yield app
-
-
-@pytest.fixture
-async def zigpy_app_controller_mock(zigpy_app_controller):
-    """Zigpy ApplicationController fixture."""
-    # The mock wrapping accesses deprecated attributes, so we suppress the warnings
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", DeprecationWarning)
-        mock_app = _wrap_mock_instance(zigpy_app_controller)
-        mock_app.backups = _wrap_mock_instance(zigpy_app_controller.backups)
-
-    yield mock_app
 
 
 @pytest.fixture(name="caplog")
