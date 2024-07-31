@@ -383,6 +383,10 @@ def globally_load_quirks():
 
     zhaquirks.setup()
 
+    # Disable gateway built in quirks loading
+    with patch("zha.application.gateway.Gateway._async_load_quirks"):
+        yield
+
 
 @pytest.fixture
 def device_joined(
