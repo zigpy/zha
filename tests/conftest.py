@@ -11,8 +11,7 @@ import threading
 import time
 from types import TracebackType
 from typing import Any, Optional
-from unittest.mock import AsyncMock, MagicMock, create_autospec, patch
-import warnings
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import zigpy
