@@ -215,7 +215,13 @@ class Gateway(AsyncUtilMixin, EventBase):
     async def async_from_config(cls, config: ZHAData) -> Self:
         """Create an instance of a gateway from config objects."""
         instance = cls(config)
-        await instance.async_initialize()
+
+        if config.config.quirks_configuration.enabled:
+            await instance.async_add_executor_job(
+                setup_quirks,
+                instance.config.config.quirks_configuration.custom_quirks_path,
+            )
+
         return instance
 
     async def async_initialize(self) -> None:
@@ -223,11 +229,6 @@ class Gateway(AsyncUtilMixin, EventBase):
         discovery.DEVICE_PROBE.initialize(self)
         discovery.ENDPOINT_PROBE.initialize(self)
         discovery.GROUP_PROBE.initialize(self)
-
-        if self.config.config.quirks_configuration.enabled:
-            await self.async_add_executor_job(
-                setup_quirks, self.config.config.quirks_configuration.custom_quirks_path
-            )
 
         self.shutting_down = False
 
