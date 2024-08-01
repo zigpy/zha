@@ -218,12 +218,6 @@ class Gateway(AsyncUtilMixin, EventBase):
         await instance.async_initialize()
         return instance
 
-    async def _async_load_quirks(self) -> None:
-        """Load quirks for this configuration."""
-        await self.async_add_executor_job(
-            setup_quirks, self.config.config.quirks_configuration.custom_quirks_path
-        )
-
     async def async_initialize(self) -> None:
         """Initialize controller and connect radio."""
         discovery.DEVICE_PROBE.initialize(self)
@@ -231,7 +225,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         discovery.GROUP_PROBE.initialize(self)
 
         if self.config.config.quirks_configuration.enabled:
-            await self._async_load_quirks()
+            await self.async_add_executor_job(
+                setup_quirks, self.config.config.quirks_configuration.custom_quirks_path
+            )
 
         self.shutting_down = False
 
