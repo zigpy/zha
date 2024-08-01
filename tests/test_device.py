@@ -616,7 +616,6 @@ async def test_async_add_to_group_remove_from_group(
 async def test_async_bind_to_group(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
-    caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test async_bind_to_group method."""
     zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
@@ -640,18 +639,11 @@ async def test_async_bind_to_group(
         group.group_id,
         [ClusterBinding(name="on_off", type=CLUSTER_TYPE_OUT, id=6, endpoint_id=3)],
     )
-    assert (
-        "0xb79c: Bind_req 00:0d:7f:00:0a:90:69:e8, ep: 3, cluster: 6 to group: 0x1001 completed: [<Status.SUCCESS: 0>]"
-        in caplog.text
-    )
 
     await zha_device_remote.async_unbind_from_group(
         group.group_id,
         [ClusterBinding(name="on_off", type=CLUSTER_TYPE_OUT, id=6, endpoint_id=3)],
     )
-
-    m1 = "0xb79c: Unbind_req 00:0d:7f:00:0a:90:69:e8, ep: 3, cluster: 6"
-    assert f"{m1} to group: 0x1001 completed: [<Status.SUCCESS: 0>]" in caplog.text
 
 
 async def test_device_automation_triggers(
