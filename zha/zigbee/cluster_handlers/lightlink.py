@@ -44,4 +44,4 @@ class LightLinkClusterHandler(ClusterHandler):
                 self.debug("Adding coordinator to 0x%04x group id", group.group_id)
                 await coordinator.add_to_group(group.group_id)
         else:
-            await coordinator.add_to_group(0x0000, name="Default Lightlink Group")
+            await coordinator.add_to_group(0x0000, name="Lightlink Group")
