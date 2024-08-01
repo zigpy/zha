@@ -34,10 +34,12 @@ class LightLinkClusterHandler(ClusterHandler):
             self.warning("Couldn't get list of groups: %s", str(exc))
             return
 
-        if isinstance(rsp, GENERAL_COMMANDS[GeneralCommand.Default_Response].schema):
-            groups = []
-        else:
+        if isinstance(
+            rsp, LightLink.ClientCommandDefs.get_group_identifiers_rsp.schema
+        ):
             groups = rsp.group_info_records
+        else:
+            groups = []
 
         if groups:
             for group in groups:
