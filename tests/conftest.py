@@ -25,7 +25,7 @@ import zigpy.profiles
 from zigpy.quirks import get_device
 import zigpy.types
 from zigpy.zcl.clusters.general import Basic, Groups
-from zigpy.zcl.foundation import Status
+from zigpy.zcl.foundation import GENERAL_COMMANDS, GeneralCommand, Status
 import zigpy.zdo.types as zdo_t
 
 from tests import common
@@ -450,7 +450,6 @@ def zigpy_device_mock(
             endpoint = device.add_endpoint(epid)
             endpoint.device_type = ep[SIG_EP_TYPE]
             endpoint.profile_id = ep.get(SIG_EP_PROFILE)
-            endpoint.request = AsyncMock(return_value=[0])
 
             for cluster_id in ep.get(SIG_EP_INPUT, []):
                 endpoint.add_input_cluster(cluster_id)
@@ -463,9 +462,38 @@ def zigpy_device_mock(
         else:
             device = get_device(device)
 
+        async def mock_request(
+            cluster: zigpy.types.ClusterId,
+            sequence: zigpy.types.uint8_t,
+            data: bytes,
+            expect_reply: bool = True,
+            command_id: GeneralCommand | zigpy.types.uint8_t = 0x00,
+        ):
+            # if isinstance(command_id, (int, GeneralCommand)):
+            # Some commands can't handle default response, and will
+            # fail with a non list element as first element.
+            if command_id in (
+                GeneralCommand.Read_Reporting_Configuration,
+                GeneralCommand.Write_Attributes,
+            ):
+                return [[]]
+
+            if command_id in GeneralCommand.__members__:
+                return GENERAL_COMMANDS[GeneralCommand.Default_Response].schema(
+                    command_id=command_id, status=Status.UNSUP_GENERAL_COMMAND
+                )
+
+            return [0]
+
+        # add request mock after device creation since quirks may have added endpoints
+        for epid, endpoint in device.endpoints.items():
+            if epid:
+                endpoint.request = AsyncMock(side_effect=mock_request)
+            else:
+                endpoint.request = AsyncMock(return_value=[0])
+
         if patch_cluster:
             for endpoint in (ep for epid, ep in device.endpoints.items() if epid):
-                endpoint.request = AsyncMock(return_value=[0])
                 for cluster in itertools.chain(
                     endpoint.in_clusters.values(), endpoint.out_clusters.values()
                 ):
