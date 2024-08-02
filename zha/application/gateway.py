@@ -224,7 +224,7 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         return instance
 
-    async def async_initialize(self) -> None:
+    async def _async_initialize(self) -> None:
         """Initialize controller and connect radio."""
         discovery.DEVICE_PROBE.initialize(self)
         discovery.ENDPOINT_PROBE.initialize(self)
@@ -239,12 +239,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             start_radio=False,
         )
 
-        try:
-            await self.application_controller.startup(auto_form=True)
-        except Exception:
-            # Explicitly shut down the controller application on failure
-            await self.application_controller.shutdown()
-            raise
+        await self.application_controller.startup(auto_form=True)
 
         self.coordinator_zha_device = self.get_or_create_device(
             self._find_coordinator_device()
@@ -257,6 +252,14 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.application_controller.groups.add_listener(self)
         self.global_updater.start()
         self._device_availability_checker.start()
+
+    async def async_initialize(self) -> None:
+        """Initialize controller and connect radio."""
+        try:
+            await self._async_initialize()
+        except Exception:
+            await self.shutdown()
+            raise
 
     def connection_lost(self, exc: Exception) -> None:
         """Handle connection lost event."""
