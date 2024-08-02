@@ -233,20 +233,18 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.shutting_down = False
 
         app_controller_cls, app_config = self.get_application_controller_data()
-        app = await app_controller_cls.new(
+        self.application_controller = await app_controller_cls.new(
             config=app_config,
             auto_form=False,
             start_radio=False,
         )
 
         try:
-            await app.startup(auto_form=True)
+            await self.application_controller.startup(auto_form=True)
         except Exception:
             # Explicitly shut down the controller application on failure
-            await app.shutdown()
+            await self.application_controller.shutdown()
             raise
-
-        self.application_controller = app
 
         self.coordinator_zha_device = self.get_or_create_device(
             self._find_coordinator_device()
