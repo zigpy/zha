@@ -24,6 +24,7 @@ from zigpy.config import (
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
+from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
 from zigpy.types.named import EUI64
 
@@ -217,6 +218,15 @@ class Gateway(AsyncUtilMixin, EventBase):
         instance = cls(config)
 
         if config.config.quirks_configuration.enabled:
+            for quirk in UNBUILT_QUIRK_BUILDERS:
+                _LOGGER.warning(
+                    "Found a v2 quirk that was not added to the registry: %s",
+                    quirk,
+                )
+                quirk.add_to_registry()
+
+            UNBUILT_QUIRK_BUILDERS.clear()
+
             await instance.async_add_executor_job(
                 setup_quirks,
                 instance.config.config.quirks_configuration.custom_quirks_path,

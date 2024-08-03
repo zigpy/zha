@@ -17,7 +17,7 @@ from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.quirks import _DEVICE_REGISTRY, CustomCluster, CustomDevice
-from zigpy.quirks.v2 import CustomDeviceV2, add_to_registry_v2
+from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
 from zigpy.zcl.clusters import closures, general
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
@@ -525,7 +525,7 @@ async def test_switch_configurable_custom_on_off_values(
     )
 
     (
-        add_to_registry_v2(zigpy_dev.manufacturer, zigpy_dev.model)
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
         .switch(
             "window_detection_function",
@@ -533,6 +533,7 @@ async def test_switch_configurable_custom_on_off_values(
             on_value=3,
             off_value=5,
         )
+        .add_to_registry()
     )
 
     zigpy_device_ = _DEVICE_REGISTRY.get_device(zigpy_dev)
@@ -600,7 +601,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
     )
 
     (
-        add_to_registry_v2(zigpy_dev.manufacturer, zigpy_dev.model)
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
         .switch(
             "window_detection_function",
@@ -609,6 +610,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
             off_value=5,
             force_inverted=True,
         )
+        .add_to_registry()
     )
 
     zigpy_device_ = _DEVICE_REGISTRY.get_device(zigpy_dev)
@@ -676,7 +678,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
     )
 
     (
-        add_to_registry_v2(zigpy_dev.manufacturer, zigpy_dev.model)
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model)
         .adds(WindowDetectionFunctionQuirk.TuyaManufCluster)
         .switch(
             "window_detection_function",
@@ -685,6 +687,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
             off_value=5,
             invert_attribute_name="window_detection_function_inverter",
         )
+        .add_to_registry()
     )
 
     zigpy_device_ = _DEVICE_REGISTRY.get_device(zigpy_dev)

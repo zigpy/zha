@@ -10,7 +10,7 @@ from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, add_to_registry_v2
+from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
@@ -1115,7 +1115,7 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
 
 
 (
-    add_to_registry_v2("Fake_Manufacturer_sensor", "Fake_Model_sensor")
+    QuirkBuilder("Fake_Manufacturer_sensor", "Fake_Model_sensor")
     .replaces(OppleCluster)
     .sensor(
         "last_feeding_size",
@@ -1124,6 +1124,7 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         multiplier=1,
         unit=UnitOfMass.GRAMS,
     )
+    .add_to_registry()
 )
 
 

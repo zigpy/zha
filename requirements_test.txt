@@ -9,6 +9,6 @@ pytest-timeout
 pytest-asyncio
 pytest-xdist
 pytest
-zigpy>=0.63.5
+zigpy>=0.65.2
 ruff
 looptime
