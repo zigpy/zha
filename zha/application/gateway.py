@@ -220,7 +220,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         if config.config.quirks_configuration.enabled:
             for quirk in UNBUILT_QUIRK_BUILDERS:
                 _LOGGER.warning(
-                    "Found a quirk that was not added to the registry: %s",
+                    "Found a v2 quirk that was not added to the registry: %s",
                     quirk,
                 )
                 quirk.add_to_registry()
