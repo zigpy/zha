@@ -15,7 +15,7 @@ from zigpy.const import SIG_EP_PROFILE
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, add_to_registry_v2
+from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
@@ -162,7 +162,7 @@ async def test_on_off_select_attribute_report(
 
 
 (
-    add_to_registry_v2("Fake_Manufacturer", "Fake_Model")
+    QuirkBuilder("Fake_Manufacturer", "Fake_Model")
     .replaces(MotionSensitivityQuirk.OppleCluster)
     .enum(
         "motion_sensitivity",
@@ -176,6 +176,7 @@ async def test_on_off_select_attribute_report(
         translation_key="motion_sensitivity",
         initially_disabled=True,
     )
+    .add_to_registry()
 )
 
 

@@ -28,10 +28,10 @@ from zigpy.quirks.v2 import (
     EntityMetadata,
     EntityType,
     NumberMetadata,
+    QuirkBuilder,
     QuirksV2RegistryEntry,
     ZCLCommandButtonMetadata,
     ZCLSensorMetadata,
-    add_to_registry_v2,
 )
 from zigpy.quirks.v2.homeassistant import UnitOfTime
 import zigpy.types
@@ -504,7 +504,7 @@ async def test_quirks_v2_entity_discovery(
     )
 
     (
-        add_to_registry_v2(
+        QuirkBuilder(
             "Ikea of Sweden", "TRADFRI remote control", zigpy.quirks._DEVICE_REGISTRY
         )
         .replaces(PowerConfig1CRCluster)
@@ -518,6 +518,7 @@ async def test_quirks_v2_entity_discovery(
             unit=UnitOfTime.SECONDS,
             multiplier=1,
         )
+        .add_to_registry()
     )
 
     zigpy_device = zigpy.quirks._DEVICE_REGISTRY.get_device(zigpy_device)
@@ -562,7 +563,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         )
 
     (
-        add_to_registry_v2("LUMI", "lumi.curtain.agl006")
+        QuirkBuilder("LUMI", "lumi.curtain.agl006")
         .adds(LocalIlluminanceMeasurementCluster)
         .replaces(BasicCluster)
         .replaces(XiaomiPowerConfigurationPercent)
@@ -584,6 +585,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
             entity_type=EntityType.DIAGNOSTIC,
         )
         .binary_sensor("error_detected", FakeXiaomiAqaraDriverE1.cluster_id)
+        .add_to_registry()
     )
 
     aqara_E1_device = zigpy_device_mock(
@@ -671,8 +673,7 @@ def _get_test_device(
     zigpy_device_mock,
     manufacturer: str,
     model: str,
-    augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry]
-    | None = None,
+    augment_method: Callable[[QuirkBuilder], QuirkBuilder] | None = None,
 ):
     zigpy_device = zigpy_device_mock(
         {
@@ -693,8 +694,8 @@ def _get_test_device(
         model=model,
     )
 
-    v2_quirk = (
-        add_to_registry_v2(manufacturer, model, zigpy.quirks._DEVICE_REGISTRY)
+    quirk_builder = (
+        QuirkBuilder(manufacturer, model, zigpy.quirks._DEVICE_REGISTRY)
         .replaces(PowerConfig1CRCluster)
         .replaces(ScenesCluster, cluster_type=ClusterType.Client)
         .number(
@@ -727,7 +728,9 @@ def _get_test_device(
     )
 
     if augment_method:
-        v2_quirk = augment_method(v2_quirk)
+        quirk_builder = augment_method(quirk_builder)
+
+    quirk_builder.add_to_registry()
 
     zigpy_device = zigpy.quirks._DEVICE_REGISTRY.get_device(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
@@ -871,10 +874,10 @@ def validate_translation_keys_device_class(
 
 
 def bad_device_class_unit_combination(
-    v2_quirk: QuirksV2RegistryEntry,
-) -> QuirksV2RegistryEntry:
+    quirk_builder: QuirkBuilder,
+) -> QuirkBuilder:
     """Introduce a bad device class and unit combination."""
-    return v2_quirk.sensor(
+    return quirk_builder.sensor(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
         entity_type=EntityType.CONFIG,
@@ -885,10 +888,10 @@ def bad_device_class_unit_combination(
 
 
 def bad_device_class_translation_key_usage(
-    v2_quirk: QuirksV2RegistryEntry,
-) -> QuirksV2RegistryEntry:
+    quirk_builder: QuirkBuilder,
+) -> QuirkBuilder:
     """Introduce a bad device class and translation key combination."""
-    return v2_quirk.sensor(
+    return quirk_builder.sensor(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
         entity_type=EntityType.CONFIG,
@@ -928,7 +931,7 @@ async def test_quirks_v2_metadata_errors(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
     device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
-    augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
+    augment_method: Callable[[QuirkBuilder], QuirkBuilder],
     validate_method: Callable,
     expected_exception_string: str,
 ) -> None:
@@ -939,30 +942,19 @@ async def test_quirks_v2_metadata_errors(
 
     # ensure the error is caught and raised
     with pytest.raises(ValueError, match=expected_exception_string):
-        try:
-            # introduce an error
-            zigpy_device = _get_test_device(
-                zigpy_device_mock,
-                "Ikea of Sweden4",
-                "TRADFRI remote control4",
-                augment_method=augment_method,
-            )
-            await device_joined(zigpy_device)
+        # introduce an error
+        zigpy_device = _get_test_device(
+            zigpy_device_mock,
+            "Ikea of Sweden4",
+            "TRADFRI remote control4",
+            augment_method=augment_method,
+        )
+        await device_joined(zigpy_device)
 
-            validate_metadata(validate_method)
-            # if the device was created we remove it
-            # so we don't pollute the rest of the tests
-            zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
-        except ValueError as e:
-            # if the device was not created we remove it
-            # so we don't pollute the rest of the tests
-            zigpy.quirks._DEVICE_REGISTRY._registry_v2.pop(
-                (
-                    "Ikea of Sweden4",
-                    "TRADFRI remote control4",
-                )
-            )
-            raise e
+        validate_metadata(validate_method)
+        # if the device was created we remove it
+        # so we don't pollute the rest of the tests
+        zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
 
 
 class BadDeviceClass(enum.Enum):
@@ -972,11 +964,11 @@ class BadDeviceClass(enum.Enum):
 
 
 def bad_binary_sensor_device_class(
-    v2_quirk: QuirksV2RegistryEntry,
-) -> QuirksV2RegistryEntry:
+    quirk_builder: QuirkBuilder,
+) -> QuirkBuilder:
     """Introduce a bad device class on a binary sensor."""
 
-    return v2_quirk.binary_sensor(
+    return quirk_builder.binary_sensor(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.on_off.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
         device_class=BadDeviceClass.BAD,
@@ -984,11 +976,11 @@ def bad_binary_sensor_device_class(
 
 
 def bad_sensor_device_class(
-    v2_quirk: QuirksV2RegistryEntry,
-) -> QuirksV2RegistryEntry:
+    quirk_builder: QuirkBuilder,
+) -> QuirkBuilder:
     """Introduce a bad device class on a sensor."""
 
-    return v2_quirk.sensor(
+    return quirk_builder.sensor(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
         device_class=BadDeviceClass.BAD,
@@ -996,11 +988,11 @@ def bad_sensor_device_class(
 
 
 def bad_number_device_class(
-    v2_quirk: QuirksV2RegistryEntry,
-) -> QuirksV2RegistryEntry:
+    quirk_builder: QuirkBuilder,
+) -> QuirkBuilder:
     """Introduce a bad device class on a number."""
 
-    return v2_quirk.number(
+    return quirk_builder.number(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.on_time.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
         device_class=BadDeviceClass.BAD,
@@ -1032,7 +1024,7 @@ async def test_quirks_v2_metadata_bad_device_classes(
     zigpy_device_mock,
     device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
-    augment_method: Callable[[QuirksV2RegistryEntry], QuirksV2RegistryEntry],
+    augment_method: Callable[[QuirkBuilder], QuirkBuilder],
     expected_exception_string: str,
 ) -> None:
     """Test bad quirks v2 device classes."""
@@ -1040,8 +1032,8 @@ async def test_quirks_v2_metadata_bad_device_classes(
     # introduce an error
     zigpy_device = _get_test_device(
         zigpy_device_mock,
-        "Ikea of Sweden4",
-        "TRADFRI remote control4",
+        "Ikea of Sweden5",
+        "TRADFRI remote control5",
         augment_method=augment_method,
     )
     await device_joined(zigpy_device)
