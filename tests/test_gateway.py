@@ -166,6 +166,24 @@ async def test_device_left(
     assert zha_dev_basic.on_network is False
 
 
+async def test_gateway_startup_failure(
+    zha_data: ZHAData,
+) -> None:
+    """Test shutdown called when gateway init fails."""
+
+    zha_gateway = await Gateway.async_from_config(zha_data)
+
+    with (
+        patch("zha.application.gateway.Gateway.load_devices", side_effect=Exception),
+        pytest.raises(Exception),
+    ):
+        zha_gateway.shutdown = AsyncMock(wraps=zha_gateway.shutdown)
+        await zha_gateway.async_initialize()
+        await zha_gateway.async_block_till_done()
+
+    assert zha_gateway.shutdown.await_count == 1
+
+
 async def test_gateway_group_methods(
     zha_gateway: Gateway,
     device_light_1,  # pylint: disable=redefined-outer-name
