@@ -422,15 +422,6 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
         """Retrieve latest state."""
         await self.get_attribute_value("fan_mode", from_cache=False)
 
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
-        """Handle attribute update from fan cluster."""
-        attr_name = self._get_attribute_name(attrid)
-        self.debug(
-            "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
-        )
-        if attr_name == "fan_mode":
-            self.attribute_updated(attrid, attr_name, value)
-
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(IKEA_REMOTE_CLUSTER)
