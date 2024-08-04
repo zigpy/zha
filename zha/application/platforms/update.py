@@ -8,8 +8,8 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, final
 
-from zigpy.ota import OtaImageWithMetadata
-from zigpy.zcl.clusters.general import Ota
+from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
+from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -24,8 +24,6 @@ from zha.zigbee.cluster_handlers.const import (
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
-    # from zigpy.application import ControllerApplication
-
     from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
 
@@ -60,6 +58,7 @@ ATTR_IN_PROGRESS: Final = "in_progress"
 ATTR_PROGRESS: Final = "progress"
 ATTR_LATEST_VERSION: Final = "latest_version"
 ATTR_RELEASE_SUMMARY: Final = "release_summary"
+ATTR_RELEASE_NOTES: Final = "release_notes"
 ATTR_RELEASE_URL: Final = "release_url"
 ATTR_VERSION: Final = "version"
 
@@ -92,6 +91,7 @@ class FirmwareUpdateEntity(PlatformEntity):
     _attr_progress: int = 0
     _attr_latest_version: str | None = None
     _attr_release_summary: str | None = None
+    _attr_release_notes: str | None = None
     _attr_release_url: str | None = None
 
     def __init__(
@@ -173,6 +173,11 @@ class FirmwareUpdateEntity(PlatformEntity):
         return self._attr_release_summary
 
     @property
+    def release_notes(self) -> str | None:
+        """Full release notes of the latest version available."""
+        return self._attr_release_notes
+
+    @property
     def release_url(self) -> str | None:
         """URL to the full release notes of the latest version available."""
         return self._attr_release_url
@@ -195,6 +200,7 @@ class FirmwareUpdateEntity(PlatformEntity):
             ATTR_PROGRESS: self.progress,
             ATTR_LATEST_VERSION: self.latest_version,
             ATTR_RELEASE_SUMMARY: release_summary,
+            ATTR_RELEASE_NOTES: self.release_notes,
             ATTR_RELEASE_URL: self.release_url,
         }
 
@@ -231,16 +237,43 @@ class FirmwareUpdateEntity(PlatformEntity):
             self._attr_installed_version = f"0x{event.attribute_value:08x}"
             self.maybe_emit_state_changed_event()
 
-    def device_ota_update_available(
-        self, image: OtaImageWithMetadata, current_file_version: int
+    def device_ota_image_query_result(
+        self,
+        images_result: OtaImagesResult,
+        query_next_img_command: QueryNextImageCommand,
     ) -> None:
         """Handle ota update available signal from Zigpy."""
-        self._latest_firmware = image
-        self._attr_latest_version = f"0x{image.version:08x}"
-        self._attr_installed_version = f"0x{current_file_version:08x}"
 
-        if image.metadata.changelog:
-            self._attr_release_summary = image.metadata.changelog
+        _LOGGER.debug("Got OTA result: %s - %s", images_result, query_next_img_command)
+
+        current_version = query_next_img_command.current_file_version
+        self._attr_installed_version = f"0x{current_version:08x}"
+
+        self._latest_firmware = None
+        self._attr_latest_version = None
+        self._attr_release_summary = None
+        self._attr_release_notes = None
+
+        if images_result.upgrades:
+            # If there are upgrades, cache the image and indicate that we should upgrade
+            self._latest_firmware = images_result.upgrades[0]
+            self._attr_latest_version = f"0x{self._latest_firmware.version:08x}"
+        elif images_result.downgrades:
+            # If not, note the version of the most recent firmware
+            self._latest_firmware = None
+            self._attr_latest_version = f"0x{images_result.downgrades[0].version:08x}"
+
+        if (
+            self._latest_firmware is not None
+            and self._latest_firmware.metadata.changelog
+        ):
+            self._attr_release_summary = self._latest_firmware.metadata.changelog
+
+        if (
+            self._latest_firmware is not None
+            and self._latest_firmware.metadata.release_notes
+        ):
+            self._attr_release_notes = self._latest_firmware.metadata.release_notes
 
         self.maybe_emit_state_changed_event()
 
