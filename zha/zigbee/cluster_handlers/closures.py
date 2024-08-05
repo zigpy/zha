@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import zigpy.types as t
 from zigpy.zcl.clusters.closures import ConfigStatus, DoorLock, Shade, WindowCovering
 
@@ -68,24 +66,6 @@ class DoorLockClusterHandler(ClusterHandler):
                     "operation": args[1].name,
                     "code_slot": (args[2] + 1),  # start code slots at 1
                 },
-            )
-
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
-        """Handle attribute update from lock cluster."""
-        attr_name = self._get_attribute_name(attrid)
-        self.debug(
-            "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
-        )
-        if attr_name == self._value_attribute:
-            self.emit(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                ClusterAttributeUpdatedEvent(
-                    attribute_id=attrid,
-                    attribute_name=attr_name,
-                    attribute_value=value,
-                    cluster_handler_unique_id=self.unique_id,
-                    cluster_id=self.cluster.cluster_id,
-                ),
             )
 
     async def async_set_user_code(self, code_slot: int, user_code: str) -> None:
