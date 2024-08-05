@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Coroutine
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Final
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
@@ -360,13 +361,13 @@ class LevelControlClusterHandler(ClusterHandler):
                 SIGNAL_MOVE_LEVEL, -args[1] if args[0] else args[1]
             )
 
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
+    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
         """Handle attribute updates on this cluster."""
         self.debug("received attribute: %s update with value: %s", attrid, value)
         if attrid == self.CURRENT_LEVEL:
             self.dispatch_level_change(SIGNAL_SET_LEVEL, value)
         else:
-            super().attribute_updated(attrid, value, _)
+            super().attribute_updated(attrid, value, timestamp)
 
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
