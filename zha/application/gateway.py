@@ -728,9 +728,10 @@ class Gateway(AsyncUtilMixin, EventBase):
             await group.on_remove()
 
         _LOGGER.debug("Shutting down ZHA ControllerApplication")
-        await self.application_controller.shutdown()
-        self.application_controller = None
-        await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
+        if self.application_controller is not None:
+            await self.application_controller.shutdown()
+            self.application_controller = None
+            await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
 
         await super().shutdown()
 
