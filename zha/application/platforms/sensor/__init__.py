@@ -29,6 +29,7 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.number.const import UNITS
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
@@ -486,6 +487,41 @@ class AnalogInput(Sensor):
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "analog_input"
+
+
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
+    stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
+)
+class AnalogInputSensor(Sensor):
+    """Sensor that displays analog input values."""
+
+    _attribute_name = "present_value"
+    _attr_translation_key: str = "analog_input"
+    _attr_entity_registry_enabled_default = False
+    _attr_extra_state_attribute_names: set[str] = {
+        "description",
+        "max_present_value",
+        "min_present_value",
+        "out_of_service",
+        "reliability",
+        "resolution",
+        "status_flags",
+        "application_type",
+    }
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        engineering_units = self._cluster_handler.engineering_units
+        self._attr_native_unit_of_measurement = UNITS.get(engineering_units)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
