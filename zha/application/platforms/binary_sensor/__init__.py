@@ -5,12 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
+from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
@@ -60,6 +61,33 @@ class BinarySensor(PlatformEntity):
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
     PLATFORM: Platform = Platform.BINARY_SENSOR
+
+    @classmethod
+    def create_platform_entity(
+        cls: type[Self],
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> Self | None:
+        """Entity Factory.
+
+        Return entity if it is a supported configuration, otherwise return None
+        """
+        cluster = cluster_handlers[0].cluster
+        if ENTITY_METADATA not in kwargs and (
+            cls._attribute_name in cluster.unsupported_attributes
+            or cls._attribute_name not in cluster.attributes_by_name
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                cls._attribute_name,
+                cls.__name__,
+            )
+            return None
+
+        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def __init__(
         self,
