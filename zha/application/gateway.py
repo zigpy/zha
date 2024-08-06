@@ -210,7 +210,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         ):
             app_config[CONF_USE_THREAD] = False
 
-        return radio_type.controller, radio_type.controller.SCHEMA(app_config)
+        return radio_type.controller, app_config
 
     @classmethod
     async def async_from_config(cls, config: ZHAData) -> Self:
