@@ -283,6 +283,7 @@ class DeviceOptions:
     consider_unavailable_battery: int = dataclasses.field(
         default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY
     )
+    allow_startup_polling_mains_devices: bool = dataclasses.field(default=True)
 
 
 @dataclass(kw_only=True, slots=True)
