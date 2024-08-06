@@ -84,26 +84,12 @@ class AlarmsClusterHandler(ClusterHandler):
     """Alarms cluster handler."""
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogInput.cluster_id)
-class AnalogInputClusterHandler(ClusterHandler):
-    """Analog Input cluster handler."""
+class AnalogClusterHandler(ClusterHandler):
+    """Common base for analog input and output cluster handlers."""
 
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=AnalogInput.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
-@registries.BINDABLE_CLUSTERS.register(AnalogOutput.cluster_id)
-@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogOutput.cluster_id)
-class AnalogOutputClusterHandler(ClusterHandler):
-    """Analog Output cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=AnalogOutput.AttributeDefs.present_value.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
     )
@@ -156,6 +142,23 @@ class AnalogOutputClusterHandler(ClusterHandler):
     def application_type(self) -> int | None:
         """Return cached value of application_type."""
         return self.cluster.get(AnalogOutput.AttributeDefs.application_type.name)
+
+
+@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogInput.cluster_id)
+class AnalogInputClusterHandler(AnalogClusterHandler):
+    """Analog Input cluster handler."""
+
+    async def async_update(self):
+        """Update cluster value attribute."""
+        await self.get_attribute_value(
+            AnalogInput.AttributeDefs.present_value.name, from_cache=False
+        )
+
+
+@registries.BINDABLE_CLUSTERS.register(AnalogOutput.cluster_id)
+@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogOutput.cluster_id)
+class AnalogOutputClusterHandler(AnalogClusterHandler):
+    """Analog Output cluster handler."""
 
     async def async_set_present_value(self, value: float) -> None:
         """Update present_value."""
