@@ -387,7 +387,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             *(dev.async_initialize(from_cache=True) for dev in self.devices.values())
         )
 
-        if not self.config.config.device_options.allow_startup_polling_mains_devices:
+        if not self.config.config.device_options.allow_mains_startup_polling:
             _LOGGER.debug("Polling of mains powered devices at startup is disabled")
             return
 
