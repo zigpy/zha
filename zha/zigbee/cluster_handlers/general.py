@@ -93,6 +93,10 @@ class AnalogInputClusterHandler(ClusterHandler):
             attr=AnalogInput.AttributeDefs.present_value.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
+        AttrReportConfig(
+            attr=AnalogInput.AttributeDefs.status_flags.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
     )
     ZCL_INIT_ATTRS = {
         AnalogInput.AttributeDefs.description.name: True,
@@ -101,7 +105,6 @@ class AnalogInputClusterHandler(ClusterHandler):
         AnalogInput.AttributeDefs.out_of_service.name: True,
         AnalogInput.AttributeDefs.reliability.name: True,
         AnalogInput.AttributeDefs.resolution.name: True,
-        AnalogInput.AttributeDefs.status_flags.name: True,
         AnalogInput.AttributeDefs.engineering_units.name: True,
         AnalogInput.AttributeDefs.application_type.name: True,
     }
