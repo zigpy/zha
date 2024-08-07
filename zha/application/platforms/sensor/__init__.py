@@ -477,7 +477,7 @@ class EnumSensor(Sensor):
         return self._enum(value).name
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT)
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT)
 class AnalogInputSensor(Sensor):
     """Sensor that displays analog input values."""
 
