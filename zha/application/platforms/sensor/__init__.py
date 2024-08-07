@@ -477,22 +477,7 @@ class EnumSensor(Sensor):
         return self._enum(value).name
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
-    manufacturers="Digi",
-    stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
-)
-class AnalogInput(Sensor):
-    """Sensor that displays analog input values."""
-
-    _attribute_name = "present_value"
-    _attr_translation_key: str = "analog_input"
-
-
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
-    stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
-)
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT)
 class AnalogInputSensor(Sensor):
     """Sensor that displays analog input values."""
 
