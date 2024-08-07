@@ -179,7 +179,72 @@ class AnalogValueClusterHandler(ClusterHandler):
             attr=AnalogValue.AttributeDefs.present_value.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
+        AttrReportConfig(
+            attr=AnalogValue.AttributeDefs.status_flags.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
     )
+
+    ZCL_INIT_ATTRS = {
+        AnalogValue.AttributeDefs.description.name: True,
+        AnalogValue.AttributeDefs.out_of_service.name: True,
+        AnalogValue.AttributeDefs.reliability.name: True,
+        AnalogValue.AttributeDefs.relinquish_default.name: True,
+        AnalogValue.AttributeDefs.engineering_units.name: True,
+        AnalogValue.AttributeDefs.application_type.name: True,
+    }
+
+    @property
+    def present_value(self) -> float | None:
+        """Return cached value of present_value."""
+        return self.cluster.get(AnalogValue.AttributeDefs.present_value.name)
+
+    @property
+    def description(self) -> str | None:
+        """Return cached value of description."""
+        return self.cluster.get(AnalogValue.AttributeDefs.description.name)
+
+    @property
+    def out_of_service(self) -> bool | None:
+        """Return cached value of out_of_service."""
+        return self.cluster.get(AnalogValue.AttributeDefs.out_of_service.name)
+
+    @property
+    def reliability(self) -> int | None:
+        """Return cached value of reliability."""
+        return self.cluster.get(AnalogValue.AttributeDefs.reliability.name)
+
+    @property
+    def relinquish_default(self) -> float | None:
+        """Return cached value of relinquish_default."""
+        return self.cluster.get(AnalogValue.AttributeDefs.relinquish_default.name)
+
+    @property
+    def status_flags(self) -> int | None:
+        """Return cached value of status_flags."""
+        return self.cluster.get(AnalogValue.AttributeDefs.status_flags.name)
+
+    @property
+    def engineering_units(self) -> int | None:
+        """Return cached value of engineering_units."""
+        return self.cluster.get(AnalogValue.AttributeDefs.engineering_units.name)
+
+    @property
+    def application_type(self) -> int | None:
+        """Return cached value of application_type."""
+        return self.cluster.get(AnalogValue.AttributeDefs.application_type.name)
+
+    async def async_set_present_value(self, value: float) -> None:
+        """Update present_value."""
+        await self.write_attributes_safe(
+            {AnalogValue.AttributeDefs.present_value.name: value}
+        )
+
+    async def async_update(self):
+        """Update cluster value attribute."""
+        await self.get_attribute_value(
+            AnalogValue.AttributeDefs.present_value.name, from_cache=False
+        )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceControl.cluster_id)
