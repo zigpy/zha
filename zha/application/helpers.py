@@ -8,6 +8,7 @@ import collections
 from collections.abc import Callable
 import dataclasses
 from dataclasses import dataclass
+import datetime
 import enum
 import logging
 import re
@@ -352,6 +353,7 @@ class ZHAData:
         default_factory=dict
     )
     allow_polling: bool = dataclasses.field(default=False)
+    local_timezone: datetime.tzinfo = dataclasses.field(default=datetime.UTC)
 
 
 class GlobalUpdater:
