@@ -1124,8 +1124,6 @@ class MinTransitionLight(Light):
 class LightGroup(GroupEntity, BaseLight):
     """Representation of a light group."""
 
-    _attr_translation_key: str = "light_group"
-
     def __init__(self, group: Group):
         """Initialize a light group."""
         # light groups change the update_group_from_child_delay so we need to do this

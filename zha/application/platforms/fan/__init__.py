@@ -283,8 +283,6 @@ class Fan(PlatformEntity, BaseFan):
 class FanGroup(GroupEntity, BaseFan):
     """Representation of a fan group."""
 
-    _attr_translation_key: str = "fan_group"
-
     def __init__(self, group: Group):
         """Initialize a fan group."""
         self._fan_cluster_handler: ClusterHandler = group.endpoint[hvac.Fan.cluster_id]
