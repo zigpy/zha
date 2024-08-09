@@ -397,8 +397,8 @@ async def test_coordinator_info_generic_name(
     current_coordinator = await device_joined(current_coord_dev)
     assert current_coordinator.is_active_coordinator
 
-    assert current_coordinator.model == "Zigbee Coordinator"
-    assert current_coordinator.manufacturer == "Generic EZSP"
+    assert current_coordinator.model == "Generic Zigbee Coordinator (EZSP)"
+    assert current_coordinator.manufacturer == ""
 
 
 async def test_async_get_clusters(

@@ -266,7 +266,7 @@ class Device(LogMixin, EventBase):
                 self.gateway.application_controller.state.node_info.manufacturer
             )
             if manufacturer is None:
-                return f"Generic {self.gateway.radio_type.name}"
+                return ""
             return manufacturer
 
         if self._zigpy_device.manufacturer is None:
@@ -280,7 +280,7 @@ class Device(LogMixin, EventBase):
         if self.is_active_coordinator:
             model = self.gateway.application_controller.state.node_info.model
             if model is None:
-                return "Zigbee Coordinator"
+                return f"Generic Zigbee Coordinator ({self.gateway.radio_type.pretty_name})"
             return model
 
         if self._zigpy_device.model is None:
