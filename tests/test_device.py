@@ -378,6 +378,29 @@ async def test_coordinator_info_uses_node_info(
     assert current_coordinator.manufacturer == "Real Coordinator Manufacturer"
 
 
+async def test_coordinator_info_generic_name(
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test that the current coordinator uses strings from `node_info`."""
+
+    current_coord_dev = zigpy_device(ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000)
+    current_coord_dev.node_desc = current_coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+
+    app = current_coord_dev.application
+    app.state.node_info.ieee = current_coord_dev.ieee
+    app.state.node_info.model = None
+    app.state.node_info.manufacturer = None
+
+    current_coordinator = await device_joined(current_coord_dev)
+    assert current_coordinator.is_active_coordinator
+
+    assert current_coordinator.model == "Generic EZSP"
+    assert current_coordinator.manufacturer == "Zigbee Coordinator"
+
+
 async def test_async_get_clusters(
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
