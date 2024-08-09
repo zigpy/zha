@@ -840,8 +840,8 @@ class SinopeLightLedColors(types.enum32):
     },
 )
 class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
-    """Representation of a switch that controls whether Double Tap Full option
-    is enabled on a Sinope light switch.
+    """Representation of the marker LED color off-state color
+    of Sinope light switches
     """
 
     _unique_id_suffix = "off_led_color"
@@ -849,3 +849,26 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
     _attr_translation_key: str = "sinope_off_led_color"
     _enum = SinopeLightLedColors
     _attr_icon = 'mdi:palette-outline'
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={
+        "DM2500ZB",
+        "DM2500ZB-G2",
+        "DM2550ZB",
+        "DM2550ZB-G2",
+        "SW2500ZB",
+        "SW2500ZB-G2",
+    },
+)
+class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
+    """Representation of the marker LED color on-state color
+    of Sinope light switches
+    """
+
+    _unique_id_suffix = "on_led_color"
+    _attribute_name = "on_led_color"
+    _attr_translation_key: str = "sinope_on_led_color"
+    _enum = SinopeLightLedColors
+    _attr_icon = 'mdi:palette'
