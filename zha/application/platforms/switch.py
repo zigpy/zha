@@ -145,7 +145,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self._on_off_cluster_handler = group.zigpy_group.endpoint[OnOff.cluster_id]
         if hasattr(self, "info_object"):
             delattr(self, "info_object")
-        self.async_update()
+        self.update()
 
     @property
     def is_on(self) -> bool:
@@ -168,7 +168,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self._state = False
         self.maybe_emit_state_changed_event()
 
-    def async_update(self, _: Any | None = None) -> None:
+    def update(self, _: Any | None = None) -> None:
         """Query all members and determine the light group state."""
         self.debug("Updating switch group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
