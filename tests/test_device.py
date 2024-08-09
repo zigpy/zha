@@ -163,9 +163,7 @@ async def test_check_available_success(
     basic_ch.read_attributes.side_effect = _update_last_seen
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event = mock.MagicMock(
-            wraps=entity.maybe_emit_state_changed_event
-        )
+        entity.emit = mock.MagicMock(wraps=entity.emit)
 
     # we want to test the device availability handling alone
     zha_gateway.global_updater.stop()
@@ -179,9 +177,9 @@ async def test_check_available_success(
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event.assert_not_called()
+        entity.emit.assert_not_called()
         assert not entity.available
-        entity.maybe_emit_state_changed_event.reset_mock()
+        entity.emit.reset_mock()
 
     # There was traffic from the device: pings, but not yet available
     await _send_time_changed(
@@ -192,9 +190,9 @@ async def test_check_available_success(
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event.assert_not_called()
+        entity.emit.assert_not_called()
         assert not entity.available
-        entity.maybe_emit_state_changed_event.reset_mock()
+        entity.emit.reset_mock()
 
     # There was traffic from the device: don't try to ping, marked as available
     await _send_time_changed(
@@ -206,9 +204,9 @@ async def test_check_available_success(
     assert zha_device.on_network is True
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event.assert_called()
+        entity.emit.assert_called()
         assert entity.available
-        entity.maybe_emit_state_changed_event.reset_mock()
+        entity.emit.reset_mock()
 
     assert "Device is not on the network, marking unavailable" not in caplog.text
     zha_device.on_network = False
@@ -219,9 +217,9 @@ async def test_check_available_success(
     assert "Device is not on the network, marking unavailable" in caplog.text
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event.assert_called()
+        entity.emit.assert_called()
         assert not entity.available
-        entity.maybe_emit_state_changed_event.reset_mock()
+        entity.emit.reset_mock()
 
 
 @patch(
@@ -247,9 +245,7 @@ async def test_check_available_unsuccessful(
     )
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event = mock.MagicMock(
-            wraps=entity.maybe_emit_state_changed_event
-        )
+        entity.emit = mock.MagicMock(wraps=entity.emit)
 
     # we want to test the device availability handling alone
     zha_gateway.global_updater.stop()
@@ -264,9 +260,9 @@ async def test_check_available_unsuccessful(
     assert zha_device.available is True
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event.assert_not_called()
+        entity.emit.assert_not_called()
         assert entity.available
-        entity.maybe_emit_state_changed_event.reset_mock()
+        entity.emit.reset_mock()
 
     # still no traffic, but zha_device is still available
     await _send_time_changed(
@@ -278,9 +274,9 @@ async def test_check_available_unsuccessful(
     assert zha_device.available is True
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event.assert_not_called()
+        entity.emit.assert_not_called()
         assert entity.available
-        entity.maybe_emit_state_changed_event.reset_mock()
+        entity.emit.reset_mock()
 
     # not even trying to update, device is unavailable
     await _send_time_changed(
@@ -292,9 +288,9 @@ async def test_check_available_unsuccessful(
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
-        entity.maybe_emit_state_changed_event.assert_called()
+        entity.emit.assert_called()
         assert not entity.available
-        entity.maybe_emit_state_changed_event.reset_mock()
+        entity.emit.reset_mock()
 
 
 @patch(
