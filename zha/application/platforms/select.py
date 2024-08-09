@@ -846,7 +846,7 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
 
     _unique_id_suffix = "off_led_color"
     _attribute_name = "off_led_color"
-    _attr_translation_key: str = "sinope_off_led_color"
+    _attr_translation_key: str = "off_led_color"
     _enum = SinopeLightLedColors
     _attr_icon = 'mdi:palette-outline'
 
@@ -869,6 +869,6 @@ class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
 
     _unique_id_suffix = "on_led_color"
     _attribute_name = "on_led_color"
-    _attr_translation_key: str = "sinope_on_led_color"
+    _attr_translation_key: str = "on_led_color"
     _enum = SinopeLightLedColors
     _attr_icon = 'mdi:palette'
