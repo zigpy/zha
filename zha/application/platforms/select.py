@@ -819,3 +819,33 @@ class DanfossViewingDirection(ZCLEnumSelectEntity):
     _attribute_name = "viewing_direction"
     _attr_translation_key: str = "viewing_direction"
     _enum = danfoss_thermostat.DanfossViewingDirectionEnum
+
+
+class SinopeLightLedColors(types.enum32):
+    Lim = 0x0affdc
+    Amber = 0x000a4b
+    Fushia = 0x0100a5
+    Perle = 0x64ffff
+    Blue = 0xffff00
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={
+        "DM2500ZB",
+        "DM2500ZB-G2",
+        "DM2550ZB",
+        "DM2550ZB-G2",
+        "SW2500ZB",
+        "SW2500ZB-G2",
+    },
+)
+class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
+    """Representation of a switch that controls whether Double Tap Full option
+    is enabled on a Sinope light switch.
+    """
+
+    _unique_id_suffix = "off_led_color"
+    _attribute_name = "off_led_color"
+    _attr_translation_key: str = "sinope_off_led_color"
+    _enum = SinopeLightLedColors
+    _attr_icon = 'mdi:palette-outline'
