@@ -262,18 +262,30 @@ class Device(LogMixin, EventBase):
     def manufacturer(self) -> str:
         """Return manufacturer for device."""
         if self.is_active_coordinator:
-            return self.gateway.application_controller.state.node_info.manufacturer
+            manufacturer = (
+                self.gateway.application_controller.state.node_info.manufacturer
+            )
+            if manufacturer is None:
+                return ""
+            return manufacturer
+
         if self._zigpy_device.manufacturer is None:
             return UNKNOWN_MANUFACTURER
+
         return self._zigpy_device.manufacturer
 
     @cached_property
     def model(self) -> str:
         """Return model for device."""
         if self.is_active_coordinator:
-            return self.gateway.application_controller.state.node_info.model
+            model = self.gateway.application_controller.state.node_info.model
+            if model is None:
+                return f"Generic Zigbee Coordinator ({self.gateway.radio_type.pretty_name})"
+            return model
+
         if self._zigpy_device.model is None:
             return UNKNOWN_MODEL
+
         return self._zigpy_device.model
 
     @cached_property

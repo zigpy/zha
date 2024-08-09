@@ -188,9 +188,13 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         self.config.gateway = self
 
+    @property
+    def radio_type(self) -> RadioType:
+        """Get the current radio type."""
+        return RadioType[self.config.config.coordinator_configuration.radio_type]
+
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
-        radio_type = RadioType[self.config.config.coordinator_configuration.radio_type]
         app_config = self.config.zigpy_config
         app_config[CONF_DEVICE] = {
             CONF_DEVICE_PATH: self.config.config.coordinator_configuration.path,
@@ -205,12 +209,12 @@ class Gateway(AsyncUtilMixin, EventBase):
         # event loop, when a connection to a TCP coordinator fails in a specific way
         if (
             CONF_USE_THREAD not in app_config
-            and radio_type is RadioType.ezsp
+            and self.radio_type is RadioType.ezsp
             and app_config[CONF_DEVICE][CONF_DEVICE_PATH].startswith("socket://")
         ):
             app_config[CONF_USE_THREAD] = False
 
-        return radio_type.controller, app_config
+        return self.radio_type.controller, app_config
 
     @classmethod
     async def async_from_config(cls, config: ZHAData) -> Self:
