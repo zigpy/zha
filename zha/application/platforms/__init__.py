@@ -465,5 +465,9 @@ class GroupEntity(BaseEntity):
             self._change_listener_debouncer.async_cancel()
 
     @abstractmethod
-    def async_update(self, _: Any | None = None) -> None:
+    def update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
+
+    async def async_update(self, _: Any | None = None) -> None:
+        """Update the state of this group entity."""
+        self.update()
