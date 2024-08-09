@@ -408,8 +408,10 @@ class Device(LogMixin, EventBase):
     @on_network.setter
     def on_network(self, new_on_network: bool) -> None:
         """Set device on_network flag."""
-        self._on_network = new_on_network
         self.update_available(new_on_network)
+        self._on_network = new_on_network
+        if not new_on_network:
+            self.debug("Device is not on the network, marking unavailable")
 
     @property
     def power_configuration_ch(self) -> ClusterHandler | None:
@@ -510,10 +512,6 @@ class Device(LogMixin, EventBase):
         # don't flip the availability state of the coordinator
         if self.is_active_coordinator:
             return
-        if not self._on_network:
-            self.debug("Device is not on the network, marking unavailable")
-            self.update_available(False)
-            return
         if self.last_seen is None:
             self.debug("last_seen is None, marking the device unavailable")
             self.update_available(False)
@@ -586,6 +584,8 @@ class Device(LogMixin, EventBase):
             return
         if availability_changed and not available:
             self.debug("Device availability changed and device became unavailable")
+            for entity in self.platform_entities.values():
+                entity.maybe_emit_state_changed_event()
             self.emit_zha_event(
                 {
                     "device_event_type": "device_offline",
