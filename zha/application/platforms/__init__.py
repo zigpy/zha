@@ -289,14 +289,14 @@ class PlatformEntity(BaseEntity):
         self._device: Device = device
         self._endpoint = endpoint
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if self.unique_id not in self._device.platform_entities:
-            self._device.platform_entities[self.unique_id] = self
+        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
+            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
         else:
             _LOGGER.debug(
                 "Not registering entity %r, unique id %r already exists: %r",
                 self,
-                self.unique_id,
-                self._device.platform_entities[self.unique_id],
+                (self.PLATFORM, self.unique_id),
+                self._device.platform_entities[(self.PLATFORM, self.unique_id)],
             )
 
     @classmethod

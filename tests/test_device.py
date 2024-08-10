@@ -17,6 +17,7 @@ from zigpy.zcl.foundation import Status, WriteAttributesResponse
 import zigpy.zdo.types as zdo_t
 
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
+from zha.application import Platform
 from zha.application.const import (
     CLUSTER_COMMAND_SERVER,
     CLUSTER_COMMANDS_CLIENT,
@@ -766,27 +767,51 @@ async def test_device_properties(
     assert zha_device.sw_version is None
 
     assert len(zha_device.platform_entities) == 3
-    assert "00:0d:6f:00:0a:90:69:e7-3-0-lqi" in zha_device.platform_entities
-    assert "00:0d:6f:00:0a:90:69:e7-3-0-rssi" in zha_device.platform_entities
-    assert "00:0d:6f:00:0a:90:69:e7-3-6" in zha_device.platform_entities
+    assert (
+        Platform.SENSOR,
+        "00:0d:6f:00:0a:90:69:e7-3-0-lqi",
+    ) in zha_device.platform_entities
+    assert (
+        Platform.SENSOR,
+        "00:0d:6f:00:0a:90:69:e7-3-0-rssi",
+    ) in zha_device.platform_entities
+    assert (
+        Platform.SWITCH,
+        "00:0d:6f:00:0a:90:69:e7-3-6",
+    ) in zha_device.platform_entities
 
     assert isinstance(
-        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-0-lqi"], LQISensor
+        zha_device.platform_entities[
+            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi")
+        ],
+        LQISensor,
     )
     assert isinstance(
-        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-0-rssi"], RSSISensor
+        zha_device.platform_entities[
+            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-rssi")
+        ],
+        RSSISensor,
     )
     assert isinstance(
-        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-6"], Switch
+        zha_device.platform_entities[(Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-6")],
+        Switch,
     )
 
-    assert zha_device.get_platform_entity("00:0d:6f:00:0a:90:69:e7-3-0-lqi") is not None
+    assert (
+        zha_device.get_platform_entity(
+            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
+        )
+        is not None
+    )
     assert isinstance(
-        zha_device.get_platform_entity("00:0d:6f:00:0a:90:69:e7-3-0-lqi"), LQISensor
+        zha_device.get_platform_entity(
+            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
+        ),
+        LQISensor,
     )
 
     with pytest.raises(KeyError, match="Entity foo not found"):
-        zha_device.get_platform_entity("foo")
+        zha_device.get_platform_entity("bar", "foo")
 
     # test things are none when they aren't returned by Zigpy
     zigpy_dev.node_desc = None
