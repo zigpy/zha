@@ -672,8 +672,8 @@ class Device(LogMixin, EventBase):
             **self.device_info.__dict__,
             active_coordinator=self.is_active_coordinator,
             entities={
-                unique_id[1]: platform_entity.info_object
-                for unique_id, platform_entity in self.platform_entities.items()
+                platform_entity.unique_id: platform_entity.info_object
+                for platform_entity in self.platform_entities.values()
             },
             neighbors=[
                 NeighborInfo(
