@@ -11,6 +11,7 @@ from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.alarm_control_panel import AlarmControlPanel
 from zha.application.platforms.alarm_control_panel.const import AlarmState
@@ -49,7 +50,7 @@ async def test_alarm_control_panel(
     zha_device: Device = await device_joined(zigpy_device)
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
     alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
-        "00:0d:6f:00:0a:90:69:e7-1"
+        (Platform.ALARM_CONTROL_PANEL, "00:0d:6f:00:0a:90:69:e7-1")
     )
     assert alarm_entity is not None
     assert isinstance(alarm_entity, AlarmControlPanel)

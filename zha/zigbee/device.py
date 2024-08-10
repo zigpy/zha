@@ -29,7 +29,7 @@ from zigpy.zcl.foundation import (
 import zigpy.zdo.types as zdo_types
 from zigpy.zdo.types import RouteStatus, _NeighborEnums
 
-from zha.application import discovery
+from zha.application import Platform, discovery
 from zha.application.const import (
     ATTR_ARGS,
     ATTR_ATTRIBUTE,
@@ -233,7 +233,7 @@ class Device(LogMixin, EventBase):
         self._checkins_missed_count: int = 0
         self._on_network: bool = True
 
-        self._platform_entities: dict[str, PlatformEntity] = {}
+        self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
         self.status: DeviceStatus = DeviceStatus.CREATED
@@ -494,13 +494,13 @@ class Device(LogMixin, EventBase):
         self._sw_build_id = sw_build_id
 
     @property
-    def platform_entities(self) -> dict[str, PlatformEntity]:
+    def platform_entities(self) -> dict[tuple[Platform, str], PlatformEntity]:
         """Return the platform entities for this device."""
         return self._platform_entities
 
-    def get_platform_entity(self, unique_id: str) -> PlatformEntity:
+    def get_platform_entity(self, platform: Platform, unique_id: str) -> PlatformEntity:
         """Get a platform entity by unique id."""
-        entity = self._platform_entities.get(unique_id)
+        entity = self._platform_entities.get((platform, unique_id))
         if entity is None:
             raise KeyError(f"Entity {unique_id} not found")
         return entity
@@ -672,7 +672,7 @@ class Device(LogMixin, EventBase):
             **self.device_info.__dict__,
             active_coordinator=self.is_active_coordinator,
             entities={
-                unique_id: platform_entity.info_object
+                unique_id[1]: platform_entity.info_object
                 for unique_id, platform_entity in self.platform_entities.items()
             },
             neighbors=[

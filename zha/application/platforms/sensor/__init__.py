@@ -381,8 +381,8 @@ class DeviceCounterSensor(BaseEntity):
         self._device.gateway.global_updater.register_update_listener(self.update)
 
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if self.unique_id not in self._device.platform_entities:
-            self._device.platform_entities[self.unique_id] = self
+        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
+            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
 
     @functools.cached_property
     def identifiers(self) -> DeviceCounterSensorIdentifiers:
