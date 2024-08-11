@@ -245,7 +245,12 @@ class Device(LogMixin, EventBase):
 
     def __repr__(self) -> str:
         """Return a string representation of the device."""
-        return f"{self._zigpy_device.__repr__()} - quirk_applied: {self.quirk_applied} - quirk_or_device_class: {self.quirk_class} - quirk_id: {self.quirk_id}"
+        return (
+            f"{repr(self._zigpy_device)} - "
+            f"quirk_applied: {self.quirk_applied} - "
+            f"quirk_or_device_class: {self.quirk_class} - "
+            f"quirk_id: {self.quirk_id}"
+        )
 
     @cached_property
     def device(self) -> zigpy.device.Device:
