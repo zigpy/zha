@@ -184,6 +184,37 @@ async def test_gateway_startup_failure(
     assert zha_gateway.shutdown.await_count == 1
 
 
+async def test_gateway_starts_entity_exception(
+    zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test gateway starts when we fail to create an entity."""
+
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "bellows.zigbee.application.ControllerApplication",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "zha.application.platforms.sensor.DeviceCounterSensor.create_platform_entity",
+            side_effect=Exception,
+        ),
+    ):
+        zha_gateway = await Gateway.async_from_config(zha_data)
+        await zha_gateway.async_initialize()
+        await zha_gateway.async_block_till_done()
+        await zha_gateway.async_initialize_devices_and_entities()
+
+        assert "Failed to create platform entity" in caplog.text
+
+        await zha_gateway.shutdown()
+
+
 async def test_gateway_group_methods(
     zha_gateway: Gateway,
     device_light_1,  # pylint: disable=redefined-outer-name

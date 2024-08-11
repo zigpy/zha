@@ -335,11 +335,12 @@ class Gateway(AsyncUtilMixin, EventBase):
                     )
                 except Exception:  # pylint: disable=broad-except
                     _LOGGER.exception(
-                        "Error creating platform entity for %s [args=%s, kwargs=%s]",
+                        "Failed to create platform entity: %s [args=%s, kwargs=%s]",
                         platform_entity_class,
                         args,
                         kw_args,
                     )
+                    continue
                 if platform_entity:
                     _LOGGER.debug(
                         "Platform entity data: %s", platform_entity.info_object
