@@ -329,9 +329,17 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         for platform in discovery.PLATFORMS:
             for platform_entity_class, args, kw_args in self.config.platforms[platform]:
-                platform_entity = platform_entity_class.create_platform_entity(
-                    *args, **kw_args
-                )
+                try:
+                    platform_entity = platform_entity_class.create_platform_entity(
+                        *args, **kw_args
+                    )
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception(
+                        "Error creating platform entity for %s [args=%s, kwargs=%s]",
+                        platform_entity_class,
+                        args,
+                        kw_args,
+                    )
                 if platform_entity:
                     _LOGGER.debug(
                         "Platform entity data: %s", platform_entity.info_object
