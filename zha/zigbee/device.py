@@ -243,6 +243,10 @@ class Device(LogMixin, EventBase):
             if ep_id != 0:
                 self._endpoints[ep_id] = Endpoint.new(endpoint, self)
 
+    def __repr__(self) -> str:
+        """Return a string representation of the device."""
+        return f"{self._zigpy_device.__repr__()} - quirk_applied: {self.quirk_applied} - quirk_or_device_class: {self.quirk_class} - quirk_id: {self.quirk_id}"
+
     @cached_property
     def device(self) -> zigpy.device.Device:
         """Return underlying Zigpy device."""
