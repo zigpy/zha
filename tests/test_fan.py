@@ -16,7 +16,12 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, hvac
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, get_group_entity, send_attributes_report
+from tests.common import (
+    get_entity,
+    get_group_entity,
+    group_entity_availability_test,
+    send_attributes_report,
+)
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -362,51 +367,9 @@ async def test_zha_group_fan_entity(
     # test that group fan is now off
     assert entity.state["is_on"] is False
 
-    assert entity.state["available"] is True
-
-    device_fan_1.on_network = False
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
-
-    device_fan_2.on_network = False
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-
-    assert entity.state["available"] is False
-
-    device_fan_1.on_network = True
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
-
-    device_fan_2.on_network = True
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-
-    assert entity.state["available"] is True
-
-    device_fan_1.available = False
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
-
-    device_fan_2.available = False
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-
-    assert entity.state["available"] is False
-
-    device_fan_1.available = True
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
-
-    device_fan_2.available = True
-    await asyncio.sleep(0.1)
-    await zha_gateway.async_block_till_done()
-
-    assert entity.state["available"] is True
+    await group_entity_availability_test(
+        zha_gateway, device_fan_1, device_fan_2, entity
+    )
 
 
 @patch(
