@@ -179,7 +179,6 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         on_states = [state for state in all_states if state["state"]]
 
         self._state = len(on_states) > 0
-        self._available = any(entity.available for entity in platform_entities)
 
         self.maybe_emit_state_changed_event()
 

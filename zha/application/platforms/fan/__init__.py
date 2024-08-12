@@ -287,7 +287,6 @@ class FanGroup(GroupEntity, BaseFan):
         """Initialize a fan group."""
         self._fan_cluster_handler: ClusterHandler = group.endpoint[hvac.Fan.cluster_id]
         super().__init__(group)
-        self._available: bool = False
         self._percentage = None
         self._preset_mode = None
         if hasattr(self, "info_object"):
@@ -355,7 +354,6 @@ class FanGroup(GroupEntity, BaseFan):
             "All platform entity states for group entity members: %s", all_states
         )
 
-        self._available = any(entity.available for entity in platform_entities)
         percentage_states: list[dict] = [
             state for state in all_states if state.get(ATTR_PERCENTAGE)
         ]
