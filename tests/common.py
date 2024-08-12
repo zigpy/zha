@@ -243,3 +243,55 @@ def get_entity(
     raise KeyError(
         f"No {entity_type} entity found for platform {platform!r} on device {device}: {device.platform_entities}"
     )
+
+
+async def group_entity_availability_test(
+    zha_gateway: Gateway, device_1: Device, device_2: Device, entity: GroupEntity
+):
+    """Test group entity availability handling."""
+
+    assert entity.state["available"] is True
+
+    device_1.on_network = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
+    device_2.on_network = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_1.on_network = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
+    device_2.on_network = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True
+
+    device_1.available = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
+    device_2.available = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_1.available = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
+    device_2.available = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True

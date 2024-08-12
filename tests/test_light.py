@@ -19,6 +19,7 @@ import zigpy.zcl.foundation as zcl_f
 from tests.common import (
     get_entity,
     get_group_entity,
+    group_entity_availability_test,
     send_attributes_report,
     update_attribute_cache,
 )
@@ -919,6 +920,10 @@ async def test_zha_group_light_entity(
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
+
+    await group_entity_availability_test(
+        zha_gateway, device_light_1, device_light_2, entity
+    )
 
     # turn it off to test a new member add being tracked
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})

@@ -113,7 +113,6 @@ class BaseLight(BaseEntity, ABC):
         """Initialize the light."""
         self._device: Device = None
         super().__init__(*args, **kwargs)
-        self._available: bool = False
         self._min_mireds: int | None = 153
         self._max_mireds: int | None = 500
         self._hs_color: tuple[float, float] | None = None
@@ -1207,12 +1206,6 @@ class LightGroup(GroupEntity, BaseLight):
             max_mireds=self.max_mireds,
         )
 
-    # remove this when all ZHA platforms and base entities are updated
-    @property
-    def available(self) -> bool:
-        """Return entity availability."""
-        return self._available
-
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
         await super().on_remove()
@@ -1260,10 +1253,6 @@ class LightGroup(GroupEntity, BaseLight):
         if self._state:
             self._off_with_transition = False
             self._off_brightness = None
-
-        self._available = any(
-            platform_entity.device.available for platform_entity in platform_entities
-        )
 
         self._brightness = reduce_attribute(on_states, ATTR_BRIGHTNESS)
 

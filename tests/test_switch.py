@@ -26,6 +26,7 @@ import zigpy.zcl.foundation as zcl_f
 from tests.common import (
     get_entity,
     get_group_entity,
+    group_entity_availability_test,
     send_attributes_report,
     update_attribute_cache,
 )
@@ -349,6 +350,10 @@ async def test_zha_group_switch_entity(
 
     # test that group light is now back on
     assert bool(entity.state["state"]) is True
+
+    await group_entity_availability_test(
+        zha_gateway, device_switch_1, device_switch_2, entity
+    )
 
 
 class WindowDetectionFunctionQuirk(CustomDevice):
