@@ -421,7 +421,7 @@ class GroupEntity(BaseEntity):
             _LOGGER,
             cooldown=update_group_from_member_delay,
             immediate=False,
-            function=self.async_update,
+            function=self.update,
         )
         self._group.register_group_entity(self)
 
@@ -440,6 +440,21 @@ class GroupEntity(BaseEntity):
         return dataclasses.replace(
             super().info_object,
             group_id=self.group_id,
+        )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the arguments to use in the command."""
+        state = super().state
+        state["available"] = self.available
+        return state
+
+    @property
+    def available(self) -> bool:
+        """Return true if all member entities are available."""
+        return any(
+            platform_entity.available
+            for platform_entity in self._group.get_platform_entities(self.PLATFORM)
         )
 
     @property
