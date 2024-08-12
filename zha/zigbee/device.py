@@ -602,16 +602,15 @@ class Device(LogMixin, EventBase):
                 name=f"({self.nwk},{self.model})_async_became_available",
                 eager_start=True,
             )
-            return
-        if availability_changed and not available:
+        elif availability_changed and not available:
             self.debug("Device availability changed and device became unavailable")
-            for entity in self.platform_entities.values():
-                entity.maybe_emit_state_changed_event()
             self.emit_zha_event(
                 {
                     "device_event_type": "device_offline",
                 },
             )
+        for entity in self.platform_entities.values():
+            entity.maybe_emit_state_changed_event()
 
     def emit_zha_event(self, event_data: dict[str, str | int]) -> None:  # pylint: disable=unused-argument
         """Relay events directly."""
@@ -627,8 +626,6 @@ class Device(LogMixin, EventBase):
     async def _async_became_available(self) -> None:
         """Update device availability and signal entities."""
         await self.async_initialize(False)
-        for platform_entity in self._platform_entities.values():
-            platform_entity.maybe_emit_state_changed_event()
 
     @property
     def device_info(self) -> DeviceInfo:
