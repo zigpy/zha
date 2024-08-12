@@ -923,6 +923,10 @@ async def test_zha_group_light_entity(
     assert entity.state["available"] is True
 
     device_light_1.on_network = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
     device_light_2.on_network = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
@@ -930,6 +934,10 @@ async def test_zha_group_light_entity(
     assert entity.state["available"] is False
 
     device_light_1.on_network = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
     device_light_2.on_network = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
@@ -937,6 +945,10 @@ async def test_zha_group_light_entity(
     assert entity.state["available"] is True
 
     device_light_1.available = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
     device_light_2.available = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
@@ -944,6 +956,10 @@ async def test_zha_group_light_entity(
     assert entity.state["available"] is False
 
     device_light_1.available = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+    assert entity.state["available"] is True
+
     device_light_2.available = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
