@@ -920,6 +920,36 @@ async def test_zha_group_light_entity(
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
 
+    assert entity.state["available"] is True
+
+    device_light_1.on_network = False
+    device_light_2.on_network = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_light_1.on_network = True
+    device_light_2.on_network = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True
+
+    device_light_1.available = False
+    device_light_2.available = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_light_1.available = True
+    device_light_2.available = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True
+
     # turn it off to test a new member add being tracked
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})
     await zha_gateway.async_block_till_done()

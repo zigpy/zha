@@ -362,6 +362,36 @@ async def test_zha_group_fan_entity(
     # test that group fan is now off
     assert entity.state["is_on"] is False
 
+    assert entity.state["available"] is True
+
+    device_fan_1.on_network = False
+    device_fan_2.on_network = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_fan_1.on_network = True
+    device_fan_2.on_network = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True
+
+    device_fan_1.available = False
+    device_fan_2.available = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_fan_1.available = True
+    device_fan_2.available = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True
+
 
 @patch(
     "zigpy.zcl.clusters.hvac.Fan.write_attributes",

@@ -350,6 +350,36 @@ async def test_zha_group_switch_entity(
     # test that group light is now back on
     assert bool(entity.state["state"]) is True
 
+    assert entity.state["available"] is True
+
+    device_switch_1.on_network = False
+    device_switch_2.on_network = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_switch_1.on_network = True
+    device_switch_2.on_network = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True
+
+    device_switch_1.available = False
+    device_switch_2.available = False
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is False
+
+    device_switch_1.available = True
+    device_switch_2.available = True
+    await asyncio.sleep(0.1)
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["available"] is True
+
 
 class WindowDetectionFunctionQuirk(CustomDevice):
     """Quirk with window detection function attribute."""
