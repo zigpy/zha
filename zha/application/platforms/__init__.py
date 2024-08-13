@@ -172,7 +172,7 @@ class BaseEntity(LogMixin, EventBase):
         return None
 
     @final
-    @cached_property
+    @property
     def unique_id(self) -> str:
         """Return the unique id."""
         return self._unique_id
@@ -364,17 +364,17 @@ class PlatformEntity(BaseEntity):
             available=self.available,
         )
 
-    @cached_property
+    @property
     def device(self) -> Device:
         """Return the device."""
         return self._device
 
-    @cached_property
+    @property
     def endpoint(self) -> Endpoint:
         """Return the endpoint."""
         return self._endpoint
 
-    @cached_property
+    @property
     def should_poll(self) -> bool:
         """Return True if we need to poll for state changes."""
         return False
@@ -462,7 +462,7 @@ class GroupEntity(BaseEntity):
         """Return the group id."""
         return self._group.group_id
 
-    @cached_property
+    @property
     def group(self) -> Group:
         """Return the group."""
         return self._group
