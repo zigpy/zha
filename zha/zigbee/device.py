@@ -252,7 +252,7 @@ class Device(LogMixin, EventBase):
             f"quirk_id: {self.quirk_id}"
         )
 
-    @cached_property
+    @property
     def device(self) -> zigpy.device.Device:
         """Return underlying Zigpy device."""
         return self._zigpy_device
@@ -262,7 +262,7 @@ class Device(LogMixin, EventBase):
         """Return device name."""
         return f"{self.manufacturer} {self.model}"
 
-    @cached_property
+    @property
     def ieee(self) -> EUI64:
         """Return ieee address for device."""
         return self._zigpy_device.ieee
@@ -305,7 +305,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.manufacturer_code
 
-    @cached_property
+    @property
     def nwk(self) -> NWK:
         """Return nwk for device."""
         return self._zigpy_device.nwk
@@ -392,7 +392,7 @@ class Device(LogMixin, EventBase):
         """Return true if the device should not issue configuration related commands."""
         return self._zigpy_device.skip_configuration or bool(self.is_active_coordinator)
 
-    @cached_property
+    @property
     def gateway(self):
         """Return the gateway for this device."""
         return self._gateway
@@ -467,7 +467,7 @@ class Device(LogMixin, EventBase):
         if self._identify_ch is None:
             self._identify_ch = cluster_handler
 
-    @cached_property
+    @property
     def zdo_cluster_handler(self) -> ZDOClusterHandler:
         """Return ZDO cluster handler."""
         return self._zdo_handler
