@@ -15,7 +15,7 @@ For more development documentation/information and discussion between developers
 
 # zha release packages available via PyPI
 
-New packages of tagged versions are also released via the "zigpy" project on PyPI
+New packages of tagged versions are also released via the "zha" project on PyPI
   - https://pypi.org/project/zha/
     - https://pypi.org/project/zha/#history
     - https://pypi.org/project/zha/#files
