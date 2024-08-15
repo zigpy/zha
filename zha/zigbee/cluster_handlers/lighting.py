@@ -101,16 +101,6 @@ class ColorClusterHandler(ClusterHandler):
         return self.cluster.get(Color.AttributeDefs.current_y.name)
 
     @property
-    def current_hue(self) -> int | None:
-        """Return cached value of the current_hue attribute."""
-        return self.cluster.get(Color.AttributeDefs.current_hue.name)
-
-    @property
-    def enhanced_current_hue(self) -> int | None:
-        """Return cached value of the enhanced_current_hue attribute."""
-        return self.cluster.get(Color.AttributeDefs.enhanced_current_hue.name)
-
-    @property
     def current_saturation(self) -> int | None:
         """Return cached value of the current_saturation attribute."""
         return self.cluster.get(Color.AttributeDefs.current_saturation.name)
@@ -148,22 +138,6 @@ class ColorClusterHandler(ClusterHandler):
             )
             max_mireds = self.MAX_MIREDS
         return max_mireds
-
-    @property
-    def hs_supported(self) -> bool:
-        """Return True if the cluster handler supports hue and saturation."""
-        return (
-            self.color_capabilities is not None
-            and Color.ColorCapabilities.Hue_and_saturation in self.color_capabilities
-        )
-
-    @property
-    def enhanced_hue_supported(self) -> bool:
-        """Return True if the cluster handler supports enhanced hue and saturation."""
-        return (
-            self.color_capabilities is not None
-            and Color.ColorCapabilities.Enhanced_hue in self.color_capabilities
-        )
 
     @property
     def xy_supported(self) -> bool:
