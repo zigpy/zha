@@ -25,7 +25,6 @@ from tests.common import (
 )
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
-from zha.application.const import CONF_ALWAYS_PREFER_XY_COLOR_MODE
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.application.platforms.light.const import (
@@ -454,58 +453,6 @@ async def test_light(
 
         cluster_color.request.reset_mock()
 
-        # test color hs from the client
-        assert entity.state["hs_color"] != [12, 34]
-        await entity.async_turn_on(brightness=50, hs_color=[12, 34])
-        await zha_gateway.async_block_till_done()
-        assert entity.state["color_mode"] == ColorMode.HS
-        assert entity.state["brightness"] == 50
-        assert entity.state["hs_color"] == [12, 34]
-        assert cluster_color.request.call_count == 1
-        assert cluster_color.request.await_count == 1
-        assert cluster_color.request.call_args == call(
-            False,
-            6,
-            cluster_color.commands_by_name["move_to_hue_and_saturation"].schema,
-            hue=8,
-            saturation=86,
-            transition_time=0,
-            expect_reply=True,
-            manufacturer=None,
-            tsn=None,
-        )
-
-        cluster_color.request.reset_mock()
-
-        # test enhanced hue support
-        cluster_color.PLUGGED_ATTR_READS["color_capabilities"] |= (
-            lighting.ColorCapabilities.Enhanced_hue
-        )
-        update_attribute_cache(cluster_color)
-        del entity._color_cluster_handler.color_capabilities
-
-        assert entity.state["hs_color"] != [56, 78]
-        await entity.async_turn_on(brightness=50, hs_color=[56, 78])
-        await zha_gateway.async_block_till_done()
-        assert entity.state["color_mode"] == ColorMode.HS
-        assert entity.state["brightness"] == 50
-        assert entity.state["hs_color"] == [56, 78]
-        assert cluster_color.request.call_count == 1
-        assert cluster_color.request.await_count == 1
-        assert cluster_color.request.call_args == call(
-            False,
-            67,
-            cluster_color.commands_by_name[
-                "enhanced_move_to_hue_and_saturation"
-            ].schema,
-            enhanced_hue=10194,
-            saturation=198,
-            transition_time=0,
-            expect_reply=True,
-            manufacturer=None,
-            tsn=None,
-        )
-
 
 async def async_test_on_off_from_light(
     zha_gateway: Gateway,
@@ -833,7 +780,6 @@ async def test_zha_group_light_entity(
         brightness=34,
         color_temp=500,
         xy_color=(1, 2),
-        hs_color=(3, 4),
         color_mode=ColorMode.XY,
         effect="colorloop",
     )
@@ -1043,7 +989,7 @@ async def test_zha_group_light_entity(
                     lighting.Color.ColorCapabilities.Hue_and_saturation
                 ),
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
         # HS light with cached hue
@@ -1054,7 +1000,7 @@ async def test_zha_group_light_entity(
                 ),
                 "current_hue": 100,
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
         # HS light with cached saturation
@@ -1065,7 +1011,7 @@ async def test_zha_group_light_entity(
                 ),
                 "current_saturation": 100,
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
         # HS light with both
@@ -1077,12 +1023,13 @@ async def test_zha_group_light_entity(
                 "current_hue": 100,
                 "current_saturation": 100,
             },
-            {CONF_ALWAYS_PREFER_XY_COLOR_MODE: False},
+            {},
             {},
         ),
     ],
 )
 # TODO expected_state is not used
+# TODO remove? No light will ever only support HS, we no longer support it
 async def test_light_initialization(
     zha_gateway: Gateway,
     zigpy_device_mock: Callable[..., ZigpyDevice],
@@ -2019,7 +1966,6 @@ async def test_light_state_restoration(
         brightness=34,
         color_temp=500,
         xy_color=(1, 2),
-        hs_color=(3, 4),
         color_mode=ColorMode.XY,
         effect="colorloop",
     )
@@ -2038,7 +1984,6 @@ async def test_light_state_restoration(
         brightness=None,
         color_temp=None,
         xy_color=None,
-        hs_color=None,
         color_mode=None,
         effect=None,  # Effect is the only `None` value actually restored
     )
