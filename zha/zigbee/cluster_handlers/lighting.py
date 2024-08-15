@@ -40,14 +40,6 @@ class ColorClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_DEFAULT,
         ),
         AttrReportConfig(
-            attr=Color.AttributeDefs.current_hue.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-        AttrReportConfig(
-            attr=Color.AttributeDefs.current_saturation.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-        AttrReportConfig(
             attr=Color.AttributeDefs.color_temperature.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
@@ -60,7 +52,6 @@ class ColorClusterHandler(ClusterHandler):
         Color.AttributeDefs.color_temp_physical_max.name: True,
         Color.AttributeDefs.color_capabilities.name: True,
         Color.AttributeDefs.color_loop_active.name: False,
-        Color.AttributeDefs.enhanced_current_hue.name: False,
         Color.AttributeDefs.start_up_color_temperature.name: True,
         Color.AttributeDefs.options.name: True,
     }
