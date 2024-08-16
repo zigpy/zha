@@ -482,7 +482,7 @@ class MultiStateInputSensor(EnumSensor):
 
     _attribute_name = "present_value"
     _unique_id_suffix = "present_value"
-    _attr_translation_key = "multistate_input"
+    _attr_translation_key: str = "multistate_input"
     _attr_entity_registry_enabled_default = False
     _attr_extra_state_attribute_names: set[str] = {
         "state_text",
@@ -493,6 +493,7 @@ class MultiStateInputSensor(EnumSensor):
         "status_flags",
         "application_type",
     }
+    _enum = enum.Enum("Empty", names=())
 
     def __init__(
         self,
@@ -504,8 +505,7 @@ class MultiStateInputSensor(EnumSensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._enum = enum.Enum("state_text", self.cluster_handlers.state_text.value)
-
+        self._enum = enum.Enum("state_text", self._cluster_handler.state_text.value)
 
 
 @MULTI_MATCH(
