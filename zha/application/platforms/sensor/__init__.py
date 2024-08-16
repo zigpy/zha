@@ -65,6 +65,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_HUMIDITY,
     CLUSTER_HANDLER_ILLUMINANCE,
     CLUSTER_HANDLER_LEAF_WETNESS,
+    CLUSTER_HANDLER_MULTISTATE_INPUT,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
     CLUSTER_HANDLER_PRESSURE,
     CLUSTER_HANDLER_SMARTENERGY_METERING,
@@ -474,6 +475,37 @@ class EnumSensor(Sensor):
         """Use name of enum."""
         assert self._enum is not None
         return self._enum(value).name
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_MULTISTATE_INPUT)
+class MultiStateInputSensor(EnumSensor):
+    """Sensor that displays enumerated values."""
+
+    _attribute_name = "present_value"
+    _unique_id_suffix = "present_value"
+    _attr_translation_key = "multistate_input"
+    _attr_entity_registry_enabled_default = False
+    _attr_extra_state_attribute_names: set[str] = {
+        "state_text",
+        "description",
+        "number_of_states",
+        "out_of_service",
+        "reliability",
+        "status_flags",
+        "application_type",
+    }
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._enum = enum.Enum("state_text", self.cluster_handlers.state_text.value)
+
 
 
 @MULTI_MATCH(
