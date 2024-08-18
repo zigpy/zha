@@ -526,7 +526,7 @@ class Battery(Sensor):
     def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
         """Return the state of the entity."""
         # per zcl specs battery percent is reported at 200% ¯\_(ツ)_/¯
-        if not isinstance(value, numbers.Number) or value == -1 or value == 255:
+        if not isinstance(value, numbers.Number) or value in (-1, 255):
             return None
         value = round(value / 2)
         return value
