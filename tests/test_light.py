@@ -304,6 +304,30 @@ async def test_light_refresh(
     assert on_off_cluster.read_attributes.await_count >= 2
     assert bool(entity.state["on"]) is False
 
+    read_call_count = on_off_cluster.read_attributes.call_count
+    read_await_count = on_off_cluster.read_attributes.await_count
+
+    entity.disable()
+
+    assert entity.enabled is False
+
+    on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 1}
+    await asyncio.sleep(4800)  # 80 minutes
+    await zha_gateway.async_block_till_done()
+    assert on_off_cluster.read_attributes.call_count == read_call_count
+    assert on_off_cluster.read_attributes.await_count == read_await_count
+    assert bool(entity.state["on"]) is False
+
+    entity.enable()
+
+    assert entity.enabled is True
+
+    await asyncio.sleep(4800)  # 80 minutes
+    await zha_gateway.async_block_till_done()
+    assert on_off_cluster.read_attributes.call_count > read_call_count
+    assert on_off_cluster.read_attributes.await_count > read_await_count
+    assert bool(entity.state["on"]) is True
+
 
 # TODO reporting is not checked
 @patch(

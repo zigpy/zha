@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 import math
 from typing import Any, Optional
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
@@ -686,6 +687,28 @@ async def test_electrical_measurement_init(
     assert cluster_handler.ac_power_multiplier == 20
     assert entity.state["state"] == 60.0
 
+    entity._refresh = AsyncMock(wraps=entity._refresh)
+
+    assert entity._refresh.await_count == 0
+
+    entity.disable()
+
+    assert entity.enabled is False
+
+    await asyncio.sleep(entity.__polling_interval + 1)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity._refresh.await_count == 0
+
+    entity.enable()
+
+    assert entity.enabled is True
+
+    await asyncio.sleep(entity.__polling_interval + 1)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity._refresh.await_count == 1
+
 
 @pytest.mark.parametrize(
     (
@@ -1196,9 +1219,29 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
 
     assert entity.state["state"] == 2
 
+    # test disabling the entity disables it and removes it from the updater
+    assert len(zha_gateway.global_updater._update_listeners) == 3
+    assert entity.enabled is True
+
+    entity.disable()
+
+    assert entity.enabled is False
+    assert len(zha_gateway.global_updater._update_listeners) == 2
+
+    # test enabling the entity enables it and adds it to the updater
+    entity.enable()
+
+    assert entity.enabled is True
+    assert len(zha_gateway.global_updater._update_listeners) == 3
+
+    # make sure we don't get multiple listeners for the same entity in the updater
+    entity.enable()
+
+    assert len(zha_gateway.global_updater._update_listeners) == 3
+
 
 @pytest.mark.looptime
-async def test_device_unavailable_skips_entity_polling(
+async def test_device_unavailable_or_disabled_skips_entity_polling(
     zha_gateway: Gateway,
     elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
@@ -1221,10 +1264,43 @@ async def test_device_unavailable_skips_entity_polling(
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert entity.state["state"] == 60
+    assert entity.enabled is True
+    assert len(zha_gateway.global_updater._update_listeners) == 5
+
+    # let's drop the normal update method from the updater
+    entity.disable()
+
+    assert entity.enabled is False
+    assert len(zha_gateway.global_updater._update_listeners) == 4
+
+    # wrap the update method so we can count how many times it was called
+    entity.update = MagicMock(wraps=entity.update)
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.update.call_count == 0
+
+    # re-enable the entity and ensure it is back in the updater and that update is called
+    entity.enable()
+    assert len(zha_gateway.global_updater._update_listeners) == 5
+    assert entity.enabled is True
+
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.update.call_count == 1
+
+    # knock it off the network and ensure the polling is skipped
+    assert (
+        "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "
+        "available: False, allow polled requests: True" not in caplog.text
+    )
 
     elec_measurement_zha_dev.on_network = False
-    await asyncio.sleep(zha_gateway.global_updater.__polling_interval * 2)
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity.update.call_count == 2
 
     assert (
         "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "

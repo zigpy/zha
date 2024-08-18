@@ -396,6 +396,8 @@ class GlobalUpdater:
 
     def register_update_listener(self, listener: Callable):
         """Register an update listener."""
+        if listener in self._update_listeners:
+            return
         self._update_listeners.append(listener)
 
     def remove_update_listener(self, listener: Callable):
