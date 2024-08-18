@@ -44,6 +44,7 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_ATTR_PER_REQ,
     SIGNAL_ATTR_UPDATED,
     UNIQUE_ID,
+    VALUE,
 )
 
 if TYPE_CHECKING:
@@ -711,6 +712,7 @@ class ClientClusterHandler(ClusterHandler):
                 ATTRIBUTE_ID: attrid,
                 ATTRIBUTE_NAME: attr_name,
                 ATTRIBUTE_VALUE: value,
+                VALUE: value,
             },
         )
 
