@@ -856,11 +856,9 @@ class DanfossAdaptationRunSettings(SwitchConfigurationEntity):
     },
 )
 class SinopeLightDoubleTapFullSwitch(SwitchConfigurationEntity):
-    """Representation of a switch that controls whether Double Tap Full option
-    is enabled on a Sinope light switch.
-    """
+    """Representation of a config option that controls whether Double Tap Full option is enabled on a Sinope light switch."""
 
     _unique_id_suffix = "double_up_full"
     _attribute_name = "double_up_full"
     _attr_translation_key: str = "double_up_full"
-    _attr_icon = 'mdi:gesture-double-tap'
+    _attr_icon = "mdi:gesture-double-tap"

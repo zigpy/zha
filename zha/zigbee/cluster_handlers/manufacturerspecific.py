@@ -40,12 +40,12 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_MIN_INT_IMMEDIATE,
     REPORT_CONFIG_RPT_CHANGE,
     SIGNAL_ATTR_UPDATED,
+    SINOPE_MANUFACTURER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
     UNKNOWN,
-    SINOPE_MANUFACTURER_CLUSTER,
 )
 from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
 
@@ -556,7 +556,7 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
         )
 
         _LOGGER.debug(
-            f"matching sinope device to cluster handler {cluster.endpoint.model}"
+            "matching sinope device to cluster handler %s", cluster.endpoint.model
         )
 
         return (

@@ -822,11 +822,14 @@ class DanfossViewingDirection(ZCLEnumSelectEntity):
 
 
 class SinopeLightLedColors(types.enum32):
-    Lim = 0x0affdc
-    Amber = 0x000a4b
-    Fushia = 0x0100a5
-    Perle = 0x64ffff
-    Blue = 0xffff00
+    """Color values for Sinope light switch status LEDs."""
+
+    Lim = 0x0AFFDC
+    Amber = 0x000A4B
+    Fushia = 0x0100A5
+    Perle = 0x64FFFF
+    Blue = 0xFFFF00
+
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="sinope_manufacturer_specific",
@@ -840,15 +843,13 @@ class SinopeLightLedColors(types.enum32):
     },
 )
 class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
-    """Representation of the marker LED color off-state color
-    of Sinope light switches
-    """
+    """Representation of the marker LED color off-state color of Sinope light switches."""
 
     _unique_id_suffix = "off_led_color"
     _attribute_name = "off_led_color"
     _attr_translation_key: str = "off_led_color"
     _enum = SinopeLightLedColors
-    _attr_icon = 'mdi:palette-outline'
+    _attr_icon: str = "mdi:palette-outline"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -863,12 +864,10 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
     },
 )
 class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
-    """Representation of the marker LED color on-state color
-    of Sinope light switches
-    """
+    """Representation of the marker LED color on-state color of Sinope light switches."""
 
     _unique_id_suffix = "on_led_color"
     _attribute_name = "on_led_color"
     _attr_translation_key: str = "on_led_color"
     _enum = SinopeLightLedColors
-    _attr_icon = 'mdi:palette'
+    _attr_icon: str = "mdi:palette"
