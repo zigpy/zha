@@ -117,6 +117,7 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None
     _attr_state_class: str | None
     _attr_enabled: bool = True
+    _attr_icon: str | None = None
 
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
@@ -148,7 +149,7 @@ class BaseEntity(LogMixin, EventBase):
     @property
     def icon(self) -> str | None:
         """Return the entity icon."""
-        return None
+        return self._attr_icon
 
     @property
     def translation_key(self) -> str | None:
