@@ -419,14 +419,17 @@ async def test_sinope_time(
         secs_since_2k = write_attributes.mock_calls[0].args[0]["secs_since_2k"]
         assert secs_since_2k == pytest.approx(60 * 60 * 24 - 5 * 60 * 60)
 
+    write_attributes.reset_mock()
+    entity._async_update_time.reset_mock()
+
     entity.disable()
 
     assert entity.enabled is False
 
     await asyncio.sleep(4600)
 
-    assert entity._async_update_time.await_count == 1
-    assert mfg_cluster.write_attributes.await_count == 1
+    assert entity._async_update_time.await_count == 0
+    assert mfg_cluster.write_attributes.await_count == 0
 
     entity.enable()
 
@@ -434,8 +437,11 @@ async def test_sinope_time(
 
     await asyncio.sleep(4600)
 
-    assert entity._async_update_time.await_count == 2
-    assert mfg_cluster.write_attributes.await_count == 2
+    assert entity._async_update_time.await_count == 1
+    assert mfg_cluster.write_attributes.await_count == 1
+
+    write_attributes.reset_mock()
+    entity._async_update_time.reset_mock()
 
 
 async def test_climate_hvac_action_running_state_zen(
