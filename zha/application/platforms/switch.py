@@ -769,7 +769,6 @@ class DanfossExternalOpenWindowDetected(SwitchConfigurationEntity):
     _unique_id_suffix = "external_open_window_detected"
     _attribute_name: str = "external_open_window_detected"
     _attr_translation_key: str = "external_window_sensor"
-    _attr_icon: str = "mdi:window-open"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -782,7 +781,6 @@ class DanfossWindowOpenFeature(SwitchConfigurationEntity):
     _unique_id_suffix = "window_open_feature"
     _attribute_name: str = "window_open_feature"
     _attr_translation_key: str = "use_internal_window_detection"
-    _attr_icon: str = "mdi:window-open"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -807,7 +805,6 @@ class DanfossRadiatorCovered(SwitchConfigurationEntity):
     _unique_id_suffix = "radiator_covered"
     _attribute_name: str = "radiator_covered"
     _attr_translation_key: str = "prioritize_external_temperature_sensor"
-    _attr_icon: str = "mdi:thermometer"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -820,7 +817,6 @@ class DanfossHeatAvailable(SwitchConfigurationEntity):
     _unique_id_suffix = "heat_available"
     _attribute_name: str = "heat_available"
     _attr_translation_key: str = "heat_available"
-    _attr_icon: str = "mdi:water-boiler"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -833,7 +829,6 @@ class DanfossLoadBalancingEnable(SwitchConfigurationEntity):
     _unique_id_suffix = "load_balancing_enable"
     _attribute_name: str = "load_balancing_enable"
     _attr_translation_key: str = "use_load_balancing"
-    _attr_icon: str = "mdi:scale-balance"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(

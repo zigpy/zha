@@ -1711,7 +1711,6 @@ class DanfossOpenWindowDetection(EnumSensor):
     _unique_id_suffix = "open_window_detection"
     _attribute_name = "open_window_detection"
     _attr_translation_key: str = "open_window_detected"
-    _attr_icon: str = "mdi:window-open"
     _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
 
 
@@ -1725,7 +1724,6 @@ class DanfossLoadEstimate(Sensor):
     _unique_id_suffix = "load_estimate"
     _attribute_name = "load_estimate"
     _attr_translation_key: str = "load_estimate"
-    _attr_icon: str = "mdi:scale-balance"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
 
@@ -1753,7 +1751,6 @@ class DanfossPreheatTime(Sensor):
     _unique_id_suffix = "preheat_time"
     _attribute_name = "preheat_time"
     _attr_translation_key: str = "preheat_time"
-    _attr_icon: str = "mdi:radiator"
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
