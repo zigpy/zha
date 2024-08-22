@@ -425,7 +425,6 @@ class IkeaFan(Fan):
     @property
     def percentage(self) -> int | None:
         """Return the current speed percentage."""
-        self.debug(f"fan_speed is {self._fan_cluster_handler.fan_speed}")
         if self._fan_cluster_handler.fan_speed is None:
             return None
         if self._fan_cluster_handler.fan_speed == 0:
@@ -453,8 +452,6 @@ class IkeaFan(Fan):
 
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""
-
-        self.debug(f"Set percentage {percentage}")
         fan_mode = math.ceil(percentage_to_ranged_value(self.speed_range, percentage))
         # 1 is a mode, not a speed, so we skip to 2 instead.
         if fan_mode == 1:

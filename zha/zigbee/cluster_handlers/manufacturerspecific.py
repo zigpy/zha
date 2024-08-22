@@ -411,7 +411,7 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
 
     @property
     def fan_speed(self) -> int | None:
-        """Return current fan mode."""
+        """Return current fan speed."""
         return self.cluster.get("fan_speed")
 
     @property
