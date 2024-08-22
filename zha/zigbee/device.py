@@ -29,7 +29,7 @@ from zigpy.zcl.foundation import (
 import zigpy.zdo.types as zdo_types
 from zigpy.zdo.types import RouteStatus, _NeighborEnums
 
-from zha.application import discovery
+from zha.application import Platform, discovery
 from zha.application.const import (
     ATTR_ARGS,
     ATTR_ATTRIBUTE,
@@ -233,7 +233,7 @@ class Device(LogMixin, EventBase):
         self._checkins_missed_count: int = 0
         self._on_network: bool = True
 
-        self._platform_entities: dict[str, PlatformEntity] = {}
+        self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
         self.status: DeviceStatus = DeviceStatus.CREATED
@@ -243,7 +243,16 @@ class Device(LogMixin, EventBase):
             if ep_id != 0:
                 self._endpoints[ep_id] = Endpoint.new(endpoint, self)
 
-    @cached_property
+    def __repr__(self) -> str:
+        """Return a string representation of the device."""
+        return (
+            f"{repr(self._zigpy_device)} - "
+            f"quirk_applied: {self.quirk_applied} - "
+            f"quirk_or_device_class: {self.quirk_class} - "
+            f"quirk_id: {self.quirk_id}"
+        )
+
+    @property
     def device(self) -> zigpy.device.Device:
         """Return underlying Zigpy device."""
         return self._zigpy_device
@@ -253,7 +262,7 @@ class Device(LogMixin, EventBase):
         """Return device name."""
         return f"{self.manufacturer} {self.model}"
 
-    @cached_property
+    @property
     def ieee(self) -> EUI64:
         """Return ieee address for device."""
         return self._zigpy_device.ieee
@@ -262,18 +271,30 @@ class Device(LogMixin, EventBase):
     def manufacturer(self) -> str:
         """Return manufacturer for device."""
         if self.is_active_coordinator:
-            return self.gateway.application_controller.state.node_info.manufacturer
+            manufacturer = (
+                self.gateway.application_controller.state.node_info.manufacturer
+            )
+            if manufacturer is None:
+                return ""
+            return manufacturer
+
         if self._zigpy_device.manufacturer is None:
             return UNKNOWN_MANUFACTURER
+
         return self._zigpy_device.manufacturer
 
     @cached_property
     def model(self) -> str:
         """Return model for device."""
         if self.is_active_coordinator:
-            return self.gateway.application_controller.state.node_info.model
+            model = self.gateway.application_controller.state.node_info.model
+            if model is None:
+                return f"Generic Zigbee Coordinator ({self.gateway.radio_type.pretty_name})"
+            return model
+
         if self._zigpy_device.model is None:
             return UNKNOWN_MODEL
+
         return self._zigpy_device.model
 
     @cached_property
@@ -284,7 +305,7 @@ class Device(LogMixin, EventBase):
 
         return self._zigpy_device.node_desc.manufacturer_code
 
-    @cached_property
+    @property
     def nwk(self) -> NWK:
         """Return nwk for device."""
         return self._zigpy_device.nwk
@@ -371,7 +392,7 @@ class Device(LogMixin, EventBase):
         """Return true if the device should not issue configuration related commands."""
         return self._zigpy_device.skip_configuration or bool(self.is_active_coordinator)
 
-    @cached_property
+    @property
     def gateway(self):
         """Return the gateway for this device."""
         return self._gateway
@@ -408,8 +429,10 @@ class Device(LogMixin, EventBase):
     @on_network.setter
     def on_network(self, new_on_network: bool) -> None:
         """Set device on_network flag."""
-        self._on_network = new_on_network
         self.update_available(new_on_network)
+        self._on_network = new_on_network
+        if not new_on_network:
+            self.debug("Device is not on the network, marking unavailable")
 
     @property
     def power_configuration_ch(self) -> ClusterHandler | None:
@@ -444,7 +467,7 @@ class Device(LogMixin, EventBase):
         if self._identify_ch is None:
             self._identify_ch = cluster_handler
 
-    @cached_property
+    @property
     def zdo_cluster_handler(self) -> ZDOClusterHandler:
         """Return ZDO cluster handler."""
         return self._zdo_handler
@@ -480,13 +503,13 @@ class Device(LogMixin, EventBase):
         self._sw_build_id = sw_build_id
 
     @property
-    def platform_entities(self) -> dict[str, PlatformEntity]:
+    def platform_entities(self) -> dict[tuple[Platform, str], PlatformEntity]:
         """Return the platform entities for this device."""
         return self._platform_entities
 
-    def get_platform_entity(self, unique_id: str) -> PlatformEntity:
+    def get_platform_entity(self, platform: Platform, unique_id: str) -> PlatformEntity:
         """Get a platform entity by unique id."""
-        entity = self._platform_entities.get(unique_id)
+        entity = self._platform_entities.get((platform, unique_id))
         if entity is None:
             raise KeyError(f"Entity {unique_id} not found")
         return entity
@@ -509,10 +532,6 @@ class Device(LogMixin, EventBase):
     async def _check_available(self, *_: Any) -> None:
         # don't flip the availability state of the coordinator
         if self.is_active_coordinator:
-            return
-        if not self._on_network:
-            self.debug("Device is not on the network, marking unavailable")
-            self.update_available(False)
             return
         if self.last_seen is None:
             self.debug("last_seen is None, marking the device unavailable")
@@ -586,6 +605,8 @@ class Device(LogMixin, EventBase):
             return
         if availability_changed and not available:
             self.debug("Device availability changed and device became unavailable")
+            for entity in self.platform_entities.values():
+                entity.maybe_emit_state_changed_event()
             self.emit_zha_event(
                 {
                     "device_event_type": "device_offline",
@@ -660,8 +681,8 @@ class Device(LogMixin, EventBase):
             **self.device_info.__dict__,
             active_coordinator=self.is_active_coordinator,
             entities={
-                unique_id: platform_entity.info_object
-                for unique_id, platform_entity in self.platform_entities.items()
+                platform_entity.unique_id: platform_entity.info_object
+                for platform_entity in self.platform_entities.values()
             },
             neighbors=[
                 NeighborInfo(

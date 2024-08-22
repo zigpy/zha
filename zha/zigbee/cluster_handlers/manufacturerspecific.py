@@ -19,7 +19,6 @@ from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
-    ClusterAttributeUpdatedEvent,
     ClusterHandler,
     registries,
 )
@@ -28,7 +27,6 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_ID,
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     INOVELLI_CLUSTER,
@@ -220,23 +218,11 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
 
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
+        super().attribute_updated(attrid, value, _)
         try:
             attr_name = self._cluster.attributes[attrid].name
         except KeyError:
             attr_name = UNKNOWN
-
-        if attr_name == self.value_attribute:
-            self.emit(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                ClusterAttributeUpdatedEvent(
-                    attribute_id=attrid,
-                    attribute_name=attr_name,
-                    attribute_value=value,
-                    cluster_handler_unique_id=self.unique_id,
-                    cluster_id=self.cluster.cluster_id,
-                ),
-            )
-            return
 
         self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,

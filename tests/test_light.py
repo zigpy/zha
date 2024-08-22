@@ -19,6 +19,7 @@ import zigpy.zcl.foundation as zcl_f
 from tests.common import (
     get_entity,
     get_group_entity,
+    group_entity_availability_test,
     send_attributes_report,
     update_attribute_cache,
 )
@@ -302,6 +303,30 @@ async def test_light_refresh(
     assert on_off_cluster.read_attributes.call_count >= 2
     assert on_off_cluster.read_attributes.await_count >= 2
     assert bool(entity.state["on"]) is False
+
+    read_call_count = on_off_cluster.read_attributes.call_count
+    read_await_count = on_off_cluster.read_attributes.await_count
+
+    entity.disable()
+
+    assert entity.enabled is False
+
+    on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 1}
+    await asyncio.sleep(4800)  # 80 minutes
+    await zha_gateway.async_block_till_done()
+    assert on_off_cluster.read_attributes.call_count == read_call_count
+    assert on_off_cluster.read_attributes.await_count == read_await_count
+    assert bool(entity.state["on"]) is False
+
+    entity.enable()
+
+    assert entity.enabled is True
+
+    await asyncio.sleep(4800)  # 80 minutes
+    await zha_gateway.async_block_till_done()
+    assert on_off_cluster.read_attributes.call_count > read_call_count
+    assert on_off_cluster.read_attributes.await_count > read_await_count
+    assert bool(entity.state["on"]) is True
 
 
 # TODO reporting is not checked
@@ -919,6 +944,10 @@ async def test_zha_group_light_entity(
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
     assert bool(entity.state["on"]) is True
+
+    await group_entity_availability_test(
+        zha_gateway, device_light_1, device_light_2, entity
+    )
 
     # turn it off to test a new member add being tracked
     await send_attributes_report(zha_gateway, dev1_cluster_on_off, {0: 0})

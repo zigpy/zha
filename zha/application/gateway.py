@@ -7,7 +7,6 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
-from functools import cached_property
 import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
@@ -188,9 +187,13 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         self.config.gateway = self
 
+    @property
+    def radio_type(self) -> RadioType:
+        """Get the current radio type."""
+        return RadioType[self.config.config.coordinator_configuration.radio_type]
+
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
-        radio_type = RadioType[self.config.config.coordinator_configuration.radio_type]
         app_config = self.config.zigpy_config
         app_config[CONF_DEVICE] = {
             CONF_DEVICE_PATH: self.config.config.coordinator_configuration.path,
@@ -205,12 +208,12 @@ class Gateway(AsyncUtilMixin, EventBase):
         # event loop, when a connection to a TCP coordinator fails in a specific way
         if (
             CONF_USE_THREAD not in app_config
-            and radio_type is RadioType.ezsp
+            and self.radio_type is RadioType.ezsp
             and app_config[CONF_DEVICE][CONF_DEVICE_PATH].startswith("socket://")
         ):
             app_config[CONF_USE_THREAD] = False
 
-        return radio_type.controller, radio_type.controller.SCHEMA(app_config)
+        return self.radio_type.controller, app_config
 
     @classmethod
     async def async_from_config(cls, config: ZHAData) -> Self:
@@ -325,16 +328,25 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         for platform in discovery.PLATFORMS:
             for platform_entity_class, args, kw_args in self.config.platforms[platform]:
-                platform_entity = platform_entity_class.create_platform_entity(
-                    *args, **kw_args
-                )
+                try:
+                    platform_entity = platform_entity_class.create_platform_entity(
+                        *args, **kw_args
+                    )
+                except Exception:  # pylint: disable=broad-except
+                    _LOGGER.exception(
+                        "Failed to create platform entity: %s [args=%s, kwargs=%s]",
+                        platform_entity_class,
+                        args,
+                        kw_args,
+                    )
+                    continue
                 if platform_entity:
                     _LOGGER.debug(
                         "Platform entity data: %s", platform_entity.info_object
                     )
             self.config.platforms[platform].clear()
 
-    @cached_property
+    @property
     def radio_concurrency(self) -> int:
         """Maximum configured radio concurrency."""
         return self.application_controller._concurrent_requests_semaphore.max_value  # pylint: disable=protected-access
@@ -374,6 +386,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         await asyncio.gather(
             *(dev.async_initialize(from_cache=True) for dev in self.devices.values())
         )
+
+        if not self.config.config.device_options.enable_mains_startup_polling:
+            _LOGGER.debug("Polling of mains powered devices at startup is disabled")
+            return
 
         async def fetch_updated_state() -> None:
             """Fetch updated state for mains powered devices."""
@@ -728,9 +744,10 @@ class Gateway(AsyncUtilMixin, EventBase):
             await group.on_remove()
 
         _LOGGER.debug("Shutting down ZHA ControllerApplication")
-        await self.application_controller.shutdown()
-        self.application_controller = None
-        await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
+        if self.application_controller is not None:
+            await self.application_controller.shutdown()
+            self.application_controller = None
+            await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
 
         await super().shutdown()
 

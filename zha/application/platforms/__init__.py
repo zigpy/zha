@@ -57,6 +57,7 @@ class BaseEntityInfo:
     state_class: str | None
     entity_category: str | None
     entity_registry_enabled_default: bool
+    enabled: bool = True
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -115,6 +116,7 @@ class BaseEntity(LogMixin, EventBase):
     _attr_entity_registry_enabled_default: bool = True
     _attr_device_class: str | None
     _attr_state_class: str | None
+    _attr_enabled: bool = True
 
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
@@ -125,6 +127,16 @@ class BaseEntity(LogMixin, EventBase):
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
         self._tracked_handles: list[asyncio.Handle] = []
+
+    @property
+    def enabled(self) -> bool:
+        """Return the entity enabled state."""
+        return self._attr_enabled
+
+    @enabled.setter
+    def enabled(self, value: bool) -> None:
+        """Set the entity enabled state."""
+        self._attr_enabled = value
 
     @property
     def fallback_name(self) -> str | None:
@@ -172,7 +184,7 @@ class BaseEntity(LogMixin, EventBase):
         return None
 
     @final
-    @cached_property
+    @property
     def unique_id(self) -> str:
         """Return the unique id."""
         return self._unique_id
@@ -199,6 +211,7 @@ class BaseEntity(LogMixin, EventBase):
             state_class=self.state_class,
             entity_category=self.entity_category,
             entity_registry_enabled_default=self.entity_registry_enabled_default,
+            enabled=self.enabled,
             # Set by platform entities
             cluster_handlers=[],
             device_ieee=None,
@@ -225,6 +238,14 @@ class BaseEntity(LogMixin, EventBase):
         if hasattr(self, "_attr_extra_state_attribute_names"):
             return self._attr_extra_state_attribute_names
         return None
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        self.enabled = True
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        self.enabled = False
 
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
@@ -289,14 +310,14 @@ class PlatformEntity(BaseEntity):
         self._device: Device = device
         self._endpoint = endpoint
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if self.unique_id not in self._device.platform_entities:
-            self._device.platform_entities[self.unique_id] = self
+        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
+            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
         else:
             _LOGGER.debug(
                 "Not registering entity %r, unique id %r already exists: %r",
                 self,
-                self.unique_id,
-                self._device.platform_entities[self.unique_id],
+                (self.PLATFORM, self.unique_id),
+                self._device.platform_entities[(self.PLATFORM, self.unique_id)],
             )
 
     @classmethod
@@ -364,17 +385,17 @@ class PlatformEntity(BaseEntity):
             available=self.available,
         )
 
-    @cached_property
+    @property
     def device(self) -> Device:
         """Return the device."""
         return self._device
 
-    @cached_property
+    @property
     def endpoint(self) -> Endpoint:
         """Return the endpoint."""
         return self._endpoint
 
-    @cached_property
+    @property
     def should_poll(self) -> bool:
         """Return True if we need to poll for state changes."""
         return False
@@ -421,7 +442,7 @@ class GroupEntity(BaseEntity):
             _LOGGER,
             cooldown=update_group_from_member_delay,
             immediate=False,
-            function=self.async_update,
+            function=self.update,
         )
         self._group.register_group_entity(self)
 
@@ -443,11 +464,26 @@ class GroupEntity(BaseEntity):
         )
 
     @property
+    def state(self) -> dict[str, Any]:
+        """Return the arguments to use in the command."""
+        state = super().state
+        state["available"] = self.available
+        return state
+
+    @property
+    def available(self) -> bool:
+        """Return true if all member entities are available."""
+        return any(
+            platform_entity.available
+            for platform_entity in self._group.get_platform_entities(self.PLATFORM)
+        )
+
+    @property
     def group_id(self) -> int:
         """Return the group id."""
         return self._group.group_id
 
-    @cached_property
+    @property
     def group(self) -> Group:
         """Return the group."""
         return self._group
@@ -465,5 +501,9 @@ class GroupEntity(BaseEntity):
             self._change_listener_debouncer.async_cancel()
 
     @abstractmethod
-    def async_update(self, _: Any | None = None) -> None:
+    def update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
+
+    async def async_update(self, _: Any | None = None) -> None:
+        """Update the state of this group entity."""
+        self.update()

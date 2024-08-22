@@ -283,18 +283,15 @@ class Fan(PlatformEntity, BaseFan):
 class FanGroup(GroupEntity, BaseFan):
     """Representation of a fan group."""
 
-    _attr_translation_key: str = "fan_group"
-
     def __init__(self, group: Group):
         """Initialize a fan group."""
         self._fan_cluster_handler: ClusterHandler = group.endpoint[hvac.Fan.cluster_id]
         super().__init__(group)
-        self._available: bool = False
         self._percentage = None
         self._preset_mode = None
         if hasattr(self, "info_object"):
             delattr(self, "info_object")
-        self.async_update()
+        self.update()
 
     @functools.cached_property
     def info_object(self) -> FanEntityInfo:
@@ -348,8 +345,8 @@ class FanGroup(GroupEntity, BaseFan):
 
         self.maybe_emit_state_changed_event()
 
-    def async_update(self, _: Any = None) -> None:
-        """Attempt to retrieve on off state from the fan."""
+    def update(self, _: Any = None) -> None:
+        """Query all members and determine the fan group state."""
         self.debug("Updating fan group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
         all_states = [entity.state for entity in platform_entities]
@@ -357,7 +354,6 @@ class FanGroup(GroupEntity, BaseFan):
             "All platform entity states for group entity members: %s", all_states
         )
 
-        self._available = any(entity.available for entity in platform_entities)
         percentage_states: list[dict] = [
             state for state in all_states if state.get(ATTR_PERCENTAGE)
         ]

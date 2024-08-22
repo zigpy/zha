@@ -1,0 +1,12 @@
+name: Pre-commit update
+
+on:
+  schedule:
+    # run daily
+    - cron: "0 0 * * *"
+
+jobs:
+  shared-precommit-update:
+    uses: zigpy/workflows/.github/workflows/pre-commit-update.yml@main
+    with:
+      PYTHON_VERSION_DEFAULT: 3.12

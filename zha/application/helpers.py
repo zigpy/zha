@@ -8,6 +8,7 @@ import collections
 from collections.abc import Callable
 import dataclasses
 from dataclasses import dataclass
+import datetime
 import enum
 import logging
 import re
@@ -282,6 +283,7 @@ class DeviceOptions:
     consider_unavailable_battery: int = dataclasses.field(
         default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY
     )
+    enable_mains_startup_polling: bool = dataclasses.field(default=True)
 
 
 @dataclass(kw_only=True, slots=True)
@@ -352,6 +354,7 @@ class ZHAData:
         default_factory=dict
     )
     allow_polling: bool = dataclasses.field(default=False)
+    local_timezone: datetime.tzinfo = dataclasses.field(default=datetime.UTC)
 
 
 class GlobalUpdater:
@@ -393,10 +396,22 @@ class GlobalUpdater:
 
     def register_update_listener(self, listener: Callable):
         """Register an update listener."""
+        if listener in self._update_listeners:
+            _LOGGER.debug(
+                "listener already registered with global updater - nothing to register: %s",
+                listener,
+            )
+            return
         self._update_listeners.append(listener)
 
     def remove_update_listener(self, listener: Callable):
         """Remove an update listener."""
+        if listener not in self._update_listeners:
+            _LOGGER.debug(
+                "listener not registered with global updater - nothing to remove: %s",
+                listener,
+            )
+            return
         self._update_listeners.remove(listener)
 
     @periodic(_REFRESH_INTERVAL)
