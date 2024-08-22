@@ -730,6 +730,40 @@ async def test_pollers_skip(
     assert "Device availability checker interval skipped" in caplog.text
 
 
+async def test_global_updater_guards(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test global updater guards."""
+
+    already_registered = (
+        "listener already registered with global updater - nothing to register"
+    )
+    not_registered = "listener not registered with global updater - nothing to remove"
+
+    assert already_registered not in caplog.text
+    assert not_registered not in caplog.text
+
+    def listener():
+        pass
+
+    zha_gateway.global_updater.register_update_listener(listener)
+
+    assert already_registered not in caplog.text
+
+    zha_gateway.global_updater.register_update_listener(listener)
+
+    assert already_registered in caplog.text
+
+    zha_gateway.global_updater.remove_update_listener(listener)
+
+    assert not_registered not in caplog.text
+
+    zha_gateway.global_updater.remove_update_listener(listener)
+
+    assert not_registered in caplog.text
+
+
 async def test_gateway_handle_message(
     zha_gateway: Gateway,
     zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
