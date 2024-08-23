@@ -7351,7 +7351,21 @@ DEVICES = [
         DEV_SIG_DEV_NO: 102,
         SIG_MANUFACTURER: "Sinope Technologies",
         SIG_MODEL: "SW2500ZB",
-        SIG_NODE_DESC: b"\x02@\x80|\x11RR\x00\x00\x00R\x00\x00",
+        SIG_NODE_DESC: {
+            "logical_type": 1,
+            "complex_descriptor_available": 0,
+            "user_descriptor_available": 1,
+            "reserved": 0,
+            "aps_flags": 0,
+            "frequency_band": 8,
+            "mac_capability_flags": 142,
+            "manufacturer_code": 4508,
+            "maximum_buffer_size": 71,
+            "maximum_incoming_transfer_size": 43,
+            "server_mask": 10752,
+            "maximum_outgoing_transfer_size": 43,
+            "descriptor_capability_field": 0,
+        },
         SIG_ENDPOINTS: {
             1: {
                 SIG_EP_TYPE: 257,
