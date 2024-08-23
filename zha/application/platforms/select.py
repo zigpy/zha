@@ -731,7 +731,6 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
     _attribute_name = "exercise_day_of_week"
     _attr_translation_key: str = "exercise_day_of_week"
     _enum = danfoss_thermostat.DanfossExerciseDayOfTheWeekEnum
-    _attr_icon: str = "mdi:wrench-clock"
 
 
 class DanfossOrientationEnum(types.enum8):

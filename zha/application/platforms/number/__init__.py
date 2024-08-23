@@ -922,7 +922,6 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
     _attr_native_max_value: int = 1439
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
-    _attr_icon: str = "mdi:clock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -937,7 +936,6 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
     _attr_translation_key: str = "external_temperature_sensor"
     _attr_native_min_value: float = -80
     _attr_native_max_value: float = 35
-    _attr_icon: str = "mdi:thermometer"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -953,7 +951,6 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
     _attr_native_min_value: int = -8000
     _attr_native_max_value: int = 2000
     _attr_mode: NumberMode = NumberMode.BOX
-    _attr_icon: str = "mdi:scale-balance"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -968,7 +965,6 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     _attr_translation_key: str = "regulation_setpoint_offset"
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
-    _attr_icon: str = "mdi:thermostat"
     _attr_native_min_value: float = -2.5
     _attr_native_max_value: float = 2.5
     _attr_native_step: float = 0.1
