@@ -843,7 +843,7 @@ class SinopeLightLedColors(types.enum32):
     },
 )
 class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
-    """Representation of the marker LED color off-state color of Sinope light switches."""
+    """Representation of the marker LED Off-state color of Sinope light switches."""
 
     _unique_id_suffix = "off_led_color"
     _attribute_name = "off_led_color"
@@ -863,7 +863,7 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
     },
 )
 class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
-    """Representation of the marker LED color on-state color of Sinope light switches."""
+    """Representation of the marker LED On-state color of Sinope light switches."""
 
     _unique_id_suffix = "on_led_color"
     _attribute_name = "on_led_color"

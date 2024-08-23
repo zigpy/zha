@@ -559,7 +559,4 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
             "matching sinope device to cluster handler %s", cluster.endpoint.model
         )
 
-        return (
-            cluster.endpoint.model in switches
-            or cluster.endpoint.device.model in switches
-        )
+        return cluster.endpoint.model in switches
