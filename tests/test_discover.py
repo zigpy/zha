@@ -100,7 +100,7 @@ def zha_device_mock(
         ieee="00:11:22:33:44:55:66:77",
         manufacturer="mock manufacturer",
         model="mock model",
-        node_desc=b"\x02@\x807\x10\x7fd\x00\x00*d\x00\x00",
+        node_desc=None,
         patch_cluster=False,
     ):
         return await device_joined(
@@ -329,7 +329,7 @@ async def test_discover_endpoint(
             device_info[SIG_ENDPOINTS],
             manufacturer=device_info[SIG_MANUFACTURER],
             model=device_info[SIG_MODEL],
-            node_desc=device_info[SIG_NODE_DESC],
+            node_desc=zdo_t.NodeDescriptor(**device_info[SIG_NODE_DESC]),
             patch_cluster=True,
         )
 
