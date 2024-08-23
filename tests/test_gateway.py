@@ -11,6 +11,7 @@ from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types
+import zigpy.zdo.types as zdo_t
 from zigpy.zdo.types import LogicalType, NodeDescriptor
 
 from tests.common import get_entity, get_group_entity
@@ -85,7 +86,27 @@ async def coordinator(
         },
         ieee="00:15:8d:00:02:32:4f:32",
         nwk=0x0000,
-        node_descriptor=b"\xf8\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff",
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.Coordinator,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.AlternatePanCoordinator
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.FullFunctionDevice
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.RxOnWhenIdle
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=43981,
+            maximum_buffer_size=82,
+            maximum_incoming_transfer_size=128,
+            server_mask=11329,
+            maximum_outgoing_transfer_size=128,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
     zha_device = await device_joined(zigpy_device)
     zha_device.available = True

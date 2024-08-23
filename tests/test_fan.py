@@ -15,6 +15,7 @@ from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, hvac
 import zigpy.zcl.foundation as zcl_f
+import zigpy.zdo.types as zdo_t
 
 from tests.common import (
     get_entity,
@@ -62,7 +63,26 @@ def zigpy_device(
         }
     }
     return zigpy_device_mock(
-        endpoints, node_descriptor=b"\x02@\x8c\x02\x10RR\x00\x00\x00R\x00\x00"
+        endpoints,
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.RxOnWhenIdle
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=4098,
+            maximum_buffer_size=82,
+            maximum_incoming_transfer_size=82,
+            server_mask=0,
+            maximum_outgoing_transfer_size=82,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
 
 
@@ -511,7 +531,25 @@ def zigpy_device_ikea(zigpy_device_mock) -> ZigpyDevice:
         manufacturer="IKEA of Sweden",
         model="STARKVIND Air purifier",
         quirk=zhaquirks.ikea.starkvind.IkeaSTARKVIND,
-        node_descriptor=b"\x02@\x8c\x02\x10RR\x00\x00\x00R\x00\x00",
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.RxOnWhenIdle
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=4098,
+            maximum_buffer_size=82,
+            maximum_incoming_transfer_size=82,
+            server_mask=0,
+            maximum_outgoing_transfer_size=82,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
 
 
@@ -665,7 +703,25 @@ def zigpy_device_kof(zigpy_device_mock) -> ZigpyDevice:
         manufacturer="King Of Fans, Inc.",
         model="HBUniversalCFRemote",
         quirk=zhaquirks.kof.kof_mr101z.CeilingFan,
-        node_descriptor=b"\x02@\x8c\x02\x10RR\x00\x00\x00R\x00\x00",
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.RxOnWhenIdle
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=4098,
+            maximum_buffer_size=82,
+            maximum_incoming_transfer_size=82,
+            server_mask=0,
+            maximum_outgoing_transfer_size=82,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
 
 

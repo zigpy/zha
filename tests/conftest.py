@@ -404,7 +404,7 @@ def zigpy_device_mock(
         ieee: str = "00:0d:6f:00:0a:90:69:e7",
         manufacturer: str = "FakeManufacturer",
         model: str = "FakeModel",
-        node_descriptor: bytes = b"\x02@\x807\x10\x7fd\x00\x00*d\x00\x00",
+        node_descriptor: zdo_t.NodeDescriptor | None = None,
         nwk: int = 0xB79C,
         patch_cluster: bool = True,
         quirk: Optional[Callable] = None,
@@ -416,7 +416,25 @@ def zigpy_device_mock(
         )
         device.manufacturer = manufacturer
         device.model = model
-        device.node_desc = zdo_t.NodeDescriptor.deserialize(node_descriptor)[0]
+
+        if node_descriptor is None:
+            node_descriptor = zdo_t.NodeDescriptor(
+                logical_type=zdo_t.LogicalType.EndDevice,
+                complex_descriptor_available=0,
+                user_descriptor_available=0,
+                reserved=0,
+                aps_flags=0,
+                frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+                mac_capability_flags=zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress,
+                manufacturer_code=4151,
+                maximum_buffer_size=127,
+                maximum_incoming_transfer_size=100,
+                server_mask=10752,
+                maximum_outgoing_transfer_size=100,
+                descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+            )
+
+        device.node_desc = node_descriptor
         device.last_seen = time.time()
 
         for epid, ep in endpoints.items():

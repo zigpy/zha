@@ -9,6 +9,7 @@ from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
+import zigpy.zdo.types as zdo_t
 
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
@@ -32,7 +33,26 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
         }
     }
     return zigpy_device_mock(
-        endpoints, node_descriptor=b"\x02@\x8c\x02\x10RR\x00\x00\x00R\x00\x00"
+        endpoints,
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.RxOnWhenIdle
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=4098,
+            maximum_buffer_size=82,
+            maximum_incoming_transfer_size=82,
+            server_mask=0,
+            maximum_outgoing_transfer_size=82,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
 
 

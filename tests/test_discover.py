@@ -40,6 +40,7 @@ import zigpy.zcl.clusters.closures
 import zigpy.zcl.clusters.general
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
+import zigpy.zdo.types as zdo_t
 
 from tests.common import get_entity, update_attribute_cache
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -133,7 +134,7 @@ async def test_devices(
         ieee="00:11:22:33:44:55:66:77",
         manufacturer=device[SIG_MANUFACTURER],
         model=device[SIG_MODEL],
-        node_descriptor=device[SIG_NODE_DESC],
+        node_descriptor=zdo_t.NodeDescriptor(**device[SIG_NODE_DESC]),
         attributes=device.get(DEV_SIG_ATTRIBUTES),
         patch_cluster=False,
     )

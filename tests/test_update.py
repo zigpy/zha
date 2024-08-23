@@ -13,6 +13,7 @@ from zigpy.profiles import zha
 import zigpy.types as t
 from zigpy.zcl import Cluster, foundation
 from zigpy.zcl.clusters import general
+import zigpy.zdo.types as zdo_t
 
 from tests.common import get_entity, update_attribute_cache
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
@@ -39,7 +40,25 @@ def zigpy_device(zigpy_device_mock):
         }
     }
     return zigpy_device_mock(
-        endpoints, node_descriptor=b"\x02@\x84_\x11\x7fd\x00\x00,d\x00\x00"
+        endpoints,
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=4447,
+            maximum_buffer_size=127,
+            maximum_incoming_transfer_size=100,
+            server_mask=11264,
+            maximum_outgoing_transfer_size=100,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
 
 
