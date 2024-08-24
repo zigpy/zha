@@ -17,7 +17,7 @@ ZHA is a versatile and hardware-independent Zigbee gateway implementation, desig
 - **Unified Zigbee Network:** By utilizing ZHA, you can establish a single Zigbee network, simplifying device management and enhancing interoperability.
 - **Low-Bandwidth Communication:** Zigbee operates on a low-bandwidth communication protocol, utilizing small, low-power digital radios to connect devices within local Zigbee wireless private area networks.
 
-## Getting Started
+## Getting Started With Development
 
 To bootstrap a development environment for ZHA, follow these steps:
 
