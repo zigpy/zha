@@ -1371,3 +1371,19 @@ async def test_danfoss_thermostat_sw_error(
     assert entity.extra_state_attribute_names
     assert "Top_pcb_sensor_error" in entity.extra_state_attribute_names
     assert entity.state["Top_pcb_sensor_error"]
+
+
+async def test_lumi_illuminance_sensor(
+    zha_gateway: Gateway,
+    zigpy_device_from_json: Callable[..., ZigpyDevice],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+) -> None:
+    """Test quirks defined illuminance sensor."""
+
+    zigpy_device = zigpy_device_from_json(
+        "tests/data/devices/lumi/lumi.sen_ill.mgl01.json"
+    )
+
+    zha_device = await device_joined(zigpy_device)
+
+    assert zha_device is not None
