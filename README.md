@@ -5,7 +5,7 @@
 [![python](https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python)](https://www.python.org)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![PyPI version](https://badge.fury.io/py/zha.svg)](https://badge.fury.io/py/zha)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](https://opensource.org/license/apache-2-0)
 
 
 ZHA is a versatile and hardware-independent Zigbee gateway implementation, designed to replace proprietary Zigbee gateways, bridges, hubs, and controllers. With ZHA, you can create a unified Zigbee network, allowing you to easily pair and connect a wide range of Zigbee-based devices for home automation and lighting.
