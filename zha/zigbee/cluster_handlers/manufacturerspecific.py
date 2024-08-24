@@ -511,7 +511,7 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize Sinope cluster handler."""
         super().__init__(cluster, endpoint)
-        shared_attr = {
+        shared_attrs = {
             "double_up_full": True,
             "on_led_color": True,
             "off_led_color": True,
@@ -525,13 +525,14 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
             "DM2500ZB",
         ]:
             self.ZCL_INIT_ATTRS = {
-                **shared_attr,
+                **shared_attrs,
                 "on_intensity": True,
             }
 
         elif self.cluster.endpoint.model in ["SW2500ZB", "SW2500ZB-G2"]:
-            self.ZCL_INIT_ATTRS = shared_attr.copy()
+            self.ZCL_INIT_ATTRS = shared_attrs.copy()
 
+    _value_attribute = "action_report"
     REPORT_CONFIG = (
         AttrReportConfig(
             attr="action_report",
