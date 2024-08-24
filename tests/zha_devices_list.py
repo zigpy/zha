@@ -7380,74 +7380,74 @@ DEVICES = [
             ("button", "00:11:22:33:44:55:66:77-1-3"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["identify"],
                 DEV_SIG_ENT_MAP_CLASS: "IdentifyButton",
-                DEV_SIG_ENT_MAP_ID: "button.sinope_technologies_dm2500zb_identify",
+                DEV_SIG_ENT_MAP_ID: "button.sinope_technologies_dm2550zb_identify",
             },
             ("light", "00:11:22:33:44:55:66:77-1"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["level", "on_off"],
                 DEV_SIG_ENT_MAP_CLASS: "Light",
-                DEV_SIG_ENT_MAP_ID: "light.sinope_technologies_dm2500zb_light",
+                DEV_SIG_ENT_MAP_ID: "light.sinope_technologies_dm2550zb_light",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["electrical_measurement"],
                 DEV_SIG_ENT_MAP_CLASS: "PolledElectricalMeasurement",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_power",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_power",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820-apparent_power"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["electrical_measurement"],
                 DEV_SIG_ENT_MAP_CLASS: "ElectricalMeasurementApparentPower",
                 DEV_SIG_ENT_MAP_ID: (
-                    "sensor.sinope_technologies_dm2500zb_apparent_power"
+                    "sensor.sinope_technologies_dm2550zb_apparent_power"
                 ),
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820-rms_current"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["electrical_measurement"],
                 DEV_SIG_ENT_MAP_CLASS: "ElectricalMeasurementRMSCurrent",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_current",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_current",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820-rms_voltage"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["electrical_measurement"],
                 DEV_SIG_ENT_MAP_CLASS: "ElectricalMeasurementRMSVoltage",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_voltage",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_voltage",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820-ac_frequency"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["electrical_measurement"],
                 DEV_SIG_ENT_MAP_CLASS: "ElectricalMeasurementFrequency",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_ac_frequency",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_ac_frequency",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2820-power_factor"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["electrical_measurement"],
                 DEV_SIG_ENT_MAP_CLASS: "ElectricalMeasurementPowerFactor",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_power_factor",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_power_factor",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-rssi"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["basic"],
                 DEV_SIG_ENT_MAP_CLASS: "RSSISensor",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_rssi",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_rssi",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-0-lqi"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["basic"],
                 DEV_SIG_ENT_MAP_CLASS: "LQISensor",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_lqi",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_lqi",
             },
             ("update", "00:11:22:33:44:55:66:77-1-25-firmware_update"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
-                DEV_SIG_ENT_MAP_ID: "update.sinope_technologies_dm2500zb_firmware",
+                DEV_SIG_ENT_MAP_ID: "update.sinope_technologies_dm2550zb_firmware",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["smartenergy_metering"],
                 DEV_SIG_ENT_MAP_CLASS: "SmartEnergyMetering",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_instantaneous_demand",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_instantaneous_demand",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-1794-summation_delivered"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["smartenergy_metering"],
                 DEV_SIG_ENT_MAP_CLASS: "SmartEnergySummation",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_summation_delivered",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_summation_delivered",
             },
             ("sensor", "00:11:22:33:44:55:66:77-1-2"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["device_temperature"],
                 DEV_SIG_ENT_MAP_CLASS: "DeviceTemperature",
-                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2500zb_device_temperature",
+                DEV_SIG_ENT_MAP_ID: "sensor.sinope_technologies_dm2550zb_device_temperature",
             },
         },
     },
