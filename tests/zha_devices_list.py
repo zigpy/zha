@@ -7350,7 +7350,7 @@ DEVICES = [
     {
         DEV_SIG_DEV_NO: 102,
         SIG_MANUFACTURER: "Sinope Technologies",
-        SIG_MODEL: "SW2500ZB",
+        SIG_MODEL: "DM2550ZB",
         SIG_NODE_DESC: {
             "logical_type": 1,
             "complex_descriptor_available": 0,
