@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Awaitable, Callable, Generator
 from contextlib import contextmanager
 import itertools
+import json
 import logging
 import os
 import reprlib
@@ -474,3 +475,97 @@ def zigpy_device_mock(
         return device
 
     return _mock_dev
+
+
+@pytest.fixture
+def zigpy_device_from_json(
+    zigpy_app_controller: ControllerApplication,
+) -> Callable[..., zigpy.device.Device]:
+    """Make a fake device using the specified cluster classes."""
+
+    def _mock_dev_from_json(
+        json_file: str,
+        patch_cluster: bool = True,
+        quirk: Optional[Callable] = None,
+    ) -> zigpy.device.Device:
+        """Make a fake device using the specified cluster classes."""
+        with open(json_file, encoding="utf-8") as file:
+            device_data = json.load(file)
+
+        ieee = "00:11:22:33:44:55:66:77"
+        nwk = device_data["data"]["nwk"]
+        manufacturer = device_data["data"]["manufacturer"]
+        model = device_data["data"]["model"]
+        node_descriptor = device_data["data"]["signature"]["node_descriptor"]
+        endpoints = device_data["data"]["signature"]["endpoints"]
+        cluster_data = device_data["data"]["cluster_details"]
+
+        device = zigpy.device.Device(
+            zigpy_app_controller, zigpy.types.EUI64.convert(ieee), nwk
+        )
+        device.manufacturer = manufacturer
+        device.model = model
+
+        node_desc = zdo_t.NodeDescriptor(
+            logical_type=node_descriptor["logical_type"],
+            complex_descriptor_available=node_descriptor[
+                "complex_descriptor_available"
+            ],
+            user_descriptor_available=node_descriptor["user_descriptor_available"],
+            reserved=node_descriptor["reserved"],
+            aps_flags=node_descriptor["aps_flags"],
+            frequency_band=node_descriptor["frequency_band"],
+            mac_capability_flags=node_descriptor["mac_capability_flags"],
+            manufacturer_code=node_descriptor["manufacturer_code"],
+            maximum_buffer_size=node_descriptor["maximum_buffer_size"],
+            maximum_incoming_transfer_size=node_descriptor[
+                "maximum_incoming_transfer_size"
+            ],
+            server_mask=node_descriptor["server_mask"],
+            maximum_outgoing_transfer_size=node_descriptor[
+                "maximum_outgoing_transfer_size"
+            ],
+            descriptor_capability_field=node_descriptor["descriptor_capability_field"],
+        )
+        device.node_desc = node_desc
+        device.last_seen = time.time()
+
+        for epid, ep in endpoints.items():
+            endpoint = device.add_endpoint(int(epid))
+            profile = zigpy.profiles.PROFILES[int(ep["profile_id"], 16)]
+            endpoint.device_type = profile.DeviceType(int(ep["device_type"], 16))
+            endpoint.profile_id = profile.PROFILE_ID
+            endpoint.request = AsyncMock(return_value=[0])
+
+            for cluster_id in ep["input_clusters"]:
+                endpoint.add_input_cluster(int(cluster_id, 16))
+
+            for cluster_id in ep["output_clusters"]:
+                endpoint.add_output_cluster(int(cluster_id, 16))
+
+        for epid, ep in cluster_data.items():
+            for cluster_id, cluster in ep["in_clusters"].items():
+                real_cluster = device.endpoints[int(epid)].in_clusters[
+                    int(cluster_id, 16)
+                ]
+                for attr_id, attr in cluster["attributes"].items():
+                    if attr["value"] is None:
+                        continue
+                    real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
+
+        if quirk:
+            device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
+        else:
+            device = get_device(device)
+
+        if patch_cluster:
+            for endpoint in (ep for epid, ep in device.endpoints.items() if epid):
+                endpoint.request = AsyncMock(return_value=[0])
+                for cluster in itertools.chain(
+                    endpoint.in_clusters.values(), endpoint.out_clusters.values()
+                ):
+                    common.patch_cluster(cluster)
+
+        return device
+
+    return _mock_dev_from_json
