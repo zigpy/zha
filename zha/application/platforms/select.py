@@ -819,3 +819,53 @@ class DanfossViewingDirection(ZCLEnumSelectEntity):
     _attribute_name = "viewing_direction"
     _attr_translation_key: str = "viewing_direction"
     _enum = danfoss_thermostat.DanfossViewingDirectionEnum
+
+
+class SinopeLightLedColors(types.enum32):
+    """Color values for Sinope light switch status LEDs."""
+
+    Lim = 0x0AFFDC
+    Amber = 0x000A4B
+    Fushia = 0x0100A5
+    Perle = 0x64FFFF
+    Blue = 0xFFFF00
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={
+        "DM2500ZB",
+        "DM2500ZB-G2",
+        "DM2550ZB",
+        "DM2550ZB-G2",
+        "SW2500ZB",
+        "SW2500ZB-G2",
+    },
+)
+class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
+    """Representation of the marker LED Off-state color of Sinope light switches."""
+
+    _unique_id_suffix = "off_led_color"
+    _attribute_name = "off_led_color"
+    _attr_translation_key: str = "off_led_color"
+    _enum = SinopeLightLedColors
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={
+        "DM2500ZB",
+        "DM2500ZB-G2",
+        "DM2550ZB",
+        "DM2550ZB-G2",
+        "SW2500ZB",
+        "SW2500ZB-G2",
+    },
+)
+class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
+    """Representation of the marker LED On-state color of Sinope light switches."""
+
+    _unique_id_suffix = "on_led_color"
+    _attribute_name = "on_led_color"
+    _attr_translation_key: str = "on_led_color"
+    _enum = SinopeLightLedColors

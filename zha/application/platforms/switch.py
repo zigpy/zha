@@ -844,3 +844,20 @@ class DanfossAdaptationRunSettings(SwitchConfigurationEntity):
     _unique_id_suffix = "adaptation_run_settings"
     _attribute_name: str = "adaptation_run_settings"
     _attr_translation_key: str = "adaptation_run_enabled"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={
+        "DM2500ZB",
+        "DM2500ZB-G2",
+        "DM2550ZB",
+        "DM2550ZB-G2",
+    },
+)
+class SinopeLightDoubleTapFullSwitch(SwitchConfigurationEntity):
+    """Representation of a config option that controls whether Double Tap Full option is enabled on a Sinope light switch."""
+
+    _unique_id_suffix = "double_up_full"
+    _attribute_name = "double_up_full"
+    _attr_translation_key: str = "double_up_full"

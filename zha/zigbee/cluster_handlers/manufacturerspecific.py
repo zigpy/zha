@@ -37,7 +37,10 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
+    REPORT_CONFIG_MIN_INT_IMMEDIATE,
+    REPORT_CONFIG_RPT_CHANGE,
     SIGNAL_ATTR_UPDATED,
+    SINOPE_MANUFACTURER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
@@ -496,3 +499,60 @@ class DanfossDiagnosticClusterHandler(DiagnosticClusterHandler):
         AttrReportConfig(attr="sw_error_code", config=REPORT_CONFIG_DEFAULT),
         AttrReportConfig(attr="motor_step_counter", config=REPORT_CONFIG_DEFAULT),
     )
+
+
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SINOPE_MANUFACTURER_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(SINOPE_MANUFACTURER_CLUSTER)
+class SinopeManufacturerClusterHandler(ClusterHandler):
+    """Sinope Manufacturer cluster handler."""
+
+    BIND = True
+
+    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
+        """Initialize Sinope cluster handler."""
+        super().__init__(cluster, endpoint)
+        self.ZCL_INIT_ATTRS = {
+            "double_up_full": True,
+            "on_led_color": True,
+            "off_led_color": True,
+            "off_led_intensity": True,
+            "on_led_intensity": True,
+        }
+
+        if self.cluster.endpoint.model in [
+            "DM2550ZB",
+            "DM2550ZB-G2",
+            "DM2500ZB-G2",
+            "DM2500ZB",
+        ]:
+            self.ZCL_INIT_ATTRS["on_intensity"] = True
+
+    _value_attribute = "action_report"
+    REPORT_CONFIG = (
+        AttrReportConfig(
+            attr="action_report",
+            config=(
+                REPORT_CONFIG_MIN_INT_IMMEDIATE,
+                REPORT_CONFIG_MIN_INT_IMMEDIATE,
+                REPORT_CONFIG_RPT_CHANGE,
+            ),
+        ),
+    )
+
+    @classmethod
+    def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:
+        """Filter the cluster match for specific devices."""
+        switches = (
+            "SW2500ZB",
+            "SW2500ZB-G2",
+            "DM2500ZB",
+            "DM2500ZB-G2",
+            "DM2550ZB",
+            "DM2550ZB-G2",
+        )
+
+        _LOGGER.debug(
+            "matching sinope device to cluster handler %s", cluster.endpoint.model
+        )
+
+        return cluster.endpoint.model in switches
