@@ -2,7 +2,9 @@
 
 from collections.abc import Awaitable, Callable, Coroutine
 import enum
+import glob
 import itertools
+import json
 import re
 from typing import Any, Final
 from unittest import mock
@@ -1043,3 +1045,54 @@ async def test_quirks_v2_metadata_bad_device_classes(
 
     # remove the device so we don't pollute the rest of the tests
     zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
+
+
+def pytest_generate_tests(metafunc):
+    """Generate tests for all device files."""
+    if "file_path" in metafunc.fixturenames:
+        # use the filename as ID for better test names
+        file_paths = sorted(glob.glob("tests/data/devices/*.json"))
+        metafunc.parametrize("file_path", file_paths, ids=file_paths)
+
+
+async def test_devices_from_files(
+    zha_device_from_file: Callable[..., Awaitable[Device]], file_path: str
+) -> None:
+    """Test all devices."""
+    zha_device = await zha_device_from_file(file_path)
+    assert zha_device is not None
+
+    with open(file_path, encoding="utf-8") as file:
+        device_data = json.load(file)
+
+    # Get the zha_lib_entities from device_data
+    zha_lib_entities = device_data.get("zha_lib_entities", [])
+
+    # Iterate over the platform_entities in device.platform_entities
+    for platform, entities in zha_lib_entities.items():
+        for entity in entities:
+            platform_entity = zha_device.platform_entities.get(
+                (Platform(platform), entity["info_object"]["unique_id"])
+            )
+            assert platform_entity is not None
+
+            # Assert that the entity properties match those in the json data
+            assert (
+                platform_entity.translation_key
+                == entity["info_object"]["translation_key"]
+            )
+            assert (
+                platform_entity.fallback_name == entity["info_object"]["fallback_name"]
+            )
+            assert platform_entity.device_class == entity["info_object"]["device_class"]
+            assert platform_entity.__class__.__name__ == entity["state"]["class_name"]
+            assert (
+                platform_entity.entity_category
+                == entity["info_object"]["entity_category"]
+            )
+            assert platform_entity.state_class == entity["info_object"]["state_class"]
+            assert (
+                platform_entity.entity_registry_enabled_default
+                == entity["info_object"]["entity_registry_enabled_default"]
+            )
+            assert platform_entity.state["class_name"] == entity["state"]["class_name"]
