@@ -12,7 +12,7 @@
   "lqi": null,
   "rssi": null,
   "last_seen": "2024-08-25T13:33:22",
-  "available": true,
+  "available": false,
   "device_type": "EndDevice",
   "signature": {
     "node_descriptor": {
@@ -669,16 +669,16 @@
     ],
     "endpoints": {
       "1": {
-        "profile_id": 260,
-        "device_type": 24321,
+        "profile_id": "0x0104",
+        "device_type": "0x5f01",
         "input_clusters": [
-          0,
-          1,
-          6,
-          18
+          "0x0000",
+          "0x0001",
+          "0x0006",
+          "0x0012"
         ],
         "output_clusters": [
-          0
+          "0x0000"
         ]
       }
     }
@@ -723,7 +723,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": true,
+          "available": false,
           "group_id": null,
           "attribute": "battery_percentage_remaining",
           "decimals": 1,
@@ -733,7 +733,7 @@
         },
         "state": {
           "class_name": "Battery",
-          "available": true,
+          "available": false,
           "state": 62,
           "battery_size": "CR2032",
           "battery_quantity": 1,
@@ -778,7 +778,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": true,
+          "available": false,
           "group_id": null,
           "attribute": "current_temperature",
           "decimals": 1,
@@ -788,7 +788,7 @@
         },
         "state": {
           "class_name": "DeviceTemperature",
-          "available": true,
+          "available": false,
           "state": 28.0
         }
       },
@@ -830,7 +830,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": true,
+          "available": false,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -840,7 +840,7 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": true,
+          "available": false,
           "state": null
         }
       },
@@ -882,7 +882,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": true,
+          "available": false,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -892,7 +892,7 @@
         },
         "state": {
           "class_name": "LQISensor",
-          "available": true,
+          "available": false,
           "state": null
         }
       }

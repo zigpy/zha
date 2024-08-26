@@ -2794,47 +2794,47 @@
     ],
     "endpoints": {
       "1": {
-        "profile_id": 260,
-        "device_type": 257,
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
         "input_clusters": [
-          0,
-          3,
-          4,
-          5,
-          6,
-          8,
-          1794,
-          2820,
-          2821,
-          64561,
-          64599
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0702",
+          "0x0b04",
+          "0x0b05",
+          "0xfc31",
+          "0xfc57"
         ],
         "output_clusters": [
-          25
+          "0x0019"
         ]
       },
       "2": {
-        "profile_id": 260,
-        "device_type": 260,
+        "profile_id": "0x0104",
+        "device_type": "0x0104",
         "input_clusters": [
-          0,
-          3,
-          4,
-          5
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005"
         ],
         "output_clusters": [
-          3,
-          6,
-          8,
-          64561
+          "0x0003",
+          "0x0006",
+          "0x0008",
+          "0xfc31"
         ]
       },
       "242": {
-        "profile_id": 41440,
-        "device_type": 97,
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
         "input_clusters": [],
         "output_clusters": [
-          33
+          "0x0021"
         ]
       }
     }

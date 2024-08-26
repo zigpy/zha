@@ -11,7 +11,7 @@
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-25T16:15:55",
+  "last_seen": "2024-08-26T10:14:56",
   "available": false,
   "device_type": "Router",
   "signature": {
@@ -100,7 +100,19 @@
       "name": "LUMI lumi.plug.maus01"
     },
     {
+      "entity_id": "sensor.lumi_lumi_plug_maus01_apparent_power",
+      "name": "LUMI lumi.plug.maus01"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_plug_maus01_current",
+      "name": "LUMI lumi.plug.maus01"
+    },
+    {
       "entity_id": "sensor.lumi_lumi_plug_maus01_voltage",
+      "name": "LUMI lumi.plug.maus01"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_plug_maus01_ac_frequency",
       "name": "LUMI lumi.plug.maus01"
     },
     {
@@ -1514,15 +1526,8 @@
           },
           "unsupported_attributes": [
             0,
-            768,
-            770,
             1024,
             1025,
-            1287,
-            1288,
-            1290,
-            1293,
-            1295,
             1296,
             1536,
             1537,
@@ -1530,19 +1535,12 @@
             1539,
             "ac_current_divisor",
             "ac_current_multiplier",
-            "ac_frequency",
             "ac_frequency_divisor",
-            "ac_frequency_max",
             "ac_frequency_multiplier",
             "ac_voltage_divisor",
             "ac_voltage_multiplier",
-            "active_power_max",
-            "apparent_power",
             "measurement_type",
-            "power_factor",
-            "rms_current",
-            "rms_current_max",
-            "rms_voltage_max"
+            "power_factor"
           ]
         },
         "0xfcc0": {
@@ -2611,55 +2609,55 @@
     ],
     "endpoints": {
       "1": {
-        "profile_id": 260,
-        "device_type": 81,
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
         "input_clusters": [
-          0,
-          1,
-          2,
-          4,
-          3,
-          6,
-          5,
-          16,
-          10,
-          2820
+          "0x0000",
+          "0x0001",
+          "0x0002",
+          "0x0004",
+          "0x0003",
+          "0x0006",
+          "0x0005",
+          "0x0010",
+          "0x000a",
+          "0x0b04"
         ],
         "output_clusters": [
-          25,
-          10
+          "0x0019",
+          "0x000a"
         ]
       },
       "2": {
-        "profile_id": 260,
-        "device_type": 9,
+        "profile_id": "0x0104",
+        "device_type": "0x0009",
         "input_clusters": [
-          12
+          "0x000c"
         ],
         "output_clusters": [
-          12,
-          4
+          "0x000c",
+          "0x0004"
         ]
       },
       "3": {
-        "profile_id": 260,
-        "device_type": 83,
+        "profile_id": "0x0104",
+        "device_type": "0x0053",
         "input_clusters": [
-          12
+          "0x000c"
         ],
         "output_clusters": [
-          12
+          "0x000c"
         ]
       },
       "100": {
-        "profile_id": 260,
-        "device_type": 263,
+        "profile_id": "0x0104",
+        "device_type": "0x0107",
         "input_clusters": [
-          15
+          "0x000f"
         ],
         "output_clusters": [
-          15,
-          4
+          "0x000f",
+          "0x0004"
         ]
       }
     }
@@ -2772,6 +2770,110 @@
       {
         "info_object": {
           "fallback_name": null,
+          "unique_id": "00:15:8d:00:02:82:d0:78-1-2820-apparent_power",
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementApparentPower",
+          "translation_key": null,
+          "device_class": "apparent_power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "00:15:8d:00:02:82:d0:78:1:0x0b04",
+              "status": "CREATED",
+              "value_attribute": "active_power"
+            }
+          ],
+          "device_ieee": [
+            120,
+            208,
+            130,
+            2,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "apparent_power",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "VA"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementApparentPower",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:02:82:d0:78-1-2820-rms_current",
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementRMSCurrent",
+          "translation_key": null,
+          "device_class": "current",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "00:15:8d:00:02:82:d0:78:1:0x0b04",
+              "status": "CREATED",
+              "value_attribute": "active_power"
+            }
+          ],
+          "device_ieee": [
+            120,
+            208,
+            130,
+            2,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "rms_current",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "A"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementRMSCurrent",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
           "unique_id": "00:15:8d:00:02:82:d0:78-1-2820-rms_voltage",
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
@@ -2819,6 +2921,58 @@
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": false,
           "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:02:82:d0:78-1-2820-ac_frequency",
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementFrequency",
+          "translation_key": "ac_frequency",
+          "device_class": "frequency",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "00:15:8d:00:02:82:d0:78:1:0x0b04",
+              "status": "CREATED",
+              "value_attribute": "active_power"
+            }
+          ],
+          "device_ieee": [
+            120,
+            208,
+            130,
+            2,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "ac_frequency",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "Hz"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementFrequency",
+          "available": false,
+          "state": null
         }
       },
       {

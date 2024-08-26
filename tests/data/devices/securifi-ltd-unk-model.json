@@ -9,10 +9,10 @@
   "quirk_id": null,
   "manufacturer_code": 4098,
   "power_source": "Mains",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2024-08-25T16:17:59",
-  "available": false,
+  "lqi": 56,
+  "rssi": -86,
+  "last_seen": "2024-08-26T10:19:10",
+  "available": true,
   "device_type": "Router",
   "signature": {
     "node_descriptor": {
@@ -2547,7 +2547,7 @@
         },
         "state": {
           "class_name": "IdentifyButton",
-          "available": false
+          "available": true
         }
       }
     ],
@@ -2600,7 +2600,7 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
-          "available": false,
+          "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2653,7 +2653,7 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
-          "available": false,
+          "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2706,7 +2706,7 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
-          "available": false,
+          "available": true,
           "state": 0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2759,7 +2759,7 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
-          "available": false,
+          "available": true,
           "state": 0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2812,8 +2812,8 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": false,
-          "state": null
+          "available": true,
+          "state": -86
         }
       },
       {
@@ -2864,8 +2864,8 @@
         },
         "state": {
           "class_name": "LQISensor",
-          "available": false,
-          "state": null
+          "available": true,
+          "state": 56
         }
       },
       {
@@ -2916,7 +2916,7 @@
         },
         "state": {
           "class_name": "PolledElectricalMeasurement",
-          "available": false,
+          "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2967,7 +2967,7 @@
         "state": {
           "class_name": "Switch",
           "state": 1,
-          "available": false
+          "available": true
         }
       }
     ],
@@ -3016,7 +3016,7 @@
         },
         "state": {
           "class_name": "FirmwareUpdateEntity",
-          "available": false,
+          "available": true,
           "installed_version": "0x00000000",
           "in_progress": false,
           "progress": 0,

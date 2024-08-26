@@ -1,6 +1,6 @@
 {
   "ieee": "00:0d:6f:00:05:65:83:f2",
-  "nwk": 10835,
+  "nwk": 26440,
   "manufacturer": "CentraLite",
   "model": "3405-L",
   "name": "CentraLite 3405-L",
@@ -11,8 +11,8 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-05T09:43:43",
-  "available": false,
+  "last_seen": "2024-08-26T08:50:02",
+  "available": true,
   "device_type": "EndDevice",
   "signature": {
     "node_descriptor": {
@@ -856,7 +856,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "code_arm_required": false,
           "code_format": "number",
@@ -864,7 +864,7 @@
         },
         "state": {
           "class_name": "AlarmControlPanel",
-          "available": false,
+          "available": true,
           "state": "disarmed"
         }
       },
@@ -906,7 +906,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "code_arm_required": false,
           "code_format": "number",
@@ -914,7 +914,7 @@
         },
         "state": {
           "class_name": "AlarmControlPanel",
-          "available": false,
+          "available": true,
           "state": "disarmed"
         }
       }
@@ -958,13 +958,13 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute_name": "zone_status"
         },
         "state": {
           "class_name": "IASZone",
-          "available": false,
+          "available": true,
           "state": false
         }
       }
@@ -1008,7 +1008,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "command": "identify",
           "args": [
@@ -1018,7 +1018,7 @@
         },
         "state": {
           "class_name": "IdentifyButton",
-          "available": false
+          "available": true
         }
       }
     ],
@@ -1061,7 +1061,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": "battery_percentage_remaining",
           "decimals": 1,
@@ -1071,7 +1071,7 @@
         },
         "state": {
           "class_name": "Battery",
-          "available": false,
+          "available": true,
           "state": null,
           "battery_size": "Other",
           "battery_quantity": 2,
@@ -1116,7 +1116,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": "measured_value",
           "decimals": 1,
@@ -1126,7 +1126,7 @@
         },
         "state": {
           "class_name": "Temperature",
-          "available": false,
+          "available": true,
           "state": 22.8
         }
       },
@@ -1168,7 +1168,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -1178,7 +1178,7 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": false,
+          "available": true,
           "state": null
         }
       },
@@ -1220,7 +1220,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -1230,7 +1230,7 @@
         },
         "state": {
           "class_name": "LQISensor",
-          "available": false,
+          "available": true,
           "state": null
         }
       }
@@ -1274,13 +1274,13 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "supported_features": 7
         },
         "state": {
           "class_name": "FirmwareUpdateEntity",
-          "available": false,
+          "available": true,
           "installed_version": "0x10025310",
           "in_progress": false,
           "progress": 0,

@@ -659,17 +659,17 @@
     },
     "endpoints": {
       "1": {
-        "profile_id": 260,
-        "device_type": 24321,
+        "profile_id": "0x0104",
+        "device_type": "0x5f01",
         "input_clusters": [
-          0,
-          6,
-          65535
+          "0x0000",
+          "0x0006",
+          "0xffff"
         ],
         "output_clusters": [
-          0,
-          4,
-          65535
+          "0x0000",
+          "0x0004",
+          "0xffff"
         ]
       }
     }

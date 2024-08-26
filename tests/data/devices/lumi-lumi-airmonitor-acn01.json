@@ -11,7 +11,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-25T18:47:31",
+  "last_seen": "2024-08-26T10:19:29",
   "available": false,
   "device_type": "EndDevice",
   "signature": {
@@ -672,18 +672,18 @@
     ],
     "endpoints": {
       "1": {
-        "profile_id": 260,
-        "device_type": 770,
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
         "input_clusters": [
-          0,
-          3,
-          1026,
-          1029,
-          1,
-          12
+          "0x0000",
+          "0x0003",
+          "0x0402",
+          "0x0405",
+          "0x0001",
+          "0x000c"
         ],
         "output_clusters": [
-          25
+          "0x0019"
         ]
       }
     }

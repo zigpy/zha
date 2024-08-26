@@ -9,10 +9,10 @@
   "quirk_id": null,
   "manufacturer_code": 4107,
   "power_source": "Mains",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2024-08-25T16:18:03",
-  "available": false,
+  "lqi": 76,
+  "rssi": -81,
+  "last_seen": "2024-08-26T10:18:44",
+  "available": true,
   "device_type": "Router",
   "signature": {
     "node_descriptor": {
@@ -846,7 +846,7 @@
         },
         "state": {
           "class_name": "IdentifyButton",
-          "available": false
+          "available": true
         }
       }
     ],
@@ -947,7 +947,7 @@
           ],
           "off_with_transition": false,
           "off_brightness": null,
-          "available": false
+          "available": true
         }
       }
     ],
@@ -999,7 +999,7 @@
         },
         "state": {
           "class_name": "StartUpCurrentLevelConfigurationEntity",
-          "available": false,
+          "available": true,
           "state": 254
         }
       },
@@ -1050,7 +1050,7 @@
         },
         "state": {
           "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "available": false,
+          "available": true,
           "state": 366
         }
       }
@@ -1106,7 +1106,7 @@
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
-          "available": false,
+          "available": true,
           "state": "On"
         }
       }
@@ -1160,8 +1160,8 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": false,
-          "state": null
+          "available": true,
+          "state": -81
         }
       },
       {
@@ -1212,8 +1212,8 @@
         },
         "state": {
           "class_name": "LQISensor",
-          "available": false,
-          "state": null
+          "available": true,
+          "state": 76
         }
       }
     ],
@@ -1262,7 +1262,7 @@
         },
         "state": {
           "class_name": "FirmwareUpdateEntity",
-          "available": false,
+          "available": true,
           "installed_version": "0x01001d00",
           "in_progress": false,
           "progress": 0,
