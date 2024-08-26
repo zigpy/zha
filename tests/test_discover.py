@@ -1128,7 +1128,9 @@ async def test_devices_from_files(
                     effect_variant=(
                         zigpy.zcl.clusters.general.Identify.EffectVariant.Default
                     ),
-                    expect_reply=cluster_identify.endpoint.model != "HDC52EastwindFan",
+                    # enhance this maybe by looking at disable default response?
+                    expect_reply=cluster_identify.endpoint.model
+                    not in ("HDC52EastwindFan", "HBUniversalCFRemote"),
                     manufacturer=None,
                     tsn=None,
                 )

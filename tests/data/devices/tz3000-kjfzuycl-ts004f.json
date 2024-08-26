@@ -1,0 +1,502 @@
+{
+  "ieee": "38:5b:44:ff:fe:36:af:0f",
+  "nwk": 2176,
+  "manufacturer": "_TZ3000_kjfzuycl",
+  "model": "TS004F",
+  "name": "_TZ3000_kjfzuycl TS004F",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.ts004f.TuyaSmartRemote004FSK",
+  "quirk_id": null,
+  "manufacturer_code": 4098,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-08-26T15:34:42",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0820",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0004",
+          "0x1000",
+          "0xe001"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0006",
+          "0x0008",
+          "0x000a",
+          "0x0019",
+          "0x0300",
+          "0x1000"
+        ]
+      }
+    },
+    "manufacturer": "_TZ3000_kjfzuycl",
+    "model": "TS004F"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.side_hose_valve_switch_identify",
+      "name": "_TZ3000_kjfzuycl TS004F"
+    },
+    {
+      "entity_id": "sensor.side_hose_valve_switch_battery",
+      "name": "_TZ3000_kjfzuycl TS004F"
+    },
+    {
+      "entity_id": "update.side_hose_valve_switch_firmware",
+      "name": "_TZ3000_kjfzuycl TS004F"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "NON_COLOR_CONTROLLER"
+    }
+  ],
+  "user_given_name": "Side Hose Valve Switch",
+  "device_reg_id": "43f107ccbcf553362db16f1e1e09cda8",
+  "area_id": "06f4047033f94ff18c70f2d36dfe3810",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "NON_COLOR_CONTROLLER",
+        "id": 2080
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "_TZ3000_kjfzuycl"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "TS004F"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0001": {
+          "endpoint_attribute": "power",
+          "attributes": {
+            "0x0021": {
+              "attribute_name": "battery_percentage_remaining",
+              "value": 200
+            },
+            "0x0020": {
+              "attribute_name": "battery_voltage",
+              "value": 30
+            }
+          },
+          "unsupported_attributes": {
+            "0x0031": {
+              "attribute_name": "battery_size"
+            },
+            "0x0033": {
+              "attribute_name": "battery_quantity"
+            }
+          }
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x1000": {
+          "endpoint_attribute": "lightlink",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0xe001": {
+          "endpoint_attribute": "tuya_external_switch_type",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {},
+          "unsupported_attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version"
+            }
+          }
+        },
+        "0x000a": {
+          "endpoint_attribute": "time",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "TS004X_cluster",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0300": {
+          "endpoint_attribute": "light_color",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x1000": {
+          "endpoint_attribute": "lightlink",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "_TZ3000_kjfzuycl",
+        "TS004F"
+      ],
+      [
+        "_TZ3000_ja5osu5g",
+        "TS004F"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0104",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0004",
+          "0x0006",
+          "0x1000",
+          "0xe001"
+        ],
+        "output_clusters": [
+          "0x0019",
+          "0x000a",
+          "0x0003",
+          "0x0004",
+          "0x0006",
+          "0x0008",
+          "0x1000"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "38:5b:44:ff:fe:36:af:0f-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "38:5b:44:ff:fe:36:af:0f:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            15,
+            175,
+            54,
+            254,
+            255,
+            68,
+            91,
+            56
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "38:5b:44:ff:fe:36:af:0f-1-1",
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "38:5b:44:ff:fe:36:af:0f:1:0x0001",
+              "status": "CREATED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": [
+            15,
+            175,
+            54,
+            254,
+            255,
+            68,
+            91,
+            56
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "battery_percentage_remaining",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 100,
+          "battery_voltage": 3.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "38:5b:44:ff:fe:36:af:0f-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "38:5b:44:ff:fe:36:af:0f:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            15,
+            175,
+            54,
+            254,
+            255,
+            68,
+            91,
+            56
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "38:5b:44:ff:fe:36:af:0f-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "38:5b:44:ff:fe:36:af:0f:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            15,
+            175,
+            54,
+            254,
+            255,
+            68,
+            91,
+            56
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "38:5b:44:ff:fe:36:af:0f-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "38:5b:44:ff:fe:36:af:0f:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            15,
+            175,
+            54,
+            254,
+            255,
+            68,
+            91,
+            56
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": null,
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": null,
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

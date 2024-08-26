@@ -1,0 +1,1385 @@
+{
+  "ieee": "5c:02:72:ff:fe:d3:bc:73",
+  "nwk": 58190,
+  "manufacturer": "lk",
+  "model": "ZBT-OnOffPlug-D0001",
+  "name": "lk ZBT-OnOffPlug-D0001",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4456,
+  "power_source": "Mains",
+  "lqi": 120,
+  "rssi": -70,
+  "last_seen": "2024-08-26T17:06:02",
+  "available": true,
+  "device_type": "Router",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4456,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x010a",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0b05",
+          "0x1000",
+          "0xfc82"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    },
+    "manufacturer": "lk",
+    "model": "ZBT-OnOffPlug-D0001"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.lk_zbt_onoffplug_d0001_73bcd3fe_identify",
+      "name": "lk ZBT-OnOffPlug-D0001"
+    },
+    {
+      "entity_id": "number.lk_zbt_onoffplug_d0001_73bcd3fe_level_on_off_transition_time",
+      "name": "lk ZBT-OnOffPlug-D0001"
+    },
+    {
+      "entity_id": "number.lk_zbt_onoffplug_d0001_73bcd3fe_level_on_level",
+      "name": "lk ZBT-OnOffPlug-D0001"
+    },
+    {
+      "entity_id": "number.lk_zbt_onoffplug_d0001_73bcd3fe_level_start_up_current_level",
+      "name": "lk ZBT-OnOffPlug-D0001"
+    },
+    {
+      "entity_id": "select.lk_zbt_onoffplug_d0001_73bcd3fe_on_off_startuponoff",
+      "name": "lk ZBT-OnOffPlug-D0001"
+    },
+    {
+      "entity_id": "switch.lk_zbt_onoffplug_d0001_on_off",
+      "name": "lk ZBT-OnOffPlug-D0001"
+    },
+    {
+      "entity_id": "update.fish_tank_heater_plug_firmware",
+      "name": "lk ZBT-OnOffPlug-D0001"
+    }
+  ],
+  "neighbors": [
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "38:5b:44:ff:fe:a5:34:80",
+      "nwk": "0x1066",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:80:d5",
+      "nwk": "0x112E",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "164"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:b9:44",
+      "nwk": "0x11E8",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "134"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "0c:43:14:ff:fe:7c:a4:cf",
+      "nwk": "0x289E",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "120"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "70:ac:08:ff:fe:ef:c4:8c",
+      "nwk": "0x2EE2",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "148"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "e0:79:8d:ff:fe:d2:8b:42",
+      "nwk": "0x2F0D",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "201"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6c:02:55",
+      "nwk": "0x383C",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "184"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:b7:81",
+      "nwk": "0x3A7C",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "108"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "14:b4:57:ff:fe:4c:43:2f",
+      "nwk": "0x426B",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "198"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6b:b4:47",
+      "nwk": "0x5B3B",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "197"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:02:4f:ea:5c",
+      "nwk": "0x7BF1",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "195"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:bd:ba",
+      "nwk": "0xAE13",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "120"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "a4:c1:38:42:5d:80:e8:43",
+      "nwk": "0xC1A4",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "199"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:ad:f7",
+      "nwk": "0xF82B",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "136"
+    },
+    {
+      "device_type": "EndDevice",
+      "rx_on_when_idle": "Off",
+      "relationship": "Child",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "ec:1b:bd:ff:fe:87:d5:3e",
+      "nwk": "0xFF7C",
+      "permit_joining": "NotAccepting",
+      "depth": "2",
+      "lqi": "116"
+    }
+  ],
+  "routes": [
+    {
+      "dest_nwk": "0x4E9B",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x3115"
+    },
+    {
+      "dest_nwk": "0x2EE2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xCDC8"
+    },
+    {
+      "dest_nwk": "0x0976",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x482B"
+    },
+    {
+      "dest_nwk": "0x0000",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": true,
+      "route_record_required": false,
+      "next_hop": "0x1066"
+    },
+    {
+      "dest_nwk": "0x9D30",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2EE2"
+    },
+    {
+      "dest_nwk": "0x0D82",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x0BAC"
+    },
+    {
+      "dest_nwk": "0x685C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xF585"
+    },
+    {
+      "dest_nwk": "0xCDB2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xCDB2"
+    },
+    {
+      "dest_nwk": "0x6B96",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x6B96"
+    },
+    {
+      "dest_nwk": "0x112E",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x112E"
+    },
+    {
+      "dest_nwk": "0x1DA5",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1066"
+    },
+    {
+      "dest_nwk": "0x4A67",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x4A67"
+    },
+    {
+      "dest_nwk": "0xE866",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x426B"
+    },
+    {
+      "dest_nwk": "0x91F2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x91F2"
+    },
+    {
+      "dest_nwk": "0xF06A",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2F0D"
+    },
+    {
+      "dest_nwk": "0x383C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x383C"
+    },
+    {
+      "dest_nwk": "0xC1A4",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xC1A4"
+    },
+    {
+      "dest_nwk": "0x5DEB",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xD423"
+    },
+    {
+      "dest_nwk": "0x1741",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2EE2"
+    },
+    {
+      "dest_nwk": "0x2EF9",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9EF3"
+    },
+    {
+      "dest_nwk": "0xF40B",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x426B"
+    },
+    {
+      "dest_nwk": "0x3115",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x6B96"
+    },
+    {
+      "dest_nwk": "0x7BF1",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x7BF1"
+    },
+    {
+      "dest_nwk": "0x3165",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x5B3B"
+    },
+    {
+      "dest_nwk": "0x837C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1066"
+    },
+    {
+      "dest_nwk": "0x0FEC",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x383C"
+    },
+    {
+      "dest_nwk": "0x3F29",
+      "route_status": "Active",
+      "memory_constrained": true,
+      "many_to_one": true,
+      "route_record_required": true,
+      "next_hop": "0x5B3B"
+    },
+    {
+      "dest_nwk": "0xD4ED",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x7BF1"
+    },
+    {
+      "dest_nwk": "0x98A2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xC1A4"
+    },
+    {
+      "dest_nwk": "0xF585",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x5B3B"
+    },
+    {
+      "dest_nwk": "0x7F08",
+      "route_status": "Active",
+      "memory_constrained": true,
+      "many_to_one": true,
+      "route_record_required": true,
+      "next_hop": "0x482B"
+    },
+    {
+      "dest_nwk": "0x9C3E",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9C3E"
+    },
+    {
+      "dest_nwk": "0x0FCD",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x426B"
+    },
+    {
+      "dest_nwk": "0xAE13",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xAE13"
+    },
+    {
+      "dest_nwk": "0x57E3",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x426B"
+    },
+    {
+      "dest_nwk": "0x4B2E",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x6B96"
+    },
+    {
+      "dest_nwk": "0xFF6D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9EF3"
+    },
+    {
+      "dest_nwk": "0xF82B",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xF82B"
+    },
+    {
+      "dest_nwk": "0x718C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x11E8"
+    },
+    {
+      "dest_nwk": "0xCDC8",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xD423"
+    },
+    {
+      "dest_nwk": "0xD423",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1066"
+    },
+    {
+      "dest_nwk": "0x9A48",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x289E"
+    },
+    {
+      "dest_nwk": "0x9D2C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x426B"
+    },
+    {
+      "dest_nwk": "0x0E5F",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x482B"
+    },
+    {
+      "dest_nwk": "0x24AC",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x3115"
+    },
+    {
+      "dest_nwk": "0x1914",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x112E"
+    },
+    {
+      "dest_nwk": "0xB708",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB708"
+    },
+    {
+      "dest_nwk": "0x80AE",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x6B96"
+    },
+    {
+      "dest_nwk": "0x948A",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x948A"
+    },
+    {
+      "dest_nwk": "0x1821",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9EF3"
+    },
+    {
+      "dest_nwk": "0xA9DD",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA9DD"
+    },
+    {
+      "dest_nwk": "0x8E8F",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x426B"
+    },
+    {
+      "dest_nwk": "0x3A7C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x3A7C"
+    },
+    {
+      "dest_nwk": "0x11E8",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x11E8"
+    },
+    {
+      "dest_nwk": "0x3C15",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x7BF1"
+    },
+    {
+      "dest_nwk": "0x5926",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x7BF1"
+    },
+    {
+      "dest_nwk": "0x38F0",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x38F0"
+    },
+    {
+      "dest_nwk": "0xF848",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x482B"
+    },
+    {
+      "dest_nwk": "0xD412",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9EF3"
+    },
+    {
+      "dest_nwk": "0xBF7D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9C3E"
+    },
+    {
+      "dest_nwk": "0x2F0D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2F0D"
+    },
+    {
+      "dest_nwk": "0xB1EB",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xF585"
+    }
+  ],
+  "endpoint_names": [
+    {
+      "name": "ON_OFF_PLUG_IN_UNIT"
+    },
+    {
+      "name": "PROXY_BASIC"
+    }
+  ],
+  "user_given_name": "Fish Tank Heater Plug",
+  "device_reg_id": "6cc2009db288d6c3393605c488352143",
+  "area_id": "a414e0d8cdc640ef93e0a8b61aba77de",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "ON_OFF_PLUG_IN_UNIT",
+        "id": 266
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "lk"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "ZBT-OnOffPlug-D0001"
+            },
+            "0x0000": {
+              "attribute_name": "zcl_version",
+              "value": 3
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 1
+            },
+            "0x4003": {
+              "attribute_name": "start_up_on_off",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_level",
+              "value": 0
+            },
+            "0x0011": {
+              "attribute_name": "on_level",
+              "value": 255
+            },
+            "0x0010": {
+              "attribute_name": "on_off_transition_time",
+              "value": 0
+            },
+            "0x4000": {
+              "attribute_name": "start_up_current_level",
+              "value": 255
+            }
+          },
+          "unsupported_attributes": {
+            "0x0013": {
+              "attribute_name": "off_transition_time"
+            },
+            "0x0014": {
+              "attribute_name": "default_move_rate"
+            },
+            "0x0012": {
+              "attribute_name": "on_transition_time"
+            }
+          }
+        },
+        "0x0b05": {
+          "endpoint_attribute": "diagnostic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x1000": {
+          "endpoint_attribute": "lightlink",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0xfc82": {
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x000a": {
+          "endpoint_attribute": "time",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version",
+              "value": 570648080
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      }
+    },
+    "242": {
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "profile_id": 41440,
+      "in_clusters": {},
+      "out_clusters": {
+        "0x0021": {
+          "endpoint_attribute": "green_power",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-8-on_off_transition_time",
+          "platform": "number",
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "translation_key": "on_off_transition_time",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 65535,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-8-on_level",
+          "platform": "number",
+          "class_name": "OnLevelConfigurationEntity",
+          "translation_key": "on_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 255,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OnLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-8-start_up_current_level",
+          "platform": "number",
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "translation_key": "start_up_current_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 255,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-6-StartUpOnOff",
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "On"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": -70
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 120
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1",
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 1,
+          "available": true
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "5c:02:72:ff:fe:d3:bc:73-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "5c:02:72:ff:fe:d3:bc:73:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            115,
+            188,
+            211,
+            254,
+            255,
+            114,
+            2,
+            92
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x22036610",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x22036610",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,898 @@
+{
+  "ieee": "00:12:4b:00:21:b4:96:29",
+  "nwk": 17699,
+  "manufacturer": "TexasInstruments",
+  "model": "ti.router",
+  "name": "TexasInstruments ti.router",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.texasinstruments.router.TiRouter",
+  "quirk_id": null,
+  "manufacturer_code": 0,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-08-09T02:32:30",
+  "available": false,
+  "device_type": "Router",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 0,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 160,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 160,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "8": {
+        "profile_id": "0x0104",
+        "device_type": "0x00ff",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    },
+    "manufacturer": "TexasInstruments",
+    "model": "ti.router"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.texasinstruments_ti_router_identify",
+      "name": "TexasInstruments ti.router"
+    },
+    {
+      "entity_id": "number.texasinstruments_ti_router_transmit_power",
+      "name": "TexasInstruments ti.router"
+    }
+  ],
+  "neighbors": [
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:06:0b:87:56",
+      "nwk": "0x3940",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "78"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6b:f8:e5",
+      "nwk": "0x4E5A",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "23"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "70:ac:08:ff:fe:ef:3c:67",
+      "nwk": "0x1DA5",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "152"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6c:0f:e9",
+      "nwk": "0x70EA",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "14"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "94:de:b8:ff:fe:45:9d:0f",
+      "nwk": "0x376F",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "111"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:80:d5",
+      "nwk": "0x49BF",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "246"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:0b:9a:d1:e4",
+      "nwk": "0xB708",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "87"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "04:87:27:ff:fe:19:2b:8d",
+      "nwk": "0xF623",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "30"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6b:db:3d",
+      "nwk": "0xA268",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "43"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "70:ac:08:ff:fe:70:dd:84",
+      "nwk": "0xF6EA",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "40"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6b:89:46",
+      "nwk": "0x9548",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "47"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "94:de:b8:ff:fe:31:4e:2b",
+      "nwk": "0x2E87",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "92"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "68:0a:e2:ff:fe:d6:1e:ab",
+      "nwk": "0xD66D",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "46"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:eb:8a:c6",
+      "nwk": "0xD412",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "36"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:01:16:e3:33",
+      "nwk": "0x6B96",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "94"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:ad:d9",
+      "nwk": "0xF848",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "43"
+    },
+    {
+      "device_type": "Coordinator",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "84:2e:14:ff:fe:8b:23:75",
+      "nwk": "0x0000",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "120"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6b:b4:39",
+      "nwk": "0xF06A",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "37"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:0b:98:0c:73",
+      "nwk": "0x27C6",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "98"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:c1:60",
+      "nwk": "0x876F",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "55"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "ec:1b:bd:ff:fe:2d:af:ac",
+      "nwk": "0x0FEB",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "93"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "68:0a:e2:ff:fe:8f:fa:33",
+      "nwk": "0x4F9C",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "62"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "70:ac:08:ff:fe:ef:6b:6d",
+      "nwk": "0xC778",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "86"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "0c:43:14:ff:fe:7c:88:82",
+      "nwk": "0x0BAC",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "68"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:9e:e1",
+      "nwk": "0x0E5F",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "47"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:9f:61",
+      "nwk": "0x9D2C",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "26"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:a0:b0",
+      "nwk": "0x685C",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "117"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "cc:cc:cc:ff:fe:da:b1:e0",
+      "nwk": "0xE178",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "2"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:bd:ba",
+      "nwk": "0xAE13",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "72"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:bb:1f",
+      "nwk": "0xCDB2",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "141"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "84:fd:27:ff:fe:69:74:42",
+      "nwk": "0x593B",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "162"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:a3:90",
+      "nwk": "0xD4B0",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "123"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:06:1b:b1:05",
+      "nwk": "0x8D8F",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "124"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6b:e6:48",
+      "nwk": "0x18C9",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "65"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:b0:00",
+      "nwk": "0xF686",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "19"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:0b:6a:c8:3a",
+      "nwk": "0x0230",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "58"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "b0:ce:18:14:03:6c:02:55",
+      "nwk": "0x383C",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "51"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "14:b4:57:ff:fe:4c:43:2f",
+      "nwk": "0x426B",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "58"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "0c:43:14:ff:fe:73:07:e2",
+      "nwk": "0xC419",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "89"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:06:cb:e1:bc",
+      "nwk": "0x363F",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "105"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "84:fd:27:ff:fe:69:79:80",
+      "nwk": "0xC906",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "75"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "28:2c:02:bf:ff:e6:c0:a0",
+      "nwk": "0xCDC8",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "222"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "90:fd:9f:ff:fe:74:75:2c",
+      "nwk": "0xFBA9",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "66"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:06:0b:94:dc",
+      "nwk": "0x1DE1",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "102"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:06:cb:f1:1a",
+      "nwk": "0xC05F",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "44"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:0b:6d:bc:5c",
+      "nwk": "0x8F2B",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "115"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Sibling",
+      "extended_pan_id": "8d:b4:1f:73:e7:35:93:1b",
+      "ieee": "00:17:88:01:0b:6d:c4:cd",
+      "nwk": "0x4936",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "81"
+    }
+  ],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "undefined_0x00ff"
+    },
+    {
+      "name": "PROXY_BASIC"
+    }
+  ],
+  "user_given_name": "Den TubesZB TexasInstruments ti.router",
+  "device_reg_id": "d160662ec830ec0ffc1209e4fb638833",
+  "area_id": "433b84b37c0c4556812951a279995b85",
+  "cluster_details": {
+    "8": {
+      "device_type": {
+        "name": "undefined_0x00ff",
+        "id": 255
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "TexasInstruments"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "ti.router"
+            },
+            "0x1337": {
+              "attribute_name": "transmit_power",
+              "value": 9
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    },
+    "242": {
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "profile_id": 41440,
+      "in_clusters": {},
+      "out_clusters": {
+        "0x0021": {
+          "endpoint_attribute": "green_power",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "TexasInstruments",
+        "ti.router"
+      ]
+    ],
+    "endpoints": {
+      "8": {
+        "profile_id": "0x0104",
+        "device_type": "0x00ff",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:21:b4:96:29-8-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 8,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "8:0x0003",
+              "unique_id": "00:12:4b:00:21:b4:96:29:8:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            41,
+            150,
+            180,
+            33,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 8,
+          "available": false,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": false
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:21:b4:96:29-8-0-transmit_power",
+          "platform": "number",
+          "class_name": "TiRouterTransmitPower",
+          "translation_key": "transmit_power",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 8,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "8:0x0000",
+              "unique_id": "00:12:4b:00:21:b4:96:29:8:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            41,
+            150,
+            180,
+            33,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 8,
+          "available": false,
+          "group_id": null,
+          "min_value": -20,
+          "max_value": 20,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "TiRouterTransmitPower",
+          "available": false,
+          "state": 9
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:21:b4:96:29-8-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 8,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "8:0x0000",
+              "unique_id": "00:12:4b:00:21:b4:96:29:8:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            41,
+            150,
+            180,
+            33,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 8,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:21:b4:96:29-8-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 8,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "8:0x0000",
+              "unique_id": "00:12:4b:00:21:b4:96:29:8:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            41,
+            150,
+            180,
+            33,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 8,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": false,
+          "state": null
+        }
+      }
+    ]
+  }
+}

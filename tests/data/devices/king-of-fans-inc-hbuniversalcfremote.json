@@ -1,0 +1,638 @@
+{
+  "ieee": "00:22:a3:00:00:09:ad:41",
+  "nwk": 28542,
+  "manufacturer": "King Of Fans,  Inc.",
+  "model": "HBUniversalCFRemote",
+  "name": "King Of Fans,  Inc. HBUniversalCFRemote",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.kof.kof_mr101z.CeilingFan",
+  "quirk_id": null,
+  "manufacturer_code": 4098,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-08-26T15:10:24",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 140,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0202"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019"
+        ]
+      }
+    },
+    "manufacturer": "King Of Fans,  Inc.",
+    "model": "HBUniversalCFRemote"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.kof_porch_41ad0900_identify",
+      "name": "King Of Fans,  Inc. HBUniversalCFRemote"
+    },
+    {
+      "entity_id": "fan.kof_porch_41ad0900_fan",
+      "name": "King Of Fans,  Inc. HBUniversalCFRemote"
+    },
+    {
+      "entity_id": "light.kof_porch_41ad0900_level_on_off",
+      "name": "King Of Fans,  Inc. HBUniversalCFRemote"
+    },
+    {
+      "entity_id": "number.king_of_fans_inc_hbuniversalcfremote_41ad0900_level_on_level",
+      "name": "King Of Fans,  Inc. HBUniversalCFRemote"
+    },
+    {
+      "entity_id": "update.kof_porch_firmware",
+      "name": "King Of Fans,  Inc. HBUniversalCFRemote"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "DIMMABLE_LIGHT"
+    }
+  ],
+  "user_given_name": "KOF Porch",
+  "device_reg_id": "bddd8922af5a41a18bef0e52c1faec7b",
+  "area_id": "2a79ce35b706412297c78753e4534794",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "King Of Fans,  Inc."
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "HBUniversalCFRemote"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {
+            "0x4003": {
+              "attribute_name": "start_up_on_off"
+            }
+          }
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_level",
+              "value": 254
+            },
+            "0x0011": {
+              "attribute_name": "on_level",
+              "value": 254
+            }
+          },
+          "unsupported_attributes": {
+            "0x4000": {
+              "attribute_name": "start_up_current_level"
+            },
+            "0x0013": {
+              "attribute_name": "off_transition_time"
+            },
+            "0x0014": {
+              "attribute_name": "default_move_rate"
+            },
+            "0x0010": {
+              "attribute_name": "on_off_transition_time"
+            },
+            "0x0012": {
+              "attribute_name": "on_transition_time"
+            }
+          }
+        },
+        "0x0202": {
+          "endpoint_attribute": "fan",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "fan_mode",
+              "value": 0
+            },
+            "0x0001": {
+              "attribute_name": "fan_mode_sequence",
+              "value": 5
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version",
+              "value": 15
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "original_signature": {
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x000e",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0202"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019"
+        ]
+      }
+    },
+    "manufacturer": "King Of Fans,  Inc."
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:09:ad:41-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "KofIdentify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            65,
+            173,
+            9,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "fan": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:09:ad:41-1-514",
+          "platform": "fan",
+          "class_name": "KofFan",
+          "translation_key": "fan",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "FanClusterHandler",
+              "generic_id": "cluster_handler_0x0202",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 514,
+                "name": "Fan Control",
+                "type": "server"
+              },
+              "id": "1:0x0202",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0202",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            65,
+            173,
+            9,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "preset_modes": [
+            "smart"
+          ],
+          "supported_features": 57,
+          "speed_count": 4,
+          "speed_list": [
+            "off",
+            "low",
+            "medium",
+            "high",
+            "smart"
+          ]
+        },
+        "state": {
+          "class_name": "KofFan",
+          "available": true,
+          "preset_mode": null,
+          "percentage": 0,
+          "is_on": false,
+          "speed": "off"
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:09:ad:41-1",
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            },
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            65,
+            173,
+            9,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "effect_list": null,
+          "supported_features": 40,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": 254,
+          "hs_color": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect": null,
+          "supported_features": 40,
+          "color_mode": "brightness",
+          "supported_color_modes": [
+            "onoff",
+            "brightness"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:09:ad:41-1-8-on_level",
+          "platform": "number",
+          "class_name": "OnLevelConfigurationEntity",
+          "translation_key": "on_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            65,
+            173,
+            9,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 255,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OnLevelConfigurationEntity",
+          "available": true,
+          "state": 254
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:09:ad:41-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "KofBasic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            65,
+            173,
+            9,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:09:ad:41-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "KofBasic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            65,
+            173,
+            9,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:09:ad:41-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "00:22:a3:00:00:09:ad:41:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            65,
+            173,
+            9,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x0000000f",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x0000000f",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

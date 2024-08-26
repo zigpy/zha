@@ -1,0 +1,1309 @@
+{
+  "ieee": "f4:ce:36:f8:ec:e4:c3:5d",
+  "nwk": 38336,
+  "manufacturer": "Homr",
+  "model": "HRMSN01",
+  "name": "Homr HRMSN01",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4660,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2023-06-26T05:50:27",
+  "available": false,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4660,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 1617,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 1617,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0400",
+          "0x0402",
+          "0x0403",
+          "0x0405",
+          "0x0406",
+          "0x0502"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      },
+      "5": {
+        "profile_id": "0x0104",
+        "device_type": "0xfff0",
+        "input_clusters": [
+          "0x0000"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      },
+      "10": {
+        "profile_id": "0x0104",
+        "device_type": "0x0102",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0300"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      }
+    },
+    "manufacturer": "Homr",
+    "model": "HRMSN01"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "binary_sensor.homr_hrmsn01_occupancy",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "button.homr_hrmsn01_identify",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "light.homr_hrmsn01_light",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "number.homr_hrmsn01_start_up_color_temperature",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "select.homr_hrmsn01_default_siren_tone",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "select.homr_hrmsn01_default_siren_level",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "select.homr_hrmsn01_default_strobe_level",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "select.homr_hrmsn01_default_strobe",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "sensor.homr_hrmsn01_illuminance",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "sensor.homr_hrmsn01_pressure",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "sensor.homr_hrmsn01_temperature",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "sensor.homr_hrmsn01_humidity",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "siren.homr_hrmsn01_siren",
+      "name": "Homr HRMSN01"
+    },
+    {
+      "entity_id": "update.homr_hrmsn01_firmware",
+      "name": "Homr HRMSN01"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "TEMPERATURE_SENSOR"
+    },
+    {
+      "name": "undefined_0xfff0"
+    },
+    {
+      "name": "COLOR_DIMMABLE_LIGHT"
+    }
+  ],
+  "user_given_name": null,
+  "device_reg_id": "e7b2536fb9e88a6db38e739dcf662100",
+  "area_id": null,
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "TEMPERATURE_SENSOR",
+        "id": 770
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "Homr"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "HRMSN01"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0402": {
+          "endpoint_attribute": "temperature",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 2400
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0403": {
+          "endpoint_attribute": "pressure",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 997
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0405": {
+          "endpoint_attribute": "humidity",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 4178
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0400": {
+          "endpoint_attribute": "illuminance",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0406": {
+          "endpoint_attribute": "occupancy",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "occupancy",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0502": {
+          "endpoint_attribute": "ias_wd",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    },
+    "5": {
+      "device_type": {
+        "name": "undefined_0xfff0",
+        "id": 65520
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    },
+    "10": {
+      "device_type": {
+        "name": "COLOR_DIMMABLE_LIGHT",
+        "id": 258
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {
+            "0x4003": {
+              "attribute_name": "start_up_on_off"
+            }
+          }
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_level",
+              "value": 255
+            }
+          },
+          "unsupported_attributes": {
+            "0x4000": {
+              "attribute_name": "start_up_current_level"
+            },
+            "0x0013": {
+              "attribute_name": "off_transition_time"
+            },
+            "0x0014": {
+              "attribute_name": "default_move_rate"
+            },
+            "0x0010": {
+              "attribute_name": "on_off_transition_time"
+            },
+            "0x0011": {
+              "attribute_name": "on_level"
+            },
+            "0x0012": {
+              "attribute_name": "on_transition_time"
+            }
+          }
+        },
+        "0x0300": {
+          "endpoint_attribute": "light_color",
+          "attributes": {
+            "0x400a": {
+              "attribute_name": "color_capabilities",
+              "value": 8
+            },
+            "0x4002": {
+              "attribute_name": "color_loop_active",
+              "value": 0
+            },
+            "0x0008": {
+              "attribute_name": "color_mode",
+              "value": 1
+            },
+            "0x400c": {
+              "attribute_name": "color_temp_physical_max",
+              "value": 0
+            },
+            "0x400b": {
+              "attribute_name": "color_temp_physical_min",
+              "value": 0
+            },
+            "0x0007": {
+              "attribute_name": "color_temperature",
+              "value": 0
+            },
+            "0x0000": {
+              "attribute_name": "current_hue",
+              "value": 0
+            },
+            "0x0001": {
+              "attribute_name": "current_saturation",
+              "value": 0
+            },
+            "0x0003": {
+              "attribute_name": "current_x",
+              "value": 0
+            },
+            "0x0004": {
+              "attribute_name": "current_y",
+              "value": 0
+            },
+            "0x4000": {
+              "attribute_name": "enhanced_current_hue",
+              "value": 0
+            },
+            "0x000f": {
+              "attribute_name": "options",
+              "value": 0
+            },
+            "0x4010": {
+              "attribute_name": "start_up_color_temperature",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1030",
+          "platform": "binary_sensor",
+          "class_name": "Occupancy",
+          "translation_key": null,
+          "device_class": "occupancy",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1030,
+                "name": "Occupancy Sensing",
+                "type": "server"
+              },
+              "id": "1:0x0406",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0406",
+              "status": "CREATED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute_name": "occupancy"
+        },
+        "state": {
+          "class_name": "Occupancy",
+          "available": false,
+          "state": true
+        }
+      }
+    ],
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": false
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-10",
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "10:0x0006",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:10:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            },
+            {
+              "class_name": "ColorClusterHandler",
+              "generic_id": "cluster_handler_0x0300",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 768,
+                "name": "Color Control",
+                "type": "server"
+              },
+              "id": "10:0x0300",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:10:0x0300",
+              "status": "CREATED",
+              "value_attribute": "current_x"
+            },
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "10:0x0008",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:10:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 10,
+          "available": false,
+          "group_id": null,
+          "effect_list": null,
+          "supported_features": 40,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": 255,
+          "hs_color": null,
+          "xy_color": [
+            0.0,
+            0.0
+          ],
+          "color_temp": 0,
+          "effect": null,
+          "supported_features": 40,
+          "color_mode": "xy",
+          "supported_color_modes": [
+            "onoff",
+            "brightness",
+            "color_temp",
+            "xy"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": false
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-10-768-start_up_color_temperature",
+          "platform": "number",
+          "class_name": "StartUpColorTemperatureConfigurationEntity",
+          "translation_key": "start_up_color_temperature",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "ColorClusterHandler",
+              "generic_id": "cluster_handler_0x0300",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 768,
+                "name": "Color Control",
+                "type": "server"
+              },
+              "id": "10:0x0300",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:10:0x0300",
+              "status": "CREATED",
+              "value_attribute": "current_x"
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 10,
+          "available": false,
+          "group_id": null,
+          "min_value": 153,
+          "max_value": 500,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "StartUpColorTemperatureConfigurationEntity",
+          "available": false,
+          "state": 0
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1282-WarningMode",
+          "platform": "select",
+          "class_name": "DefaultToneSelectEntity",
+          "translation_key": "default_siren_tone",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IasWdClusterHandler",
+              "generic_id": "cluster_handler_0x0502",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1282,
+                "name": "IAS Warning Device",
+                "type": "server"
+              },
+              "id": "1:0x0502",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0502",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "WarningMode",
+          "options": [
+            "Stop",
+            "Burglar",
+            "Fire",
+            "Emergency",
+            "Police Panic",
+            "Fire Panic",
+            "Emergency Panic"
+          ]
+        },
+        "state": {
+          "class_name": "DefaultToneSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1282-SirenLevel",
+          "platform": "select",
+          "class_name": "DefaultSirenLevelSelectEntity",
+          "translation_key": "default_siren_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IasWdClusterHandler",
+              "generic_id": "cluster_handler_0x0502",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1282,
+                "name": "IAS Warning Device",
+                "type": "server"
+              },
+              "id": "1:0x0502",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0502",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "SirenLevel",
+          "options": [
+            "Low level sound",
+            "Medium level sound",
+            "High level sound",
+            "Very high level sound"
+          ]
+        },
+        "state": {
+          "class_name": "DefaultSirenLevelSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1282-StrobeLevel",
+          "platform": "select",
+          "class_name": "DefaultStrobeLevelSelectEntity",
+          "translation_key": "default_strobe_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IasWdClusterHandler",
+              "generic_id": "cluster_handler_0x0502",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1282,
+                "name": "IAS Warning Device",
+                "type": "server"
+              },
+              "id": "1:0x0502",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0502",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "StrobeLevel",
+          "options": [
+            "Low level strobe",
+            "Medium level strobe",
+            "High level strobe",
+            "Very high level strobe"
+          ]
+        },
+        "state": {
+          "class_name": "DefaultStrobeLevelSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1282-Strobe",
+          "platform": "select",
+          "class_name": "DefaultStrobeSelectEntity",
+          "translation_key": "default_strobe",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IasWdClusterHandler",
+              "generic_id": "cluster_handler_0x0502",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1282,
+                "name": "IAS Warning Device",
+                "type": "server"
+              },
+              "id": "1:0x0502",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0502",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "Strobe",
+          "options": [
+            "No Strobe",
+            "Strobe"
+          ]
+        },
+        "state": {
+          "class_name": "DefaultStrobeSelectEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1024",
+          "platform": "sensor",
+          "class_name": "Illuminance",
+          "translation_key": null,
+          "device_class": "illuminance",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IlluminanceMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0400",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1024,
+                "name": "Illuminance Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0400",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0400",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "lx"
+        },
+        "state": {
+          "class_name": "Illuminance",
+          "available": false,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1027",
+          "platform": "sensor",
+          "class_name": "Pressure",
+          "translation_key": null,
+          "device_class": "pressure",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "PressureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0403",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1027,
+                "name": "Pressure Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0403",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0403",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 0,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "hPa"
+        },
+        "state": {
+          "class_name": "Pressure",
+          "available": false,
+          "state": 997
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1026",
+          "platform": "sensor",
+          "class_name": "Temperature",
+          "translation_key": null,
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "TemperatureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0402",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1026,
+                "name": "Temperature Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0402",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0402",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "°C"
+        },
+        "state": {
+          "class_name": "Temperature",
+          "available": false,
+          "state": 24.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1029",
+          "platform": "sensor",
+          "class_name": "Humidity",
+          "translation_key": null,
+          "device_class": "humidity",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "RelativeHumidityClusterHandler",
+              "generic_id": "cluster_handler_0x0405",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1029,
+                "name": "Relative Humidity Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0405",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0405",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Humidity",
+          "available": false,
+          "state": 41.8
+        }
+      }
+    ],
+    "siren": [
+      {
+        "info_object": {
+          "fallback_name": "Siren",
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-1-1282",
+          "platform": "siren",
+          "class_name": "Siren",
+          "translation_key": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IasWdClusterHandler",
+              "generic_id": "cluster_handler_0x0502",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1282,
+                "name": "IAS Warning Device",
+                "type": "server"
+              },
+              "id": "1:0x0502",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:1:0x0502",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "available_tones": {
+            "1": "Burglar",
+            "2": "Fire",
+            "3": "Emergency",
+            "4": "Police Panic",
+            "5": "Fire Panic",
+            "6": "Emergency Panic"
+          },
+          "supported_features": 31
+        },
+        "state": {
+          "class_name": "Siren",
+          "available": false,
+          "state": false
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f4:ce:36:f8:ec:e4:c3:5d-5-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 5,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "5:0x0019",
+              "unique_id": "f4:ce:36:f8:ec:e4:c3:5d:5:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            93,
+            195,
+            228,
+            236,
+            248,
+            54,
+            206,
+            244
+          ],
+          "endpoint_id": 5,
+          "available": false,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": false,
+          "installed_version": null,
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": null,
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}
