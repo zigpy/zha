@@ -1,6 +1,6 @@
 {
-  "ieee": "94:34:69:ff:fe:08:9d:c1",
-  "nwk": 60741,
+  "ieee": "04:0d:84:ff:fe:02:9d:6d",
+  "nwk": 18938,
   "manufacturer": "Inovelli",
   "model": "VZM31-SN",
   "name": "Inovelli VZM31-SN",
@@ -11,7 +11,7 @@
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2022-11-12T19:46:16",
+  "last_seen": "2024-03-01T21:01:01",
   "available": false,
   "device_type": "Router",
   "signature": {
@@ -168,11 +168,15 @@
       "name": "Inovelli VZM31-SN"
     },
     {
-      "entity_id": "select.inovelli_vzm31_sn_switch_type",
+      "entity_id": "number.inovelli_vzm31_sn_double_tap_up_level",
       "name": "Inovelli VZM31-SN"
     },
     {
-      "entity_id": "select.inovelli_vzm31_sn_start_up_behavior",
+      "entity_id": "number.inovelli_vzm31_sn_double_tap_down_level",
+      "name": "Inovelli VZM31-SN"
+    },
+    {
+      "entity_id": "select.inovelli_vzm31_sn_switch_type",
       "name": "Inovelli VZM31-SN"
     },
     {
@@ -180,7 +184,11 @@
       "name": "Inovelli VZM31-SN"
     },
     {
-      "entity_id": "sensor.inovelli_vzm31_sn_power_factor",
+      "entity_id": "select.inovelli_vzm31_sn_led_scaling_mode",
+      "name": "Inovelli VZM31-SN"
+    },
+    {
+      "entity_id": "select.inovelli_vzm31_sn_non_neutral_output",
       "name": "Inovelli VZM31-SN"
     },
     {
@@ -201,6 +209,18 @@
     },
     {
       "entity_id": "switch.inovelli_vzm31_sn_double_tap_up_enabled",
+      "name": "Inovelli VZM31-SN"
+    },
+    {
+      "entity_id": "switch.inovelli_vzm31_sn_double_tap_down_enabled",
+      "name": "Inovelli VZM31-SN"
+    },
+    {
+      "entity_id": "switch.inovelli_vzm31_sn_aux_switch_scenes",
+      "name": "Inovelli VZM31-SN"
+    },
+    {
+      "entity_id": "switch.inovelli_vzm31_sn_binding_off_to_on_sync_level",
       "name": "Inovelli VZM31-SN"
     },
     {
@@ -228,8 +248,279 @@
       "name": "Inovelli VZM31-SN"
     }
   ],
-  "neighbors": [],
-  "routes": [],
+  "neighbors": [
+    {
+      "device_type": "Coordinator",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:12:4b:00:1c:a1:b8:46",
+      "nwk": "0x0000",
+      "permit_joining": "Unknown",
+      "depth": "0",
+      "lqi": "183"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:15:8d:00:03:42:9e:da",
+      "nwk": "0x0403",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "134"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "ec:1b:bd:ff:fe:32:46:39",
+      "nwk": "0x0A42",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "194"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "b4:0e:cf:d3:a1:6b:00:00",
+      "nwk": "0x1174",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "189"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:0b:57:ff:fe:39:3d:3c",
+      "nwk": "0x15B7",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "175"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "14:2d:41:ff:fe:58:aa:27",
+      "nwk": "0x20C0",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "225"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:0b:57:ff:fe:d5:37:65",
+      "nwk": "0x26E4",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "90"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:0b:57:ff:fe:36:b9:a0",
+      "nwk": "0x2BE0",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "127"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0c:70:de:86",
+      "nwk": "0x3380",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "178"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0c:dd:95:e0",
+      "nwk": "0x3E44",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "166"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0c:71:de:73",
+      "nwk": "0x4E9E",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "196"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0c:76:26:ca",
+      "nwk": "0x5262",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "165"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "a4:c1:38:44:c6:4d:75:c2",
+      "nwk": "0x6C17",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "161"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0b:1f:d3:ae",
+      "nwk": "0x7981",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "182"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:09:cc:29:f2",
+      "nwk": "0x8B15",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "176"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:0d:6f:ff:fe:7a:84:a9",
+      "nwk": "0x9D90",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "120"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0c:71:3c:02",
+      "nwk": "0xA520",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "220"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:0b:57:ff:fe:8e:8c:44",
+      "nwk": "0xA68D",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "139"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:0d:6f:ff:fe:a5:b7:93",
+      "nwk": "0xB55A",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "145"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "28:2c:02:bf:ff:eb:4f:2f",
+      "nwk": "0xB900",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "186"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0c:e2:c6:d7",
+      "nwk": "0xCE06",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "189"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:0b:57:ff:fe:8e:93:5f",
+      "nwk": "0xDE37",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "122"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "fe:ed:fa:ce:de:ad:be:ef",
+      "ieee": "00:17:88:01:0c:6e:be:18",
+      "nwk": "0xE10F",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "242"
+    }
+  ],
+  "routes": [
+    {
+      "dest_nwk": "0x0000",
+      "route_status": "Active",
+      "memory_constrained": true,
+      "many_to_one": true,
+      "route_record_required": false,
+      "next_hop": "0x0000"
+    },
+    {
+      "dest_nwk": "0x2BE0",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2BE0"
+    }
+  ],
   "endpoint_names": [
     {
       "name": "DIMMABLE_LIGHT"
@@ -242,7 +533,7 @@
     }
   ],
   "user_given_name": null,
-  "device_reg_id": "6da25e750b65703044aae2618a54e5a0",
+  "device_reg_id": "5bbd14578db96541f1dcfbacbdd1f803",
   "area_id": null,
   "cluster_details": {
     "1": {
@@ -341,7 +632,7 @@
             },
             "0x4000": {
               "attribute": "ZCLAttributeDef(id=0x4000, name='sw_build_id', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
+              "value": "2.14"
             },
             "0x0000": {
               "attribute": "ZCLAttributeDef(id=0x0000, name='zcl_version', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
@@ -441,7 +732,7 @@
             },
             "0x0000": {
               "attribute": "ZCLAttributeDef(id=0x0000, name='on_off', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Report|Scene: 25>, mandatory=True, is_manufacturer_specific=False)",
-              "value": 1
+              "value": 0
             },
             "0x4001": {
               "attribute": "ZCLAttributeDef(id=0x4001, name='on_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
@@ -453,7 +744,7 @@
             },
             "0x4003": {
               "attribute": "ZCLAttributeDef(id=0x4003, name='start_up_on_off', type=<enum 'StartUpOnOff'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 255
+              "value": null
             }
           },
           "unsupported_attributes": []
@@ -676,7 +967,7 @@
             },
             "0x0000": {
               "attribute": "ZCLAttributeDef(id=0x0000, name='current_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 0
+              "value": 24
             },
             "0x0001": {
               "attribute": "ZCLAttributeDef(id=0x0001, name='current_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
@@ -1072,8 +1363,22 @@
             }
           },
           "unsupported_attributes": [
+            1,
+            256,
+            258,
+            260,
+            262,
+            264,
+            266,
             772,
             1024,
+            "current_summ_received",
+            "current_tier1_summ_delivered",
+            "current_tier2_summ_delivered",
+            "current_tier3_summ_delivered",
+            "current_tier4_summ_delivered",
+            "current_tier5_summ_delivered",
+            "current_tier6_summ_delivered",
             "demand_formatting",
             "instantaneous_demand"
           ]
@@ -1155,7 +1460,7 @@
             },
             "0x050b": {
               "attribute": "ZCLAttributeDef(id=0x050B, name='active_power', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read|Report: 9>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 2
+              "value": 0
             },
             "0x050d": {
               "attribute": "ZCLAttributeDef(id=0x050D, name='active_power_max', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
@@ -1620,6 +1925,7 @@
             1290,
             1293,
             1295,
+            1296,
             1536,
             1537,
             1538,
@@ -1636,6 +1942,7 @@
             "apparent_power",
             "measurement_type",
             "power_divisor",
+            "power_factor",
             "power_multiplier",
             "rms_current",
             "rms_current_max",
@@ -1802,15 +2109,15 @@
             },
             "0x007b": {
               "attribute": "ZCLAttributeDef(id=0x007B, name='aux_switch_scenes', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": null
+              "value": 0
             },
             "0x007d": {
               "attribute": "ZCLAttributeDef(id=0x007D, name='binding_off_to_on_sync_level', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": null
+              "value": 0
             },
             "0x0032": {
               "attribute": "ZCLAttributeDef(id=0x0032, name='button_delay', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": 5
+              "value": 3
             },
             "0x003d": {
               "attribute": "ZCLAttributeDef(id=0x003D, name='default_led1_strip_color_when_off', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
@@ -1958,11 +2265,11 @@
             },
             "0x0036": {
               "attribute": "ZCLAttributeDef(id=0x0036, name='double_tap_down_enabled', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": null
+              "value": 0
             },
             "0x0038": {
               "attribute": "ZCLAttributeDef(id=0x0038, name='double_tap_down_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": null
+              "value": 2
             },
             "0x0035": {
               "attribute": "ZCLAttributeDef(id=0x0035, name='double_tap_up_enabled', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
@@ -1970,7 +2277,7 @@
             },
             "0x0037": {
               "attribute": "ZCLAttributeDef(id=0x0037, name='double_tap_up_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": null
+              "value": 254
             },
             "0x0082": {
               "attribute": "ZCLAttributeDef(id=0x0082, name='fan_module_binding_control', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
@@ -1994,7 +2301,7 @@
             },
             "0x0019": {
               "attribute": "ZCLAttributeDef(id=0x0019, name='increased_non_neutral_output', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": null
+              "value": 0
             },
             "0x0020": {
               "attribute": "ZCLAttributeDef(id=0x0020, name='internal_temp_monitor', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
@@ -2014,23 +2321,23 @@
             },
             "0x0060": {
               "attribute": "ZCLAttributeDef(id=0x0060, name='led_color_when_off', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": 170
+              "value": 24
             },
             "0x005f": {
               "attribute": "ZCLAttributeDef(id=0x005F, name='led_color_when_on', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": 170
+              "value": 246
             },
             "0x0062": {
               "attribute": "ZCLAttributeDef(id=0x0062, name='led_intensity_when_off', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": 1
+              "value": 100
             },
             "0x0061": {
               "attribute": "ZCLAttributeDef(id=0x0061, name='led_intensity_when_on', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": 33
+              "value": 100
             },
             "0x0064": {
               "attribute": "ZCLAttributeDef(id=0x0064, name='led_scaling_mode', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
-              "value": null
+              "value": 0
             },
             "0x0011": {
               "attribute": "ZCLAttributeDef(id=0x0011, name='load_level_indicator_timeout', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
@@ -2844,7 +3151,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-3",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-3",
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -2863,20 +3170,20 @@
                 "type": "server"
               },
               "id": "1:0x0003",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0003",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0003",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -2897,7 +3204,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1",
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
@@ -2916,7 +3223,7 @@
                 "type": "server"
               },
               "id": "1:0x0006",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0006",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0006",
               "status": "CREATED",
               "value_attribute": "on_off"
             },
@@ -2930,20 +3237,20 @@
                 "type": "server"
               },
               "id": "1:0x0008",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0008",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0008",
               "status": "CREATED",
               "value_attribute": "current_level"
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -2964,8 +3271,8 @@
           "supported_features": 40,
           "color_mode": "brightness",
           "supported_color_modes": [
-            "onoff",
-            "brightness"
+            "brightness",
+            "onoff"
           ],
           "off_with_transition": false,
           "off_brightness": null,
@@ -2977,7 +3284,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-8-on_off_transition_time",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-8-on_off_transition_time",
           "platform": "number",
           "class_name": "OnOffTransitionTimeConfigurationEntity",
           "translation_key": "on_off_transition_time",
@@ -2996,20 +3303,20 @@
                 "type": "server"
               },
               "id": "1:0x0008",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0008",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0008",
               "status": "CREATED",
               "value_attribute": "current_level"
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3028,7 +3335,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-8-on_level",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-8-on_level",
           "platform": "number",
           "class_name": "OnLevelConfigurationEntity",
           "translation_key": "on_level",
@@ -3047,20 +3354,20 @@
                 "type": "server"
               },
               "id": "1:0x0008",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0008",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0008",
               "status": "CREATED",
               "value_attribute": "current_level"
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3079,7 +3386,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-8-start_up_current_level",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-8-start_up_current_level",
           "platform": "number",
           "class_name": "StartUpCurrentLevelConfigurationEntity",
           "translation_key": "start_up_current_level",
@@ -3098,20 +3405,20 @@
                 "type": "server"
               },
               "id": "1:0x0008",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0008",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0008",
               "status": "CREATED",
               "value_attribute": "current_level"
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3130,7 +3437,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-dimming_speed_up_remote",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-dimming_speed_up_remote",
           "platform": "number",
           "class_name": "InovelliRemoteDimmingUpSpeed",
           "translation_key": "dimming_speed_up_remote",
@@ -3149,20 +3456,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3181,7 +3488,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-button_delay",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-button_delay",
           "platform": "number",
           "class_name": "InovelliButtonDelay",
           "translation_key": "button_delay",
@@ -3200,20 +3507,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3226,13 +3533,13 @@
         "state": {
           "class_name": "InovelliButtonDelay",
           "available": false,
-          "state": 5
+          "state": 3
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-dimming_speed_up_local",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-dimming_speed_up_local",
           "platform": "number",
           "class_name": "InovelliLocalDimmingUpSpeed",
           "translation_key": "dimming_speed_up_local",
@@ -3251,20 +3558,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3283,7 +3590,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-ramp_rate_off_to_on_local",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-ramp_rate_off_to_on_local",
           "platform": "number",
           "class_name": "InovelliLocalRampRateOffToOn",
           "translation_key": "ramp_rate_off_to_on_local",
@@ -3302,20 +3609,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3334,7 +3641,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-ramp_rate_off_to_on_remote",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-ramp_rate_off_to_on_remote",
           "platform": "number",
           "class_name": "InovelliRemoteDimmingSpeedOffToOn",
           "translation_key": "ramp_rate_off_to_on_remote",
@@ -3353,20 +3660,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3385,7 +3692,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-dimming_speed_down_remote",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-dimming_speed_down_remote",
           "platform": "number",
           "class_name": "InovelliRemoteDimmingDownSpeed",
           "translation_key": "dimming_speed_down_remote",
@@ -3404,20 +3711,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3436,7 +3743,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-dimming_speed_down_local",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-dimming_speed_down_local",
           "platform": "number",
           "class_name": "InovelliLocalDimmingDownSpeed",
           "translation_key": "dimming_speed_down_local",
@@ -3455,20 +3762,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3487,7 +3794,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-ramp_rate_on_to_off_local",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-ramp_rate_on_to_off_local",
           "platform": "number",
           "class_name": "InovelliLocalRampRateOnToOff",
           "translation_key": "ramp_rate_on_to_off_local",
@@ -3506,20 +3813,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3538,7 +3845,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-ramp_rate_on_to_off_remote",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-ramp_rate_on_to_off_remote",
           "platform": "number",
           "class_name": "InovelliRemoteDimmingSpeedOnToOff",
           "translation_key": "ramp_rate_on_to_off_remote",
@@ -3557,20 +3864,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3589,7 +3896,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-minimum_level",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-minimum_level",
           "platform": "number",
           "class_name": "InovelliMinimumLoadDimmingLevel",
           "translation_key": "minimum_level",
@@ -3608,20 +3915,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3640,7 +3947,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-maximum_level",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-maximum_level",
           "platform": "number",
           "class_name": "InovelliMaximumLoadDimmingLevel",
           "translation_key": "maximum_level",
@@ -3659,20 +3966,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3691,7 +3998,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-auto_off_timer",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-auto_off_timer",
           "platform": "number",
           "class_name": "InovelliAutoShutoffTimer",
           "translation_key": "auto_off_timer",
@@ -3710,20 +4017,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3742,7 +4049,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-load_level_indicator_timeout",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-load_level_indicator_timeout",
           "platform": "number",
           "class_name": "InovelliLoadLevelIndicatorTimeout",
           "translation_key": "load_level_indicator_timeout",
@@ -3761,20 +4068,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3793,7 +4100,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-led_color_when_on",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-led_color_when_on",
           "platform": "number",
           "class_name": "InovelliDefaultAllLEDOnColor",
           "translation_key": "led_color_when_on",
@@ -3812,20 +4119,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3838,13 +4145,13 @@
         "state": {
           "class_name": "InovelliDefaultAllLEDOnColor",
           "available": false,
-          "state": 170
+          "state": 246
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-led_color_when_off",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-led_color_when_off",
           "platform": "number",
           "class_name": "InovelliDefaultAllLEDOffColor",
           "translation_key": "led_color_when_off",
@@ -3863,20 +4170,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3889,13 +4196,13 @@
         "state": {
           "class_name": "InovelliDefaultAllLEDOffColor",
           "available": false,
-          "state": 170
+          "state": 24
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-led_intensity_when_on",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-led_intensity_when_on",
           "platform": "number",
           "class_name": "InovelliDefaultAllLEDOnIntensity",
           "translation_key": "led_intensity_when_on",
@@ -3914,20 +4221,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3940,13 +4247,13 @@
         "state": {
           "class_name": "InovelliDefaultAllLEDOnIntensity",
           "available": false,
-          "state": 33
+          "state": 100
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-led_intensity_when_off",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-led_intensity_when_off",
           "platform": "number",
           "class_name": "InovelliDefaultAllLEDOffIntensity",
           "translation_key": "led_intensity_when_off",
@@ -3965,20 +4272,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -3991,7 +4298,109 @@
         "state": {
           "class_name": "InovelliDefaultAllLEDOffIntensity",
           "available": false,
-          "state": 1
+          "state": 100
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-double_tap_up_level",
+          "platform": "number",
+          "class_name": "InovelliDoubleTapUpLevel",
+          "translation_key": "double_tap_up_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            109,
+            157,
+            2,
+            254,
+            255,
+            132,
+            13,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "min_value": 2,
+          "max_value": 254,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "InovelliDoubleTapUpLevel",
+          "available": false,
+          "state": 254
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-double_tap_down_level",
+          "platform": "number",
+          "class_name": "InovelliDoubleTapDownLevel",
+          "translation_key": "double_tap_down_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            109,
+            157,
+            2,
+            254,
+            255,
+            132,
+            13,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 254,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "InovelliDoubleTapDownLevel",
+          "available": false,
+          "state": 2
         }
       }
     ],
@@ -3999,7 +4408,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-switch_type",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-switch_type",
           "platform": "select",
           "class_name": "InovelliSwitchTypeEntity",
           "translation_key": "switch_type",
@@ -4018,20 +4427,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4053,61 +4462,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-6-StartUpOnOff",
-          "platform": "select",
-          "class_name": "StartupOnOffSelectEntity",
-          "translation_key": "start_up_on_off",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
-            }
-          ],
-          "device_ieee": [
-            193,
-            157,
-            8,
-            254,
-            255,
-            105,
-            52,
-            148
-          ],
-          "endpoint_id": 1,
-          "available": false,
-          "group_id": null,
-          "enum": "StartUpOnOff",
-          "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
-          ]
-        },
-        "state": {
-          "class_name": "StartupOnOffSelectEntity",
-          "available": false,
-          "state": "PreviousValue"
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-output_mode",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-output_mode",
           "platform": "select",
           "class_name": "InovelliOutputModeEntity",
           "translation_key": "output_mode",
@@ -4126,20 +4481,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4155,65 +4510,117 @@
           "available": false,
           "state": "OnOff"
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-led_scaling_mode",
+          "platform": "select",
+          "class_name": "InovelliLedScalingModeEntity",
+          "translation_key": "led_scaling_mode",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            109,
+            157,
+            2,
+            254,
+            255,
+            132,
+            13,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "enum": "InovelliLedScalingMode",
+          "options": [
+            "VZM31SN",
+            "LZW31SN"
+          ]
+        },
+        "state": {
+          "class_name": "InovelliLedScalingModeEntity",
+          "available": false,
+          "state": "VZM31SN"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-increased_non_neutral_output",
+          "platform": "select",
+          "class_name": "InovelliNonNeutralOutputEntity",
+          "translation_key": "increased_non_neutral_output",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            109,
+            157,
+            2,
+            254,
+            255,
+            132,
+            13,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "enum": "InovelliNonNeutralOutput",
+          "options": [
+            "Low",
+            "High"
+          ]
+        },
+        "state": {
+          "class_name": "InovelliNonNeutralOutputEntity",
+          "available": false,
+          "state": "Low"
+        }
       }
     ],
     "sensor": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-2820-power_factor",
-          "platform": "sensor",
-          "class_name": "ElectricalMeasurementPowerFactor",
-          "translation_key": null,
-          "device_class": "power_factor",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0b04",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0b04",
-              "status": "CREATED",
-              "value_attribute": "active_power"
-            }
-          ],
-          "device_ieee": [
-            193,
-            157,
-            8,
-            254,
-            255,
-            105,
-            52,
-            148
-          ],
-          "endpoint_id": 1,
-          "available": false,
-          "group_id": null,
-          "attribute": "power_factor",
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "%"
-        },
-        "state": {
-          "class_name": "ElectricalMeasurementPowerFactor",
-          "available": false,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-0-rssi",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-0-rssi",
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
@@ -4232,20 +4639,20 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0000",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4265,7 +4672,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-0-lqi",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-0-lqi",
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
@@ -4284,20 +4691,20 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0000",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4317,7 +4724,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-2820",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-2820",
           "platform": "sensor",
           "class_name": "ElectricalMeasurement",
           "translation_key": null,
@@ -4336,20 +4743,20 @@
                 "type": "server"
               },
               "id": "1:0x0b04",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0b04",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0b04",
               "status": "CREATED",
               "value_attribute": "active_power"
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4363,13 +4770,13 @@
         "state": {
           "class_name": "ElectricalMeasurement",
           "available": false,
-          "state": 0.2
+          "state": 0.0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-1794-summation_delivered",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-1794-summation_delivered",
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
           "translation_key": "summation_delivered",
@@ -4388,20 +4795,20 @@
                 "type": "server"
               },
               "id": "1:0x0702",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0702",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0702",
               "status": "CREATED",
               "value_attribute": "instantaneous_demand"
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4415,7 +4822,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": false,
-          "state": 0.0,
+          "state": 0.24,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -4426,7 +4833,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-invert_switch",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-invert_switch",
           "platform": "switch",
           "class_name": "InovelliInvertSwitch",
           "translation_key": "invert_switch",
@@ -4445,20 +4852,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4479,7 +4886,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-smart_bulb_mode",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-smart_bulb_mode",
           "platform": "switch",
           "class_name": "InovelliSmartBulbMode",
           "translation_key": "smart_bulb_mode",
@@ -4498,20 +4905,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4532,7 +4939,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-double_tap_up_enabled",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-double_tap_up_enabled",
           "platform": "switch",
           "class_name": "InovelliDoubleTapUpEnabled",
           "translation_key": "double_tap_up_enabled",
@@ -4551,20 +4958,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4585,7 +4992,166 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-local_protection",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-double_tap_down_enabled",
+          "platform": "switch",
+          "class_name": "InovelliDoubleTapDownEnabled",
+          "translation_key": "double_tap_down_enabled",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            109,
+            157,
+            2,
+            254,
+            255,
+            132,
+            13,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute_name": "double_tap_down_enabled",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliDoubleTapDownEnabled",
+          "available": false,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-aux_switch_scenes",
+          "platform": "switch",
+          "class_name": "InovelliAuxSwitchScenes",
+          "translation_key": "aux_switch_scenes",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            109,
+            157,
+            2,
+            254,
+            255,
+            132,
+            13,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute_name": "aux_switch_scenes",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliAuxSwitchScenes",
+          "available": false,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-binding_off_to_on_sync_level",
+          "platform": "switch",
+          "class_name": "InovelliBindingOffToOnSyncLevel",
+          "translation_key": "binding_off_to_on_sync_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            109,
+            157,
+            2,
+            254,
+            255,
+            132,
+            13,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute_name": "binding_off_to_on_sync_level",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliBindingOffToOnSyncLevel",
+          "available": false,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-local_protection",
           "platform": "switch",
           "class_name": "InovelliLocalProtection",
           "translation_key": "local_protection",
@@ -4604,20 +5170,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4638,7 +5204,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-on_off_led_mode",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-on_off_led_mode",
           "platform": "switch",
           "class_name": "InovelliOnOffLEDMode",
           "translation_key": "one_led_mode",
@@ -4657,20 +5223,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4691,7 +5257,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-firmware_progress_led",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-firmware_progress_led",
           "platform": "switch",
           "class_name": "InovelliFirmwareProgressLED",
           "translation_key": "firmware_progress_led",
@@ -4710,20 +5276,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4744,7 +5310,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-relay_click_in_on_off_mode",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-relay_click_in_on_off_mode",
           "platform": "switch",
           "class_name": "InovelliRelayClickInOnOffMode",
           "translation_key": "relay_click_in_on_off_mode",
@@ -4763,20 +5329,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4797,7 +5363,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-64561-disable_clear_notifications_double_tap",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-64561-disable_clear_notifications_double_tap",
           "platform": "switch",
           "class_name": "InovelliDisableDoubleTapClearNotificationsMode",
           "translation_key": "disable_clear_notifications_double_tap",
@@ -4816,20 +5382,20 @@
                 "type": "server"
               },
               "id": "1:0xfc31",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0xfc31",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0xfc31",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,
@@ -4852,7 +5418,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "94:34:69:ff:fe:08:9d:c1-1-25-firmware_update",
+          "unique_id": "04:0d:84:ff:fe:02:9d:6d-1-25-firmware_update",
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
@@ -4871,20 +5437,20 @@
                 "type": "client"
               },
               "id": "1:0x0019",
-              "unique_id": "94:34:69:ff:fe:08:9d:c1:1:0x0019",
+              "unique_id": "04:0d:84:ff:fe:02:9d:6d:1:0x0019",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            193,
+            109,
             157,
-            8,
+            2,
             254,
             255,
-            105,
-            52,
-            148
+            132,
+            13,
+            4
           ],
           "endpoint_id": 1,
           "available": false,

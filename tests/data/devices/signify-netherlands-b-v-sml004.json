@@ -1,18 +1,18 @@
 {
-  "ieee": "00:15:8d:00:01:b1:ca:eb",
-  "nwk": 44153,
-  "manufacturer": "LUMI",
-  "model": "lumi.sensor_motion.aq2",
-  "name": "LUMI lumi.sensor_motion.aq2",
+  "ieee": "00:17:88:01:0c:dc:9d:61",
+  "nwk": 17998,
+  "manufacturer": "Signify Netherlands B.V.",
+  "model": "SML004",
+  "name": "Signify Netherlands B.V. SML004",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.xiaomi.aqara.motion_aq2.MotionAQ2",
+  "quirk_class": "zhaquirks.philips.motion.SignifyMotion",
   "quirk_id": null,
-  "manufacturer_code": 4151,
+  "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2024-07-27T15:42:45",
-  "available": false,
+  "last_seen": "2024-08-26T13:26:59",
+  "available": true,
   "device_type": "EndDevice",
   "signature": {
     "node_descriptor": {
@@ -23,65 +23,73 @@
       "aps_flags": 0,
       "frequency_band": 8,
       "mac_capability_flags": 128,
-      "manufacturer_code": 4151,
-      "maximum_buffer_size": 127,
-      "maximum_incoming_transfer_size": 100,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 100,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 128,
       "descriptor_capability_field": 0
     },
     "endpoints": {
-      "1": {
+      "2": {
         "profile_id": "0x0104",
         "device_type": "0x0107",
         "input_clusters": [
           "0x0000",
           "0x0001",
-          "0x0002",
           "0x0003",
           "0x0400",
-          "0x0406",
-          "0x0500",
-          "0xffff"
+          "0x0402",
+          "0x0406"
         ],
         "output_clusters": [
           "0x0000",
+          "0x0003",
+          "0x0006",
           "0x0019"
         ]
       }
     },
-    "manufacturer": "LUMI",
-    "model": "lumi.sensor_motion.aq2"
+    "manufacturer": "Signify Netherlands B.V.",
+    "model": "SML004"
   },
   "active_coordinator": false,
   "entities": [
     {
-      "entity_id": "binary_sensor.lumi_lumi_sensor_motion_aq2_occupancy_3",
-      "name": "LUMI lumi.sensor_motion.aq2"
+      "entity_id": "binary_sensor.signify_netherlands_b_v_sml004_occupancy",
+      "name": "Signify Netherlands B.V. SML004"
     },
     {
-      "entity_id": "binary_sensor.lumi_lumi_sensor_motion_aq2_motion_3",
-      "name": "LUMI lumi.sensor_motion.aq2"
+      "entity_id": "binary_sensor.signify_netherlands_b_v_sml004_opening",
+      "name": "Signify Netherlands B.V. SML004"
     },
     {
-      "entity_id": "button.lumi_lumi_sensor_motion_aq2_identify_3",
-      "name": "LUMI lumi.sensor_motion.aq2"
+      "entity_id": "button.signify_netherlands_b_v_sml004_identify",
+      "name": "Signify Netherlands B.V. SML004"
     },
     {
-      "entity_id": "sensor.lumi_lumi_sensor_motion_aq2_battery_3",
-      "name": "LUMI lumi.sensor_motion.aq2"
+      "entity_id": "select.signify_netherlands_b_v_sml004_motion_sensitivity",
+      "name": "Signify Netherlands B.V. SML004"
     },
     {
-      "entity_id": "sensor.lumi_lumi_sensor_motion_aq2_illuminance_3",
-      "name": "LUMI lumi.sensor_motion.aq2"
+      "entity_id": "sensor.signify_netherlands_b_v_sml004_battery",
+      "name": "Signify Netherlands B.V. SML004"
     },
     {
-      "entity_id": "sensor.lumi_lumi_sensor_motion_aq2_device_temperature_3",
-      "name": "LUMI lumi.sensor_motion.aq2"
+      "entity_id": "sensor.signify_netherlands_b_v_sml004_illuminance",
+      "name": "Signify Netherlands B.V. SML004"
     },
     {
-      "entity_id": "update.lumi_lumi_sensor_motion_aq2_firmware_3",
-      "name": "LUMI lumi.sensor_motion.aq2"
+      "entity_id": "sensor.signify_netherlands_b_v_sml004_temperature",
+      "name": "Signify Netherlands B.V. SML004"
+    },
+    {
+      "entity_id": "switch.signify_netherlands_b_v_sml004_led_trigger_indicator",
+      "name": "Signify Netherlands B.V. SML004"
+    },
+    {
+      "entity_id": "update.signify_netherlands_b_v_sml004_firmware",
+      "name": "Signify Netherlands B.V. SML004"
     }
   ],
   "neighbors": [],
@@ -92,10 +100,10 @@
     }
   ],
   "user_given_name": null,
-  "device_reg_id": "65b3f7bbb5c0b03b149f77cb7ef26f6d",
+  "device_reg_id": "0f8d72755c7822e17dbe1dd373f427a2",
   "area_id": null,
   "cluster_details": {
-    "1": {
+    "2": {
       "device_type": {
         "name": "OCCUPANCY_SENSOR",
         "id": 263
@@ -111,7 +119,7 @@
             },
             "0x0001": {
               "attribute": "ZCLAttributeDef(id=0x0001, name='app_version', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 5
+              "value": null
             },
             "0xfffd": {
               "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
@@ -147,7 +155,7 @@
             },
             "0x0004": {
               "attribute": "ZCLAttributeDef(id=0x0004, name='manufacturer', type=<class 'zigpy.types.basic.LimitedCharString.<locals>.LimitedCharString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": "LUMI"
+              "value": "Signify Netherlands B.V."
             },
             "0x000c": {
               "attribute": "ZCLAttributeDef(id=0x000C, name='manufacturer_version_details', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
@@ -155,7 +163,7 @@
             },
             "0x0005": {
               "attribute": "ZCLAttributeDef(id=0x0005, name='model', type=<class 'zigpy.types.basic.LimitedCharString.<locals>.LimitedCharString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": "lumi.sensor_motion.aq2"
+              "value": "SML004"
             },
             "0x0011": {
               "attribute": "ZCLAttributeDef(id=0x0011, name='physical_env', type=<enum 'PhysicalEnvironment'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
@@ -192,6 +200,10 @@
             "0x4000": {
               "attribute": "ZCLAttributeDef(id=0x4000, name='sw_build_id', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
               "value": null
+            },
+            "0x0033": {
+              "attribute": "ZCLAttributeDef(id=0x0033, name='trigger_indicator', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
+              "value": 0
             },
             "0x0000": {
               "attribute": "ZCLAttributeDef(id=0x0000, name='zcl_version', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
@@ -373,11 +385,11 @@
             },
             "0x0021": {
               "attribute": "ZCLAttributeDef(id=0x0021, name='battery_percentage_remaining', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Report: 9>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 161
+              "value": 200
             },
             "0x0033": {
               "attribute": "ZCLAttributeDef(id=0x0033, name='battery_quantity', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 1
+              "value": null
             },
             "0x0034": {
               "attribute": "ZCLAttributeDef(id=0x0034, name='battery_rated_voltage', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
@@ -385,7 +397,7 @@
             },
             "0x0031": {
               "attribute": "ZCLAttributeDef(id=0x0031, name='battery_size', type=<enum 'BatterySize'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 9
+              "value": null
             },
             "0x0036": {
               "attribute": "ZCLAttributeDef(id=0x0036, name='battery_volt_min_thres', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
@@ -405,7 +417,7 @@
             },
             "0x0020": {
               "attribute": "ZCLAttributeDef(id=0x0020, name='battery_voltage', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 30.4
+              "value": 30
             },
             "0xfffd": {
               "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
@@ -440,7 +452,12 @@
               "value": null
             }
           },
-          "unsupported_attributes": []
+          "unsupported_attributes": [
+            49,
+            51,
+            "battery_quantity",
+            "battery_size"
+          ]
         },
         "0x0003": {
           "endpoint_attribute": "identify",
@@ -451,56 +468,6 @@
             },
             "0x0000": {
               "attribute": "ZCLAttributeDef(id=0x0000, name='identify_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=True, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0xfffe": {
-              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            }
-          },
-          "unsupported_attributes": []
-        },
-        "0x0002": {
-          "endpoint_attribute": "device_temperature",
-          "attributes": {
-            "0xfffd": {
-              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0000": {
-              "attribute": "ZCLAttributeDef(id=0x0000, name='current_temperature', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": 2700
-            },
-            "0x0010": {
-              "attribute": "ZCLAttributeDef(id=0x0010, name='dev_temp_alarm_mask', type=<flag 'DeviceTempAlarmMask'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0014": {
-              "attribute": "ZCLAttributeDef(id=0x0014, name='high_temp_dwell_trip_point', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0012": {
-              "attribute": "ZCLAttributeDef(id=0x0012, name='high_temp_thres', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0013": {
-              "attribute": "ZCLAttributeDef(id=0x0013, name='low_temp_dwell_trip_point', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0011": {
-              "attribute": "ZCLAttributeDef(id=0x0011, name='low_temp_thres', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0002": {
-              "attribute": "ZCLAttributeDef(id=0x0002, name='max_temp_experienced', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0001": {
-              "attribute": "ZCLAttributeDef(id=0x0001, name='min_temp_experienced', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0003": {
-              "attribute": "ZCLAttributeDef(id=0x0003, name='over_temp_total_dwell', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
               "value": null
             },
             "0xfffe": {
@@ -527,7 +494,7 @@
             },
             "0x0000": {
               "attribute": "ZCLAttributeDef(id=0x0000, name='measured_value', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Report: 9>, mandatory=True, is_manufacturer_specific=False)",
-              "value": 28687.444383948256
+              "value": 16181
             },
             "0x0001": {
               "attribute": "ZCLAttributeDef(id=0x0001, name='min_measured_value', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
@@ -544,8 +511,38 @@
           },
           "unsupported_attributes": []
         },
+        "0x0402": {
+          "endpoint_attribute": "temperature",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0002": {
+              "attribute": "ZCLAttributeDef(id=0x0002, name='max_measured_value', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='measured_value', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read|Report: 9>, mandatory=True, is_manufacturer_specific=False)",
+              "value": 2587
+            },
+            "0x0001": {
+              "attribute": "ZCLAttributeDef(id=0x0001, name='min_measured_value', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0003": {
+              "attribute": "ZCLAttributeDef(id=0x0003, name='tolerance', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": []
+        },
         "0x0406": {
-          "endpoint_attribute": "occupancy",
+          "endpoint_attribute": "philips_occupancy",
           "attributes": {
             "0xfffd": {
               "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
@@ -557,14 +554,6 @@
             },
             "0x0001": {
               "attribute": "ZCLAttributeDef(id=0x0001, name='occupancy_sensor_type_bitmap', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0030": {
-              "attribute": "ZCLAttributeDef(id=0x0030, name='physical_contact_o_to_u_delay', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0031": {
-              "attribute": "ZCLAttributeDef(id=0x0031, name='physical_contact_u_to_o_delay', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
               "value": null
             },
             "0x0032": {
@@ -587,6 +576,14 @@
               "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
               "value": null
             },
+            "0x0030": {
+              "attribute": "ZCLAttributeDef(id=0x0030, name='sensitivity', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
+              "value": 0
+            },
+            "0x0031": {
+              "attribute": "ZCLAttributeDef(id=0x0031, name='sensitivity_max', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write|Report: 11>, mandatory=False, is_manufacturer_specific=True)",
+              "value": null
+            },
             "0x0020": {
               "attribute": "ZCLAttributeDef(id=0x0020, name='ultrasonic_o_to_u_delay', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
               "value": null
@@ -600,45 +597,6 @@
               "value": null
             }
           },
-          "unsupported_attributes": []
-        },
-        "0x0500": {
-          "endpoint_attribute": "ias_zone",
-          "attributes": {
-            "0x0010": {
-              "attribute": "ZCLAttributeDef(id=0x0010, name='cie_addr', type=<class 'zigpy.types.named.EUI64'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=True, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0013": {
-              "attribute": "ZCLAttributeDef(id=0x0013, name='current_zone_sensitivity_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0012": {
-              "attribute": "ZCLAttributeDef(id=0x0012, name='num_zone_sensitivity_levels_supported', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0011": {
-              "attribute": "ZCLAttributeDef(id=0x0011, name='zone_id', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": null
-            },
-            "0x0000": {
-              "attribute": "ZCLAttributeDef(id=0x0000, name='zone_state', type=<enum 'ZoneState'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": 0
-            },
-            "0x0002": {
-              "attribute": "ZCLAttributeDef(id=0x0002, name='zone_status', type=<flag 'ZoneStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": 0
-            },
-            "0x0001": {
-              "attribute": "ZCLAttributeDef(id=0x0001, name='zone_type', type=<enum 'ZoneType'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": 13
-            }
-          },
-          "unsupported_attributes": []
-        },
-        "0xffff": {
-          "endpoint_attribute": "manufacturer_specific",
-          "attributes": {},
           "unsupported_attributes": []
         }
       },
@@ -741,6 +699,63 @@
           },
           "unsupported_attributes": []
         },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='identify_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": []
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4000": {
+              "attribute": "ZCLAttributeDef(id=0x4000, name='global_scene_control', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4002": {
+              "attribute": "ZCLAttributeDef(id=0x4002, name='off_wait_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='on_off', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Report|Scene: 25>, mandatory=True, is_manufacturer_specific=False)",
+              "value": 1
+            },
+            "0x4001": {
+              "attribute": "ZCLAttributeDef(id=0x4001, name='on_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4003": {
+              "attribute": "ZCLAttributeDef(id=0x4003, name='start_up_on_off', type=<enum 'StartUpOnOff'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": [
+            0,
+            16387,
+            "on_off",
+            "start_up_on_off"
+          ]
+        },
         "0x0019": {
           "endpoint_attribute": "ota",
           "attributes": {
@@ -750,7 +765,7 @@
             },
             "0x0002": {
               "attribute": "ZCLAttributeDef(id=0x0002, name='current_file_version', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": null
+              "value": 33568006
             },
             "0x0003": {
               "attribute": "ZCLAttributeDef(id=0x0003, name='current_zigbee_stack_version', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
@@ -813,40 +828,30 @@
   "original_signature": {
     "models_info": [
       [
-        "LUMI",
-        "lumi.sensor_motion.aq2"
+        "Signify Netherlands B.V.",
+        "SML003"
+      ],
+      [
+        "Signify Netherlands B.V.",
+        "SML004"
       ]
     ],
-    "node_desc": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4151,
-      "maximum_buffer_size": 127,
-      "maximum_incoming_transfer_size": 100,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 100,
-      "descriptor_capability_field": 0
-    },
     "endpoints": {
-      "1": {
+      "2": {
         "profile_id": "0x0104",
         "device_type": "0x0107",
         "input_clusters": [
           "0x0000",
-          "0xffff",
-          "0x0406",
-          "0x0400",
-          "0x0500",
           "0x0001",
-          "0x0003"
+          "0x0003",
+          "0x0400",
+          "0x0402",
+          "0x0406"
         ],
         "output_clusters": [
           "0x0000",
+          "0x0003",
+          "0x0006",
           "0x0019"
         ]
       }
@@ -857,9 +862,9 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-1030",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-1030",
           "platform": "binary_sensor",
-          "class_name": "Occupancy",
+          "class_name": "HueOccupancy",
           "translation_key": null,
           "device_class": "occupancy",
           "state_class": null,
@@ -869,85 +874,85 @@
             {
               "class_name": "OccupancySensingClusterHandler",
               "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 1,
+              "endpoint_id": 2,
               "cluster": {
                 "id": 1030,
-                "name": "Occupancy Sensing",
+                "name": "PhilipsOccupancySensing",
                 "type": "server"
               },
-              "id": "1:0x0406",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0406",
+              "id": "2:0x0406",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0406",
               "status": "CREATED",
               "value_attribute": "occupancy"
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
           "attribute_name": "occupancy"
         },
         "state": {
-          "class_name": "Occupancy",
-          "available": false,
+          "class_name": "HueOccupancy",
+          "available": true,
           "state": false
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-1280",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-6",
           "platform": "binary_sensor",
-          "class_name": "IASZone",
+          "class_name": "Opening",
           "translation_key": null,
-          "device_class": "motion",
+          "device_class": "opening",
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
-              "class_name": "IASZoneClusterHandler",
-              "generic_id": "cluster_handler_0x0500",
-              "endpoint_id": 1,
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 2,
               "cluster": {
-                "id": 1280,
-                "name": "IAS Zone",
-                "type": "server"
+                "id": 6,
+                "name": "On/Off",
+                "type": "client"
               },
-              "id": "1:0x0500",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0500",
+              "id": "2:0x0006",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0006",
               "status": "CREATED",
-              "value_attribute": null
+              "value_attribute": "on_off"
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
-          "attribute_name": "zone_status"
+          "attribute_name": "on_off"
         },
         "state": {
-          "class_name": "IASZone",
-          "available": false,
-          "state": false
+          "class_name": "Opening",
+          "available": true,
+          "state": true
         }
       }
     ],
@@ -955,7 +960,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-3",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-3",
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -967,30 +972,30 @@
             {
               "class_name": "IdentifyClusterHandler",
               "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
+              "endpoint_id": 2,
               "cluster": {
                 "id": 3,
                 "name": "Identify",
                 "type": "server"
               },
-              "id": "1:0x0003",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0003",
+              "id": "2:0x0003",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0003",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
           "command": "identify",
           "args": [
@@ -1000,7 +1005,64 @@
         },
         "state": {
           "class_name": "IdentifyButton",
-          "available": false
+          "available": true
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-1030-motion_sensitivity",
+          "platform": "select",
+          "class_name": "HueV2MotionSensitivity",
+          "translation_key": "motion_sensitivity",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1030,
+                "name": "PhilipsOccupancySensing",
+                "type": "server"
+              },
+              "id": "2:0x0406",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0406",
+              "status": "CREATED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": [
+            97,
+            157,
+            220,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "enum": "HueV2MotionSensitivities",
+          "options": [
+            "Lowest",
+            "Low",
+            "Medium",
+            "High",
+            "Highest"
+          ]
+        },
+        "state": {
+          "class_name": "HueV2MotionSensitivity",
+          "available": true,
+          "state": "Lowest"
         }
       }
     ],
@@ -1008,7 +1070,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-1",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-1",
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
@@ -1020,30 +1082,30 @@
             {
               "class_name": "PowerConfigurationClusterHandler",
               "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
+              "endpoint_id": 2,
               "cluster": {
                 "id": 1,
                 "name": "Power Configuration",
                 "type": "server"
               },
-              "id": "1:0x0001",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0001",
+              "id": "2:0x0001",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0001",
               "status": "CREATED",
               "value_attribute": "battery_voltage"
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
           "attribute": "battery_percentage_remaining",
           "decimals": 1,
@@ -1053,17 +1115,15 @@
         },
         "state": {
           "class_name": "Battery",
-          "available": false,
-          "state": 80,
-          "battery_size": "CR2450",
-          "battery_quantity": 1,
-          "battery_voltage": 3.04
+          "available": true,
+          "state": 100,
+          "battery_voltage": 3.0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-1024",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-1024",
           "platform": "sensor",
           "class_name": "Illuminance",
           "translation_key": null,
@@ -1075,30 +1135,30 @@
             {
               "class_name": "IlluminanceMeasurementClusterHandler",
               "generic_id": "cluster_handler_0x0400",
-              "endpoint_id": 1,
+              "endpoint_id": 2,
               "cluster": {
                 "id": 1024,
                 "name": "Illuminance Measurement",
                 "type": "server"
               },
-              "id": "1:0x0400",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0400",
+              "id": "2:0x0400",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0400",
               "status": "CREATED",
               "value_attribute": "measured_value"
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
           "attribute": "measured_value",
           "decimals": 1,
@@ -1108,66 +1168,66 @@
         },
         "state": {
           "class_name": "Illuminance",
-          "available": false,
-          "state": 739
+          "available": true,
+          "state": 41
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-2",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-1026",
           "platform": "sensor",
-          "class_name": "DeviceTemperature",
-          "translation_key": "device_temperature",
+          "class_name": "Temperature",
+          "translation_key": null,
           "device_class": "temperature",
           "state_class": "measurement",
-          "entity_category": "diagnostic",
+          "entity_category": null,
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
-              "class_name": "DeviceTemperatureClusterHandler",
-              "generic_id": "cluster_handler_0x0002",
-              "endpoint_id": 1,
+              "class_name": "TemperatureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0402",
+              "endpoint_id": 2,
               "cluster": {
-                "id": 2,
-                "name": "Device Temperature",
+                "id": 1026,
+                "name": "Temperature Measurement",
                 "type": "server"
               },
-              "id": "1:0x0002",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0002",
+              "id": "2:0x0402",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0402",
               "status": "CREATED",
-              "value_attribute": "current_temperature"
+              "value_attribute": "measured_value"
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
-          "attribute": "current_temperature",
+          "attribute": "measured_value",
           "decimals": 1,
           "divisor": 100,
           "multiplier": 1,
           "unit": "°C"
         },
         "state": {
-          "class_name": "DeviceTemperature",
-          "available": false,
-          "state": 27.0
+          "class_name": "Temperature",
+          "available": true,
+          "state": 25.9
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-0-rssi",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-0-rssi",
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
@@ -1179,30 +1239,30 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
+              "endpoint_id": 2,
               "cluster": {
                 "id": 0,
                 "name": "BasicCluster",
                 "type": "server"
               },
-              "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0000",
+              "id": "2:0x0000",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -1212,14 +1272,14 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": false,
+          "available": true,
           "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-0-lqi",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-0-lqi",
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
@@ -1231,30 +1291,30 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
+              "endpoint_id": 2,
               "cluster": {
                 "id": 0,
                 "name": "BasicCluster",
                 "type": "server"
               },
-              "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0000",
+              "id": "2:0x0000",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -1264,8 +1324,63 @@
         },
         "state": {
           "class_name": "LQISensor",
-          "available": false,
+          "available": true,
           "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-0-trigger_indicator",
+          "platform": "switch",
+          "class_name": "HueMotionTriggerIndicatorSwitch",
+          "translation_key": "trigger_indicator",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "2:0x0000",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            97,
+            157,
+            220,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "trigger_indicator",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "HueMotionTriggerIndicatorSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],
@@ -1273,7 +1388,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:01:b1:ca:eb-1-25-firmware_update",
+          "unique_id": "00:17:88:01:0c:dc:9d:61-2-25-firmware_update",
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
@@ -1285,40 +1400,40 @@
             {
               "class_name": "OtaClientClusterHandler",
               "generic_id": "cluster_handler_0x0019",
-              "endpoint_id": 1,
+              "endpoint_id": 2,
               "cluster": {
                 "id": 25,
                 "name": "Ota",
                 "type": "client"
               },
-              "id": "1:0x0019",
-              "unique_id": "00:15:8d:00:01:b1:ca:eb:1:0x0019",
+              "id": "2:0x0019",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0019",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            235,
-            202,
-            177,
+            97,
+            157,
+            220,
+            12,
             1,
-            0,
-            141,
-            21,
+            136,
+            23,
             0
           ],
-          "endpoint_id": 1,
-          "available": false,
+          "endpoint_id": 2,
+          "available": true,
           "group_id": null,
           "supported_features": 7
         },
         "state": {
           "class_name": "FirmwareUpdateEntity",
-          "available": false,
-          "installed_version": null,
+          "available": true,
+          "installed_version": "0x02003506",
           "in_progress": false,
           "progress": 0,
-          "latest_version": null,
+          "latest_version": "0x02003506",
           "release_summary": null,
           "release_url": null
         }

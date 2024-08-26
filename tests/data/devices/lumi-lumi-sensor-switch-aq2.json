@@ -1,6 +1,6 @@
 {
-  "ieee": "00:15:8d:00:02:13:49:c3",
-  "nwk": 5569,
+  "ieee": "00:15:8d:00:02:13:91:38",
+  "nwk": 57674,
   "manufacturer": "LUMI",
   "model": "lumi.sensor_switch.aq2",
   "name": "LUMI lumi.sensor_switch.aq2",
@@ -11,8 +11,8 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-18T14:57:26",
-  "available": false,
+  "last_seen": "2024-08-26T13:29:23",
+  "available": true,
   "device_type": "EndDevice",
   "signature": {
     "node_descriptor": {
@@ -70,7 +70,7 @@
     }
   ],
   "user_given_name": null,
-  "device_reg_id": "9ee9f6ecc4e2c68379537649261eb906",
+  "device_reg_id": "6f42665fe7ef72011b03a44dbe652d1f",
   "area_id": null,
   "cluster_details": {
     "1": {
@@ -351,7 +351,7 @@
             },
             "0x0021": {
               "attribute": "ZCLAttributeDef(id=0x0021, name='battery_percentage_remaining', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Report: 9>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 161
+              "value": 154
             },
             "0x0033": {
               "attribute": "ZCLAttributeDef(id=0x0033, name='battery_quantity', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
@@ -429,7 +429,7 @@
             },
             "0x0000": {
               "attribute": "ZCLAttributeDef(id=0x0000, name='current_temperature', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
-              "value": 2300
+              "value": 2900
             },
             "0x0010": {
               "attribute": "ZCLAttributeDef(id=0x0010, name='dev_temp_alarm_mask', type=<flag 'DeviceTempAlarmMask'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
@@ -679,7 +679,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:02:13:49:c3-1-1",
+          "unique_id": "00:15:8d:00:02:13:91:38-1-1",
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
@@ -698,14 +698,14 @@
                 "type": "server"
               },
               "id": "1:0x0001",
-              "unique_id": "00:15:8d:00:02:13:49:c3:1:0x0001",
+              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0001",
               "status": "CREATED",
               "value_attribute": "battery_voltage"
             }
           ],
           "device_ieee": [
-            195,
-            73,
+            56,
+            145,
             19,
             2,
             0,
@@ -714,7 +714,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": "battery_percentage_remaining",
           "decimals": 1,
@@ -724,8 +724,8 @@
         },
         "state": {
           "class_name": "Battery",
-          "available": false,
-          "state": 80,
+          "available": true,
+          "state": 77,
           "battery_size": "CR2032",
           "battery_quantity": 1,
           "battery_voltage": 3.04
@@ -734,7 +734,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:02:13:49:c3-1-2",
+          "unique_id": "00:15:8d:00:02:13:91:38-1-2",
           "platform": "sensor",
           "class_name": "DeviceTemperature",
           "translation_key": "device_temperature",
@@ -753,14 +753,14 @@
                 "type": "server"
               },
               "id": "1:0x0002",
-              "unique_id": "00:15:8d:00:02:13:49:c3:1:0x0002",
+              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0002",
               "status": "CREATED",
               "value_attribute": "current_temperature"
             }
           ],
           "device_ieee": [
-            195,
-            73,
+            56,
+            145,
             19,
             2,
             0,
@@ -769,7 +769,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": "current_temperature",
           "decimals": 1,
@@ -779,14 +779,14 @@
         },
         "state": {
           "class_name": "DeviceTemperature",
-          "available": false,
-          "state": 23.0
+          "available": true,
+          "state": 29.0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:02:13:49:c3-1-0-rssi",
+          "unique_id": "00:15:8d:00:02:13:91:38-1-0-rssi",
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
@@ -805,14 +805,14 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:02:13:49:c3:1:0x0000",
+              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            195,
-            73,
+            56,
+            145,
             19,
             2,
             0,
@@ -821,7 +821,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -831,14 +831,14 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": false,
+          "available": true,
           "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:02:13:49:c3-1-0-lqi",
+          "unique_id": "00:15:8d:00:02:13:91:38-1-0-lqi",
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
@@ -857,14 +857,14 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:02:13:49:c3:1:0x0000",
+              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            195,
-            73,
+            56,
+            145,
             19,
             2,
             0,
@@ -873,7 +873,7 @@
             0
           ],
           "endpoint_id": 1,
-          "available": false,
+          "available": true,
           "group_id": null,
           "attribute": null,
           "decimals": 1,
@@ -883,7 +883,7 @@
         },
         "state": {
           "class_name": "LQISensor",
-          "available": false,
+          "available": true,
           "state": null
         }
       }

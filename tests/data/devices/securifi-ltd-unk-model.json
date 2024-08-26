@@ -1,6 +1,6 @@
 {
-  "ieee": "00:0d:6f:00:0a:76:ec:9e",
-  "nwk": 36766,
+  "ieee": "00:0d:6f:00:05:49:ac:68",
+  "nwk": 58652,
   "manufacturer": "Securifi Ltd.",
   "model": "unk_model",
   "name": "Securifi Ltd. unk_model",
@@ -9,10 +9,10 @@
   "quirk_id": null,
   "manufacturer_code": 4098,
   "power_source": "Mains",
-  "lqi": 56,
-  "rssi": -86,
-  "last_seen": "2024-08-26T10:19:10",
-  "available": true,
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-01-14T09:54:05",
+  "available": false,
   "device_type": "Router",
   "signature": {
     "node_descriptor": {
@@ -95,49 +95,55 @@
       "name": "Securifi Ltd. unk_model"
     }
   ],
-  "neighbors": [
-    {
-      "device_type": "Coordinator",
-      "rx_on_when_idle": "On",
-      "relationship": "NoneOfTheAbove",
-      "extended_pan_id": "d8:1a:3b:68:86:49:fe:23",
-      "ieee": "00:0d:6f:00:0a:ff:74:55",
-      "nwk": "0x0000",
-      "permit_joining": "Unknown",
-      "depth": "0",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "NoneOfTheAbove",
-      "extended_pan_id": "d8:1a:3b:68:86:49:fe:23",
-      "ieee": "00:15:8d:00:02:82:d0:78",
-      "nwk": "0x9FB9",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "NoneOfTheAbove",
-      "extended_pan_id": "d8:1a:3b:68:86:49:fe:23",
-      "ieee": "b0:ce:18:14:03:6b:9a:ee",
-      "nwk": "0xB27C",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    }
-  ],
+  "neighbors": [],
   "routes": [
+    {
+      "dest_nwk": "0x6D04",
+      "route_status": "Active",
+      "memory_constrained": true,
+      "many_to_one": true,
+      "route_record_required": true,
+      "next_hop": "0x6D04"
+    },
     {
       "dest_nwk": "0x0000",
       "route_status": "Active",
-      "memory_constrained": false,
+      "memory_constrained": true,
       "many_to_one": true,
-      "route_record_required": true,
-      "next_hop": "0x0000"
+      "route_record_required": false,
+      "next_hop": "0xD8ED"
+    },
+    {
+      "dest_nwk": "0x508F",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x7DB1"
+    },
+    {
+      "dest_nwk": "0xAFA8",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x7DB1"
+    },
+    {
+      "dest_nwk": "0xA551",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x69B1"
+    },
+    {
+      "dest_nwk": "0x7F9C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x445A"
     }
   ],
   "endpoint_names": [
@@ -146,7 +152,7 @@
     }
   ],
   "user_given_name": null,
-  "device_reg_id": "9f44b626d46549020c3f662bd9d04a61",
+  "device_reg_id": "0960bf44561e286e25b203ece439c311",
   "area_id": null,
   "cluster_details": {
     "1": {
@@ -668,7 +674,7 @@
             },
             "0x0604": {
               "attribute": "ZCLAttributeDef(id=0x0604, name='ac_power_multiplier', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Report: 9>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 10252
+              "value": 10255
             },
             "0x0804": {
               "attribute": "ZCLAttributeDef(id=0x0804, name='ac_reactive_power_overload', type=<class 'zigpy.types.basic.int16s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
@@ -1068,7 +1074,7 @@
             },
             "0x0505": {
               "attribute": "ZCLAttributeDef(id=0x0505, name='rms_voltage', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Report: 9>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 0
+              "value": 26866
             },
             "0x0507": {
               "attribute": "ZCLAttributeDef(id=0x0507, name='rms_voltage_max', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
@@ -1765,7 +1771,7 @@
             },
             "0x0002": {
               "attribute": "ZCLAttributeDef(id=0x0002, name='current_file_version', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
-              "value": 0
+              "value": null
             },
             "0x0003": {
               "attribute": "ZCLAttributeDef(id=0x0003, name='current_zigbee_stack_version', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
@@ -2502,7 +2508,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-3",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-3",
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -2521,16 +2527,16 @@
                 "type": "server"
               },
               "id": "1:0x0003",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0003",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0003",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2547,7 +2553,7 @@
         },
         "state": {
           "class_name": "IdentifyButton",
-          "available": true
+          "available": false
         }
       }
     ],
@@ -2555,7 +2561,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-2820-rms_current",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-2820-rms_current",
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
@@ -2574,16 +2580,16 @@
                 "type": "server"
               },
               "id": "1:0x0b04",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0b04",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0b04",
               "status": "CREATED",
               "value_attribute": "active_power"
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2600,7 +2606,7 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
-          "available": true,
+          "available": false,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2608,7 +2614,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-2820-rms_voltage",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-2820-rms_voltage",
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
@@ -2627,16 +2633,16 @@
                 "type": "server"
               },
               "id": "1:0x0b04",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0b04",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0b04",
               "status": "CREATED",
               "value_attribute": "active_power"
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2653,15 +2659,15 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
-          "available": true,
-          "state": 0.0,
+          "available": false,
+          "state": 123,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-2820-ac_frequency",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-2820-ac_frequency",
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
@@ -2680,16 +2686,16 @@
                 "type": "server"
               },
               "id": "1:0x0b04",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0b04",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0b04",
               "status": "CREATED",
               "value_attribute": "active_power"
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2706,7 +2712,7 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
-          "available": true,
+          "available": false,
           "state": 0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2714,7 +2720,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-2820-power_factor",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-2820-power_factor",
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
@@ -2733,16 +2739,16 @@
                 "type": "server"
               },
               "id": "1:0x0b04",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0b04",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0b04",
               "status": "CREATED",
               "value_attribute": "active_power"
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2759,7 +2765,7 @@
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
-          "available": true,
+          "available": false,
           "state": 0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2767,7 +2773,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-0-rssi",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-0-rssi",
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
@@ -2786,16 +2792,16 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0000",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2812,14 +2818,14 @@
         },
         "state": {
           "class_name": "RSSISensor",
-          "available": true,
-          "state": -86
+          "available": false,
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-0-lqi",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-0-lqi",
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
@@ -2838,16 +2844,16 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0000",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0000",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2864,14 +2870,14 @@
         },
         "state": {
           "class_name": "LQISensor",
-          "available": true,
-          "state": 56
+          "available": false,
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-2820",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-2820",
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
@@ -2890,16 +2896,16 @@
                 "type": "server"
               },
               "id": "1:0x0b04",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0b04",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0b04",
               "status": "CREATED",
               "value_attribute": "active_power"
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2916,7 +2922,7 @@
         },
         "state": {
           "class_name": "PolledElectricalMeasurement",
-          "available": true,
+          "available": false,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
@@ -2926,7 +2932,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-6",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-6",
           "platform": "switch",
           "class_name": "Switch",
           "translation_key": "switch",
@@ -2945,16 +2951,16 @@
                 "type": "server"
               },
               "id": "1:0x0006",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0006",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0006",
               "status": "CREATED",
               "value_attribute": "on_off"
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -2967,7 +2973,7 @@
         "state": {
           "class_name": "Switch",
           "state": 1,
-          "available": true
+          "available": false
         }
       }
     ],
@@ -2975,7 +2981,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:0d:6f:00:0a:76:ec:9e-1-25-firmware_update",
+          "unique_id": "00:0d:6f:00:05:49:ac:68-1-25-firmware_update",
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
@@ -2994,16 +3000,16 @@
                 "type": "client"
               },
               "id": "1:0x0019",
-              "unique_id": "00:0d:6f:00:0a:76:ec:9e:1:0x0019",
+              "unique_id": "00:0d:6f:00:05:49:ac:68:1:0x0019",
               "status": "CREATED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            158,
-            236,
-            118,
-            10,
+            104,
+            172,
+            73,
+            5,
             0,
             111,
             13,
@@ -3016,11 +3022,11 @@
         },
         "state": {
           "class_name": "FirmwareUpdateEntity",
-          "available": true,
-          "installed_version": "0x00000000",
+          "available": false,
+          "installed_version": null,
           "in_progress": false,
           "progress": 0,
-          "latest_version": "0x00000000",
+          "latest_version": null,
           "release_summary": null,
           "release_url": null
         }
