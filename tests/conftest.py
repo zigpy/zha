@@ -577,7 +577,17 @@ def zigpy_device_from_json(
                     real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
                     real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
                 for unsupported_attr in cluster["unsupported_attributes"]:
-                    real_cluster.unsupported_attributes.add(unsupported_attr)
+                    if isinstance(
+                        unsupported_attr, str
+                    ) and unsupported_attr.startswith("0x"):
+                        attrid = int(unsupported_attr, 16)
+                        real_cluster.unsupported_attributes.add(attrid)
+                        if attrid in real_cluster.attributes:
+                            real_cluster.unsupported_attributes.add(
+                                real_cluster.attributes[attrid].name
+                            )
+                    else:
+                        real_cluster.unsupported_attributes.add(unsupported_attr)
 
             for cluster_id, cluster in ep["out_clusters"].items():
                 real_cluster = device.endpoints[int(epid)].out_clusters[
@@ -594,7 +604,17 @@ def zigpy_device_from_json(
                     real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
                     real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
                 for unsupported_attr in cluster["unsupported_attributes"]:
-                    real_cluster.unsupported_attributes.add(unsupported_attr)
+                    if isinstance(
+                        unsupported_attr, str
+                    ) and unsupported_attr.startswith("0x"):
+                        attrid = int(unsupported_attr, 16)
+                        real_cluster.unsupported_attributes.add(attrid)
+                        if attrid in real_cluster.attributes:
+                            real_cluster.unsupported_attributes.add(
+                                real_cluster.attributes[attrid].name
+                            )
+                    else:
+                        real_cluster.unsupported_attributes.add(unsupported_attr)
 
         return device
 

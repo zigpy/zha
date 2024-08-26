@@ -1,0 +1,427 @@
+{
+  "ieee": "74:4d:bd:ff:fe:60:7c:c2",
+  "nwk": 162,
+  "manufacturer": "iSilentLLC",
+  "model": "Test Device",
+  "name": "iSilentLLC Test Device",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4660,
+  "power_source": "Mains",
+  "lqi": 72,
+  "rssi": null,
+  "last_seen": "2024-08-26T14:47:52",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 140,
+      "manufacturer_code": 4660,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 0,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 0,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "10": {
+        "profile_id": "0x0104",
+        "device_type": "0x0002",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0006"
+        ],
+        "output_clusters": []
+      },
+      "11": {
+        "profile_id": "0x0104",
+        "device_type": "0x0002",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0006"
+        ],
+        "output_clusters": []
+      }
+    },
+    "manufacturer": "iSilentLLC",
+    "model": "Test Device"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.isilentllc_test_device_identify",
+      "name": "iSilentLLC Test Device"
+    },
+    {
+      "entity_id": "switch.isilentllc_test_device_switch",
+      "name": "iSilentLLC Test Device"
+    },
+    {
+      "entity_id": "switch.isilentllc_test_device_switch_2",
+      "name": "iSilentLLC Test Device"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "ON_OFF_OUTPUT"
+    },
+    {
+      "name": "ON_OFF_OUTPUT"
+    }
+  ],
+  "user_given_name": null,
+  "device_reg_id": "d8e4087068feb96beacaf6fff478253c",
+  "area_id": "e90afd9cc0e84a7da3d7162b6e4c3ac1",
+  "cluster_details": {
+    "10": {
+      "device_type": {
+        "name": "ON_OFF_OUTPUT",
+        "id": 2
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "iSilentLLC"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "Test Device"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {
+            "0x4003": {
+              "attribute_name": "start_up_on_off"
+            }
+          }
+        }
+      },
+      "out_clusters": {}
+    },
+    "11": {
+      "device_type": {
+        "name": "ON_OFF_OUTPUT",
+        "id": 2
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "iSilentLLC"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {
+            "0x4003": {
+              "attribute_name": "start_up_on_off"
+            }
+          }
+        }
+      },
+      "out_clusters": {}
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "74:4d:bd:ff:fe:60:7c:c2-10-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "10:0x0003",
+              "unique_id": "74:4d:bd:ff:fe:60:7c:c2:10:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            194,
+            124,
+            96,
+            254,
+            255,
+            189,
+            77,
+            116
+          ],
+          "endpoint_id": 10,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "74:4d:bd:ff:fe:60:7c:c2-10-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "10:0x0000",
+              "unique_id": "74:4d:bd:ff:fe:60:7c:c2:10:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            194,
+            124,
+            96,
+            254,
+            255,
+            189,
+            77,
+            116
+          ],
+          "endpoint_id": 10,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "74:4d:bd:ff:fe:60:7c:c2-10-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "10:0x0000",
+              "unique_id": "74:4d:bd:ff:fe:60:7c:c2:10:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            194,
+            124,
+            96,
+            254,
+            255,
+            189,
+            77,
+            116
+          ],
+          "endpoint_id": 10,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 72
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "74:4d:bd:ff:fe:60:7c:c2-10-6",
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "10:0x0006",
+              "unique_id": "74:4d:bd:ff:fe:60:7c:c2:10:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            194,
+            124,
+            96,
+            254,
+            255,
+            189,
+            77,
+            116
+          ],
+          "endpoint_id": 10,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 0,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "74:4d:bd:ff:fe:60:7c:c2-11-6",
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "11:0x0006",
+              "unique_id": "74:4d:bd:ff:fe:60:7c:c2:11:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            194,
+            124,
+            96,
+            254,
+            255,
+            189,
+            77,
+            116
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 0,
+          "available": true
+        }
+      }
+    ]
+  }
+}

@@ -1128,7 +1128,7 @@ async def test_devices_from_files(
                     effect_variant=(
                         zigpy.zcl.clusters.general.Identify.EffectVariant.Default
                     ),
-                    expect_reply=True,
+                    expect_reply=cluster_identify.endpoint.model != "HDC52EastwindFan",
                     manufacturer=None,
                     tsn=None,
                 )

@@ -1,0 +1,843 @@
+{
+  "ieee": "54:ef:44:10:00:49:74:c7",
+  "nwk": 27073,
+  "manufacturer": "LUMI",
+  "model": "lumi.motion.ac02",
+  "name": "LUMI lumi.motion.ac02",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.motion_ac02.LumiMotionAC02",
+  "quirk_id": null,
+  "manufacturer_code": 4447,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-08-26T13:46:53",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4447,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0107",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0400",
+          "0x0406",
+          "0x0500",
+          "0xfcc0"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019",
+          "0xfcc0"
+        ]
+      }
+    },
+    "manufacturer": "LUMI",
+    "model": "lumi.motion.ac02"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "binary_sensor.lumi_lumi_motion_ac02_occupancy",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "binary_sensor.lumi_lumi_motion_ac02_iaszone",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "button.lumi_lumi_motion_ac02_identifybutton",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "number.lumi_lumi_motion_ac02_aqaramotiondetectioninterval",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "select.lumi_lumi_motion_ac02_aqaramotionsensitivity",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_motion_ac02_battery",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_motion_ac02_illuminance",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "switch.lumi_lumi_motion_ac02_p1motiontriggerindicatorswitch",
+      "name": "LUMI lumi.motion.ac02"
+    },
+    {
+      "entity_id": "update.garage_motion_sensor_firmware",
+      "name": "LUMI lumi.motion.ac02"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "OCCUPANCY_SENSOR"
+    }
+  ],
+  "user_given_name": "Garage Motion Sensor",
+  "device_reg_id": "8c82e91f49d81fe9e4d03edbb46bc40e",
+  "area_id": "39c3b31bfe5a4ec0bb40636de9c88608",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "OCCUPANCY_SENSOR",
+        "id": 263
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0001": {
+              "attribute_name": "app_version",
+              "value": 5
+            },
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "LUMI"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "lumi.motion.ac02"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0001": {
+          "endpoint_attribute": "power",
+          "attributes": {
+            "0x0021": {
+              "attribute_name": "battery_percentage_remaining",
+              "value": 151
+            },
+            "0x0033": {
+              "attribute_name": "battery_quantity",
+              "value": 1
+            },
+            "0x0031": {
+              "attribute_name": "battery_size",
+              "value": 11
+            },
+            "0x0020": {
+              "attribute_name": "battery_voltage",
+              "value": 30.3
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0406": {
+          "endpoint_attribute": "occupancy",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "occupancy",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0500": {
+          "endpoint_attribute": "ias_zone",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "zone_state",
+              "value": 0
+            },
+            "0x0002": {
+              "attribute_name": "zone_status",
+              "value": 0
+            },
+            "0x0001": {
+              "attribute_name": "zone_type",
+              "value": 13
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0400": {
+          "endpoint_attribute": "illuminance",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 13803.112417116059
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0xfcc0": {
+          "endpoint_attribute": "opple_cluster",
+          "attributes": {
+            "0x0102": {
+              "attribute_name": "detection_interval",
+              "value": 30
+            },
+            "0x010c": {
+              "attribute_name": "motion_sensitivity",
+              "value": 3
+            },
+            "0x0152": {
+              "attribute_name": "trigger_indicator",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0xfcc0": {
+          "endpoint_attribute": "opple_cluster",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "LUMI",
+        "lumi.motion.ac02"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0107",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0xfcc0"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019",
+          "0xfcc0"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-1030",
+          "platform": "binary_sensor",
+          "class_name": "Occupancy",
+          "translation_key": null,
+          "device_class": "occupancy",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1030,
+                "name": "Occupancy Sensing",
+                "type": "server"
+              },
+              "id": "1:0x0406",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0406",
+              "status": "CREATED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "occupancy"
+        },
+        "state": {
+          "class_name": "Occupancy",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-1280",
+          "platform": "binary_sensor",
+          "class_name": "IASZone",
+          "translation_key": null,
+          "device_class": "motion",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IASZoneClusterHandler",
+              "generic_id": "cluster_handler_0x0500",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1280,
+                "name": "IAS Zone",
+                "type": "server"
+              },
+              "id": "1:0x0500",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0500",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "zone_status"
+        },
+        "state": {
+          "class_name": "IASZone",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-64704-detection_interval",
+          "platform": "number",
+          "class_name": "AqaraMotionDetectionInterval",
+          "translation_key": "detection_interval",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "OppleCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0xfcc0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 2,
+          "max_value": 65535,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "AqaraMotionDetectionInterval",
+          "available": true,
+          "state": 30
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-64704-motion_sensitivity",
+          "platform": "select",
+          "class_name": "AqaraMotionSensitivity",
+          "translation_key": "motion_sensitivity",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "OppleCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0xfcc0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "AqaraMotionSensitivities",
+          "options": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+        "state": {
+          "class_name": "AqaraMotionSensitivity",
+          "available": true,
+          "state": "High"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-1",
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0001",
+              "status": "CREATED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "battery_percentage_remaining",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 76,
+          "battery_size": "CR1632",
+          "battery_quantity": 1,
+          "battery_voltage": 3.03
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-1024",
+          "platform": "sensor",
+          "class_name": "Illuminance",
+          "translation_key": null,
+          "device_class": "illuminance",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IlluminanceMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0400",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1024,
+                "name": "Illuminance Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0400",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0400",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "lx"
+        },
+        "state": {
+          "class_name": "Illuminance",
+          "available": true,
+          "state": 24
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-64704-trigger_indicator",
+          "platform": "switch",
+          "class_name": "P1MotionTriggerIndicatorSwitch",
+          "translation_key": "trigger_indicator",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "OppleCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0xfcc0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "trigger_indicator",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "P1MotionTriggerIndicatorSwitch",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:49:74:c7-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "54:ef:44:10:00:49:74:c7:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            199,
+            116,
+            73,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": null,
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": null,
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

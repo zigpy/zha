@@ -1,0 +1,611 @@
+{
+  "ieee": "00:15:8d:00:05:4b:9d:1f",
+  "nwk": 65315,
+  "manufacturer": "LUMI",
+  "model": "lumi.weather",
+  "name": "LUMI lumi.weather",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.weather.Weather",
+  "quirk_id": null,
+  "manufacturer_code": 4151,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-08-26T13:48:22",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4151,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x5f01",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0402",
+          "0x0403",
+          "0x0405",
+          "0xffff"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0004",
+          "0xffff"
+        ]
+      }
+    },
+    "manufacturer": "LUMI",
+    "model": "lumi.weather"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.lumi_lumi_weather_1f9d4b05_identify",
+      "name": "LUMI lumi.weather"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_weather_power",
+      "name": "LUMI lumi.weather"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_weather_pressure",
+      "name": "LUMI lumi.weather"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_weather_temperature",
+      "name": "LUMI lumi.weather"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_weather_humidity",
+      "name": "LUMI lumi.weather"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "undefined_0x5f01"
+    }
+  ],
+  "user_given_name": "Bathroom Shower",
+  "device_reg_id": "0cc232d9da843fb904547795b18436b1",
+  "area_id": "d0f7ecb50d2647e38a14d7b57efef0f3",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "undefined_0x5f01",
+        "id": 24321
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0001": {
+              "attribute_name": "app_version",
+              "value": 5
+            },
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "LUMI"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "lumi.weather"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0001": {
+          "endpoint_attribute": "power",
+          "attributes": {
+            "0x0021": {
+              "attribute_name": "battery_percentage_remaining",
+              "value": 118
+            },
+            "0x0033": {
+              "attribute_name": "battery_quantity",
+              "value": 1
+            },
+            "0x0031": {
+              "attribute_name": "battery_size",
+              "value": 10
+            },
+            "0x0020": {
+              "attribute_name": "battery_voltage",
+              "value": 29.9
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0402": {
+          "endpoint_attribute": "temperature",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 2173
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0403": {
+          "endpoint_attribute": "pressure",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 1009
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0405": {
+          "endpoint_attribute": "humidity",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 5799
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0xffff": {
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0xffff": {
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "LUMI",
+        "lumi.weather"
+      ]
+    ],
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4151,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x5f01",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0xffff",
+          "0x0402",
+          "0x0403",
+          "0x0405"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0004",
+          "0xffff"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1",
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0001",
+              "status": "CREATED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "battery_percentage_remaining",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 59,
+          "battery_size": "CR2032",
+          "battery_quantity": 1,
+          "battery_voltage": 2.99
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1027",
+          "platform": "sensor",
+          "class_name": "Pressure",
+          "translation_key": null,
+          "device_class": "pressure",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "PressureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0403",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1027,
+                "name": "Pressure Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0403",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0403",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 0,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "hPa"
+        },
+        "state": {
+          "class_name": "Pressure",
+          "available": true,
+          "state": 1009
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1026",
+          "platform": "sensor",
+          "class_name": "Temperature",
+          "translation_key": null,
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "TemperatureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0402",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1026,
+                "name": "Temperature Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0402",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0402",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "°C"
+        },
+        "state": {
+          "class_name": "Temperature",
+          "available": true,
+          "state": 21.7
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1029",
+          "platform": "sensor",
+          "class_name": "Humidity",
+          "translation_key": null,
+          "device_class": "humidity",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "RelativeHumidityClusterHandler",
+              "generic_id": "cluster_handler_0x0405",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1029,
+                "name": "Relative Humidity Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0405",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0405",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Humidity",
+          "available": true,
+          "state": 58.0
+        }
+      }
+    ]
+  }
+}

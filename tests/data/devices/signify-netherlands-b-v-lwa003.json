@@ -1,0 +1,1308 @@
+{
+  "ieee": "00:17:88:01:0c:76:6c:d5",
+  "nwk": 6747,
+  "manufacturer": "Signify Netherlands B.V.",
+  "model": "LWA003",
+  "name": "Signify Netherlands B.V. LWA003",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4107,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-08-26T14:12:19",
+  "available": true,
+  "device_type": "Router",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 128,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "11": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x1000",
+          "0xfc02"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    },
+    "manufacturer": "Signify Netherlands B.V.",
+    "model": "LWA003"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.signify_netherlands_b_v_lwa003_identifybutton",
+      "name": "Signify Netherlands B.V. LWA003"
+    },
+    {
+      "entity_id": "light.signify_netherlands_b_v_lwa003_huelight",
+      "name": "Signify Netherlands B.V. LWA003"
+    },
+    {
+      "entity_id": "number.signify_netherlands_b_v_lwa003_startupcurrentlevelconfiguration",
+      "name": "Signify Netherlands B.V. LWA003"
+    },
+    {
+      "entity_id": "select.signify_netherlands_b_v_lwa003_startuponoffselect",
+      "name": "Signify Netherlands B.V. LWA003"
+    },
+    {
+      "entity_id": "update.master_bedroom_1_firmware",
+      "name": "Signify Netherlands B.V. LWA003"
+    }
+  ],
+  "neighbors": [
+    {
+      "device_type": "Coordinator",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:0d:6f:00:0b:12:ed:40",
+      "nwk": "0x0000",
+      "permit_joining": "Unknown",
+      "depth": "0",
+      "lqi": "215"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "84:ba:20:ff:fe:3e:a2:98",
+      "nwk": "0x11A5",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "112"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0c:73:87:8d",
+      "nwk": "0x1579",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "70:ac:08:ff:fe:ef:73:bb",
+      "nwk": "0x1906",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "175"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0d:00:18:d5",
+      "nwk": "0x2428",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "186"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "70:ac:08:ff:fe:ef:c4:b7",
+      "nwk": "0x3E2B",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "102"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "04:cf:8c:df:3c:76:1e:de",
+      "nwk": "0x4EB1",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "118"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "94:de:b8:ff:fe:31:4d:de",
+      "nwk": "0x5772",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "232"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "28:2c:02:bf:ff:e6:a8:02",
+      "nwk": "0x6007",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "84"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "70:ac:08:ff:fe:70:f1:8c",
+      "nwk": "0x6C1D",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "121"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0d:00:32:fb",
+      "nwk": "0x754C",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "196"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "84:71:27:ff:fe:92:f9:dc",
+      "nwk": "0x7757",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "147"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0d:01:9f:ff",
+      "nwk": "0x90CD",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "143"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "28:2c:02:bf:ff:ea:38:4a",
+      "nwk": "0x9B0D",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "123"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0d:01:9c:a3",
+      "nwk": "0x9F48",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "172"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0d:01:7f:6a",
+      "nwk": "0xA0CF",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "149"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "94:de:b8:ff:fe:31:5f:77",
+      "nwk": "0xA639",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "105"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "28:2c:02:bf:ff:e6:b7:85",
+      "nwk": "0xB09D",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "201"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "28:2c:02:bf:ff:e6:ed:3c",
+      "nwk": "0xB3BE",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "76"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "94:de:b8:ff:fe:45:8d:a5",
+      "nwk": "0xB42A",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "140"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "28:2c:02:bf:ff:e6:d0:f5",
+      "nwk": "0xBFE6",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "90"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "28:2c:02:bf:ff:e6:ac:38",
+      "nwk": "0xD1D9",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "71"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Parent",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0c:73:84:f6",
+      "nwk": "0xDFE3",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "38:5b:44:ff:fe:a5:1d:cf",
+      "nwk": "0xE7D9",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "103"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "28:2c:02:bf:ff:e6:e8:72",
+      "nwk": "0xE9C9",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "144"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:17:88:01:0d:01:9c:de",
+      "nwk": "0xEE1A",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "145"
+    },
+    {
+      "device_type": "EndDevice",
+      "rx_on_when_idle": "Off",
+      "relationship": "Child",
+      "extended_pan_id": "62:af:97:71:87:dd:99:fe",
+      "ieee": "00:0d:6f:00:0b:5c:55:48",
+      "nwk": "0x9539",
+      "permit_joining": "NotAccepting",
+      "depth": "3",
+      "lqi": "192"
+    }
+  ],
+  "routes": [
+    {
+      "dest_nwk": "0x0000",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": true,
+      "route_record_required": false,
+      "next_hop": "0x0000"
+    },
+    {
+      "dest_nwk": "0xC15B",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x754C"
+    },
+    {
+      "dest_nwk": "0x3E2B",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x3E2B"
+    },
+    {
+      "dest_nwk": "0xA971",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x3057"
+    },
+    {
+      "dest_nwk": "0x50B2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1579"
+    },
+    {
+      "dest_nwk": "0x3DDA",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xDFE3"
+    },
+    {
+      "dest_nwk": "0x096F",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2428"
+    },
+    {
+      "dest_nwk": "0x3C63",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9F48"
+    },
+    {
+      "dest_nwk": "0xC536",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xEE1A"
+    },
+    {
+      "dest_nwk": "0x4776",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x4776"
+    },
+    {
+      "dest_nwk": "0xD6C2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9F48"
+    },
+    {
+      "dest_nwk": "0x8481",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2428"
+    },
+    {
+      "dest_nwk": "0x3D8C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xE7D9"
+    },
+    {
+      "dest_nwk": "0x2CD2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2428"
+    },
+    {
+      "dest_nwk": "0x0BFE",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x9B0D"
+    },
+    {
+      "dest_nwk": "0xE9C9",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xE9C9"
+    },
+    {
+      "dest_nwk": "0x022F",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB42A"
+    },
+    {
+      "dest_nwk": "0x2216",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2428"
+    },
+    {
+      "dest_nwk": "0x6EC2",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2428"
+    },
+    {
+      "dest_nwk": "0xB161",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB42A"
+    },
+    {
+      "dest_nwk": "0x9B0D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x90CD"
+    },
+    {
+      "dest_nwk": "0xE7D0",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xDFE3"
+    },
+    {
+      "dest_nwk": "0x3B3E",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x2428"
+    },
+    {
+      "dest_nwk": "0xCC8A",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1906"
+    },
+    {
+      "dest_nwk": "0x7DA1",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x6C1D"
+    },
+    {
+      "dest_nwk": "0x7A11",
+      "route_status": "Active",
+      "memory_constrained": true,
+      "many_to_one": true,
+      "route_record_required": true,
+      "next_hop": "0x6C1D"
+    },
+    {
+      "dest_nwk": "0xD1D9",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xD1D9"
+    },
+    {
+      "dest_nwk": "0xA5FB",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA639"
+    },
+    {
+      "dest_nwk": "0x6007",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x6007"
+    },
+    {
+      "dest_nwk": "0xCE1D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB42A"
+    },
+    {
+      "dest_nwk": "0xC789",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA639"
+    },
+    {
+      "dest_nwk": "0xB3BE",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB3BE"
+    },
+    {
+      "dest_nwk": "0x3B2C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1579"
+    },
+    {
+      "dest_nwk": "0x8745",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xEE1A"
+    },
+    {
+      "dest_nwk": "0xB09D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB09D"
+    },
+    {
+      "dest_nwk": "0x2990",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x3B3E"
+    },
+    {
+      "dest_nwk": "0xF1CD",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA639"
+    },
+    {
+      "dest_nwk": "0x3057",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x3057"
+    },
+    {
+      "dest_nwk": "0x5BB5",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB42A"
+    },
+    {
+      "dest_nwk": "0xE776",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1579"
+    },
+    {
+      "dest_nwk": "0x856D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA0CF"
+    },
+    {
+      "dest_nwk": "0x209C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x754C"
+    },
+    {
+      "dest_nwk": "0x1853",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x754C"
+    },
+    {
+      "dest_nwk": "0xBFE6",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xBFE6"
+    },
+    {
+      "dest_nwk": "0x49B5",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA0CF"
+    },
+    {
+      "dest_nwk": "0x7A99",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x1579"
+    },
+    {
+      "dest_nwk": "0x8955",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x754C"
+    },
+    {
+      "dest_nwk": "0xBE08",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA639"
+    }
+  ],
+  "endpoint_names": [
+    {
+      "name": "DIMMABLE_LIGHT"
+    },
+    {
+      "name": "PROXY_BASIC"
+    }
+  ],
+  "user_given_name": "Master Bedroom 1",
+  "device_reg_id": "7273a835deee8ab57c5a0b10476f24c3",
+  "area_id": "9a9e0754d4dd444f851261f26b29ac55",
+  "cluster_details": {
+    "11": {
+      "device_type": {
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "Signify Netherlands B.V."
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "LWA003"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            },
+            "0x4003": {
+              "attribute_name": "start_up_on_off",
+              "value": 255
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_level",
+              "value": 254
+            },
+            "0x4000": {
+              "attribute_name": "start_up_current_level",
+              "value": 254
+            }
+          },
+          "unsupported_attributes": {
+            "0x0012": {
+              "attribute_name": "on_transition_time"
+            },
+            "0x0010": {
+              "attribute_name": "on_off_transition_time"
+            },
+            "0x0011": {
+              "attribute_name": "on_level"
+            },
+            "0x0013": {
+              "attribute_name": "off_transition_time"
+            },
+            "0x0014": {
+              "attribute_name": "default_move_rate"
+            }
+          }
+        },
+        "0x1000": {
+          "endpoint_attribute": "lightlink",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0xfc02": {
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version",
+              "value": 16785162
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      }
+    },
+    "242": {
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "profile_id": 41440,
+      "in_clusters": {},
+      "out_clusters": {
+        "0x0021": {
+          "endpoint_attribute": "green_power",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:76:6c:d5-11-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "11:0x0003",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            213,
+            108,
+            118,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:76:6c:d5-11",
+          "platform": "light",
+          "class_name": "HueLight",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "11:0x0006",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            },
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "11:0x0008",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            213,
+            108,
+            118,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "effect_list": null,
+          "supported_features": 40,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "HueLight",
+          "on": false,
+          "brightness": 254,
+          "hs_color": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect": null,
+          "supported_features": 40,
+          "color_mode": "brightness",
+          "supported_color_modes": [
+            "onoff",
+            "brightness"
+          ],
+          "off_with_transition": false,
+          "off_brightness": 254,
+          "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:76:6c:d5-11-8-start_up_current_level",
+          "platform": "number",
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "translation_key": "start_up_current_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "11:0x0008",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            213,
+            108,
+            118,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 255,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "available": true,
+          "state": 254
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:76:6c:d5-11-6-StartUpOnOff",
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "11:0x0006",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            213,
+            108,
+            118,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "PreviousValue"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:76:6c:d5-11-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "11:0x0000",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            213,
+            108,
+            118,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:76:6c:d5-11-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "11:0x0000",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            213,
+            108,
+            118,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:76:6c:d5-11-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "11:0x0019",
+              "unique_id": "00:17:88:01:0c:76:6c:d5:11:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            213,
+            108,
+            118,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x01001f0a",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x01001f0a",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}
