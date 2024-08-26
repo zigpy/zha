@@ -528,49 +528,32 @@ def zigpy_device_from_json(
         device.node_desc = node_desc
         device.last_seen = time.time()
 
-        if "original_signature" in device_data:
-            orig_endpoints = device_data["original_signature"]["endpoints"]
-            for epid, ep in orig_endpoints.items():
-                endpoint = device.add_endpoint(int(epid))
-                with suppress(Exception):
-                    profile = zigpy.profiles.PROFILES[int(ep["profile_id"])]
+        orig_endpoints = (
+            device_data["original_signature"]["endpoints"]
+            if "original_signature" in device_data
+            else endpoints
+        )
+        for epid, ep in orig_endpoints.items():
+            endpoint = device.add_endpoint(int(epid))
+            profile = None
+            with suppress(Exception):
+                profile = zigpy.profiles.PROFILES[int(ep["profile_id"], 16)]
 
-                endpoint.device_type = (
-                    profile.DeviceType(int(ep["device_type"]))
-                    if profile
-                    else int(ep["device_type"])
-                )
-                endpoint.profile_id = (
-                    profile.PROFILE_ID if profile else int(ep["profile_id"])
-                )
-                endpoint.request = AsyncMock(return_value=[0])
+            endpoint.device_type = (
+                profile.DeviceType(int(ep["device_type"], 16))
+                if profile
+                else int(ep["device_type"], 16)
+            )
+            endpoint.profile_id = (
+                profile.PROFILE_ID if profile else int(ep["profile_id"], 16)
+            )
+            endpoint.request = AsyncMock(return_value=[0])
 
-                for cluster_id in ep["input_clusters"]:
-                    endpoint.add_input_cluster(int(cluster_id))
+            for cluster_id in ep["input_clusters"]:
+                endpoint.add_input_cluster(int(cluster_id, 16))
 
-                for cluster_id in ep["output_clusters"]:
-                    endpoint.add_output_cluster(int(cluster_id))
-        else:
-            for epid, ep in endpoints.items():
-                endpoint = device.add_endpoint(int(epid))
-                with suppress(Exception):
-                    profile = zigpy.profiles.PROFILES[int(ep["profile_id"], 16)]
-
-                endpoint.device_type = (
-                    profile.DeviceType(int(ep["device_type"], 16))
-                    if profile
-                    else int(ep["device_type"], 16)
-                )
-                endpoint.profile_id = (
-                    profile.PROFILE_ID if profile else int(ep["profile_id"], 16)
-                )
-                endpoint.request = AsyncMock(return_value=[0])
-
-                for cluster_id in ep["input_clusters"]:
-                    endpoint.add_input_cluster(int(cluster_id, 16))
-
-                for cluster_id in ep["output_clusters"]:
-                    endpoint.add_output_cluster(int(cluster_id, 16))
+            for cluster_id in ep["output_clusters"]:
+                endpoint.add_output_cluster(int(cluster_id, 16))
 
         if quirk:
             device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
@@ -586,10 +569,15 @@ def zigpy_device_from_json(
                 if patch_cluster:
                     common.patch_cluster(real_cluster)
                 for attr_id, attr in cluster["attributes"].items():
-                    if attr["value"] is None:
+                    if (
+                        attr["value"] is None
+                        or attr_id in cluster["unsupported_attributes"]
+                    ):
                         continue
                     real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
                     real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
+                for unsupported_attr in cluster["unsupported_attributes"]:
+                    real_cluster.unsupported_attributes.add(unsupported_attr)
 
             for cluster_id, cluster in ep["out_clusters"].items():
                 real_cluster = device.endpoints[int(epid)].out_clusters[
@@ -598,10 +586,15 @@ def zigpy_device_from_json(
                 if patch_cluster:
                     common.patch_cluster(real_cluster)
                 for attr_id, attr in cluster["attributes"].items():
-                    if attr["value"] is None:
+                    if (
+                        attr["value"] is None
+                        or attr_id in cluster["unsupported_attributes"]
+                    ):
                         continue
                     real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
                     real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
+                for unsupported_attr in cluster["unsupported_attributes"]:
+                    real_cluster.unsupported_attributes.add(unsupported_attr)
 
         return device
 
