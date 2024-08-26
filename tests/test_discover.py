@@ -1059,40 +1059,77 @@ async def test_devices_from_files(
     zha_device_from_file: Callable[..., Awaitable[Device]], file_path: str
 ) -> None:
     """Test all devices."""
-    zha_device = await zha_device_from_file(file_path)
-    assert zha_device is not None
+    with mock.patch(
+        "zigpy.zcl.clusters.general.Identify.request",
+        new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
+    ):
+        zha_device = await zha_device_from_file(file_path)
+        assert zha_device is not None
 
-    with open(file_path, encoding="utf-8") as file:
-        device_data = json.load(file)
+        with open(file_path, encoding="utf-8") as file:
+            device_data = json.load(file)
 
-    # Get the zha_lib_entities from device_data
-    zha_lib_entities = device_data.get("zha_lib_entities", [])
+        # Get the zha_lib_entities from device_data
+        zha_lib_entities = device_data.get("zha_lib_entities", [])
 
-    # Iterate over the platform_entities in device.platform_entities
-    for platform, entities in zha_lib_entities.items():
-        for entity in entities:
-            platform_entity = zha_device.platform_entities.get(
-                (Platform(platform), entity["info_object"]["unique_id"])
-            )
-            assert platform_entity is not None
+        entity_count = 0
+        # Iterate over the platform_entities in device.platform_entities
+        for platform, entities in zha_lib_entities.items():
+            for entity in entities:
+                entity_count += 1
+                platform_entity = zha_device.platform_entities.get(
+                    (Platform(platform), entity["info_object"]["unique_id"])
+                )
+                assert platform_entity is not None
 
-            # Assert that the entity properties match those in the json data
-            assert (
-                platform_entity.translation_key
-                == entity["info_object"]["translation_key"]
-            )
-            assert (
-                platform_entity.fallback_name == entity["info_object"]["fallback_name"]
-            )
-            assert platform_entity.device_class == entity["info_object"]["device_class"]
-            assert platform_entity.__class__.__name__ == entity["state"]["class_name"]
-            assert (
-                platform_entity.entity_category
-                == entity["info_object"]["entity_category"]
-            )
-            assert platform_entity.state_class == entity["info_object"]["state_class"]
-            assert (
-                platform_entity.entity_registry_enabled_default
-                == entity["info_object"]["entity_registry_enabled_default"]
-            )
-            assert platform_entity.state["class_name"] == entity["state"]["class_name"]
+                # Assert that the entity properties match those in the json data
+                assert (
+                    platform_entity.translation_key
+                    == entity["info_object"]["translation_key"]
+                )
+                assert (
+                    platform_entity.fallback_name
+                    == entity["info_object"]["fallback_name"]
+                )
+                assert (
+                    platform_entity.device_class
+                    == entity["info_object"]["device_class"]
+                )
+                assert (
+                    platform_entity.__class__.__name__ == entity["state"]["class_name"]
+                )
+                assert (
+                    platform_entity.entity_category
+                    == entity["info_object"]["entity_category"]
+                )
+                assert (
+                    platform_entity.state_class == entity["info_object"]["state_class"]
+                )
+                assert (
+                    platform_entity.entity_registry_enabled_default
+                    == entity["info_object"]["entity_registry_enabled_default"]
+                )
+                assert (
+                    platform_entity.state["class_name"] == entity["state"]["class_name"]
+                )
+
+        # Assert that the number of entities in the device matches the number of entities in the json data
+        assert len(zha_device.platform_entities) == entity_count
+
+        # Assert identify called on join for devices that support it
+        cluster_identify = _get_identify_cluster(zha_device.device)
+        if cluster_identify and not zha_device.skip_configuration:
+            assert cluster_identify.request.mock_calls == [
+                mock.call(
+                    False,
+                    cluster_identify.commands_by_name["trigger_effect"].id,
+                    cluster_identify.commands_by_name["trigger_effect"].schema,
+                    effect_id=zigpy.zcl.clusters.general.Identify.EffectIdentifier.Okay,
+                    effect_variant=(
+                        zigpy.zcl.clusters.general.Identify.EffectVariant.Default
+                    ),
+                    expect_reply=True,
+                    manufacturer=None,
+                    tsn=None,
+                )
+            ]
