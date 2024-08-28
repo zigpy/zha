@@ -87,6 +87,7 @@ SMARTTHINGS_HUMIDITY_CLUSTER: Final[int] = 0xFC45
 SONOFF_CLUSTER: Final[int] = 0xFC11
 TUYA_MANUFACTURER_CLUSTER: Final[int] = 0xEF00
 VOC_LEVEL_CLUSTER: Final[int] = 0x042E
+SINOPE_MANUFACTURER_CLUSTER: Final[int] = 0xFF01
 
 CLUSTER_HANDLER_EVENT: Final[str] = "cluster_handler_event"
 CLUSTER_HANDLER_ATTRIBUTE_UPDATED: Final[str] = "cluster_handler_attribute_updated"
@@ -109,3 +110,4 @@ SIGNAL_REMOVE: Final[str] = "remove"
 SIGNAL_SET_LEVEL: Final[str] = "set_level"
 SIGNAL_STATE_ATTR: Final[str] = "update_state_attribute"
 UNKNOWN: Final[str] = "unknown"
+VALUE: Final[str] = "value"

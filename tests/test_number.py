@@ -9,6 +9,7 @@ from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
+import zigpy.zdo.types as zdo_t
 
 from tests.common import get_entity, send_attributes_report, update_attribute_cache
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -56,7 +57,24 @@ async def light(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
                 SIG_EP_OUTPUT: [general.Ota.cluster_id],
             }
         },
-        node_descriptor=b"\x02@\x84_\x11\x7fd\x00\x00,d\x00\x00",
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=4447,
+            maximum_buffer_size=127,
+            maximum_incoming_transfer_size=100,
+            server_mask=11264,
+            maximum_outgoing_transfer_size=100,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
 
     return zigpy_device

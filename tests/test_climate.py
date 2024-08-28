@@ -7,7 +7,9 @@ from collections.abc import Awaitable, Callable, Coroutine
 import logging
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, call, patch
+import zoneinfo
 
+from freezegun import freeze_time
 import pytest
 import zhaquirks.sinope.thermostat
 from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
@@ -379,6 +381,7 @@ async def test_climate_hvac_action_running_state(
 @pytest.mark.looptime
 async def test_sinope_time(
     device_climate_sinope: Device,
+    zha_gateway: Gateway,
 ):
     """Test hvac action via running state."""
 
@@ -393,9 +396,52 @@ async def test_sinope_time(
 
     await asyncio.sleep(4600)
 
+    write_attributes = mfg_cluster.write_attributes
+    assert entity._async_update_time.await_count == 1
+    assert write_attributes.await_count == 1
+    assert "secs_since_2k" in write_attributes.mock_calls[0].args[0]
+
+    write_attributes.reset_mock()
+
+    # Default time zone of UTC
+    with freeze_time("2000-01-02 00:00:00"):
+        await entity._async_update_time()
+        secs_since_2k = write_attributes.mock_calls[0].args[0]["secs_since_2k"]
+        assert secs_since_2k == pytest.approx(60 * 60 * 24)
+
+    write_attributes.reset_mock()
+
+    # New time zone
+    zha_gateway.config.local_timezone = zoneinfo.ZoneInfo("America/New_York")
+
+    with freeze_time("2000-01-02 00:00:00"):
+        await entity._async_update_time()
+        secs_since_2k = write_attributes.mock_calls[0].args[0]["secs_since_2k"]
+        assert secs_since_2k == pytest.approx(60 * 60 * 24 - 5 * 60 * 60)
+
+    write_attributes.reset_mock()
+    entity._async_update_time.reset_mock()
+
+    entity.disable()
+
+    assert entity.enabled is False
+
+    await asyncio.sleep(4600)
+
+    assert entity._async_update_time.await_count == 0
+    assert mfg_cluster.write_attributes.await_count == 0
+
+    entity.enable()
+
+    assert entity.enabled is True
+
+    await asyncio.sleep(4600)
+
     assert entity._async_update_time.await_count == 1
     assert mfg_cluster.write_attributes.await_count == 1
-    assert "secs_since_2k" in mfg_cluster.write_attributes.await_args_list[0][0][0]
+
+    write_attributes.reset_mock()
+    entity._async_update_time.reset_mock()
 
 
 async def test_climate_hvac_action_running_state_zen(

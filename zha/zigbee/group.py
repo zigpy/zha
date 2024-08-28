@@ -77,12 +77,12 @@ class GroupMember(LogMixin):
         self._device: Device = device
         self._endpoint_id: int = endpoint_id
 
-    @cached_property
+    @property
     def group(self) -> Group:
         """Return the group this member belongs to."""
         return self._group
 
-    @cached_property
+    @property
     def endpoint_id(self) -> int:
         """Return the endpoint id for this group member."""
         return self._endpoint_id
@@ -92,7 +92,7 @@ class GroupMember(LogMixin):
         """Return the endpoint for this group member."""
         return self._device.device.endpoints.get(self.endpoint_id)
 
-    @cached_property
+    @property
     def device(self) -> Device:
         """Return the ZHA device for this group member."""
         return self._device
@@ -164,27 +164,27 @@ class Group(LogMixin):
         """Return group name."""
         return self._zigpy_group.name
 
-    @cached_property
+    @property
     def group_id(self) -> int:
         """Return group name."""
         return self._zigpy_group.group_id
 
-    @cached_property
+    @property
     def endpoint(self) -> zigpy.endpoint.Endpoint:
         """Return the endpoint for this group."""
         return self._zigpy_group.endpoint
 
-    @cached_property
+    @property
     def group_entities(self) -> dict[str, GroupEntity]:
         """Return the platform entities of the group."""
         return self._group_entities
 
-    @cached_property
+    @property
     def zigpy_group(self) -> ZigpyGroup:
         """Return the zigpy group."""
         return self._zigpy_group
 
-    @cached_property
+    @property
     def gateway(self) -> Gateway:
         """Return the gateway for this group."""
         return self._gateway
@@ -253,8 +253,6 @@ class Group(LogMixin):
             delattr(self, "info_object")
         if hasattr(self, "members"):
             delattr(self, "members")
-        if hasattr(self, "group_entities"):
-            delattr(self, "group_entities")
 
     def update_entity_subscriptions(self) -> None:
         """Update the entity event subscriptions.

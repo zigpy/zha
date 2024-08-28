@@ -113,7 +113,6 @@ class BaseLight(BaseEntity, ABC):
         """Initialize the light."""
         self._device: Device = None
         super().__init__(*args, **kwargs)
-        self._available: bool = False
         self._min_mireds: int | None = 153
         self._max_mireds: int | None = 500
         self._hs_color: tuple[float, float] | None = None
@@ -711,7 +710,6 @@ class Light(PlatformEntity, BaseLight):
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
-        self._cancel_refresh_handle: Callable | None = None
         effect_list = []
 
         light_options = device.gateway.config.config.light_options
@@ -813,18 +811,8 @@ class Light(PlatformEntity, BaseLight):
                 CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
             )
 
-        self._tracked_tasks.append(
-            device.gateway.async_create_background_task(
-                self._refresh(),
-                name=f"light_refresh_{self.unique_id}",
-                eager_start=True,
-                untracked=True,
-            )
-        )
-        self.debug(
-            "started polling with refresh interval of %s",
-            getattr(self, "__polling_interval"),
-        )
+        self._refresh_task: asyncio.Task | None = None
+        self.start_polling()
 
     @functools.cached_property
     def info_object(self) -> LightEntityInfo:
@@ -836,6 +824,33 @@ class Light(PlatformEntity, BaseLight):
             min_mireds=self.min_mireds,
             max_mireds=self.max_mireds,
         )
+
+    def start_polling(self) -> None:
+        """Start polling."""
+        self._refresh_task = self.device.gateway.async_create_background_task(
+            self._refresh(),
+            name=f"light_refresh_{self.unique_id}",
+            eager_start=True,
+            untracked=True,
+        )
+        self._tracked_tasks.append(self._refresh_task)
+        self.debug(
+            "started polling with refresh interval of %s",
+            getattr(self, "__polling_interval"),
+        )
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self.start_polling()
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        if self._refresh_task:
+            self._tracked_tasks.remove(self._refresh_task)
+            self._refresh_task.cancel()
+            self._refresh_task = None
 
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self) -> None:
@@ -1124,8 +1139,6 @@ class MinTransitionLight(Light):
 class LightGroup(GroupEntity, BaseLight):
     """Representation of a light group."""
 
-    _attr_translation_key: str = "light_group"
-
     def __init__(self, group: Group):
         """Initialize a light group."""
         # light groups change the update_group_from_child_delay so we need to do this
@@ -1196,7 +1209,7 @@ class LightGroup(GroupEntity, BaseLight):
 
         if hasattr(self, "info_object"):
             delattr(self, "info_object")
-        self.async_update()
+        self.update()
 
     @functools.cached_property
     def info_object(self) -> LightEntityInfo:
@@ -1208,12 +1221,6 @@ class LightGroup(GroupEntity, BaseLight):
             min_mireds=self.min_mireds,
             max_mireds=self.max_mireds,
         )
-
-    # remove this when all ZHA platforms and base entities are updated
-    @property
-    def available(self) -> bool:
-        """Return entity availability."""
-        return self._available
 
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
@@ -1245,7 +1252,7 @@ class LightGroup(GroupEntity, BaseLight):
         if self._debounced_member_refresh:
             await self._debounced_member_refresh.async_call()
 
-    def async_update(self, _: Any = None) -> None:
+    def update(self, _: Any = None) -> None:
         """Query all members and determine the light group state."""
         self.debug("Updating light group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
@@ -1262,10 +1269,6 @@ class LightGroup(GroupEntity, BaseLight):
         if self._state:
             self._off_with_transition = False
             self._off_brightness = None
-
-        self._available = any(
-            platform_entity.device.available for platform_entity in platform_entities
-        )
 
         self._brightness = reduce_attribute(on_states, ATTR_BRIGHTNESS)
 

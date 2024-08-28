@@ -11,6 +11,7 @@ from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types
+import zigpy.zdo.types as zdo_t
 from zigpy.zdo.types import LogicalType, NodeDescriptor
 
 from tests.common import get_entity, get_group_entity
@@ -85,7 +86,27 @@ async def coordinator(
         },
         ieee="00:15:8d:00:02:32:4f:32",
         nwk=0x0000,
-        node_descriptor=b"\xf8\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff",
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.Coordinator,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.AlternatePanCoordinator
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.FullFunctionDevice
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.RxOnWhenIdle
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=43981,
+            maximum_buffer_size=82,
+            maximum_incoming_transfer_size=128,
+            server_mask=11329,
+            maximum_outgoing_transfer_size=128,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
     zha_device = await device_joined(zigpy_device)
     zha_device.available = True
@@ -182,6 +203,72 @@ async def test_gateway_startup_failure(
         await zha_gateway.async_block_till_done()
 
     assert zha_gateway.shutdown.await_count == 1
+
+
+async def test_gateway_starts_entity_exception(
+    zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test gateway starts when we fail to create an entity."""
+
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "bellows.zigbee.application.ControllerApplication",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "zha.application.platforms.sensor.DeviceCounterSensor.create_platform_entity",
+            side_effect=Exception,
+        ),
+    ):
+        zha_gateway = await Gateway.async_from_config(zha_data)
+        await zha_gateway.async_initialize()
+        await zha_gateway.async_block_till_done()
+        await zha_gateway.async_initialize_devices_and_entities()
+
+        assert "Failed to create platform entity" in caplog.text
+
+        await zha_gateway.shutdown()
+
+
+@pytest.mark.parametrize(("enabled", "await_count"), [(True, 1), (False, 0)])
+async def test_mains_devices_startup_polling_config(
+    zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
+    enabled: bool,
+    await_count: int,
+) -> None:
+    """Test mains powered device startup polling config is respected."""
+
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "bellows.zigbee.application.ControllerApplication",
+            return_value=zigpy_app_controller,
+        ),
+    ):
+        zha_data.config.device_options.enable_mains_startup_polling = enabled
+        zha_gateway = await Gateway.async_from_config(zha_data)
+        zha_gateway.async_fetch_updated_state_mains = AsyncMock(
+            wraps=zha_gateway.async_fetch_updated_state_mains
+        )
+        await zha_gateway.async_initialize()
+        await zha_gateway.async_block_till_done()
+        await zha_gateway.async_initialize_devices_and_entities()
+        await zha_gateway.async_block_till_done()
+
+        assert zha_gateway.async_fetch_updated_state_mains.await_count == await_count
+
+        await zha_gateway.shutdown()
+        await zha_gateway.async_block_till_done()
 
 
 async def test_gateway_group_methods(
@@ -409,7 +496,10 @@ async def test_gateway_initialize_bellows_thread(
     ) as mock_new:
         zha_gw = Gateway(zha_data)
         await zha_gw.async_initialize()
-        assert mock_new.mock_calls[-1].kwargs["config"][CONF_USE_THREAD] is thread_state
+        assert (
+            mock_new.mock_calls[-1].kwargs["config"].get(CONF_USE_THREAD, True)
+            is thread_state
+        )
         await zha_gw.shutdown()
 
 
@@ -659,6 +749,40 @@ async def test_pollers_skip(
 
     assert "Global updater interval skipped" in caplog.text
     assert "Device availability checker interval skipped" in caplog.text
+
+
+async def test_global_updater_guards(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test global updater guards."""
+
+    already_registered = (
+        "listener already registered with global updater - nothing to register"
+    )
+    not_registered = "listener not registered with global updater - nothing to remove"
+
+    assert already_registered not in caplog.text
+    assert not_registered not in caplog.text
+
+    def listener():
+        pass
+
+    zha_gateway.global_updater.register_update_listener(listener)
+
+    assert already_registered not in caplog.text
+
+    zha_gateway.global_updater.register_update_listener(listener)
+
+    assert already_registered in caplog.text
+
+    zha_gateway.global_updater.remove_update_listener(listener)
+
+    assert not_registered not in caplog.text
+
+    zha_gateway.global_updater.remove_update_listener(listener)
+
+    assert not_registered in caplog.text
 
 
 async def test_gateway_handle_message(

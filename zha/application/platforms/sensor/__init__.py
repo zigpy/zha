@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from asyncio import Task
 from dataclasses import dataclass
 import enum
 import functools
@@ -289,25 +289,41 @@ class PollableSensor(Sensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._cancel_refresh_handle: Callable | None = None
-        if self.should_poll:
-            self._tracked_tasks.append(
-                device.gateway.async_create_background_task(
-                    self._refresh(),
-                    name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
-                    eager_start=True,
-                    untracked=True,
-                )
-            )
-            self.debug(
-                "started polling with refresh interval of %s",
-                getattr(self, "__polling_interval"),
-            )
+        self._polling_task: Task | None = None
+        self.maybe_start_polling()
 
     @property
     def should_poll(self) -> bool:
         """Return True if we need to poll for state changes."""
         return self._use_custom_polling
+
+    def maybe_start_polling(self) -> None:
+        """Start polling if necessary."""
+        if self.should_poll:
+            self._polling_task = self.device.gateway.async_create_background_task(
+                self._refresh(),
+                name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
+                eager_start=True,
+                untracked=True,
+            )
+            self._tracked_tasks.append(self._polling_task)
+            self.debug(
+                "started polling with refresh interval of %s",
+                getattr(self, "__polling_interval"),
+            )
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self.maybe_start_polling()
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        if self._polling_task:
+            self._tracked_tasks.remove(self._polling_task)
+            self._polling_task.cancel()
+            self._polling_task = None
 
     @periodic(_REFRESH_INTERVAL)
     async def _refresh(self):
@@ -381,8 +397,8 @@ class DeviceCounterSensor(BaseEntity):
         self._device.gateway.global_updater.register_update_listener(self.update)
 
         # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if self.unique_id not in self._device.platform_entities:
-            self._device.platform_entities[self.unique_id] = self
+        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
+            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
 
     @functools.cached_property
     def identifiers(self) -> DeviceCounterSensorIdentifiers:
@@ -423,6 +439,16 @@ class DeviceCounterSensor(BaseEntity):
     def device(self) -> Device:
         """Return the device."""
         return self._device
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self._device.gateway.global_updater.register_update_listener(self.update)
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        self._device.gateway.global_updater.remove_update_listener(self.update)
 
     def update(self):
         """Call async_update at a constrained random interval."""
@@ -526,7 +552,7 @@ class Battery(Sensor):
     def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
         """Return the state of the entity."""
         # per zcl specs battery percent is reported at 200% ¯\_(ツ)_/¯
-        if not isinstance(value, numbers.Number) or value == -1 or value == 255:
+        if not isinstance(value, numbers.Number) or value in (-1, 255):
             return None
         value = round(value / 2)
         return value
@@ -1382,6 +1408,16 @@ class RSSISensor(Sensor):
         """Return the state of the entity."""
         return getattr(self._device.device, self._unique_id_suffix)
 
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self._device.gateway.global_updater.register_update_listener(self.update)
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        self._device.gateway.global_updater.remove_update_listener(self.update)
+
     def update(self):
         """Call async_update at a constrained random interval."""
         if self._device.available and self._device.gateway.config.allow_polling:
@@ -1675,7 +1711,6 @@ class DanfossOpenWindowDetection(EnumSensor):
     _unique_id_suffix = "open_window_detection"
     _attribute_name = "open_window_detection"
     _attr_translation_key: str = "open_window_detected"
-    _attr_icon: str = "mdi:window-open"
     _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
 
 
@@ -1689,7 +1724,6 @@ class DanfossLoadEstimate(Sensor):
     _unique_id_suffix = "load_estimate"
     _attribute_name = "load_estimate"
     _attr_translation_key: str = "load_estimate"
-    _attr_icon: str = "mdi:scale-balance"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
 
@@ -1717,7 +1751,6 @@ class DanfossPreheatTime(Sensor):
     _unique_id_suffix = "preheat_time"
     _attribute_name = "preheat_time"
     _attr_translation_key: str = "preheat_time"
-    _attr_icon: str = "mdi:radiator"
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 

@@ -17,6 +17,7 @@ from zigpy.zcl.foundation import Status, WriteAttributesResponse
 import zigpy.zdo.types as zdo_t
 
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
+from zha.application import Platform
 from zha.application.const import (
     CLUSTER_COMMAND_SERVER,
     CLUSTER_COMMANDS_CLIENT,
@@ -75,7 +76,25 @@ def zigpy_device_mains(
             }
         }
         return zigpy_device_mock(
-            endpoints, node_descriptor=b"\x02@\x84_\x11\x7fd\x00\x00,d\x00\x00"
+            endpoints,
+            node_descriptor=zdo_t.NodeDescriptor(
+                logical_type=zdo_t.LogicalType.EndDevice,
+                complex_descriptor_available=0,
+                user_descriptor_available=0,
+                reserved=0,
+                aps_flags=0,
+                frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+                mac_capability_flags=(
+                    zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                    | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+                ),
+                manufacturer_code=4447,
+                maximum_buffer_size=127,
+                maximum_incoming_transfer_size=100,
+                server_mask=11264,
+                maximum_outgoing_transfer_size=100,
+                descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+            ),
         )
 
     return _dev
@@ -162,6 +181,12 @@ async def test_check_available_success(
 
     basic_ch.read_attributes.side_effect = _update_last_seen
 
+    for entity in zha_device.platform_entities.values():
+        entity.emit = mock.MagicMock(wraps=entity.emit)
+
+    # we want to test the device availability handling alone
+    zha_gateway.global_updater.stop()
+
     # successfully ping zigpy device, but zha_device is not yet available
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
@@ -170,6 +195,11 @@ async def test_check_available_success(
     assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
 
+    for entity in zha_device.platform_entities.values():
+        entity.emit.assert_not_called()
+        assert not entity.available
+        entity.emit.reset_mock()
+
     # There was traffic from the device: pings, but not yet available
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
@@ -177,6 +207,11 @@ async def test_check_available_success(
     assert basic_ch.read_attributes.await_count == 2
     assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
+
+    for entity in zha_device.platform_entities.values():
+        entity.emit.assert_not_called()
+        assert not entity.available
+        entity.emit.reset_mock()
 
     # There was traffic from the device: don't try to ping, marked as available
     await _send_time_changed(
@@ -187,22 +222,23 @@ async def test_check_available_success(
     assert zha_device.available is True
     assert zha_device.on_network is True
 
+    for entity in zha_device.platform_entities.values():
+        entity.emit.assert_called()
+        assert entity.available
+        entity.emit.reset_mock()
+
     assert "Device is not on the network, marking unavailable" not in caplog.text
     zha_device.on_network = False
 
     assert zha_device.available is False
     assert zha_device.on_network is False
 
-    sleep_time = max(
-        zha_gateway.global_updater.__polling_interval,
-        zha_gateway._device_availability_checker.__polling_interval,
-    )
-    sleep_time += 2
-
-    await asyncio.sleep(sleep_time)
-    await zha_gateway.async_block_till_done(wait_background_tasks=True)
-
     assert "Device is not on the network, marking unavailable" in caplog.text
+
+    for entity in zha_device.platform_entities.values():
+        entity.emit.assert_called()
+        assert not entity.available
+        entity.emit.reset_mock()
 
 
 @patch(
@@ -227,6 +263,12 @@ async def test_check_available_unsuccessful(
         time.time() - zha_device.consider_unavailable_time - 2
     )
 
+    for entity in zha_device.platform_entities.values():
+        entity.emit = mock.MagicMock(wraps=entity.emit)
+
+    # we want to test the device availability handling alone
+    zha_gateway.global_updater.stop()
+
     # unsuccessfully ping zigpy device, but zha_device is still available
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
@@ -235,6 +277,11 @@ async def test_check_available_unsuccessful(
     assert basic_ch.read_attributes.await_count == 1
     assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
+
+    for entity in zha_device.platform_entities.values():
+        entity.emit.assert_not_called()
+        assert entity.available
+        entity.emit.reset_mock()
 
     # still no traffic, but zha_device is still available
     await _send_time_changed(
@@ -245,6 +292,11 @@ async def test_check_available_unsuccessful(
     assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
 
+    for entity in zha_device.platform_entities.values():
+        entity.emit.assert_not_called()
+        assert entity.available
+        entity.emit.reset_mock()
+
     # not even trying to update, device is unavailable
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
@@ -253,6 +305,11 @@ async def test_check_available_unsuccessful(
     assert basic_ch.read_attributes.await_count == 2
     assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
+
+    for entity in zha_device.platform_entities.values():
+        entity.emit.assert_called()
+        assert not entity.available
+        entity.emit.reset_mock()
 
 
 @patch(
@@ -338,6 +395,29 @@ async def test_coordinator_info_uses_node_info(
 
     assert current_coordinator.model == "Real Coordinator Model"
     assert current_coordinator.manufacturer == "Real Coordinator Manufacturer"
+
+
+async def test_coordinator_info_generic_name(
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test that the current coordinator uses strings from `node_info`."""
+
+    current_coord_dev = zigpy_device(ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000)
+    current_coord_dev.node_desc = current_coord_dev.node_desc.replace(
+        logical_type=zdo_t.LogicalType.Coordinator
+    )
+
+    app = current_coord_dev.application
+    app.state.node_info.ieee = current_coord_dev.ieee
+    app.state.node_info.model = None
+    app.state.node_info.manufacturer = None
+
+    current_coordinator = await device_joined(current_coord_dev)
+    assert current_coordinator.is_active_coordinator
+
+    assert current_coordinator.model == "Generic Zigbee Coordinator (EZSP)"
+    assert current_coordinator.manufacturer == ""
 
 
 async def test_async_get_clusters(
@@ -705,27 +785,51 @@ async def test_device_properties(
     assert zha_device.sw_version is None
 
     assert len(zha_device.platform_entities) == 3
-    assert "00:0d:6f:00:0a:90:69:e7-3-0-lqi" in zha_device.platform_entities
-    assert "00:0d:6f:00:0a:90:69:e7-3-0-rssi" in zha_device.platform_entities
-    assert "00:0d:6f:00:0a:90:69:e7-3-6" in zha_device.platform_entities
+    assert (
+        Platform.SENSOR,
+        "00:0d:6f:00:0a:90:69:e7-3-0-lqi",
+    ) in zha_device.platform_entities
+    assert (
+        Platform.SENSOR,
+        "00:0d:6f:00:0a:90:69:e7-3-0-rssi",
+    ) in zha_device.platform_entities
+    assert (
+        Platform.SWITCH,
+        "00:0d:6f:00:0a:90:69:e7-3-6",
+    ) in zha_device.platform_entities
 
     assert isinstance(
-        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-0-lqi"], LQISensor
+        zha_device.platform_entities[
+            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi")
+        ],
+        LQISensor,
     )
     assert isinstance(
-        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-0-rssi"], RSSISensor
+        zha_device.platform_entities[
+            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-rssi")
+        ],
+        RSSISensor,
     )
     assert isinstance(
-        zha_device.platform_entities["00:0d:6f:00:0a:90:69:e7-3-6"], Switch
+        zha_device.platform_entities[(Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-6")],
+        Switch,
     )
 
-    assert zha_device.get_platform_entity("00:0d:6f:00:0a:90:69:e7-3-0-lqi") is not None
+    assert (
+        zha_device.get_platform_entity(
+            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
+        )
+        is not None
+    )
     assert isinstance(
-        zha_device.get_platform_entity("00:0d:6f:00:0a:90:69:e7-3-0-lqi"), LQISensor
+        zha_device.get_platform_entity(
+            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
+        ),
+        LQISensor,
     )
 
     with pytest.raises(KeyError, match="Entity foo not found"):
-        zha_device.get_platform_entity("foo")
+        zha_device.get_platform_entity("bar", "foo")
 
     # test things are none when they aren't returned by Zigpy
     zigpy_dev.node_desc = None

@@ -151,6 +151,11 @@ class RadioType(enum.Enum):
         """Return radio type description."""
         return self._desc
 
+    @property
+    def pretty_name(self) -> str:
+        """Return radio type name."""
+        return self.description.split(" = ", 1)[0]
+
 
 UNKNOWN = "unknown"
 UNKNOWN_MANUFACTURER = "unk_manufacturer"

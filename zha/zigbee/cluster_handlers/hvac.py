@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from zigpy.zcl.clusters.hvac import (
     Dehumidification,
     Fan,
@@ -12,14 +10,8 @@ from zigpy.zcl.clusters.hvac import (
     UserInterface,
 )
 
-from zha.zigbee.cluster_handlers import (
-    AttrReportConfig,
-    ClusterAttributeUpdatedEvent,
-    ClusterHandler,
-    registries,
-)
+from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
 from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
     REPORT_CONFIG_OP,
@@ -65,24 +57,6 @@ class FanClusterHandler(ClusterHandler):
         await self.get_attribute_value(
             Fan.AttributeDefs.fan_mode.name, from_cache=False
         )
-
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
-        """Handle attribute update from fan cluster."""
-        attr_name = self._get_attribute_name(attrid)
-        self.debug(
-            "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
-        )
-        if attr_name == "fan_mode":
-            self.emit(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                ClusterAttributeUpdatedEvent(
-                    attribute_id=attrid,
-                    attribute_name=attr_name,
-                    attribute_value=value,
-                    cluster_handler_unique_id=self.unique_id,
-                    cluster_id=self.cluster.cluster_id,
-                ),
-            )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Pump.cluster_id)
@@ -286,23 +260,6 @@ class ThermostatClusterHandler(ClusterHandler):
         """Temperature when room is not occupied."""
         return self.cluster.get(
             Thermostat.AttributeDefs.unoccupied_heating_setpoint.name
-        )
-
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
-        """Handle attribute update cluster."""
-        attr_name = self._get_attribute_name(attrid)
-        self.debug(
-            "Attribute report '%s'[%s] = %s", self.cluster.name, attr_name, value
-        )
-        self.emit(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            ClusterAttributeUpdatedEvent(
-                attribute_id=attrid,
-                attribute_name=attr_name,
-                attribute_value=value,
-                cluster_handler_unique_id=self.unique_id,
-                cluster_id=self.cluster.cluster_id,
-            ),
         )
 
     async def async_set_operation_mode(self, mode) -> bool:

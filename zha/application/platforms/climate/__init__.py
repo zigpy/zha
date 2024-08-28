@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from asyncio import Task
 from dataclasses import dataclass
 import datetime as dt
 import functools
@@ -494,19 +495,35 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._presets = [Preset.AWAY, Preset.NONE]
         self._supported_features |= ClimateEntityFeature.PRESET_MODE
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
+        self._time_update_task: Task | None = None
+        self.start_polling()
 
-        self._tracked_tasks.append(
-            device.gateway.async_create_background_task(
-                self._update_time(),
-                name=f"sinope_time_updater_{self.unique_id}",
-                eager_start=True,
-                untracked=True,
-            )
+    def start_polling(self) -> None:
+        """Start polling."""
+        self._time_update_task = self.device.gateway.async_create_background_task(
+            self._update_time(),
+            name=f"sinope_time_updater_{self.unique_id}",
+            eager_start=True,
+            untracked=True,
         )
+        self._tracked_tasks.append(self._time_update_task)
         self.debug(
             "started time updating interval of %s",
             getattr(self, "__polling_interval"),
         )
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self.start_polling()
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        if self._time_update_task:
+            self._tracked_tasks.remove(self._time_update_task)
+            self._time_update_task.cancel()
+            self._time_update_task = None
 
     @periodic((2700, 4500))
     async def _update_time(self) -> None:
@@ -536,9 +553,9 @@ class SinopeTechnologiesThermostat(Thermostat):
     async def _async_update_time(self) -> None:
         """Update thermostat's time display."""
 
+        now = dt.datetime.now(self._device.gateway.config.local_timezone)
         secs_2k = (
-            dt.datetime.now(dt.UTC).replace(tzinfo=None)
-            - dt.datetime(2000, 1, 1, 0, 0, 0, 0)
+            now.replace(tzinfo=None) - dt.datetime(2000, 1, 1, 0, 0, 0, 0)
         ).total_seconds()
 
         self.debug("Updating time: %s", secs_2k)
