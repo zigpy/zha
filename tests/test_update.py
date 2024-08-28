@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import DeliveryError
-from zigpy.ota import OtaImageWithMetadata
+from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
 import zigpy.ota.image as firmware
 from zigpy.ota.providers import BaseOtaImageMetadata
 from zigpy.profiles import zha
@@ -103,8 +103,10 @@ async def setup_test_data(
         ),
     )
 
-    cluster.endpoint.device.application.ota.get_ota_image = AsyncMock(
-        return_value=None if file_not_found else fw_image
+    cluster.endpoint.device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=() if file_not_found else (fw_image,), downgrades=()
+        )
     )
 
     zha_device = await device_joined(zigpy_device)
@@ -350,7 +352,7 @@ async def test_firmware_update_success(
 
     entity = get_entity(zha_device, platform=Platform.UPDATE)
 
-    await entity.async_install(fw_image.firmware.header.file_version, False)
+    await entity.async_install(f"0x{fw_image.firmware.header.file_version:08x}")
     await zha_gateway.async_block_till_done()
 
     assert (
@@ -428,7 +430,7 @@ async def test_firmware_update_raises(
 
     cluster.endpoint.reply = AsyncMock(side_effect=endpoint_reply)
     with pytest.raises(ZHAException):
-        await entity.async_install(fw_image.firmware.header.file_version, False)
+        await entity.async_install(f"0x{fw_image.firmware.header.file_version:08x}")
         await zha_gateway.async_block_till_done()
 
     with (
@@ -438,7 +440,7 @@ async def test_firmware_update_raises(
         ),
         pytest.raises(ZHAException),
     ):
-        await entity.async_install(fw_image.firmware.header.file_version, False)
+        await entity.async_install(f"0x{fw_image.firmware.header.file_version:08x}")
         await zha_gateway.async_block_till_done()
 
 
@@ -498,7 +500,7 @@ async def test_firmware_update_no_longer_compatible(
 
     cluster.endpoint.reply = AsyncMock(side_effect=endpoint_reply)
     with pytest.raises(ZHAException):
-        await entity.async_install(fw_image.firmware.header.file_version, False)
+        await entity.async_install(f"0x{fw_image.firmware.header.file_version:08x}")
         await zha_gateway.async_block_till_done()
 
     # We updated the currently installed firmware version, as it is no longer valid
