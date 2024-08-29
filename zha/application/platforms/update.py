@@ -207,20 +207,6 @@ class FirmwareUpdateEntity(PlatformEntity):
             ATTR_RELEASE_URL: self.release_url,
         }
 
-    @final
-    async def async_install_with_progress(self, version: str | None) -> None:
-        """Install update and handle progress if needed.
-
-        Handles setting the in_progress state in case the entity doesn't
-        support it natively.
-        """
-        try:
-            await self.async_install(version=version)
-        finally:
-            # No matter what happens, we always stop progress in the end
-            self._attr_in_progress = False
-            self.maybe_emit_state_changed_event()
-
     def _get_cluster_version(self) -> str | None:
         """Synchronize current file version with the cluster."""
 
