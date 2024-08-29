@@ -245,16 +245,8 @@ class FirmwareUpdateEntity(PlatformEntity):
             # If there are upgrades, cache the image and indicate that we should upgrade
             latest_firmware = images_result.upgrades[0]
             self._attr_latest_version = f"0x{latest_firmware.version:08x}"
-            self._attr_release_summary = (
-                latest_firmware.metadata.changelog
-                if latest_firmware.metadata.changelog
-                else None
-            )
-            self._attr_release_notes = (
-                latest_firmware.metadata.release_notes
-                if latest_firmware.metadata.release_notes
-                else None
-            )
+            self._attr_release_summary = latest_firmware.metadata.changelog or None
+            self._attr_release_notes = latest_firmware.metadata.release_notes or None
         elif images_result.downgrades:
             # If not, note the version of the most recent firmware
             latest_firmware = None
