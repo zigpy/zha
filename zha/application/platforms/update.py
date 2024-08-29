@@ -5,11 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import IntFlag, StrEnum
 import functools
+import itertools
 import logging
 from typing import TYPE_CHECKING, Any, Final, final
 
-from zigpy.ota import OtaImageWithMetadata
-from zigpy.zcl.clusters.general import Ota
+from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
+from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -24,8 +25,6 @@ from zha.zigbee.cluster_handlers.const import (
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
-    # from zigpy.application import ControllerApplication
-
     from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
 
@@ -60,6 +59,7 @@ ATTR_IN_PROGRESS: Final = "in_progress"
 ATTR_PROGRESS: Final = "progress"
 ATTR_LATEST_VERSION: Final = "latest_version"
 ATTR_RELEASE_SUMMARY: Final = "release_summary"
+ATTR_RELEASE_NOTES: Final = "release_notes"
 ATTR_RELEASE_URL: Final = "release_url"
 ATTR_VERSION: Final = "version"
 
@@ -92,6 +92,7 @@ class FirmwareUpdateEntity(PlatformEntity):
     _attr_progress: int = 0
     _attr_latest_version: str | None = None
     _attr_release_summary: str | None = None
+    _attr_release_notes: str | None = None
     _attr_release_url: str | None = None
 
     def __init__(
@@ -110,7 +111,9 @@ class FirmwareUpdateEntity(PlatformEntity):
         ]
         self._attr_installed_version: str | None = self._get_cluster_version()
         self._attr_latest_version = self._attr_installed_version
-        self._latest_firmware: OtaImageWithMetadata | None = None
+        self._compatible_images: OtaImagesResult = OtaImagesResult(
+            upgrades=(), downgrades=()
+        )
 
         self.device.device.add_listener(self)
         self._ota_cluster_handler.on_event(
@@ -173,6 +176,11 @@ class FirmwareUpdateEntity(PlatformEntity):
         return self._attr_release_summary
 
     @property
+    def release_notes(self) -> str | None:
+        """Full release notes of the latest version available."""
+        return self._attr_release_notes
+
+    @property
     def release_url(self) -> str | None:
         """URL to the full release notes of the latest version available."""
         return self._attr_release_url
@@ -195,24 +203,9 @@ class FirmwareUpdateEntity(PlatformEntity):
             ATTR_PROGRESS: self.progress,
             ATTR_LATEST_VERSION: self.latest_version,
             ATTR_RELEASE_SUMMARY: release_summary,
+            ATTR_RELEASE_NOTES: self.release_notes,
             ATTR_RELEASE_URL: self.release_url,
         }
-
-    @final
-    async def async_install_with_progress(
-        self, version: str | None, backup: bool
-    ) -> None:
-        """Install update and handle progress if needed.
-
-        Handles setting the in_progress state in case the entity doesn't
-        support it natively.
-        """
-        try:
-            await self.async_install(version, backup)
-        finally:
-            # No matter what happens, we always stop progress in the end
-            self._attr_in_progress = False
-            self.maybe_emit_state_changed_event()
 
     def _get_cluster_version(self) -> str | None:
         """Synchronize current file version with the cluster."""
@@ -231,16 +224,33 @@ class FirmwareUpdateEntity(PlatformEntity):
             self._attr_installed_version = f"0x{event.attribute_value:08x}"
             self.maybe_emit_state_changed_event()
 
-    def device_ota_update_available(
-        self, image: OtaImageWithMetadata, current_file_version: int
+    def device_ota_image_query_result(
+        self,
+        images_result: OtaImagesResult,
+        query_next_img_command: QueryNextImageCommand,
     ) -> None:
         """Handle ota update available signal from Zigpy."""
-        self._latest_firmware = image
-        self._attr_latest_version = f"0x{image.version:08x}"
-        self._attr_installed_version = f"0x{current_file_version:08x}"
 
-        if image.metadata.changelog:
-            self._attr_release_summary = image.metadata.changelog
+        current_version = query_next_img_command.current_file_version
+        self._attr_installed_version = f"0x{current_version:08x}"
+
+        self._compatible_images = images_result
+        self._attr_latest_version = None
+        self._attr_release_summary = None
+        self._attr_release_notes = None
+
+        latest_firmware: OtaImageWithMetadata | None = None
+
+        if images_result.upgrades:
+            # If there are upgrades, cache the image and indicate that we should upgrade
+            latest_firmware = images_result.upgrades[0]
+            self._attr_latest_version = f"0x{latest_firmware.version:08x}"
+            self._attr_release_summary = latest_firmware.metadata.changelog or None
+            self._attr_release_notes = latest_firmware.metadata.release_notes or None
+        elif images_result.downgrades:
+            # If not, note the version of the most recent firmware
+            latest_firmware = None
+            self._attr_latest_version = f"0x{images_result.downgrades[0].version:08x}"
 
         self.maybe_emit_state_changed_event()
 
@@ -253,11 +263,25 @@ class FirmwareUpdateEntity(PlatformEntity):
         self._attr_progress = int(progress)
         self.maybe_emit_state_changed_event()
 
-    async def async_install(
-        self, version: str | None, backup: bool, **kwargs: Any
-    ) -> None:
+    async def async_install(self, version: str | None) -> None:
         """Install an update."""
-        assert self._latest_firmware is not None
+
+        if version is None:
+            if not self._compatible_images.upgrades:
+                raise ZHAException("No firmware updates are available")
+
+            firmware = self._compatible_images.upgrades[0]
+        else:
+            version = int(version, 16)
+
+            for firmware in itertools.chain(
+                self._compatible_images.upgrades,
+                self._compatible_images.downgrades,
+            ):
+                if firmware.version == version:
+                    break
+            else:
+                raise ZHAException(f"Version {version!r} is not available")
 
         self._attr_in_progress = True
         self._attr_progress = 0
@@ -265,20 +289,13 @@ class FirmwareUpdateEntity(PlatformEntity):
 
         try:
             result = await self.device.device.update_firmware(
-                image=self._latest_firmware,
+                image=firmware,
                 progress_callback=self._update_progress,
             )
         except Exception as ex:
             self._attr_in_progress = False
             self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {ex}") from ex
-
-        # If we tried to install firmware that is no longer compatible with the device,
-        # bail out
-        if result == Status.NO_IMAGE_AVAILABLE:
-            self._attr_in_progress = False
-            self._attr_latest_version = self._attr_installed_version
-            self.maybe_emit_state_changed_event()
 
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
@@ -287,7 +304,6 @@ class FirmwareUpdateEntity(PlatformEntity):
             raise ZHAException(f"Update was not successful: {result}")
 
         # Clear the state
-        self._latest_firmware = None
         self._attr_in_progress = False
         self.maybe_emit_state_changed_event()
 
