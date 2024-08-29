@@ -305,13 +305,6 @@ class FirmwareUpdateEntity(PlatformEntity):
             self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {ex}") from ex
 
-        # If we tried to install firmware that is no longer compatible with the device,
-        # bail out
-        if result == Status.NO_IMAGE_AVAILABLE:
-            self._attr_in_progress = False
-            self._attr_latest_version = self._attr_installed_version
-            self.maybe_emit_state_changed_event()
-
         # If the update finished but was not successful, we should also throw an error
         if result != Status.SUCCESS:
             self._attr_in_progress = False
