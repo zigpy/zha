@@ -1,7 +1,7 @@
 """Test ZHA firmware updates."""
 
 from collections.abc import Awaitable, Callable
-from unittest.mock import AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, call, patch
 
 import pytest
 from zigpy.device import Device as ZigpyDevice
@@ -138,7 +138,7 @@ async def setup_test_data(
     # set up firmware image
     fw_image = create_fw_image(installed_fw_version + 10)
 
-    cluster.endpoint.device.application.ota.get_ota_images = AsyncMock(
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
         return_value=OtaImagesResult(
             upgrades=(fw_image,),
             downgrades=(),
@@ -447,14 +447,23 @@ async def test_firmware_update_raises(
         await zha_gateway.async_block_till_done()
 
 
-async def test_firmware_update_no_longer_compatible(
+async def test_firmware_update_downgrade(
     zha_gateway: Gateway,
     device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
 ) -> None:
-    """Test ZHA update platform - firmware update is no longer valid."""
+    """Test ZHA update platform - force a firmware downgrade."""
     zha_device, cluster, fw_image, installed_fw_version = await setup_test_data(
         device_joined, zigpy_device
+    )
+
+    fw_image_downgrade = create_fw_image(installed_fw_version - 10)
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=(fw_image,),
+            downgrades=(fw_image_downgrade,),
+        )
     )
 
     entity = get_entity(zha_device, platform=Platform.UPDATE)
@@ -481,32 +490,30 @@ async def test_firmware_update_no_longer_compatible(
         == f"0x{fw_image.firmware.header.file_version:08x}"
     )
 
-    new_version = 0x99999999
-
-    async def endpoint_reply(cluster_id, tsn, data, command_id):
-        if cluster_id == general.Ota.cluster_id:
-            hdr, cmd = cluster.deserialize(data)
-            if isinstance(cmd, general.Ota.ImageNotifyCommand):
-                zigpy_device.packet_received(
-                    make_packet(
-                        zigpy_device,
-                        cluster,
-                        general.Ota.ServerCommandDefs.query_next_image.name,
-                        field_control=general.Ota.QueryNextImageCommand.FieldControl.HardwareVersion,
-                        manufacturer_code=fw_image.firmware.header.manufacturer_id,
-                        image_type=fw_image.firmware.header.image_type,
-                        # The device reports that it is no longer compatible!
-                        current_file_version=new_version,
-                        hardware_version=1,
-                    )
-                )
-
-    cluster.endpoint.reply = AsyncMock(side_effect=endpoint_reply)
-    with pytest.raises(ZHAException):
-        await entity.async_install(f"0x{fw_image.firmware.header.file_version:08x}")
+    with patch.object(
+        zigpy_device, "update_firmware", return_value=foundation.Status.SUCCESS
+    ) as mock_update:
+        await entity.async_install(
+            f"0x{fw_image_downgrade.firmware.header.file_version:08x}"
+        )
+        # Pretend the downgrade worked
+        cluster.update_attribute(
+            general.Ota.AttributeDefs.current_file_version.id,
+            fw_image_downgrade.firmware.header.file_version,
+        )
         await zha_gateway.async_block_till_done()
 
-    # We updated the currently installed firmware version, as it is no longer valid
-    assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{new_version:08x}"
+    # The downgrade image was used
+    assert mock_update.mock_calls == [
+        call(image=fw_image_downgrade, progress_callback=ANY)
+    ]
+
+    assert (
+        entity.state[ATTR_INSTALLED_VERSION]
+        == f"0x{fw_image_downgrade.firmware.header.file_version:08x}"
+    )
     assert not entity.state[ATTR_IN_PROGRESS]
-    assert entity.state[ATTR_LATEST_VERSION] == f"0x{new_version:08x}"
+    assert (
+        entity.state[ATTR_LATEST_VERSION]
+        == f"0x{fw_image.firmware.header.file_version:08x}"
+    )
