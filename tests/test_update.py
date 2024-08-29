@@ -573,3 +573,47 @@ async def test_firmware_update_no_image(
     assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
     assert not entity.state[ATTR_IN_PROGRESS]
     assert entity.state[ATTR_LATEST_VERSION] is None
+
+
+async def test_firmware_update_latest_version_even_if_downgrade(
+    zha_gateway: Gateway,
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test ZHA update platform - `latest_version` always reflects the latest."""
+    zha_device, cluster, fw_image, installed_fw_version = await setup_test_data(
+        device_joined, zigpy_device
+    )
+
+    fw_image_downgrade = create_fw_image(installed_fw_version - 10)
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=(),
+            downgrades=(fw_image_downgrade,),
+        )
+    )
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    # simulate an image available notification
+    await cluster._handle_query_next_image(
+        foundation.ZCLHeader.cluster(
+            tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
+        ),
+        general.QueryNextImageCommand(
+            field_control=fw_image.firmware.header.field_control,
+            manufacturer_code=zha_device.manufacturer_code,
+            image_type=fw_image.firmware.header.image_type,
+            current_file_version=installed_fw_version,
+            hardware_version=1,
+        ),
+    )
+
+    await zha_gateway.async_block_till_done()
+    assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
+    assert not entity.state[ATTR_IN_PROGRESS]
+    assert (
+        entity.state[ATTR_LATEST_VERSION]
+        == f"0x{fw_image_downgrade.firmware.header.file_version:08x}"
+    )
