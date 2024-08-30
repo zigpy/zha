@@ -5,11 +5,12 @@ from __future__ import annotations
 import asyncio
 import binascii
 import collections
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 import dataclasses
 from dataclasses import dataclass
 import datetime
 import enum
+import inspect
 import logging
 import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
@@ -370,8 +371,14 @@ class GlobalUpdater:
     def __init__(self, gateway: Gateway):
         """Initialize the GlobalUpdater."""
         self._updater_task_handle: asyncio.Task = None
-        self._update_listeners: list[Callable] = []
+        self._update_listeners: list[Callable | Awaitable] = []
         self._gateway: Gateway = gateway
+        self._polling_active: bool = False
+
+    @property
+    def polling_active(self) -> bool:
+        """Return the polling active state."""
+        return self._polling_active
 
     def start(self):
         """Start the global updater."""
@@ -394,7 +401,7 @@ class GlobalUpdater:
             self._updater_task_handle = None
         _LOGGER.debug("global updater stopped")
 
-    def register_update_listener(self, listener: Callable):
+    def register_update_listener(self, listener: Callable | Awaitable):
         """Register an update listener."""
         if listener in self._update_listeners:
             _LOGGER.debug(
@@ -404,7 +411,7 @@ class GlobalUpdater:
             return
         self._update_listeners.append(listener)
 
-    def remove_update_listener(self, listener: Callable):
+    def remove_update_listener(self, listener: Callable | Awaitable):
         """Remove an update listener."""
         if listener not in self._update_listeners:
             _LOGGER.debug(
@@ -419,9 +426,15 @@ class GlobalUpdater:
         """Update all listeners."""
         _LOGGER.debug("Global updater interval starting")
         if self._gateway.config.allow_polling:
+            self._polling_active = True
+            _LOGGER.debug("Global updater running update callbacks")
             for listener in self._update_listeners:
                 _LOGGER.debug("Global updater running update callback")
-                listener()
+                if inspect.iscoroutinefunction(listener):
+                    await listener()
+                else:
+                    listener()  # type: ignore
+            self._polling_active = False
         else:
             _LOGGER.debug("Global updater interval skipped")
         _LOGGER.debug("Global updater interval finished")

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from asyncio import Task
 from dataclasses import dataclass
 import enum
 import functools
@@ -31,7 +30,6 @@ from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.decorators import periodic
 from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONCENTRATION_PARTS_PER_BILLION,
@@ -276,9 +274,7 @@ class Sensor(PlatformEntity):
 class PollableSensor(Sensor):
     """Base ZHA sensor that polls for state."""
 
-    _REFRESH_INTERVAL = (30, 45)
     _use_custom_polling: bool = True
-    __polling_interval: int
 
     def __init__(
         self,
@@ -290,8 +286,8 @@ class PollableSensor(Sensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._polling_task: Task | None = None
         self.maybe_start_polling()
+        self._attribute_reported_count: int = 0
 
     @property
     def should_poll(self) -> bool:
@@ -301,17 +297,7 @@ class PollableSensor(Sensor):
     def maybe_start_polling(self) -> None:
         """Start polling if necessary."""
         if self.should_poll:
-            self._polling_task = self.device.gateway.async_create_background_task(
-                self._refresh(),
-                name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
-                eager_start=True,
-                untracked=True,
-            )
-            self._tracked_tasks.append(self._polling_task)
-            self.debug(
-                "started polling with refresh interval of %s",
-                getattr(self, "__polling_interval"),
-            )
+            self._device.gateway.global_updater.register_update_listener(self._refresh)
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -321,22 +307,43 @@ class PollableSensor(Sensor):
     def disable(self) -> None:
         """Disable the entity."""
         super().disable()
-        if self._polling_task:
-            self._tracked_tasks.remove(self._polling_task)
-            self._polling_task.cancel()
-            self._polling_task = None
+        if self.should_poll:
+            self._device.gateway.global_updater.remove_update_listener(self._refresh)
 
-    @periodic(_REFRESH_INTERVAL)
+    def handle_cluster_handler_attribute_updated(
+        self,
+        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+    ) -> None:
+        """Handle attribute updates from the cluster handler."""
+        super().handle_cluster_handler_attribute_updated(event)
+        if (
+            self._attribute_name == event.attribute_name
+            and self.should_poll
+            and not self._device.gateway.global_updater.polling_active
+        ):
+            self.debug("received an attribute update while polling was not active")
+            self._attribute_reported_count += 1
+            if self._attribute_reported_count > 5:
+                self.debug("appears to be a reporting sensor, disabling polling")
+                self._device.gateway.global_updater.remove_update_listener(
+                    self._refresh
+                )
+                self._use_custom_polling = False
+
     async def _refresh(self):
         """Call async_update at a constrained random interval."""
-        if self.device.available and self.device.gateway.config.allow_polling:
+        if (
+            self.device.available
+            and self.should_poll
+            and self.device.gateway.config.allow_polling
+        ):
             self.debug("polling for updated state")
             await self.async_update()
-            self.maybe_emit_state_changed_event()
         else:
             self.debug(
-                "skipping polling for updated state, available: %s, allow polled requests: %s",
+                "skipping polling for updated state, available: %s, should_poll: %s, allow polled requests: %s",
                 self.device.available,
+                self.should_poll,
                 self.device.gateway.config.allow_polling,
             )
 
@@ -576,13 +583,11 @@ class Battery(Sensor):
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    models={"VZM31-SN", "SP 234", "outletv4"},
 )
 class ElectricalMeasurement(PollableSensor):
     """Active power measurement."""
 
-    _use_custom_polling: bool = False
+    _use_custom_polling: bool = True
     _attribute_name = "active_power"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
@@ -636,59 +641,49 @@ class ElectricalMeasurement(PollableSensor):
         return round(value)
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-)
-class PolledElectricalMeasurement(ElectricalMeasurement):
-    """Polled active power measurement."""
-
-    _use_custom_polling: bool = True
-
-
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
+class ElectricalMeasurementApparentPower(ElectricalMeasurement):
     """Apparent power measurement."""
 
     _attribute_name = "apparent_power"
     _unique_id_suffix = "apparent_power"
-    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurement
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
     _div_mul_prefix = "ac_power"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementRMSCurrent(PolledElectricalMeasurement):
+class ElectricalMeasurementRMSCurrent(ElectricalMeasurement):
     """RMS current measurement."""
 
     _attribute_name = "rms_current"
     _unique_id_suffix = "rms_current"
-    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurement
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _div_mul_prefix = "ac_current"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementRMSVoltage(PolledElectricalMeasurement):
+class ElectricalMeasurementRMSVoltage(ElectricalMeasurement):
     """RMS Voltage measurement."""
 
     _attribute_name = "rms_voltage"
     _unique_id_suffix = "rms_voltage"
-    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurement
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _div_mul_prefix = "ac_voltage"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementFrequency(PolledElectricalMeasurement):
+class ElectricalMeasurementFrequency(ElectricalMeasurement):
     """Frequency measurement."""
 
     _attribute_name = "ac_frequency"
     _unique_id_suffix = "ac_frequency"
-    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurement
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_translation_key: str = "ac_frequency"
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
@@ -696,12 +691,12 @@ class ElectricalMeasurementFrequency(PolledElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementPowerFactor(PolledElectricalMeasurement):
+class ElectricalMeasurementPowerFactor(ElectricalMeasurement):
     """Power Factor measurement."""
 
     _attribute_name = "power_factor"
     _unique_id_suffix = "power_factor"
-    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurement
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
     _div_mul_prefix = None
@@ -780,13 +775,12 @@ class SmartEnergyMeteringEntityDescription:
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
-    stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
 )
 class SmartEnergyMetering(PollableSensor):
     """Metering sensor."""
 
     entity_description: SmartEnergyMeteringEntityDescription
-    _use_custom_polling: bool = False
+    _use_custom_polling: bool = True
     _attribute_name = "instantaneous_demand"
     _attr_translation_key: str = "instantaneous_demand"
     _attr_extra_state_attribute_names: set[str] = {
@@ -902,7 +896,6 @@ class SmartEnergySummationEntityDescription(SmartEnergyMeteringEntityDescription
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
-    stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
 )
 class SmartEnergySummation(SmartEnergyMetering):
     """Smart Energy Metering summation sensor."""
@@ -911,6 +904,7 @@ class SmartEnergySummation(SmartEnergyMetering):
     _attribute_name = "current_summ_delivered"
     _unique_id_suffix = "summation_delivered"
     _attr_translation_key: str = "summation_delivered"
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergySummationEntityDescription(
@@ -983,23 +977,12 @@ class SmartEnergySummation(SmartEnergyMetering):
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
-    models={"TS011F", "ZLinky_TIC", "TICMeter"},
-    stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
-)
-class PolledSmartEnergySummation(SmartEnergySummation):
-    """Polled Smart Energy Metering summation sensor."""
-
-    _use_custom_polling: bool = True
-
-
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-class Tier1SmartEnergySummation(PolledSmartEnergySummation):
+class Tier1SmartEnergySummation(SmartEnergyMetering):
     """Tier 1 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
     _attribute_name = "current_tier1_summ_delivered"
     _unique_id_suffix = "tier1_summation_delivered"
     _attr_translation_key: str = "tier1_summation_delivered"
@@ -1009,10 +992,10 @@ class Tier1SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-class Tier2SmartEnergySummation(PolledSmartEnergySummation):
+class Tier2SmartEnergySummation(SmartEnergyMetering):
     """Tier 2 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
     _attribute_name = "current_tier2_summ_delivered"
     _unique_id_suffix = "tier2_summation_delivered"
     _attr_translation_key: str = "tier2_summation_delivered"
@@ -1022,10 +1005,10 @@ class Tier2SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-class Tier3SmartEnergySummation(PolledSmartEnergySummation):
+class Tier3SmartEnergySummation(SmartEnergyMetering):
     """Tier 3 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
     _attribute_name = "current_tier3_summ_delivered"
     _unique_id_suffix = "tier3_summation_delivered"
     _attr_translation_key: str = "tier3_summation_delivered"
@@ -1035,10 +1018,10 @@ class Tier3SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-class Tier4SmartEnergySummation(PolledSmartEnergySummation):
+class Tier4SmartEnergySummation(SmartEnergyMetering):
     """Tier 4 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
     _attribute_name = "current_tier4_summ_delivered"
     _unique_id_suffix = "tier4_summation_delivered"
     _attr_translation_key: str = "tier4_summation_delivered"
@@ -1048,10 +1031,10 @@ class Tier4SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-class Tier5SmartEnergySummation(PolledSmartEnergySummation):
+class Tier5SmartEnergySummation(SmartEnergyMetering):
     """Tier 5 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
     _attribute_name = "current_tier5_summ_delivered"
     _unique_id_suffix = "tier5_summation_delivered"
     _attr_translation_key: str = "tier5_summation_delivered"
@@ -1061,10 +1044,10 @@ class Tier5SmartEnergySummation(PolledSmartEnergySummation):
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
     models={"ZLinky_TIC", "TICMeter"},
 )
-class Tier6SmartEnergySummation(PolledSmartEnergySummation):
+class Tier6SmartEnergySummation(SmartEnergyMetering):
     """Tier 6 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
     _attribute_name = "current_tier6_summ_delivered"
     _unique_id_suffix = "tier6_summation_delivered"
     _attr_translation_key: str = "tier6_summation_delivered"
@@ -1073,10 +1056,10 @@ class Tier6SmartEnergySummation(PolledSmartEnergySummation):
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
 )
-class SmartEnergySummationReceived(PolledSmartEnergySummation):
+class SmartEnergySummationReceived(SmartEnergySummation):
     """Smart Energy Metering summation received sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
+    _use_custom_polling = False  # Poll indirectly by SmartEnergyMetering
     _attribute_name = "current_summ_received"
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"

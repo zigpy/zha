@@ -471,7 +471,7 @@ async def async_test_pi_heating_demand(
         ),
         (
             homeautomation.ElectricalMeasurement.cluster_id,
-            sensor.PolledElectricalMeasurement,
+            sensor.ElectricalMeasurement,
             async_test_electrical_measurement,
             {"ac_power_divisor": 1000, "ac_power_multiplier": 1},
             {"apparent_power", "rms_current", "rms_voltage"},
@@ -628,7 +628,7 @@ async def test_electrical_measurement_init(
     entity = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurement,
     )
 
     await send_attributes_report(
@@ -656,10 +656,10 @@ async def test_electrical_measurement_init(
 
     zha_device.on_network = False
 
-    await asyncio.sleep(entity.__polling_interval + 1)
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 1)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert (
-        "1-2820: skipping polling for updated state, available: False, allow polled requests: True"
+        "1-2820: skipping polling for updated state, available: False, should_poll: True, allow polled requests: True"
         in caplog.text
     )
 
@@ -701,7 +701,7 @@ async def test_electrical_measurement_init(
 
     assert entity.enabled is False
 
-    await asyncio.sleep(entity.__polling_interval + 1)
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 1)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert entity._refresh.await_count == 0
@@ -710,10 +710,28 @@ async def test_electrical_measurement_init(
 
     assert entity.enabled is True
 
-    await asyncio.sleep(entity.__polling_interval + 1)
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 1)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert entity._refresh.await_count == 1
+
+    entity._refresh.reset_mock()
+
+    # send the 6th attribute report to trigger the disabling of polling
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {EMAttrs.active_power.id: 30, EMAttrs.ac_power_multiplier.id: 20},
+    )
+
+    await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 1)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert entity._refresh.await_count == 0
+    assert (
+        "zha.application.platforms:__init__.py:276 00:0d:6f:00:0a:90:69:e7-1-2820: appears to be a reporting sensor, disabling polling"
+        in caplog.text
+    )
 
 
 @pytest.mark.parametrize(
@@ -732,7 +750,7 @@ async def test_electrical_measurement_init(
                 "rms_current",
             },
             {
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurement,
                 sensor.ElectricalMeasurementFrequency,
                 sensor.ElectricalMeasurementPowerFactor,
             },
@@ -752,7 +770,7 @@ async def test_electrical_measurement_init(
             },
             {
                 sensor.ElectricalMeasurementRMSVoltage,
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurement,
             },
             {
                 sensor.ElectricalMeasurementApparentPower,
@@ -766,7 +784,7 @@ async def test_electrical_measurement_init(
             set(),
             {
                 sensor.ElectricalMeasurementRMSVoltage,
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurement,
                 sensor.ElectricalMeasurementApparentPower,
                 sensor.ElectricalMeasurementRMSCurrent,
                 sensor.ElectricalMeasurementFrequency,
@@ -1034,7 +1052,7 @@ async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-out
     entity = get_entity(
         zha_dev,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurement,
     )
     assert entity.state["state"] == 2.0
 
@@ -1113,7 +1131,7 @@ async def test_elec_measurement_skip_unsupported_attribute(
     entity = get_entity(
         zha_dev,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurement,
     )
     await entity.async_update()
     await zha_dev.gateway.async_block_till_done()
@@ -1269,13 +1287,13 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
     assert entity.state["state"] == 60
     assert entity.enabled is True
-    assert len(zha_gateway.global_updater._update_listeners) == 5
+    assert len(zha_gateway.global_updater._update_listeners) == 6
 
     # let's drop the normal update method from the updater
     entity.disable()
 
     assert entity.enabled is False
-    assert len(zha_gateway.global_updater._update_listeners) == 4
+    assert len(zha_gateway.global_updater._update_listeners) == 5
 
     # wrap the update method so we can count how many times it was called
     entity.update = MagicMock(wraps=entity.update)
@@ -1286,7 +1304,7 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
     # re-enable the entity and ensure it is back in the updater and that update is called
     entity.enable()
-    assert len(zha_gateway.global_updater._update_listeners) == 5
+    assert len(zha_gateway.global_updater._update_listeners) == 6
     assert entity.enabled is True
 
     await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)
