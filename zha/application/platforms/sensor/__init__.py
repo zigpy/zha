@@ -69,6 +69,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_PRESSURE,
     CLUSTER_HANDLER_SMARTENERGY_METERING,
     CLUSTER_HANDLER_SOIL_MOISTURE,
+    CLUSTER_HANDLER_FLOW_MEASUREMENT,
     CLUSTER_HANDLER_TEMPERATURE,
     CLUSTER_HANDLER_THERMOSTAT,
     SMARTTHINGS_HUMIDITY_CLUSTER,
@@ -1114,6 +1115,17 @@ class Pressure(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_FLOW_MEASUREMENT)
+class Flow(Sensor):
+    """Flow Measurement sensor."""
+
+    _attribute_name = "measured_value"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLUME_FLOW_RATE
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _divisor = 10
+    _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_TEMPERATURE)
