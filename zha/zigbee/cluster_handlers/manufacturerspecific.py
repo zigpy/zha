@@ -190,7 +190,9 @@ class OppleRemoteClusterHandler(ClusterHandler):
                 "hand_open": True,
             }
 
-    async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:  # pylint: disable=unused-argument
+    async def async_initialize_cluster_handler_specific(
+        self, from_cache: bool
+    ) -> None:  # pylint: disable=unused-argument
         """Initialize cluster handler specific."""
         if self.cluster.endpoint.model in ("lumi.motion.ac02", "lumi.motion.agl04"):
             interval = self.cluster.get("detection_interval", self.cluster.get(0x0102))
@@ -435,14 +437,19 @@ class XiaomiVibrationAQ1ClusterHandler(MultistateInputClusterHandler):
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SONOFF_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(SONOFF_CLUSTER)
-class SonoffPresenceSenorClusterHandler(ClusterHandler):
-    """SonoffPresenceSensor cluster handler."""
+class SonoffClusterHandler(ClusterHandler):
+    """Sonoff Custom cluster handler."""
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize SonoffPresenceSensor cluster handler."""
+        """Initialize Sonoff cluster handler."""
         super().__init__(cluster, endpoint)
         if self.cluster.endpoint.model == "SNZB-06P":
             self.ZCL_INIT_ATTRS = {"last_illumination_state": True}
+        elif self.cluster.endpoint.model == "SWV":
+            self.ZCL_INIT_ATTRS = {"valve_status": True}
+            self.REPORT_CONFIG = AttrReportConfig(
+                attr="valve_status", config=REPORT_CONFIG_DEFAULT
+            )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(

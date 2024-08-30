@@ -7,6 +7,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING
 
+from zhaquirks.sonoff import swv as sonoff_swv
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import BinarySensorMetadata
 
@@ -400,3 +401,33 @@ class DanfossPreheatStatus(BinarySensor):
     _attr_translation_key: str = "preheat_status"
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+@MULTI_MATCH(cluster_handler_names="sonoff_manufacturer", models={"SWV"})
+class SonoffSWVValveLeakStatus(BinarySensor):
+    """Danfoss proprietary attribute for showing the status of the adaptation run."""
+
+    _unique_id_suffix = "valve_leak_status"
+    _attribute_name = "valve_status"
+    _attr_translation_key: str = "valve_leak"
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+
+    @staticmethod
+    def parse(value: bool | int) -> bool:
+        """Parse the raw attribute into a bool state."""
+        return BinarySensor.parse(value & sonoff_swv.ValveStatusBitmap.Water_Leakage)
+
+
+@MULTI_MATCH(cluster_handler_names="sonoff_manufacturer", models={"SWV"})
+class SonoffSWVWaterShortageStatus(BinarySensor):
+    """Danfoss proprietary attribute for showing the status of the adaptation run."""
+
+    _unique_id_suffix = "water_supply_status"
+    _attribute_name = "valve_status"
+    _attr_translation_key: str = "water_supply"
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+
+    @staticmethod
+    def parse(value: bool | int) -> bool:
+        """Parse the raw attribute into a bool state."""
+        return BinarySensor.parse(value & sonoff_swv.ValveStatusBitmap.Water_Shortage)
