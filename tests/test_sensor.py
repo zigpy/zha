@@ -1287,13 +1287,13 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
     assert entity.state["state"] == 60
     assert entity.enabled is True
-    assert len(zha_gateway.global_updater._update_listeners) == 6
+    assert len(zha_gateway.global_updater._update_listeners) == 5
 
     # let's drop the normal update method from the updater
     entity.disable()
 
     assert entity.enabled is False
-    assert len(zha_gateway.global_updater._update_listeners) == 5
+    assert len(zha_gateway.global_updater._update_listeners) == 4
 
     # wrap the update method so we can count how many times it was called
     entity.update = MagicMock(wraps=entity.update)
@@ -1304,7 +1304,7 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
     # re-enable the entity and ensure it is back in the updater and that update is called
     entity.enable()
-    assert len(zha_gateway.global_updater._update_listeners) == 6
+    assert len(zha_gateway.global_updater._update_listeners) == 5
     assert entity.enabled is True
 
     await asyncio.sleep(zha_gateway.global_updater.__polling_interval + 2)

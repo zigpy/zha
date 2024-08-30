@@ -371,7 +371,8 @@ class GlobalUpdater:
     def __init__(self, gateway: Gateway):
         """Initialize the GlobalUpdater."""
         self._updater_task_handle: asyncio.Task = None
-        self._update_listeners: list[Callable | Awaitable] = []
+        self._update_listeners: list[Callable] = []
+        self._update_awaitables: list[Callable[[], Awaitable]] = []
         self._gateway: Gateway = gateway
         self._polling_active: bool = False
 
@@ -401,25 +402,34 @@ class GlobalUpdater:
             self._updater_task_handle = None
         _LOGGER.debug("global updater stopped")
 
-    def register_update_listener(self, listener: Callable | Awaitable):
+    def register_update_listener(self, listener: Callable | Callable[[], Awaitable]):
         """Register an update listener."""
-        if listener in self._update_listeners:
+        if listener in self._update_listeners or listener in self._update_awaitables:
             _LOGGER.debug(
                 "listener already registered with global updater - nothing to register: %s",
                 listener,
             )
             return
-        self._update_listeners.append(listener)
+        if inspect.iscoroutinefunction(listener):
+            self._update_awaitables.append(listener)
+        else:
+            self._update_listeners.append(listener)
 
-    def remove_update_listener(self, listener: Callable | Awaitable):
+    def remove_update_listener(self, listener: Callable | Callable[[], Awaitable]):
         """Remove an update listener."""
-        if listener not in self._update_listeners:
+        if (
+            listener not in self._update_listeners
+            and listener not in self._update_awaitables
+        ):
             _LOGGER.debug(
                 "listener not registered with global updater - nothing to remove: %s",
                 listener,
             )
             return
-        self._update_listeners.remove(listener)
+        if inspect.iscoroutinefunction(listener):
+            self._update_awaitables.remove(listener)
+        else:
+            self._update_listeners.remove(listener)
 
     @periodic(_REFRESH_INTERVAL)
     async def update_listeners(self):
@@ -430,10 +440,10 @@ class GlobalUpdater:
             _LOGGER.debug("Global updater running update callbacks")
             for listener in self._update_listeners:
                 _LOGGER.debug("Global updater running update callback")
-                if inspect.iscoroutinefunction(listener):
-                    await listener()
-                else:
-                    listener()  # type: ignore
+                listener()
+            await gather_with_limited_concurrency(
+                3, *[awaitable() for awaitable in self._update_awaitables]
+            )
             self._polling_active = False
         else:
             _LOGGER.debug("Global updater interval skipped")
