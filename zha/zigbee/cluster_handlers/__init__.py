@@ -659,7 +659,7 @@ class ClusterHandler(LogMixin, EventBase):
                         "Discovered received command id: %s", discovered_command_id
                     )
                     command_id = discovered_command_id + 1
-            response[command_method.__name__] = command_ids_discovered
+            response[command_method.func.__name__] = command_ids_discovered
         return response
 
     async def discover_attributes(self) -> list[DiscoverAttributesResponseRecord]:
