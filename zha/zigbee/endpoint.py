@@ -256,3 +256,14 @@ class Endpoint:
             self.all_cluster_handlers[cluster_id]
             for cluster_id in (available - claimed)
         ]
+
+    async def scan(self):
+        """Scan the endpoint for ZCL details."""
+        for cluster_collection in (
+            self.all_cluster_handlers,
+            self.client_cluster_handlers,
+        ):
+            for cluster_handler in cluster_collection.values():
+                _LOGGER.debug("Scanning cluster handler: %s", cluster_handler.id)
+                await cluster_handler.discover_attributes()
+                await cluster_handler.discover_commands()
