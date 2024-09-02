@@ -1063,9 +1063,9 @@ class Device(LogMixin, EventBase):
                 fmt = f"{log_msg[1]} completed: %s"
             zdo.debug(fmt, *(log_msg[2] + (outcome,)))
 
-    async def scan(self):
-        """Scan device for ZCL details."""
-        self.debug("Scanning binding table")
+    async def read_binding_table(self):
+        """Read the binding table for this device."""
+        self.debug("Reading binding table")
         (
             status,
             entries,
@@ -1073,12 +1073,16 @@ class Device(LogMixin, EventBase):
             binding_table,
         ) = await self.device.zdo.Mgmt_Bind_req(0)
         self.debug(
-            "Scan binding table status: %s, entries: %s, start_index: %s, binding_table: %s",
+            "Read binding table status: %s, entries: %s, start_index: %s, binding_table: %s",
             status,
             entries,
             start_index,
             binding_table,
         )
+
+    async def scan(self):
+        """Scan device for ZCL details."""
+        await self.read_binding_table()
         for endpoint_id, endpoint in self.endpoints.items():
             if endpoint_id == 0:
                 continue
