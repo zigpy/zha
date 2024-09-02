@@ -7,8 +7,8 @@ import functools
 import logging
 from typing import TYPE_CHECKING
 
-from zhaquirks.sonoff import swv as sonoff_swv
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
+from zhaquirks.sonoff import swv as sonoff_swv
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
