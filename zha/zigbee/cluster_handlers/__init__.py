@@ -655,9 +655,7 @@ class ClusterHandler(LogMixin, EventBase):
                 discovery_complete, command_ids = command_response
                 command_ids_discovered.extend(command_ids)
                 for discovered_command_id in command_ids:
-                    self.debug(
-                        "Discovered received command id: %s", discovered_command_id
-                    )
+                    self.debug("Discovered command id: %s", discovered_command_id)
                     command_id = discovered_command_id + 1
             response[command_method.func.__name__] = command_ids_discovered
         return response
