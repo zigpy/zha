@@ -447,7 +447,6 @@ class MultistateInputClusterHandler(ClusterHandler):
         )
 
 
-
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
 class MultistateOutputClusterHandler(ClusterHandler):
     """Multistate Output cluster handler."""

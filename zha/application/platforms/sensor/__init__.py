@@ -502,6 +502,7 @@ class EnumSensor(Sensor):
         assert self._enum is not None
         return self._enum(value).name
 
+
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_MULTISTATE_INPUT)
 class MultiStateInputSensor(EnumSensor):
     """Sensor that displays enumerated values."""
