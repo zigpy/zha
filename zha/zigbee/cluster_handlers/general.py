@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Coroutine
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Final
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
@@ -47,13 +48,11 @@ from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
-    ClusterAttributeUpdatedEvent,
     ClusterHandler,
     parse_and_log_command,
     registries,
 )
 from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_LEVEL_CHANGED,
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_BATTERY_SAVE,
@@ -362,11 +361,13 @@ class LevelControlClusterHandler(ClusterHandler):
                 SIGNAL_MOVE_LEVEL, -args[1] if args[0] else args[1]
             )
 
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
+    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
         """Handle attribute updates on this cluster."""
         self.debug("received attribute: %s update with value: %s", attrid, value)
         if attrid == self.CURRENT_LEVEL:
             self.dispatch_level_change(SIGNAL_SET_LEVEL, value)
+        else:
+            super().attribute_updated(attrid, value, timestamp)
 
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
@@ -568,20 +569,6 @@ class OnOffClusterHandler(ClusterHandler):
         """Set the state to off."""
         self._off_listener = None
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
-
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
-        """Handle attribute updates on this cluster."""
-        if attrid == OnOff.AttributeDefs.on_off.id:
-            self.emit(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                ClusterAttributeUpdatedEvent(
-                    attribute_id=attrid,
-                    attribute_name=OnOff.AttributeDefs.on_off.name,
-                    attribute_value=value,
-                    cluster_handler_unique_id=self.unique_id,
-                    cluster_id=self.cluster.cluster_id,
-                ),
-            )
 
     async def async_update(self):
         """Initialize cluster handler."""

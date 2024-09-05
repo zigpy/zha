@@ -18,16 +18,8 @@ from zigpy.zcl.clusters.security import (
 )
 
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import (
-    ClusterAttributeUpdatedEvent,
-    ClusterHandler,
-    ClusterHandlerStatus,
-    registries,
-)
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_STATE_CHANGED,
-)
+from zha.zigbee.cluster_handlers import ClusterHandler, ClusterHandlerStatus, registries
+from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_STATE_CHANGED
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
@@ -401,20 +393,6 @@ class IASZoneClusterHandler(ClusterHandler):
 
         self._status = ClusterHandlerStatus.CONFIGURED
         self.debug("finished IASZoneClusterHandler configuration")
-
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
-        """Handle attribute updates on this cluster."""
-        if attrid == IasZone.AttributeDefs.zone_status.id:
-            self.emit(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                ClusterAttributeUpdatedEvent(
-                    attribute_id=attrid,
-                    attribute_name=IasZone.AttributeDefs.zone_status.name,
-                    attribute_value=value,
-                    cluster_handler_unique_id=self.unique_id,
-                    cluster_id=self.cluster.cluster_id,
-                ),
-            )
 
     async def async_update(self) -> None:
         """Retrieve latest state."""

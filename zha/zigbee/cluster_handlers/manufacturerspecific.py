@@ -19,7 +19,6 @@ from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
-    ClusterAttributeUpdatedEvent,
     ClusterHandler,
     registries,
 )
@@ -28,7 +27,6 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_ID,
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     INOVELLI_CLUSTER,
@@ -39,7 +37,10 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
+    REPORT_CONFIG_MIN_INT_IMMEDIATE,
+    REPORT_CONFIG_RPT_CHANGE,
     SIGNAL_ATTR_UPDATED,
+    SINOPE_MANUFACTURER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
@@ -220,23 +221,11 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
 
     def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
         """Handle attribute updates on this cluster."""
+        super().attribute_updated(attrid, value, _)
         try:
             attr_name = self._cluster.attributes[attrid].name
         except KeyError:
             attr_name = UNKNOWN
-
-        if attr_name == self.value_attribute:
-            self.emit(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                ClusterAttributeUpdatedEvent(
-                    attribute_id=attrid,
-                    attribute_name=attr_name,
-                    attribute_value=value,
-                    cluster_handler_unique_id=self.unique_id,
-                    cluster_id=self.cluster.cluster_id,
-                ),
-            )
-            return
 
         self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,
@@ -410,6 +399,11 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
         return self.cluster.get("fan_mode")
 
     @property
+    def fan_speed(self) -> int | None:
+        """Return current fan speed."""
+        return self.cluster.get("fan_speed")
+
+    @property
     def fan_mode_sequence(self) -> int | None:
         """Return possible fan mode speeds."""
         return self.cluster.get("fan_mode_sequence")
@@ -421,6 +415,7 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
     async def async_update(self) -> None:
         """Retrieve latest state."""
         await self.get_attribute_value("fan_mode", from_cache=False)
+        await self.get_attribute_value("fan_speed", from_cache=False)
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)
@@ -510,3 +505,60 @@ class DanfossDiagnosticClusterHandler(DiagnosticClusterHandler):
         AttrReportConfig(attr="sw_error_code", config=REPORT_CONFIG_DEFAULT),
         AttrReportConfig(attr="motor_step_counter", config=REPORT_CONFIG_DEFAULT),
     )
+
+
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SINOPE_MANUFACTURER_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(SINOPE_MANUFACTURER_CLUSTER)
+class SinopeManufacturerClusterHandler(ClusterHandler):
+    """Sinope Manufacturer cluster handler."""
+
+    BIND = True
+
+    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
+        """Initialize Sinope cluster handler."""
+        super().__init__(cluster, endpoint)
+        self.ZCL_INIT_ATTRS = {
+            "double_up_full": True,
+            "on_led_color": True,
+            "off_led_color": True,
+            "off_led_intensity": True,
+            "on_led_intensity": True,
+        }
+
+        if self.cluster.endpoint.model in [
+            "DM2550ZB",
+            "DM2550ZB-G2",
+            "DM2500ZB-G2",
+            "DM2500ZB",
+        ]:
+            self.ZCL_INIT_ATTRS["on_intensity"] = True
+
+    _value_attribute = "action_report"
+    REPORT_CONFIG = (
+        AttrReportConfig(
+            attr="action_report",
+            config=(
+                REPORT_CONFIG_MIN_INT_IMMEDIATE,
+                REPORT_CONFIG_MIN_INT_IMMEDIATE,
+                REPORT_CONFIG_RPT_CHANGE,
+            ),
+        ),
+    )
+
+    @classmethod
+    def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:
+        """Filter the cluster match for specific devices."""
+        switches = (
+            "SW2500ZB",
+            "SW2500ZB-G2",
+            "DM2500ZB",
+            "DM2500ZB-G2",
+            "DM2550ZB",
+            "DM2550ZB-G2",
+        )
+
+        _LOGGER.debug(
+            "matching sinope device to cluster handler %s", cluster.endpoint.model
+        )
+
+        return cluster.endpoint.model in switches

@@ -922,7 +922,6 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
     _attr_native_max_value: int = 1439
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
-    _attr_icon: str = "mdi:clock"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -937,7 +936,6 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
     _attr_translation_key: str = "external_temperature_sensor"
     _attr_native_min_value: float = -80
     _attr_native_max_value: float = 35
-    _attr_icon: str = "mdi:thermometer"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -953,7 +951,6 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
     _attr_native_min_value: int = -8000
     _attr_native_max_value: int = 2000
     _attr_mode: NumberMode = NumberMode.BOX
-    _attr_icon: str = "mdi:scale-balance"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -968,8 +965,66 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     _attr_translation_key: str = "regulation_setpoint_offset"
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
-    _attr_icon: str = "mdi:thermostat"
     _attr_native_min_value: float = -2.5
     _attr_native_max_value: float = 2.5
     _attr_native_step: float = 0.1
     _attr_multiplier = 1 / 10
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"},
+)
+class SinopeDimmerOnLevelConfigurationEntity(NumberConfigurationEntity):
+    """Representation of a Sinope dimmer switch on level."""
+
+    _unique_id_suffix = "on_intensity"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 1
+    _attr_native_max_value: float = 255
+    _attribute_name = "on_intensity"
+    _attr_translation_key: str = "on_level"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={
+        "DM2500ZB",
+        "DM2500ZB-G2",
+        "DM2550ZB",
+        "DM2550ZB-G2",
+        "SW2500ZB",
+        "SW2500ZB-G2",
+    },
+)
+class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
+    """Representation of a Sinope switch LED on-level brightness."""
+
+    _unique_id_suffix = "on_led_intensity"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 1
+    _attr_native_max_value: float = 100
+    _attribute_name = "on_led_intensity"
+    _attr_translation_key: str = "on_led_intensity"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="sinope_manufacturer_specific",
+    models={
+        "DM2500ZB",
+        "DM2500ZB-G2",
+        "DM2550ZB",
+        "DM2550ZB-G2",
+        "SW2500ZB",
+        "SW2500ZB-G2",
+    },
+)
+class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
+    """Representation of a Sinope switch LED off-level brightness."""
+
+    _unique_id_suffix = "off_led_intensity"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 1
+    _attr_native_max_value: float = 100
+    _attribute_name = "off_led_intensity"
+    _attr_translation_key: str = "off_led_intensity"
