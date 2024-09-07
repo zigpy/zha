@@ -551,7 +551,7 @@ class AnalogInputSensor(Sensor):
     """Sensor that displays analog input values."""
 
     _attribute_name = "present_value"
-    _attr_translation_key = "analog_input"
+    _attr_translation_key: str = "analog_input"
     _unique_id_suffix = "present_value"
     _attr_entity_registry_enabled_default = False
     _attr_has_entity_name = True
@@ -568,18 +568,6 @@ class AnalogInputSensor(Sensor):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         engineering_units = self._cluster_handler.engineering_units
         self._attr_native_unit_of_measurement = UNITS.get(engineering_units)
-
-
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
-    manufacturers="Digi",
-    stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
-)
-class AnalogInput(Sensor):
-    """Sensor that displays analog input values."""
-
-    _attribute_name = "present_value"
-    _attr_translation_key: str = "analog_input"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
