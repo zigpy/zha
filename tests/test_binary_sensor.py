@@ -47,7 +47,7 @@ DEVICE_OCCUPANCY = {
 DEVICE_GENERAL = {
     1: {
         SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.OCCUPANCY_SENSOR,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SENSOR,
         SIG_EP_INPUT: [general.BinaryInput.cluster_id],
         SIG_EP_OUTPUT: [],
     }

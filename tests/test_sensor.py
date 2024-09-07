@@ -18,14 +18,10 @@ from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smart
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from tests.common import (
-    SIG_EP_INPUT,
-    SIG_EP_OUTPUT,
-    SIG_EP_PROFILE,
-    SIG_EP_TYPE,
-    create_mock_zigpy_device,
+    find_entity,
     get_entity,
-    join_zigpy_device,
     send_attributes_report,
+    update_attribute_cache,
 )
 from zha.application import Platform
 from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
@@ -588,6 +584,7 @@ async def test_sensor(
     )
 
     await zha_gateway.async_block_till_done()
+    assert entity.fallback_name is None
     # test sensor associated logic
     await test_func(zha_gateway, cluster, entity)
 
@@ -1375,3 +1372,32 @@ async def test_danfoss_thermostat_sw_error(
     assert entity.extra_state_attribute_names
     assert "Top_pcb_sensor_error" in entity.extra_state_attribute_names
     assert entity.state["Top_pcb_sensor_error"]
+
+
+async def test_sensor_general(
+    zigpy_device_mock: Callable[..., ZigpyDevice],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
+) -> None:
+    """Test sensor general - description."""
+    DEVICE_GENERAL = {
+        1: {
+            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.COMBINED_INTERFACE,
+            SIG_EP_INPUT: [general.AnalogInput.cluster_id],
+            SIG_EP_OUTPUT: [],
+        }
+    }
+
+    zigpy_device = zigpy_device_mock(DEVICE_GENERAL)
+
+    cluster = getattr(zigpy_device.endpoints[1], "analog_input")
+    cluster.PLUGGED_ATTR_READS = {"description": "Analog Input", "present_value": 1.0}
+    update_attribute_cache(cluster)
+    zha_device = await device_joined(zigpy_device)
+    entity: PlatformEntity = find_entity(zha_device, Platform.SENSOR)
+
+    await entity.async_update()
+    await zha_gateway.async_block_till_done()
+    assert entity.fallback_name == "Analog Input"
+    assert entity.translation_key is None
