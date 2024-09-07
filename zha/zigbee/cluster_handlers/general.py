@@ -93,6 +93,72 @@ class AnalogInputClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_DEFAULT,
         ),
     )
+    ZCL_INIT_ATTRS = {
+        AnalogInput.AttributeDefs.description.name: True,
+        AnalogInput.AttributeDefs.max_present_value.name: True,
+        AnalogInput.AttributeDefs.min_present_value.name: True,
+        AnalogInput.AttributeDefs.out_of_service.name: True,
+        AnalogInput.AttributeDefs.reliability.name: True,
+        AnalogInput.AttributeDefs.resolution.name: True,
+        AnalogInput.AttributeDefs.engineering_units.name: True,
+        AnalogInput.AttributeDefs.application_type.name: True,
+    }
+
+    @property
+    def present_value(self) -> float | None:
+        """Return cached value of present_value."""
+        return self.cluster.get(AnalogInput.AttributeDefs.present_value.name)
+
+    @property
+    def description(self) -> str | None:
+        """Return cached value of description."""
+        return self.cluster.get(AnalogInput.AttributeDefs.description.name)
+
+    @property
+    def max_present_value(self) -> float | None:
+        """Return cached value of max_present_value."""
+        return self.cluster.get(AnalogInput.AttributeDefs.max_present_value.name)
+
+    @property
+    def min_present_value(self) -> float | None:
+        """Return cached value of min_present_value."""
+        return self.cluster.get(AnalogInput.AttributeDefs.min_present_value.name)
+
+    @property
+    def out_of_service(self) -> bool | None:
+        """Return cached value of out_of_service."""
+        return self.cluster.get(AnalogInput.AttributeDefs.out_of_service.name)
+
+    @property
+    def reliability(self) -> int | None:
+        """Return cached value of reliability."""
+        return self.cluster.get(AnalogInput.AttributeDefs.reliability.name)
+
+    @property
+    def resolution(self) -> float | None:
+        """Return cached value of resolution."""
+        return self.cluster.get(AnalogInput.AttributeDefs.resolution.name)
+
+    @property
+    def status_flags(self) -> int | None:
+        """Return cached value of status_flags."""
+        return self.cluster.get(AnalogInput.AttributeDefs.status_flags.name)
+
+    @property
+    def engineering_units(self) -> int | None:
+        """Return cached value of engineering_units."""
+        return self.cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
+
+    @property
+    def application_type(self) -> int | None:
+        """Return cached value of application_type."""
+        return self.cluster.get(AnalogInput.AttributeDefs.application_type.name)
+
+    async def async_update(self):
+        """Update cluster value attribute."""
+        await self.get_attribute_value(
+            AnalogInput.AttributeDefs.present_value.name, from_cache=False
+        )
 
 
 @registries.BINDABLE_CLUSTERS.register(AnalogOutput.cluster_id)
@@ -232,6 +298,15 @@ class BinaryInputClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_DEFAULT,
         ),
     )
+
+    ZCL_INIT_ATTRS = {
+        BinaryInput.AttributeDefs.description.name: True,
+    }
+
+    @property
+    def description(self) -> str | None:
+        """Return cached value of description."""
+        return self.cluster.get(BinaryInput.AttributeDefs.description.name)
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(BinaryOutput.cluster_id)
@@ -390,6 +465,15 @@ class MultistateInputClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_DEFAULT,
         ),
     )
+
+    ZCL_INIT_ATTRS = {
+        MultistateInput.AttributeDefs.description.name: True,
+    }
+
+    @property
+    def description(self) -> str | None:
+        """Return cached value of description."""
+        return self.cluster.get(MultistateInput.AttributeDefs.description.name)
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
