@@ -519,6 +519,7 @@ class MultiStateInputSensor(EnumSensor):
     _unique_id_suffix = "present_value"
     _attr_entity_registry_enabled_default = False
     _attr_traslation_key = "multistate_input"
+    _enum = enum.Enum("Empty", names=())  # type: ignore [misc]
 
     def __init__(
         self,
