@@ -202,6 +202,10 @@ class Sensor(PlatformEntity):
             self._divisor = entity_metadata.divisor
         if entity_metadata.multiplier is not None:
             self._multiplier = entity_metadata.multiplier
+        if entity_metadata.translation_key is not None:
+            self._attr_translation_key = entity_metadata.translation_key
+        if entity_metadata.state_class is not None:
+            self._attr_state_class = entity_metadata.state_class.value
         if entity_metadata.device_class is not None:
             self._attr_device_class = validate_device_class(
                 SensorDeviceClass,
@@ -209,7 +213,7 @@ class Sensor(PlatformEntity):
                 Platform.SENSOR.value,
                 _LOGGER,
             )
-        if entity_metadata.device_class is None and entity_metadata.unit is not None:
+        if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = validate_unit(
                 entity_metadata.unit
             ).value
