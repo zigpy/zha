@@ -390,3 +390,36 @@ NON_NUMERIC_DEVICE_CLASSES = {
     SensorDeviceClass.ENUM,
     SensorDeviceClass.TIMESTAMP,
 }
+
+
+class AnalogInputStateClass(enum.Enum):
+    """State class for AnalogInput Types."""
+
+    TEMPERATURE = (0x00, SensorDeviceClass.TEMPERATURE)
+    RELATIVE_HUMIDITY = (0x01, SensorDeviceClass.HUMIDITY)
+    PRESSURE = (0x02, SensorDeviceClass.PRESSURE)
+    FLOW = (0x03, SensorDeviceClass.VOLUME_FLOW_RATE)
+    PERCENTAGE = (0x04, None)
+    PARTS_PER_MILLION = (0x05, SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS)
+    RPM = (0x06, None)
+    CURRENT = (0x07, SensorDeviceClass.CURRENT)
+    FREQUENCY = (0x08, SensorDeviceClass.FREQUENCY)
+    POWER_WATTS = (0x09, SensorDeviceClass.POWER)
+    POWER_KILOWATTS = (0x0A, SensorDeviceClass.POWER)
+    ENERGY = (0x0B, SensorDeviceClass.ENERGY)
+    COUNT = (0x0C, None)
+    ENTHALPY = (0x0D, None)
+    TIME_SECONDS = (0x0E, None)
+
+    def __init__(self, type, dev_class):
+        """Init this enum."""
+        self.type = type
+        self.dev_class = dev_class
+
+    @classmethod
+    def device_class(cls, type):
+        """Return the device class given a type."""
+        for entry in cls:
+            if entry.type == type:
+                return entry.dev_class.value
+        return None

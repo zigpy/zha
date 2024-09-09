@@ -18,11 +18,17 @@ from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smart
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from tests.common import (
-    find_entity,
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
+    join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
 )
+from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
@@ -390,6 +396,65 @@ async def async_test_pi_heating_demand(
     assert_state(entity, 1, "%")
 
 
+async def async_test_general_analog_input(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+):
+    """Test general analog input."""
+    await entity.async_update()
+
+    assert entity.device_class == SensorDeviceClass.HUMIDITY.value
+
+    if entity._cluster_handler.resolution is not None:
+        assert entity.suggested_display_precision == 1
+    else:
+        assert entity.suggested_display_precision is None
+
+    assert entity._cluster_handler.max_present_value == 100.0
+    assert entity._cluster_handler.min_present_value == 1.0
+    assert entity._cluster_handler.out_of_service == 0
+    assert entity._cluster_handler.reliability == 0
+    assert entity._cluster_handler.status_flags == 0
+    assert entity._cluster_handler.application_type == 0x00010000
+    assert entity._cluster_handler.present_value == 1.0
+
+    await send_attributes_report(
+        zha_gateway, cluster, {general.AnalogInput.AttributeDefs.present_value.id: 1.0}
+    )
+    assert_state(entity, 1.0, "%")
+
+
+async def async_test_general_multistate_input(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+):
+    """Test general multistate input."""
+    await entity.async_update()
+
+    assert entity._cluster_handler.number_of_states == 2
+    assert entity._cluster_handler.out_of_service == 0
+    assert entity._cluster_handler.present_value == 1
+    assert entity._cluster_handler.reliability == 0
+    assert entity._cluster_handler.status_flags == 0
+    assert entity._cluster_handler.application_type == 0x00000009
+
+    if entity._cluster_handler.state_text is None:
+        assert_state(entity, "state_1", None)
+        await send_attributes_report(
+            zha_gateway,
+            cluster,
+            {general.MultistateInput.AttributeDefs.present_value.id: 2},
+        )
+        assert_state(entity, "state_2", None)
+    else:
+        assert entity._cluster_handler.state_text == ["Night", "Day", "Hold"]
+        assert_state(entity, "Night", None)
+        await send_attributes_report(
+            zha_gateway,
+            cluster,
+            {general.MultistateInput.AttributeDefs.present_value.id: 2},
+        )
+        assert_state(entity, "Day", None)
+
+
 @pytest.mark.parametrize(
     "cluster_id, entity_type, test_func, read_plug, unsupported_attrs",
     (
@@ -543,6 +608,72 @@ async def async_test_pi_heating_demand(
             None,
             None,
         ),
+        (
+            general.AnalogInput.cluster_id,
+            sensor.AnalogInputSensor,
+            async_test_general_analog_input,
+            {
+                "present_value": 1.0,
+                "description": "Analog Input",
+                "max_present_value": 100.0,
+                "min_present_value": 1.0,
+                "out_of_service": 0,
+                "reliability": 0,
+                "resolution": 1.1,
+                "status_flags": 0,
+                "engineering_units": 98,
+                "application_type": 0x00010000,
+            },
+            None,
+        ),
+        (
+            general.AnalogInput.cluster_id,
+            sensor.AnalogInputSensor,
+            async_test_general_analog_input,
+            {
+                "present_value": 1.0,
+                "description": "Analog Input",
+                "max_present_value": 100.0,
+                "min_present_value": 1.0,
+                "out_of_service": 0,
+                "reliability": 0,
+                "status_flags": 0,
+                "engineering_units": 98,
+                "application_type": 0x00010000,
+            },
+            None,
+        ),
+        (
+            general.MultistateInput.cluster_id,
+            sensor.MultiStateInputSensor,
+            async_test_general_multistate_input,
+            {
+                "state_text": t.LVList(["Night", "Day", "Hold"]),
+                "description": "Multistate Input",
+                "number_of_states": 2,
+                "out_of_service": 0,
+                "present_value": 1,
+                "reliability": 0,
+                "status_flags": 0,
+                "application_type": 0x00000009,
+            },
+            None,
+        ),
+        (
+            general.MultistateInput.cluster_id,
+            sensor.MultiStateInputSensor,
+            async_test_general_multistate_input,
+            {
+                "description": "Multistate Input",
+                "number_of_states": 2,
+                "out_of_service": 0,
+                "present_value": 1,
+                "reliability": 0,
+                "status_flags": 0,
+                "application_type": 0x00000009,
+            },
+            None,
+        ),
     ),
 )
 async def test_sensor(
@@ -584,7 +715,12 @@ async def test_sensor(
     )
 
     await zha_gateway.async_block_till_done()
-    assert entity.fallback_name is None
+
+    if read_plug and read_plug.get("description", None):
+        assert entity.fallback_name == read_plug.get("description", None)
+        assert entity.translation_key is None
+    else:
+        assert entity.fallback_name is None
     # test sensor associated logic
     await test_func(zha_gateway, cluster, entity)
 
@@ -1372,32 +1508,3 @@ async def test_danfoss_thermostat_sw_error(
     assert entity.extra_state_attribute_names
     assert "Top_pcb_sensor_error" in entity.extra_state_attribute_names
     assert entity.state["Top_pcb_sensor_error"]
-
-
-async def test_sensor_general(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zha_gateway: Gateway,
-) -> None:
-    """Test sensor general - description."""
-    DEVICE_GENERAL = {
-        1: {
-            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.COMBINED_INTERFACE,
-            SIG_EP_INPUT: [general.AnalogInput.cluster_id],
-            SIG_EP_OUTPUT: [],
-        }
-    }
-
-    zigpy_device = zigpy_device_mock(DEVICE_GENERAL)
-
-    cluster = getattr(zigpy_device.endpoints[1], "analog_input")
-    cluster.PLUGGED_ATTR_READS = {"description": "Analog Input", "present_value": 1.0}
-    update_attribute_cache(cluster)
-    zha_device = await device_joined(zigpy_device)
-    entity: PlatformEntity = find_entity(zha_device, Platform.SENSOR)
-
-    await entity.async_update()
-    await zha_gateway.async_block_till_done()
-    assert entity.fallback_name == "Analog Input"
-    assert entity.translation_key is None

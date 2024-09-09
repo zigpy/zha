@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import enum
 import functools
 import logging
+import math
 import numbers
 from typing import TYPE_CHECKING, Any, Self
 
@@ -30,7 +31,11 @@ from zha.application.platforms import (
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import UNITS
-from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
+from zha.application.platforms.sensor.const import (
+    AnalogInputStateClass,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import (
@@ -539,7 +544,7 @@ class MultiStateInputSensor(EnumSensor):
             self._enum = enum.Enum(  # type: ignore [misc]
                 "state_text",
                 [
-                    (f"state_{i}", i)
+                    (f"state_{i+1}", i + 1)
                     for i in range(
                         self._cluster_handler.cluster.get("number_of_states")
                     )
@@ -569,6 +574,27 @@ class AnalogInputSensor(Sensor):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         engineering_units = self._cluster_handler.engineering_units
         self._attr_native_unit_of_measurement = UNITS.get(engineering_units)
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def device_class(self) -> str | None:
+        """Return the device class."""
+        if self._cluster_handler.application_type is not None:
+            device_type = (self._cluster_handler.application_type >> 16) & 0xFF
+            return AnalogInputStateClass.device_class(device_type)
+        return None
+
+    @property
+    def suggested_display_precision(self) -> int | None:
+        """Return the the display precision."""
+        if self._cluster_handler.resolution is not None:
+            return math.ceil(
+                -math.log10(
+                    abs(self._cluster_handler.resolution)
+                    - abs(math.floor(self._cluster_handler.resolution))
+                )
+            )
+        return None
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)

@@ -100,6 +100,7 @@ class AnalogInputClusterHandler(ClusterHandler):
         AnalogInput.AttributeDefs.out_of_service.name: True,
         AnalogInput.AttributeDefs.reliability.name: True,
         AnalogInput.AttributeDefs.resolution.name: True,
+        AnalogInput.AttributeDefs.status_flags.name: True,
         AnalogInput.AttributeDefs.engineering_units.name: True,
         AnalogInput.AttributeDefs.application_type.name: True,
     }
@@ -467,13 +468,62 @@ class MultistateInputClusterHandler(ClusterHandler):
     )
 
     ZCL_INIT_ATTRS = {
+        MultistateInput.AttributeDefs.state_text.name: True,
+        MultistateInput.AttributeDefs.description.name: True,
+        MultistateInput.AttributeDefs.number_of_states.name: True,
+        MultistateInput.AttributeDefs.out_of_service.name: True,
+        MultistateInput.AttributeDefs.present_value.name: True,
+        MultistateInput.AttributeDefs.reliability.name: True,
+        MultistateInput.AttributeDefs.status_flags.name: True,
+        MultistateInput.AttributeDefs.application_type.name: True,
         MultistateInput.AttributeDefs.description.name: True,
     }
+
+    @property
+    def state_text(self) -> t.LVList | None:
+        """Return cached value of state text."""
+        return self.cluster.get(MultistateInput.AttributeDefs.state_text.name)
 
     @property
     def description(self) -> str | None:
         """Return cached value of description."""
         return self.cluster.get(MultistateInput.AttributeDefs.description.name)
+
+    @property
+    def number_of_states(self) -> int:
+        """Return cached value of number of states."""
+        return self.cluster.get(MultistateInput.AttributeDefs.number_of_states.name)
+
+    @property
+    def out_of_service(self) -> bool | None:
+        """Return cached value of out of service."""
+        return self.cluster.get(AnalogInput.AttributeDefs.out_of_service.name)
+
+    @property
+    def present_value(self) -> int:
+        """Return cached value of present value."""
+        return self.cluster.get(AnalogInput.AttributeDefs.present_value.name)
+
+    @property
+    def reliability(self) -> int | None:
+        """Return cached value of reliability."""
+        return self.cluster.get(AnalogInput.AttributeDefs.reliability.name)
+
+    @property
+    def status_flags(self) -> int | None:
+        """Return cached value of status flags."""
+        return self.cluster.get(AnalogInput.AttributeDefs.status_flags.name)
+
+    @property
+    def application_type(self) -> int | None:
+        """Return cached value of application type."""
+        return self.cluster.get(AnalogInput.AttributeDefs.application_type.name)
+
+    async def async_update(self):
+        """Update cluster value attribute."""
+        await self.get_attribute_value(
+            AnalogInput.AttributeDefs.present_value.name, from_cache=False
+        )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
