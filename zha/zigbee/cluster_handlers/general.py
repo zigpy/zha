@@ -476,7 +476,6 @@ class MultistateInputClusterHandler(ClusterHandler):
         MultistateInput.AttributeDefs.reliability.name: True,
         MultistateInput.AttributeDefs.status_flags.name: True,
         MultistateInput.AttributeDefs.application_type.name: True,
-        MultistateInput.AttributeDefs.description.name: True,
     }
 
     @property
@@ -497,32 +496,32 @@ class MultistateInputClusterHandler(ClusterHandler):
     @property
     def out_of_service(self) -> bool | None:
         """Return cached value of out of service."""
-        return self.cluster.get(AnalogInput.AttributeDefs.out_of_service.name)
+        return self.cluster.get(MultistateInput.AttributeDefs.out_of_service.name)
 
     @property
     def present_value(self) -> int:
         """Return cached value of present value."""
-        return self.cluster.get(AnalogInput.AttributeDefs.present_value.name)
+        return self.cluster.get(MultistateInput.AttributeDefs.present_value.name)
 
     @property
     def reliability(self) -> int | None:
         """Return cached value of reliability."""
-        return self.cluster.get(AnalogInput.AttributeDefs.reliability.name)
+        return self.cluster.get(MultistateInput.AttributeDefs.reliability.name)
 
     @property
     def status_flags(self) -> int | None:
         """Return cached value of status flags."""
-        return self.cluster.get(AnalogInput.AttributeDefs.status_flags.name)
+        return self.cluster.get(MultistateInput.AttributeDefs.status_flags.name)
 
     @property
     def application_type(self) -> int | None:
         """Return cached value of application type."""
-        return self.cluster.get(AnalogInput.AttributeDefs.application_type.name)
+        return self.cluster.get(MultistateInput.AttributeDefs.application_type.name)
 
     async def async_update(self):
         """Update cluster value attribute."""
         await self.get_attribute_value(
-            AnalogInput.AttributeDefs.present_value.name, from_cache=False
+            MultistateInput.AttributeDefs.present_value.name, from_cache=False
         )
 
 
