@@ -316,6 +316,26 @@ async def test_climate_local_temperature(
     assert entity.state["current_temperature"] == 21.0
 
 
+async def test_climate_outdoor_temperature(
+    device_climate: Device,
+    zha_gateway: Gateway,
+) -> None:
+    """Test outdoor temperature."""
+
+    thrm_cluster = device_climate.device.endpoints[1].thermostat
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+    assert entity.state["outdoor_temperature"] is None
+
+    await send_attributes_report(
+        zha_gateway,
+        thrm_cluster,
+        {Thermostat.AttributeDefs.outdoor_temperature.id: 2150},
+    )
+    assert entity.state["outdoor_temperature"] == 21.5
+
+
 async def test_climate_hvac_action_running_state(
     device_climate_sinope: Device,
     zha_gateway: Gateway,

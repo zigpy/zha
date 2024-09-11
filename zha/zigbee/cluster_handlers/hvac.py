@@ -209,6 +209,11 @@ class ThermostatClusterHandler(ClusterHandler):
         return self.cluster.get(Thermostat.AttributeDefs.local_temperature.name)
 
     @property
+    def outdoor_temperature(self) -> int | None:
+        """Thermostat outdoor temperature."""
+        return self.cluster.get(Thermostat.AttributeDefs.outdoor_temperature.name)
+
+    @property
     def occupancy(self) -> int | None:
         """Is occupancy detected."""
         return self.cluster.get(Thermostat.AttributeDefs.occupancy.name)

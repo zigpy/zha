@@ -150,6 +150,7 @@ class Thermostat(PlatformEntity):
 
         response = super().state
         response["current_temperature"] = self.current_temperature
+        response["outdoor_temperature"] = self.outdoor_temperature
         response["target_temperature"] = self.target_temperature
         response["target_temperature_high"] = self.target_temperature_high
         response["target_temperature_low"] = self.target_temperature_low
@@ -178,6 +179,13 @@ class Thermostat(PlatformEntity):
         if self._thermostat_cluster_handler.local_temperature is None:
             return None
         return self._thermostat_cluster_handler.local_temperature / ZCL_TEMP
+
+    @property
+    def outdoor_temperature(self):
+        """Return the outdoor temperature."""
+        if self._thermostat_cluster_handler.outdoor_temperature is None:
+            return None
+        return self._thermostat_cluster_handler.outdoor_temperature / ZCL_TEMP
 
     @property
     def fan_mode(self) -> str | None:
