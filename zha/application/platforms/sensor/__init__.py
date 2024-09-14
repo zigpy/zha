@@ -1127,6 +1127,12 @@ class Flow(Sensor):
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
 
+    def formatter(self, value: int) -> int | None:
+        """Handle unknown value state."""
+        if value == 0xFFFF:
+            return None
+        return super().formatter(value)
+
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_TEMPERATURE)
 class Temperature(Sensor):
