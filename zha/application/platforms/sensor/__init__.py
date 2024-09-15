@@ -64,6 +64,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     CLUSTER_HANDLER_HUMIDITY,
     CLUSTER_HANDLER_ILLUMINANCE,
+    CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_LEAF_WETNESS,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
     CLUSTER_HANDLER_PRESSURE,
@@ -1137,6 +1138,36 @@ class DeviceTemperature(Sensor):
     _attr_translation_key: str = "device_temperature"
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
+class InovelliInternalTemperature(Sensor):
+    """Switch Internal Temperature Sensor."""
+
+    _attribute_name = "internal_temp_monitor"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_translation_key: str = "internal_temp_monitor"
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+class InovelliOverheatedState(types.enum8):
+    """Inovelli overheat protection state."""
+
+    Normal = 0x00
+    Overheated = 0x01
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
+class InovelliOverheated(EnumSensor):
+    """Sensor that displays the overheat protection state."""
+
+    _attribute_name = "overheated"
+    _unique_id_suffix = "overheated"
+    _attr_translation_key: str = "overheated"
+    _enum = InovelliOverheatedState
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
 

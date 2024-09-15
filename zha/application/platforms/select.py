@@ -637,6 +637,25 @@ class InovelliNonNeutralOutputEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "increased_non_neutral_output"
 
 
+class InovelliDimmingMode(types.enum1):
+    """Inovelli dimming mode selection."""
+
+    LeadingEdge = 0x00
+    TrailingEdge = 0x01
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM31-SN", "VZM36"}
+)
+class InovelliDimmingModeEntity(ZCLEnumSelectEntity):
+    """Inovelli dimming mode control."""
+
+    _unique_id_suffix = "leading_or_trailing_edge"
+    _attribute_name = "leading_or_trailing_edge"
+    _enum = InovelliDimmingMode
+    _attr_translation_key: str = "leading_or_trailing_edge"
+
+
 class AqaraFeedingMode(types.enum8):
     """Feeding mode."""
 

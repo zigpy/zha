@@ -650,6 +650,42 @@ class InovelliAutoShutoffTimer(NumberConfigurationEntity):
     _attr_translation_key: str = "auto_off_timer"
 
 
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
+class InovelliLocalDefaultLevel(NumberConfigurationEntity):
+    """Inovelli local default dimming/fan level configuration entity."""
+
+    _unique_id_suffix = "default_level_local"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "default_level_local"
+    _attr_translation_key: str = "default_level_local"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
+class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
+    """Inovelli remote default dimming/fan level configuration entity."""
+
+    _unique_id_suffix = "default_level_remote"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "default_level_remote"
+    _attr_translation_key: str = "default_level_remote"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
+class InovelliStartupDefaultLevel(NumberConfigurationEntity):
+    """Inovelli start-up default dimming/fan level configuration entity."""
+
+    _unique_id_suffix = "state_after_power_restored"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "state_after_power_restored"
+    _attr_translation_key: str = "state_after_power_restored"
+
+
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM35-SN"}
 )
