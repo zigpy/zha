@@ -18,6 +18,7 @@ from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
+from zigpy.zcl.clusters.general_const import ApplicationType
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
@@ -32,7 +33,7 @@ from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import UNITS
 from zha.application.platforms.sensor.const import (
-    AnalogInputStateClass,
+    ANALOG_INPUT_APPTYPE_DEV_CLASS,
     SensorDeviceClass,
     SensorStateClass,
 )
@@ -538,16 +539,14 @@ class MultiStateInputSensor(EnumSensor):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         if self._cluster_handler.cluster.get("state_text"):
             self._enum = enum.Enum(  # type: ignore [misc]
-                "state_text", self._cluster_handler.cluster.get("state_text")
+                "state_text", self._cluster_handler.cluster["state_text"]
             )
         elif self._cluster_handler.cluster.get("number_of_states") is not None:
             self._enum = enum.Enum(  # type: ignore [misc]
                 "state_text",
                 [
                     (f"state_{i+1}", i + 1)
-                    for i in range(
-                        self._cluster_handler.cluster.get("number_of_states")
-                    )
+                    for i in range(self._cluster_handler.cluster["number_of_states"])
                 ],
             )
 
@@ -580,8 +579,8 @@ class AnalogInputSensor(Sensor):
     def device_class(self) -> str | None:
         """Return the device class."""
         if self._cluster_handler.application_type is not None:
-            device_type = (self._cluster_handler.application_type >> 16) & 0xFF
-            return AnalogInputStateClass.device_class(device_type)
+            app_type = ApplicationType(self._cluster_handler.application_type)
+            return ANALOG_INPUT_APPTYPE_DEV_CLASS[app_type.type]
         return None
 
     @property

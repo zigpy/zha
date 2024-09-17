@@ -414,7 +414,7 @@ async def async_test_general_analog_input(
     assert entity._cluster_handler.out_of_service == 0
     assert entity._cluster_handler.reliability == 0
     assert entity._cluster_handler.status_flags == 0
-    assert entity._cluster_handler.application_type == 0x00010000
+    assert entity._cluster_handler.application_type == 0x00070100
     assert entity._cluster_handler.present_value == 1.0
 
     await send_attributes_report(
@@ -622,7 +622,7 @@ async def async_test_general_multistate_input(
                 "resolution": 1.1,
                 "status_flags": 0,
                 "engineering_units": 98,
-                "application_type": 0x00010000,
+                "application_type": 0x00070100,
             },
             None,
         ),
@@ -639,7 +639,7 @@ async def async_test_general_multistate_input(
                 "reliability": 0,
                 "status_flags": 0,
                 "engineering_units": 98,
-                "application_type": 0x00010000,
+                "application_type": 0x00070100,
             },
             None,
         ),

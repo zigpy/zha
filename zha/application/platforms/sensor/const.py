@@ -2,6 +2,8 @@
 
 import enum
 
+from zigpy.zcl.clusters.general_const import AnalogInputType
+
 
 class SensorStateClass(enum.StrEnum):
     """State class for sensors."""
@@ -391,35 +393,20 @@ NON_NUMERIC_DEVICE_CLASSES = {
     SensorDeviceClass.TIMESTAMP,
 }
 
-
-class AnalogInputStateClass(enum.Enum):
-    """State class for AnalogInput Types."""
-
-    TEMPERATURE = (0x00, SensorDeviceClass.TEMPERATURE)
-    RELATIVE_HUMIDITY = (0x01, SensorDeviceClass.HUMIDITY)
-    PRESSURE = (0x02, SensorDeviceClass.PRESSURE)
-    FLOW = (0x03, SensorDeviceClass.VOLUME_FLOW_RATE)
-    PERCENTAGE = (0x04, None)
-    PARTS_PER_MILLION = (0x05, SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS)
-    RPM = (0x06, None)
-    CURRENT = (0x07, SensorDeviceClass.CURRENT)
-    FREQUENCY = (0x08, SensorDeviceClass.FREQUENCY)
-    POWER_WATTS = (0x09, SensorDeviceClass.POWER)
-    POWER_KILOWATTS = (0x0A, SensorDeviceClass.POWER)
-    ENERGY = (0x0B, SensorDeviceClass.ENERGY)
-    COUNT = (0x0C, None)
-    ENTHALPY = (0x0D, None)
-    TIME_SECONDS = (0x0E, None)
-
-    def __init__(self, type, dev_class):
-        """Init this enum."""
-        self.type = type
-        self.dev_class = dev_class
-
-    @classmethod
-    def device_class(cls, type):
-        """Return the device class given a type."""
-        for entry in cls:
-            if entry.type == type:
-                return entry.dev_class.value
-        return None
+ANALOG_INPUT_APPTYPE_DEV_CLASS = {
+    AnalogInputType.Temp_Degrees_C: SensorDeviceClass.TEMPERATURE,
+    AnalogInputType.Relative_Humidity_Percent: SensorDeviceClass.HUMIDITY,
+    AnalogInputType.Pressure_Pascal: SensorDeviceClass.PRESSURE,
+    AnalogInputType.Flow_Liters_Per_Sec: SensorDeviceClass.VOLUME_FLOW_RATE,
+    AnalogInputType.Percentage: None,
+    AnalogInputType.Parts_Per_Million: SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
+    AnalogInputType.Rotational_Speed_RPM: None,
+    AnalogInputType.Current_Amps: SensorDeviceClass.CURRENT,
+    AnalogInputType.Frequency_Hz: SensorDeviceClass.FREQUENCY,
+    AnalogInputType.Power_Watts: SensorDeviceClass.POWER,
+    AnalogInputType.Power_Kilo_Watts: SensorDeviceClass.POWER,
+    AnalogInputType.Energy_Kilo_Watt_Hours: SensorDeviceClass.ENERGY,
+    AnalogInputType.Count: None,
+    AnalogInputType.Enthalpy_KJoules_Per_Kg: None,
+    AnalogInputType.Time_Seconds: None,
+}
