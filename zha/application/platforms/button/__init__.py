@@ -236,6 +236,7 @@ class AqaraSelfTestButton(WriteAttributeButton):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "self_test"
 
+
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
