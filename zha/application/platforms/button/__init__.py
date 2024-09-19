@@ -235,3 +235,15 @@ class AqaraSelfTestButton(WriteAttributeButton):
     _attribute_value = 1
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "self_test"
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
+)
+class AqaraCalibrateButton(WriteAttributeButton):
+    """Defines a ZHA calibrate button for Aqara TRV."""
+
+    _unique_id_suffix = "calibrate"
+    _attribute_name = "calibrate"
+    _attribute_value = 1
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_translation_key = "calibrate"
