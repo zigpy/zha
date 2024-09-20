@@ -387,13 +387,12 @@ class Gateway(AsyncUtilMixin, EventBase):
             *(dev.async_initialize(from_cache=True) for dev in self.devices.values())
         )
 
-        if not self.config.config.device_options.enable_mains_startup_polling:
-            _LOGGER.debug("Polling of mains powered devices at startup is disabled")
-            return
-
         async def fetch_updated_state() -> None:
             """Fetch updated state for mains powered devices."""
-            await self.async_fetch_updated_state_mains()
+            if not self.config.config.device_options.enable_mains_startup_polling:
+                _LOGGER.debug("Polling of mains powered devices at startup is disabled")
+            else:
+                await self.async_fetch_updated_state_mains()
             _LOGGER.debug("Allowing polled requests")
             self.config.allow_polling = True
 
