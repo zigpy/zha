@@ -1,0 +1,1582 @@
+{
+  "ieee": "00:15:8d:00:04:44:ec:08",
+  "nwk": 36765,
+  "manufacturer": "LUMI",
+  "model": "lumi.relay.c2acn01",
+  "name": "LUMI lumi.relay.c2acn01",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.relay_c2acn01.Relay",
+  "quirk_id": null,
+  "manufacturer_code": 4151,
+  "power_source": "Mains",
+  "lqi": 145,
+  "rssi": null,
+  "last_seen": "2024-08-26T14:48:58",
+  "available": true,
+  "device_type": "Router",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4151,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0002",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x000a",
+          "0x000c",
+          "0x0010",
+          "0x0702",
+          "0x0b04"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0010"
+        ],
+        "output_clusters": []
+      }
+    },
+    "manufacturer": "LUMI",
+    "model": "lumi.relay.c2acn01"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.lumi_lumi_relay_c2acn01_identifybutton",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "light.lumi_lumi_relay_c2acn01_light",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "light.lumi_lumi_relay_c2acn01_light_2",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_relay_c2acn01_electricalmeasurementpowerfactor",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_relay_c2acn01_devicetemperature",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "sensor.lumi_lumi_relay_c2acn01_electricalmeasurement",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "sensor.downstairs_bathroom_fan_instantaneous_demand",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "sensor.downstairs_bathroom_fan_summation_delivered",
+      "name": "LUMI lumi.relay.c2acn01"
+    },
+    {
+      "entity_id": "update.downstairs_bathroom_fan_firmware",
+      "name": "LUMI lumi.relay.c2acn01"
+    }
+  ],
+  "neighbors": [
+    {
+      "device_type": "Coordinator",
+      "rx_on_when_idle": "On",
+      "relationship": "Parent",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:12:4b:00:25:90:19:2d",
+      "nwk": "0x0000",
+      "permit_joining": "Unknown",
+      "depth": "0",
+      "lqi": "111"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Child",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:41:67:1f:d7",
+      "nwk": "0xB988",
+      "permit_joining": "Unknown",
+      "depth": "2",
+      "lqi": "123"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "7c:b0:3e:aa:00:a4:34:be",
+      "nwk": "0x04D6",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "41"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "f0:f5:bd:ff:fe:2c:e0:90",
+      "nwk": "0xEE0B",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "56"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "cc:cc:cc:ff:fe:c4:dc:e1",
+      "nwk": "0xA57B",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "54"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:41:93:fe:df",
+      "nwk": "0x29E5",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "127"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:41:95:c3:a6",
+      "nwk": "0x8B02",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "49"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:15:8d:00:04:27:01:b4",
+      "nwk": "0x696C",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "105"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:2c:24",
+      "nwk": "0x68BB",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "107"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:40:c0:4e:54",
+      "nwk": "0x8F36",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "49"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:17:33",
+      "nwk": "0xAEFD",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "85"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:db:00",
+      "nwk": "0x0F04",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "82"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:12:4b:00:1c:46:5f:b1",
+      "nwk": "0xE2CF",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "40"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:1e:8a",
+      "nwk": "0xA7AB",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "124"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:0d:6f:00:10:67:70:a5",
+      "nwk": "0x334B",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "58"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "f0:d1:b8:00:00:05:49:22",
+      "nwk": "0xEE12",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "75"
+    }
+  ],
+  "routes": [
+    {
+      "dest_nwk": "0x3DD7",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x35E1",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x1CCA",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x2545",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x3EB2",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x29E5",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x29E5"
+    },
+    {
+      "dest_nwk": "0x4B84",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x4BF4",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x696C"
+    },
+    {
+      "dest_nwk": "0xCBDB",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x4FE6",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x6114",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xF7AE",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x7C06",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xEE0B",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x29E5"
+    },
+    {
+      "dest_nwk": "0x6100",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x29E5"
+    },
+    {
+      "dest_nwk": "0x4691",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x62C7",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x696C"
+    },
+    {
+      "dest_nwk": "0xB988",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB988"
+    },
+    {
+      "dest_nwk": "0x6404",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x7D23",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x1C1E",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x404B",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x76B5",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB988"
+    },
+    {
+      "dest_nwk": "0x696C",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x696C"
+    },
+    {
+      "dest_nwk": "0xC0FA",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xB988"
+    },
+    {
+      "dest_nwk": "0xEE12",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x3C7D",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x95A8",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x9AF8",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x13E7",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x696C"
+    },
+    {
+      "dest_nwk": "0xE2CF",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x9D97",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x00A2",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x591D",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x696C"
+    },
+    {
+      "dest_nwk": "0x6616",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xE44F",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xEC02",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x79AB",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xB789",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x696C"
+    },
+    {
+      "dest_nwk": "0x0000",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": true,
+      "route_record_required": false,
+      "next_hop": "0x0000"
+    },
+    {
+      "dest_nwk": "0x7045",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x5256",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x8B02",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x8B02"
+    },
+    {
+      "dest_nwk": "0x20A9",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xD53C",
+      "route_status": "Discovery_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x334B",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x334B"
+    },
+    {
+      "dest_nwk": "0x770B",
+      "route_status": "Validation_Underway",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x29E5"
+    },
+    {
+      "dest_nwk": "0x4FEB",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x696C"
+    }
+  ],
+  "endpoint_names": [
+    {
+      "name": "DIMMABLE_LIGHT"
+    },
+    {
+      "name": "DIMMABLE_LIGHT"
+    }
+  ],
+  "user_given_name": "Downstairs Bathroom Fan",
+  "device_reg_id": "67e3549f005c4961b41de57538171b00",
+  "area_id": "55e8aaa5e4ee44f8abdf4499bcab9e39",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0001": {
+              "attribute_name": "app_version",
+              "value": 1
+            },
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "LUMI"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "lumi.relay.c2acn01"
+            },
+            "0x0007": {
+              "attribute_name": "power_source",
+              "value": 4
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0001": {
+          "endpoint_attribute": "power",
+          "attributes": {
+            "0x0020": {
+              "attribute_name": "battery_voltage",
+              "value": 0
+            },
+            "0x0000": {
+              "attribute_name": "mains_voltage",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0002": {
+          "endpoint_attribute": "device_temperature",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_temperature",
+              "value": 4000
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0010": {
+          "endpoint_attribute": "binary_output",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x000a": {
+          "endpoint_attribute": "time",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0702": {
+          "endpoint_attribute": "smartenergy_metering",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_summ_delivered",
+              "value": 96
+            },
+            "0x0302": {
+              "attribute_name": "divisor",
+              "value": 1000
+            },
+            "0x0306": {
+              "attribute_name": "metering_device_type",
+              "value": 0
+            },
+            "0x0301": {
+              "attribute_name": "multiplier",
+              "value": 1
+            },
+            "0x0303": {
+              "attribute_name": "summation_formatting",
+              "value": 35
+            },
+            "0x0300": {
+              "attribute_name": "unit_of_measure",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0b04": {
+          "endpoint_attribute": "electrical_measurement",
+          "attributes": {
+            "0x0605": {
+              "attribute_name": "ac_power_divisor",
+              "value": 10
+            },
+            "0x0604": {
+              "attribute_name": "ac_power_multiplier",
+              "value": 1
+            },
+            "0x050b": {
+              "attribute_name": "active_power",
+              "value": 0
+            },
+            "0x0500": {
+              "attribute_name": "instantaneous_voltage",
+              "value": 119.24866943359376
+            },
+            "0x0403": {
+              "attribute_name": "power_divisor",
+              "value": 1
+            },
+            "0x0402": {
+              "attribute_name": "power_multiplier",
+              "value": 1
+            },
+            "0x0505": {
+              "attribute_name": "rms_voltage",
+              "value": 118.93077392578125
+            },
+            "0x0304": {
+              "attribute_name": "total_active_power",
+              "value": 96
+            }
+          },
+          "unsupported_attributes": {
+            "0x0300": {
+              "attribute_name": "ac_frequency"
+            },
+            "0x050f": {
+              "attribute_name": "apparent_power"
+            },
+            "0x0302": {
+              "attribute_name": "ac_frequency_max"
+            },
+            "0x0505": {
+              "attribute_name": "rms_voltage"
+            },
+            "0x050d": {
+              "attribute_name": "active_power_max"
+            },
+            "0x0508": {
+              "attribute_name": "rms_current"
+            },
+            "0x0507": {
+              "attribute_name": "rms_voltage_max"
+            },
+            "0x050a": {
+              "attribute_name": "rms_current_max"
+            }
+          }
+        },
+        "0x000c": {
+          "endpoint_attribute": "analog_input",
+          "attributes": {
+            "0x0055": {
+              "attribute_name": "present_value",
+              "value": 0.00767827033996582
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version",
+              "value": 36
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x000a": {
+          "endpoint_attribute": "time",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    },
+    "2": {
+      "device_type": {
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0010": {
+          "endpoint_attribute": "binary_output",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {}
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "LUMI",
+        "lumi.relay.c2acn01"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0002",
+          "0x0004",
+          "0x0003",
+          "0x0006",
+          "0x0005",
+          "0x0010",
+          "0x000a",
+          "0x0b04",
+          "0x000c"
+        ],
+        "output_clusters": [
+          "0x0019",
+          "0x000a"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0006",
+          "0x0010",
+          "0x0004",
+          "0x0005"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1",
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "effect_list": null,
+          "supported_features": 8,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "hs_color": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect": null,
+          "supported_features": 8,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-2",
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "2:0x0006",
+              "unique_id": "00:15:8d:00:04:44:ec:08:2:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "effect_list": null,
+          "supported_features": 8,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "hs_color": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect": null,
+          "supported_features": 8,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-2820-power_factor",
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementPowerFactor",
+          "translation_key": null,
+          "device_class": "power_factor",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0b04",
+              "status": "CREATED",
+              "value_attribute": "active_power"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "power_factor",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementPowerFactor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-2",
+          "platform": "sensor",
+          "class_name": "DeviceTemperature",
+          "translation_key": "device_temperature",
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "DeviceTemperatureClusterHandler",
+              "generic_id": "cluster_handler_0x0002",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2,
+                "name": "Device Temperature",
+                "type": "server"
+              },
+              "id": "1:0x0002",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0002",
+              "status": "CREATED",
+              "value_attribute": "current_temperature"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "current_temperature",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "°C"
+        },
+        "state": {
+          "class_name": "DeviceTemperature",
+          "available": true,
+          "state": 40.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 145
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-2820",
+          "platform": "sensor",
+          "class_name": "PolledElectricalMeasurement",
+          "translation_key": null,
+          "device_class": "power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0b04",
+              "status": "CREATED",
+              "value_attribute": "active_power"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "active_power",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "W"
+        },
+        "state": {
+          "class_name": "PolledElectricalMeasurement",
+          "available": true,
+          "state": 0.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-1794",
+          "platform": "sensor",
+          "class_name": "SmartEnergyMetering",
+          "translation_key": "instantaneous_demand",
+          "device_class": "power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1794,
+                "name": "MeteringCluster",
+                "type": "server"
+              },
+              "id": "1:0x0702",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0702",
+              "status": "CREATED",
+              "value_attribute": "instantaneous_demand"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "instantaneous_demand",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "W"
+        },
+        "state": {
+          "class_name": "SmartEnergyMetering",
+          "available": true,
+          "state": null,
+          "device_type": "Electric Metering",
+          "zcl_unit_of_measurement": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-1794-summation_delivered",
+          "platform": "sensor",
+          "class_name": "SmartEnergySummation",
+          "translation_key": "summation_delivered",
+          "device_class": "energy",
+          "state_class": "total_increasing",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1794,
+                "name": "MeteringCluster",
+                "type": "server"
+              },
+              "id": "1:0x0702",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0702",
+              "status": "CREATED",
+              "value_attribute": "instantaneous_demand"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "current_summ_delivered",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "kWh"
+        },
+        "state": {
+          "class_name": "SmartEnergySummation",
+          "available": true,
+          "state": 0.096,
+          "device_type": "Electric Metering",
+          "zcl_unit_of_measurement": 0
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x00000024",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x00000024",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

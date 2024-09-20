@@ -1,8 +1,11 @@
 """Test ZHA device discovery."""
 
+import asyncio
 from collections.abc import Awaitable, Callable, Coroutine
 import enum
 import itertools
+import json
+import pathlib
 import re
 from typing import Any, Final
 from unittest import mock
@@ -1043,3 +1046,100 @@ async def test_quirks_v2_metadata_bad_device_classes(
 
     # remove the device so we don't pollute the rest of the tests
     zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
+
+
+def pytest_generate_tests(metafunc):
+    """Generate tests for all device files."""
+    if "file_path" in metafunc.fixturenames:
+        # use the filename as ID for better test names
+        file_paths = sorted(pathlib.Path("tests/data/devices").glob("**/*.json"))
+        file_paths = [
+            f for f in file_paths if f.name != "lumi-lumi-motion-agl04.json"
+        ]  # TODO: fix lingering timer for `_Motion._turn_off` in quirks
+
+        metafunc.parametrize("file_path", file_paths, ids=[f.name for f in file_paths])
+
+
+async def test_devices_from_files(
+    zha_device_from_file: Callable[..., Awaitable[Device]], file_path: str
+) -> None:
+    """Test all devices."""
+    with mock.patch(
+        "zigpy.zcl.clusters.general.Identify.request",
+        new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
+    ):
+        zha_device = await zha_device_from_file(file_path)
+        assert zha_device is not None
+
+        device_data = json.loads(
+            await asyncio.get_running_loop().run_in_executor(None, file_path.read_text)
+        )
+
+        # Get the zha_lib_entities from device_data
+        zha_lib_entities = device_data.get("zha_lib_entities", [])
+
+        entity_count = 0
+        # Iterate over the platform_entities in device.platform_entities
+        for platform, entities in zha_lib_entities.items():
+            for entity in entities:
+                entity_count += 1
+                platform_entity = zha_device.platform_entities.get(
+                    (Platform(platform), entity["info_object"]["unique_id"])
+                )
+                assert platform_entity is not None
+
+                # Assert that the entity properties match those in the json data
+                assert (
+                    platform_entity.translation_key
+                    == entity["info_object"]["translation_key"]
+                )
+                assert (
+                    platform_entity.fallback_name
+                    == entity["info_object"]["fallback_name"]
+                )
+                assert (
+                    platform_entity.device_class
+                    == entity["info_object"]["device_class"]
+                )
+                assert (
+                    platform_entity.__class__.__name__ == entity["state"]["class_name"]
+                )
+                assert (
+                    platform_entity.entity_category
+                    == entity["info_object"]["entity_category"]
+                )
+                assert (
+                    platform_entity.state_class == entity["info_object"]["state_class"]
+                )
+                assert (
+                    platform_entity.entity_registry_enabled_default
+                    == entity["info_object"]["entity_registry_enabled_default"]
+                )
+                assert (
+                    platform_entity.state["class_name"] == entity["state"]["class_name"]
+                )
+
+        # Assert that the number of entities in the device matches the number of entities in the json data
+        assert len(zha_device.platform_entities) == entity_count
+
+        # Assert identify called on join for devices that support it
+        cluster_identify = _get_identify_cluster(zha_device.device)
+        if cluster_identify and not zha_device.skip_configuration:
+            assert cluster_identify.request.mock_calls == [
+                mock.call(
+                    False,
+                    cluster_identify.commands_by_name["trigger_effect"].id,
+                    cluster_identify.commands_by_name["trigger_effect"].schema,
+                    effect_id=zigpy.zcl.clusters.general.Identify.EffectIdentifier.Okay,
+                    effect_variant=(
+                        zigpy.zcl.clusters.general.Identify.EffectVariant.Default
+                    ),
+                    # enhance this maybe by looking at disable default response?
+                    expect_reply=(
+                        cluster_identify.endpoint.model
+                        not in ("HDC52EastwindFan", "HBUniversalCFRemote")
+                    ),
+                    manufacturer=None,
+                    tsn=None,
+                )
+            ]

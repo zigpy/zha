@@ -1,0 +1,492 @@
+{
+  "ieee": "00:17:88:01:0c:26:42:ec",
+  "nwk": 46170,
+  "manufacturer": "Signify Netherlands B.V.",
+  "model": "RWL022",
+  "name": "Signify Netherlands B.V. RWL022",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.philips.rwl022.PhilipsRWL022",
+  "quirk_id": null,
+  "manufacturer_code": 4107,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-08-26T16:49:33",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 128,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0830",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x1000",
+          "0xfc00"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0019",
+          "0x1000"
+        ]
+      }
+    },
+    "manufacturer": "Signify Netherlands B.V.",
+    "model": "RWL022"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.signify_netherlands_b_v_rwl022_identifybutton",
+      "name": "Signify Netherlands B.V. RWL022"
+    },
+    {
+      "entity_id": "sensor.signify_netherlands_b_v_rwl022_battery",
+      "name": "Signify Netherlands B.V. RWL022"
+    },
+    {
+      "entity_id": "update.back_hose_signify_netherlands_b_v_rwl022_firmware",
+      "name": "Signify Netherlands B.V. RWL022"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "NON_COLOR_SCENE_CONTROLLER"
+    }
+  ],
+  "user_given_name": "Back Hose Signify Netherlands B.V. RWL022",
+  "device_reg_id": "1b2bd27a3ff288eca267f695c5a2cc7a",
+  "area_id": "a971cb6d957b4a33b0f0ec58a54db0a6",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "NON_COLOR_SCENE_CONTROLLER",
+        "id": 2096
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "Signify Netherlands B.V."
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "RWL022"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0001": {
+          "endpoint_attribute": "power",
+          "attributes": {
+            "0x0021": {
+              "attribute_name": "battery_percentage_remaining",
+              "value": 191
+            },
+            "0x0020": {
+              "attribute_name": "battery_voltage",
+              "value": 28
+            }
+          },
+          "unsupported_attributes": {
+            "0x0031": {
+              "attribute_name": "battery_size"
+            },
+            "0x0033": {
+              "attribute_name": "battery_quantity"
+            }
+          }
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0xfc00": {
+          "endpoint_attribute": "philips_remote_cluster",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x1000": {
+          "endpoint_attribute": "lightlink",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version",
+              "value": 33565954
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x1000": {
+          "endpoint_attribute": "lightlink",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "Signify Netherlands B.V.",
+        "RWL022"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0830",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0xfc00",
+          "0x1000"
+        ],
+        "output_clusters": [
+          "0x0019",
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0006",
+          "0x0008",
+          "0x0005",
+          "0x1000"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:26:42:ec-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "00:17:88:01:0c:26:42:ec:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            236,
+            66,
+            38,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:26:42:ec-1-1",
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "00:17:88:01:0c:26:42:ec:1:0x0001",
+              "status": "CREATED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": [
+            236,
+            66,
+            38,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "battery_percentage_remaining",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 96,
+          "battery_voltage": 2.8
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:26:42:ec-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "PhilipsBasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:17:88:01:0c:26:42:ec:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            236,
+            66,
+            38,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:26:42:ec-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "PhilipsBasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:17:88:01:0c:26:42:ec:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            236,
+            66,
+            38,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:17:88:01:0c:26:42:ec-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "00:17:88:01:0c:26:42:ec:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            236,
+            66,
+            38,
+            12,
+            1,
+            136,
+            23,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x02002d02",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x02002d02",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

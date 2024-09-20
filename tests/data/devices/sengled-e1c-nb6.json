@@ -1,0 +1,413 @@
+{
+  "ieee": "b0:ce:18:14:00:04:2d:f3",
+  "nwk": 15485,
+  "manufacturer": "sengled",
+  "model": "E1C-NB6",
+  "name": "sengled E1C-NB6",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4448,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-02-08T16:15:50",
+  "available": false,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 140,
+      "manufacturer_code": 4448,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0009",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0b05"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    },
+    "manufacturer": "sengled",
+    "model": "E1C-NB6"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.christmas_tree_lights_identifybutton",
+      "name": "sengled E1C-NB6"
+    },
+    {
+      "entity_id": "switch.sengled_e1c_nb6_f32d0400_on_off",
+      "name": "sengled E1C-NB6"
+    },
+    {
+      "entity_id": "update.christmas_tree_lights_firmware",
+      "name": "sengled E1C-NB6"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "MAIN_POWER_OUTLET"
+    }
+  ],
+  "user_given_name": "Christmas Tree Lights",
+  "device_reg_id": "c5c667fcf38349bc804000480f5fab16",
+  "area_id": "fbd11ce6440d4260a54f35400f982954",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "MAIN_POWER_OUTLET",
+        "id": 9
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "sengled"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "E1C-NB6"
+            },
+            "0x0007": {
+              "attribute_name": "power_source",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {
+            "0x4003": {
+              "attribute_name": "start_up_on_off"
+            }
+          }
+        },
+        "0x0b05": {
+          "endpoint_attribute": "diagnostic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:00:04:2d:f3-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "b0:ce:18:14:00:04:2d:f3:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            243,
+            45,
+            4,
+            0,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": false
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:00:04:2d:f3-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "b0:ce:18:14:00:04:2d:f3:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            243,
+            45,
+            4,
+            0,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:00:04:2d:f3-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "b0:ce:18:14:00:04:2d:f3:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            243,
+            45,
+            4,
+            0,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": false,
+          "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:00:04:2d:f3-1-6",
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "b0:ce:18:14:00:04:2d:f3:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            243,
+            45,
+            4,
+            0,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 1,
+          "available": false
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:00:04:2d:f3-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "b0:ce:18:14:00:04:2d:f3:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            243,
+            45,
+            4,
+            0,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": false,
+          "installed_version": null,
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": null,
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,1618 @@
+{
+  "ieee": "b0:ce:18:14:03:3a:9b:48",
+  "nwk": 51911,
+  "manufacturer": "sengled",
+  "model": "E11-G13",
+  "name": "sengled E11-G13",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4448,
+  "power_source": "Mains",
+  "lqi": 168,
+  "rssi": -58,
+  "last_seen": "2024-08-26T13:36:28",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 140,
+      "manufacturer_code": 4448,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0101",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0702",
+          "0x0b05"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    },
+    "manufacturer": "sengled",
+    "model": "E11-G13"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.sengled_e11_g13_identify_2",
+      "name": "sengled E11-G13"
+    },
+    {
+      "entity_id": "light.sengled_e11_g13_light_2",
+      "name": "sengled E11-G13"
+    },
+    {
+      "entity_id": "number.sengled_e11_g13_on_level_2",
+      "name": "sengled E11-G13"
+    },
+    {
+      "entity_id": "sensor.sengled_e11_g13_instantaneous_demand_2",
+      "name": "sengled E11-G13"
+    },
+    {
+      "entity_id": "sensor.sengled_e11_g13_summation_delivered_2",
+      "name": "sengled E11-G13"
+    },
+    {
+      "entity_id": "update.sengled_e11_g13_firmware_2",
+      "name": "sengled E11-G13"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "DIMMABLE_LIGHT"
+    }
+  ],
+  "user_given_name": null,
+  "device_reg_id": "0e63751eb4747e6cac329949b3dad9ef",
+  "area_id": null,
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0013": {
+              "attribute": "ZCLAttributeDef(id=0x0013, name='alarm_mask', type=<flag 'AlarmMask'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0001": {
+              "attribute": "ZCLAttributeDef(id=0x0001, name='app_version', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0006": {
+              "attribute": "ZCLAttributeDef(id=0x0006, name='date_code', type=<class 'zigpy.types.basic.LimitedCharString.<locals>.LimitedCharString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0012": {
+              "attribute": "ZCLAttributeDef(id=0x0012, name='device_enabled', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0014": {
+              "attribute": "ZCLAttributeDef(id=0x0014, name='disable_local_config', type=<flag 'DisableLocalConfig'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0008": {
+              "attribute": "ZCLAttributeDef(id=0x0008, name='generic_device_class', type=<enum 'GenericDeviceClass'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0009": {
+              "attribute": "ZCLAttributeDef(id=0x0009, name='generic_device_type', type=<enum 'GenericLightingDeviceType'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0003": {
+              "attribute": "ZCLAttributeDef(id=0x0003, name='hw_version', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0010": {
+              "attribute": "ZCLAttributeDef(id=0x0010, name='location_desc', type=<class 'zigpy.types.basic.LimitedCharString.<locals>.LimitedCharString'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0004": {
+              "attribute": "ZCLAttributeDef(id=0x0004, name='manufacturer', type=<class 'zigpy.types.basic.LimitedCharString.<locals>.LimitedCharString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": "sengled"
+            },
+            "0x000c": {
+              "attribute": "ZCLAttributeDef(id=0x000C, name='manufacturer_version_details', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0005": {
+              "attribute": "ZCLAttributeDef(id=0x0005, name='model', type=<class 'zigpy.types.basic.LimitedCharString.<locals>.LimitedCharString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": "E11-G13"
+            },
+            "0x0011": {
+              "attribute": "ZCLAttributeDef(id=0x0011, name='physical_env', type=<enum 'PhysicalEnvironment'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0007": {
+              "attribute": "ZCLAttributeDef(id=0x0007, name='power_source', type=<enum 'PowerSource'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000a": {
+              "attribute": "ZCLAttributeDef(id=0x000A, name='product_code', type=<class 'zigpy.types.basic.LVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000e": {
+              "attribute": "ZCLAttributeDef(id=0x000E, name='product_label', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000b": {
+              "attribute": "ZCLAttributeDef(id=0x000B, name='product_url', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000d": {
+              "attribute": "ZCLAttributeDef(id=0x000D, name='serial_number', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0002": {
+              "attribute": "ZCLAttributeDef(id=0x0002, name='stack_version', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4000": {
+              "attribute": "ZCLAttributeDef(id=0x4000, name='sw_build_id', type=<class 'zigpy.types.basic.CharacterString'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='zcl_version', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": [
+            16384,
+            "sw_build_id"
+          ]
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='identify_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": []
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='name_support', type=<flag 'NameSupport'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": []
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='count', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0002": {
+              "attribute": "ZCLAttributeDef(id=0x0002, name='current_group', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0001": {
+              "attribute": "ZCLAttributeDef(id=0x0001, name='current_scene', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0005": {
+              "attribute": "ZCLAttributeDef(id=0x0005, name='last_configured_by', type=<class 'zigpy.types.named.EUI64'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0004": {
+              "attribute": "ZCLAttributeDef(id=0x0004, name='name_support', type=<flag 'NameSupport'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0003": {
+              "attribute": "ZCLAttributeDef(id=0x0003, name='scene_valid', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": []
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4000": {
+              "attribute": "ZCLAttributeDef(id=0x4000, name='global_scene_control', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4002": {
+              "attribute": "ZCLAttributeDef(id=0x4002, name='off_wait_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='on_off', type=<enum 'Bool'>, access=<ZCLAttributeAccess.Read|Report|Scene: 25>, mandatory=True, is_manufacturer_specific=False)",
+              "value": 0
+            },
+            "0x4001": {
+              "attribute": "ZCLAttributeDef(id=0x4001, name='on_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4003": {
+              "attribute": "ZCLAttributeDef(id=0x4003, name='start_up_on_off', type=<enum 'StartUpOnOff'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": [
+            16387,
+            "start_up_on_off"
+          ]
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0004": {
+              "attribute": "ZCLAttributeDef(id=0x0004, name='current_frequency', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Report|Scene: 25>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='current_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Report|Scene: 25>, mandatory=True, is_manufacturer_specific=False)",
+              "value": 254
+            },
+            "0x0014": {
+              "attribute": "ZCLAttributeDef(id=0x0014, name='default_move_rate', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0006": {
+              "attribute": "ZCLAttributeDef(id=0x0006, name='max_frequency', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0003": {
+              "attribute": "ZCLAttributeDef(id=0x0003, name='max_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0005": {
+              "attribute": "ZCLAttributeDef(id=0x0005, name='min_frequency', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0002": {
+              "attribute": "ZCLAttributeDef(id=0x0002, name='min_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0013": {
+              "attribute": "ZCLAttributeDef(id=0x0013, name='off_transition_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0011": {
+              "attribute": "ZCLAttributeDef(id=0x0011, name='on_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 255
+            },
+            "0x0010": {
+              "attribute": "ZCLAttributeDef(id=0x0010, name='on_off_transition_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0012": {
+              "attribute": "ZCLAttributeDef(id=0x0012, name='on_transition_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000f": {
+              "attribute": "ZCLAttributeDef(id=0x000F, name='options', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0001": {
+              "attribute": "ZCLAttributeDef(id=0x0001, name='remaining_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x4000": {
+              "attribute": "ZCLAttributeDef(id=0x4000, name='start_up_current_level', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read|Write: 3>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": [
+            16,
+            18,
+            19,
+            20,
+            16384,
+            "default_move_rate",
+            "off_transition_time",
+            "on_off_transition_time",
+            "on_transition_time",
+            "start_up_current_level"
+          ]
+        },
+        "0x0702": {
+          "endpoint_attribute": "smartenergy_metering",
+          "attributes": {
+            "0x0020": {
+              "attribute": "ZCLAttributeDef(id=0x0020, name='active_register_tier_delivered', type=<enum 'RegisteredTier'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0021": {
+              "attribute": "ZCLAttributeDef(id=0x0021, name='active_register_tier_received', type=<enum 'RegisteredTier'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0314": {
+              "attribute": "ZCLAttributeDef(id=0x0314, name='alternative_consumption_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0313": {
+              "attribute": "ZCLAttributeDef(id=0x0313, name='alternative_demand_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0312": {
+              "attribute": "ZCLAttributeDef(id=0x0312, name='alternative_unit_of_measure', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0a00": {
+              "attribute": "ZCLAttributeDef(id=0x0A00, name='bill_to_date', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0a01": {
+              "attribute": "ZCLAttributeDef(id=0x0A01, name='bill_to_date_time_stamp', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0019": {
+              "attribute": "ZCLAttributeDef(id=0x0019, name='control_temperature', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0413": {
+              "attribute": "ZCLAttributeDef(id=0x0413, name='cur_month_max_energy_carr_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0414": {
+              "attribute": "ZCLAttributeDef(id=0x0414, name='cur_month_min_energy_carr_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0405": {
+              "attribute": "ZCLAttributeDef(id=0x0405, name='cur_part_profile_int_start_time_delivered', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0406": {
+              "attribute": "ZCLAttributeDef(id=0x0406, name='cur_part_profile_int_start_time_received', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0407": {
+              "attribute": "ZCLAttributeDef(id=0x0407, name='cur_part_profile_int_value_delivered', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0408": {
+              "attribute": "ZCLAttributeDef(id=0x0408, name='cur_part_profile_int_value_received', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0415": {
+              "attribute": "ZCLAttributeDef(id=0x0415, name='cur_year_max_energy_carr_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0416": {
+              "attribute": "ZCLAttributeDef(id=0x0416, name='cur_year_min_energy_carr_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000e": {
+              "attribute": "ZCLAttributeDef(id=0x000E, name='current_block', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000c": {
+              "attribute": "ZCLAttributeDef(id=0x000C, name='current_block_period_consump_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x001d": {
+              "attribute": "ZCLAttributeDef(id=0x001D, name='current_block_period_consump_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x001e": {
+              "attribute": "ZCLAttributeDef(id=0x001E, name='current_block_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x040d": {
+              "attribute": "ZCLAttributeDef(id=0x040D, name='current_day_max_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0409": {
+              "attribute": "ZCLAttributeDef(id=0x0409, name='current_day_max_pressure', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x040a": {
+              "attribute": "ZCLAttributeDef(id=0x040A, name='current_day_min_pressure', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0600": {
+              "attribute": "ZCLAttributeDef(id=0x0600, name='current_demand_delivered', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x001a": {
+              "attribute": "ZCLAttributeDef(id=0x001A, name='current_in_energy_carrier_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0015": {
+              "attribute": "ZCLAttributeDef(id=0x0015, name='current_in_energy_carrier_summ', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0002": {
+              "attribute": "ZCLAttributeDef(id=0x0002, name='current_max_demand_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0008": {
+              "attribute": "ZCLAttributeDef(id=0x0008, name='current_max_demand_delivered_time', type=<class 'zigpy.types.named.UTCTime'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0003": {
+              "attribute": "ZCLAttributeDef(id=0x0003, name='current_max_demand_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0009": {
+              "attribute": "ZCLAttributeDef(id=0x0009, name='current_max_demand_received_time', type=<class 'zigpy.types.named.UTCTime'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0206": {
+              "attribute": "ZCLAttributeDef(id=0x0206, name='current_meter_id', type=<class 'zigpy.types.basic.LVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x040f": {
+              "attribute": "ZCLAttributeDef(id=0x040F, name='current_month_max_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x001b": {
+              "attribute": "ZCLAttributeDef(id=0x001B, name='current_out_energy_carrier_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0016": {
+              "attribute": "ZCLAttributeDef(id=0x0016, name='current_out_energy_carrier_summ', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='current_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 369631
+            },
+            "0x0001": {
+              "attribute": "ZCLAttributeDef(id=0x0001, name='current_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0112": {
+              "attribute": "ZCLAttributeDef(id=0x0112, name='current_tier10_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0113": {
+              "attribute": "ZCLAttributeDef(id=0x0113, name='current_tier10_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0114": {
+              "attribute": "ZCLAttributeDef(id=0x0114, name='current_tier11_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0115": {
+              "attribute": "ZCLAttributeDef(id=0x0115, name='current_tier11_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0116": {
+              "attribute": "ZCLAttributeDef(id=0x0116, name='current_tier12_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0117": {
+              "attribute": "ZCLAttributeDef(id=0x0117, name='current_tier12_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0118": {
+              "attribute": "ZCLAttributeDef(id=0x0118, name='current_tier13_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0119": {
+              "attribute": "ZCLAttributeDef(id=0x0119, name='current_tier13_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011a": {
+              "attribute": "ZCLAttributeDef(id=0x011A, name='current_tier14_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011b": {
+              "attribute": "ZCLAttributeDef(id=0x011B, name='current_tier14_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011c": {
+              "attribute": "ZCLAttributeDef(id=0x011C, name='current_tier15_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011d": {
+              "attribute": "ZCLAttributeDef(id=0x011D, name='current_tier15_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0100": {
+              "attribute": "ZCLAttributeDef(id=0x0100, name='current_tier1_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0101": {
+              "attribute": "ZCLAttributeDef(id=0x0101, name='current_tier1_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0102": {
+              "attribute": "ZCLAttributeDef(id=0x0102, name='current_tier2_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0103": {
+              "attribute": "ZCLAttributeDef(id=0x0103, name='current_tier2_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0104": {
+              "attribute": "ZCLAttributeDef(id=0x0104, name='current_tier3_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0105": {
+              "attribute": "ZCLAttributeDef(id=0x0105, name='current_tier3_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0106": {
+              "attribute": "ZCLAttributeDef(id=0x0106, name='current_tier4_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0107": {
+              "attribute": "ZCLAttributeDef(id=0x0107, name='current_tier4_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0108": {
+              "attribute": "ZCLAttributeDef(id=0x0108, name='current_tier5_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0109": {
+              "attribute": "ZCLAttributeDef(id=0x0109, name='current_tier5_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010a": {
+              "attribute": "ZCLAttributeDef(id=0x010A, name='current_tier6_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010b": {
+              "attribute": "ZCLAttributeDef(id=0x010B, name='current_tier6_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010c": {
+              "attribute": "ZCLAttributeDef(id=0x010C, name='current_tier7_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010d": {
+              "attribute": "ZCLAttributeDef(id=0x010D, name='current_tier7_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010e": {
+              "attribute": "ZCLAttributeDef(id=0x010E, name='current_tier8_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010f": {
+              "attribute": "ZCLAttributeDef(id=0x010F, name='current_tier8_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0110": {
+              "attribute": "ZCLAttributeDef(id=0x0110, name='current_tier9_summ_delivered', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0111": {
+              "attribute": "ZCLAttributeDef(id=0x0111, name='current_tier9_summ_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0410": {
+              "attribute": "ZCLAttributeDef(id=0x0410, name='current_year_max_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0401": {
+              "attribute": "ZCLAttributeDef(id=0x0401, name='currentday_consump_delivered', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0402": {
+              "attribute": "ZCLAttributeDef(id=0x0402, name='currentday_consump_received', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0411": {
+              "attribute": "ZCLAttributeDef(id=0x0411, name='currentday_max_energy_carr_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0311": {
+              "attribute": "ZCLAttributeDef(id=0x0311, name='customer_id_number', type=<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000d": {
+              "attribute": "ZCLAttributeDef(id=0x000D, name='daily_consump_target', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0005": {
+              "attribute": "ZCLAttributeDef(id=0x0005, name='daily_freeze_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000a": {
+              "attribute": "ZCLAttributeDef(id=0x000A, name='default_update_period', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0304": {
+              "attribute": "ZCLAttributeDef(id=0x0304, name='demand_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 33
+            },
+            "0x0602": {
+              "attribute": "ZCLAttributeDef(id=0x0602, name='demand_integration_period', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0601": {
+              "attribute": "ZCLAttributeDef(id=0x0601, name='demand_limit', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0604": {
+              "attribute": "ZCLAttributeDef(id=0x0604, name='demand_limit_arm_duration', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0004": {
+              "attribute": "ZCLAttributeDef(id=0x0004, name='dft_summ', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x001f": {
+              "attribute": "ZCLAttributeDef(id=0x001F, name='dft_summation_received', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0302": {
+              "attribute": "ZCLAttributeDef(id=0x0302, name='divisor', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 10000
+            },
+            "0x0801": {
+              "attribute": "ZCLAttributeDef(id=0x0801, name='electricity_alarm_mask', type=<flag 'bitmap32'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x030b": {
+              "attribute": "ZCLAttributeDef(id=0x030B, name='energy_carrier_demand_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x030a": {
+              "attribute": "ZCLAttributeDef(id=0x030A, name='energy_carrier_summ_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0309": {
+              "attribute": "ZCLAttributeDef(id=0x0309, name='energy_carrier_unit_of_meas', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0806": {
+              "attribute": "ZCLAttributeDef(id=0x0806, name='extended_generic_alarm_mask', type=<flag 'bitmap48'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0204": {
+              "attribute": "ZCLAttributeDef(id=0x0204, name='extended_status', type=<flag 'bitmap64'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000b": {
+              "attribute": "ZCLAttributeDef(id=0x000B, name='fast_poll_update_period', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0013": {
+              "attribute": "ZCLAttributeDef(id=0x0013, name='flow_restriction', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0805": {
+              "attribute": "ZCLAttributeDef(id=0x0805, name='gas_specific_alarm_mask', type=<flag 'bitmap16'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0802": {
+              "attribute": "ZCLAttributeDef(id=0x0802, name='gen_flow_pressure_alarm_mask', type=<flag 'bitmap16'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0800": {
+              "attribute": "ZCLAttributeDef(id=0x0800, name='generic_alarm_mask', type=<flag 'bitmap16'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0804": {
+              "attribute": "ZCLAttributeDef(id=0x0804, name='heat_cool_specific_alarm_mask', type=<flag 'bitmap16'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0305": {
+              "attribute": "ZCLAttributeDef(id=0x0305, name='historical_consump_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0203": {
+              "attribute": "ZCLAttributeDef(id=0x0203, name='hours_in_fault', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0202": {
+              "attribute": "ZCLAttributeDef(id=0x0202, name='hours_in_operation', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0207": {
+              "attribute": "ZCLAttributeDef(id=0x0207, name='iambient_consumption_indicator', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0017": {
+              "attribute": "ZCLAttributeDef(id=0x0017, name='inlet_temperature', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0400": {
+              "attribute": "ZCLAttributeDef(id=0x0400, name='instantaneous_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 0
+            },
+            "0x0022": {
+              "attribute": "ZCLAttributeDef(id=0x0022, name='last_block_switch_time', type=<class 'zigpy.types.named.UTCTime'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0807": {
+              "attribute": "ZCLAttributeDef(id=0x0807, name='manufacture_alarm_mask', type=<flag 'bitmap16'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0500": {
+              "attribute": "ZCLAttributeDef(id=0x0500, name='max_number_of_periods_delivered', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0308": {
+              "attribute": "ZCLAttributeDef(id=0x0308, name='meter_serial_number', type=<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0306": {
+              "attribute": "ZCLAttributeDef(id=0x0306, name='metering_device_type', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 0
+            },
+            "0x030e": {
+              "attribute": "ZCLAttributeDef(id=0x030E, name='module_serial_number', type=<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0301": {
+              "attribute": "ZCLAttributeDef(id=0x0301, name='multiplier', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 1
+            },
+            "0x0603": {
+              "attribute": "ZCLAttributeDef(id=0x0603, name='number_of_demand_subintervals', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x030f": {
+              "attribute": "ZCLAttributeDef(id=0x030F, name='operating_tariff_label_delivered', type=<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0310": {
+              "attribute": "ZCLAttributeDef(id=0x0310, name='operating_tariff_label_received', type=<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0018": {
+              "attribute": "ZCLAttributeDef(id=0x0018, name='outlet_temperature', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0006": {
+              "attribute": "ZCLAttributeDef(id=0x0006, name='power_factor', type=<class 'zigpy.types.basic.int8s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0011": {
+              "attribute": "ZCLAttributeDef(id=0x0011, name='preset_reading_time', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x040e": {
+              "attribute": "ZCLAttributeDef(id=0x040E, name='previous_day_max_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x040b": {
+              "attribute": "ZCLAttributeDef(id=0x040B, name='previous_day_max_pressure', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x040c": {
+              "attribute": "ZCLAttributeDef(id=0x040C, name='previous_day_min_pressure', type=<class 'zigpy.types.basic.uint48_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0403": {
+              "attribute": "ZCLAttributeDef(id=0x0403, name='previousday_consump_delivered', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0404": {
+              "attribute": "ZCLAttributeDef(id=0x0404, name='previousday_consump_received', type=<class 'zigpy.types.basic.uint24_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0412": {
+              "attribute": "ZCLAttributeDef(id=0x0412, name='previousday_max_energy_carr_demand', type=<class 'zigpy.types.basic.int24s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000f": {
+              "attribute": "ZCLAttributeDef(id=0x000F, name='profile_interval_period', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0a02": {
+              "attribute": "ZCLAttributeDef(id=0x0A02, name='projected_bill', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0a03": {
+              "attribute": "ZCLAttributeDef(id=0x0A03, name='projected_bill_time_stamp', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0007": {
+              "attribute": "ZCLAttributeDef(id=0x0007, name='reading_snapshot_time', type=<class 'zigpy.types.named.UTCTime'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0201": {
+              "attribute": "ZCLAttributeDef(id=0x0201, name='remaining_battery_life', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0205": {
+              "attribute": "ZCLAttributeDef(id=0x0205, name='remaining_battery_life_days', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0307": {
+              "attribute": "ZCLAttributeDef(id=0x0307, name='site_id', type=<class 'zigpy.types.basic.LimitedLVBytes.<locals>.LimitedLVBytes'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0200": {
+              "attribute": "ZCLAttributeDef(id=0x0200, name='status', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 0
+            },
+            "0x0303": {
+              "attribute": "ZCLAttributeDef(id=0x0303, name='summation_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 33
+            },
+            "0x0014": {
+              "attribute": "ZCLAttributeDef(id=0x0014, name='supply_status', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x030d": {
+              "attribute": "ZCLAttributeDef(id=0x030D, name='temperature_formatting', type=<flag 'bitmap8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x030c": {
+              "attribute": "ZCLAttributeDef(id=0x030C, name='temperature_unit_of_measure', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0300": {
+              "attribute": "ZCLAttributeDef(id=0x0300, name='unit_of_measure', type=<enum 'enum8'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 0
+            },
+            "0x0012": {
+              "attribute": "ZCLAttributeDef(id=0x0012, name='volume_per_report', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0803": {
+              "attribute": "ZCLAttributeDef(id=0x0803, name='water_specific_alarm_mask', type=<flag 'bitmap16'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": [
+            1,
+            256,
+            258,
+            260,
+            262,
+            264,
+            266,
+            "current_summ_received",
+            "current_tier1_summ_delivered",
+            "current_tier2_summ_delivered",
+            "current_tier3_summ_delivered",
+            "current_tier4_summ_delivered",
+            "current_tier5_summ_delivered",
+            "current_tier6_summ_delivered"
+          ]
+        },
+        "0x0b05": {
+          "endpoint_attribute": "diagnostic",
+          "attributes": {
+            "0x0116": {
+              "attribute": "ZCLAttributeDef(id=0x0116, name='aps_decrypt_failures', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0113": {
+              "attribute": "ZCLAttributeDef(id=0x0113, name='aps_fc_failure', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0106": {
+              "attribute": "ZCLAttributeDef(id=0x0106, name='aps_rx_bcast', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0108": {
+              "attribute": "ZCLAttributeDef(id=0x0108, name='aps_rx_ucast', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0107": {
+              "attribute": "ZCLAttributeDef(id=0x0107, name='aps_tx_bcast', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010b": {
+              "attribute": "ZCLAttributeDef(id=0x010B, name='aps_tx_ucast_fail', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010a": {
+              "attribute": "ZCLAttributeDef(id=0x010A, name='aps_tx_ucast_retry', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0109": {
+              "attribute": "ZCLAttributeDef(id=0x0109, name='aps_tx_ucast_success', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0114": {
+              "attribute": "ZCLAttributeDef(id=0x0114, name='aps_unauthorized_key', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011b": {
+              "attribute": "ZCLAttributeDef(id=0x011B, name='average_mac_retry_per_aps_message_sent', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0111": {
+              "attribute": "ZCLAttributeDef(id=0x0111, name='child_moved', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0110": {
+              "attribute": "ZCLAttributeDef(id=0x0110, name='join_indication', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011c": {
+              "attribute": "ZCLAttributeDef(id=0x011C, name='last_message_lqi', type=<class 'zigpy.types.basic.uint8_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011d": {
+              "attribute": "ZCLAttributeDef(id=0x011D, name='last_message_rssi', type=<class 'zigpy.types.basic.int8s'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0100": {
+              "attribute": "ZCLAttributeDef(id=0x0100, name='mac_rx_bcast', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0102": {
+              "attribute": "ZCLAttributeDef(id=0x0102, name='mac_rx_ucast', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0101": {
+              "attribute": "ZCLAttributeDef(id=0x0101, name='mac_tx_bcast', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0103": {
+              "attribute": "ZCLAttributeDef(id=0x0103, name='mac_tx_ucast', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0105": {
+              "attribute": "ZCLAttributeDef(id=0x0105, name='mac_tx_ucast_fail', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0104": {
+              "attribute": "ZCLAttributeDef(id=0x0104, name='mac_tx_ucast_retry', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010d": {
+              "attribute": "ZCLAttributeDef(id=0x010D, name='neighbor_added', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010e": {
+              "attribute": "ZCLAttributeDef(id=0x010E, name='neighbor_removed', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010f": {
+              "attribute": "ZCLAttributeDef(id=0x010F, name='neighbor_stale', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='number_of_resets', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0115": {
+              "attribute": "ZCLAttributeDef(id=0x0115, name='nwk_decrypt_failures', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0112": {
+              "attribute": "ZCLAttributeDef(id=0x0112, name='nwk_fc_failure', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0117": {
+              "attribute": "ZCLAttributeDef(id=0x0117, name='packet_buffer_allocate_failures', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x011a": {
+              "attribute": "ZCLAttributeDef(id=0x011A, name='packet_validate_drop_count', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0001": {
+              "attribute": "ZCLAttributeDef(id=0x0001, name='persistent_memory_writes', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0119": {
+              "attribute": "ZCLAttributeDef(id=0x0119, name='phy_to_mac_queue_limit_reached', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0118": {
+              "attribute": "ZCLAttributeDef(id=0x0118, name='relayed_ucast', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x010c": {
+              "attribute": "ZCLAttributeDef(id=0x010C, name='route_disc_initiated', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": []
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0xfffd": {
+              "attribute": "ZCLAttributeDef(id=0xFFFD, name='cluster_revision', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0002": {
+              "attribute": "ZCLAttributeDef(id=0x0002, name='current_file_version', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": 9
+            },
+            "0x0003": {
+              "attribute": "ZCLAttributeDef(id=0x0003, name='current_zigbee_stack_version', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0004": {
+              "attribute": "ZCLAttributeDef(id=0x0004, name='downloaded_file_version', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0005": {
+              "attribute": "ZCLAttributeDef(id=0x0005, name='downloaded_zigbee_stack_version', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0001": {
+              "attribute": "ZCLAttributeDef(id=0x0001, name='file_offset', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000a": {
+              "attribute": "ZCLAttributeDef(id=0x000A, name='image_stamp', type=<class 'zigpy.types.basic.uint32_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0008": {
+              "attribute": "ZCLAttributeDef(id=0x0008, name='image_type_id', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0006": {
+              "attribute": "ZCLAttributeDef(id=0x0006, name='image_upgrade_status', type=<enum 'ImageUpgradeStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0007": {
+              "attribute": "ZCLAttributeDef(id=0x0007, name='manufacturer_id', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0009": {
+              "attribute": "ZCLAttributeDef(id=0x0009, name='minimum_block_req_delay', type=<class 'zigpy.types.basic.uint16_t'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0xfffe": {
+              "attribute": "ZCLAttributeDef(id=0xFFFE, name='reporting_status', type=<enum 'AttributeReportingStatus'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000b": {
+              "attribute": "ZCLAttributeDef(id=0x000B, name='upgrade_activation_policy', type=<enum 'UpgradeActivationPolicy'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x0000": {
+              "attribute": "ZCLAttributeDef(id=0x0000, name='upgrade_server_id', type=<class 'zigpy.types.named.EUI64'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=True, is_manufacturer_specific=False)",
+              "value": null
+            },
+            "0x000c": {
+              "attribute": "ZCLAttributeDef(id=0x000C, name='upgrade_timeout_policy', type=<enum 'UpgradeTimeoutPolicy'>, access=<ZCLAttributeAccess.Read: 1>, mandatory=False, is_manufacturer_specific=False)",
+              "value": null
+            }
+          },
+          "unsupported_attributes": []
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1",
+          "platform": "light",
+          "class_name": "MinTransitionLight",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            },
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "effect_list": null,
+          "supported_features": 40,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "MinTransitionLight",
+          "on": false,
+          "brightness": 254,
+          "hs_color": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect": null,
+          "supported_features": 40,
+          "color_mode": "brightness",
+          "supported_color_modes": [
+            "brightness",
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": 254,
+          "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1-8-on_level",
+          "platform": "number",
+          "class_name": "OnLevelConfigurationEntity",
+          "translation_key": "on_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 255,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OnLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": -58
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 168
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1-1794",
+          "platform": "sensor",
+          "class_name": "SmartEnergyMetering",
+          "translation_key": "instantaneous_demand",
+          "device_class": "power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1794,
+                "name": "Metering",
+                "type": "server"
+              },
+              "id": "1:0x0702",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0702",
+              "status": "CREATED",
+              "value_attribute": "instantaneous_demand"
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "instantaneous_demand",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "W"
+        },
+        "state": {
+          "class_name": "SmartEnergyMetering",
+          "available": true,
+          "state": 0.0,
+          "device_type": "Electric Metering",
+          "status": "NO_ALARMS",
+          "zcl_unit_of_measurement": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1-1794-summation_delivered",
+          "platform": "sensor",
+          "class_name": "SmartEnergySummation",
+          "translation_key": "summation_delivered",
+          "device_class": "energy",
+          "state_class": "total_increasing",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1794,
+                "name": "Metering",
+                "type": "server"
+              },
+              "id": "1:0x0702",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0702",
+              "status": "CREATED",
+              "value_attribute": "instantaneous_demand"
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "current_summ_delivered",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "kWh"
+        },
+        "state": {
+          "class_name": "SmartEnergySummation",
+          "available": true,
+          "state": 36.963,
+          "device_type": "Electric Metering",
+          "status": "NO_ALARMS",
+          "zcl_unit_of_measurement": 0
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "b0:ce:18:14:03:3a:9b:48-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "b0:ce:18:14:03:3a:9b:48:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            72,
+            155,
+            58,
+            3,
+            20,
+            24,
+            206,
+            176
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x00000009",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x00000009",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

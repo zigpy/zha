@@ -1,0 +1,748 @@
+{
+  "ieee": "54:ef:44:10:00:4d:2d:5b",
+  "nwk": 26662,
+  "manufacturer": "aqara",
+  "model": "lumi.motion.ac01",
+  "name": "aqara lumi.motion.ac01",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.motion_ac01.AqaraLumiMotionAc01",
+  "quirk_id": null,
+  "manufacturer_code": 4660,
+  "power_source": "Mains",
+  "lqi": 132,
+  "rssi": -67,
+  "last_seen": "2024-08-26T17:05:54",
+  "available": true,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 140,
+      "manufacturer_code": 4660,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 127,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 127,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0xfff0",
+        "input_clusters": [
+          "0x0000",
+          "0x0002",
+          "0x0003",
+          "0x0406",
+          "0xfcc0"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019"
+        ]
+      }
+    },
+    "manufacturer": "aqara",
+    "model": "lumi.motion.ac01"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "binary_sensor.aqara_lumi_motion_ac01_5b2d4d00_occupancy",
+      "name": "aqara lumi.motion.ac01"
+    },
+    {
+      "entity_id": "button.aqara_lumi_motion_ac01_5b2d4d00_identify",
+      "name": "aqara lumi.motion.ac01"
+    },
+    {
+      "entity_id": "button.aqara_lumi_motion_ac01_5b2d4d00_opple_cluster_reset_no_presence_status",
+      "name": "aqara lumi.motion.ac01"
+    },
+    {
+      "entity_id": "select.aqara_lumi_motion_ac01_5b2d4d00_opple_cluster_monitoring_mode",
+      "name": "aqara lumi.motion.ac01"
+    },
+    {
+      "entity_id": "select.aqara_lumi_motion_ac01_5b2d4d00_opple_cluster_approach_distance",
+      "name": "aqara lumi.motion.ac01"
+    },
+    {
+      "entity_id": "select.aqara_lumi_motion_ac01_5b2d4d00_opple_cluster_motion_sensitivity",
+      "name": "aqara lumi.motion.ac01"
+    },
+    {
+      "entity_id": "sensor.aqara_lumi_motion_ac01_5b2d4d00_device_temperature",
+      "name": "aqara lumi.motion.ac01"
+    },
+    {
+      "entity_id": "update.den_fp1_firmware",
+      "name": "aqara lumi.motion.ac01"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "undefined_0xfff0"
+    }
+  ],
+  "user_given_name": "Den FP1",
+  "device_reg_id": "31ae75b0e536a3a44d26724f5aab819d",
+  "area_id": "433b84b37c0c4556812951a279995b85",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "undefined_0xfff0",
+        "id": 65520
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0001": {
+              "attribute_name": "app_version",
+              "value": 53
+            },
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "aqara"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "lumi.motion.ac01"
+            },
+            "0x4000": {
+              "attribute_name": "sw_build_id",
+              "value": ""
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0002": {
+          "endpoint_attribute": "device_temperature",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_temperature",
+              "value": 2700
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0406": {
+          "endpoint_attribute": "occupancy",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "occupancy",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0xfcc0": {
+          "endpoint_attribute": "opple_cluster",
+          "attributes": {
+            "0x0146": {
+              "attribute_name": "approach_distance",
+              "value": 0
+            },
+            "0x0144": {
+              "attribute_name": "monitoring_mode",
+              "value": 1
+            },
+            "0x010c": {
+              "attribute_name": "motion_sensitivity",
+              "value": 3
+            },
+            "0x0142": {
+              "attribute_name": "presence",
+              "value": 1
+            },
+            "0x0157": {
+              "attribute_name": "reset_no_presence_status",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version",
+              "value": 53
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "aqara",
+        "lumi.motion.ac01"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0xfff0",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0xfcc0"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-1030",
+          "platform": "binary_sensor",
+          "class_name": "Occupancy",
+          "translation_key": null,
+          "device_class": "occupancy",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1030,
+                "name": "Occupancy Sensing",
+                "type": "server"
+              },
+              "id": "1:0x0406",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0x0406",
+              "status": "CREATED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "occupancy"
+        },
+        "state": {
+          "class_name": "Occupancy",
+          "available": true,
+          "state": true
+        }
+      }
+    ],
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-64704-reset_no_presence_status",
+          "platform": "button",
+          "class_name": "NoPresenceStatusResetButton",
+          "translation_key": "reset_no_presence_status",
+          "device_class": "restart",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "OppleCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0xfcc0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "reset_no_presence_status",
+          "attribute_value": 1
+        },
+        "state": {
+          "class_name": "NoPresenceStatusResetButton",
+          "available": true
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-64704-monitoring_mode",
+          "platform": "select",
+          "class_name": "AqaraMonitoringMode",
+          "translation_key": "monitoring_mode",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "OppleCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0xfcc0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "AqaraMonitoringModess",
+          "options": [
+            "Undirected",
+            "Left Right"
+          ]
+        },
+        "state": {
+          "class_name": "AqaraMonitoringMode",
+          "available": true,
+          "state": "Left Right"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-64704-approach_distance",
+          "platform": "select",
+          "class_name": "AqaraApproachDistance",
+          "translation_key": "approach_distance",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "OppleCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0xfcc0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "AqaraApproachDistances",
+          "options": [
+            "Far",
+            "Medium",
+            "Near"
+          ]
+        },
+        "state": {
+          "class_name": "AqaraApproachDistance",
+          "available": true,
+          "state": "Far"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-64704-motion_sensitivity",
+          "platform": "select",
+          "class_name": "AqaraMotionSensitivity",
+          "translation_key": "motion_sensitivity",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "OppleCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0xfcc0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "AqaraMotionSensitivities",
+          "options": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+        "state": {
+          "class_name": "AqaraMotionSensitivity",
+          "available": true,
+          "state": "High"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-2",
+          "platform": "sensor",
+          "class_name": "DeviceTemperature",
+          "translation_key": "device_temperature",
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "DeviceTemperatureClusterHandler",
+              "generic_id": "cluster_handler_0x0002",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2,
+                "name": "Device Temperature",
+                "type": "server"
+              },
+              "id": "1:0x0002",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0x0002",
+              "status": "CREATED",
+              "value_attribute": "current_temperature"
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "current_temperature",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "°C"
+        },
+        "state": {
+          "class_name": "DeviceTemperature",
+          "available": true,
+          "state": 27.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": -67
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 132
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "54:ef:44:10:00:4d:2d:5b-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "54:ef:44:10:00:4d:2d:5b:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            91,
+            45,
+            77,
+            0,
+            16,
+            68,
+            239,
+            84
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x00000035",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x00000036",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}
