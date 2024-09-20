@@ -1,10 +1,11 @@
 """Test ZHA device discovery."""
 
+import asyncio
 from collections.abc import Awaitable, Callable, Coroutine
 import enum
-import glob
 import itertools
 import json
+import pathlib
 import re
 from typing import Any, Final
 from unittest import mock
@@ -1051,8 +1052,8 @@ def pytest_generate_tests(metafunc):
     """Generate tests for all device files."""
     if "file_path" in metafunc.fixturenames:
         # use the filename as ID for better test names
-        file_paths = sorted(glob.glob("tests/data/devices/*.json"))
-        metafunc.parametrize("file_path", file_paths, ids=file_paths)
+        file_paths = sorted(pathlib.Path("tests/data/devices").glob("**/*.json"))
+        metafunc.parametrize("file_path", file_paths, ids=[f.name for f in file_paths])
 
 
 async def test_devices_from_files(
@@ -1066,8 +1067,9 @@ async def test_devices_from_files(
         zha_device = await zha_device_from_file(file_path)
         assert zha_device is not None
 
-        with open(file_path, encoding="utf-8") as file:
-            device_data = json.load(file)
+        device_data = json.loads(
+            await asyncio.get_running_loop().run_in_executor(None, file_path.read_text)
+        )
 
         # Get the zha_lib_entities from device_data
         zha_lib_entities = device_data.get("zha_lib_entities", [])
@@ -1129,8 +1131,10 @@ async def test_devices_from_files(
                         zigpy.zcl.clusters.general.Identify.EffectVariant.Default
                     ),
                     # enhance this maybe by looking at disable default response?
-                    expect_reply=cluster_identify.endpoint.model
-                    not in ("HDC52EastwindFan", "HBUniversalCFRemote"),
+                    expect_reply=(
+                        cluster_identify.endpoint.model
+                        not in ("HDC52EastwindFan", "HBUniversalCFRemote")
+                    ),
                     manufacturer=None,
                     tsn=None,
                 )
