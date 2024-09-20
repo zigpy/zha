@@ -399,6 +399,11 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
         return self.cluster.get("fan_mode")
 
     @property
+    def fan_speed(self) -> int | None:
+        """Return current fan speed."""
+        return self.cluster.get("fan_speed")
+
+    @property
     def fan_mode_sequence(self) -> int | None:
         """Return possible fan mode speeds."""
         return self.cluster.get("fan_mode_sequence")
@@ -410,6 +415,7 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
     async def async_update(self) -> None:
         """Retrieve latest state."""
         await self.get_attribute_value("fan_mode", from_cache=False)
+        await self.get_attribute_value("fan_speed", from_cache=False)
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)

@@ -580,6 +580,13 @@ async def test_fan_ikea(
         call({"fan_mode": 1}, manufacturer=None)
     ]
 
+    # turn on with set speed from HA
+    cluster.write_attributes.reset_mock()
+    await async_turn_on(zha_gateway, entity, speed="high")
+    assert cluster.write_attributes.mock_calls == [
+        call({"fan_mode": 10}, manufacturer=None)
+    ]
+
     # turn off from HA
     cluster.write_attributes.reset_mock()
     await async_turn_off(zha_gateway, entity)
@@ -592,6 +599,13 @@ async def test_fan_ikea(
     await async_set_percentage(zha_gateway, entity, percentage=100)
     assert cluster.write_attributes.mock_calls == [
         call({"fan_mode": 10}, manufacturer=None)
+    ]
+
+    # skip 10% when set from HA
+    cluster.write_attributes.reset_mock()
+    await async_set_percentage(zha_gateway, entity, percentage=10)
+    assert cluster.write_attributes.mock_calls == [
+        call({"fan_mode": 2}, manufacturer=None)
     ]
 
     # change preset_mode from HA
@@ -621,17 +635,17 @@ async def test_fan_ikea(
     ),
     [
         (None, False, None, None),
-        ({"fan_mode": 0}, False, 0, None),
-        ({"fan_mode": 1}, True, 10, PRESET_MODE_AUTO),
-        ({"fan_mode": 10}, True, 20, "Speed 1"),
-        ({"fan_mode": 15}, True, 30, "Speed 1.5"),
-        ({"fan_mode": 20}, True, 40, "Speed 2"),
-        ({"fan_mode": 25}, True, 50, "Speed 2.5"),
-        ({"fan_mode": 30}, True, 60, "Speed 3"),
-        ({"fan_mode": 35}, True, 70, "Speed 3.5"),
-        ({"fan_mode": 40}, True, 80, "Speed 4"),
-        ({"fan_mode": 45}, True, 90, "Speed 4.5"),
-        ({"fan_mode": 50}, True, 100, "Speed 5"),
+        ({"fan_mode": 0, "fan_speed": 0}, False, 0, None),
+        ({"fan_mode": 1, "fan_speed": 30}, True, 60, PRESET_MODE_AUTO),
+        ({"fan_mode": 10, "fan_speed": 10}, True, 20, None),
+        ({"fan_mode": 15, "fan_speed": 15}, True, 30, None),
+        ({"fan_mode": 20, "fan_speed": 20}, True, 40, None),
+        ({"fan_mode": 25, "fan_speed": 25}, True, 50, None),
+        ({"fan_mode": 30, "fan_speed": 30}, True, 60, None),
+        ({"fan_mode": 35, "fan_speed": 35}, True, 70, None),
+        ({"fan_mode": 40, "fan_speed": 40}, True, 80, None),
+        ({"fan_mode": 45, "fan_speed": 45}, True, 90, None),
+        ({"fan_mode": 50, "fan_speed": 50}, True, 100, None),
     ],
 )
 async def test_fan_ikea_init(
@@ -660,7 +674,7 @@ async def test_fan_ikea_update_entity(
 ) -> None:
     """Test ZHA fan platform."""
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
-    cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
+    cluster.PLUGGED_ATTR_READS = {"fan_mode": 0, "fan_speed": 0}
 
     zha_device = await device_joined(zigpy_device_ikea)
     entity = get_entity(zha_device, platform=Platform.FAN)
@@ -670,13 +684,13 @@ async def test_fan_ikea_update_entity(
     assert entity.state[ATTR_PRESET_MODE] is None
     assert entity.percentage_step == 100 / 10
 
-    cluster.PLUGGED_ATTR_READS = {"fan_mode": 1}
+    cluster.PLUGGED_ATTR_READS = {"fan_mode": 1, "fan_speed": 6}
 
     await entity.async_update()
     await zha_gateway.async_block_till_done()
 
     assert entity.state["is_on"] is True
-    assert entity.state[ATTR_PERCENTAGE] == 10
+    assert entity.state[ATTR_PERCENTAGE] == 60
     assert entity.state[ATTR_PRESET_MODE] is PRESET_MODE_AUTO
     assert entity.percentage_step == 100 / 10
 
