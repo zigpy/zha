@@ -145,6 +145,7 @@ class BaseLight(BaseEntity, ABC):
         response["brightness"] = self.brightness
         response["xy_color"] = self.xy_color
         response["color_temp"] = self.color_temp
+        response["effect_list"] = self.effect_list
         response["effect"] = self.effect
         response["supported_features"] = self.supported_features
         response["color_mode"] = self.color_mode
