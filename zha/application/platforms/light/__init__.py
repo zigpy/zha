@@ -906,6 +906,7 @@ class Light(PlatformEntity, BaseLight):
             effect = update_params.get(ATTR_EFFECT)
 
             supported_modes = self._supported_color_modes
+            effect_list = self._effect_list
 
             # unset "off brightness" and "off with transition"
             # if group turned on this light
@@ -944,7 +945,7 @@ class Light(PlatformEntity, BaseLight):
                 self._color_temp = color_temp
             if xy_color is not None and ColorMode.XY in supported_modes:
                 self._xy_color = xy_color
-            if effect is not None and self._effect_list and effect in self._effect_list:
+            if effect is not None and effect_list and effect in effect_list:
                 self._effect = effect
 
             self.maybe_emit_state_changed_event()
