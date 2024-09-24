@@ -1,7 +1,7 @@
 """Test ZHA select entities."""
 
 from collections.abc import Awaitable, Callable
-from unittest.mock import call
+from unittest.mock import call, patch
 
 import pytest
 from zhaquirks import (
@@ -17,6 +17,7 @@ from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, get_device
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
+from zigpy.zcl import foundation
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
@@ -232,13 +233,31 @@ async def test_on_off_select_attribute_report_v2(
     assert entity._attr_entity_registry_enabled_default is True
     assert entity._attr_translation_key == "motion_sensitivity"
 
-    await entity.async_select_option(AqaraMotionSensitivities.Medium.name)
-    await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
-    assert cluster.write_attributes.call_count == 1
-    assert cluster.write_attributes.call_args == call(
-        {"motion_sensitivity": AqaraMotionSensitivities.Medium}, manufacturer=None
-    )
+    Write_Attributes_rsp = foundation.GENERAL_COMMANDS[
+        foundation.GeneralCommand.Write_Attributes_rsp
+    ].schema
+
+    with (
+        patch(
+            "zigpy.device.Device.request",
+            return_value=Write_Attributes_rsp(
+                status_records=[
+                    foundation.WriteAttributesStatusRecord(
+                        status=foundation.Status.SUCCESS
+                    )
+                ]
+            ),
+        ),
+        patch.object(cluster, "write_attributes", wraps=cluster.write_attributes),
+    ):
+        await entity.async_select_option(AqaraMotionSensitivities.Medium.name)
+
+        await zha_gateway.async_block_till_done()
+        assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
+        assert cluster.write_attributes.call_count == 1
+        assert cluster.write_attributes.call_args == call(
+            {"motion_sensitivity": AqaraMotionSensitivities.Medium}, manufacturer=None
+        )
 
 
 async def test_non_zcl_select_state_restoration(

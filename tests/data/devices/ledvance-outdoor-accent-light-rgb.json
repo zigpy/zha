@@ -1,0 +1,1042 @@
+{
+  "ieee": "f0:d1:b8:00:00:07:83:8e",
+  "nwk": 25604,
+  "manufacturer": "LEDVANCE",
+  "model": "Outdoor Accent Light RGB",
+  "name": "LEDVANCE Outdoor Accent Light RGB",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4489,
+  "power_source": "Mains",
+  "lqi": 138,
+  "rssi": null,
+  "last_seen": "2024-08-26T14:47:57",
+  "available": true,
+  "device_type": "Router",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4489,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0102",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0300",
+          "0x0b05",
+          "0xfc01"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    },
+    "manufacturer": "LEDVANCE",
+    "model": "Outdoor Accent Light RGB"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.deck_strip_lights_identifybutton",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    },
+    {
+      "entity_id": "light.deck_strip_lights_light",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    },
+    {
+      "entity_id": "number.deck_strip_lights_onofftransitiontimeconfiguration",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    },
+    {
+      "entity_id": "number.deck_strip_lights_onlevelconfiguration",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    },
+    {
+      "entity_id": "number.deck_strip_lights_ontransitiontimeconfiguration",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    },
+    {
+      "entity_id": "number.deck_strip_lights_offtransitiontimeconfiguration",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    },
+    {
+      "entity_id": "number.deck_strip_lights_defaultmoverateconfiguration",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    },
+    {
+      "entity_id": "update.deck_strip_lights_firmware",
+      "name": "LEDVANCE Outdoor Accent Light RGB"
+    }
+  ],
+  "neighbors": [
+    {
+      "device_type": "Coordinator",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:12:4b:00:25:90:19:2d",
+      "nwk": "0x0000",
+      "permit_joining": "Unknown",
+      "depth": "0",
+      "lqi": "254"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:db:00",
+      "nwk": "0x0F04",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:41:93:fe:df",
+      "nwk": "0x29E5",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:0d:6f:00:10:67:70:a5",
+      "nwk": "0x334B",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "170"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "cc:cc:cc:ff:fe:d7:8e:af",
+      "nwk": "0x4691",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "254"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:40:c0:4d:cb",
+      "nwk": "0x6100",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "183"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:2c:24",
+      "nwk": "0x68BB",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:41:92:cf:47",
+      "nwk": "0x79AB",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "cc:cc:cc:ff:fe:c4:dc:e1",
+      "nwk": "0xA57B",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:1e:8a",
+      "nwk": "0xA7AB",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:17:33",
+      "nwk": "0xAEFD",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "255"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:41:67:1f:d7",
+      "nwk": "0xB988",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "254"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:12:4b:00:1c:46:5f:b1",
+      "nwk": "0xE2CF",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "179"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "f0:f5:bd:ff:fe:2c:e0:90",
+      "nwk": "0xEE0B",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "254"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "On",
+      "relationship": "Sibling",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "f0:d1:b8:00:00:05:49:22",
+      "nwk": "0xEE12",
+      "permit_joining": "Unknown",
+      "depth": "15",
+      "lqi": "253"
+    }
+  ],
+  "routes": [
+    {
+      "dest_nwk": "0xA57B",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xA57B"
+    },
+    {
+      "dest_nwk": "0x0000",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": true,
+      "route_record_required": false,
+      "next_hop": "0xAEFD"
+    },
+    {
+      "dest_nwk": "0x8F36",
+      "route_status": "Active",
+      "memory_constrained": true,
+      "many_to_one": true,
+      "route_record_required": true,
+      "next_hop": "0xA7AB"
+    },
+    {
+      "dest_nwk": "0x8F9D",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x79AB"
+    }
+  ],
+  "endpoint_names": [
+    {
+      "name": "COLOR_DIMMABLE_LIGHT"
+    }
+  ],
+  "user_given_name": "Deck Strip Lights",
+  "device_reg_id": "ab2d40140aa6400ebaa745d1c2f64ca5",
+  "area_id": "6904ea8616fa4c288e6dc51007cc20f6",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "COLOR_DIMMABLE_LIGHT",
+        "id": 258
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "LEDVANCE"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "Outdoor Accent Light RGB"
+            },
+            "0x0007": {
+              "attribute_name": "power_source",
+              "value": 1
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {
+            "0x4003": {
+              "attribute_name": "start_up_on_off"
+            }
+          }
+        },
+        "0x0008": {
+          "endpoint_attribute": "level",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "current_level",
+              "value": 202
+            },
+            "0x0014": {
+              "attribute_name": "default_move_rate",
+              "value": 254
+            },
+            "0x0013": {
+              "attribute_name": "off_transition_time",
+              "value": 5
+            },
+            "0x0011": {
+              "attribute_name": "on_level",
+              "value": 255
+            },
+            "0x0010": {
+              "attribute_name": "on_off_transition_time",
+              "value": 5
+            },
+            "0x0012": {
+              "attribute_name": "on_transition_time",
+              "value": 5
+            }
+          },
+          "unsupported_attributes": {
+            "0x4000": {
+              "attribute_name": "start_up_current_level"
+            }
+          }
+        },
+        "0x0300": {
+          "endpoint_attribute": "light_color",
+          "attributes": {
+            "0x400a": {
+              "attribute_name": "color_capabilities",
+              "value": 9
+            },
+            "0x0008": {
+              "attribute_name": "color_mode",
+              "value": 2
+            },
+            "0x400c": {
+              "attribute_name": "color_temp_physical_max",
+              "value": 6535
+            },
+            "0x400b": {
+              "attribute_name": "color_temp_physical_min",
+              "value": 1901
+            },
+            "0x0007": {
+              "attribute_name": "color_temperature",
+              "value": 1901
+            },
+            "0x0000": {
+              "attribute_name": "current_hue",
+              "value": 0
+            },
+            "0x0001": {
+              "attribute_name": "current_saturation",
+              "value": 254
+            },
+            "0x0003": {
+              "attribute_name": "current_x",
+              "value": 10747
+            },
+            "0x0004": {
+              "attribute_name": "current_y",
+              "value": 8650
+            },
+            "0x000f": {
+              "attribute_name": "options",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {
+            "0x4000": {
+              "attribute_name": "enhanced_current_hue"
+            },
+            "0x4002": {
+              "attribute_name": "color_loop_active"
+            },
+            "0x4010": {
+              "attribute_name": "start_up_color_temperature"
+            }
+          }
+        },
+        "0x0b05": {
+          "endpoint_attribute": "diagnostic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0xfc01": {
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {
+            "0x0002": {
+              "attribute_name": "current_file_version",
+              "value": 1057832
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1",
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            },
+            {
+              "class_name": "ColorClusterHandler",
+              "generic_id": "cluster_handler_0x0300",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 768,
+                "name": "Color Control",
+                "type": "server"
+              },
+              "id": "1:0x0300",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0300",
+              "status": "CREATED",
+              "value_attribute": "current_x"
+            },
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "effect_list": null,
+          "supported_features": 40,
+          "min_mireds": 1901,
+          "max_mireds": 6535
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": 202,
+          "hs_color": null,
+          "xy_color": [
+            0.16398870832379644,
+            0.13199053940642405
+          ],
+          "color_temp": 1901,
+          "effect": null,
+          "supported_features": 40,
+          "color_mode": "color_temp",
+          "supported_color_modes": [
+            "color_temp",
+            "xy",
+            "onoff",
+            "brightness"
+          ],
+          "off_with_transition": false,
+          "off_brightness": 202,
+          "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-8-on_off_transition_time",
+          "platform": "number",
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "translation_key": "on_off_transition_time",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 65535,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 5
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-8-on_level",
+          "platform": "number",
+          "class_name": "OnLevelConfigurationEntity",
+          "translation_key": "on_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 255,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OnLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-8-on_transition_time",
+          "platform": "number",
+          "class_name": "OnTransitionTimeConfigurationEntity",
+          "translation_key": "on_transition_time",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 65534,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OnTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 5
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-8-off_transition_time",
+          "platform": "number",
+          "class_name": "OffTransitionTimeConfigurationEntity",
+          "translation_key": "off_transition_time",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 65534,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "OffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 5
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-8-default_move_rate",
+          "platform": "number",
+          "class_name": "DefaultMoveRateConfigurationEntity",
+          "translation_key": "default_move_rate",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0008",
+              "status": "CREATED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "min_value": 0,
+          "max_value": 254,
+          "step": 1.0,
+          "multiplier": 1
+        },
+        "state": {
+          "class_name": "DefaultMoveRateConfigurationEntity",
+          "available": true,
+          "state": 254
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 138
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:07:83:8e-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "f0:d1:b8:00:00:07:83:8e:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            142,
+            131,
+            7,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x00102428",
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": "0x00102428",
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

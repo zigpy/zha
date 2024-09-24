@@ -1,0 +1,659 @@
+{
+  "ieee": "00:12:4b:00:24:56:cb:dc",
+  "nwk": 63406,
+  "manufacturer": "SONOFF",
+  "model": "S31 Lite zb",
+  "name": "SONOFF S31 Lite zb",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 0,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2024-02-02T15:59:11",
+  "available": false,
+  "device_type": "Router",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 0,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 160,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 160,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0xc05e",
+        "device_type": "0x0010",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      }
+    },
+    "manufacturer": "SONOFF",
+    "model": "S31 Lite zb"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.outdoor_christmas_lights_identifybutton",
+      "name": "SONOFF S31 Lite zb"
+    },
+    {
+      "entity_id": "switch.plug_outdoor_christmas_lights_on_off",
+      "name": "SONOFF S31 Lite zb"
+    }
+  ],
+  "neighbors": [
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "Parent",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:26:d3:61",
+      "nwk": "0xB811",
+      "permit_joining": "Unknown",
+      "depth": "1",
+      "lqi": "55"
+    },
+    {
+      "device_type": "EndDevice",
+      "rx_on_when_idle": "On",
+      "relationship": "Child",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "b0:ce:18:14:00:04:0b:6d",
+      "nwk": "0xCAB2",
+      "permit_joining": "Unknown",
+      "depth": "3",
+      "lqi": "96"
+    },
+    {
+      "device_type": "EndDevice",
+      "rx_on_when_idle": "On",
+      "relationship": "Child",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "b0:ce:18:14:00:04:2d:f3",
+      "nwk": "0x3C7D",
+      "permit_joining": "Unknown",
+      "depth": "3",
+      "lqi": "114"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:15:8d:00:04:27:01:b4",
+      "nwk": "0x696C",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "5"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:12:4b:00:1c:46:5f:b1",
+      "nwk": "0xE2CF",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "45"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:0d:6f:00:10:67:70:a5",
+      "nwk": "0x80A4",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "1"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:db:00",
+      "nwk": "0x0F04",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "39"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:2c:24",
+      "nwk": "0x68BB",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "91"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:22:a3:00:00:25:1e:8a",
+      "nwk": "0xA7AB",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "45"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:40:c0:4e:54",
+      "nwk": "0x8F36",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "1"
+    },
+    {
+      "device_type": "Coordinator",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:12:4b:00:25:90:19:2d",
+      "nwk": "0x0000",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "6"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:40:c0:4d:cb",
+      "nwk": "0x9E57",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "38"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "7c:e5:24:00:00:02:30:a7",
+      "nwk": "0xCA77",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "1"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "cc:cc:cc:ff:fe:c4:dc:e1",
+      "nwk": "0xA459",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "1"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:13:a2:00:41:92:cf:47",
+      "nwk": "0x5636",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "19"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "7c:b0:3e:aa:00:a4:34:be",
+      "nwk": "0x73F9",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "1"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "cc:cc:cc:ff:fe:d7:8e:af",
+      "nwk": "0x4691",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "1"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "f0:d1:b8:00:00:05:49:22",
+      "nwk": "0xEE12",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "54"
+    },
+    {
+      "device_type": "Router",
+      "rx_on_when_idle": "Unknown",
+      "relationship": "NoneOfTheAbove",
+      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
+      "ieee": "00:15:8d:00:04:44:ec:08",
+      "nwk": "0x8F9D",
+      "permit_joining": "Unknown",
+      "depth": "255",
+      "lqi": "1"
+    }
+  ],
+  "routes": [
+    {
+      "dest_nwk": "0x3C7D",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x8F9D",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xEE12",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x5C68",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x0000",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": true,
+      "route_record_required": false,
+      "next_hop": "0xEE12"
+    },
+    {
+      "dest_nwk": "0x7DB5",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x08E8"
+    },
+    {
+      "dest_nwk": "0x68BB",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x0F04",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0xB811",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x8F36",
+      "route_status": "Active",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0x08E8"
+    },
+    {
+      "dest_nwk": "0x76B5",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x19F7",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    },
+    {
+      "dest_nwk": "0x08E8",
+      "route_status": "Discovery_Failed",
+      "memory_constrained": false,
+      "many_to_one": false,
+      "route_record_required": false,
+      "next_hop": "0xFFFE"
+    }
+  ],
+  "endpoint_names": [
+    {
+      "name": "ON_OFF_PLUGIN_UNIT"
+    }
+  ],
+  "user_given_name": "Outdoor Christmas Lights",
+  "device_reg_id": "e0c4f5f427243ea2935f0497b5cef686",
+  "area_id": "front_porch",
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "ON_OFF_PLUGIN_UNIT",
+        "id": 16
+      },
+      "profile_id": 49246,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "SONOFF"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "S31 Lite zb"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0004": {
+          "endpoint_attribute": "groups",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0005": {
+          "endpoint_attribute": "scenes",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0006": {
+          "endpoint_attribute": "on_off",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "on_off",
+              "value": 0
+            }
+          },
+          "unsupported_attributes": {
+            "0x4003": {
+              "attribute_name": "start_up_on_off"
+            }
+          }
+        }
+      },
+      "out_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:24:56:cb:dc-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "00:12:4b:00:24:56:cb:dc:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            220,
+            203,
+            86,
+            36,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": false
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:24:56:cb:dc-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:12:4b:00:24:56:cb:dc:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            220,
+            203,
+            86,
+            36,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:24:56:cb:dc-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:12:4b:00:24:56:cb:dc:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            220,
+            203,
+            86,
+            36,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": false,
+          "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:12:4b:00:24:56:cb:dc-1",
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "00:12:4b:00:24:56:cb:dc:1:0x0006",
+              "status": "CREATED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            220,
+            203,
+            86,
+            36,
+            0,
+            75,
+            18,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 0,
+          "available": false
+        }
+      }
+    ]
+  }
+}

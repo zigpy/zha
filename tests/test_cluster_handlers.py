@@ -1362,7 +1362,12 @@ async def test_zha_send_event_from_quirk(
     assert on_off_ch.emit_zha_event.mock_calls == [
         call(
             "attribute_updated",
-            {"attribute_id": 0, "attribute_name": "on_off", "attribute_value": True},
+            {
+                "attribute_id": 0,
+                "attribute_name": "on_off",
+                "attribute_value": True,
+                "value": True,
+            },
         )
     ]
 
@@ -1378,6 +1383,7 @@ async def test_zha_send_event_from_quirk(
                 "attribute_id": 0x25,
                 "attribute_name": "Unknown",
                 "attribute_value": "Bar",
+                "value": "Bar",
             },
         )
     ]

@@ -1,19 +1,25 @@
 """Test zhaws binary sensor."""
 
 from collections.abc import Awaitable, Callable
-from unittest.mock import call
+from unittest.mock import MagicMock, call
 
 import pytest
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general, measurement, security
 
-from tests.common import find_entity, send_attributes_report, update_attribute_cache
+from tests.common import (
+    find_entity,
+    get_entity,
+    send_attributes_report,
+    update_attribute_cache,
+)
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
-from zha.application.platforms.binary_sensor import IASZone, Occupancy
+from zha.application.platforms.binary_sensor import Accelerometer, IASZone, Occupancy
+from zha.zigbee.cluster_handlers.const import SMARTTHINGS_ACCELERATION_CLUSTER
 from zha.zigbee.device import Device
 
 DEVICE_IAS = {
@@ -32,6 +38,24 @@ DEVICE_OCCUPANCY = {
         SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.OCCUPANCY_SENSOR,
         SIG_EP_INPUT: [measurement.OccupancySensing.cluster_id],
         SIG_EP_OUTPUT: [],
+    }
+}
+
+
+DEVICE_SMARTTHINGS_MULTI = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.IAS_ZONE,
+        SIG_EP_INPUT: [
+            general.Basic.cluster_id,
+            general.PowerConfiguration.cluster_id,
+            general.Identify.cluster_id,
+            general.PollControl.cluster_id,
+            measurement.TemperatureMeasurement.cluster_id,
+            security.IasZone.cluster_id,
+            SMARTTHINGS_ACCELERATION_CLUSTER,
+        ],
+        SIG_EP_OUTPUT: [general.Identify.cluster_id, general.Ota.cluster_id],
     }
 }
 
@@ -143,3 +167,38 @@ async def test_binary_sensor(
     # test getting messages that trigger and reset the sensors
     cluster = getattr(zigpy_device.endpoints[1], cluster_name)
     await on_off_test(zha_gateway, cluster, entity, plugs)
+
+
+async def test_smarttthings_multi(
+    zigpy_device_mock: Callable[..., ZigpyDevice],
+    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
+) -> None:
+    """Test smartthings multi."""
+    zigpy_device = zigpy_device_mock(
+        DEVICE_SMARTTHINGS_MULTI, manufacturer="Samjin", model="multi"
+    )
+    zha_device = await device_joined(zigpy_device)
+
+    entity: PlatformEntity = get_entity(
+        zha_device, Platform.BINARY_SENSOR, entity_type=Accelerometer
+    )
+    assert entity is not None
+    assert isinstance(entity, Accelerometer)
+    assert entity.PLATFORM == Platform.BINARY_SENSOR
+    assert entity.is_on is False
+
+    st_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfc02"]
+    assert st_ch is not None
+
+    st_ch.emit_zha_event = MagicMock(wraps=st_ch.emit_zha_event)
+
+    await send_attributes_report(zha_gateway, st_ch.cluster, {0x0012: 120})
+
+    assert st_ch.emit_zha_event.call_count == 1
+    assert st_ch.emit_zha_event.mock_calls == [
+        call(
+            "attribute_updated",
+            {"attribute_id": 18, "attribute_name": "x_axis", "attribute_value": 120},
+        )
+    ]

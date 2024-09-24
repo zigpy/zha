@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from asyncio import Task
 from dataclasses import dataclass
 import datetime as dt
 import functools
@@ -149,6 +150,7 @@ class Thermostat(PlatformEntity):
 
         response = super().state
         response["current_temperature"] = self.current_temperature
+        response["outdoor_temperature"] = self.outdoor_temperature
         response["target_temperature"] = self.target_temperature
         response["target_temperature_high"] = self.target_temperature_high
         response["target_temperature_low"] = self.target_temperature_low
@@ -177,6 +179,13 @@ class Thermostat(PlatformEntity):
         if self._thermostat_cluster_handler.local_temperature is None:
             return None
         return self._thermostat_cluster_handler.local_temperature / ZCL_TEMP
+
+    @property
+    def outdoor_temperature(self):
+        """Return the outdoor temperature."""
+        if self._thermostat_cluster_handler.outdoor_temperature is None:
+            return None
+        return self._thermostat_cluster_handler.outdoor_temperature / ZCL_TEMP
 
     @property
     def fan_mode(self) -> str | None:
@@ -494,19 +503,35 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._presets = [Preset.AWAY, Preset.NONE]
         self._supported_features |= ClimateEntityFeature.PRESET_MODE
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
+        self._time_update_task: Task | None = None
+        self.start_polling()
 
-        self._tracked_tasks.append(
-            device.gateway.async_create_background_task(
-                self._update_time(),
-                name=f"sinope_time_updater_{self.unique_id}",
-                eager_start=True,
-                untracked=True,
-            )
+    def start_polling(self) -> None:
+        """Start polling."""
+        self._time_update_task = self.device.gateway.async_create_background_task(
+            self._update_time(),
+            name=f"sinope_time_updater_{self.unique_id}",
+            eager_start=True,
+            untracked=True,
         )
+        self._tracked_tasks.append(self._time_update_task)
         self.debug(
             "started time updating interval of %s",
             getattr(self, "__polling_interval"),
         )
+
+    def enable(self) -> None:
+        """Enable the entity."""
+        super().enable()
+        self.start_polling()
+
+    def disable(self) -> None:
+        """Disable the entity."""
+        super().disable()
+        if self._time_update_task:
+            self._tracked_tasks.remove(self._time_update_task)
+            self._time_update_task.cancel()
+            self._time_update_task = None
 
     @periodic((2700, 4500))
     async def _update_time(self) -> None:

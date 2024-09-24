@@ -76,7 +76,25 @@ def zigpy_device_mains(
             }
         }
         return zigpy_device_mock(
-            endpoints, node_descriptor=b"\x02@\x84_\x11\x7fd\x00\x00,d\x00\x00"
+            endpoints,
+            node_descriptor=zdo_t.NodeDescriptor(
+                logical_type=zdo_t.LogicalType.EndDevice,
+                complex_descriptor_available=0,
+                user_descriptor_available=0,
+                reserved=0,
+                aps_flags=0,
+                frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+                mac_capability_flags=(
+                    zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                    | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+                ),
+                manufacturer_code=4447,
+                maximum_buffer_size=127,
+                maximum_incoming_transfer_size=100,
+                server_mask=11264,
+                maximum_outgoing_transfer_size=100,
+                descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+            ),
         )
 
     return _dev

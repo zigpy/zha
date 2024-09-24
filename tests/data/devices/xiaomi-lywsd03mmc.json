@@ -1,0 +1,547 @@
+{
+  "ieee": "a4:c1:38:dd:ed:49:77:95",
+  "nwk": 57984,
+  "manufacturer": "Xiaomi",
+  "model": "LYWSD03MMC",
+  "name": "Xiaomi LYWSD03MMC",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 4417,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2023-12-09T12:23:04",
+  "available": false,
+  "device_type": "EndDevice",
+  "signature": {
+    "node_descriptor": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4417,
+      "maximum_buffer_size": 74,
+      "maximum_incoming_transfer_size": 404,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 404,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0020",
+          "0x0402",
+          "0x0405"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    },
+    "manufacturer": "Xiaomi",
+    "model": "LYWSD03MMC"
+  },
+  "active_coordinator": false,
+  "entities": [
+    {
+      "entity_id": "button.xiaomi_lywsd03mmc_identify",
+      "name": "Xiaomi LYWSD03MMC"
+    },
+    {
+      "entity_id": "sensor.xiaomi_lywsd03mmc_battery",
+      "name": "Xiaomi LYWSD03MMC"
+    },
+    {
+      "entity_id": "sensor.xiaomi_lywsd03mmc_temperature",
+      "name": "Xiaomi LYWSD03MMC"
+    },
+    {
+      "entity_id": "sensor.xiaomi_lywsd03mmc_humidity",
+      "name": "Xiaomi LYWSD03MMC"
+    },
+    {
+      "entity_id": "update.xiaomi_lywsd03mmc_firmware",
+      "name": "Xiaomi LYWSD03MMC"
+    }
+  ],
+  "neighbors": [],
+  "routes": [],
+  "endpoint_names": [
+    {
+      "name": "TEMPERATURE_SENSOR"
+    }
+  ],
+  "user_given_name": null,
+  "device_reg_id": "4d78da4f787a86c5bc74d347413e11bc",
+  "area_id": null,
+  "cluster_details": {
+    "1": {
+      "device_type": {
+        "name": "TEMPERATURE_SENSOR",
+        "id": 770
+      },
+      "profile_id": 260,
+      "in_clusters": {
+        "0x0000": {
+          "endpoint_attribute": "basic",
+          "attributes": {
+            "0x0004": {
+              "attribute_name": "manufacturer",
+              "value": "Xiaomi"
+            },
+            "0x0005": {
+              "attribute_name": "model",
+              "value": "LYWSD03MMC"
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0003": {
+          "endpoint_attribute": "identify",
+          "attributes": {},
+          "unsupported_attributes": {}
+        },
+        "0x0001": {
+          "endpoint_attribute": "power",
+          "attributes": {
+            "0x0021": {
+              "attribute_name": "battery_percentage_remaining",
+              "value": 3
+            },
+            "0x0020": {
+              "attribute_name": "battery_voltage",
+              "value": 22
+            }
+          },
+          "unsupported_attributes": {
+            "0x0031": {
+              "attribute_name": "battery_size"
+            },
+            "0x0033": {
+              "attribute_name": "battery_quantity"
+            }
+          }
+        },
+        "0x0405": {
+          "endpoint_attribute": "humidity",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 5296
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0402": {
+          "endpoint_attribute": "temperature",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "measured_value",
+              "value": 1997
+            }
+          },
+          "unsupported_attributes": {}
+        },
+        "0x0020": {
+          "endpoint_attribute": "poll_control",
+          "attributes": {
+            "0x0000": {
+              "attribute_name": "checkin_interval",
+              "value": 13200
+            }
+          },
+          "unsupported_attributes": {}
+        }
+      },
+      "out_clusters": {
+        "0x0019": {
+          "endpoint_attribute": "ota",
+          "attributes": {},
+          "unsupported_attributes": {}
+        }
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-3",
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0003",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": false
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-1",
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0001",
+              "status": "CREATED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "battery_percentage_remaining",
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": false,
+          "state": 2,
+          "battery_voltage": 2.2
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-1026",
+          "platform": "sensor",
+          "class_name": "Temperature",
+          "translation_key": null,
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "TemperatureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0402",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1026,
+                "name": "Temperature Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0402",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0402",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "°C"
+        },
+        "state": {
+          "class_name": "Temperature",
+          "available": false,
+          "state": 20.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-0-rssi",
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-0-lqi",
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0000",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": null,
+          "decimals": 1,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": false,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-1029",
+          "platform": "sensor",
+          "class_name": "Humidity",
+          "translation_key": null,
+          "device_class": "humidity",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "RelativeHumidityClusterHandler",
+              "generic_id": "cluster_handler_0x0405",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1029,
+                "name": "Relative Humidity Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0405",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0405",
+              "status": "CREATED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "attribute": "measured_value",
+          "decimals": 1,
+          "divisor": 100,
+          "multiplier": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Humidity",
+          "available": false,
+          "state": 53.0
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-25-firmware_update",
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0019",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": false,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": false,
+          "installed_version": null,
+          "in_progress": false,
+          "progress": 0,
+          "latest_version": null,
+          "release_summary": null,
+          "release_url": null
+        }
+      }
+    ]
+  }
+}

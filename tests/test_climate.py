@@ -316,6 +316,26 @@ async def test_climate_local_temperature(
     assert entity.state["current_temperature"] == 21.0
 
 
+async def test_climate_outdoor_temperature(
+    device_climate: Device,
+    zha_gateway: Gateway,
+) -> None:
+    """Test outdoor temperature."""
+
+    thrm_cluster = device_climate.device.endpoints[1].thermostat
+    entity: ThermostatEntity = get_entity(
+        device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+    assert entity.state["outdoor_temperature"] is None
+
+    await send_attributes_report(
+        zha_gateway,
+        thrm_cluster,
+        {Thermostat.AttributeDefs.outdoor_temperature.id: 2150},
+    )
+    assert entity.state["outdoor_temperature"] == 21.5
+
+
 async def test_climate_hvac_action_running_state(
     device_climate_sinope: Device,
     zha_gateway: Gateway,
@@ -418,6 +438,30 @@ async def test_sinope_time(
         await entity._async_update_time()
         secs_since_2k = write_attributes.mock_calls[0].args[0]["secs_since_2k"]
         assert secs_since_2k == pytest.approx(60 * 60 * 24 - 5 * 60 * 60)
+
+    write_attributes.reset_mock()
+    entity._async_update_time.reset_mock()
+
+    entity.disable()
+
+    assert entity.enabled is False
+
+    await asyncio.sleep(4600)
+
+    assert entity._async_update_time.await_count == 0
+    assert mfg_cluster.write_attributes.await_count == 0
+
+    entity.enable()
+
+    assert entity.enabled is True
+
+    await asyncio.sleep(4600)
+
+    assert entity._async_update_time.await_count == 1
+    assert mfg_cluster.write_attributes.await_count == 1
+
+    write_attributes.reset_mock()
+    entity._async_update_time.reset_mock()
 
 
 async def test_climate_hvac_action_running_state_zen(
