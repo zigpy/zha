@@ -962,7 +962,7 @@ class Light(PlatformEntity, BaseLight):
         color_temp: int | None,
         xy_color: tuple[float, float] | None,
         color_mode: ColorMode | None,
-        effect: str,
+        effect: str | None,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
         if state is not None:
@@ -1262,7 +1262,7 @@ class LightGroup(GroupEntity, BaseLight):
         color_temp: int | None,
         xy_color: tuple[float, float] | None,
         color_mode: ColorMode | None,
-        effect: str,
+        effect: str | None,
     ) -> None:
         """Restore extra state attributes."""
         # Group state is calculated from the members,
