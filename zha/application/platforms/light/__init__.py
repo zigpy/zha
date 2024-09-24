@@ -40,7 +40,6 @@ from zha.application.platforms.light.const import (
     ATTR_EFFECT,
     ATTR_EFFECT_LIST,
     ATTR_FLASH,
-    ATTR_HS_COLOR,
     ATTR_MAX_MIREDS,
     ATTR_MIN_MIREDS,
     ATTR_SUPPORTED_COLOR_MODES,
@@ -115,7 +114,6 @@ class BaseLight(BaseEntity, ABC):
         super().__init__(*args, **kwargs)
         self._min_mireds: int | None = 153
         self._max_mireds: int | None = 500
-        self._hs_color: tuple[float, float] | None = None
         self._xy_color: tuple[float, float] | None = None
         self._color_mode = ColorMode.UNKNOWN  # Set by subclasses
         self._color_temp: int | None = None
@@ -131,7 +129,6 @@ class BaseLight(BaseEntity, ABC):
         self._zha_config_transition: int = self._DEFAULT_MIN_TRANSITION_TIME
         self._zha_config_enhanced_light_transition: bool = False
         self._zha_config_enable_light_transitioning_flag: bool = True
-        self._zha_config_always_prefer_xy_color_mode: bool = True
         self._on_off_cluster_handler: ClusterHandler = None
         self._level_cluster_handler: ClusterHandler = None
         self._color_cluster_handler: ClusterHandler = None
@@ -146,7 +143,6 @@ class BaseLight(BaseEntity, ABC):
         response = super().state
         response["on"] = self.is_on
         response["brightness"] = self.brightness
-        response["hs_color"] = self.hs_color
         response["xy_color"] = self.xy_color
         response["color_temp"] = self.color_temp
         response["effect"] = self.effect
@@ -156,11 +152,6 @@ class BaseLight(BaseEntity, ABC):
         response["off_with_transition"] = self._off_with_transition
         response["off_brightness"] = self._off_brightness
         return response
-
-    @property
-    def hs_color(self) -> tuple[float, float] | None:
-        """Return the hs color value [int, int]."""
-        return self._hs_color
 
     @property
     def xy_color(self) -> tuple[float, float] | None:
@@ -250,7 +241,6 @@ class BaseLight(BaseEntity, ABC):
         flash = kwargs.get(ATTR_FLASH)
         temperature = kwargs.get(ATTR_COLOR_TEMP)
         xy_color = kwargs.get(ATTR_XY_COLOR)
-        hs_color = kwargs.get(ATTR_HS_COLOR)
 
         execute_if_off_supported = (
             self._GROUP_SUPPORTS_EXECUTE_IF_OFF
@@ -263,7 +253,6 @@ class BaseLight(BaseEntity, ABC):
             brightness_supported(self._supported_color_modes)
             or temperature is not None
             or xy_color is not None
-            or hs_color is not None
         ) and self._zha_config_enable_light_transitioning_flag
         transition_time = (
             (
@@ -274,7 +263,6 @@ class BaseLight(BaseEntity, ABC):
                     or (self._off_with_transition and self._off_brightness is not None)
                     or temperature is not None
                     or xy_color is not None
-                    or hs_color is not None
                 )
                 else DEFAULT_ON_OFF_TRANSITION + DEFAULT_EXTRA_TRANSITION_DELAY_SHORT
             )
@@ -318,10 +306,6 @@ class BaseLight(BaseEntity, ABC):
                 or (
                     xy_color is not None
                     and (self._xy_color != xy_color or self._color_mode != ColorMode.XY)
-                )
-                or (
-                    hs_color is not None
-                    and (self._hs_color != hs_color or self._color_mode != ColorMode.HS)
                 )
             )
             and brightness_supported(self._supported_color_modes)
@@ -368,7 +352,6 @@ class BaseLight(BaseEntity, ABC):
             if not await self.async_handle_color_commands(
                 temperature,
                 duration,  # duration is ignored by lights when off
-                hs_color,
                 xy_color,
                 new_color_provided_while_off,
                 t_log,
@@ -426,7 +409,6 @@ class BaseLight(BaseEntity, ABC):
             if not await self.async_handle_color_commands(
                 temperature,
                 duration,
-                hs_color,
                 xy_color,
                 new_color_provided_while_off,
                 t_log,
@@ -545,7 +527,6 @@ class BaseLight(BaseEntity, ABC):
         self,
         temperature,
         duration,
-        hs_color,
         xy_color,
         new_color_provided_while_off,
         t_log,
@@ -569,33 +550,6 @@ class BaseLight(BaseEntity, ABC):
             self._color_mode = ColorMode.COLOR_TEMP
             self._color_temp = temperature
             self._xy_color = None
-            self._hs_color = None
-
-        if hs_color is not None:
-            if (
-                not isinstance(self, LightGroup)
-                and self._color_cluster_handler.enhanced_hue_supported
-            ):
-                result = await self._color_cluster_handler.enhanced_move_to_hue_and_saturation(
-                    enhanced_hue=int(hs_color[0] * 65535 / 360),
-                    saturation=int(hs_color[1] * 2.54),
-                    transition_time=int(10 * transition_time),
-                )
-                t_log["enhanced_move_to_hue_and_saturation"] = result
-            else:
-                result = await self._color_cluster_handler.move_to_hue_and_saturation(
-                    hue=int(hs_color[0] * 254 / 360),
-                    saturation=int(hs_color[1] * 2.54),
-                    transition_time=int(10 * transition_time),
-                )
-                t_log["move_to_hue_and_saturation"] = result
-            if result[1] is not Status.SUCCESS:
-                return False
-            self._color_mode = ColorMode.HS
-            self._hs_color = hs_color
-            self._xy_color = None
-            self._color_temp = None
-            xy_color = None  # don't set xy_color if it is also present
 
         if xy_color is not None:
             result = await self._color_cluster_handler.move_to_color(
@@ -609,7 +563,6 @@ class BaseLight(BaseEntity, ABC):
             self._color_mode = ColorMode.XY
             self._xy_color = xy_color
             self._color_temp = None
-            self._hs_color = None
 
         return True
 
@@ -713,9 +666,6 @@ class Light(PlatformEntity, BaseLight):
         effect_list = []
 
         light_options = device.gateway.config.config.light_options
-        self._zha_config_always_prefer_xy_color_mode = (
-            light_options.always_prefer_xy_color_mode
-        )
 
         self._supported_color_modes = {ColorMode.ONOFF}
         if self._level_cluster_handler:
@@ -728,10 +678,7 @@ class Light(PlatformEntity, BaseLight):
                 self._supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._color_temp = self._color_cluster_handler.color_temperature
 
-            if self._color_cluster_handler.xy_supported and (
-                self._zha_config_always_prefer_xy_color_mode
-                or not self._color_cluster_handler.hs_supported
-            ):
+            if self._color_cluster_handler.xy_supported:
                 self._supported_color_modes.add(ColorMode.XY)
                 curr_x = self._color_cluster_handler.current_x
                 curr_y = self._color_cluster_handler.current_y
@@ -740,44 +687,18 @@ class Light(PlatformEntity, BaseLight):
                 else:
                     self._xy_color = (0, 0)
 
-            if (
-                self._color_cluster_handler.hs_supported
-                and not self._zha_config_always_prefer_xy_color_mode
-            ):
-                self._supported_color_modes.add(ColorMode.HS)
-                if (
-                    self._color_cluster_handler.enhanced_hue_supported
-                    and self._color_cluster_handler.enhanced_current_hue is not None
-                ):
-                    curr_hue = (
-                        self._color_cluster_handler.enhanced_current_hue * 65535 / 360
-                    )
-                elif self._color_cluster_handler.current_hue is not None:
-                    curr_hue = self._color_cluster_handler.current_hue * 254 / 360
-                else:
-                    curr_hue = 0
-
-                if (
-                    curr_saturation := self._color_cluster_handler.current_saturation
-                ) is None:
-                    curr_saturation = 0
-
-                self._hs_color = (
-                    int(curr_hue),
-                    int(curr_saturation * 2.54),
-                )
-
             if self._color_cluster_handler.color_loop_supported:
                 self._supported_features |= LightEntityFeature.EFFECT
                 effect_list.append(EFFECT_COLORLOOP)
                 if self._color_cluster_handler.color_loop_active == 1:
                     self._effect = EFFECT_COLORLOOP
+
         self._external_supported_color_modes = supported_color_modes = (
             filter_supported_color_modes(self._supported_color_modes)
         )
         if len(supported_color_modes) == 1:
             self._color_mode = next(iter(supported_color_modes))
-        else:  # Light supports color_temp + hs, determine which mode the light is in
+        else:  # Light supports color_temp + xy, determine which mode the light is in
             assert self._color_cluster_handler
             if (
                 self._color_cluster_handler.color_mode
@@ -932,19 +853,6 @@ class Light(PlatformEntity, BaseLight):
                 "current_x",
                 "current_y",
             ]
-            if (
-                not self._zha_config_always_prefer_xy_color_mode
-                and self._color_cluster_handler.enhanced_hue_supported
-            ):
-                attributes.append("enhanced_current_hue")
-                attributes.append("current_saturation")
-            if (
-                self._color_cluster_handler.hs_supported
-                and not self._color_cluster_handler.enhanced_hue_supported
-                and not self._zha_config_always_prefer_xy_color_mode
-            ):
-                attributes.append("current_hue")
-                attributes.append("current_saturation")
             if self._color_cluster_handler.color_temp_supported:
                 attributes.append("color_temperature")
             if self._color_cluster_handler.color_loop_supported:
@@ -967,26 +875,6 @@ class Light(PlatformEntity, BaseLight):
                     if color_temp is not None and color_mode:
                         self._color_temp = color_temp
                         self._xy_color = None
-                        self._hs_color = None
-                elif (
-                    color_mode == Color.ColorMode.Hue_and_saturation
-                    and not self._zha_config_always_prefer_xy_color_mode
-                ):
-                    self._color_mode = ColorMode.HS
-                    if self._color_cluster_handler.enhanced_hue_supported:
-                        current_hue = results.get("enhanced_current_hue")
-                    else:
-                        current_hue = results.get("current_hue")
-                    current_saturation = results.get("current_saturation")
-                    if current_hue is not None and current_saturation is not None:
-                        self._hs_color = (
-                            int(current_hue * 360 / 65535)
-                            if self._color_cluster_handler.enhanced_hue_supported
-                            else int(current_hue * 360 / 254),
-                            int(current_saturation / 2.54),
-                        )
-                        self._xy_color = None
-                        self._color_temp = None
                 else:
                     self._color_mode = ColorMode.XY
                     color_x = results.get("current_x")
@@ -994,7 +882,6 @@ class Light(PlatformEntity, BaseLight):
                     if color_x is not None and color_y is not None:
                         self._xy_color = (color_x / 65535, color_y / 65535)
                         self._color_temp = None
-                        self._hs_color = None
 
             color_loop_active = results.get("color_loop_active")
             if color_loop_active is not None:
@@ -1014,7 +901,6 @@ class Light(PlatformEntity, BaseLight):
             color_mode = update_params.get(ATTR_COLOR_MODE)
             color_temp = update_params.get(ATTR_COLOR_TEMP)
             xy_color = update_params.get(ATTR_XY_COLOR)
-            hs_color = update_params.get(ATTR_HS_COLOR)
             effect = update_params.get(ATTR_EFFECT)
 
             supported_modes = self._supported_color_modes
@@ -1056,8 +942,6 @@ class Light(PlatformEntity, BaseLight):
                 self._color_temp = color_temp
             if xy_color is not None and ColorMode.XY in supported_modes:
                 self._xy_color = xy_color
-            if hs_color is not None and ColorMode.HS in supported_modes:
-                self._hs_color = hs_color
             # the effect is always deactivated in async_turn_on if not provided
             if effect is None:
                 self._effect = None
@@ -1075,7 +959,6 @@ class Light(PlatformEntity, BaseLight):
         brightness: int | None,
         color_temp: int | None,
         xy_color: tuple[float, float] | None,
-        hs_color: tuple[float, float] | None,
         color_mode: ColorMode | None,
         effect: str | None,
     ) -> None:
@@ -1092,8 +975,6 @@ class Light(PlatformEntity, BaseLight):
             self._color_temp = color_temp
         if xy_color is not None:
             self._xy_color = xy_color
-        if hs_color is not None:
-            self._hs_color = hs_color
         if color_mode is not None:
             self._color_mode = color_mode
 
@@ -1156,9 +1037,6 @@ class LightGroup(GroupEntity, BaseLight):
         self._zha_config_transition = light_options.default_light_transition
         self._zha_config_enable_light_transitioning_flag = (
             light_options.enable_light_transitioning_flag
-        )
-        self._zha_config_always_prefer_xy_color_mode = (
-            light_options.always_prefer_xy_color_mode
         )
         self._zha_config_enhanced_light_transition = False
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
@@ -1271,14 +1149,7 @@ class LightGroup(GroupEntity, BaseLight):
             self._off_brightness = None
 
         self._brightness = reduce_attribute(on_states, ATTR_BRIGHTNESS)
-
         self._xy_color = reduce_attribute(on_states, ATTR_XY_COLOR, reduce=mean_tuple)
-
-        if not self._zha_config_always_prefer_xy_color_mode:
-            self._hs_color = reduce_attribute(
-                on_states, ATTR_HS_COLOR, reduce=mean_tuple
-            )
-
         self._color_temp = reduce_attribute(on_states, ATTR_COLOR_TEMP)
         self._min_mireds = reduce_attribute(
             states, ATTR_MIN_MIREDS, default=153, reduce=min
@@ -1332,12 +1203,6 @@ class LightGroup(GroupEntity, BaseLight):
             else:
                 self._color_mode = next(iter(supported_color_modes))
 
-            if self._color_mode == ColorMode.HS and (
-                color_mode_count[ColorMode.HS] != len(self._group.members)
-                or self._zha_config_always_prefer_xy_color_mode
-            ):  # switch to XY if all members do not support HS
-                self._color_mode = ColorMode.XY
-
         self._supported_features = LightEntityFeature(0)
         for support in find_state_attributes(states, ATTR_SUPPORTED_FEATURES):
             # Merge supported features by emulating support for every feature
@@ -1379,10 +1244,6 @@ class LightGroup(GroupEntity, BaseLight):
             update_params[ATTR_COLOR_MODE] = self._color_mode
             update_params[ATTR_XY_COLOR] = self._xy_color
 
-        if service_kwargs.get(ATTR_HS_COLOR) is not None:
-            update_params[ATTR_COLOR_MODE] = self._color_mode
-            update_params[ATTR_HS_COLOR] = self._hs_color
-
         # we always update effect for now, as we don't know if it was set or not
         update_params[ATTR_EFFECT] = self._effect
 
@@ -1398,7 +1259,6 @@ class LightGroup(GroupEntity, BaseLight):
         brightness: int | None,
         color_temp: int | None,
         xy_color: tuple[float, float] | None,
-        hs_color: tuple[float, float] | None,
         color_mode: ColorMode | None,
         effect: str | None,
     ) -> None:

@@ -228,9 +228,6 @@ async def poll_control_device(
                 "current_x",
                 "current_y",
                 "color_temperature",
-                "current_hue",
-                "enhanced_current_hue",
-                "current_saturation",
             },
         ),
         (

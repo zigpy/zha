@@ -40,14 +40,6 @@ class ColorClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_DEFAULT,
         ),
         AttrReportConfig(
-            attr=Color.AttributeDefs.current_hue.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-        AttrReportConfig(
-            attr=Color.AttributeDefs.current_saturation.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-        AttrReportConfig(
             attr=Color.AttributeDefs.color_temperature.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
@@ -60,7 +52,6 @@ class ColorClusterHandler(ClusterHandler):
         Color.AttributeDefs.color_temp_physical_max.name: True,
         Color.AttributeDefs.color_capabilities.name: True,
         Color.AttributeDefs.color_loop_active.name: False,
-        Color.AttributeDefs.enhanced_current_hue.name: False,
         Color.AttributeDefs.start_up_color_temperature.name: True,
         Color.AttributeDefs.options.name: True,
     }
@@ -101,16 +92,6 @@ class ColorClusterHandler(ClusterHandler):
         return self.cluster.get(Color.AttributeDefs.current_y.name)
 
     @property
-    def current_hue(self) -> int | None:
-        """Return cached value of the current_hue attribute."""
-        return self.cluster.get(Color.AttributeDefs.current_hue.name)
-
-    @property
-    def enhanced_current_hue(self) -> int | None:
-        """Return cached value of the enhanced_current_hue attribute."""
-        return self.cluster.get(Color.AttributeDefs.enhanced_current_hue.name)
-
-    @property
     def current_saturation(self) -> int | None:
         """Return cached value of the current_saturation attribute."""
         return self.cluster.get(Color.AttributeDefs.current_saturation.name)
@@ -148,22 +129,6 @@ class ColorClusterHandler(ClusterHandler):
             )
             max_mireds = self.MAX_MIREDS
         return max_mireds
-
-    @property
-    def hs_supported(self) -> bool:
-        """Return True if the cluster handler supports hue and saturation."""
-        return (
-            self.color_capabilities is not None
-            and Color.ColorCapabilities.Hue_and_saturation in self.color_capabilities
-        )
-
-    @property
-    def enhanced_hue_supported(self) -> bool:
-        """Return True if the cluster handler supports enhanced hue and saturation."""
-        return (
-            self.color_capabilities is not None
-            and Color.ColorCapabilities.Enhanced_hue in self.color_capabilities
-        )
 
     @property
     def xy_supported(self) -> bool:

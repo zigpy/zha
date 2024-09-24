@@ -333,7 +333,7 @@ async def test_color_number(
 
     entity = get_entity(zha_device, platform=Platform.NUMBER, qualifier=attr)
 
-    assert color_cluster.read_attributes.call_count == 3
+    assert color_cluster.read_attributes.call_count == 2
     assert (
         call(
             [
