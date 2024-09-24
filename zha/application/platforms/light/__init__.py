@@ -665,7 +665,7 @@ class Light(PlatformEntity, BaseLight):
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
-        effect_list = []
+        effect_list = [EFFECT_OFF]
 
         light_options = device.gateway.config.config.light_options
 
@@ -714,7 +714,7 @@ class Light(PlatformEntity, BaseLight):
             self._supported_features |= LightEntityFeature.FLASH
 
         if effect_list:
-            self._effect_list = [EFFECT_OFF, *effect_list]
+            self._effect_list = effect_list
 
         self._zha_config_transition = light_options.default_light_transition
         self._zha_config_enhanced_light_transition = (
