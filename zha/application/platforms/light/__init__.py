@@ -976,9 +976,8 @@ class Light(PlatformEntity, BaseLight):
             self._xy_color = xy_color
         if color_mode is not None:
             self._color_mode = color_mode
-
-        # Effect is always restored, as `None` indicates that no effect is active
-        self._effect = effect
+        if effect is not None:
+            self._effect = effect
 
 
 @STRICT_MATCH(
