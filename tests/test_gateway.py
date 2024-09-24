@@ -34,7 +34,7 @@ from zha.application.gateway import (
 )
 from zha.application.helpers import ZHAData
 from zha.application.platforms import GroupEntity
-from zha.application.platforms.light.const import LightEntityFeature
+from zha.application.platforms.light.const import EFFECT_OFF, LightEntityFeature
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -314,7 +314,7 @@ async def test_gateway_group_methods(
     assert info.supported_features == LightEntityFeature.TRANSITION
     assert info.min_mireds == 153
     assert info.max_mireds == 500
-    assert info.effect_list is None
+    assert info.effect_list == [EFFECT_OFF]
 
     device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
     device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
