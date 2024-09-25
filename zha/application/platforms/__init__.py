@@ -343,8 +343,12 @@ class PlatformEntity(BaseEntity):
         has_device_class = hasattr(entity_metadata, "device_class")
         has_attribute_name = hasattr(entity_metadata, "attribute_name")
         has_command_name = hasattr(entity_metadata, "command_name")
+        has_fallback_name = hasattr(entity_metadata, "fallback_name")
 
         if not has_device_class or entity_metadata.device_class is None:
+            if has_fallback_name:
+                self._attr_fallback_name = entity_metadata.fallback_name
+
             if entity_metadata.translation_key:
                 self._attr_translation_key = entity_metadata.translation_key
             elif has_attribute_name:
