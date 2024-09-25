@@ -346,14 +346,15 @@ class PlatformEntity(BaseEntity):
         has_fallback_name = hasattr(entity_metadata, "fallback_name")
 
         if not has_device_class or entity_metadata.device_class is None:
+            if has_fallback_name:
+                self._attr_fallback_name = entity_metadata.fallback_name
+
             if entity_metadata.translation_key:
                 self._attr_translation_key = entity_metadata.translation_key
             elif has_attribute_name:
                 self._attr_translation_key = entity_metadata.attribute_name
             elif has_command_name:
                 self._attr_translation_key = entity_metadata.command_name
-            elif has_fallback_name:
-                self._attr_fallback_name = entity_metadata.fallback_name
 
         if has_attribute_name:
             self._unique_id_suffix = entity_metadata.attribute_name
