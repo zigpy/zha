@@ -521,6 +521,8 @@ async def test_quirks_v2_entity_discovery(
             step=1,
             unit=UnitOfTime.SECONDS,
             multiplier=1,
+            translation_key="off_wait_time",
+            fallback_name="Off wait time",
         )
         .add_to_registry()
     )
@@ -580,6 +582,8 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
             BasicCluster.cluster_id,
             entity_platform=Platform.SENSOR,
             entity_type=EntityType.DIAGNOSTIC,
+            translation_key="power_source",
+            fallback_name="Power source",
         )
         .enum(
             "hooks_state",
@@ -587,8 +591,15 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
             FakeXiaomiAqaraDriverE1.cluster_id,
             entity_platform=Platform.SENSOR,
             entity_type=EntityType.DIAGNOSTIC,
+            translation_key="hooks_state",
+            fallback_name="Hooks state",
         )
-        .binary_sensor("error_detected", FakeXiaomiAqaraDriverE1.cluster_id)
+        .binary_sensor(
+            "error_detected",
+            FakeXiaomiAqaraDriverE1.cluster_id,
+            translation_key="error_detected",
+            fallback_name="Error detected",
+        )
         .add_to_registry()
     )
 
@@ -800,7 +811,7 @@ async def test_quirks_v2_entity_discovery_errors(
         "entity_type=<EntityType.CONFIG: 'config'>, cluster_id=6, endpoint_id=1, "
         "cluster_type=<ClusterType.Server: 0>, initially_disabled=False, "
         "attribute_initialized_from_cache=True, translation_key='analog_input', "
-        "attribute_name='off_wait_time', divisor=1, multiplier=1, "
+        "fallback_name=None, attribute_name='off_wait_time', divisor=1, multiplier=1, "
         "unit=None, device_class=None, state_class=None)}"
     )
     # fmt: on
@@ -914,51 +925,6 @@ def validate_metadata(validator: Callable) -> None:
         for entity_metadata in quirk.entity_metadata:
             platform = Platform(entity_metadata.entity_platform.value)
             validator(quirk, entity_metadata, platform, translations)
-
-
-@pytest.mark.parametrize(
-    ("augment_method", "validate_method", "expected_exception_string"),
-    [
-        (
-            bad_device_class_unit_combination,
-            validate_device_class_unit,
-            "cannot have both unit and device_class",
-        ),
-        (
-            bad_device_class_translation_key_usage,
-            validate_translation_keys_device_class,
-            "cannot have both a translation_key and a device_class",
-        ),
-    ],
-)
-async def test_quirks_v2_metadata_errors(
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
-    augment_method: Callable[[QuirkBuilder], QuirkBuilder],
-    validate_method: Callable,
-    expected_exception_string: str,
-) -> None:
-    """Ensure all v2 quirks translation keys exist."""
-
-    # no error yet
-    validate_metadata(validate_method)
-
-    # ensure the error is caught and raised
-    with pytest.raises(ValueError, match=expected_exception_string):
-        # introduce an error
-        zigpy_device = _get_test_device(
-            zigpy_device_mock,
-            "Ikea of Sweden4",
-            "TRADFRI remote control4",
-            augment_method=augment_method,
-        )
-        await device_joined(zigpy_device)
-
-        validate_metadata(validate_method)
-        # if the device was created we remove it
-        # so we don't pollute the rest of the tests
-        zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
 
 
 class BadDeviceClass(enum.Enum):
