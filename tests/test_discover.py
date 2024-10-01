@@ -9,7 +9,7 @@ import pathlib
 import re
 from typing import Any, Final
 from unittest import mock
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
@@ -120,10 +120,6 @@ def zha_device_mock(
     return _mock
 
 
-@patch(
-    "zigpy.zcl.clusters.general.Identify.request",
-    new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
-)
 @pytest.mark.parametrize("device", DEVICES)
 async def test_devices(
     device,
@@ -144,7 +140,9 @@ async def test_devices(
 
     cluster_identify = _get_identify_cluster(zigpy_device)
     if cluster_identify:
-        cluster_identify.request.reset_mock()
+        cluster_identify.request = AsyncMock(
+            return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]
+        )
 
     zha_dev: Device = await device_joined(zigpy_device)
     await zha_gateway.async_block_till_done()
@@ -155,14 +153,24 @@ async def test_devices(
                 False,
                 cluster_identify.commands_by_name["trigger_effect"].id,
                 cluster_identify.commands_by_name["trigger_effect"].schema,
+                manufacturer=None,
+                expect_reply=True,
+                tsn=None,
                 effect_id=zigpy.zcl.clusters.general.Identify.EffectIdentifier.Okay,
                 effect_variant=(
                     zigpy.zcl.clusters.general.Identify.EffectVariant.Default
                 ),
-                expect_reply=True,
+            ),
+            mock.call(
+                True,
+                zcl_f.GeneralCommand.Discover_Attributes,
+                zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Discover_Attributes].schema,
                 manufacturer=None,
+                expect_reply=True,
                 tsn=None,
-            )
+                start_attribute_id=0,
+                max_attribute_ids=255,
+            ),
         ]
 
     event_cluster_handlers = {
