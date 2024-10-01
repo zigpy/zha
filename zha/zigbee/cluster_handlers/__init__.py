@@ -375,7 +375,7 @@ class ClusterHandler(LogMixin, EventBase):
         event_data: dict[str, dict[str, Any]],
     ) -> None:
         """Parse configure reporting result."""
-        if isinstance(res, (Exception, ConfigureReportingResponseRecord)):
+        if isinstance(res, (Exception, ConfigureReportingResponseRecord, int)):
             # assume default response
             self.debug(
                 "attr reporting for '%s' on '%s': %s",

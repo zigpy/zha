@@ -2,7 +2,6 @@
 
 import zigpy.exceptions
 from zigpy.zcl.clusters.lightlink import LightLink
-from zigpy.zcl.foundation import GENERAL_COMMANDS, GeneralCommand
 
 from zha.zigbee.cluster_handlers import ClusterHandler, ClusterHandlerStatus, registries
 
@@ -34,10 +33,12 @@ class LightLinkClusterHandler(ClusterHandler):
             self.warning("Couldn't get list of groups: %s", str(exc))
             return
 
-        if isinstance(rsp, GENERAL_COMMANDS[GeneralCommand.Default_Response].schema):
-            groups = []
-        else:
+        if isinstance(
+            rsp, LightLink.ClientCommandDefs.get_group_identifiers_rsp.schema
+        ):
             groups = rsp.group_info_records
+        else:
+            groups = []
 
         if groups:
             for group in groups:

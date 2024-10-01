@@ -834,8 +834,10 @@ async def test_ep_cluster_handlers_configure(cluster_handler) -> None:
         mock.patch.dict(endpoint.claimed_cluster_handlers, claimed, clear=True),
         mock.patch.dict(endpoint.client_cluster_handlers, client_handlers, clear=True),
     ):
-        await endpoint.async_configure()
-        await endpoint.async_initialize(mock.sentinel.from_cache)
+        with pytest.raises(ExceptionGroup):
+            await endpoint.async_configure()
+        with pytest.raises(ExceptionGroup):
+            await endpoint.async_initialize(mock.sentinel.from_cache)
 
     for ch in [*claimed.values(), *client_handlers.values()]:
         assert ch.async_initialize.call_count == 1
@@ -843,9 +845,6 @@ async def test_ep_cluster_handlers_configure(cluster_handler) -> None:
         assert ch.async_initialize.call_args[0][0] is mock.sentinel.from_cache
         assert ch.async_configure.call_count == 1
         assert ch.async_configure.await_count == 1
-
-    assert ch_3.debug.call_count == 2
-    assert ch_5.debug.call_count == 2
 
 
 async def test_poll_control_configure(
