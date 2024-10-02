@@ -3,7 +3,7 @@
 # pylint: disable=redefined-outer-name
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -15,6 +15,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
     get_entity,
+    join_zigpy_device,
     make_zcl_header,
     send_attributes_report,
     update_attribute_cache,
@@ -34,7 +35,6 @@ from zha.application.platforms.cover.const import (
     CoverEntityFeature,
 )
 from zha.exceptions import ZHAException
-from zha.zigbee.device import Device
 
 Default_Response = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Default_Response].schema
 
@@ -121,7 +121,6 @@ WCCS = closures.WindowCovering.ConfigStatus
 
 async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     zha_gateway: Gateway,
-    device_joined,
     zigpy_cover_device,
 ) -> None:
     """Test ZHA cover platform."""
@@ -134,7 +133,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
         WCAttrs.config_status.name: WCCS(~WCCS.Open_up_commands_reversed),
     }
     update_attribute_cache(cluster)
-    zha_device = await device_joined(zigpy_cover_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
     assert (
         not zha_device.endpoints[1]
         .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
@@ -171,7 +170,6 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
 
 
 async def test_cover(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_cover_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
@@ -185,7 +183,7 @@ async def test_cover(
         WCAttrs.config_status.name: WCCS(~WCCS.Open_up_commands_reversed),
     }
     update_attribute_cache(cluster)
-    zha_device = await device_joined(zigpy_cover_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
 
     assert (
         not zha_device.endpoints[1]
@@ -400,9 +398,7 @@ async def test_cover(
         assert cluster.request.call_args[1]["expect_reply"] is True
 
 
-async def test_cover_failures(
-    zha_gateway: Gateway, device_joined, zigpy_cover_device
-) -> None:
+async def test_cover_failures(zha_gateway: Gateway, zigpy_cover_device) -> None:
     """Test ZHA cover platform failure cases."""
 
     # load up cover domain
@@ -412,7 +408,7 @@ async def test_cover_failures(
         WCAttrs.window_covering_type.name: WCT.Tilt_blind_tilt_and_lift,
     }
     update_attribute_cache(cluster)
-    zha_device = await device_joined(zigpy_cover_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
 
     entity = get_entity(zha_device, platform=Platform.COVER)
 
@@ -560,13 +556,12 @@ async def test_cover_failures(
 
 
 async def test_shade(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_shade_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test zha cover platform for shade device type."""
 
-    zha_device = await device_joined(zigpy_shade_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_shade_device)
     cluster_on_off = zigpy_shade_device.endpoints.get(1).on_off
     cluster_level = zigpy_shade_device.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
@@ -722,13 +717,12 @@ async def test_shade(
 
 
 async def test_keen_vent(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_keen_vent: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test keen vent."""
 
-    zha_device = await device_joined(zigpy_keen_vent)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_keen_vent)
     cluster_on_off = zigpy_keen_vent.endpoints.get(1).on_off
     cluster_level = zigpy_keen_vent.endpoints.get(1).level
     entity = get_entity(zha_device, platform=Platform.COVER)
@@ -783,13 +777,11 @@ async def test_keen_vent(
         assert entity.state["current_position"] == 100
 
 
-async def test_cover_remote(
-    zha_gateway: Gateway, device_joined, zigpy_cover_remote
-) -> None:
+async def test_cover_remote(zha_gateway: Gateway, zigpy_cover_remote) -> None:
     """Test ZHA cover remote."""
 
     # load up cover domain
-    zha_device = await device_joined(zigpy_cover_remote)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_remote)
     zha_device.emit_zha_event = MagicMock(wraps=zha_device.emit_zha_event)
 
     cluster = zigpy_cover_remote.endpoints[1].out_clusters[
@@ -820,12 +812,11 @@ async def test_cover_remote(
 
 
 async def test_cover_state_restoration(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_cover_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test the cover state restoration."""
-    zha_device = await device_joined(zigpy_cover_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
     entity = get_entity(zha_device, platform=Platform.COVER)
 
     assert entity.state["state"] != STATE_CLOSED
