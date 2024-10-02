@@ -1,6 +1,6 @@
 """Test zha lock."""
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
@@ -9,7 +9,12 @@ import zigpy.profiles.zha
 from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, send_attributes_report, update_attribute_cache
+from tests.common import (
+    get_entity,
+    join_zigpy_device,
+    send_attributes_report,
+    update_attribute_cache,
+)
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -27,7 +32,7 @@ SET_USER_STATUS = 9
 @pytest.fixture
 async def lock(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> tuple[Device, closures.DoorLock]:
     """Lock cluster fixture."""
 
@@ -42,7 +47,7 @@ async def lock(
         },
     )
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].door_lock
 
 
