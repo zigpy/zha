@@ -21,7 +21,7 @@ import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import Thermostat
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, send_attributes_report
+from tests.common import get_entity, join_zigpy_device, send_attributes_report
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import (
@@ -195,7 +195,7 @@ ATTR_PRESET_MODE = "preset_mode"
 @pytest.fixture
 def device_climate_mock(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Callable[
     [
         dict[int, dict[str, Any]],
@@ -217,7 +217,7 @@ def device_climate_mock(
         zigpy_device = zigpy_device_mock(clusters, manufacturer=manuf, quirk=quirk)
         zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
         zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = plugged_attrs
-        zha_device = await device_joined(zigpy_device)
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
         return zha_device
 
     return _dev
