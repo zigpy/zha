@@ -1,6 +1,6 @@
 """Test zha application helpers."""
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 
 import pytest
 from zigpy.device import Device as ZigpyDevice
@@ -8,10 +8,10 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters.general import Basic, OnOff
 from zigpy.zcl.clusters.security import IasZone
 
+from tests.common import join_zigpy_device
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application.gateway import Gateway
 from zha.application.helpers import async_is_bindable_target, get_matched_clusters
-from zha.zigbee.device import Device
 
 IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
 IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
@@ -71,16 +71,17 @@ def remote_zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyD
 
 
 async def test_async_is_bindable_target(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zigpy_device_not_bindable: ZigpyDevice,  # pylint: disable=redefined-outer-name
     remote_zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test zha if a device is a binding target for another device."""
-    zha_device = await device_joined(zigpy_device)
-    not_bindable_zha_device = await device_joined(zigpy_device_not_bindable)
-    remote_zha_device = await device_joined(remote_zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    not_bindable_zha_device = await join_zigpy_device(
+        zha_gateway, zigpy_device_not_bindable
+    )
+    remote_zha_device = await join_zigpy_device(zha_gateway, remote_zigpy_device)
 
     assert async_is_bindable_target(remote_zha_device, zha_device)
 
@@ -88,16 +89,17 @@ async def test_async_is_bindable_target(
 
 
 async def test_get_matched_clusters(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zigpy_device_not_bindable: ZigpyDevice,  # pylint: disable=redefined-outer-name
     remote_zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test getting matched clusters for 2 zha devices."""
-    zha_device = await device_joined(zigpy_device)
-    not_bindable_zha_device = await device_joined(zigpy_device_not_bindable)
-    remote_zha_device = await device_joined(remote_zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    not_bindable_zha_device = await join_zigpy_device(
+        zha_gateway, zigpy_device_not_bindable
+    )
+    remote_zha_device = await join_zigpy_device(zha_gateway, remote_zigpy_device)
 
     matches = await get_matched_clusters(remote_zha_device, zha_device)
     assert len(matches) == 1
