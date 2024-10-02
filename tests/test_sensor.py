@@ -17,7 +17,7 @@ from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
-from tests.common import get_entity, send_attributes_report
+from tests.common import get_entity, join_zigpy_device, send_attributes_report
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
@@ -67,12 +67,12 @@ async def elec_measurement_zigpy_dev(
 
 @pytest.fixture
 async def elec_measurement_zha_dev(
+    zha_gateway: Gateway,
     elec_measurement_zigpy_dev: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> Device:
     """Electric Measurement ZHA device."""
 
-    zha_dev = await device_joined(elec_measurement_zigpy_dev)
+    zha_dev = await join_zigpy_device(zha_gateway, elec_measurement_zigpy_dev)
     zha_dev.available = True
     return zha_dev
 
@@ -543,7 +543,6 @@ async def async_test_pi_heating_demand(
 )
 async def test_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
     cluster_id: int,
     entity_type: type[PlatformEntity],
@@ -575,7 +574,7 @@ async def test_sensor(
         zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
     cluster.PLUGGED_ATTR_READS = read_plug or {}
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     entity = get_entity(
         zha_device, platform=Platform.SENSOR, exact_entity_type=entity_type
     )
@@ -598,7 +597,6 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
 @pytest.mark.looptime
 async def test_electrical_measurement_init(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -617,7 +615,7 @@ async def test_electrical_measurement_init(
     )
 
     cluster = zigpy_device.endpoints[1].in_clusters[cluster_id]
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity = get_entity(
         zha_device,
@@ -804,8 +802,8 @@ async def test_electrical_measurement_init(
     ),
 )
 async def test_unsupported_attributes_sensor(
+    zha_gateway: Gateway,
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     cluster_id: int,
     unsupported_attributes: set,
     included_entity_types: set,
@@ -830,7 +828,7 @@ async def test_unsupported_attributes_sensor(
     for attr in unsupported_attributes:
         cluster.add_unsupported_attribute(attr)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     present_entity_types = {
         type(e)
@@ -933,8 +931,8 @@ async def test_unsupported_attributes_sensor(
     ),
 )
 async def test_se_summation_uom(
+    zha_gateway: Gateway,
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     raw_uom: int,
     raw_value: int,
     expected_state: str,
@@ -970,7 +968,7 @@ async def test_se_summation_uom(
         "summation_formatting": 0b1_0111_010,
         "unit_of_measure": raw_uom,
     }
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="summation_delivered"
@@ -995,7 +993,6 @@ async def test_elec_measurement_sensor_type(
     elec_measurement_zigpy_dev: ZigpyDevice,  # pylint: disable=redefined-outer-name
     raw_measurement_type: int,
     expected_type: str,
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test zha electrical measurement sensor type."""
@@ -1005,7 +1002,7 @@ async def test_elec_measurement_sensor_type(
         "measurement_type"
     ] = raw_measurement_type
 
-    zha_dev = await device_joined(zigpy_dev)
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     entity = get_entity(zha_dev, platform=Platform.SENSOR)
     assert entity.state["measurement_type"] == expected_type
@@ -1015,7 +1012,6 @@ async def test_elec_measurement_sensor_type(
 async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
     elec_measurement_zigpy_dev: ZigpyDevice,
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Test ZHA electrical measurement sensor polling."""
 
@@ -1024,7 +1020,7 @@ async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-out
         20
     )
 
-    zha_dev = await device_joined(zigpy_dev)
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     # test that the sensor has an initial state of 2.0
     entity = get_entity(
@@ -1080,6 +1076,7 @@ async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-out
     ),
 )
 async def test_elec_measurement_skip_unsupported_attribute(
+    zha_gateway: Gateway,
     elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
     supported_attributes: set[str],
 ) -> None:
@@ -1155,7 +1152,6 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
 async def zigpy_device_aqara_sensor_v2(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
 ):
     """Device tracker zigpy Aqara motion sensor device."""
 
@@ -1176,7 +1172,7 @@ async def zigpy_device_aqara_sensor_v2(
 
     zigpy_device = get_device(zigpy_device)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].opple_cluster
 
 
@@ -1310,8 +1306,8 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
 @pytest.fixture
 async def zigpy_device_danfoss_thermostat(
+    zha_gateway: Gateway,
     zigpy_device_mock: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> tuple[Device, zigpy.device.Device]:
     """Danfoss thermostat device."""
 
@@ -1337,7 +1333,7 @@ async def zigpy_device_danfoss_thermostat(
         quirk=danfoss_thermostat.DanfossThermostat,
     )
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device
 
 
