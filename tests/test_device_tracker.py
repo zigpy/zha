@@ -8,7 +8,7 @@ import pytest
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general
 
-from tests.common import get_entity, send_attributes_report
+from tests.common import get_entity, join_zigpy_device, send_attributes_report
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -39,12 +39,11 @@ def zigpy_device_dt(zigpy_device_mock):
 @pytest.mark.looptime
 async def test_device_tracker(
     zha_gateway: Gateway,
-    device_joined,
     zigpy_device_dt,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA device tracker platform."""
 
-    zha_device = await device_joined(zigpy_device_dt)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_dt)
     cluster = zigpy_device_dt.endpoints.get(1).power
     entity = get_entity(zha_device, platform=Platform.DEVICE_TRACKER)
 
