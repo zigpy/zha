@@ -3,7 +3,7 @@
 # pylint: disable=redefined-outer-name
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 import logging
 from typing import Optional
 from unittest.mock import AsyncMock, call, patch
@@ -21,6 +21,7 @@ from tests.common import (
     get_entity,
     get_group_entity,
     group_entity_availability_test,
+    join_zigpy_device,
     send_attributes_report,
 )
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -89,7 +90,7 @@ def zigpy_device(
 @pytest.fixture
 async def device_fan_1(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha fan platform."""
 
@@ -108,7 +109,7 @@ async def device_fan_1(
         },
         ieee=IEEE_GROUPABLE_DEVICE,
     )
-    zha_device = await device_joined(zigpy_dev)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     zha_device.available = True
     return zha_device
 
@@ -116,7 +117,7 @@ async def device_fan_1(
 @pytest.fixture
 async def device_fan_2(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha fan platform."""
 
@@ -136,19 +137,18 @@ async def device_fan_2(
         },
         ieee=IEEE_GROUPABLE_DEVICE2,
     )
-    zha_device = await device_joined(zigpy_dev)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     zha_device.available = True
     return zha_device
 
 
 async def test_fan(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test zha fan platform."""
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = zigpy_device.endpoints.get(1).fan
 
     entity = get_entity(zha_device, platform=Platform.FAN)
@@ -283,7 +283,9 @@ async def async_set_preset_mode(
 )
 @pytest.mark.looptime
 async def test_zha_group_fan_entity(
-    device_fan_1: Device, device_fan_2: Device, zha_gateway: Gateway
+    device_fan_1: Device,
+    device_fan_2: Device,
+    zha_gateway: Gateway,
 ):
     """Test the fan entity for a ZHAWS group."""
 
@@ -450,7 +452,6 @@ async def test_zha_group_fan_entity_failure_state(
     ),
 )
 async def test_fan_init(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     plug_read: dict,
@@ -462,7 +463,7 @@ async def test_fan_init(
 
     cluster = zigpy_device.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = plug_read
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity = get_entity(zha_device, platform=Platform.FAN)
 
@@ -473,7 +474,6 @@ async def test_fan_init(
 
 
 async def test_fan_update_entity(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,
     zha_gateway: Gateway,
 ):
@@ -481,7 +481,7 @@ async def test_fan_update_entity(
 
     cluster = zigpy_device.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity = get_entity(zha_device, platform=Platform.FAN)
 
@@ -555,11 +555,10 @@ def zigpy_device_ikea(zigpy_device_mock) -> ZigpyDevice:
 
 async def test_fan_ikea(
     zha_gateway: Gateway,
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_ikea: ZigpyDevice,
 ) -> None:
     """Test ZHA fan Ikea platform."""
-    zha_device = await device_joined(zigpy_device_ikea)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_ikea)
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
     entity = get_entity(zha_device, platform=Platform.FAN)
 
@@ -649,18 +648,18 @@ async def test_fan_ikea(
     ],
 )
 async def test_fan_ikea_init(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_ikea: ZigpyDevice,
     ikea_plug_read: dict,
     ikea_expected_state: bool,
     ikea_expected_percentage: int,
     ikea_preset_mode: Optional[str],
+    zha_gateway: Gateway,
 ) -> None:
     """Test ZHA fan platform."""
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
     cluster.PLUGGED_ATTR_READS = ikea_plug_read
 
-    zha_device = await device_joined(zigpy_device_ikea)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_ikea)
     entity = get_entity(zha_device, platform=Platform.FAN)
     assert entity.state["is_on"] == ikea_expected_state
     assert entity.state["percentage"] == ikea_expected_percentage
@@ -669,14 +668,13 @@ async def test_fan_ikea_init(
 
 async def test_fan_ikea_update_entity(
     zha_gateway: Gateway,
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_ikea: ZigpyDevice,
 ) -> None:
     """Test ZHA fan platform."""
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0, "fan_speed": 0}
 
-    zha_device = await device_joined(zigpy_device_ikea)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_ikea)
     entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is False
@@ -741,11 +739,10 @@ def zigpy_device_kof(zigpy_device_mock) -> ZigpyDevice:
 
 async def test_fan_kof(
     zha_gateway: Gateway,
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_kof: ZigpyDevice,
 ) -> None:
     """Test ZHA fan platform for King of Fans."""
-    zha_device = await device_joined(zigpy_device_kof)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_kof)
     cluster = zigpy_device_kof.endpoints.get(1).fan
     entity = get_entity(zha_device, platform=Platform.FAN)
 
@@ -807,8 +804,8 @@ async def test_fan_kof(
     ],
 )
 async def test_fan_kof_init(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_kof: ZigpyDevice,
+    zha_gateway: Gateway,
     plug_read: dict,
     expected_state: bool,
     expected_percentage: Optional[int],
@@ -819,7 +816,7 @@ async def test_fan_kof_init(
     cluster = zigpy_device_kof.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = plug_read
 
-    zha_device = await device_joined(zigpy_device_kof)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_kof)
     entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is expected_state
@@ -829,7 +826,6 @@ async def test_fan_kof_init(
 
 async def test_fan_kof_update_entity(
     zha_gateway: Gateway,
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device_kof: ZigpyDevice,
 ) -> None:
     """Test ZHA fan platform for King of Fans."""
@@ -837,7 +833,7 @@ async def test_fan_kof_update_entity(
     cluster = zigpy_device_kof.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
 
-    zha_device = await device_joined(zigpy_device_kof)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_kof)
     entity = get_entity(zha_device, platform=Platform.FAN)
 
     assert entity.state["is_on"] is False
