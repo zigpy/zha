@@ -1,6 +1,6 @@
 """Test zha alarm control panel."""
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 import logging
 from unittest.mock import AsyncMock, call, patch, sentinel
 
@@ -11,6 +11,7 @@ from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
+from tests.common import join_zigpy_device
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -61,13 +62,12 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
 async def test_alarm_control_panel(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test zhaws alarm control panel platform."""
-    zha_device: Device = await device_joined(zigpy_device)
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
     alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
         (Platform.ALARM_CONTROL_PANEL, "00:0d:6f:00:0a:90:69:e7-1")
