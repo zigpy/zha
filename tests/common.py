@@ -2,13 +2,20 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
+from contextlib import suppress
+import json
 import logging
+import pathlib
+import time
 from typing import Any, Optional
 from unittest.mock import AsyncMock, Mock
 
+from zigpy.application import ControllerApplication
+from zigpy.quirks import get_device as quirks_get_device
 import zigpy.types as t
 import zigpy.zcl
 import zigpy.zcl.foundation as zcl_f
+import zigpy.zdo.types as zdo_t
 
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -19,7 +26,7 @@ from zha.zigbee.group import Group
 _LOGGER = logging.getLogger(__name__)
 
 
-def patch_cluster(cluster: zigpy.zcl.Cluster) -> None:
+def patch_cluster_for_testing(cluster: zigpy.zcl.Cluster) -> None:
     """Patch a cluster for testing."""
     cluster.PLUGGED_ATTR_READS = {}
 
@@ -295,3 +302,150 @@ async def group_entity_availability_test(
     await zha_gateway.async_block_till_done()
 
     assert entity.state["available"] is True
+
+
+def zigpy_device_from_device_data(
+    app: ControllerApplication,
+    device_data: dict,
+    patch_cluster: bool = True,
+    quirk: Optional[Callable] = None,
+) -> zigpy.device.Device:
+    """Make a fake device using the specified cluster classes."""
+    ieee = zigpy.types.EUI64.convert(device_data["ieee"])
+    nwk = device_data["nwk"]
+    manufacturer = device_data["manufacturer"]
+    model = device_data["model"]
+    node_descriptor = device_data["signature"]["node_descriptor"]
+    endpoints = device_data["signature"]["endpoints"]
+    cluster_data = device_data["cluster_details"]
+
+    device = zigpy.device.Device(app, ieee, nwk)
+    device.manufacturer = manufacturer
+    device.model = model
+
+    node_desc = zdo_t.NodeDescriptor(
+        logical_type=node_descriptor["logical_type"],
+        complex_descriptor_available=node_descriptor["complex_descriptor_available"],
+        user_descriptor_available=node_descriptor["user_descriptor_available"],
+        reserved=node_descriptor["reserved"],
+        aps_flags=node_descriptor["aps_flags"],
+        frequency_band=node_descriptor["frequency_band"],
+        mac_capability_flags=node_descriptor["mac_capability_flags"],
+        manufacturer_code=node_descriptor["manufacturer_code"],
+        maximum_buffer_size=node_descriptor["maximum_buffer_size"],
+        maximum_incoming_transfer_size=node_descriptor[
+            "maximum_incoming_transfer_size"
+        ],
+        server_mask=node_descriptor["server_mask"],
+        maximum_outgoing_transfer_size=node_descriptor[
+            "maximum_outgoing_transfer_size"
+        ],
+        descriptor_capability_field=node_descriptor["descriptor_capability_field"],
+    )
+    device.node_desc = node_desc
+    device.last_seen = time.time()
+
+    orig_endpoints = (
+        device_data["original_signature"]["endpoints"]
+        if "original_signature" in device_data
+        else endpoints
+    )
+    for epid, ep in orig_endpoints.items():
+        endpoint = device.add_endpoint(int(epid))
+        profile = None
+        with suppress(Exception):
+            profile = zigpy.profiles.PROFILES[int(ep["profile_id"], 16)]
+
+        endpoint.device_type = (
+            profile.DeviceType(int(ep["device_type"], 16))
+            if profile
+            else int(ep["device_type"], 16)
+        )
+        endpoint.profile_id = (
+            profile.PROFILE_ID if profile else int(ep["profile_id"], 16)
+        )
+        endpoint.request = AsyncMock(return_value=[0])
+
+        for cluster_id in ep["input_clusters"]:
+            endpoint.add_input_cluster(int(cluster_id, 16))
+
+        for cluster_id in ep["output_clusters"]:
+            endpoint.add_output_cluster(int(cluster_id, 16))
+
+    if quirk:
+        device = quirk(app, device.ieee, device.nwk, device)
+    else:
+        device = quirks_get_device(device)
+
+    for epid, ep in cluster_data.items():
+        endpoint.request = AsyncMock(return_value=[0])
+        for cluster_id, cluster in ep["in_clusters"].items():
+            real_cluster = device.endpoints[int(epid)].in_clusters[int(cluster_id, 16)]
+            if patch_cluster:
+                patch_cluster_for_testing(real_cluster)
+            for attr_id, attr in cluster["attributes"].items():
+                if (
+                    attr["value"] is None
+                    or attr_id in cluster["unsupported_attributes"]
+                ):
+                    continue
+                real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
+                real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
+            for unsupported_attr in cluster["unsupported_attributes"]:
+                if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
+                    "0x"
+                ):
+                    attrid = int(unsupported_attr, 16)
+                    real_cluster.unsupported_attributes.add(attrid)
+                    if attrid in real_cluster.attributes:
+                        real_cluster.unsupported_attributes.add(
+                            real_cluster.attributes[attrid].name
+                        )
+                else:
+                    real_cluster.unsupported_attributes.add(unsupported_attr)
+
+        for cluster_id, cluster in ep["out_clusters"].items():
+            real_cluster = device.endpoints[int(epid)].out_clusters[int(cluster_id, 16)]
+            if patch_cluster:
+                patch_cluster_for_testing(real_cluster)
+            for attr_id, attr in cluster["attributes"].items():
+                if (
+                    attr["value"] is None
+                    or attr_id in cluster["unsupported_attributes"]
+                ):
+                    continue
+                real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
+                real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
+            for unsupported_attr in cluster["unsupported_attributes"]:
+                if isinstance(unsupported_attr, str) and unsupported_attr.startswith(
+                    "0x"
+                ):
+                    attrid = int(unsupported_attr, 16)
+                    real_cluster.unsupported_attributes.add(attrid)
+                    if attrid in real_cluster.attributes:
+                        real_cluster.unsupported_attributes.add(
+                            real_cluster.attributes[attrid].name
+                        )
+                else:
+                    real_cluster.unsupported_attributes.add(unsupported_attr)
+
+    return device
+
+
+async def zigpy_device_from_json(
+    app: ControllerApplication,
+    json_file: str,
+    patch_cluster: bool = True,
+    quirk: Optional[Callable] = None,
+) -> zigpy.device.Device:
+    """Make a fake device using the specified cluster classes."""
+    device_data = await asyncio.get_running_loop().run_in_executor(
+        None, pathlib.Path(json_file).read_text
+    )
+
+    return zigpy_device_from_device_data(
+        app=app,
+        device_data=json.loads(device_data),
+        patch_cluster=patch_cluster,
+        quirk=quirk,
+    )

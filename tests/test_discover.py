@@ -22,6 +22,7 @@ from zhaquirks.xiaomi.aqara.driver_curtain_e1 import (
     WindowCoveringE1,
     XiaomiAqaraDriverE1,
 )
+from zigpy.application import ControllerApplication
 from zigpy.const import SIG_ENDPOINTS, SIG_MANUFACTURER, SIG_MODEL, SIG_NODE_DESC
 import zigpy.device
 import zigpy.profiles.zha
@@ -45,7 +46,7 @@ import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
-from tests.common import get_entity, update_attribute_cache
+from tests.common import get_entity, update_attribute_cache, zigpy_device_from_json
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform, discovery
 from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
@@ -1028,14 +1029,18 @@ def pytest_generate_tests(metafunc):
 
 
 async def test_devices_from_files(
-    zha_device_from_file: Callable[..., Awaitable[Device]], file_path: str
+    zigpy_app_controller: ControllerApplication,
+    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
+    file_path: str,
 ) -> None:
     """Test all devices."""
     with mock.patch(
         "zigpy.zcl.clusters.general.Identify.request",
         new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
     ):
-        zha_device = await zha_device_from_file(file_path)
+        zigpy_device = await zigpy_device_from_json(zigpy_app_controller, file_path)
+        zha_device = await device_joined(zigpy_device)
+
         assert zha_device is not None
 
         device_data = json.loads(
