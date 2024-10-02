@@ -1,6 +1,6 @@
 """Test ZHA button."""
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from typing import Final
 from unittest.mock import call, patch
 
@@ -23,7 +23,12 @@ from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, mock_coro, update_attribute_cache
+from tests.common import (
+    get_entity,
+    join_zigpy_device,
+    mock_coro,
+    update_attribute_cache,
+)
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -37,7 +42,7 @@ from zha.zigbee.device import Device
 @pytest.fixture
 async def contact_sensor(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> tuple[Device, general.Identify]:
     """Contact sensor fixture."""
 
@@ -56,7 +61,7 @@ async def contact_sensor(
         },
     )
 
-    zha_device: Device = await device_joined(zigpy_device)
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].identify
 
 
@@ -84,7 +89,10 @@ class FrostLockQuirk(CustomDevice):
 
 
 @pytest.fixture
-async def tuya_water_valve(zigpy_device_mock, device_joined):
+async def tuya_water_valve(
+    zigpy_device_mock,
+    zha_gateway: Gateway,
+):
     """Tuya Water Valve fixture."""
 
     zigpy_device = zigpy_device_mock(
@@ -107,7 +115,7 @@ async def tuya_water_valve(zigpy_device_mock, device_joined):
         model="TS0601",
     )
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].tuya_manufacturer
 
 
@@ -210,7 +218,10 @@ class FakeManufacturerCluster(CustomCluster, ManufacturerSpecificCluster):
 
 
 @pytest.fixture
-async def custom_button_device(zigpy_device_mock, device_joined):
+async def custom_button_device(
+    zha_gateway: Gateway,
+    zigpy_device_mock,
+):
     """Button device fixture for quirks button tests."""
 
     zigpy_device = zigpy_device_mock(
@@ -233,7 +244,7 @@ async def custom_button_device(zigpy_device_mock, device_joined):
         FakeManufacturerCluster.AttributeDefs.feed.name: 0,
     }
     update_attribute_cache(zigpy_device.endpoints[1].mfg_identify)
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].mfg_identify
 
 
