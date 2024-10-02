@@ -17,8 +17,16 @@ from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
-from tests.common import get_entity, join_zigpy_device, send_attributes_report
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    join_zigpy_device,
+    send_attributes_report,
+)
 from zha.application import Platform
 from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
@@ -33,11 +41,12 @@ EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
 
 @pytest.fixture
 async def elec_measurement_zigpy_dev(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
+    zha_gateway: Gateway,
 ) -> ZigpyDevice:
     """Electric Measurement zigpy device."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -542,7 +551,6 @@ async def async_test_pi_heating_demand(
     ),
 )
 async def test_sensor(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
     cluster_id: int,
     entity_type: type[PlatformEntity],
@@ -552,7 +560,8 @@ async def test_sensor(
 ) -> None:
     """Test zha sensor platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [cluster_id, general.Basic.cluster_id],
@@ -560,7 +569,7 @@ async def test_sensor(
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
                 SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
-        }
+        },
     )
     cluster = zigpy_device.endpoints[1].in_clusters[cluster_id]
     if unsupported_attrs:
@@ -596,14 +605,14 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
 
 @pytest.mark.looptime
 async def test_electrical_measurement_init(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test proper initialization of the electrical measurement cluster."""
 
     cluster_id = homeautomation.ElectricalMeasurement.cluster_id
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [cluster_id, general.Basic.cluster_id],
@@ -611,7 +620,7 @@ async def test_electrical_measurement_init(
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
                 SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
-        }
+        },
     )
 
     cluster = zigpy_device.endpoints[1].in_clusters[cluster_id]
@@ -803,7 +812,6 @@ async def test_electrical_measurement_init(
 )
 async def test_unsupported_attributes_sensor(
     zha_gateway: Gateway,
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     cluster_id: int,
     unsupported_attributes: set,
     included_entity_types: set,
@@ -811,7 +819,8 @@ async def test_unsupported_attributes_sensor(
 ) -> None:
     """Test zha sensor platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [cluster_id, general.Basic.cluster_id],
@@ -819,7 +828,7 @@ async def test_unsupported_attributes_sensor(
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
                 SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
-        }
+        },
     )
     cluster = zigpy_device.endpoints[1].in_clusters[cluster_id]
     if cluster_id == smartenergy.Metering.cluster_id:
@@ -932,7 +941,6 @@ async def test_unsupported_attributes_sensor(
 )
 async def test_se_summation_uom(
     zha_gateway: Gateway,
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     raw_uom: int,
     raw_value: int,
     expected_state: str,
@@ -940,7 +948,8 @@ async def test_se_summation_uom(
 ) -> None:
     """Test zha smart energy summation."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -951,7 +960,7 @@ async def test_se_summation_uom(
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
                 SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
-        }
+        },
     )
     zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
 
@@ -1151,11 +1160,11 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
 @pytest.fixture
 async def zigpy_device_aqara_sensor_v2(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
 ):
     """Device tracker zigpy Aqara motion sensor device."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -1307,11 +1316,11 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 @pytest.fixture
 async def zigpy_device_danfoss_thermostat(
     zha_gateway: Gateway,
-    zigpy_device_mock: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
 ) -> tuple[Device, zigpy.device.Device]:
     """Danfoss thermostat device."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
