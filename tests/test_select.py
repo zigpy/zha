@@ -1,6 +1,6 @@
 """Test ZHA select entities."""
 
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from unittest.mock import call, patch
 
 import pytest
@@ -21,7 +21,7 @@ from zigpy.zcl import foundation
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
-from tests.common import get_entity, send_attributes_report
+from tests.common import get_entity, join_zigpy_device, send_attributes_report
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -33,7 +33,7 @@ from zha.zigbee.device import Device
 @pytest.fixture
 async def siren(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> tuple[Device, security.IasWd]:
     """Siren fixture."""
 
@@ -48,7 +48,7 @@ async def siren(
         },
     )
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
@@ -117,9 +117,7 @@ class MotionSensitivityQuirk(CustomDevice):
 
 
 @pytest.fixture
-async def zigpy_device_aqara_sensor(
-    zha_gateway: Gateway, zigpy_device_mock, device_joined
-):
+async def zigpy_device_aqara_sensor(zha_gateway: Gateway, zigpy_device_mock):
     """Device tracker zigpy Aqara motion sensor device."""
 
     zigpy_device = zigpy_device_mock(
@@ -136,7 +134,7 @@ async def zigpy_device_aqara_sensor(
     )
 
     zigpy_device = get_device(zigpy_device)
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     zha_device.available = True
     await zha_gateway.async_block_till_done()
     return zigpy_device
@@ -144,12 +142,11 @@ async def zigpy_device_aqara_sensor(
 
 async def test_on_off_select_attribute_report(
     zha_gateway: Gateway,
-    device_joined,
     zigpy_device_aqara_sensor,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA attribute report parsing for select platform."""
 
-    zha_device = await device_joined(zigpy_device_aqara_sensor)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_aqara_sensor)
     cluster = zigpy_device_aqara_sensor.endpoints.get(1).opple_cluster
 
     entity = get_entity(zha_device, platform=Platform.SELECT)
@@ -185,7 +182,6 @@ async def test_on_off_select_attribute_report(
 async def zigpy_device_aqara_sensor_v2(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined,
 ):
     """Device tracker zigpy Aqara motion sensor device."""
 
@@ -205,7 +201,7 @@ async def zigpy_device_aqara_sensor_v2(
     )
     zigpy_device = get_device(zigpy_device)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].opple_cluster
 
 
