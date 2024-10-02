@@ -1,7 +1,6 @@
 """Test zha switch."""
 
 import asyncio
-from collections.abc import Callable
 import logging
 from unittest.mock import call, patch
 
@@ -24,6 +23,7 @@ from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
+    create_mock_zigpy_device,
     get_entity,
     get_group_entity,
     group_entity_availability_test,
@@ -47,7 +47,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -57,14 +57,14 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    zigpy_dev: ZigpyDevice = zigpy_device_mock(endpoints)
+    zigpy_dev: ZigpyDevice = create_mock_zigpy_device(zha_gateway, endpoints)
     # this one is mains powered
     zigpy_dev.node_desc.mac_capability_flags |= 0b_0000_0100
     return zigpy_dev
 
 
 @pytest.fixture
-def zigpy_cover_device(zigpy_device_mock):
+def zigpy_cover_device(zha_gateway: Gateway):
     """Zigpy cover device."""
 
     endpoints = {
@@ -78,17 +78,15 @@ def zigpy_cover_device(zigpy_device_mock):
             SIG_EP_OUTPUT: [],
         }
     }
-    return zigpy_device_mock(endpoints)
+    return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
 @pytest.fixture
-async def device_switch_1(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    zha_gateway: Gateway,
-) -> Device:
+async def device_switch_1(zha_gateway: Gateway) -> Device:
     """Test zha switch platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.OnOff.cluster_id, general.Groups.cluster_id],
@@ -105,13 +103,11 @@ async def device_switch_1(
 
 
 @pytest.fixture
-async def device_switch_2(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    zha_gateway: Gateway,
-) -> Device:
+async def device_switch_2(zha_gateway: Gateway) -> Device:
     """Test zha switch platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.OnOff.cluster_id, general.Groups.cluster_id],
@@ -391,11 +387,11 @@ class WindowDetectionFunctionQuirk(CustomDevice):
 
 async def test_switch_configurable(
     zha_gateway: Gateway,
-    zigpy_device_mock,
 ) -> None:
     """Test ZHA configurable switch platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id],
@@ -502,12 +498,11 @@ async def test_switch_configurable(
     ]
 
 
-async def test_switch_configurable_custom_on_off_values(
-    zha_gateway: Gateway, zigpy_device_mock
-) -> None:
+async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) -> None:
     """Test ZHA configurable switch platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id],
@@ -579,11 +574,12 @@ async def test_switch_configurable_custom_on_off_values(
 
 
 async def test_switch_configurable_custom_on_off_values_force_inverted(
-    zha_gateway: Gateway, zigpy_device_mock
+    zha_gateway: Gateway,
 ) -> None:
     """Test ZHA configurable switch platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id],
@@ -656,11 +652,12 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
 
 
 async def test_switch_configurable_custom_on_off_values_inverter_attribute(
-    zha_gateway: Gateway, zigpy_device_mock
+    zha_gateway: Gateway,
 ) -> None:
     """Test ZHA configurable switch platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id],

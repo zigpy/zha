@@ -3,6 +3,7 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 from contextlib import suppress
+import itertools
 import json
 import logging
 import pathlib
@@ -11,6 +12,7 @@ from typing import Any, Optional
 from unittest.mock import AsyncMock, Mock
 
 from zigpy.application import ControllerApplication
+from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zigpy.quirks import get_device as quirks_get_device
 import zigpy.types as t
 import zigpy.zcl
@@ -462,4 +464,81 @@ async def join_zigpy_device(
 
     device = zha_gateway.get_device(zigpy_dev.ieee)
     assert device is not None
+    return device
+
+
+def create_mock_zigpy_device(
+    zha_gateway: Gateway,
+    endpoints: dict[int, dict[str, Any]],
+    ieee: str = "00:0d:6f:00:0a:90:69:e7",
+    manufacturer: str = "FakeManufacturer",
+    model: str = "FakeModel",
+    node_descriptor: zdo_t.NodeDescriptor | None = None,
+    nwk: int = 0xB79C,
+    patch_cluster: bool = True,
+    quirk: Optional[Callable] = None,
+    attributes: dict[int, dict[str, dict[str, Any]]] = None,
+) -> zigpy.device.Device:
+    """Make a fake device using the specified cluster classes."""
+    zigpy_app_controller = zha_gateway.application_controller
+    device = zigpy.device.Device(
+        zigpy_app_controller, zigpy.types.EUI64.convert(ieee), nwk
+    )
+    device.manufacturer = manufacturer
+    device.model = model
+
+    if node_descriptor is None:
+        node_descriptor = zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress,
+            manufacturer_code=4151,
+            maximum_buffer_size=127,
+            maximum_incoming_transfer_size=100,
+            server_mask=10752,
+            maximum_outgoing_transfer_size=100,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        )
+
+    device.node_desc = node_descriptor
+    device.last_seen = time.time()
+
+    for epid, ep in endpoints.items():
+        endpoint = device.add_endpoint(epid)
+        endpoint.device_type = ep[SIG_EP_TYPE]
+        endpoint.profile_id = ep.get(SIG_EP_PROFILE)
+        endpoint.request = AsyncMock(return_value=[0])
+
+        for cluster_id in ep.get(SIG_EP_INPUT, []):
+            endpoint.add_input_cluster(cluster_id)
+
+        for cluster_id in ep.get(SIG_EP_OUTPUT, []):
+            endpoint.add_output_cluster(cluster_id)
+
+    if quirk:
+        device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
+    else:
+        device = quirks_get_device(device)
+
+    if patch_cluster:
+        for endpoint in (ep for epid, ep in device.endpoints.items() if epid):
+            endpoint.request = AsyncMock(return_value=[0])
+            for cluster in itertools.chain(
+                endpoint.in_clusters.values(), endpoint.out_clusters.values()
+            ):
+                patch_cluster_for_testing(cluster)
+
+    if attributes is not None:
+        for ep_id, clusters in attributes.items():
+            for cluster_name, attrs in clusters.items():
+                cluster = getattr(device.endpoints[ep_id], cluster_name)
+
+                for name, value in attrs.items():
+                    attr_id = cluster.find_attribute(name).id
+                    cluster._attr_cache[attr_id] = value
+
     return device
