@@ -1,7 +1,7 @@
 """Test zha siren."""
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
@@ -11,7 +11,7 @@ from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, mock_coro
+from tests.common import get_entity, join_zigpy_device, mock_coro
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -22,7 +22,7 @@ from zha.zigbee.device import Device
 @pytest.fixture
 async def siren(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> tuple[Device, security.IasWd]:
     """Siren fixture."""
 
@@ -37,7 +37,7 @@ async def siren(
         },
     )
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
