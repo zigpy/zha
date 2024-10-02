@@ -1,7 +1,7 @@
 """Test ZHA device discovery."""
 
 import asyncio
-from collections.abc import Awaitable, Callable, Coroutine
+from collections.abc import Callable
 import enum
 import itertools
 import json
@@ -22,7 +22,6 @@ from zhaquirks.xiaomi.aqara.driver_curtain_e1 import (
     WindowCoveringE1,
     XiaomiAqaraDriverE1,
 )
-from zigpy.application import ControllerApplication
 from zigpy.const import SIG_ENDPOINTS, SIG_MANUFACTURER, SIG_MODEL, SIG_NODE_DESC
 import zigpy.device
 import zigpy.profiles.zha
@@ -46,7 +45,12 @@ import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
-from tests.common import get_entity, update_attribute_cache, zigpy_device_from_json
+from tests.common import (
+    get_entity,
+    join_zigpy_device,
+    update_attribute_cache,
+    zigpy_device_from_json,
+)
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform, discovery
 from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
@@ -92,35 +96,6 @@ def contains_ignored_suffix(unique_id: str) -> bool:
     return any(suffix.lower() in unique_id.lower() for suffix in IGNORE_SUFFIXES)
 
 
-@pytest.fixture
-def zha_device_mock(
-    zigpy_device_mock: Callable[..., zigpy.device.Device],
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
-) -> Callable[..., Coroutine[Any, Any, Device]]:
-    """Mock device factory."""
-
-    async def _mock(
-        endpoints,
-        ieee="00:11:22:33:44:55:66:77",
-        manufacturer="mock manufacturer",
-        model="mock model",
-        node_desc=None,
-        patch_cluster=False,
-    ):
-        return await device_joined(
-            zigpy_device_mock(
-                endpoints,
-                ieee=ieee,
-                manufacturer=manufacturer,
-                model=model,
-                node_descriptor=node_desc,
-                patch_cluster=patch_cluster,
-            )
-        )
-
-    return _mock
-
-
 @patch(
     "zigpy.zcl.clusters.general.Identify.request",
     new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
@@ -130,7 +105,6 @@ async def test_devices(
     device,
     zha_gateway: Gateway,
     zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
 ) -> None:
     """Test device discovery."""
     zigpy_device = zigpy_device_mock(
@@ -147,7 +121,7 @@ async def test_devices(
     if cluster_identify:
         cluster_identify.request.reset_mock()
 
-    zha_dev: Device = await device_joined(zigpy_device)
+    zha_dev: Device = await join_zigpy_device(zha_gateway, zigpy_device)
     await zha_gateway.async_block_till_done()
 
     if cluster_identify and not zha_dev.skip_configuration:
@@ -323,19 +297,21 @@ def test_discover_probe_single_cluster() -> None:
 @pytest.mark.parametrize("device_info", DEVICES)
 async def test_discover_endpoint(
     device_info: dict[str, Any],
-    zha_device_mock: Callable[..., Coroutine[Any, Any, Device]],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,  # pylint: disable=unused-argument
+    zigpy_device_mock,
 ) -> None:
     """Test device discovery."""
 
     with mock.patch("zha.zigbee.endpoint.Endpoint.async_new_entity") as new_ent:
-        device = await zha_device_mock(
-            device_info[SIG_ENDPOINTS],
+        zigpy_dev = zigpy_device_mock(
+            endpoints=device_info[SIG_ENDPOINTS],
+            ieee="00:11:22:33:44:55:66:77",
             manufacturer=device_info[SIG_MANUFACTURER],
             model=device_info[SIG_MODEL],
-            node_desc=zdo_t.NodeDescriptor(**device_info[SIG_NODE_DESC]),
+            node_descriptor=zdo_t.NodeDescriptor(**device_info[SIG_NODE_DESC]),
             patch_cluster=True,
         )
+        device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert device_info[DEV_SIG_EVT_CLUSTER_HANDLERS] == sorted(
         ch.id
@@ -485,7 +461,6 @@ async def test_device_override(
 async def test_quirks_v2_entity_discovery(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
 ) -> None:
     """Test quirks v2 discovery."""
 
@@ -539,7 +514,7 @@ async def test_quirks_v2_entity_discovery(
     }
     update_attribute_cache(zigpy_device.endpoints[1].on_off)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     get_entity(zha_device, platform=Platform.NUMBER)
 
@@ -547,7 +522,6 @@ async def test_quirks_v2_entity_discovery(
 async def test_quirks_v2_entity_discovery_e1_curtain(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
 ) -> None:
     """Test quirks v2 discovery for e1 curtain motor."""
 
@@ -655,7 +629,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
     }
     update_attribute_cache(aqara_E1_device.endpoints[1].window_covering)
 
-    zha_device = await device_joined(aqara_E1_device)
+    zha_device = await join_zigpy_device(zha_gateway, aqara_E1_device)
 
     power_source_entity = get_entity(
         zha_device,
@@ -764,7 +738,6 @@ def _get_test_device(
 async def test_quirks_v2_entity_no_metadata(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - no metadata."""
@@ -773,7 +746,7 @@ async def test_quirks_v2_entity_no_metadata(
         zigpy_device_mock, "Ikea of Sweden2", "TRADFRI remote control2"
     )
     setattr(zigpy_device, "_exposes_metadata", {})
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     assert (
         f"Device: {str(zigpy_device.ieee)}-{zha_device.name} does not expose any quirks v2 entities"
         in caplog.text
@@ -783,7 +756,6 @@ async def test_quirks_v2_entity_no_metadata(
 async def test_quirks_v2_entity_discovery_errors(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - errors."""
@@ -791,7 +763,7 @@ async def test_quirks_v2_entity_discovery_errors(
     zigpy_device = _get_test_device(
         zigpy_device_mock, "Ikea of Sweden3", "TRADFRI remote control3"
     )
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     m1 = f"Device: {str(zigpy_device.ieee)}-{zha_device.name} does not have an"
     m2 = " endpoint with id: 3 - unable to create entity with cluster"
@@ -966,7 +938,6 @@ ERROR_ROOT = "Quirks provided an invalid device class"
 async def test_quirks_v2_metadata_bad_device_classes(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
     caplog: pytest.LogCaptureFixture,
     augment_method: Callable[[QuirkBuilder], QuirkBuilder],
     expected_exception_string: str,
@@ -980,7 +951,7 @@ async def test_quirks_v2_metadata_bad_device_classes(
         "TRADFRI remote control5",
         augment_method=augment_method,
     )
-    await device_joined(zigpy_device)
+    await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert expected_exception_string in caplog.text
 
@@ -991,7 +962,6 @@ async def test_quirks_v2_metadata_bad_device_classes(
 async def test_quirks_v2_fallback_name(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     zigpy_device_mock,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
 ) -> None:
     """Test quirks v2 fallback name."""
 
@@ -1006,7 +976,7 @@ async def test_quirks_v2_fallback_name(
             fallback_name="Fallback name",
         ),
     )
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity = get_entity(
         zha_device,
@@ -1029,8 +999,7 @@ def pytest_generate_tests(metafunc):
 
 
 async def test_devices_from_files(
-    zigpy_app_controller: ControllerApplication,
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
     file_path: str,
 ) -> None:
     """Test all devices."""
@@ -1038,8 +1007,10 @@ async def test_devices_from_files(
         "zigpy.zcl.clusters.general.Identify.request",
         new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
     ):
-        zigpy_device = await zigpy_device_from_json(zigpy_app_controller, file_path)
-        zha_device = await device_joined(zigpy_device)
+        zigpy_device = await zigpy_device_from_json(
+            zha_gateway.application_controller, file_path
+        )
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
         assert zha_device is not None
 
