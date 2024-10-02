@@ -1,7 +1,7 @@
 """Test ZHA Gateway."""
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
@@ -14,7 +14,7 @@ import zigpy.zdo.types
 import zigpy.zdo.types as zdo_t
 from zigpy.zdo.types import LogicalType, NodeDescriptor
 
-from tests.common import get_entity, get_group_entity
+from tests.common import get_entity, get_group_entity, join_zigpy_device
 from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import (
@@ -59,19 +59,19 @@ def zigpy_dev_basic(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevic
 
 @pytest.fixture
 async def zha_dev_basic(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
     zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
 ) -> Device:
     """ZHA device with just a basic cluster."""
 
-    zha_device = await device_joined(zigpy_dev_basic)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev_basic)
     return zha_device
 
 
 @pytest.fixture
 async def coordinator(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test ZHA light platform."""
 
@@ -108,7 +108,7 @@ async def coordinator(
             descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
         ),
     )
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     zha_device.available = True
     return zha_device
 
@@ -116,7 +116,7 @@ async def coordinator(
 @pytest.fixture
 async def device_light_1(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test ZHA light platform."""
 
@@ -138,7 +138,7 @@ async def device_light_1(
         manufacturer="Philips",
         model="LWA004",
     )
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     zha_device.available = True
     return zha_device
 
@@ -146,7 +146,7 @@ async def device_light_1(
 @pytest.fixture
 async def device_light_2(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test ZHA light platform."""
 
@@ -167,7 +167,7 @@ async def device_light_2(
         ieee=IEEE_GROUPABLE_DEVICE2,
         manufacturer="Sengled",
     )
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     zha_device.available = True
     return zha_device
 
