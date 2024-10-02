@@ -5,19 +5,22 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable
 import logging
 from typing import Any
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
     get_group_entity,
     group_entity_availability_test,
@@ -25,7 +28,6 @@ from tests.common import (
     send_attributes_report,
     update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
@@ -90,12 +92,12 @@ LIGHT_COLOR = {
 
 @pytest.fixture
 async def coordinator(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Groups.cluster_id],
@@ -134,12 +136,12 @@ async def coordinator(
 
 @pytest.fixture
 async def device_light_1(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -171,12 +173,12 @@ async def device_light_1(
 
 @pytest.fixture
 async def device_light_2(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -207,12 +209,12 @@ async def device_light_2(
 
 @pytest.fixture
 async def device_light_3(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -246,12 +248,12 @@ async def device_light_3(
 
 @pytest.fixture
 async def eWeLink_light(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ):
     """Mock eWeLink light."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -286,11 +288,10 @@ async def eWeLink_light(
 
 @pytest.mark.looptime
 async def test_light_refresh(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ):
     """Test zha light platform refresh."""
-    zigpy_device = zigpy_device_mock(LIGHT_ON_OFF)
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_ON_OFF)
     on_off_cluster = zigpy_device.endpoints[1].on_off
     on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 0}
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -371,7 +372,6 @@ async def test_light_refresh(
 )
 @pytest.mark.looptime
 async def test_light(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
     device: dict,
     reporting: tuple,  # pylint: disable=unused-argument
@@ -379,7 +379,7 @@ async def test_light(
     """Test zha light platform."""
 
     # create zigpy devices
-    zigpy_device = zigpy_device_mock(device)
+    zigpy_device = create_mock_zigpy_device(zha_gateway, device)
     cluster_color: lighting.Color = getattr(
         zigpy_device.endpoints[1], "light_color", None
     )
@@ -1075,7 +1075,6 @@ async def test_zha_group_light_entity(
 # TODO remove? No light will ever only support HS, we no longer support it
 async def test_light_initialization(
     zha_gateway: Gateway,
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     plugged_attr_reads: dict[str, Any],
     config_override: dict[str, Any],
     expected_state: dict[str, Any],  # pylint: disable=unused-argument
@@ -1083,7 +1082,7 @@ async def test_light_initialization(
     """Test ZHA light initialization with cached attributes and color modes."""
 
     # create zigpy devices
-    zigpy_device = zigpy_device_mock(LIGHT_COLOR)
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_COLOR)
 
     # mock attribute reads
     zigpy_device.endpoints[1].light_color.PLUGGED_ATTR_READS = plugged_attr_reads
