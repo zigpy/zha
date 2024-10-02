@@ -265,7 +265,7 @@ class NumberConfigurationEntity(PlatformEntity):
                 Platform.NUMBER.value,
                 _LOGGER,
             )
-        if entity_metadata.device_class is None and entity_metadata.unit is not None:
+        if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = validate_unit(
                 entity_metadata.unit
             ).value
