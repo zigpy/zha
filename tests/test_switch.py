@@ -1,7 +1,7 @@
 """Test zha switch."""
 
 import asyncio
-from collections.abc import Awaitable, Callable
+from collections.abc import Callable
 import logging
 from unittest.mock import call, patch
 
@@ -27,6 +27,7 @@ from tests.common import (
     get_entity,
     get_group_entity,
     group_entity_availability_test,
+    join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
 )
@@ -83,7 +84,7 @@ def zigpy_cover_device(zigpy_device_mock):
 @pytest.fixture
 async def device_switch_1(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha switch platform."""
 
@@ -98,7 +99,7 @@ async def device_switch_1(
         },
         ieee=IEEE_GROUPABLE_DEVICE,
     )
-    zha_device = await device_joined(zigpy_dev)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     zha_device.available = True
     return zha_device
 
@@ -106,7 +107,7 @@ async def device_switch_1(
 @pytest.fixture
 async def device_switch_2(
     zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha switch platform."""
 
@@ -121,18 +122,17 @@ async def device_switch_2(
         },
         ieee=IEEE_GROUPABLE_DEVICE2,
     )
-    zha_device = await device_joined(zigpy_dev)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     zha_device.available = True
     return zha_device
 
 
 async def test_switch(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test zha switch platform."""
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = zigpy_device.endpoints.get(1).on_off
     entity: PlatformEntity = get_entity(zha_device, Platform.SWITCH)
 
@@ -389,9 +389,11 @@ class WindowDetectionFunctionQuirk(CustomDevice):
     }
 
 
-@pytest.fixture
-async def zigpy_device_tuya(zigpy_device_mock, device_joined):
-    """Device tracker zigpy tuya device."""
+async def test_switch_configurable(
+    zha_gateway: Gateway,
+    zigpy_device_mock,
+) -> None:
+    """Test ZHA configurable switch platform."""
 
     zigpy_dev = zigpy_device_mock(
         {
@@ -404,21 +406,9 @@ async def zigpy_device_tuya(zigpy_device_mock, device_joined):
         manufacturer="_TZE200_b6wax7g0",
         quirk=WindowDetectionFunctionQuirk,
     )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    zha_device = await device_joined(zigpy_dev)
-    zha_device.available = True
-    return zigpy_dev
-
-
-async def test_switch_configurable(
-    zha_gateway: Gateway,
-    device_joined,
-    zigpy_device_tuya,  # pylint: disable=redefined-outer-name
-) -> None:
-    """Test ZHA configurable switch platform."""
-
-    zha_device = await device_joined(zigpy_device_tuya)
-    cluster = zigpy_device_tuya.endpoints[1].tuya_manufacturer
+    cluster = zigpy_dev.endpoints[1].tuya_manufacturer
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     # test that the state has changed from unavailable to off
@@ -513,7 +503,7 @@ async def test_switch_configurable(
 
 
 async def test_switch_configurable_custom_on_off_values(
-    zha_gateway: Gateway, device_joined, zigpy_device_mock
+    zha_gateway: Gateway, zigpy_device_mock
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -548,7 +538,7 @@ async def test_switch_configurable_custom_on_off_values(
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
 
-    zha_device = await device_joined(zigpy_device_)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
 
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
@@ -589,7 +579,7 @@ async def test_switch_configurable_custom_on_off_values(
 
 
 async def test_switch_configurable_custom_on_off_values_force_inverted(
-    zha_gateway: Gateway, device_joined, zigpy_device_mock
+    zha_gateway: Gateway, zigpy_device_mock
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -625,7 +615,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
 
-    zha_device = await device_joined(zigpy_device_)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
 
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
@@ -666,7 +656,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
 
 
 async def test_switch_configurable_custom_on_off_values_inverter_attribute(
-    zha_gateway: Gateway, device_joined, zigpy_device_mock
+    zha_gateway: Gateway, zigpy_device_mock
 ) -> None:
     """Test ZHA configurable switch platform."""
 
@@ -705,7 +695,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
     }
     update_attribute_cache(cluster)
 
-    zha_device = await device_joined(zigpy_device_)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
 
     entity = get_entity(zha_device, platform=Platform.SWITCH)
 
@@ -753,7 +743,6 @@ WCM = closures.WindowCovering.WindowCoveringMode
 
 async def test_cover_inversion_switch(
     zha_gateway: Gateway,
-    device_joined,
     zigpy_cover_device,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA cover platform."""
@@ -768,7 +757,7 @@ async def test_cover_inversion_switch(
         WCAttrs.window_covering_mode.name: WCM(WCM.LEDs_display_feedback),
     }
     update_attribute_cache(cluster)
-    zha_device = await device_joined(zigpy_cover_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
     assert (
         not zha_device.endpoints[1]
         .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
@@ -847,7 +836,7 @@ async def test_cover_inversion_switch(
 
 
 async def test_cover_inversion_switch_not_created(
-    device_joined,
+    zha_gateway: Gateway,
     zigpy_cover_device,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA cover platform."""
@@ -860,7 +849,7 @@ async def test_cover_inversion_switch_not_created(
         WCAttrs.config_status.name: WCCS(~WCCS.Open_up_commands_reversed),
     }
     update_attribute_cache(cluster)
-    zha_device = await device_joined(zigpy_cover_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
 
     assert cluster.read_attributes.call_count == 3
     assert (

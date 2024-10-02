@@ -449,3 +449,17 @@ async def zigpy_device_from_json(
         patch_cluster=patch_cluster,
         quirk=quirk,
     )
+
+
+async def join_zigpy_device(
+    zha_gateway: Gateway, zigpy_dev: zigpy.device.Device
+) -> Device:
+    """Return a newly joined ZHA device."""
+
+    zha_gateway.application_controller.devices[zigpy_dev.ieee] = zigpy_dev
+    await zha_gateway.async_device_initialized(zigpy_dev)
+    await zha_gateway.async_block_till_done()
+
+    device = zha_gateway.get_device(zigpy_dev.ieee)
+    assert device is not None
+    return device

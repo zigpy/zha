@@ -1,7 +1,7 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Awaitable, Callable, Generator
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 import itertools
 import logging
@@ -38,7 +38,6 @@ from zha.application.helpers import (
     ZHAData,
 )
 from zha.async_ import ZHAJob
-from zha.zigbee.device import Device
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -355,24 +354,6 @@ def globally_load_quirks():
     # Disable gateway built in quirks loading
     with patch("zha.application.gateway.setup_quirks"):
         yield
-
-
-@pytest.fixture
-def device_joined(
-    zha_gateway: Gateway,  # pylint: disable=redefined-outer-name
-) -> Callable[[zigpy.device.Device], Awaitable[Device]]:
-    """Return a newly joined ZHAWS device."""
-
-    async def _zha_device(zigpy_dev: zigpy.device.Device) -> Device:
-        zha_gateway.application_controller.devices[zigpy_dev.ieee] = zigpy_dev
-        await zha_gateway.async_device_initialized(zigpy_dev)
-        await zha_gateway.async_block_till_done()
-
-        device = zha_gateway.get_device(zigpy_dev.ieee)
-        assert device is not None
-        return device
-
-    return _zha_device
 
 
 @pytest.fixture
