@@ -1,34 +1,27 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Awaitable, Callable, Coroutine, Generator
-from contextlib import contextmanager, suppress
-import itertools
-import json
+from collections.abc import Callable, Generator
+from contextlib import contextmanager
 import logging
 import os
 import reprlib
 import threading
-import time
 from types import TracebackType
-from typing import Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import zigpy
 from zigpy.application import ControllerApplication
 import zigpy.config
-from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 import zigpy.device
 import zigpy.group
 import zigpy.profiles
-from zigpy.quirks import get_device
 import zigpy.types
 from zigpy.zcl.clusters.general import Basic, Groups
 from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
-from tests import common
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.helpers import (
@@ -39,7 +32,6 @@ from zha.application.helpers import (
     ZHAData,
 )
 from zha.async_ import ZHAJob
-from zha.zigbee.device import Device
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -359,24 +351,6 @@ def globally_load_quirks():
 
 
 @pytest.fixture
-def device_joined(
-    zha_gateway: Gateway,  # pylint: disable=redefined-outer-name
-) -> Callable[[zigpy.device.Device], Awaitable[Device]]:
-    """Return a newly joined ZHAWS device."""
-
-    async def _zha_device(zigpy_dev: zigpy.device.Device) -> Device:
-        zha_gateway.application_controller.devices[zigpy_dev.ieee] = zigpy_dev
-        await zha_gateway.async_device_initialized(zigpy_dev)
-        await zha_gateway.async_block_till_done()
-
-        device = zha_gateway.get_device(zigpy_dev.ieee)
-        assert device is not None
-        return device
-
-    return _zha_device
-
-
-@pytest.fixture
 def cluster_handler() -> Callable:
     """Clueter handler mock factory fixture."""
 
@@ -392,244 +366,3 @@ def cluster_handler() -> Callable:
         return ch
 
     return cluster_handler_factory
-
-
-@pytest.fixture
-def zigpy_device_mock(
-    zigpy_app_controller: ControllerApplication,
-) -> Callable[..., zigpy.device.Device]:
-    """Make a fake device using the specified cluster classes."""
-
-    def _mock_dev(
-        endpoints: dict[int, dict[str, Any]],
-        ieee: str = "00:0d:6f:00:0a:90:69:e7",
-        manufacturer: str = "FakeManufacturer",
-        model: str = "FakeModel",
-        node_descriptor: zdo_t.NodeDescriptor | None = None,
-        nwk: int = 0xB79C,
-        patch_cluster: bool = True,
-        quirk: Optional[Callable] = None,
-        attributes: dict[int, dict[str, dict[str, Any]]] = None,
-    ) -> zigpy.device.Device:
-        """Make a fake device using the specified cluster classes."""
-        device = zigpy.device.Device(
-            zigpy_app_controller, zigpy.types.EUI64.convert(ieee), nwk
-        )
-        device.manufacturer = manufacturer
-        device.model = model
-
-        if node_descriptor is None:
-            node_descriptor = zdo_t.NodeDescriptor(
-                logical_type=zdo_t.LogicalType.EndDevice,
-                complex_descriptor_available=0,
-                user_descriptor_available=0,
-                reserved=0,
-                aps_flags=0,
-                frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
-                mac_capability_flags=zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress,
-                manufacturer_code=4151,
-                maximum_buffer_size=127,
-                maximum_incoming_transfer_size=100,
-                server_mask=10752,
-                maximum_outgoing_transfer_size=100,
-                descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
-            )
-
-        device.node_desc = node_descriptor
-        device.last_seen = time.time()
-
-        for epid, ep in endpoints.items():
-            endpoint = device.add_endpoint(epid)
-            endpoint.device_type = ep[SIG_EP_TYPE]
-            endpoint.profile_id = ep.get(SIG_EP_PROFILE)
-            endpoint.request = AsyncMock(return_value=[0])
-
-            for cluster_id in ep.get(SIG_EP_INPUT, []):
-                endpoint.add_input_cluster(cluster_id)
-
-            for cluster_id in ep.get(SIG_EP_OUTPUT, []):
-                endpoint.add_output_cluster(cluster_id)
-
-        if quirk:
-            device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
-        else:
-            device = get_device(device)
-
-        if patch_cluster:
-            for endpoint in (ep for epid, ep in device.endpoints.items() if epid):
-                endpoint.request = AsyncMock(return_value=[0])
-                for cluster in itertools.chain(
-                    endpoint.in_clusters.values(), endpoint.out_clusters.values()
-                ):
-                    common.patch_cluster(cluster)
-
-        if attributes is not None:
-            for ep_id, clusters in attributes.items():
-                for cluster_name, attrs in clusters.items():
-                    cluster = getattr(device.endpoints[ep_id], cluster_name)
-
-                    for name, value in attrs.items():
-                        attr_id = cluster.find_attribute(name).id
-                        cluster._attr_cache[attr_id] = value
-
-        return device
-
-    return _mock_dev
-
-
-@pytest.fixture
-def zigpy_device_from_json(
-    zigpy_app_controller: ControllerApplication,
-) -> Callable[..., zigpy.device.Device]:
-    """Make a fake device using the specified cluster classes."""
-
-    def _mock_dev_from_json(
-        json_file: str,
-        patch_cluster: bool = True,
-        quirk: Optional[Callable] = None,
-    ) -> zigpy.device.Device:
-        """Make a fake device using the specified cluster classes."""
-        with open(json_file, encoding="utf-8") as file:
-            device_data = json.load(file)
-
-        ieee = zigpy.types.EUI64.convert(device_data["ieee"])
-        nwk = device_data["nwk"]
-        manufacturer = device_data["manufacturer"]
-        model = device_data["model"]
-        node_descriptor = device_data["signature"]["node_descriptor"]
-        endpoints = device_data["signature"]["endpoints"]
-        cluster_data = device_data["cluster_details"]
-
-        device = zigpy.device.Device(zigpy_app_controller, ieee, nwk)
-        device.manufacturer = manufacturer
-        device.model = model
-
-        node_desc = zdo_t.NodeDescriptor(
-            logical_type=node_descriptor["logical_type"],
-            complex_descriptor_available=node_descriptor[
-                "complex_descriptor_available"
-            ],
-            user_descriptor_available=node_descriptor["user_descriptor_available"],
-            reserved=node_descriptor["reserved"],
-            aps_flags=node_descriptor["aps_flags"],
-            frequency_band=node_descriptor["frequency_band"],
-            mac_capability_flags=node_descriptor["mac_capability_flags"],
-            manufacturer_code=node_descriptor["manufacturer_code"],
-            maximum_buffer_size=node_descriptor["maximum_buffer_size"],
-            maximum_incoming_transfer_size=node_descriptor[
-                "maximum_incoming_transfer_size"
-            ],
-            server_mask=node_descriptor["server_mask"],
-            maximum_outgoing_transfer_size=node_descriptor[
-                "maximum_outgoing_transfer_size"
-            ],
-            descriptor_capability_field=node_descriptor["descriptor_capability_field"],
-        )
-        device.node_desc = node_desc
-        device.last_seen = time.time()
-
-        orig_endpoints = (
-            device_data["original_signature"]["endpoints"]
-            if "original_signature" in device_data
-            else endpoints
-        )
-        for epid, ep in orig_endpoints.items():
-            endpoint = device.add_endpoint(int(epid))
-            profile = None
-            with suppress(Exception):
-                profile = zigpy.profiles.PROFILES[int(ep["profile_id"], 16)]
-
-            endpoint.device_type = (
-                profile.DeviceType(int(ep["device_type"], 16))
-                if profile
-                else int(ep["device_type"], 16)
-            )
-            endpoint.profile_id = (
-                profile.PROFILE_ID if profile else int(ep["profile_id"], 16)
-            )
-            endpoint.request = AsyncMock(return_value=[0])
-
-            for cluster_id in ep["input_clusters"]:
-                endpoint.add_input_cluster(int(cluster_id, 16))
-
-            for cluster_id in ep["output_clusters"]:
-                endpoint.add_output_cluster(int(cluster_id, 16))
-
-        if quirk:
-            device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
-        else:
-            device = get_device(device)
-
-        for epid, ep in cluster_data.items():
-            endpoint.request = AsyncMock(return_value=[0])
-            for cluster_id, cluster in ep["in_clusters"].items():
-                real_cluster = device.endpoints[int(epid)].in_clusters[
-                    int(cluster_id, 16)
-                ]
-                if patch_cluster:
-                    common.patch_cluster(real_cluster)
-                for attr_id, attr in cluster["attributes"].items():
-                    if (
-                        attr["value"] is None
-                        or attr_id in cluster["unsupported_attributes"]
-                    ):
-                        continue
-                    real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
-                    real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
-                for unsupported_attr in cluster["unsupported_attributes"]:
-                    if isinstance(
-                        unsupported_attr, str
-                    ) and unsupported_attr.startswith("0x"):
-                        attrid = int(unsupported_attr, 16)
-                        real_cluster.unsupported_attributes.add(attrid)
-                        if attrid in real_cluster.attributes:
-                            real_cluster.unsupported_attributes.add(
-                                real_cluster.attributes[attrid].name
-                            )
-                    else:
-                        real_cluster.unsupported_attributes.add(unsupported_attr)
-
-            for cluster_id, cluster in ep["out_clusters"].items():
-                real_cluster = device.endpoints[int(epid)].out_clusters[
-                    int(cluster_id, 16)
-                ]
-                if patch_cluster:
-                    common.patch_cluster(real_cluster)
-                for attr_id, attr in cluster["attributes"].items():
-                    if (
-                        attr["value"] is None
-                        or attr_id in cluster["unsupported_attributes"]
-                    ):
-                        continue
-                    real_cluster._attr_cache[int(attr_id, 16)] = attr["value"]
-                    real_cluster.PLUGGED_ATTR_READS[int(attr_id, 16)] = attr["value"]
-                for unsupported_attr in cluster["unsupported_attributes"]:
-                    if isinstance(
-                        unsupported_attr, str
-                    ) and unsupported_attr.startswith("0x"):
-                        attrid = int(unsupported_attr, 16)
-                        real_cluster.unsupported_attributes.add(attrid)
-                        if attrid in real_cluster.attributes:
-                            real_cluster.unsupported_attributes.add(
-                                real_cluster.attributes[attrid].name
-                            )
-                    else:
-                        real_cluster.unsupported_attributes.add(unsupported_attr)
-
-        return device
-
-    return _mock_dev_from_json
-
-
-@pytest.fixture
-def zha_device_from_file(
-    zigpy_device_from_json: Callable[..., zigpy.device.Device],
-    device_joined: Callable[[zigpy.device.Device], Awaitable[Device]],
-) -> Callable[[str], Coroutine[Any, Any, Device]]:
-    """Return a ZHA device from a JSON file."""
-
-    async def _zha_device_from_file(file_path: str) -> Device:
-        zigpy_dev = zigpy_device_from_json(file_path)
-        return await device_joined(zigpy_dev)
-
-    return _zha_device_from_file

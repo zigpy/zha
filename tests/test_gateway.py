@@ -1,7 +1,6 @@
 """Test ZHA Gateway."""
 
 import asyncio
-from collections.abc import Awaitable, Callable
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
@@ -14,8 +13,16 @@ import zigpy.zdo.types
 import zigpy.zdo.types as zdo_t
 from zigpy.zdo.types import LogicalType, NodeDescriptor
 
-from tests.common import get_entity, get_group_entity
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    get_group_entity,
+    join_zigpy_device,
+)
 from zha.application import Platform
 from zha.application.const import (
     CONF_USE_THREAD,
@@ -43,9 +50,10 @@ IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 
 
 @pytest.fixture
-def zigpy_dev_basic(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+def zigpy_dev_basic(zha_gateway: Gateway) -> ZigpyDevice:
     """Zigpy device with just a basic cluster."""
-    return zigpy_device_mock(
+    return create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id],
@@ -53,29 +61,27 @@ def zigpy_dev_basic(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevic
                 SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
                 SIG_EP_PROFILE: zha.PROFILE_ID,
             }
-        }
+        },
     )
 
 
 @pytest.fixture
 async def zha_dev_basic(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
     zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
 ) -> Device:
     """ZHA device with just a basic cluster."""
 
-    zha_device = await device_joined(zigpy_dev_basic)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev_basic)
     return zha_device
 
 
 @pytest.fixture
-async def coordinator(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-) -> Device:
+async def coordinator(zha_gateway: Gateway) -> Device:
     """Test ZHA light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [],
@@ -108,19 +114,16 @@ async def coordinator(
             descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
         ),
     )
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
 @pytest.fixture
-async def device_light_1(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-) -> Device:
+async def device_light_1(zha_gateway: Gateway) -> Device:
     """Test ZHA light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -138,19 +141,16 @@ async def device_light_1(
         manufacturer="Philips",
         model="LWA004",
     )
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
 @pytest.fixture
-async def device_light_2(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-) -> Device:
+async def device_light_2(zha_gateway: Gateway) -> Device:
     """Test ZHA light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -167,8 +167,7 @@ async def device_light_2(
         ieee=IEEE_GROUPABLE_DEVICE2,
         manufacturer="Sengled",
     )
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
@@ -509,7 +508,6 @@ async def test_startup_concurrency_limit(
     radio_concurrency: int,
     zigpy_app_controller: ControllerApplication,
     zha_data: ZHAData,
-    zigpy_device_mock,
 ):
     """Test ZHA gateway limits concurrency on startup."""
     zha_gw = Gateway(zha_data)
@@ -521,7 +519,8 @@ async def test_startup_concurrency_limit(
         await zha_gw.async_initialize()
 
     for i in range(50):
-        zigpy_dev = zigpy_device_mock(
+        zigpy_dev = create_mock_zigpy_device(
+            zha_gw,
             {
                 1: {
                     SIG_EP_INPUT: [

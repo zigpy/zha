@@ -1,6 +1,5 @@
 """Test zha number platform."""
 
-from collections.abc import Awaitable, Callable
 from unittest.mock import call
 
 import pytest
@@ -11,8 +10,17 @@ import zigpy.types
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types as zdo_t
 
-from tests.common import get_entity, send_attributes_report, update_attribute_cache
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    join_zigpy_device,
+    send_attributes_report,
+    update_attribute_cache,
+)
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
@@ -22,9 +30,7 @@ from zha.zigbee.device import Device
 
 
 @pytest.fixture
-def zigpy_analog_output_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_analog_output_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Zigpy analog_output device."""
 
     endpoints = {
@@ -35,14 +41,15 @@ def zigpy_analog_output_device(
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    return zigpy_device_mock(endpoints)
+    return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
 @pytest.fixture
-async def light(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+async def light(zha_gateway: Gateway) -> ZigpyDevice:
     """Siren fixture."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_PROFILE: zha.PROFILE_ID,
@@ -82,7 +89,6 @@ async def light(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
 
 async def test_number(
     zigpy_analog_output_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
 ) -> None:
     """Test zha number platform."""
@@ -101,7 +107,7 @@ async def test_number(
     update_attribute_cache(cluster)
     cluster.PLUGGED_ATTR_READS["present_value"] = 15.0
 
-    zha_device = await device_joined(zigpy_analog_output_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
     # one for present_value and one for the rest configuration attributes
     assert cluster.read_attributes.call_count == 3
     attr_reads = set()
@@ -193,7 +199,6 @@ async def test_number(
 async def test_level_control_number(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     light: Device,  # pylint: disable=redefined-outer-name
-    device_joined,
     attr: str,
     initial_value: int,
     new_value: int,
@@ -205,7 +210,7 @@ async def test_level_control_number(
     level_control_cluster.PLUGGED_ATTR_READS = {
         attr: initial_value,
     }
-    zha_device = await device_joined(light)
+    zha_device = await join_zigpy_device(zha_gateway, light)
 
     entity = get_entity(zha_device, platform=Platform.NUMBER, qualifier=attr)
 
@@ -318,7 +323,6 @@ async def test_level_control_number(
 async def test_color_number(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     light: Device,  # pylint: disable=redefined-outer-name
-    device_joined,
     attr: str,
     initial_value: int,
     new_value: int,
@@ -329,7 +333,7 @@ async def test_color_number(
     color_cluster.PLUGGED_ATTR_READS = {
         attr: initial_value,
     }
-    zha_device = await device_joined(light)
+    zha_device = await join_zigpy_device(zha_gateway, light)
 
     entity = get_entity(zha_device, platform=Platform.NUMBER, qualifier=attr)
 

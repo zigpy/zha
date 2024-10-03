@@ -1,6 +1,5 @@
 """Test ZHA select entities."""
 
-from collections.abc import Awaitable, Callable
 from unittest.mock import call, patch
 
 import pytest
@@ -12,7 +11,6 @@ from zhaquirks import (
     PROFILE_ID,
 )
 from zigpy.const import SIG_EP_PROFILE
-from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, get_device
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
@@ -21,8 +19,15 @@ from zigpy.zcl import foundation
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
-from tests.common import get_entity, send_attributes_report
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    join_zigpy_device,
+    send_attributes_report,
+)
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory
@@ -32,12 +37,12 @@ from zha.zigbee.device import Device
 
 @pytest.fixture
 async def siren(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> tuple[Device, security.IasWd]:
     """Siren fixture."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id, security.IasWd.cluster_id],
@@ -48,7 +53,7 @@ async def siren(
         },
     )
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
@@ -117,12 +122,11 @@ class MotionSensitivityQuirk(CustomDevice):
 
 
 @pytest.fixture
-async def zigpy_device_aqara_sensor(
-    zha_gateway: Gateway, zigpy_device_mock, device_joined
-):
+async def aqara_sensor(zha_gateway: Gateway) -> Device:
     """Device tracker zigpy Aqara motion sensor device."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id],
@@ -136,23 +140,19 @@ async def zigpy_device_aqara_sensor(
     )
 
     zigpy_device = get_device(zigpy_device)
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
-    await zha_gateway.async_block_till_done()
-    return zigpy_device
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    return zha_device
 
 
 async def test_on_off_select_attribute_report(
     zha_gateway: Gateway,
-    device_joined,
-    zigpy_device_aqara_sensor,  # pylint: disable=redefined-outer-name
+    aqara_sensor,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA attribute report parsing for select platform."""
 
-    zha_device = await device_joined(zigpy_device_aqara_sensor)
-    cluster = zigpy_device_aqara_sensor.endpoints.get(1).opple_cluster
+    cluster = aqara_sensor.device.endpoints.get(1).opple_cluster
 
-    entity = get_entity(zha_device, platform=Platform.SELECT)
+    entity = get_entity(aqara_sensor, platform=Platform.SELECT)
     assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
 
     # send attribute report from device
@@ -184,12 +184,11 @@ async def test_on_off_select_attribute_report(
 @pytest.fixture
 async def zigpy_device_aqara_sensor_v2(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
-    device_joined,
 ):
     """Device tracker zigpy Aqara motion sensor device."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -205,7 +204,7 @@ async def zigpy_device_aqara_sensor_v2(
     )
     zigpy_device = get_device(zigpy_device)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device, zigpy_device.endpoints[1].opple_cluster
 
 

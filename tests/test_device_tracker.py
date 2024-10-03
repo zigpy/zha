@@ -8,8 +8,16 @@ import pytest
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general
 
-from tests.common import get_entity, send_attributes_report
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    join_zigpy_device,
+    send_attributes_report,
+)
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.device_tracker import SourceType
@@ -17,7 +25,7 @@ from zha.application.registries import SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
 
 
 @pytest.fixture
-def zigpy_device_dt(zigpy_device_mock):
+def zigpy_device_dt(zha_gateway: Gateway) -> zigpy.device.Device:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -33,18 +41,17 @@ def zigpy_device_dt(zigpy_device_mock):
             SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
         }
     }
-    return zigpy_device_mock(endpoints)
+    return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
 @pytest.mark.looptime
 async def test_device_tracker(
     zha_gateway: Gateway,
-    device_joined,
     zigpy_device_dt,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA device tracker platform."""
 
-    zha_device = await device_joined(zigpy_device_dt)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_dt)
     cluster = zigpy_device_dt.endpoints.get(1).power
     entity = get_entity(zha_device, platform=Platform.DEVICE_TRACKER)
 

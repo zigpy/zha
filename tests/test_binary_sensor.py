@@ -4,23 +4,26 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import MagicMock, call
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general, measurement, security
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     find_entity,
     get_entity,
+    join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import Accelerometer, IASZone, Occupancy
 from zha.zigbee.cluster_handlers.const import SMARTTHINGS_ACCELERATION_CLUSTER
-from zha.zigbee.device import Device
 
 DEVICE_IAS = {
     1: {
@@ -145,8 +148,6 @@ async def async_test_iaszone_on_off(
     ],
 )
 async def test_binary_sensor(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
     device: dict,
     on_off_test: Callable[..., Awaitable[None]],
@@ -155,8 +156,8 @@ async def test_binary_sensor(
     plugs: dict[str, int],
 ) -> None:
     """Test ZHA binary_sensor platform."""
-    zigpy_device = zigpy_device_mock(device)
-    zha_device = await device_joined(zigpy_device)
+    zigpy_device = create_mock_zigpy_device(zha_gateway, device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity: PlatformEntity = find_entity(zha_device, Platform.BINARY_SENSOR)
     assert entity is not None
@@ -170,15 +171,13 @@ async def test_binary_sensor(
 
 
 async def test_smarttthings_multi(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
 ) -> None:
     """Test smartthings multi."""
-    zigpy_device = zigpy_device_mock(
-        DEVICE_SMARTTHINGS_MULTI, manufacturer="Samjin", model="multi"
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway, DEVICE_SMARTTHINGS_MULTI, manufacturer="Samjin", model="multi"
     )
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity: PlatformEntity = get_entity(
         zha_device, Platform.BINARY_SENSOR, entity_type=Accelerometer

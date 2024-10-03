@@ -5,26 +5,29 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
 import logging
 from typing import Any
 from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
     get_group_entity,
     group_entity_availability_test,
+    join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
@@ -89,12 +92,12 @@ LIGHT_COLOR = {
 
 @pytest.fixture
 async def coordinator(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Groups.cluster_id],
@@ -126,19 +129,18 @@ async def coordinator(
             descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
         ),
     )
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
 @pytest.fixture
 async def device_light_1(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -163,19 +165,18 @@ async def device_light_1(
         "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature
         | lighting.Color.ColorCapabilities.XY_attributes
     }
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
 @pytest.fixture
 async def device_light_2(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -199,19 +200,18 @@ async def device_light_2(
         "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature
         | lighting.Color.ColorCapabilities.XY_attributes
     }
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
 @pytest.fixture
 async def device_light_3(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -238,19 +238,18 @@ async def device_light_3(
         )
     }
 
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
 @pytest.fixture
 async def eWeLink_light(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ):
     """Mock eWeLink light."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -278,22 +277,19 @@ async def eWeLink_light(
         "color_temp_physical_min": 0,
         "color_temp_physical_max": 0,
     }
-    zha_device = await device_joined(zigpy_device)
-    zha_device.available = True
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     return zha_device
 
 
 @pytest.mark.looptime
 async def test_light_refresh(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test zha light platform refresh."""
-    zigpy_device = zigpy_device_mock(LIGHT_ON_OFF)
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_ON_OFF)
     on_off_cluster = zigpy_device.endpoints[1].on_off
     on_off_cluster.PLUGGED_ATTR_READS = {"on_off": 0}
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     entity = get_entity(zha_device, platform=Platform.LIGHT)
     assert bool(entity.state["on"]) is False
@@ -371,8 +367,6 @@ async def test_light_refresh(
 )
 @pytest.mark.looptime
 async def test_light(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
     device: dict,
     reporting: tuple,  # pylint: disable=unused-argument
@@ -380,7 +374,7 @@ async def test_light(
     """Test zha light platform."""
 
     # create zigpy devices
-    zigpy_device = zigpy_device_mock(device)
+    zigpy_device = create_mock_zigpy_device(zha_gateway, device)
     cluster_color: lighting.Color = getattr(
         zigpy_device.endpoints[1], "light_color", None
     )
@@ -396,7 +390,7 @@ async def test_light(
             ),
         }
         update_attribute_cache(cluster_color)
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     cluster_on_off: general.OnOff = zigpy_device.endpoints[1].on_off
     cluster_level: general.LevelControl = getattr(
@@ -1076,8 +1070,6 @@ async def test_zha_group_light_entity(
 # TODO remove? No light will ever only support HS, we no longer support it
 async def test_light_initialization(
     zha_gateway: Gateway,
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     plugged_attr_reads: dict[str, Any],
     config_override: dict[str, Any],
     expected_state: dict[str, Any],  # pylint: disable=unused-argument
@@ -1085,7 +1077,7 @@ async def test_light_initialization(
     """Test ZHA light initialization with cached attributes and color modes."""
 
     # create zigpy devices
-    zigpy_device = zigpy_device_mock(LIGHT_COLOR)
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_COLOR)
 
     # mock attribute reads
     zigpy_device.endpoints[1].light_color.PLUGGED_ATTR_READS = plugged_attr_reads
@@ -1093,7 +1085,7 @@ async def test_light_initialization(
     light_options = zha_gateway.config.config.light_options
     for key in config_override:
         setattr(light_options, key, config_override[key])
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     _entity = get_entity(zha_device, platform=Platform.LIGHT)
 
     # TODO ensure hue and saturation are properly set on startup

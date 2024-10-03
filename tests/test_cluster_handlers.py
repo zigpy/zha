@@ -2,7 +2,6 @@
 
 # pylint:disable=redefined-outer-name,too-many-lines
 
-from collections.abc import Awaitable, Callable
 import logging
 import math
 from typing import TYPE_CHECKING, Any
@@ -34,8 +33,16 @@ from zigpy.zcl.clusters.homeautomation import Diagnostic
 from zigpy.zcl.clusters.measurement import TemperatureMeasurement
 import zigpy.zdo.types as zdo_t
 
-from tests.common import make_zcl_header, send_attributes_report
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    join_zigpy_device,
+    make_zcl_header,
+    send_attributes_report,
+)
 from zha.application.const import ATTR_QUIRK_ID
 from zha.application.gateway import Gateway
 from zha.exceptions import ZHAException
@@ -76,12 +83,11 @@ def nwk():
 
 
 @pytest.fixture
-def zigpy_coordinator_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_coordinator_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Coordinator device fixture."""
 
-    coordinator = zigpy_device_mock(
+    coordinator = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [0x1000],
@@ -113,11 +119,13 @@ def endpoint(zigpy_coordinator_device: ZigpyDevice) -> Endpoint:
 
 @pytest.fixture
 def poll_control_ch(
-    endpoint: Endpoint, zigpy_device_mock: Callable[..., ZigpyDevice]
+    endpoint: Endpoint,
+    zha_gateway: Gateway,
 ) -> PollControlClusterHandler:
     """Poll control cluster_handler fixture."""
     cluster_id = zigpy.zcl.clusters.general.PollControl.cluster_id
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [cluster_id],
@@ -141,13 +149,11 @@ def poll_control_ch(
 
 
 @pytest.fixture
-async def poll_control_device(
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> Device:
+async def poll_control_device(zha_gateway: Gateway) -> Device:
     """Poll control device fixture."""
     cluster_id = zigpy.zcl.clusters.general.PollControl.cluster_id
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [cluster_id],
@@ -161,7 +167,7 @@ async def poll_control_device(
         "test model",
     )
 
-    zha_device = await device_joined(zigpy_dev)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     return zha_device
 
 
@@ -297,11 +303,11 @@ async def test_in_cluster_handler_config(
     bind_count,
     attrs,
     endpoint: Endpoint,
-    zigpy_device_mock,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test ZHA core cluster handler configuration for input clusters."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {1: {SIG_EP_INPUT: [cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
         "00:11:22:33:44:55:66:77",
         "test manufacturer",
@@ -339,12 +345,12 @@ async def test_in_cluster_handler_config(
 
 async def test_cluster_handler_bind_error(
     endpoint: Endpoint,
-    zigpy_device_mock,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test ZHA core cluster handler bind error."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
         "00:11:22:33:44:55:66:77",
         "test manufacturer",
@@ -369,12 +375,12 @@ async def test_cluster_handler_bind_error(
 
 async def test_cluster_handler_configure_reporting_error(
     endpoint: Endpoint,
-    zigpy_device_mock,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test ZHA core cluster handler configure reporting error."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
         "00:11:22:33:44:55:66:77",
         "test manufacturer",
@@ -399,11 +405,11 @@ async def test_cluster_handler_configure_reporting_error(
 
 async def test_write_attributes_safe_key_error(
     endpoint: Endpoint,
-    zigpy_device_mock,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test ZHA core cluster handler write attributes safe key error."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
         "00:11:22:33:44:55:66:77",
         "test manufacturer",
@@ -431,12 +437,12 @@ async def test_write_attributes_safe_key_error(
 
 async def test_get_attributes_error(
     endpoint: Endpoint,
-    zigpy_device_mock,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test ZHA core cluster handler get attributes timeout error."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
         "00:11:22:33:44:55:66:77",
         "test manufacturer",
@@ -462,12 +468,12 @@ async def test_get_attributes_error(
 
 async def test_get_attributes_error_raises(
     endpoint: Endpoint,
-    zigpy_device_mock,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test ZHA core cluster handler get attributes timeout error."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {1: {SIG_EP_INPUT: [OnOff.cluster_id], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
         "00:11:22:33:44:55:66:77",
         "test manufacturer",
@@ -528,11 +534,11 @@ async def test_out_cluster_handler_config(
     cluster_id: int,
     bind_count: int,
     endpoint: Endpoint,
-    zigpy_device_mock,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test ZHA core cluster handler configuration for output clusters."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {1: {SIG_EP_OUTPUT: [cluster_id], SIG_EP_INPUT: [], SIG_EP_TYPE: 0x1234}},
         "00:11:22:33:44:55:66:77",
         "test manufacturer",
@@ -676,12 +682,13 @@ def test_epch_claim_cluster_handlers(cluster_handler) -> None:
 )
 async def test_ep_cluster_handlers_all_cluster_handlers(
     m1,  # pylint: disable=unused-argument
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> None:
     """Test Endpointcluster_handlers adding all cluster_handlers."""
-    zha_device = await device_joined(
-        zigpy_device_mock(
+    zha_device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
             {
                 1: {
                     SIG_EP_INPUT: [0, 1, 6, 8],
@@ -695,8 +702,8 @@ async def test_ep_cluster_handlers_all_cluster_handlers(
                     SIG_EP_TYPE: 0x0000,
                     SIG_EP_PROFILE: 0x0104,
                 },
-            }
-        )
+            },
+        ),
     )
     assert "1:0x0000" in zha_device._endpoints[1].all_cluster_handlers
     assert "1:0x0001" in zha_device._endpoints[1].all_cluster_handlers
@@ -727,13 +734,14 @@ async def test_ep_cluster_handlers_all_cluster_handlers(
 )
 async def test_cluster_handler_power_config(
     m1,  # pylint: disable=unused-argument
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
+    zha_gateway: Gateway,
 ) -> None:
     """Test that cluster_handlers only get a single power cluster_handler."""
     in_clusters = [0, 1, 6, 8]
-    zha_device: Device = await device_joined(
-        zigpy_device_mock(
+    zha_device: Device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
             endpoints={
                 1: {
                     SIG_EP_INPUT: in_clusters,
@@ -749,7 +757,7 @@ async def test_cluster_handler_power_config(
                 },
             },
             ieee="01:2d:6f:00:0a:90:69:e8",
-        )
+        ),
     )
     assert "1:0x0000" in zha_device._endpoints[1].all_cluster_handlers
     assert "1:0x0001" in zha_device._endpoints[1].all_cluster_handlers
@@ -762,8 +770,10 @@ async def test_cluster_handler_power_config(
     assert "2:0x0008" in zha_device._endpoints[2].all_cluster_handlers
     assert "2:0x0300" in zha_device._endpoints[2].all_cluster_handlers
 
-    zha_device = await device_joined(
-        zigpy_device_mock(
+    zha_device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
             endpoints={
                 1: {
                     SIG_EP_INPUT: [],
@@ -779,13 +789,15 @@ async def test_cluster_handler_power_config(
                 },
             },
             ieee="02:2d:6f:00:0a:90:69:e8",
-        )
+        ),
     )
     assert "1:0x0001" not in zha_device._endpoints[1].all_cluster_handlers
     assert "2:0x0001" in zha_device._endpoints[2].all_cluster_handlers
 
-    zha_device = await device_joined(
-        zigpy_device_mock(
+    zha_device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
             endpoints={
                 2: {
                     SIG_EP_INPUT: in_clusters,
@@ -795,7 +807,7 @@ async def test_cluster_handler_power_config(
                 }
             },
             ieee="03:2d:6f:00:0a:90:69:e8",
-        )
+        ),
     )
     assert "2:0x0001" in zha_device._endpoints[2].all_cluster_handlers
 
@@ -947,10 +959,11 @@ async def test_poll_control_ikea(poll_control_device: Device) -> None:
 
 
 @pytest.fixture
-def zigpy_zll_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+def zigpy_zll_device(zha_gateway: Gateway) -> ZigpyDevice:
     """ZLL device fixture."""
 
-    return zigpy_device_mock(
+    return create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [0x1000],
@@ -1025,15 +1038,15 @@ async def test_zll_device_groups(
 )
 async def test_cluster_no_ep_attribute(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
 ) -> None:
     """Test cluster handlers for clusters without ep_attribute."""
 
-    zha_device = await device_joined(
-        zigpy_device_mock(
-            {1: {SIG_EP_INPUT: [0x042E], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}}
-        )
+    zha_device = await join_zigpy_device(
+        zha_gateway,
+        create_mock_zigpy_device(
+            zha_gateway,
+            {1: {SIG_EP_INPUT: [0x042E], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
+        ),
     )
 
     assert "1:0x042e" in zha_device._endpoints[1].all_cluster_handlers
@@ -1136,7 +1149,9 @@ async def test_invalid_cluster_handler(zha_gateway: Gateway, caplog) -> None:  #
     assert "missing_attr" in caplog.text
 
 
-async def test_standard_cluster_handler(zha_gateway: Gateway) -> None:  # pylint: disable=unused-argument
+async def test_standard_cluster_handler(
+    zha_gateway: Gateway,
+) -> None:  # pylint: disable=unused-argument
     """Test setting up a cluster handler that matches a standard cluster."""
 
     class TestZigbeeClusterHandler(ColorClusterHandler):
@@ -1173,7 +1188,9 @@ async def test_standard_cluster_handler(zha_gateway: Gateway) -> None:  # pylint
     )
 
 
-async def test_quirk_id_cluster_handler(zha_gateway: Gateway) -> None:  # pylint: disable=unused-argument
+async def test_quirk_id_cluster_handler(
+    zha_gateway: Gateway,
+) -> None:  # pylint: disable=unused-argument
     """Test setting up a cluster handler that matches a standard cluster."""
 
     class TestZigbeeClusterHandler(ColorClusterHandler):
@@ -1265,13 +1282,10 @@ def test_parse_and_log_command_unknown(poll_control_ch):  # noqa: F811
     assert parse_and_log_command(poll_control_ch, 0x00, 0xAB, []) == "0xAB"
 
 
-async def test_zha_send_event_from_quirk(
-    zha_gateway: Gateway,
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-):
+async def test_zha_send_event_from_quirk(zha_gateway: Gateway):
     """Test that a quirk can send an event."""
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -1292,7 +1306,7 @@ async def test_zha_send_event_from_quirk(
 
     assert isinstance(zigpy_device, SwitchAQ3)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     ms_input_ch = zha_device.endpoints[1].all_cluster_handlers["1:0x0012"]
     assert ms_input_ch is not None
@@ -1311,7 +1325,8 @@ async def test_zha_send_event_from_quirk(
         )
     ]
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -1340,7 +1355,7 @@ async def test_zha_send_event_from_quirk(
 
     assert isinstance(zigpy_device, CentraLite3130)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     on_off_ch = zha_device.endpoints[1].client_cluster_handlers["1:0x0006"]
     assert on_off_ch is not None
@@ -1389,12 +1404,10 @@ async def test_zha_send_event_from_quirk(
     ]
 
 
-async def test_zdo_cluster_handler(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
-):
+async def test_zdo_cluster_handler(zha_gateway: Gateway):
     """Test that a quirk can send an event."""
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -1415,7 +1428,7 @@ async def test_zdo_cluster_handler(
 
     assert isinstance(zigpy_device, SwitchAQ3)
 
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert zha_device.zdo_cluster_handler is not None
     assert zha_device.zdo_cluster_handler.status == ClusterHandlerStatus.INITIALIZED
