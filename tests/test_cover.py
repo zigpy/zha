@@ -3,7 +3,6 @@
 # pylint: disable=redefined-outer-name
 
 import asyncio
-from collections.abc import Callable
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -14,13 +13,17 @@ from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
     make_zcl_header,
     send_attributes_report,
     update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import ATTR_COMMAND
 from zha.application.gateway import Gateway
@@ -40,9 +43,7 @@ Default_Response = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Default_Response]
 
 
 @pytest.fixture
-def zigpy_cover_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_cover_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Zigpy cover device."""
 
     endpoints = {
@@ -53,13 +54,11 @@ def zigpy_cover_device(
             SIG_EP_OUTPUT: [],
         }
     }
-    return zigpy_device_mock(endpoints)
+    return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
 @pytest.fixture
-def zigpy_cover_remote(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_cover_remote(zha_gateway: Gateway) -> ZigpyDevice:
     """Zigpy cover remote device."""
 
     endpoints = {
@@ -70,13 +69,11 @@ def zigpy_cover_remote(
             SIG_EP_OUTPUT: [closures.WindowCovering.cluster_id],
         }
     }
-    return zigpy_device_mock(endpoints)
+    return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
 @pytest.fixture
-def zigpy_shade_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_shade_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Zigpy shade device."""
 
     endpoints = {
@@ -91,13 +88,11 @@ def zigpy_shade_device(
             SIG_EP_OUTPUT: [],
         }
     }
-    return zigpy_device_mock(endpoints)
+    return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
 @pytest.fixture
-def zigpy_keen_vent(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_keen_vent(zha_gateway: Gateway) -> ZigpyDevice:
     """Zigpy Keen Vent device."""
 
     endpoints = {
@@ -108,8 +103,8 @@ def zigpy_keen_vent(
             SIG_EP_OUTPUT: [],
         }
     }
-    return zigpy_device_mock(
-        endpoints, manufacturer="Keen Home Inc", model="SV02-612-MP-1.3"
+    return create_mock_zigpy_device(
+        zha_gateway, endpoints, manufacturer="Keen Home Inc", model="SV02-612-MP-1.3"
     )
 
 
