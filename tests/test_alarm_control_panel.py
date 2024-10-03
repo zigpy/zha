@@ -1,6 +1,5 @@
 """Test zha alarm control panel."""
 
-from collections.abc import Callable
 import logging
 from unittest.mock import AsyncMock, call, patch, sentinel
 
@@ -11,8 +10,14 @@ from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
-from tests.common import join_zigpy_device
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    join_zigpy_device,
+)
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.alarm_control_panel import AlarmControlPanel
@@ -23,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -33,7 +38,8 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    return zigpy_device_mock(
+    return create_mock_zigpy_device(
+        zha_gateway,
         endpoints,
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,

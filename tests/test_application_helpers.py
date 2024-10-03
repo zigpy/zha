@@ -1,15 +1,19 @@
 """Test zha application helpers."""
 
-from collections.abc import Callable
-
 import pytest
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.general import Basic, OnOff
 from zigpy.zcl.clusters.security import IasZone
 
-from tests.common import join_zigpy_device
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    join_zigpy_device,
+)
 from zha.application.gateway import Gateway
 from zha.application.helpers import async_is_bindable_target, get_matched_clusters
 
@@ -18,7 +22,7 @@ IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 
 
 @pytest.fixture
-def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -28,16 +32,14 @@ def zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    zigpy_dev: ZigpyDevice = zigpy_device_mock(endpoints)
+    zigpy_dev: ZigpyDevice = create_mock_zigpy_device(zha_gateway, endpoints)
     # this one is mains powered
     zigpy_dev.node_desc.mac_capability_flags |= 0b_0000_0100
     return zigpy_dev
 
 
 @pytest.fixture
-def zigpy_device_not_bindable(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_device_not_bindable(zha_gateway: Gateway) -> ZigpyDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -47,14 +49,14 @@ def zigpy_device_not_bindable(
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    zigpy_dev: ZigpyDevice = zigpy_device_mock(
-        endpoints, ieee=IEEE_GROUPABLE_DEVICE2, nwk=0x2345
+    zigpy_dev: ZigpyDevice = create_mock_zigpy_device(
+        zha_gateway, endpoints, ieee=IEEE_GROUPABLE_DEVICE2, nwk=0x2345
     )
     return zigpy_dev
 
 
 @pytest.fixture
-def remote_zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+def remote_zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -64,8 +66,8 @@ def remote_zigpy_device(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyD
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    remote_zigpy_dev: ZigpyDevice = zigpy_device_mock(
-        endpoints, ieee=IEEE_GROUPABLE_DEVICE, nwk=0x1234
+    remote_zigpy_dev: ZigpyDevice = create_mock_zigpy_device(
+        zha_gateway, endpoints, ieee=IEEE_GROUPABLE_DEVICE, nwk=0x1234
     )
     return remote_zigpy_dev
 

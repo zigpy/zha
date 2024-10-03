@@ -1,21 +1,23 @@
 """Test zha lock."""
 
-from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
@@ -31,12 +33,12 @@ SET_USER_STATUS = 9
 
 @pytest.fixture
 async def lock(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> tuple[Device, closures.DoorLock]:
     """Lock cluster fixture."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [closures.DoorLock.cluster_id, general.Basic.cluster_id],

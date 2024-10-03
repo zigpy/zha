@@ -14,8 +14,15 @@ from zigpy.zcl import Cluster, foundation
 from zigpy.zcl.clusters import general
 import zigpy.zdo.types as zdo_t
 
-from tests.common import get_entity, join_zigpy_device, update_attribute_cache
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    join_zigpy_device,
+    update_attribute_cache,
+)
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.update import (
@@ -28,7 +35,7 @@ from zha.exceptions import ZHAException
 
 
 @pytest.fixture
-def zigpy_device(zigpy_device_mock):
+def zigpy_device(zha_gateway: Gateway):
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -37,7 +44,8 @@ def zigpy_device(zigpy_device_mock):
             SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
         }
     }
-    return zigpy_device_mock(
+    return create_mock_zigpy_device(
+        zha_gateway,
         endpoints,
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,

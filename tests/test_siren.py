@@ -1,18 +1,23 @@
 """Test zha siren."""
 
 import asyncio
-from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
 from zigpy.const import SIG_EP_PROFILE
-from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, join_zigpy_device, mock_coro
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    join_zigpy_device,
+    mock_coro,
+)
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.siren import SirenEntityFeature
@@ -21,12 +26,12 @@ from zha.zigbee.device import Device
 
 @pytest.fixture
 async def siren(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> tuple[Device, security.IasWd]:
     """Siren fixture."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id, security.IasWd.cluster_id],

@@ -16,8 +16,13 @@ from zigpy.zcl.clusters import general
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
 import zigpy.zdo.types as zdo_t
 
-from tests.common import join_zigpy_device
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    join_zigpy_device,
+)
 from zha.application import Platform
 from zha.application.const import (
     CLUSTER_COMMAND_SERVER,
@@ -36,9 +41,7 @@ from zha.zigbee.group import Group
 
 
 @pytest.fixture
-def zigpy_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> Callable[..., ZigpyDevice]:
+def zigpy_device(zha_gateway: Gateway) -> Callable[..., ZigpyDevice]:
     """Device tracker zigpy device."""
 
     def _dev(with_basic_cluster_handler: bool = True, **kwargs):
@@ -53,15 +56,13 @@ def zigpy_device(
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
             }
         }
-        return zigpy_device_mock(endpoints, **kwargs)
+        return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)
 
     return _dev
 
 
 @pytest.fixture
-def zigpy_device_mains(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> Callable[..., ZigpyDevice]:
+def zigpy_device_mains(zha_gateway: Gateway) -> Callable[..., ZigpyDevice]:
     """Device tracker zigpy device."""
 
     def _dev(with_basic_cluster_handler: bool = True):
@@ -76,7 +77,8 @@ def zigpy_device_mains(
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
             }
         }
-        return zigpy_device_mock(
+        return create_mock_zigpy_device(
+            zha_gateway,
             endpoints,
             node_descriptor=zdo_t.NodeDescriptor(
                 logical_type=zdo_t.LogicalType.EndDevice,
@@ -119,11 +121,11 @@ def device_without_basic_cluster_handler(
 
 @pytest.fixture
 async def ota_zha_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> Device:
     """ZHA device with OTA cluster fixture."""
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [general.Basic.cluster_id],

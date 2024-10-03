@@ -23,6 +23,10 @@ from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
     create_mock_zigpy_device,
     get_entity,
     get_group_entity,
@@ -31,7 +35,6 @@ from tests.common import (
     send_attributes_report,
     update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity

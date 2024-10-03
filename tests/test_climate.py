@@ -14,15 +14,22 @@ import pytest
 import zhaquirks.sinope.thermostat
 from zhaquirks.sinope.thermostat import SinopeTechnologiesThermostatCluster
 import zhaquirks.tuya.ts0601_trv
-from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles
 import zigpy.quirks
 import zigpy.zcl.clusters
 from zigpy.zcl.clusters.hvac import Thermostat
 import zigpy.zcl.foundation as zcl_f
 
-from tests.common import get_entity, join_zigpy_device, send_attributes_report
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
+from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
+    get_entity,
+    join_zigpy_device,
+    send_attributes_report,
+)
 from zha.application import Platform
 from zha.application.const import (
     PRESET_AWAY,
@@ -194,7 +201,6 @@ ATTR_PRESET_MODE = "preset_mode"
 
 @pytest.fixture
 def device_climate_mock(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
     zha_gateway: Gateway,
 ) -> Callable[
     [
@@ -214,7 +220,9 @@ def device_climate_mock(
         quirk: type[zigpy.quirks.CustomDevice] | None = None,
     ) -> Device:
         plugged_attrs = ZCL_ATTR_PLUG if plug is None else {**ZCL_ATTR_PLUG, **plug}
-        zigpy_device = zigpy_device_mock(clusters, manufacturer=manuf, quirk=quirk)
+        zigpy_device = create_mock_zigpy_device(
+            zha_gateway, clusters, manufacturer=manuf, quirk=quirk
+        )
         zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
         zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = plugged_attrs
         zha_device = await join_zigpy_device(zha_gateway, zigpy_device)

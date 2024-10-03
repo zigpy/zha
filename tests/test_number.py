@@ -1,6 +1,5 @@
 """Test zha number platform."""
 
-from collections.abc import Callable
 from unittest.mock import call
 
 import pytest
@@ -12,12 +11,16 @@ from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
@@ -27,9 +30,7 @@ from zha.zigbee.device import Device
 
 
 @pytest.fixture
-def zigpy_analog_output_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_analog_output_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Zigpy analog_output device."""
 
     endpoints = {
@@ -40,14 +41,15 @@ def zigpy_analog_output_device(
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    return zigpy_device_mock(endpoints)
+    return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
 @pytest.fixture
-async def light(zigpy_device_mock: Callable[..., ZigpyDevice]) -> ZigpyDevice:
+async def light(zha_gateway: Gateway) -> ZigpyDevice:
     """Siren fixture."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_PROFILE: zha.PROFILE_ID,
