@@ -130,7 +130,6 @@ async def coordinator(
         ),
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    zha_device.available = True
     return zha_device
 
 
@@ -167,7 +166,6 @@ async def device_light_1(
         | lighting.Color.ColorCapabilities.XY_attributes
     }
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    zha_device.available = True
     return zha_device
 
 
@@ -203,7 +201,6 @@ async def device_light_2(
         | lighting.Color.ColorCapabilities.XY_attributes
     }
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    zha_device.available = True
     return zha_device
 
 
@@ -242,7 +239,6 @@ async def device_light_3(
     }
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    zha_device.available = True
     return zha_device
 
 
@@ -282,7 +278,6 @@ async def eWeLink_light(
         "color_temp_physical_max": 0,
     }
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    zha_device.available = True
     return zha_device
 
 

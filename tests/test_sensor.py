@@ -82,7 +82,6 @@ async def elec_measurement_zha_dev(
     """Electric Measurement ZHA device."""
 
     zha_dev = await join_zigpy_device(zha_gateway, elec_measurement_zigpy_dev)
-    zha_dev.available = True
     return zha_dev
 
 

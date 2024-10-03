@@ -122,7 +122,7 @@ class MotionSensitivityQuirk(CustomDevice):
 
 
 @pytest.fixture
-async def zigpy_device_aqara_sensor(zha_gateway: Gateway):
+async def aqara_sensor(zha_gateway: Gateway) -> Device:
     """Device tracker zigpy Aqara motion sensor device."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -141,21 +141,18 @@ async def zigpy_device_aqara_sensor(zha_gateway: Gateway):
 
     zigpy_device = get_device(zigpy_device)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    zha_device.available = True
-    await zha_gateway.async_block_till_done()
-    return zigpy_device
+    return zha_device
 
 
 async def test_on_off_select_attribute_report(
     zha_gateway: Gateway,
-    zigpy_device_aqara_sensor,  # pylint: disable=redefined-outer-name
+    aqara_sensor,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA attribute report parsing for select platform."""
 
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_aqara_sensor)
-    cluster = zigpy_device_aqara_sensor.endpoints.get(1).opple_cluster
+    cluster = aqara_sensor.device.endpoints.get(1).opple_cluster
 
-    entity = get_entity(zha_device, platform=Platform.SELECT)
+    entity = get_entity(aqara_sensor, platform=Platform.SELECT)
     assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
 
     # send attribute report from device

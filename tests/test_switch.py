@@ -101,7 +101,6 @@ async def device_switch_1(zha_gateway: Gateway) -> Device:
         ieee=IEEE_GROUPABLE_DEVICE,
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
-    zha_device.available = True
     return zha_device
 
 
@@ -122,7 +121,6 @@ async def device_switch_2(zha_gateway: Gateway) -> Device:
         ieee=IEEE_GROUPABLE_DEVICE2,
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
-    zha_device.available = True
     return zha_device
 
 
