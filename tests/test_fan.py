@@ -3,7 +3,6 @@
 # pylint: disable=redefined-outer-name
 
 import asyncio
-from collections.abc import Callable
 import logging
 from typing import Optional
 from unittest.mock import AsyncMock, call, patch
@@ -18,13 +17,17 @@ import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
     get_group_entity,
     group_entity_availability_test,
     join_zigpy_device,
     send_attributes_report,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
@@ -51,9 +54,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def zigpy_device(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-) -> ZigpyDevice:
+def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -63,7 +64,8 @@ def zigpy_device(
             SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
-    return zigpy_device_mock(
+    return create_mock_zigpy_device(
+        zha_gateway,
         endpoints,
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,
@@ -88,13 +90,11 @@ def zigpy_device(
 
 
 @pytest.fixture
-async def device_fan_1(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    zha_gateway: Gateway,
-) -> Device:
+async def device_fan_1(zha_gateway: Gateway) -> Device:
     """Test zha fan platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -115,13 +115,11 @@ async def device_fan_1(
 
 
 @pytest.fixture
-async def device_fan_2(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    zha_gateway: Gateway,
-) -> Device:
+async def device_fan_2(zha_gateway: Gateway) -> Device:
     """Test zha fan platform."""
 
-    zigpy_dev = zigpy_device_mock(
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -510,7 +508,7 @@ async def test_fan_update_entity(
 
 
 @pytest.fixture
-def zigpy_device_ikea(zigpy_device_mock) -> ZigpyDevice:
+def zigpy_device_ikea(zha_gateway: Gateway) -> ZigpyDevice:
     """Ikea fan zigpy device."""
     endpoints = {
         1: {
@@ -526,7 +524,8 @@ def zigpy_device_ikea(zigpy_device_mock) -> ZigpyDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         },
     }
-    return zigpy_device_mock(
+    return create_mock_zigpy_device(
+        zha_gateway,
         endpoints,
         manufacturer="IKEA of Sweden",
         model="STARKVIND Air purifier",
@@ -694,7 +693,7 @@ async def test_fan_ikea_update_entity(
 
 
 @pytest.fixture
-def zigpy_device_kof(zigpy_device_mock) -> ZigpyDevice:
+def zigpy_device_kof(zha_gateway: Gateway) -> ZigpyDevice:
     """Fan by King of Fans zigpy device."""
     endpoints = {
         1: {
@@ -710,7 +709,8 @@ def zigpy_device_kof(zigpy_device_mock) -> ZigpyDevice:
             SIG_EP_PROFILE: zha.PROFILE_ID,
         },
     }
-    return zigpy_device_mock(
+    return create_mock_zigpy_device(
+        zha_gateway,
         endpoints,
         manufacturer="King Of Fans, Inc.",
         model="HBUniversalCFRemote",
