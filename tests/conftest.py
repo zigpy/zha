@@ -303,6 +303,7 @@ class TestGateway:
 async def zha_gateway(
     zha_data: ZHAData,
     zigpy_app_controller,
+    caplog,  # pylint: disable=unused-argument
 ):
     """Set up ZHA component."""
 
