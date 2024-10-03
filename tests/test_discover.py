@@ -46,12 +46,16 @@ import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
+    SIG_EP_INPUT,
+    SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
+    SIG_EP_TYPE,
+    create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
     update_attribute_cache,
     zigpy_device_from_json,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform, discovery
 from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
 from zha.application.gateway import Gateway
@@ -104,10 +108,10 @@ def contains_ignored_suffix(unique_id: str) -> bool:
 async def test_devices(
     device,
     zha_gateway: Gateway,
-    zigpy_device_mock,
 ) -> None:
     """Test device discovery."""
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         endpoints=device[SIG_ENDPOINTS],
         ieee="00:11:22:33:44:55:66:77",
         manufacturer=device[SIG_MANUFACTURER],
@@ -298,12 +302,12 @@ def test_discover_probe_single_cluster() -> None:
 async def test_discover_endpoint(
     device_info: dict[str, Any],
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
 ) -> None:
     """Test device discovery."""
 
     with mock.patch("zha.zigbee.endpoint.Endpoint.async_new_entity") as new_ent:
-        zigpy_dev = zigpy_device_mock(
+        zigpy_dev = create_mock_zigpy_device(
+            zha_gateway,
             endpoints=device_info[SIG_ENDPOINTS],
             ieee="00:11:22:33:44:55:66:77",
             manufacturer=device_info[SIG_MANUFACTURER],
@@ -424,11 +428,13 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
 
 @pytest.mark.parametrize("override", [None, "switch"])
 async def test_device_override(
-    zha_gateway: Gateway, zigpy_device_mock, override
+    zha_gateway: Gateway,
+    override: str | None,
 ) -> None:
     """Test device discovery override."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.COLOR_DIMMABLE_LIGHT,
@@ -460,11 +466,11 @@ async def test_device_override(
 
 async def test_quirks_v2_entity_discovery(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
 ) -> None:
     """Test quirks v2 discovery."""
 
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -521,7 +527,6 @@ async def test_quirks_v2_entity_discovery(
 
 async def test_quirks_v2_entity_discovery_e1_curtain(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
 ) -> None:
     """Test quirks v2 discovery for e1 curtain motor."""
 
@@ -578,7 +583,8 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         .add_to_registry()
     )
 
-    aqara_E1_device = zigpy_device_mock(
+    aqara_E1_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_DEVICE,
@@ -660,12 +666,13 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
 
 
 def _get_test_device(
-    zigpy_device_mock,
+    zha_gateway: Gateway,
     manufacturer: str,
     model: str,
     augment_method: Callable[[QuirkBuilder], QuirkBuilder] | None = None,
 ):
-    zigpy_device = zigpy_device_mock(
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
         {
             1: {
                 SIG_EP_INPUT: [
@@ -737,13 +744,12 @@ def _get_test_device(
 
 async def test_quirks_v2_entity_no_metadata(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - no metadata."""
 
     zigpy_device = _get_test_device(
-        zigpy_device_mock, "Ikea of Sweden2", "TRADFRI remote control2"
+        zha_gateway, "Ikea of Sweden2", "TRADFRI remote control2"
     )
     setattr(zigpy_device, "_exposes_metadata", {})
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -755,13 +761,12 @@ async def test_quirks_v2_entity_no_metadata(
 
 async def test_quirks_v2_entity_discovery_errors(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test quirks v2 discovery skipped - errors."""
 
     zigpy_device = _get_test_device(
-        zigpy_device_mock, "Ikea of Sweden3", "TRADFRI remote control3"
+        zha_gateway, "Ikea of Sweden3", "TRADFRI remote control3"
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
@@ -937,7 +942,6 @@ ERROR_ROOT = "Quirks provided an invalid device class"
 )
 async def test_quirks_v2_metadata_bad_device_classes(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
     caplog: pytest.LogCaptureFixture,
     augment_method: Callable[[QuirkBuilder], QuirkBuilder],
     expected_exception_string: str,
@@ -946,7 +950,7 @@ async def test_quirks_v2_metadata_bad_device_classes(
 
     # introduce an error
     zigpy_device = _get_test_device(
-        zigpy_device_mock,
+        zha_gateway,
         "Ikea of Sweden5",
         "TRADFRI remote control5",
         augment_method=augment_method,
@@ -961,12 +965,11 @@ async def test_quirks_v2_metadata_bad_device_classes(
 
 async def test_quirks_v2_fallback_name(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    zigpy_device_mock,
 ) -> None:
     """Test quirks v2 fallback name."""
 
     zigpy_device = _get_test_device(
-        zigpy_device_mock,
+        zha_gateway,
         "Ikea of Sweden6",
         "TRADFRI remote control6",
         augment_method=lambda builder: builder.sensor(
