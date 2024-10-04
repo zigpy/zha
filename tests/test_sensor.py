@@ -26,9 +26,7 @@ from tests.common import (
     get_entity,
     join_zigpy_device,
     send_attributes_report,
-    update_attribute_cache,
 )
-from tests.conftest import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
 from zha.application import Platform
 from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway

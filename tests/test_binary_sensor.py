@@ -181,17 +181,17 @@ async def test_binary_sensor(
 
 
 async def test_binary_sensor_general(
-    zigpy_device_mock: Callable[..., ZigpyDevice],
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
 ) -> None:
     """Test binary sensor general - description."""
-    zigpy_device = zigpy_device_mock(DEVICE_GENERAL)
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway, DEVICE_GENERAL, manufacturer="DevManuf", model="DevModel"
+    )
 
     cluster = getattr(zigpy_device.endpoints[1], "binary_input")
     cluster.PLUGGED_ATTR_READS = {"description": "Binary Input", "present_value": 1}
     update_attribute_cache(cluster)
-    zha_device = await device_joined(zigpy_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     entity: PlatformEntity = find_entity(zha_device, Platform.BINARY_SENSOR)
 
     await entity.async_update()

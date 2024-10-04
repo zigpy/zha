@@ -189,7 +189,6 @@ async def test_number(
 
 async def test_number_missing_description_attr(
     zigpy_analog_output_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    device_joined: Callable[[ZigpyDevice], Awaitable[Device]],
     zha_gateway: Gateway,
 ) -> None:
     """Test zha number platform - missing description attribute."""
@@ -205,8 +204,7 @@ async def test_number_missing_description_attr(
         "application_type": 4 * 0x10000,
     }
     update_attribute_cache(cluster)
-
-    zha_device = await device_joined(zigpy_analog_output_device)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
 
     entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
     assert isinstance(entity, PlatformEntity)
