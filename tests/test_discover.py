@@ -92,6 +92,7 @@ IGNORE_SUFFIXES = [
     "default_move_rate",
     "start_up_current_level",
     "counter",
+    "setpoint_change_source_timestamp",
 ]
 
 

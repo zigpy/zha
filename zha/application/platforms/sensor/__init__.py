@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from asyncio import Task
 from dataclasses import dataclass
+from datetime import date, datetime
 import enum
 import functools
 import logging
@@ -29,7 +30,12 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
+from zha.application.platforms.sensor.const import (
+    NON_NUMERIC_FORMATTERS,
+    UNIX_EPOCH_TO_ZCL_EPOCH,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import (
@@ -240,7 +246,7 @@ class Sensor(PlatformEntity):
         return response
 
     @property
-    def native_value(self) -> str | int | float | None:
+    def native_value(self) -> date | datetime | str | int | float | None:
         """Return the state of the entity."""
         assert self._attribute_name is not None
         raw_state = self._cluster_handler.cluster.get(self._attribute_name)
@@ -264,13 +270,26 @@ class Sensor(PlatformEntity):
         ):
             self.maybe_emit_state_changed_event()
 
-    def formatter(self, value: int | enum.IntEnum) -> int | float | str | None:
+    def formatter(
+        self, value: int | enum.IntEnum
+    ) -> date | datetime | int | float | str | None:
+        """Pass-through formatter."""
+        return getattr(
+            self,
+            NON_NUMERIC_FORMATTERS.get(self._attr_device_class, "numeric_formatter"),
+        )(value)
+
+    def numeric_formatter(self, value: int | enum.IntEnum) -> int | float | str | None:
         """Numeric pass-through formatter."""
         if self._decimals > 0:
             return round(
                 float(value * self._multiplier) / self._divisor, self._decimals
             )
         return round(float(value * self._multiplier) / self._divisor)
+
+    def timestamp_formatter(self, value: int) -> datetime | None:
+        """Timestamp pass-through formatter."""
+        return datetime.fromtimestamp(value - UNIX_EPOCH_TO_ZCL_EPOCH)
 
 
 class PollableSensor(Sensor):
@@ -1629,6 +1648,20 @@ class SetpointChangeSource(EnumSensor):
     _attr_translation_key: str = "setpoint_change_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _enum = SetpointChangeSourceEnum
+
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
+class SetpointChangeSourceTimestamp(Sensor):
+    """Sensor that displays the timestamp the setpoint change.
+
+    Optional thermostat attribute.
+    """
+
+    _unique_id_suffix = "setpoint_change_source_timestamp"
+    _attribute_name = "setpoint_change_source_timestamp"
+    _attr_translation_key: str = "setpoint_change_source_timestamp"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)

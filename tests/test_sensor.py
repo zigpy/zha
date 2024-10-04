@@ -2,6 +2,7 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
+from datetime import datetime
 import math
 from typing import Any, Optional
 from unittest.mock import AsyncMock, MagicMock
@@ -394,6 +395,18 @@ async def async_test_pi_heating_demand(
     assert_state(entity, 1, "%")
 
 
+async def async_test_change_source_timestamp(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+):
+    """Test change source timestamp is correctly returned."""
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 2674725315},
+    )
+    assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15)
+
+
 @pytest.mark.parametrize(
     "cluster_id, entity_type, test_func, read_plug, unsupported_attrs",
     (
@@ -544,6 +557,13 @@ async def async_test_pi_heating_demand(
             hvac.Thermostat.cluster_id,
             sensor.PiHeatingDemand,
             async_test_pi_heating_demand,
+            None,
+            None,
+        ),
+        (
+            hvac.Thermostat.cluster_id,
+            sensor.SetpointChangeSourceTimestamp,
+            async_test_change_source_timestamp,
             None,
             None,
         ),
