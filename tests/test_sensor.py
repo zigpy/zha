@@ -2,7 +2,7 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from datetime import UTC, datetime
 import math
 from typing import Any, Optional
 from unittest.mock import AsyncMock, MagicMock
@@ -404,7 +404,7 @@ async def async_test_change_source_timestamp(
         cluster,
         {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 2674725315},
     )
-    assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15)
+    assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
 @pytest.mark.parametrize(

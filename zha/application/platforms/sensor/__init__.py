@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from asyncio import Task
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 import enum
 import functools
 import logging
@@ -289,7 +289,7 @@ class Sensor(PlatformEntity):
 
     def timestamp_formatter(self, value: int) -> datetime | None:
         """Timestamp pass-through formatter."""
-        return datetime.fromtimestamp(value - UNIX_EPOCH_TO_ZCL_EPOCH)
+        return datetime.fromtimestamp(value - UNIX_EPOCH_TO_ZCL_EPOCH, tz=UTC)
 
 
 class PollableSensor(Sensor):
