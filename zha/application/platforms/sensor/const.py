@@ -390,3 +390,5 @@ NON_NUMERIC_DEVICE_CLASSES = {
     SensorDeviceClass.ENUM,
     SensorDeviceClass.TIMESTAMP,
 }
+
+UNIX_EPOCH_TO_ZCL_EPOCH = 946684800
