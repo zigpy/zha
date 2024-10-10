@@ -3,7 +3,7 @@
 from enum import IntFlag, StrEnum
 from typing import Final
 
-from zigpy.zcl.clusters.hvac import SystemMode
+from zigpy.zcl.clusters.hvac import ControlSequenceOfOperation, RunningMode, SystemMode
 
 ATTR_SYS_MODE: Final[str] = "system_mode"
 ATTR_FAN_MODE: Final[str] = "fan_mode"
@@ -20,19 +20,9 @@ ATTR_UNOCCP_COOL_SETPT: Final[str] = "unoccupied_cooling_setpoint"
 ATTR_HVAC_MODE: Final[str] = "hvac_mode"
 ATTR_TARGET_TEMP_HIGH: Final[str] = "target_temp_high"
 ATTR_TARGET_TEMP_LOW: Final[str] = "target_temp_low"
-
-SUPPORT_TARGET_TEMPERATURE: Final[int] = 1
-SUPPORT_TARGET_TEMPERATURE_RANGE: Final[int] = 2
-SUPPORT_TARGET_HUMIDITY: Final[int] = 4
-SUPPORT_FAN_MODE: Final[int] = 8
-SUPPORT_PRESET_MODE: Final[int] = 16
-SUPPORT_SWING_MODE: Final[int] = 32
-SUPPORT_AUX_HEAT: Final[int] = 64
+ATTR_TEMPERATURE: Final[str] = "temperature"
 
 PRECISION_TENTHS: Final[float] = 0.1
-# Temperature attribute
-ATTR_TEMPERATURE: Final[str] = "temperature"
-TEMP_CELSIUS: Final[str] = "°C"
 
 # Possible fan state
 FAN_ON = "on"
@@ -150,17 +140,29 @@ class HVACAction(StrEnum):
     PREHEATING = "preheating"
 
 
-RUNNING_MODE = {0x00: HVACMode.OFF, 0x03: HVACMode.COOL, 0x04: HVACMode.HEAT}
+RUNNING_MODE = {
+    RunningMode.Off: HVACMode.OFF,
+    RunningMode.Cool: HVACMode.COOL,
+    RunningMode.Heat: HVACMode.HEAT,
+}
 
 SEQ_OF_OPERATION = {
-    0x00: [HVACMode.OFF, HVACMode.COOL],  # cooling only
-    0x01: [HVACMode.OFF, HVACMode.COOL],  # cooling with reheat
-    0x02: [HVACMode.OFF, HVACMode.HEAT],  # heating only
-    0x03: [HVACMode.OFF, HVACMode.HEAT],  # heating with reheat
-    # cooling and heating 4-pipes
-    0x04: [HVACMode.OFF, HVACMode.HEAT_COOL, HVACMode.COOL, HVACMode.HEAT],
-    # cooling and heating 4-pipes
-    0x05: [HVACMode.OFF, HVACMode.HEAT_COOL, HVACMode.COOL, HVACMode.HEAT],
+    ControlSequenceOfOperation.Cooling_Only: [HVACMode.OFF, HVACMode.COOL],
+    ControlSequenceOfOperation.Cooling_With_Reheat: [HVACMode.OFF, HVACMode.COOL],
+    ControlSequenceOfOperation.Heating_Only: [HVACMode.OFF, HVACMode.HEAT],
+    ControlSequenceOfOperation.Heating_With_Reheat: [HVACMode.OFF, HVACMode.HEAT],
+    ControlSequenceOfOperation.Cooling_and_Heating: [
+        HVACMode.OFF,
+        HVACMode.HEAT_COOL,
+        HVACMode.COOL,
+        HVACMode.HEAT,
+    ],
+    ControlSequenceOfOperation.Cooling_and_Heating_with_Reheat: [
+        HVACMode.OFF,
+        HVACMode.HEAT_COOL,
+        HVACMode.COOL,
+        HVACMode.HEAT,
+    ],
     0x06: [HVACMode.COOL, HVACMode.HEAT, HVACMode.OFF],  # centralite specific
     0x07: [HVACMode.HEAT_COOL, HVACMode.OFF],  # centralite specific
 }
