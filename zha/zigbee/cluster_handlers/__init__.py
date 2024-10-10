@@ -8,9 +8,9 @@ from dataclasses import dataclass
 from enum import Enum
 import functools
 import logging
+import traceback
 from typing import TYPE_CHECKING, Any, Final, ParamSpec, TypedDict
 
-import traceback
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl

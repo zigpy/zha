@@ -629,7 +629,10 @@ class PollControlClusterHandler(ClusterHandler):
         """Respond to checkin command."""
         try:
             await self.checkin_response(True, self.CHECKIN_FAST_POLL_TIMEOUT, tsn=tsn)
-            if self._endpoint.device.manufacturer_code not in self._IGNORED_MANUFACTURER_ID:
+            if (
+                self._endpoint.device.manufacturer_code
+                not in self._IGNORED_MANUFACTURER_ID
+            ):
                 await self.set_long_poll_interval(self.LONG_POLL)
         except Exception:
             self.error(traceback.format_exc())
