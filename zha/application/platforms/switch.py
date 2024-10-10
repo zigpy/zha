@@ -51,7 +51,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class SwitchConfigurationEntityInfo(BaseEntityInfo):
+class ConfigurableAttributeSwitchInfo(BaseEntityInfo):
     """Switch configuration entity info."""
 
     attribute_name: str
@@ -183,7 +183,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self.maybe_emit_state_changed_event()
 
 
-class SwitchConfigurationEntity(PlatformEntity):
+class ConfigurableAttributeSwitch(PlatformEntity):
     """Representation of a ZHA switch configuration entity."""
 
     PLATFORM = Platform.SWITCH
@@ -251,9 +251,9 @@ class SwitchConfigurationEntity(PlatformEntity):
         self._on_value = entity_metadata.on_value
 
     @functools.cached_property
-    def info_object(self) -> SwitchConfigurationEntityInfo:
+    def info_object(self) -> ConfigurableAttributeSwitchInfo:
         """Return representation of the switch configuration entity."""
-        return SwitchConfigurationEntityInfo(
+        return ConfigurableAttributeSwitchInfo(
             **super().info_object.__dict__,
             attribute_name=self._attribute_name,
             invert_attribute_name=self._inverter_attribute_name,
@@ -341,7 +341,7 @@ class SwitchConfigurationEntity(PlatformEntity):
         "_TZE200_b6wax7g0",
     },
 )
-class OnOffWindowDetectionFunctionConfigurationEntity(SwitchConfigurationEntity):
+class OnOffWindowDetectionFunctionConfigurationEntity(ConfigurableAttributeSwitch):
     """Representation of a ZHA window detection configuration entity."""
 
     _unique_id_suffix = "on_off_window_opened_detection"
@@ -353,7 +353,7 @@ class OnOffWindowDetectionFunctionConfigurationEntity(SwitchConfigurationEntity)
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.motion.ac02"}
 )
-class P1MotionTriggerIndicatorSwitch(SwitchConfigurationEntity):
+class P1MotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     """Representation of a ZHA motion triggering configuration entity."""
 
     _unique_id_suffix = "trigger_indicator"
@@ -365,7 +365,7 @@ class P1MotionTriggerIndicatorSwitch(SwitchConfigurationEntity):
     cluster_handler_names="opple_cluster",
     models={"lumi.plug.mmeu01", "lumi.plug.maeu01"},
 )
-class XiaomiPlugPowerOutageMemorySwitch(SwitchConfigurationEntity):
+class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
     """Representation of a ZHA power outage memory configuration entity."""
 
     _unique_id_suffix = "power_outage_memory"
@@ -378,7 +378,7 @@ class XiaomiPlugPowerOutageMemorySwitch(SwitchConfigurationEntity):
     manufacturers={"Philips", "Signify Netherlands B.V."},
     models={"SML001", "SML002", "SML003", "SML004"},
 )
-class HueMotionTriggerIndicatorSwitch(SwitchConfigurationEntity):
+class HueMotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     """Representation of a ZHA motion triggering configuration entity."""
 
     _unique_id_suffix = "trigger_indicator"
@@ -390,7 +390,7 @@ class HueMotionTriggerIndicatorSwitch(SwitchConfigurationEntity):
     cluster_handler_names="ikea_airpurifier",
     models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
 )
-class ChildLock(SwitchConfigurationEntity):
+class ChildLock(ConfigurableAttributeSwitch):
     """ZHA BinarySensor."""
 
     _unique_id_suffix = "child_lock"
@@ -402,7 +402,7 @@ class ChildLock(SwitchConfigurationEntity):
     cluster_handler_names="ikea_airpurifier",
     models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
 )
-class DisableLed(SwitchConfigurationEntity):
+class DisableLed(ConfigurableAttributeSwitch):
     """ZHA BinarySensor."""
 
     _unique_id_suffix = "disable_led"
@@ -413,7 +413,7 @@ class DisableLed(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliInvertSwitch(SwitchConfigurationEntity):
+class InovelliInvertSwitch(ConfigurableAttributeSwitch):
     """Inovelli invert switch control."""
 
     _unique_id_suffix = "invert_switch"
@@ -424,7 +424,7 @@ class InovelliInvertSwitch(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliSmartBulbMode(SwitchConfigurationEntity):
+class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
     """Inovelli smart bulb mode control."""
 
     _unique_id_suffix = "smart_bulb_mode"
@@ -435,7 +435,7 @@ class InovelliSmartBulbMode(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM35-SN"}
 )
-class InovelliSmartFanMode(SwitchConfigurationEntity):
+class InovelliSmartFanMode(ConfigurableAttributeSwitch):
     """Inovelli smart fan mode control."""
 
     _unique_id_suffix = "smart_fan_mode"
@@ -446,7 +446,7 @@ class InovelliSmartFanMode(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliDoubleTapUpEnabled(SwitchConfigurationEntity):
+class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
     """Inovelli double tap up enabled."""
 
     _unique_id_suffix = "double_tap_up_enabled"
@@ -457,7 +457,7 @@ class InovelliDoubleTapUpEnabled(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliDoubleTapDownEnabled(SwitchConfigurationEntity):
+class InovelliDoubleTapDownEnabled(ConfigurableAttributeSwitch):
     """Inovelli double tap down enabled."""
 
     _unique_id_suffix = "double_tap_down_enabled"
@@ -468,7 +468,7 @@ class InovelliDoubleTapDownEnabled(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliAuxSwitchScenes(SwitchConfigurationEntity):
+class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
     """Inovelli unique aux switch scenes."""
 
     _unique_id_suffix = "aux_switch_scenes"
@@ -479,7 +479,7 @@ class InovelliAuxSwitchScenes(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliBindingOffToOnSyncLevel(SwitchConfigurationEntity):
+class InovelliBindingOffToOnSyncLevel(ConfigurableAttributeSwitch):
     """Inovelli send move to level with on/off to bound devices."""
 
     _unique_id_suffix = "binding_off_to_on_sync_level"
@@ -490,7 +490,7 @@ class InovelliBindingOffToOnSyncLevel(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliLocalProtection(SwitchConfigurationEntity):
+class InovelliLocalProtection(ConfigurableAttributeSwitch):
     """Inovelli local protection control."""
 
     _unique_id_suffix = "local_protection"
@@ -501,7 +501,7 @@ class InovelliLocalProtection(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliOnOffLEDMode(SwitchConfigurationEntity):
+class InovelliOnOffLEDMode(ConfigurableAttributeSwitch):
     """Inovelli only 1 LED mode control."""
 
     _unique_id_suffix = "on_off_led_mode"
@@ -512,7 +512,7 @@ class InovelliOnOffLEDMode(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliFirmwareProgressLED(SwitchConfigurationEntity):
+class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
     """Inovelli firmware progress LED control."""
 
     _unique_id_suffix = "firmware_progress_led"
@@ -523,7 +523,7 @@ class InovelliFirmwareProgressLED(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliRelayClickInOnOffMode(SwitchConfigurationEntity):
+class InovelliRelayClickInOnOffMode(ConfigurableAttributeSwitch):
     """Inovelli relay click in on off mode control."""
 
     _unique_id_suffix = "relay_click_in_on_off_mode"
@@ -534,7 +534,7 @@ class InovelliRelayClickInOnOffMode(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI,
 )
-class InovelliDisableDoubleTapClearNotificationsMode(SwitchConfigurationEntity):
+class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch):
     """Inovelli disable clear notifications double tap control."""
 
     _unique_id_suffix = "disable_clear_notifications_double_tap"
@@ -545,7 +545,7 @@ class InovelliDisableDoubleTapClearNotificationsMode(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-class AqaraPetFeederLEDIndicator(SwitchConfigurationEntity):
+class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
     """Representation of a LED indicator configuration entity."""
 
     _unique_id_suffix = "disable_led_indicator"
@@ -557,7 +557,7 @@ class AqaraPetFeederLEDIndicator(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-class AqaraPetFeederChildLock(SwitchConfigurationEntity):
+class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
     """Representation of a child lock configuration entity."""
 
     _unique_id_suffix = "child_lock"
@@ -568,7 +568,7 @@ class AqaraPetFeederChildLock(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ON_OFF, quirk_ids=TUYA_PLUG_ONOFF
 )
-class TuyaChildLockSwitch(SwitchConfigurationEntity):
+class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
     """Representation of a child lock configuration entity."""
 
     _unique_id_suffix = "child_lock"
@@ -579,7 +579,7 @@ class TuyaChildLockSwitch(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-class AqaraThermostatWindowDetection(SwitchConfigurationEntity):
+class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
     """Representation of an Aqara thermostat window detection configuration entity."""
 
     _unique_id_suffix = "window_detection"
@@ -590,7 +590,7 @@ class AqaraThermostatWindowDetection(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-class AqaraThermostatValveDetection(SwitchConfigurationEntity):
+class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
     """Representation of an Aqara thermostat valve detection configuration entity."""
 
     _unique_id_suffix = "valve_detection"
@@ -601,7 +601,7 @@ class AqaraThermostatValveDetection(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
 )
-class AqaraThermostatChildLock(SwitchConfigurationEntity):
+class AqaraThermostatChildLock(ConfigurableAttributeSwitch):
     """Representation of an Aqara thermostat child lock configuration entity."""
 
     _unique_id_suffix = "child_lock"
@@ -612,7 +612,7 @@ class AqaraThermostatChildLock(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraHeartbeatIndicator(SwitchConfigurationEntity):
+class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
     """Representation of a heartbeat indicator configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "heartbeat_indicator"
@@ -623,7 +623,7 @@ class AqaraHeartbeatIndicator(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraLinkageAlarm(SwitchConfigurationEntity):
+class AqaraLinkageAlarm(ConfigurableAttributeSwitch):
     """Representation of a linkage alarm configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "linkage_alarm"
@@ -634,7 +634,7 @@ class AqaraLinkageAlarm(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraBuzzerManualMute(SwitchConfigurationEntity):
+class AqaraBuzzerManualMute(ConfigurableAttributeSwitch):
     """Representation of a buzzer manual mute configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "buzzer_manual_mute"
@@ -645,7 +645,7 @@ class AqaraBuzzerManualMute(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
-class AqaraBuzzerManualAlarm(SwitchConfigurationEntity):
+class AqaraBuzzerManualAlarm(ConfigurableAttributeSwitch):
     """Representation of a buzzer manual mute configuration entity for Aqara smoke sensors."""
 
     _unique_id_suffix = "buzzer_manual_alarm"
@@ -654,7 +654,7 @@ class AqaraBuzzerManualAlarm(SwitchConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
-class WindowCoveringInversionSwitch(SwitchConfigurationEntity):
+class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
     """Representation of a switch that controls inversion for window covering devices.
 
     This is necessary because this cluster uses 2 attributes to control inversion.
@@ -751,7 +751,7 @@ class WindowCoveringInversionSwitch(SwitchConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.curtain.agl001"}
 )
-class AqaraE1CurtainMotorHooksLockedSwitch(SwitchConfigurationEntity):
+class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
     """Representation of a switch that controls whether the curtain motor hooks are locked."""
 
     _unique_id_suffix = "hooks_lock"
@@ -763,7 +763,7 @@ class AqaraE1CurtainMotorHooksLockedSwitch(SwitchConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     quirk_ids={DANFOSS_ALLY_THERMOSTAT},
 )
-class DanfossExternalOpenWindowDetected(SwitchConfigurationEntity):
+class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating an open window."""
 
     _unique_id_suffix = "external_open_window_detected"
@@ -775,7 +775,7 @@ class DanfossExternalOpenWindowDetected(SwitchConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     quirk_ids={DANFOSS_ALLY_THERMOSTAT},
 )
-class DanfossWindowOpenFeature(SwitchConfigurationEntity):
+class DanfossWindowOpenFeature(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute enabling open window detection."""
 
     _unique_id_suffix = "window_open_feature"
@@ -787,7 +787,7 @@ class DanfossWindowOpenFeature(SwitchConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     quirk_ids={DANFOSS_ALLY_THERMOSTAT},
 )
-class DanfossMountingModeControl(SwitchConfigurationEntity):
+class DanfossMountingModeControl(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for switching to mounting mode."""
 
     _unique_id_suffix = "mounting_mode_control"
@@ -799,7 +799,7 @@ class DanfossMountingModeControl(SwitchConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     quirk_ids={DANFOSS_ALLY_THERMOSTAT},
 )
-class DanfossRadiatorCovered(SwitchConfigurationEntity):
+class DanfossRadiatorCovered(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating full usage of the external temperature sensor."""
 
     _unique_id_suffix = "radiator_covered"
@@ -811,7 +811,7 @@ class DanfossRadiatorCovered(SwitchConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     quirk_ids={DANFOSS_ALLY_THERMOSTAT},
 )
-class DanfossHeatAvailable(SwitchConfigurationEntity):
+class DanfossHeatAvailable(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating available heat."""
 
     _unique_id_suffix = "heat_available"
@@ -823,7 +823,7 @@ class DanfossHeatAvailable(SwitchConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     quirk_ids={DANFOSS_ALLY_THERMOSTAT},
 )
-class DanfossLoadBalancingEnable(SwitchConfigurationEntity):
+class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for enabling load balancing."""
 
     _unique_id_suffix = "load_balancing_enable"
@@ -835,7 +835,7 @@ class DanfossLoadBalancingEnable(SwitchConfigurationEntity):
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     quirk_ids={DANFOSS_ALLY_THERMOSTAT},
 )
-class DanfossAdaptationRunSettings(SwitchConfigurationEntity):
+class DanfossAdaptationRunSettings(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for enabling daily adaptation run.
 
     Actually a bitmap, but only the first bit is used.
@@ -855,7 +855,7 @@ class DanfossAdaptationRunSettings(SwitchConfigurationEntity):
         "DM2550ZB-G2",
     },
 )
-class SinopeLightDoubleTapFullSwitch(SwitchConfigurationEntity):
+class SinopeLightDoubleTapFullSwitch(ConfigurableAttributeSwitch):
     """Representation of a config option that controls whether Double Tap Full option is enabled on a Sinope light switch."""
 
     _unique_id_suffix = "double_up_full"
