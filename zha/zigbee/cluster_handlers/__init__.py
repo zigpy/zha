@@ -10,6 +10,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, ParamSpec, TypedDict
 
+import traceback
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl
