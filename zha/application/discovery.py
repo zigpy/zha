@@ -156,7 +156,11 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         SwitchMetadata,
         EntityType.CONFIG,
     ): switch.SwitchConfigurationEntity,
-    (Platform.SWITCH, SwitchMetadata, EntityType.STANDARD): switch.Switch,
+    (
+        Platform.SWITCH,
+        SwitchMetadata,
+        EntityType.STANDARD,
+    ): switch.SwitchConfigurationEntity,
 }
 
 
