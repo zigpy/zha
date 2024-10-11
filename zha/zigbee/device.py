@@ -16,7 +16,6 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 import zigpy.quirks
-from zigpy.quirks.v2 import CustomDeviceV2
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.zcl.clusters import Cluster
@@ -723,8 +722,8 @@ class Device(LogMixin, EventBase):
         await asyncio.gather(
             *(endpoint.async_configure() for endpoint in self._endpoints.values())
         )
-        if isinstance(self._zigpy_device, CustomDeviceV2):
-            self.debug("applying quirks v2 custom device configuration")
+        if isinstance(self._zigpy_device, zigpy.quirks.CustomDevice):
+            self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 
         self.emit(
