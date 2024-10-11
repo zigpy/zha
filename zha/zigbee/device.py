@@ -722,7 +722,7 @@ class Device(LogMixin, EventBase):
         await asyncio.gather(
             *(endpoint.async_configure() for endpoint in self._endpoints.values())
         )
-        if isinstance(self._zigpy_device, zigpy.quirks.CustomDevice):
+        if isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 
