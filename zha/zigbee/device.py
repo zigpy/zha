@@ -207,7 +207,7 @@ class Device(LogMixin, EventBase):
         self._gateway: Gateway = _gateway
         self._zigpy_device: ZigpyDevice = zigpy_device
         self.quirk_applied: bool = isinstance(
-            self._zigpy_device, zigpy.quirks.CustomDevice
+            self._zigpy_device, zigpy.quirks.BaseCustomDevice
         )
         self.quirk_class: str = (
             f"{self._zigpy_device.__class__.__module__}."
