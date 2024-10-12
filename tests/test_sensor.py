@@ -85,6 +85,17 @@ async def async_test_humidity(
     assert_state(entity, 10.0, "%")
 
 
+async def async_test_flow(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+) -> None:
+    """Test flow sensor."""
+    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 40})
+    assert_state(entity, 4.0, "m³/h")
+
+    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0xFFFF})
+    assert_state(entity, None, "m³/h")
+
+
 async def async_test_temperature(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
@@ -393,6 +404,13 @@ async def async_test_pi_heating_demand(
             measurement.RelativeHumidity.cluster_id,
             sensor.Humidity,
             async_test_humidity,
+            None,
+            None,
+        ),
+        (
+            measurement.FlowMeasurement.cluster_id,
+            sensor.Flow,
+            async_test_flow,
             None,
             None,
         ),
