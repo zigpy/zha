@@ -45,18 +45,13 @@
           "0x0702",
           "0x0b04"
         ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
+        "output_clusters": ["0x000a", "0x0019"]
       },
       "242": {
         "profile_id": "0xa1e0",
         "device_type": "0x0061",
         "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
+        "output_clusters": ["0x0021"]
       }
     },
     "manufacturer": "LUMI",
@@ -1389,23 +1384,12 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "command": "identify",
-          "args": [
-            5
-          ],
+          "args": [5],
           "kwargs": {}
         },
         "state": {
@@ -1442,16 +1426,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1470,9 +1445,7 @@
           "effect": null,
           "supported_features": 8,
           "color_mode": "onoff",
-          "supported_color_modes": [
-            "onoff"
-          ],
+          "supported_color_modes": ["onoff"],
           "off_with_transition": false,
           "off_brightness": null,
           "available": true
@@ -1507,16 +1480,7 @@
               "value_attribute": "current_temperature"
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1559,16 +1523,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1611,16 +1566,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1641,7 +1587,7 @@
           "fallback_name": null,
           "unique_id": "04:cf:8c:df:3c:76:1c:82-1-2820",
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "translation_key": null,
           "device_class": "power",
           "state_class": "measurement",
@@ -1663,16 +1609,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1683,7 +1620,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
@@ -1716,16 +1653,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1773,16 +1701,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            130,
-            28,
-            118,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
+          "device_ieee": [130, 28, 118, 60, 223, 140, 207, 4],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

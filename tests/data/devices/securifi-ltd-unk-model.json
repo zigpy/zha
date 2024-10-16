@@ -258,10 +258,7 @@
               "value": null
             }
           },
-          "unsupported_attributes": [
-            5,
-            "model"
-          ]
+          "unsupported_attributes": [5, "model"]
         },
         "0x0001": {
           "endpoint_attribute": "power",
@@ -620,10 +617,7 @@
               "value": null
             }
           },
-          "unsupported_attributes": [
-            16387,
-            "start_up_on_off"
-          ]
+          "unsupported_attributes": [16387, "start_up_on_off"]
         },
         "0x0b04": {
           "endpoint_attribute": "electrical_measurement",
@@ -2532,23 +2526,12 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
           "command": "identify",
-          "args": [
-            5
-          ],
+          "args": [5],
           "kwargs": {}
         },
         "state": {
@@ -2585,16 +2568,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2638,16 +2612,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2691,16 +2656,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2744,16 +2700,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2797,16 +2744,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2849,16 +2787,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2879,7 +2808,7 @@
           "fallback_name": null,
           "unique_id": "00:0d:6f:00:05:49:ac:68-1-2820",
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "translation_key": null,
           "device_class": "power",
           "state_class": "measurement",
@@ -2901,16 +2830,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2921,7 +2841,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "available": false,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
@@ -2956,16 +2876,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null
@@ -3005,16 +2916,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            104,
-            172,
-            73,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": [104, 172, 73, 5, 0, 111, 13, 0],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,

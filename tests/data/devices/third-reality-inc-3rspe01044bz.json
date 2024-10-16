@@ -44,17 +44,13 @@
           "0x0b04",
           "0x1000"
         ],
-        "output_clusters": [
-          "0x0019"
-        ]
+        "output_clusters": ["0x0019"]
       },
       "242": {
         "profile_id": "0xa1e0",
         "device_type": "0x0061",
         "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
+        "output_clusters": ["0x0021"]
       }
     },
     "manufacturer": "Third Reality, Inc",
@@ -1779,23 +1775,12 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
           "command": "identify",
-          "args": [
-            5
-          ],
+          "args": [5],
           "kwargs": {}
         },
         "state": {
@@ -1832,26 +1817,12 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
           "enum": "StartUpOnOff",
-          "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
-          ]
+          "options": ["Off", "On", "Toggle", "PreviousValue"]
         },
         "state": {
           "class_name": "StartupOnOffSelectEntity",
@@ -1888,16 +1859,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -1940,16 +1902,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -1992,16 +1945,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2044,16 +1988,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2096,16 +2031,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2126,7 +2052,7 @@
           "fallback_name": null,
           "unique_id": "28:2c:02:bf:ff:ed:94:3b-1-2820",
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "translation_key": null,
           "device_class": "power",
           "state_class": "measurement",
@@ -2148,16 +2074,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2168,7 +2085,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "available": false,
           "state": 0.2
         }
@@ -2200,16 +2117,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,
@@ -2256,16 +2164,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null
@@ -2305,16 +2204,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            59,
-            148,
-            237,
-            255,
-            191,
-            2,
-            44,
-            40
-          ],
+          "device_ieee": [59, 148, 237, 255, 191, 2, 44, 40],
           "endpoint_id": 1,
           "available": false,
           "group_id": null,

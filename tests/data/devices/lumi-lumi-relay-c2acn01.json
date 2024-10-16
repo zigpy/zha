@@ -48,20 +48,12 @@
           "0x0702",
           "0x0b04"
         ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
+        "output_clusters": ["0x000a", "0x0019"]
       },
       "2": {
         "profile_id": "0x0104",
         "device_type": "0x0101",
-        "input_clusters": [
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0010"
-        ],
+        "input_clusters": ["0x0004", "0x0005", "0x0006", "0x0010"],
         "output_clusters": []
       }
     },
@@ -930,12 +922,7 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.relay.c2acn01"
-      ]
-    ],
+    "models_info": [["LUMI", "lumi.relay.c2acn01"]],
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
@@ -953,20 +940,12 @@
           "0x0b04",
           "0x000c"
         ],
-        "output_clusters": [
-          "0x0019",
-          "0x000a"
-        ]
+        "output_clusters": ["0x0019", "0x000a"]
       },
       "2": {
         "profile_id": "0x0104",
         "device_type": "0x0101",
-        "input_clusters": [
-          "0x0006",
-          "0x0010",
-          "0x0004",
-          "0x0005"
-        ],
+        "input_clusters": ["0x0006", "0x0010", "0x0004", "0x0005"],
         "output_clusters": []
       }
     }
@@ -1000,23 +979,12 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "command": "identify",
-          "args": [
-            5
-          ],
+          "args": [5],
           "kwargs": {}
         },
         "state": {
@@ -1053,16 +1021,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1081,9 +1040,7 @@
           "effect": null,
           "supported_features": 8,
           "color_mode": "onoff",
-          "supported_color_modes": [
-            "onoff"
-          ],
+          "supported_color_modes": ["onoff"],
           "off_with_transition": false,
           "off_brightness": null,
           "available": true
@@ -1116,16 +1073,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -1144,9 +1092,7 @@
           "effect": null,
           "supported_features": 8,
           "color_mode": "onoff",
-          "supported_color_modes": [
-            "onoff"
-          ],
+          "supported_color_modes": ["onoff"],
           "off_with_transition": false,
           "off_brightness": null,
           "available": true
@@ -1181,16 +1127,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1233,16 +1170,7 @@
               "value_attribute": "current_temperature"
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1285,16 +1213,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1337,16 +1256,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1367,7 +1277,7 @@
           "fallback_name": null,
           "unique_id": "00:15:8d:00:04:44:ec:08-1-2820",
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "translation_key": null,
           "device_class": "power",
           "state_class": "measurement",
@@ -1389,16 +1299,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1409,7 +1310,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "available": true,
           "state": 0.0
         }
@@ -1441,16 +1342,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1495,16 +1387,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1551,16 +1434,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            8,
-            236,
-            68,
-            4,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": [8, 236, 68, 4, 0, 141, 21, 0],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

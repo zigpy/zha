@@ -43,9 +43,7 @@
           "0x0702",
           "0x0b04"
         ],
-        "output_clusters": [
-          "0x0019"
-        ]
+        "output_clusters": ["0x0019"]
       }
     },
     "manufacturer": "_TYZB01_zanh6v1o",
@@ -560,23 +558,12 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "command": "identify",
-          "args": [
-            5
-          ],
+          "args": [5],
           "kwargs": {}
         },
         "state": {
@@ -613,16 +600,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -665,16 +643,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -717,16 +686,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -769,16 +729,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -799,7 +750,7 @@
           "fallback_name": null,
           "unique_id": "cc:cc:cc:ff:fe:da:b1:e0-1-2820",
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "translation_key": null,
           "device_class": "power",
           "state_class": "measurement",
@@ -821,16 +772,7 @@
               "value_attribute": "active_power"
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -841,7 +783,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurement",
           "available": true,
           "state": 1
         }
@@ -873,16 +815,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -930,16 +863,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null
@@ -979,16 +903,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            224,
-            177,
-            218,
-            254,
-            255,
-            204,
-            204,
-            204
-          ],
+          "device_ieee": [224, 177, 218, 254, 255, 204, 204, 204],
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
