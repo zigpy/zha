@@ -2021,7 +2021,7 @@ async def test_light_state_restoration(
         color_temp=None,
         xy_color=None,
         color_mode=None,
-        effect=None,  # Effect is the only `None` value actually restored
+        effect=None,
     )
 
     assert entity.state["on"] is True
@@ -2029,4 +2029,4 @@ async def test_light_state_restoration(
     assert entity.state["color_temp"] == 500
     assert entity.state["xy_color"] == (1, 2)
     assert entity.state["color_mode"] == ColorMode.XY
-    assert entity.state["effect"] is None
+    assert entity.state["effect"] == "colorloop"

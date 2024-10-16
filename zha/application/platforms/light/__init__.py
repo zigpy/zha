@@ -53,6 +53,7 @@ from zha.application.platforms.light.const import (
     DEFAULT_MIN_TRANSITION_MANUFACTURERS,
     DEFAULT_ON_OFF_TRANSITION,
     EFFECT_COLORLOOP,
+    EFFECT_OFF,
     FLASH_EFFECTS,
     ColorMode,
     LightEntityFeature,
@@ -122,7 +123,7 @@ class BaseLight(BaseEntity, ABC):
         self._off_with_transition: bool = False
         self._off_brightness: int | None = None
         self._effect_list: list[str] | None = None
-        self._effect: str | None = None
+        self._effect: str = EFFECT_OFF
         self._supported_color_modes: set[ColorMode] = set()
         self._external_supported_color_modes: set[ColorMode] = set()
         self._zha_config_transition: int = self._DEFAULT_MIN_TRANSITION_TIME
@@ -174,7 +175,7 @@ class BaseLight(BaseEntity, ABC):
         return self._effect_list
 
     @property
-    def effect(self) -> str | None:
+    def effect(self) -> str:
         """Return the current effect."""
         return self._effect
 
@@ -461,7 +462,7 @@ class BaseLight(BaseEntity, ABC):
                 start_hue=0,
             )
             t_log["color_loop_set"] = result
-            self._effect = None
+            self._effect = EFFECT_OFF
 
         if flash is not None:
             result = await self._identify_cluster_handler.trigger_effect(
@@ -663,7 +664,7 @@ class Light(PlatformEntity, BaseLight):
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
-        effect_list = []
+        effect_list = [EFFECT_OFF]
 
         light_options = device.gateway.config.config.light_options
 
@@ -888,7 +889,7 @@ class Light(PlatformEntity, BaseLight):
                 if color_loop_active == 1:
                     self._effect = EFFECT_COLORLOOP
                 else:
-                    self._effect = None
+                    self._effect = EFFECT_OFF
         self.maybe_emit_state_changed_event()
 
     def _assume_group_state(self, update_params) -> None:
@@ -904,6 +905,7 @@ class Light(PlatformEntity, BaseLight):
             effect = update_params.get(ATTR_EFFECT)
 
             supported_modes = self._supported_color_modes
+            effect_list = self._effect_list
 
             # unset "off brightness" and "off with transition"
             # if group turned on this light
@@ -942,10 +944,7 @@ class Light(PlatformEntity, BaseLight):
                 self._color_temp = color_temp
             if xy_color is not None and ColorMode.XY in supported_modes:
                 self._xy_color = xy_color
-            # the effect is always deactivated in async_turn_on if not provided
-            if effect is None:
-                self._effect = None
-            elif self._effect_list and effect in self._effect_list:
+            if effect is not None and effect_list and effect in effect_list:
                 self._effect = effect
 
             self.maybe_emit_state_changed_event()
@@ -977,9 +976,8 @@ class Light(PlatformEntity, BaseLight):
             self._xy_color = xy_color
         if color_mode is not None:
             self._color_mode = color_mode
-
-        # Effect is always restored, as `None` indicates that no effect is active
-        self._effect = effect
+        if effect is not None:
+            self._effect = effect
 
 
 @STRICT_MATCH(
@@ -1164,7 +1162,7 @@ class LightGroup(GroupEntity, BaseLight):
             # Merge all effects from all effect_lists with a union merge.
             self._effect_list = list(set().union(*all_effect_lists))
 
-        self._effect = None
+        self._effect = EFFECT_OFF
         all_effects = list(find_state_attributes(on_states, ATTR_EFFECT))
         if all_effects:
             # Report the most common effect.
@@ -1248,7 +1246,7 @@ class LightGroup(GroupEntity, BaseLight):
             update_params[ATTR_COLOR_MODE] = self._color_mode
             update_params[ATTR_XY_COLOR] = self._xy_color
 
-        # we always update effect for now, as we don't know if it was set or not
+        # setting any other attribute will turn the effect off, so we always set this
         update_params[ATTR_EFFECT] = self._effect
 
         for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
