@@ -893,9 +893,9 @@ async def test_poll_control_checkin_response(
     await poll_control_ch.check_in_response(33)
     assert cluster.endpoint.request.call_count == 3
     assert cluster.endpoint.request.await_count == 3
-    assert cluster.endpoint.request.call_args_list[0][0][1] == 33
-    assert cluster.endpoint.request.call_args_list[0][0][0] == 0x0020
-    assert cluster.endpoint.request.call_args_list[1][0][0] == 0x0020
+    assert cluster.endpoint.request.mock_calls[0].kwargs["sequence"] == 33
+    assert cluster.endpoint.request.mock_calls[0].kwargs["cluster"] == 0x0020
+    assert cluster.endpoint.request.mock_calls[1].kwargs["cluster"] == 0x0020
 
 
 async def test_poll_control_cluster_command(poll_control_device: Device) -> None:
