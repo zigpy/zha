@@ -204,7 +204,7 @@ class Endpoint:
         results = await gather(*tasks, return_exceptions=True)
         for cluster_handler, outcome in zip(cluster_handlers, results):
             if isinstance(outcome, Exception):
-                cluster_handler.debug(
+                cluster_handler.warning(
                     "'%s' stage failed: %s", func_name, str(outcome), exc_info=outcome
                 )
             else:
