@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import binascii
 import collections
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Coroutine
 import dataclasses
 from dataclasses import dataclass
 import datetime
