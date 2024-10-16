@@ -44,6 +44,14 @@ DEVICE_OCCUPANCY = {
     }
 }
 
+DEVICE_GENERAL = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SENSOR,
+        SIG_EP_INPUT: [general.BinaryInput.cluster_id],
+        SIG_EP_OUTPUT: [],
+    }
+}
 
 DEVICE_SMARTTHINGS_MULTI = {
     1: {
@@ -163,11 +171,33 @@ async def test_binary_sensor(
     assert entity is not None
     assert isinstance(entity, entity_type)
     assert entity.PLATFORM == Platform.BINARY_SENSOR
+
+    assert entity.fallback_name is None
     assert entity.is_on is False
 
     # test getting messages that trigger and reset the sensors
     cluster = getattr(zigpy_device.endpoints[1], cluster_name)
     await on_off_test(zha_gateway, cluster, entity, plugs)
+
+
+async def test_binary_sensor_general(
+    zha_gateway: Gateway,
+) -> None:
+    """Test binary sensor general - description."""
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway, DEVICE_GENERAL, manufacturer="DevManuf", model="DevModel"
+    )
+
+    cluster = getattr(zigpy_device.endpoints[1], "binary_input")
+    cluster.PLUGGED_ATTR_READS = {"description": "Binary Input", "present_value": 1}
+    update_attribute_cache(cluster)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity: PlatformEntity = find_entity(zha_device, Platform.BINARY_SENSOR)
+
+    await entity.async_update()
+    await zha_gateway.async_block_till_done()
+    assert entity.fallback_name == "Binary Input"
+    assert entity.translation_key is None
 
 
 async def test_smarttthings_multi(

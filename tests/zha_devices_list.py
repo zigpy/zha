@@ -2842,6 +2842,16 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_plug_maus01_firmware",
             },
+            ("sensor", "00:11:22:33:44:55:66:77-2-12-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_plug_maus01_analog_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-12-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_plug_maus01_analog_input_2",
+            },
         },
     },
     {
@@ -2956,6 +2966,11 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_relay_c2acn01_firmware",
             },
+            ("sensor", "00:11:22:33:44:55:66:77-1-12-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_relay_c2acn01_analog_input",
+            },
         },
     },
     {
@@ -3027,6 +3042,21 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_remote_b186acn01_firmware",
             },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b186acn01_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b186acn01_multistate_input_2",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b186acn01_multistate_input_3",
+            },
         },
     },
     {
@@ -3097,6 +3127,21 @@ DEVICES = [
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_remote_b286acn01_firmware",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286acn01_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286acn01_multistate_input_2",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286acn01_multistate_input_3",
             },
         },
     },
@@ -3185,6 +3230,16 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "LQISensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286opcn01_lqi",
             },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286opcn01_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286opcn01_multistate_input_1",
+            },
         },
     },
     {
@@ -3270,7 +3325,27 @@ DEVICES = [
             ("sensor", "00:11:22:33:44:55:66:77-1-0-lqi"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["basic"],
                 DEV_SIG_ENT_MAP_CLASS: "LQISensor",
-                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b486opcn01_lqi",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_C_lqi",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286opcn01_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286opcn01_multistate_input_2",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286opcn01_multistate_input_3",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-4-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b286opcn01_multistate_input_4",
             },
         },
     },
@@ -3323,6 +3398,36 @@ DEVICES = [
                 DEV_SIG_CLUSTER_HANDLERS: ["basic"],
                 DEV_SIG_ENT_MAP_CLASS: "LQISensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_lqi",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_1",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_2",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-4-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_3",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-5-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_4",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-6-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_5",
             },
         },
     },
@@ -3410,6 +3515,36 @@ DEVICES = [
                 DEV_SIG_CLUSTER_HANDLERS: ["basic"],
                 DEV_SIG_ENT_MAP_CLASS: "LQISensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_lqi",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_1",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_2",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-4-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_3",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-5-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_4",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-6-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_remote_b686opcn01_multistate_input_5",
             },
         },
     },
@@ -3695,6 +3830,21 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_86sw1_firmware",
             },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_86sw1_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_86sw1_multistate_input_2",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_86sw1_multistate_input_3",
+            },
         },
     },
     {
@@ -3765,6 +3915,16 @@ DEVICES = [
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_cube_aqgl01_firmware",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-2-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_cube_aqgl01_multistate_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-3-12-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_cube_aqgl01_analog_input",
             },
         },
     },
@@ -4116,6 +4276,16 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_sensor_smoke_firmware",
             },
+            ("sensor", "00:11:22:33:44:55:66:77-1-12-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_smoke_analog_input",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_smoke_multistate_input",
+            },
         },
     },
     {
@@ -4266,6 +4436,11 @@ DEVICES = [
                 DEV_SIG_CLUSTER_HANDLERS: ["basic"],
                 DEV_SIG_ENT_MAP_CLASS: "LQISensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_switch_aq3_lqi",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-1-18-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_sensor_switch_aq3_multistate_input",
             },
         },
     },
@@ -4424,6 +4599,11 @@ DEVICES = [
                 DEV_SIG_CLUSTER_HANDLERS: ["ota"],
                 DEV_SIG_ENT_MAP_CLASS: "FirmwareUpdateEntity",
                 DEV_SIG_ENT_MAP_ID: "update.lumi_lumi_vibration_aq1_firmware",
+            },
+            ("sensor", "00:11:22:33:44:55:66:77-1-257-present_value"): {
+                DEV_SIG_CLUSTER_HANDLERS: ["multistate_input"],
+                DEV_SIG_ENT_MAP_CLASS: "MultiStateInputSensor",
+                DEV_SIG_ENT_MAP_ID: "sensor.lumi_lumi_vibration_aq1_multistate_input",
             },
         },
     },
@@ -6993,9 +7173,9 @@ DEVICES = [
         },
         DEV_SIG_EVT_CLUSTER_HANDLERS: ["232:0x0008"],
         DEV_SIG_ENT_MAP: {
-            ("sensor", "00:11:22:33:44:55:66:77-208-12"): {
+            ("sensor", "00:11:22:33:44:55:66:77-208-12-present_value"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
-                DEV_SIG_ENT_MAP_CLASS: "AnalogInput",
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.digi_xbee3_analog_input",
             },
             ("switch", "00:11:22:33:44:55:66:77-208-6"): {
@@ -7003,9 +7183,9 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "Switch",
                 DEV_SIG_ENT_MAP_ID: "switch.digi_xbee3_switch",
             },
-            ("sensor", "00:11:22:33:44:55:66:77-209-12"): {
+            ("sensor", "00:11:22:33:44:55:66:77-209-12-present_value"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
-                DEV_SIG_ENT_MAP_CLASS: "AnalogInput",
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.digi_xbee3_analog_input_2",
             },
             ("switch", "00:11:22:33:44:55:66:77-209-6"): {
@@ -7013,9 +7193,9 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "Switch",
                 DEV_SIG_ENT_MAP_ID: "switch.digi_xbee3_switch_2",
             },
-            ("sensor", "00:11:22:33:44:55:66:77-210-12"): {
+            ("sensor", "00:11:22:33:44:55:66:77-210-12-present_value"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
-                DEV_SIG_ENT_MAP_CLASS: "AnalogInput",
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.digi_xbee3_analog_input_3",
             },
             ("switch", "00:11:22:33:44:55:66:77-210-6"): {
@@ -7023,9 +7203,9 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "Switch",
                 DEV_SIG_ENT_MAP_ID: "switch.digi_xbee3_switch_3",
             },
-            ("sensor", "00:11:22:33:44:55:66:77-211-12"): {
+            ("sensor", "00:11:22:33:44:55:66:77-211-12-present_value"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
-                DEV_SIG_ENT_MAP_CLASS: "AnalogInput",
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.digi_xbee3_analog_input_4",
             },
             ("switch", "00:11:22:33:44:55:66:77-211-6"): {
@@ -7048,9 +7228,9 @@ DEVICES = [
                 DEV_SIG_ENT_MAP_CLASS: "Switch",
                 DEV_SIG_ENT_MAP_ID: "switch.digi_xbee3_switch_7",
             },
-            ("sensor", "00:11:22:33:44:55:66:77-215-12"): {
+            ("sensor", "00:11:22:33:44:55:66:77-215-12-present_value"): {
                 DEV_SIG_CLUSTER_HANDLERS: ["analog_input"],
-                DEV_SIG_ENT_MAP_CLASS: "AnalogInput",
+                DEV_SIG_ENT_MAP_CLASS: "AnalogInputSensor",
                 DEV_SIG_ENT_MAP_ID: "sensor.digi_xbee3_analog_input_5",
             },
             ("switch", "00:11:22:33:44:55:66:77-215-6"): {

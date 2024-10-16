@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import enum
 import functools
 import logging
+import math
 import numbers
 from typing import TYPE_CHECKING, Any, Self
 
@@ -17,6 +18,7 @@ from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
+from zigpy.zcl.clusters.general_const import ApplicationType
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
@@ -29,7 +31,12 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
+from zha.application.platforms.number.const import UNITS
+from zha.application.platforms.sensor.const import (
+    ANALOG_INPUT_APPTYPE_DEV_CLASS,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import (
@@ -66,6 +73,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ILLUMINANCE,
     CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_LEAF_WETNESS,
+    CLUSTER_HANDLER_MULTISTATE_INPUT,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
     CLUSTER_HANDLER_PRESSURE,
     CLUSTER_HANDLER_SMARTENERGY_METERING,
@@ -194,6 +202,12 @@ class Sensor(PlatformEntity):
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
         )
+        if (
+            hasattr(self._cluster_handler, "description")
+            and self._cluster_handler.description is not None
+        ):
+            self._attr_translation_key = None
+            self._attr_fallback_name: str = self._cluster_handler.description
 
     def _init_from_quirks_metadata(self, entity_metadata: ZCLSensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -503,16 +517,83 @@ class EnumSensor(Sensor):
         return self._enum(value).name
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
-    manufacturers="Digi",
-    stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
-)
-class AnalogInput(Sensor):
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_MULTISTATE_INPUT)
+class MultiStateInputSensor(EnumSensor):
+    """Sensor that displays enumerated values."""
+
+    _attribute_name = "present_value"
+    _unique_id_suffix = "present_value"
+    _attr_entity_registry_enabled_default = False
+    _attr_traslation_key = "multistate_input"
+    _enum = enum.Enum("Empty", names=())  # type: ignore [misc]
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        if self._cluster_handler.cluster.get("state_text"):
+            self._enum = enum.Enum(  # type: ignore [misc]
+                "state_text", self._cluster_handler.cluster["state_text"]
+            )
+        elif self._cluster_handler.cluster.get("number_of_states") is not None:
+            self._enum = enum.Enum(  # type: ignore [misc]
+                "state_text",
+                [
+                    (f"state_{i+1}", i + 1)
+                    for i in range(self._cluster_handler.cluster["number_of_states"])
+                ],
+            )
+
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT)
+class AnalogInputSensor(Sensor):
     """Sensor that displays analog input values."""
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "analog_input"
+    _unique_id_suffix = "present_value"
+    _attr_entity_registry_enabled_default = False
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this sensor."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        engineering_units = self._cluster_handler.engineering_units
+        self._attr_native_unit_of_measurement = UNITS.get(engineering_units)
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def device_class(self) -> str | None:
+        """Return the device class."""
+        if self._cluster_handler.application_type is not None:
+            app_type = ApplicationType(self._cluster_handler.application_type)
+            return ANALOG_INPUT_APPTYPE_DEV_CLASS[app_type.type]
+        return None
+
+    @property
+    def suggested_display_precision(self) -> int | None:
+        """Return the the display precision."""
+        if self._cluster_handler.resolution is not None:
+            return math.ceil(
+                -math.log10(
+                    abs(self._cluster_handler.resolution)
+                    - abs(math.floor(self._cluster_handler.resolution))
+                )
+            )
+        return None
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
