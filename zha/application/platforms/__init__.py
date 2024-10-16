@@ -58,6 +58,7 @@ class BaseEntityInfo:
     entity_category: str | None
     entity_registry_enabled_default: bool
     enabled: bool = True
+    state: dict[str, Any]
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -212,6 +213,7 @@ class BaseEntity(LogMixin, EventBase):
             entity_category=self.entity_category,
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
+            state=self.state,
             # Set by platform entities
             cluster_handlers=[],
             device_ieee=None,
