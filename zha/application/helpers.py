@@ -402,7 +402,9 @@ class GlobalUpdater:
             self._updater_task_handle = None
         _LOGGER.debug("global updater stopped")
 
-    def register_update_listener(self, listener: Callable[[], Coroutine[None, None, None]]) -> None:
+    def register_update_listener(
+        self, listener: Callable[[], Coroutine[None, None, None]]
+    ) -> None:
         """Register an update listener."""
         if listener in self._update_listeners or listener in self._update_awaitables:
             _LOGGER.debug(
