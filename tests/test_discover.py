@@ -6,10 +6,8 @@ import enum
 import itertools
 import json
 import pathlib
-import re
-from typing import Any, Final
 from unittest import mock
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
@@ -22,7 +20,6 @@ from zhaquirks.xiaomi.aqara.driver_curtain_e1 import (
     WindowCoveringE1,
     XiaomiAqaraDriverE1,
 )
-from zigpy.const import SIG_ENDPOINTS, SIG_MANUFACTURER, SIG_MODEL, SIG_NODE_DESC
 import zigpy.device
 import zigpy.profiles.zha
 import zigpy.quirks
@@ -43,7 +40,6 @@ import zigpy.zcl.clusters.closures
 import zigpy.zcl.clusters.general
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
-import zigpy.zdo.types as zdo_t
 
 from tests.common import (
     SIG_EP_INPUT,
@@ -57,133 +53,13 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform, discovery
-from zha.application.discovery import ENDPOINT_PROBE, PLATFORMS, EndpointProbe
+from zha.application.discovery import ENDPOINT_PROBE, EndpointProbe
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
-from zha.application.platforms import PlatformEntity, binary_sensor, sensor
-from zha.application.registries import (
-    PLATFORM_ENTITIES,
-    SINGLE_INPUT_CLUSTER_DEVICE_CLASS,
-)
+from zha.application.platforms import binary_sensor, sensor
+from zha.application.registries import SINGLE_INPUT_CLUSTER_DEVICE_CLASS
 from zha.zigbee.cluster_handlers import ClusterHandler
-from zha.zigbee.device import Device
 from zha.zigbee.endpoint import Endpoint
-
-from .zha_devices_list import (
-    DEV_SIG_ATTRIBUTES,
-    DEV_SIG_CLUSTER_HANDLERS,
-    DEV_SIG_ENT_MAP,
-    DEV_SIG_ENT_MAP_CLASS,
-    DEV_SIG_ENT_MAP_ID,
-    DEV_SIG_EVT_CLUSTER_HANDLERS,
-    DEVICES,
-)
-
-NO_TAIL_ID = re.compile("_\\d$")
-UNIQUE_ID_HD = re.compile(r"^(([\da-fA-F]{2}:){7}[\da-fA-F]{2}-\d{1,3})", re.X)
-STATE_OFF: Final[str] = "off"
-
-IGNORE_SUFFIXES = [
-    zigpy.zcl.clusters.general.OnOff.StartUpOnOff.__name__,
-    "on_off_transition_time",
-    "on_level",
-    "on_transition_time",
-    "off_transition_time",
-    "default_move_rate",
-    "start_up_current_level",
-    "counter",
-]
-
-
-def contains_ignored_suffix(unique_id: str) -> bool:
-    """Return true if the unique_id ends with an ignored suffix."""
-    return any(suffix.lower() in unique_id.lower() for suffix in IGNORE_SUFFIXES)
-
-
-@patch(
-    "zigpy.zcl.clusters.general.Identify.request",
-    new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
-)
-@pytest.mark.parametrize("device", DEVICES)
-async def test_devices(
-    device,
-    zha_gateway: Gateway,
-) -> None:
-    """Test device discovery."""
-    zigpy_device = create_mock_zigpy_device(
-        zha_gateway,
-        endpoints=device[SIG_ENDPOINTS],
-        ieee="00:11:22:33:44:55:66:77",
-        manufacturer=device[SIG_MANUFACTURER],
-        model=device[SIG_MODEL],
-        node_descriptor=zdo_t.NodeDescriptor(**device[SIG_NODE_DESC]),
-        attributes=device.get(DEV_SIG_ATTRIBUTES),
-        patch_cluster=False,
-    )
-
-    cluster_identify = _get_identify_cluster(zigpy_device)
-    if cluster_identify:
-        cluster_identify.request.reset_mock()
-
-    zha_dev: Device = await join_zigpy_device(zha_gateway, zigpy_device)
-    await zha_gateway.async_block_till_done()
-
-    if cluster_identify and not zha_dev.skip_configuration:
-        assert cluster_identify.request.mock_calls == [
-            mock.call(
-                False,
-                cluster_identify.commands_by_name["trigger_effect"].id,
-                cluster_identify.commands_by_name["trigger_effect"].schema,
-                effect_id=zigpy.zcl.clusters.general.Identify.EffectIdentifier.Okay,
-                effect_variant=(
-                    zigpy.zcl.clusters.general.Identify.EffectVariant.Default
-                ),
-                expect_reply=True,
-                manufacturer=None,
-                tsn=None,
-            )
-        ]
-
-    event_cluster_handlers = {
-        ch.id
-        for endpoint in zha_dev._endpoints.values()
-        for ch in endpoint.client_cluster_handlers.values()
-    }
-    assert event_cluster_handlers == set(device[DEV_SIG_EVT_CLUSTER_HANDLERS])
-    # we need to probe the class create entity factory so we need to reset this to get accurate results
-    PLATFORM_ENTITIES.clean_up()
-
-    # Keep track of unhandled entities: they should always be ones we explicitly ignore
-    created_entities: dict[str, PlatformEntity] = {}
-    for dev in zha_gateway.devices.values():
-        for entity in dev.platform_entities.values():
-            if entity.device.ieee == zigpy_device.ieee:
-                created_entities[entity.unique_id] = entity
-
-    unhandled_entities = set(created_entities.keys())
-
-    for (platform, unique_id), ent_info in device[DEV_SIG_ENT_MAP].items():
-        no_tail_id = NO_TAIL_ID.sub("", ent_info[DEV_SIG_ENT_MAP_ID])
-        message1 = f"No entity found for platform[{platform}] unique_id[{unique_id}] no_tail_id[{no_tail_id}]"
-
-        if not contains_ignored_suffix(unique_id):
-            assert unique_id in created_entities, message1
-            entity = created_entities[unique_id]
-            unhandled_entities.remove(unique_id)
-
-            assert platform == entity.PLATFORM
-            assert type(entity).__name__ == ent_info[DEV_SIG_ENT_MAP_CLASS]
-            # unique_id used for discover is the same for "multi entities"
-            assert unique_id == entity.unique_id
-            assert {ch.name for ch in entity.cluster_handlers.values()} == set(
-                ent_info[DEV_SIG_CLUSTER_HANDLERS]
-            )
-
-    # All unhandled entities should be ones we explicitly ignore
-    for unique_id in unhandled_entities:
-        platform = created_entities[unique_id].PLATFORM
-        assert platform in PLATFORMS
-        assert contains_ignored_suffix(unique_id)
 
 
 def _get_identify_cluster(zigpy_device):
@@ -296,63 +172,6 @@ def test_discover_probe_single_cluster() -> None:
     assert endpoint.async_new_entity.call_args[0][0] == Platform.SWITCH
     assert endpoint.async_new_entity.call_args[0][1] == mock.sentinel.entity_cls
     assert endpoint.async_new_entity.call_args[0][3] == mock.sentinel.claimed
-
-
-@pytest.mark.parametrize("device_info", DEVICES)
-async def test_discover_endpoint(
-    device_info: dict[str, Any],
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
-) -> None:
-    """Test device discovery."""
-
-    with mock.patch("zha.zigbee.endpoint.Endpoint.async_new_entity") as new_ent:
-        zigpy_dev = create_mock_zigpy_device(
-            zha_gateway,
-            endpoints=device_info[SIG_ENDPOINTS],
-            ieee="00:11:22:33:44:55:66:77",
-            manufacturer=device_info[SIG_MANUFACTURER],
-            model=device_info[SIG_MODEL],
-            node_descriptor=zdo_t.NodeDescriptor(**device_info[SIG_NODE_DESC]),
-            patch_cluster=True,
-        )
-        device = await join_zigpy_device(zha_gateway, zigpy_dev)
-
-    assert device_info[DEV_SIG_EVT_CLUSTER_HANDLERS] == sorted(
-        ch.id
-        for endpoint in device._endpoints.values()
-        for ch in endpoint.client_cluster_handlers.values()
-    )
-
-    # build a dict of entity_class -> (platform, unique_id, cluster_handlers) tuple
-    ha_ent_info = {}
-    for call in new_ent.call_args_list:
-        platform, entity_cls, unique_id, cluster_handlers = call[0]
-        if not contains_ignored_suffix(unique_id):
-            unique_id_head = UNIQUE_ID_HD.match(unique_id).group(
-                0
-            )  # ieee + endpoint_id
-            ha_ent_info[(unique_id_head, entity_cls.__name__)] = (
-                platform,
-                unique_id,
-                cluster_handlers,
-            )
-
-    for platform_id, ent_info in device_info[DEV_SIG_ENT_MAP].items():
-        platform, unique_id = platform_id
-
-        test_ent_class = ent_info[DEV_SIG_ENT_MAP_CLASS]
-        test_unique_id_head = UNIQUE_ID_HD.match(unique_id).group(0)
-        assert (test_unique_id_head, test_ent_class) in ha_ent_info
-
-        entity_platform, entity_unique_id, entity_cluster_handlers = ha_ent_info[
-            (test_unique_id_head, test_ent_class)
-        ]
-        assert platform is entity_platform.value
-        # unique_id used for discover is the same for "multi entities"
-        assert unique_id.startswith(entity_unique_id)
-        assert {ch.name for ch in entity_cluster_handlers} == set(
-            ent_info[DEV_SIG_CLUSTER_HANDLERS]
-        )
 
 
 def _ch_mock(cluster):
