@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import Enum
 import functools
 import logging
@@ -48,7 +47,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
 class EnumSelectInfo(BaseEntityInfo):
     """Enum select entity info."""
 

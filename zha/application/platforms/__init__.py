@@ -5,11 +5,10 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from contextlib import suppress
-import dataclasses
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, Optional, final
+from typing import TYPE_CHECKING, Any, Literal, Optional, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
@@ -19,6 +18,7 @@ from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
+from zha.model import BaseEvent, BaseModel
 from zha.zigbee.cluster_handlers import ClusterHandlerInfo
 
 if TYPE_CHECKING:
@@ -44,13 +44,11 @@ class EntityCategory(StrEnum):
     DIAGNOSTIC = "diagnostic"
 
 
-@dataclasses.dataclass(frozen=True, kw_only=True)
-class BaseEntityInfo:
+class BaseEntityInfo(BaseModel):
     """Information about a base entity."""
 
-    fallback_name: str
+    platform: Platform
     unique_id: str
-    platform: str
     class_name: str
     translation_key: str | None
     device_class: str | None
@@ -58,6 +56,7 @@ class BaseEntityInfo:
     entity_category: str | None
     entity_registry_enabled_default: bool
     enabled: bool = True
+    fallback_name: str | None
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -69,15 +68,13 @@ class BaseEntityInfo:
     group_id: int | None
 
 
-@dataclasses.dataclass(frozen=True, kw_only=True)
-class BaseIdentifiers:
+class BaseIdentifiers(BaseModel):
     """Identifiers for the base entity."""
 
     unique_id: str
-    platform: str
+    platform: Platform
 
 
-@dataclasses.dataclass(frozen=True, kw_only=True)
 class PlatformEntityIdentifiers(BaseIdentifiers):
     """Identifiers for the platform entity."""
 
@@ -85,20 +82,18 @@ class PlatformEntityIdentifiers(BaseIdentifiers):
     endpoint_id: int
 
 
-@dataclasses.dataclass(frozen=True, kw_only=True)
 class GroupEntityIdentifiers(BaseIdentifiers):
     """Identifiers for the group entity."""
 
     group_id: int
 
 
-@dataclasses.dataclass(frozen=True, kw_only=True)
-class EntityStateChangedEvent:
+class EntityStateChangedEvent(BaseEvent):
     """Event for when an entity state changes."""
 
-    event_type: Final[str] = "entity"
-    event: Final[str] = STATE_CHANGED
-    platform: str
+    event_type: Literal["entity"] = "entity"
+    event: Literal["state_changed"] = "state_changed"
+    platform: Platform
     unique_id: str
     device_ieee: Optional[EUI64] = None
     endpoint_id: Optional[int] = None
@@ -379,12 +374,13 @@ class PlatformEntity(BaseEntity):
     @cached_property
     def info_object(self) -> BaseEntityInfo:
         """Return a representation of the platform entity."""
-        return dataclasses.replace(
-            super().info_object,
-            cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
-            device_ieee=self._device.ieee,
-            endpoint_id=self._endpoint.id,
-            available=self.available,
+        return super().info_object.model_copy(
+            update={
+                "cluster_handlers": [ch.info_object for ch in self._cluster_handlers],
+                "device_ieee": self._device.ieee,
+                "endpoint_id": self._endpoint.id,
+                "available": self.available,
+            }
         )
 
     @property
@@ -460,10 +456,7 @@ class GroupEntity(BaseEntity):
     @cached_property
     def info_object(self) -> BaseEntityInfo:
         """Return a representation of the group."""
-        return dataclasses.replace(
-            super().info_object,
-            group_id=self.group_id,
-        )
+        return super().info_object.model_copy(update={"group_id": self.group_id})
 
     @property
     def state(self) -> dict[str, Any]:

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING
@@ -46,7 +45,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
 class BinarySensorEntityInfo(BaseEntityInfo):
     """Binary sensor entity info."""
 
