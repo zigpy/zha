@@ -23,6 +23,7 @@ dependencies = [
     "zha-quirks==0.0.123",
     "pyserial==3.5",
     "pyserial-asyncio-fast",
+    "pydantic==2.9.2"
 ]
 
 [tool.setuptools.packages.find]

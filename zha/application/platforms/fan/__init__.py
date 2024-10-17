@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from dataclasses import dataclass
 import functools
 import math
 from typing import TYPE_CHECKING, Any
@@ -59,7 +58,6 @@ GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
 
 
-@dataclass(frozen=True, kw_only=True)
 class FanEntityInfo(BaseEntityInfo):
     """Fan entity info."""
 

@@ -5,12 +5,11 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Final, Self
+from typing import TYPE_CHECKING, Any, Literal, Self
 
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
@@ -55,7 +54,6 @@ from zha.application.const import (
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
     ZHA_CLUSTER_HANDLER_CFG_DONE,
-    ZHA_CLUSTER_HANDLER_MSG,
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values
@@ -63,6 +61,7 @@ from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
+from zha.model import BaseEvent, BaseModel
 from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
 from zha.zigbee.endpoint import Endpoint
 
@@ -83,8 +82,33 @@ def get_device_automation_triggers(
     }
 
 
-@dataclass(frozen=True, kw_only=True)
-class ClusterBinding:
+class DeviceStatus(StrEnum):
+    """Status of a device."""
+
+    CREATED = "created"
+    INITIALIZED = "initialized"
+
+
+class ZHAEvent(BaseEvent):
+    """Event generated when a device wishes to send an arbitrary event."""
+
+    device_ieee: EUI64
+    unique_id: str
+    data: dict[str, Any]
+    event_type: Literal["zha_event"] = "zha_event"
+    event: Literal["zha_event"] = "zha_event"
+
+
+class ClusterHandlerConfigurationComplete(BaseEvent):
+    """Event generated when all cluster handlers are configured."""
+
+    device_ieee: EUI64
+    unique_id: str
+    event_type: Literal["zha_channel_message"] = "zha_channel_message"
+    event: Literal["zha_channel_cfg_done"] = "zha_channel_cfg_done"
+
+
+class ClusterBinding(BaseModel):
     """Describes a cluster binding."""
 
     name: str
@@ -93,36 +117,7 @@ class ClusterBinding:
     endpoint_id: int
 
 
-class DeviceStatus(Enum):
-    """Status of a device."""
-
-    CREATED = 1
-    INITIALIZED = 2
-
-
-@dataclass(kw_only=True, frozen=True)
-class ZHAEvent:
-    """Event generated when a device wishes to send an arbitrary event."""
-
-    device_ieee: EUI64
-    unique_id: str
-    data: dict[str, Any]
-    event_type: Final[str] = ZHA_EVENT
-    event: Final[str] = ZHA_EVENT
-
-
-@dataclass(kw_only=True, frozen=True)
-class ClusterHandlerConfigurationComplete:
-    """Event generated when all cluster handlers are configured."""
-
-    device_ieee: EUI64
-    unique_id: str
-    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
-    event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceInfo:
+class DeviceInfo(BaseModel):
     """Describes a device."""
 
     ieee: EUI64
@@ -135,16 +130,15 @@ class DeviceInfo:
     quirk_id: str | None
     manufacturer_code: int | None
     power_source: str
-    lqi: int
-    rssi: int
+    lqi: int | None
+    rssi: int | None
     last_seen: str
     available: bool
     device_type: str
     signature: dict[str, Any]
 
 
-@dataclass(kw_only=True, frozen=True)
-class NeighborInfo:
+class NeighborInfo(BaseModel):
     """Describes a neighbor."""
 
     device_type: _NeighborEnums.DeviceType
@@ -158,8 +152,7 @@ class NeighborInfo:
     lqi: uint8_t
 
 
-@dataclass(kw_only=True, frozen=True)
-class RouteInfo:
+class RouteInfo(BaseModel):
     """Describes a route."""
 
     dest_nwk: NWK
@@ -170,14 +163,12 @@ class RouteInfo:
     next_hop: NWK
 
 
-@dataclass(kw_only=True, frozen=True)
-class EndpointNameInfo:
+class EndpointNameInfo(BaseModel):
     """Describes an endpoint name."""
 
     name: str
 
 
-@dataclass(kw_only=True, frozen=True)
 class ExtendedDeviceInfo(DeviceInfo):
     """Describes a ZHA device."""
 
@@ -567,11 +558,11 @@ class Device(LogMixin, EventBase):
                 "Attempting to checkin with device - missed checkins: %s",
                 self._checkins_missed_count,
             )
-            if not self.basic_ch:
+            if not self._basic_ch:
                 self.debug("does not have a mandatory basic cluster")
                 self.update_available(False)
                 return
-            res = await self.basic_ch.get_attribute_value(
+            res = await self._basic_ch.get_attribute_value(
                 ATTR_MANUFACTURER, from_cache=False
             )
             if res is not None:
@@ -732,7 +723,7 @@ class Device(LogMixin, EventBase):
             ZHA_CLUSTER_HANDLER_CFG_DONE,
             ClusterHandlerConfigurationComplete(
                 device_ieee=self.ieee,
-                unique_id=self.ieee,
+                unique_id=self.unique_id,
             ),
         )
 
@@ -740,10 +731,10 @@ class Device(LogMixin, EventBase):
 
         if (
             should_identify
-            and self.identify_ch is not None
+            and self._identify_ch is not None
             and not self.skip_configuration
         ):
-            await self.identify_ch.trigger_effect(
+            await self._identify_ch.trigger_effect(
                 effect_id=Identify.EffectIdentifier.Okay,
                 effect_variant=Identify.EffectVariant.Default,
             )

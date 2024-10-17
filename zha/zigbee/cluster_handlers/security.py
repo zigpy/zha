@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-import dataclasses
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Literal
 
 import zigpy.zcl
 from zigpy.zcl.clusters.security import (
@@ -18,6 +17,7 @@ from zigpy.zcl.clusters.security import (
 )
 
 from zha.exceptions import ZHAException
+from zha.model import BaseEvent
 from zha.zigbee.cluster_handlers import ClusterHandler, ClusterHandlerStatus, registries
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_STATE_CHANGED
 
@@ -28,12 +28,11 @@ SIGNAL_ARMED_STATE_CHANGED = "zha_armed_state_changed"
 SIGNAL_ALARM_TRIGGERED = "zha_armed_triggered"
 
 
-@dataclasses.dataclass(frozen=True, kw_only=True)
-class ClusterHandlerStateChangedEvent:
+class ClusterHandlerStateChangedEvent(BaseEvent):
     """Event to signal that a cluster attribute has been updated."""
 
-    event_type: Final[str] = "cluster_handler_event"
-    event: Final[str] = "cluster_handler_state_changed"
+    event_type: Literal["cluster_handler_event"] = "cluster_handler_event"
+    event: Literal["cluster_handler_state_changed"] = "cluster_handler_state_changed"
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)

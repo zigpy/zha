@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING, Any
@@ -42,7 +41,6 @@ STRICT_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
 class AlarmControlPanelEntityInfo(BaseEntityInfo):
     """Alarm control panel entity info."""
 

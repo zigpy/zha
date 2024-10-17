@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import suppress
-from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 import logging
 import time
-from typing import Any, Final, Self, TypeVar, cast
+from typing import Any, Final, Literal, Self, TypeVar, cast
 
 from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
@@ -25,14 +24,13 @@ import zigpy.endpoint
 import zigpy.group
 from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
-from zigpy.types.named import EUI64
+from zigpy.types.named import EUI64, NWK
 
 from zha.application import discovery
 from zha.application.const import (
     CONF_USE_THREAD,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
-    ZHA_GW_MSG,
     ZHA_GW_MSG_CONNECTION_LOST,
     ZHA_GW_MSG_DEVICE_FULL_INIT,
     ZHA_GW_MSG_DEVICE_JOINED,
@@ -52,6 +50,7 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
+from zha.model import BaseEvent, BaseModel
 from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
@@ -69,58 +68,51 @@ class DevicePairingStatus(Enum):
     INITIALIZED = 4
 
 
-@dataclass(kw_only=True, frozen=True)
 class DeviceInfoWithPairingStatus(DeviceInfo):
     """Information about a device with pairing status."""
 
     pairing_status: DevicePairingStatus
 
 
-@dataclass(kw_only=True, frozen=True)
 class ExtendedDeviceInfoWithPairingStatus(ExtendedDeviceInfo):
     """Information about a device with pairing status."""
 
     pairing_status: DevicePairingStatus
 
 
-@dataclass(kw_only=True, frozen=True)
-class DeviceJoinedDeviceInfo:
+class DeviceJoinedDeviceInfo(BaseModel):
     """Information about a device."""
 
-    ieee: str
-    nwk: int
+    ieee: EUI64
+    nwk: NWK
     pairing_status: DevicePairingStatus
 
 
-@dataclass(kw_only=True, frozen=True)
-class ConnectionLostEvent:
+class ConnectionLostEvent(BaseEvent):
     """Event to signal that the connection to the radio has been lost."""
 
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_CONNECTION_LOST
+    event_type: Literal["zha_gateway_message"] = "zha_gateway_message"
+    event: Literal["connection_lost"] = "connection_lost"
     exception: Exception | None = None
 
 
-@dataclass(kw_only=True, frozen=True)
-class DeviceJoinedEvent:
+class DeviceJoinedEvent(BaseEvent):
     """Event to signal that a device has joined the network."""
 
     device_info: DeviceJoinedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_JOINED
+    event_type: Literal["zha_gateway_message"] = "zha_gateway_message"
+    event: Literal["device_joined"] = "device_joined"
 
 
-@dataclass(kw_only=True, frozen=True)
-class DeviceLeftEvent:
+class DeviceLeftEvent(BaseEvent):
     """Event to signal that a device has left the network."""
 
     ieee: EUI64
-    nwk: int
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_LEFT
+    nwk: NWK
+    event_type: Literal["zha_gateway_message"] = "zha_gateway_message"
+    event: Literal["device_left"] = "device_left"
 
 
-@dataclass(kw_only=True, frozen=True)
 class RawDeviceInitializedDeviceInfo(DeviceJoinedDeviceInfo):
     """Information about a device that has been initialized without quirks loaded."""
 
@@ -129,41 +121,37 @@ class RawDeviceInitializedDeviceInfo(DeviceJoinedDeviceInfo):
     signature: dict[str, Any]
 
 
-@dataclass(kw_only=True, frozen=True)
-class RawDeviceInitializedEvent:
+class RawDeviceInitializedEvent(BaseEvent):
     """Event to signal that a device has been initialized without quirks loaded."""
 
     device_info: RawDeviceInitializedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_RAW_INIT
+    event_type: Literal["zha_gateway_message"] = "zha_gateway_message"
+    event: Literal["raw_device_initialized"] = "raw_device_initialized"
 
 
-@dataclass(kw_only=True, frozen=True)
-class DeviceFullInitEvent:
+class DeviceFullInitEvent(BaseEvent):
     """Event to signal that a device has been fully initialized."""
 
     device_info: ExtendedDeviceInfoWithPairingStatus
     new_join: bool = False
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_FULL_INIT
+    event_type: Literal["zha_gateway_message"] = "zha_gateway_message"
+    event: Literal["device_fully_initialized"] = "device_fully_initialized"
 
 
-@dataclass(kw_only=True, frozen=True)
-class GroupEvent:
+class GroupEvent(BaseEvent):
     """Event to signal a group event."""
 
     event: str
     group_info: GroupInfo
-    event_type: Final[str] = ZHA_GW_MSG
+    event_type: Literal["zha_gateway_message"] = "zha_gateway_message"
 
 
-@dataclass(kw_only=True, frozen=True)
-class DeviceRemovedEvent:
+class DeviceRemovedEvent(BaseEvent):
     """Event to signal that a device has been removed."""
 
     device_info: ExtendedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_REMOVED
+    event_type: Literal["zha_gateway_message"] = "zha_gateway_message"
+    event: Literal["device_removed"] = "device_removed"
 
 
 class Gateway(AsyncUtilMixin, EventBase):

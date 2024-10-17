@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Coroutine
-from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Literal
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 import zigpy.exceptions
@@ -45,6 +44,7 @@ from zigpy.zcl.clusters.general import (
 from zigpy.zcl.foundation import Status
 
 from zha.exceptions import ZHAException
+from zha.model import BaseEvent
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
@@ -69,13 +69,12 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
-@dataclass(frozen=True, kw_only=True)
-class LevelChangeEvent:
+class LevelChangeEvent(BaseEvent):
     """Event to signal that a cluster attribute has been updated."""
 
     level: int
     event: str
-    event_type: Final[str] = "cluster_handler_event"
+    event_type: Literal["cluster_handler_event"] = "cluster_handler_event"
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Alarms.cluster_id)
