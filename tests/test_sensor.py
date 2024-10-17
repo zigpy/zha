@@ -2,6 +2,7 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
 import math
 from typing import Any, Optional
 from unittest.mock import AsyncMock, MagicMock
@@ -394,6 +395,18 @@ async def async_test_pi_heating_demand(
     assert_state(entity, 1, "%")
 
 
+async def async_test_change_source_timestamp(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+):
+    """Test change source timestamp is correctly returned."""
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 2674725315},
+    )
+    assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
+
+
 @pytest.mark.parametrize(
     "cluster_id, entity_type, test_func, read_plug, unsupported_attrs",
     (
@@ -544,6 +557,13 @@ async def async_test_pi_heating_demand(
             hvac.Thermostat.cluster_id,
             sensor.PiHeatingDemand,
             async_test_pi_heating_demand,
+            None,
+            None,
+        ),
+        (
+            hvac.Thermostat.cluster_id,
+            sensor.SetpointChangeSourceTimestamp,
+            async_test_change_source_timestamp,
             None,
             None,
         ),
@@ -1124,6 +1144,78 @@ async def test_elec_measurement_skip_unsupported_attribute(
         a for call in cluster.read_attributes.call_args_list for a in call[0][0]
     }
     assert read_attrs == supported_attributes
+
+
+class TimestampCluster(CustomCluster, ManufacturerSpecificCluster):
+    """Timestamp Quirk V2 Cluster."""
+
+    cluster_id = 0xEF00
+    ep_attribute = "time_test_cluster"
+    attributes = {
+        0xEF65: ("start_time", t.uint32_t, True),
+    }
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize."""
+        super().__init__(*args, **kwargs)
+        # populate cache to create config entity
+        self._attr_cache.update({0xEF65: 10})
+
+
+(
+    QuirkBuilder("Fake_Timestamp_sensor", "Fake_Model_sensor")
+    .replaces(TimestampCluster)
+    .sensor(
+        "start_time",
+        TimestampCluster.cluster_id,
+        device_class=SensorDeviceClass.TIMESTAMP,
+        translation_key="start_time",
+        fallback_name="Start Time",
+    )
+    .add_to_registry()
+)
+
+
+@pytest.fixture
+async def zigpy_device_timestamp_sensor_v2(
+    zha_gateway: Gateway,  # pylint: disable=unused-argument
+):
+    """Timestamp Test device."""
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    TimestampCluster.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+            }
+        },
+        manufacturer="Fake_Timestamp_sensor",
+        model="Fake_Model_sensor",
+    )
+
+    zigpy_device = get_device(zigpy_device)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    return zha_device, zigpy_device.endpoints[1].time_test_cluster
+
+
+async def test_timestamp_sensor_v2(
+    zha_gateway: Gateway,
+    zigpy_device_timestamp_sensor_v2,  # pylint: disable=redefined-outer-name
+) -> None:
+    """Test quirks defined sensor."""
+
+    zha_device, cluster = zigpy_device_timestamp_sensor_v2
+    assert isinstance(zha_device.device, CustomDeviceV2)
+    entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="start_time")
+
+    await send_attributes_report(zha_gateway, cluster, {0xEF65: 2674725315})
+    assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
 class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
