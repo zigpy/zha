@@ -1,7 +1,7 @@
 """Shared models for ZHA."""
 
 import logging
-from typing import Any, Literal, Optional, Union
+from typing import Literal, Optional, Union
 
 from pydantic import (
     BaseModel as PydanticBaseModel,
@@ -9,22 +9,9 @@ from pydantic import (
     field_serializer,
     field_validator,
 )
-from zigpy.types.named import EUI64
+from zigpy.types.named import EUI64, NWK
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def convert_to_ieee(ieee: Optional[Union[str, EUI64, list]]) -> Optional[EUI64]:
-    """Convert ieee to EUI64."""
-    if ieee is None:
-        return None
-    if isinstance(ieee, EUI64):
-        return ieee
-    if isinstance(ieee, str):
-        return EUI64.convert(ieee)
-    if isinstance(ieee, list):
-        return EUI64.deserialize(ieee)[0]
-    return ieee
 
 
 class BaseModel(PydanticBaseModel):
@@ -34,24 +21,26 @@ class BaseModel(PydanticBaseModel):
 
     @field_validator("ieee", "device_ieee", mode="before", check_fields=False)
     @classmethod
-    def convert_ieee(cls, ieee: Optional[Union[str, EUI64, list]]) -> Optional[EUI64]:
+    def convert_ieee(cls, ieee: Optional[Union[str, EUI64]]) -> Optional[EUI64]:
         """Convert ieee to EUI64."""
-        return convert_to_ieee(ieee)
-
-    @field_serializer("ieee", "device_ieee", check_fields=False)
-    def serialize_ieee(self, ieee):
-        """Customize how ieee is serialized."""
-        if isinstance(ieee, EUI64):
-            return str(ieee)
+        if ieee is None:
+            return None
+        if isinstance(ieee, str):
+            return EUI64.convert(ieee)
         return ieee
 
+    @field_validator("nwk", mode="before", check_fields=False)
     @classmethod
-    def _get_value(cls, *args, **kwargs) -> Any:
-        """Convert EUI64 to string."""
-        value = args[0]
-        if isinstance(value, EUI64):
-            return str(value)
-        return PydanticBaseModel._get_value(cls, *args, **kwargs)
+    def convert_nwk(cls, nwk: Optional[Union[int, NWK]]) -> Optional[NWK]:
+        """Convert int to NWK."""
+        if isinstance(nwk, int) and not isinstance(nwk, NWK):
+            return NWK(nwk)
+        return nwk
+
+    @field_serializer("ieee", "device_ieee", check_fields=False)
+    def serialize_ieee(self, ieee: EUI64):
+        """Customize how ieee is serialized."""
+        return str(ieee)
 
 
 class BaseEvent(BaseModel):
