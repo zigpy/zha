@@ -198,11 +198,19 @@ class Motion(Opening):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
-class IASZone(BinarySensor):
+class IASZoneBinarySensor(BinarySensor):
     """ZHA IAS BinarySensor."""
 
     _attribute_name = "zone_status"
+
+    async def async_update(self) -> None:
+        """Attempt to retrieve on off state from the IAS Zone sensor."""
+        await PlatformEntity.async_update(self)
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
+class IASZone(IASZoneBinarySensor):
+    """ZHA IAS BinarySensor."""
 
     def __init__(
         self,
@@ -236,9 +244,69 @@ class IASZone(BinarySensor):
         """Parse the raw attribute into a bool state."""
         return BinarySensor.parse(value & 3)  # use only bit 0 and 1 for alarm state
 
-    async def async_update(self) -> None:
-        """Attempt to retrieve on off state from the IAS Zone sensor."""
-        await PlatformEntity.async_update(self)
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
+class IASZoneTamper(IASZoneBinarySensor):
+    """ZHA IAS Tamper BinarySensor."""
+
+    _attribute_name = "zone_status"
+    _unique_id_suffix = "tamper"
+    _attr_device_class = BinarySensorDeviceClass.TAMPER
+    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @staticmethod
+    def parse(value: bool | int) -> bool:
+        """Parse the raw attribute into a bool state."""
+        return BinarySensor.parse(value & (1 << 2))
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
+class IASZoneBatteryLow(IASZoneBinarySensor):
+    """ZHA IAS Battery Low BinarySensor."""
+
+    _attribute_name = "zone_status"
+    _unique_id_suffix = "battery_low"
+    _attr_device_class = BinarySensorDeviceClass.BATTERY
+    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @staticmethod
+    def parse(value: bool | int) -> bool:
+        """Parse the raw attribute into a bool state."""
+        return BinarySensor.parse(value & ((1 << 3) | (1 << 9)))
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
+class IASZoneTrouble(IASZoneBinarySensor):
+    """ZHA IAS Test Mode BinarySensor."""
+
+    _attribute_name = "zone_status"
+    _unique_id_suffix = "trouble"
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @staticmethod
+    def parse(value: bool | int) -> bool:
+        """Parse the raw attribute into a bool state."""
+        return BinarySensor.parse(value & (1 << 6))
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
+class IASZoneTestMode(IASZoneBinarySensor):
+    """ZHA IAS Test Mode BinarySensor."""
+
+    _attribute_name = "zone_status"
+    _unique_id_suffix = "test_mode"
+    _attr_translation_key: str = "test_mode"
+    _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+
+    @staticmethod
+    def parse(value: bool | int) -> bool:
+        """Parse the raw attribute into a bool state."""
+        return BinarySensor.parse(value & (1 << 8))
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE, models={"WL4200", "WL4200S"})
