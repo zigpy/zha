@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from asyncio import Task
-from dataclasses import dataclass
 import datetime as dt
 import functools
 from typing import TYPE_CHECKING, Any
@@ -56,7 +55,6 @@ STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.CLIMAT
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.CLIMATE)
 
 
-@dataclass(frozen=True, kw_only=True)
 class ThermostatEntityInfo(BaseEntityInfo):
     """Thermostat entity info."""
 

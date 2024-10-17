@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from asyncio import Task
-from dataclasses import dataclass
 from datetime import UTC, date, datetime
 import enum
 import functools
@@ -37,6 +36,7 @@ from zha.application.platforms.sensor.const import (
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
+from zha.model import BaseModel
 from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONCENTRATION_PARTS_PER_BILLION,
@@ -113,24 +113,22 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 
-@dataclass(frozen=True, kw_only=True)
 class SensorEntityInfo(BaseEntityInfo):
     """Sensor entity info."""
 
-    attribute: str
     decimals: int
     divisor: int
     multiplier: int
+    attribute: str | None = None  # LQI and RSSI have no attribute
     unit: str | None = None
     device_class: SensorDeviceClass | None = None
     state_class: SensorStateClass | None = None
 
 
-@dataclass(frozen=True, kw_only=True)
 class DeviceCounterEntityInfo(BaseEntityInfo):
     """Device counter entity info."""
 
-    device_ieee: str
+    device_ieee: types.EUI64
     available: bool
     counter: str
     counter_value: int
@@ -138,11 +136,10 @@ class DeviceCounterEntityInfo(BaseEntityInfo):
     counter_group: str
 
 
-@dataclass(frozen=True, kw_only=True)
 class DeviceCounterSensorIdentifiers(BaseIdentifiers):
     """Device counter sensor identifiers."""
 
-    device_ieee: str
+    device_ieee: types.EUI64
 
 
 class Sensor(PlatformEntity):
@@ -426,8 +423,13 @@ class DeviceCounterSensor(BaseEntity):
     @functools.cached_property
     def info_object(self) -> DeviceCounterEntityInfo:
         """Return a representation of the platform entity."""
+        data = super().info_object.__dict__
+        data.pop("device_ieee")
+        data.pop("available")
         return DeviceCounterEntityInfo(
-            **super().info_object.__dict__,
+            **data,
+            device_ieee=self._device.ieee,
+            available=self._device.available,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,
             counter_groups=self._zigpy_counter_groups,
@@ -782,9 +784,8 @@ class Illuminance(Sensor):
         return round(pow(10, ((value - 1) / 10000)))
 
 
-@dataclass(frozen=True, kw_only=True)
-class SmartEnergyMeteringEntityDescription:
-    """Dataclass that describes a Zigbee smart energy metering entity."""
+class SmartEnergyMeteringEntityDescription(BaseModel):
+    """Model that describes a Zigbee smart energy metering entity."""
 
     key: str = "instantaneous_demand"
     state_class: SensorStateClass | None = SensorStateClass.MEASUREMENT
@@ -907,9 +908,8 @@ class SmartEnergyMetering(PollableSensor):
         return self._cluster_handler.demand_formatter(value)
 
 
-@dataclass(frozen=True, kw_only=True)
 class SmartEnergySummationEntityDescription(SmartEnergyMeteringEntityDescription):
-    """Dataclass that describes a Zigbee smart energy summation entity."""
+    """Model that describes a Zigbee smart energy summation entity."""
 
     key: str = "summation_delivered"
     state_class: SensorStateClass | None = SensorStateClass.TOTAL_INCREASING
