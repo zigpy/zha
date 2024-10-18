@@ -77,6 +77,12 @@ class BinarySensor(PlatformEntity):
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
         )
+        if (
+            hasattr(self._cluster_handler, "description")
+            and self._cluster_handler.description is not None
+        ):
+            self._attr_translation_key = None
+            self._attr_fallback_name: str = self._cluster_handler.description
 
     def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
         """Init this entity from the quirks metadata."""

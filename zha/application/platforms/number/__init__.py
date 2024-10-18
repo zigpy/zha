@@ -95,6 +95,14 @@ class Number(PlatformEntity):
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
         )
+        if (
+            hasattr(self._analog_output_cluster_handler, "description")
+            and self._analog_output_cluster_handler.description is not None
+        ):
+            self._attr_translation_key = None
+            self._attr_fallback_name: str = (
+                self._analog_output_cluster_handler.description
+            )
 
     @functools.cached_property
     def info_object(self) -> NumberEntityInfo:
