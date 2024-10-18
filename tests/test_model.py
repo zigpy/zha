@@ -60,7 +60,7 @@ def test_ser_deser_zha_event():
 
     assert device_info.model_dump() == {
         "ieee": "00:00:00:00:00:00:00:00",
-        "nwk": "0x0000",
+        "nwk": 0x0000,
         "manufacturer": "test",
         "model": "test",
         "name": "test",

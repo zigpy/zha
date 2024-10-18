@@ -74,7 +74,9 @@ class BaseModel(PydanticBaseModel):
         """Customize how ieee is serialized."""
         return str(ieee)
 
-    @field_serializer("nwk", "dest_nwk", "next_hop", check_fields=False)
+    @field_serializer(
+        "nwk", "dest_nwk", "next_hop", when_used="json", check_fields=False
+    )
     def serialize_nwk(self, nwk: NWK):
         """Serialize nwk as hex string."""
         return repr(nwk)
