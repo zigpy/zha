@@ -5,12 +5,13 @@
 from __future__ import annotations
 
 import asyncio
-from enum import StrEnum
+from enum import Enum, StrEnum
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Literal, Self
+from typing import TYPE_CHECKING, Any, Literal, Self, Union
 
+from pydantic import field_serializer, field_validator
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
@@ -61,7 +62,7 @@ from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
-from zha.model import BaseEvent, BaseModel
+from zha.model import BaseEvent, BaseModel, convert_enum, convert_int
 from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
 from zha.zigbee.endpoint import Endpoint
 
@@ -151,6 +152,55 @@ class NeighborInfo(BaseModel):
     depth: uint8_t
     lqi: uint8_t
 
+    _convert_device_type = field_validator(
+        "device_type", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.DeviceType))
+
+    _convert_rx_on_when_idle = field_validator(
+        "rx_on_when_idle", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.RxOnWhenIdle))
+
+    _convert_relationship = field_validator(
+        "relationship", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.Relationship))
+
+    _convert_permit_joining = field_validator(
+        "permit_joining", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.PermitJoins))
+
+    _convert_depth = field_validator("depth", mode="before", check_fields=False)(
+        convert_int(uint8_t)
+    )
+    _convert_lqi = field_validator("lqi", mode="before", check_fields=False)(
+        convert_int(uint8_t)
+    )
+
+    @field_validator("extended_pan_id", mode="before", check_fields=False)
+    @classmethod
+    def convert_extended_pan_id(
+        cls, extended_pan_id: Union[str, ExtendedPanId]
+    ) -> ExtendedPanId:
+        """Convert extended_pan_id to ExtendedPanId."""
+        if isinstance(extended_pan_id, str):
+            return ExtendedPanId.convert(extended_pan_id)
+        return extended_pan_id
+
+    @field_serializer("extended_pan_id", check_fields=False)
+    def serialize_extended_pan_id(self, extended_pan_id: ExtendedPanId):
+        """Customize how extended_pan_id is serialized."""
+        return str(extended_pan_id)
+
+    @field_serializer(
+        "device_type",
+        "rx_on_when_idle",
+        "relationship",
+        "permit_joining",
+        check_fields=False,
+    )
+    def serialize_enums(self, enum_value: Enum):
+        """Serialize enums by name."""
+        return enum_value.name
+
 
 class RouteInfo(BaseModel):
     """Describes a route."""
@@ -161,6 +211,30 @@ class RouteInfo(BaseModel):
     many_to_one: uint1_t
     route_record_required: uint1_t
     next_hop: NWK
+
+    _convert_route_status = field_validator(
+        "route_status", mode="before", check_fields=False
+    )(convert_enum(RouteStatus))
+
+    _convert_memory_constrained = field_validator(
+        "memory_constrained", mode="before", check_fields=False
+    )(convert_int(uint1_t))
+
+    _convert_many_to_one = field_validator(
+        "many_to_one", mode="before", check_fields=False
+    )(convert_int(uint1_t))
+
+    _convert_route_record_required = field_validator(
+        "route_record_required", mode="before", check_fields=False
+    )(convert_int(uint1_t))
+
+    @field_serializer(
+        "route_status",
+        check_fields=False,
+    )
+    def serialize_route_status(self, route_status: RouteStatus):
+        """Serialize route_status as name."""
+        return route_status.name
 
 
 class EndpointNameInfo(BaseModel):
