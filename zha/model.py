@@ -25,10 +25,12 @@ def convert_ieee(ieee: Optional[Union[str, EUI64]]) -> Optional[EUI64]:
     return ieee
 
 
-def convert_nwk(nwk: Optional[Union[int, NWK]]) -> Optional[NWK]:
+def convert_nwk(nwk: Optional[Union[int, str, NWK]]) -> Optional[NWK]:
     """Convert int to NWK."""
     if isinstance(nwk, int) and not isinstance(nwk, NWK):
         return NWK(nwk)
+    if isinstance(nwk, str):
+        return NWK(int(nwk, base=16))
     return nwk
 
 
@@ -71,6 +73,11 @@ class BaseModel(PydanticBaseModel):
     def serialize_ieee(self, ieee: EUI64):
         """Customize how ieee is serialized."""
         return str(ieee)
+
+    @field_serializer("nwk", "dest_nwk", "next_hop", check_fields=False)
+    def serialize_nwk(self, nwk: NWK):
+        """Serialize nwk as hex string."""
+        return repr(nwk)
 
 
 class BaseEvent(BaseModel):
