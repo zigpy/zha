@@ -861,7 +861,7 @@ def test_neighbor_info_ser_deser() -> None:
 
     neighbor_info = NeighborInfo(
         ieee="00:0d:6f:00:0a:90:69:e7",
-        nwk=0x1234,
+        nwk="0x1234",
         extended_pan_id="00:0d:6f:00:0a:90:69:e7",
         lqi=255,
         relationship=zdo_t._NeighborEnums.Relationship.Child.name,
@@ -881,7 +881,7 @@ def test_neighbor_info_ser_deser() -> None:
 
     assert neighbor_info.model_dump() == {
         "ieee": "00:0d:6f:00:0a:90:69:e7",
-        "nwk": 0x1234,
+        "nwk": "0x1234",
         "extended_pan_id": "00:0d:6f:00:0a:90:69:e7",
         "lqi": 255,
         "relationship": zdo_t._NeighborEnums.Relationship.Child.name,
@@ -893,7 +893,7 @@ def test_neighbor_info_ser_deser() -> None:
 
     assert neighbor_info.model_dump_json() == (
         '{"device_type":"Router","rx_on_when_idle":"On","relationship":"Child",'
-        '"extended_pan_id":"00:0d:6f:00:0a:90:69:e7","ieee":"00:0d:6f:00:0a:90:69:e7","nwk":4660,'
+        '"extended_pan_id":"00:0d:6f:00:0a:90:69:e7","ieee":"00:0d:6f:00:0a:90:69:e7","nwk":"0x1234",'
         '"permit_joining":"Accepting","depth":0,"lqi":255}'
     )
 
@@ -915,8 +915,8 @@ def test_route_info_ser_deser() -> None:
     assert isinstance(route_info.route_status, zdo_t.RouteStatus)
 
     assert route_info.model_dump() == {
-        "dest_nwk": 0x1234,
-        "next_hop": 0x5678,
+        "dest_nwk": "0x1234",
+        "next_hop": "0x5678",
         "route_status": zdo_t.RouteStatus.Active.name,
         "memory_constrained": 0,
         "many_to_one": 1,
@@ -924,6 +924,6 @@ def test_route_info_ser_deser() -> None:
     }
 
     assert route_info.model_dump_json() == (
-        '{"dest_nwk":4660,"route_status":"Active","memory_constrained":0,"many_to_one":1,'
-        '"route_record_required":1,"next_hop":22136}'
+        '{"dest_nwk":"0x1234","route_status":"Active","memory_constrained":0,"many_to_one":1,'
+        '"route_record_required":1,"next_hop":"0x5678"}'
     )

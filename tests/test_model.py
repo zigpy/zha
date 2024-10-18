@@ -37,7 +37,7 @@ def test_ser_deser_zha_event():
 
     device_info = DeviceInfo(
         ieee="00:00:00:00:00:00:00:00",
-        nwk=0x0000,
+        nwk="0x0000",
         manufacturer="test",
         model="test",
         name="test",
@@ -60,7 +60,7 @@ def test_ser_deser_zha_event():
 
     assert device_info.model_dump() == {
         "ieee": "00:00:00:00:00:00:00:00",
-        "nwk": 0,
+        "nwk": "0x0000",
         "manufacturer": "test",
         "model": "test",
         "name": "test",
@@ -78,7 +78,7 @@ def test_ser_deser_zha_event():
     }
 
     assert device_info.model_dump_json() == (
-        '{"ieee":"00:00:00:00:00:00:00:00","nwk":0,'
+        '{"ieee":"00:00:00:00:00:00:00:00","nwk":"0x0000",'
         '"manufacturer":"test","model":"test","name":"test","quirk_applied":true,'
         '"quirk_class":"test","quirk_id":"test","manufacturer_code":0,"power_source":"test",'
         '"lqi":1,"rssi":2,"last_seen":"","available":true,"device_type":"test","signature":{"foo":"bar"}}'
