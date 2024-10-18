@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-from dataclasses import dataclass
 from enum import IntFlag
 import functools
 from typing import TYPE_CHECKING, Any, Final, cast
@@ -54,7 +53,6 @@ class SirenEntityFeature(IntFlag):
     DURATION = 16
 
 
-@dataclass(frozen=True, kw_only=True)
 class SirenEntityInfo(BaseEntityInfo):
     """Siren entity info."""
 
