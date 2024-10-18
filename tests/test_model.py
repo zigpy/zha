@@ -1,8 +1,12 @@
 """Tests for the ZHA model module."""
 
+from collections.abc import Callable
+from enum import Enum
+
 from zigpy.types import NWK
 from zigpy.types.named import EUI64
 
+from zha.model import convert_enum
 from zha.zigbee.device import DeviceInfo, ZHAEvent
 
 
@@ -83,3 +87,18 @@ def test_ser_deser_zha_event():
         '"quirk_class":"test","quirk_id":"test","manufacturer_code":0,"power_source":"test",'
         '"lqi":1,"rssi":2,"last_seen":"","available":true,"device_type":"test","signature":{"foo":"bar"}}'
     )
+
+
+def test_convert_enum() -> None:
+    """Test the convert enum method."""
+
+    class TestEnum(Enum):
+        """Test enum."""
+
+        VALUE = 1
+
+    convert_test_enum: Callable[[str | Enum], Enum] = convert_enum(TestEnum)
+
+    assert convert_test_enum(TestEnum.VALUE.name) == TestEnum.VALUE
+    assert isinstance(convert_test_enum(TestEnum.VALUE.name), TestEnum)
+    assert convert_test_enum(TestEnum.VALUE) == TestEnum.VALUE

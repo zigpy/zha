@@ -927,3 +927,17 @@ def test_route_info_ser_deser() -> None:
         '{"dest_nwk":"0x1234","route_status":"Active","memory_constrained":0,"many_to_one":1,'
         '"route_record_required":1,"next_hop":"0x5678"}'
     )
+
+
+def test_convert_extended_pan_id() -> None:
+    """Test conversion of extended panid."""
+
+    extended_pan_id = zigpy.types.ExtendedPanId.convert("00:0d:6f:00:0a:90:69:e7")
+
+    assert NeighborInfo.convert_extended_pan_id(extended_pan_id) == extended_pan_id
+
+    converted_extended_pan_id = NeighborInfo.convert_extended_pan_id(
+        "00:0d:6f:00:0a:90:69:e7"
+    )
+    assert isinstance(converted_extended_pan_id, zigpy.types.ExtendedPanId)
+    assert converted_extended_pan_id == extended_pan_id

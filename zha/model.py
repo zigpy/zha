@@ -40,7 +40,7 @@ def convert_enum(enum_type: Enum) -> Callable[[str | Enum], Enum]:
     def _convert_enum(enum_name_or_instance: str | Enum) -> Enum:
         """Convert extended_pan_id to ExtendedPanId."""
         if isinstance(enum_name_or_instance, str):
-            return enum_type(enum_name_or_instance)  # type: ignore
+            return enum_type[enum_name_or_instance]  # type: ignore
         return enum_name_or_instance
 
     return _convert_enum
