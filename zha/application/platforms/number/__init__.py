@@ -868,7 +868,7 @@ class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY, models={"SNZB-06P"}
+    cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY, models={"SNZB-06P", "SNZB-03P"}
 )
 class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
     """Configuration of Sonoff sensor presence detection timeout."""
