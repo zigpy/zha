@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from asyncio import Task
 from dataclasses import dataclass
+from datetime import UTC, date, datetime
 import enum
 import functools
 import logging
@@ -34,6 +35,7 @@ from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
+    UNIX_EPOCH_TO_ZCL_EPOCH,
     SensorDeviceClass,
     SensorStateClass,
 )
@@ -254,7 +256,7 @@ class Sensor(PlatformEntity):
         return response
 
     @property
-    def native_value(self) -> str | int | float | None:
+    def native_value(self) -> date | datetime | str | int | float | None:
         """Return the state of the entity."""
         assert self._attribute_name is not None
         raw_state = self._cluster_handler.cluster.get(self._attribute_name)
@@ -278,13 +280,23 @@ class Sensor(PlatformEntity):
         ):
             self.maybe_emit_state_changed_event()
 
-    def formatter(self, value: int | enum.IntEnum) -> int | float | str | None:
+    def formatter(
+        self, value: int | enum.IntEnum
+    ) -> datetime | int | float | str | None:
         """Numeric pass-through formatter."""
         if self._decimals > 0:
             return round(
                 float(value * self._multiplier) / self._divisor, self._decimals
             )
         return round(float(value * self._multiplier) / self._divisor)
+
+
+class TimestampSensor(Sensor):
+    """Timestamp ZHA sensor."""
+
+    def formatter(self, value: int | enum.IntEnum) -> datetime | None:
+        """Pass-through formatter."""
+        return datetime.fromtimestamp(value - UNIX_EPOCH_TO_ZCL_EPOCH, tz=UTC)
 
 
 class PollableSensor(Sensor):
@@ -1710,6 +1722,20 @@ class SetpointChangeSource(EnumSensor):
     _attr_translation_key: str = "setpoint_change_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _enum = SetpointChangeSourceEnum
+
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
+class SetpointChangeSourceTimestamp(TimestampSensor):
+    """Sensor that displays the timestamp the setpoint change.
+
+    Optional thermostat attribute.
+    """
+
+    _unique_id_suffix = "setpoint_change_source_timestamp"
+    _attribute_name = "setpoint_change_source_timestamp"
+    _attr_translation_key: str = "setpoint_change_source_timestamp"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)

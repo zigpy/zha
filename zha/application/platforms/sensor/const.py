@@ -410,3 +410,4 @@ ANALOG_INPUT_APPTYPE_DEV_CLASS = {
     AnalogInputType.Enthalpy_KJoules_Per_Kg: None,
     AnalogInputType.Time_Seconds: None,
 }
+UNIX_EPOCH_TO_ZCL_EPOCH = 946684800

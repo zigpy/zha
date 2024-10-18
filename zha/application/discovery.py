@@ -40,6 +40,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
 )
+from zha.application.platforms.sensor.const import SensorDeviceClass
 from zha.application.registries import (
     DEVICE_CLASS,
     PLATFORM_ENTITIES,
@@ -155,8 +156,16 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         Platform.SWITCH,
         SwitchMetadata,
         EntityType.CONFIG,
-    ): switch.SwitchConfigurationEntity,
-    (Platform.SWITCH, SwitchMetadata, EntityType.STANDARD): switch.Switch,
+    ): switch.ConfigurableAttributeSwitch,
+    (
+        Platform.SWITCH,
+        SwitchMetadata,
+        EntityType.STANDARD,
+    ): switch.ConfigurableAttributeSwitch,
+}
+
+QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS = {
+    SensorDeviceClass.TIMESTAMP: sensor.TimestampSensor
 }
 
 
@@ -275,6 +284,11 @@ class DeviceProbe:
                         },
                     )
                     continue
+
+                if entity_class is sensor.Sensor:
+                    entity_class = QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS.get(
+                        entity_metadata.device_class, entity_class
+                    )
 
                 # automatically add the attribute to ZCL_INIT_ATTRS for the cluster
                 # handler if it is not already in the list

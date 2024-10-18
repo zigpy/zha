@@ -16,7 +16,6 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 import zigpy.quirks
-from zigpy.quirks.v2 import CustomDeviceV2
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.zcl.clusters import Cluster
@@ -207,7 +206,7 @@ class Device(LogMixin, EventBase):
         self._gateway: Gateway = _gateway
         self._zigpy_device: ZigpyDevice = zigpy_device
         self.quirk_applied: bool = isinstance(
-            self._zigpy_device, zigpy.quirks.CustomDevice
+            self._zigpy_device, zigpy.quirks.BaseCustomDevice
         )
         self.quirk_class: str = (
             f"{self._zigpy_device.__class__.__module__}."
@@ -720,12 +719,14 @@ class Device(LogMixin, EventBase):
         self.debug("started configuration")
         await self._zdo_handler.async_configure()
         self._zdo_handler.debug("'async_configure' stage succeeded")
+
+        if isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice):
+            self.debug("applying quirks custom device configuration")
+            await self._zigpy_device.apply_custom_configuration()
+
         await asyncio.gather(
             *(endpoint.async_configure() for endpoint in self._endpoints.values())
         )
-        if isinstance(self._zigpy_device, CustomDeviceV2):
-            self.debug("applying quirks v2 custom device configuration")
-            await self._zigpy_device.apply_custom_configuration()
 
         self.emit(
             ZHA_CLUSTER_HANDLER_CFG_DONE,
