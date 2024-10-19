@@ -9,6 +9,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Literal, ParamSpec, TypedDict
 
+from pydantic import field_serializer
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl
@@ -166,6 +167,31 @@ class ClusterInfo(BaseModel):
     name: str
     type: str
     commands: list[ZCLCommandDef]
+
+    @field_serializer("commands", when_used="json-unless-none", check_fields=False)
+    def serialize_commands(self, commands: list[ZCLCommandDef]):
+        """Serialize commands."""
+        converted_commands = []
+        for command in commands:
+            converted_command = {
+                "id": command.id,
+                "name": command.name,
+                "schema": {
+                    "command": command.schema.command.name,
+                    "fields": [
+                        {
+                            "name": f.name,
+                            "type": f.type.__name__,
+                            "optional": f.optional,
+                        }
+                        for f in command.schema.fields
+                    ],
+                },
+                "direction": command.direction,
+                "is_manufacturer_specific": command.is_manufacturer_specific,
+            }
+            converted_commands.append(converted_command)
+        return converted_commands
 
 
 class ClusterHandlerInfo(BaseModel):
