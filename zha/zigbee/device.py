@@ -5,13 +5,13 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Final, Self
+from typing import TYPE_CHECKING, Any, Literal, Self, Union
 
+from pydantic import field_serializer, field_validator
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
@@ -55,7 +55,6 @@ from zha.application.const import (
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
     ZHA_CLUSTER_HANDLER_CFG_DONE,
-    ZHA_CLUSTER_HANDLER_MSG,
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values
@@ -63,6 +62,7 @@ from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
+from zha.model import BaseEvent, BaseModel, convert_enum, convert_int
 from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
 from zha.zigbee.endpoint import Endpoint
 
@@ -83,8 +83,33 @@ def get_device_automation_triggers(
     }
 
 
-@dataclass(frozen=True, kw_only=True)
-class ClusterBinding:
+class DeviceStatus(StrEnum):
+    """Status of a device."""
+
+    CREATED = "created"
+    INITIALIZED = "initialized"
+
+
+class ZHAEvent(BaseEvent):
+    """Event generated when a device wishes to send an arbitrary event."""
+
+    device_ieee: EUI64
+    unique_id: str
+    data: dict[str, Any]
+    event_type: Literal["zha_event"] = "zha_event"
+    event: Literal["zha_event"] = "zha_event"
+
+
+class ClusterHandlerConfigurationComplete(BaseEvent):
+    """Event generated when all cluster handlers are configured."""
+
+    device_ieee: EUI64
+    unique_id: str
+    event_type: Literal["zha_channel_message"] = "zha_channel_message"
+    event: Literal["zha_channel_cfg_done"] = "zha_channel_cfg_done"
+
+
+class ClusterBinding(BaseModel):
     """Describes a cluster binding."""
 
     name: str
@@ -93,36 +118,7 @@ class ClusterBinding:
     endpoint_id: int
 
 
-class DeviceStatus(Enum):
-    """Status of a device."""
-
-    CREATED = 1
-    INITIALIZED = 2
-
-
-@dataclass(kw_only=True, frozen=True)
-class ZHAEvent:
-    """Event generated when a device wishes to send an arbitrary event."""
-
-    device_ieee: EUI64
-    unique_id: str
-    data: dict[str, Any]
-    event_type: Final[str] = ZHA_EVENT
-    event: Final[str] = ZHA_EVENT
-
-
-@dataclass(kw_only=True, frozen=True)
-class ClusterHandlerConfigurationComplete:
-    """Event generated when all cluster handlers are configured."""
-
-    device_ieee: EUI64
-    unique_id: str
-    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
-    event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceInfo:
+class DeviceInfo(BaseModel):
     """Describes a device."""
 
     ieee: EUI64
@@ -135,16 +131,22 @@ class DeviceInfo:
     quirk_id: str | None
     manufacturer_code: int | None
     power_source: str
-    lqi: int
-    rssi: int
+    lqi: int | None
+    rssi: int | None
     last_seen: str
     available: bool
     device_type: str
     signature: dict[str, Any]
 
+    @field_serializer("signature", when_used="json-unless-none", check_fields=False)
+    def serialize_signature(self, signature: dict[str, Any]):
+        """Serialize signature."""
+        if "node_descriptor" in signature:
+            signature["node_descriptor"] = signature["node_descriptor"].as_dict()
+        return signature
 
-@dataclass(kw_only=True, frozen=True)
-class NeighborInfo:
+
+class NeighborInfo(BaseModel):
     """Describes a neighbor."""
 
     device_type: _NeighborEnums.DeviceType
@@ -157,9 +159,57 @@ class NeighborInfo:
     depth: uint8_t
     lqi: uint8_t
 
+    _convert_device_type = field_validator(
+        "device_type", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.DeviceType))
 
-@dataclass(kw_only=True, frozen=True)
-class RouteInfo:
+    _convert_rx_on_when_idle = field_validator(
+        "rx_on_when_idle", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.RxOnWhenIdle))
+
+    _convert_relationship = field_validator(
+        "relationship", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.Relationship))
+
+    _convert_permit_joining = field_validator(
+        "permit_joining", mode="before", check_fields=False
+    )(convert_enum(_NeighborEnums.PermitJoins))
+
+    _convert_depth = field_validator("depth", mode="before", check_fields=False)(
+        convert_int(uint8_t)
+    )
+    _convert_lqi = field_validator("lqi", mode="before", check_fields=False)(
+        convert_int(uint8_t)
+    )
+
+    @field_validator("extended_pan_id", mode="before", check_fields=False)
+    @classmethod
+    def convert_extended_pan_id(
+        cls, extended_pan_id: Union[str, ExtendedPanId]
+    ) -> ExtendedPanId:
+        """Convert extended_pan_id to ExtendedPanId."""
+        if isinstance(extended_pan_id, str):
+            return ExtendedPanId.convert(extended_pan_id)
+        return extended_pan_id
+
+    @field_serializer("extended_pan_id", check_fields=False)
+    def serialize_extended_pan_id(self, extended_pan_id: ExtendedPanId):
+        """Customize how extended_pan_id is serialized."""
+        return str(extended_pan_id)
+
+    @field_serializer(
+        "device_type",
+        "rx_on_when_idle",
+        "relationship",
+        "permit_joining",
+        check_fields=False,
+    )
+    def serialize_enums(self, enum_value: Enum):
+        """Serialize enums by name."""
+        return enum_value.name
+
+
+class RouteInfo(BaseModel):
     """Describes a route."""
 
     dest_nwk: NWK
@@ -169,23 +219,46 @@ class RouteInfo:
     route_record_required: uint1_t
     next_hop: NWK
 
+    _convert_route_status = field_validator(
+        "route_status", mode="before", check_fields=False
+    )(convert_enum(RouteStatus))
 
-@dataclass(kw_only=True, frozen=True)
-class EndpointNameInfo:
+    _convert_memory_constrained = field_validator(
+        "memory_constrained", mode="before", check_fields=False
+    )(convert_int(uint1_t))
+
+    _convert_many_to_one = field_validator(
+        "many_to_one", mode="before", check_fields=False
+    )(convert_int(uint1_t))
+
+    _convert_route_record_required = field_validator(
+        "route_record_required", mode="before", check_fields=False
+    )(convert_int(uint1_t))
+
+    @field_serializer(
+        "route_status",
+        check_fields=False,
+    )
+    def serialize_route_status(self, route_status: RouteStatus):
+        """Serialize route_status as name."""
+        return route_status.name
+
+
+class EndpointNameInfo(BaseModel):
     """Describes an endpoint name."""
 
     name: str
 
 
-@dataclass(kw_only=True, frozen=True)
 class ExtendedDeviceInfo(DeviceInfo):
     """Describes a ZHA device."""
 
     active_coordinator: bool
-    entities: dict[str, BaseEntityInfo]
+    entities: dict[tuple[Platform, str], BaseEntityInfo]
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
+    device_automation_triggers: dict[tuple[str, str], dict[str, Any]]
 
 
 class Device(LogMixin, EventBase):
@@ -406,7 +479,7 @@ class Device(LogMixin, EventBase):
         return commands
 
     @cached_property
-    def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, str]]:
+    def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, Any]]:
         """Return the device automation triggers for this device."""
         return get_device_automation_triggers(self._zigpy_device)
 
@@ -567,11 +640,11 @@ class Device(LogMixin, EventBase):
                 "Attempting to checkin with device - missed checkins: %s",
                 self._checkins_missed_count,
             )
-            if not self.basic_ch:
+            if not self._basic_ch:
                 self.debug("does not have a mandatory basic cluster")
                 self.update_available(False)
                 return
-            res = await self.basic_ch.get_attribute_value(
+            res = await self._basic_ch.get_attribute_value(
                 ATTR_MANUFACTURER, from_cache=False
             )
             if res is not None:
@@ -680,8 +753,8 @@ class Device(LogMixin, EventBase):
             **self.device_info.__dict__,
             active_coordinator=self.is_active_coordinator,
             entities={
-                platform_entity.unique_id: platform_entity.info_object
-                for platform_entity in self.platform_entities.values()
+                platform_entity_key: platform_entity.info_object
+                for platform_entity_key, platform_entity in self.platform_entities.items()
             },
             neighbors=[
                 NeighborInfo(
@@ -709,6 +782,7 @@ class Device(LogMixin, EventBase):
                 for route in topology.routes[self.ieee]
             ],
             endpoint_names=names,
+            device_automation_triggers=self.device_automation_triggers,
         )
 
     async def async_configure(self) -> None:
@@ -732,7 +806,7 @@ class Device(LogMixin, EventBase):
             ZHA_CLUSTER_HANDLER_CFG_DONE,
             ClusterHandlerConfigurationComplete(
                 device_ieee=self.ieee,
-                unique_id=self.ieee,
+                unique_id=self.unique_id,
             ),
         )
 
@@ -740,10 +814,10 @@ class Device(LogMixin, EventBase):
 
         if (
             should_identify
-            and self.identify_ch is not None
+            and self._identify_ch is not None
             and not self.skip_configuration
         ):
-            await self.identify_ch.trigger_effect(
+            await self._identify_ch.trigger_effect(
                 effect_id=Identify.EffectIdentifier.Okay,
                 effect_variant=Identify.EffectVariant.Default,
             )

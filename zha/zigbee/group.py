@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from dataclasses import dataclass
 from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any
@@ -19,6 +18,7 @@ from zha.application.platforms import (
 )
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
+from zha.model import BaseModel
 from zha.zigbee.device import ExtendedDeviceInfo
 
 if TYPE_CHECKING:
@@ -31,25 +31,22 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
-class GroupMemberReference:
+class GroupMemberReference(BaseModel):
     """Describes a group member."""
 
     ieee: EUI64
     endpoint_id: int
 
 
-@dataclass(frozen=True, kw_only=True)
-class GroupEntityReference:
+class GroupEntityReference(BaseModel):
     """Reference to a group entity."""
 
-    entity_id: int
+    entity_id: str
     name: str | None = None
     original_name: str | None = None
 
 
-@dataclass(frozen=True, kw_only=True)
-class GroupMemberInfo:
+class GroupMemberInfo(BaseModel):
     """Describes a group member."""
 
     ieee: EUI64
@@ -58,8 +55,7 @@ class GroupMemberInfo:
     entities: dict[str, BaseEntityInfo]
 
 
-@dataclass(frozen=True, kw_only=True)
-class GroupInfo:
+class GroupInfo(BaseModel):
     """Describes a group."""
 
     group_id: int
