@@ -410,6 +410,65 @@ async def async_test_change_source_timestamp(
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
+async def async_test_general_analog_input(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+):
+    """Test general analog input."""
+    await entity.async_update()
+
+    assert entity.device_class == SensorDeviceClass.HUMIDITY.value
+
+    if entity._cluster_handler.resolution is not None:
+        assert entity.suggested_display_precision == 1
+    else:
+        assert entity.suggested_display_precision is None
+
+    assert entity._cluster_handler.max_present_value == 100.0
+    assert entity._cluster_handler.min_present_value == 1.0
+    assert entity._cluster_handler.out_of_service == 0
+    assert entity._cluster_handler.reliability == 0
+    assert entity._cluster_handler.status_flags == 0
+    assert entity._cluster_handler.application_type == 0x00070100
+    assert entity._cluster_handler.present_value == 1.0
+
+    await send_attributes_report(
+        zha_gateway, cluster, {general.AnalogInput.AttributeDefs.present_value.id: 1.0}
+    )
+    assert_state(entity, 1.0, "%")
+
+
+async def async_test_general_multistate_input(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+):
+    """Test general multistate input."""
+    await entity.async_update()
+
+    assert entity._cluster_handler.number_of_states == 2
+    assert entity._cluster_handler.out_of_service == 0
+    assert entity._cluster_handler.present_value == 1
+    assert entity._cluster_handler.reliability == 0
+    assert entity._cluster_handler.status_flags == 0
+    assert entity._cluster_handler.application_type == 0x00000009
+
+    if entity._cluster_handler.state_text is None:
+        assert_state(entity, "state_1", None)
+        await send_attributes_report(
+            zha_gateway,
+            cluster,
+            {general.MultistateInput.AttributeDefs.present_value.id: 2},
+        )
+        assert_state(entity, "state_2", None)
+    else:
+        assert entity._cluster_handler.state_text == ["Night", "Day", "Hold"]
+        assert_state(entity, "Night", None)
+        await send_attributes_report(
+            zha_gateway,
+            cluster,
+            {general.MultistateInput.AttributeDefs.present_value.id: 2},
+        )
+        assert_state(entity, "Day", None)
+
+
 @pytest.mark.parametrize(
     "cluster_id, entity_type, test_func, read_plug, unsupported_attrs",
     (
@@ -570,6 +629,72 @@ async def async_test_change_source_timestamp(
             None,
             None,
         ),
+        (
+            general.AnalogInput.cluster_id,
+            sensor.AnalogInputSensor,
+            async_test_general_analog_input,
+            {
+                "present_value": 1.0,
+                "description": "Analog Input",
+                "max_present_value": 100.0,
+                "min_present_value": 1.0,
+                "out_of_service": 0,
+                "reliability": 0,
+                "resolution": 1.1,
+                "status_flags": 0,
+                "engineering_units": 98,
+                "application_type": 0x00070100,
+            },
+            None,
+        ),
+        (
+            general.AnalogInput.cluster_id,
+            sensor.AnalogInputSensor,
+            async_test_general_analog_input,
+            {
+                "present_value": 1.0,
+                "description": "Analog Input",
+                "max_present_value": 100.0,
+                "min_present_value": 1.0,
+                "out_of_service": 0,
+                "reliability": 0,
+                "status_flags": 0,
+                "engineering_units": 98,
+                "application_type": 0x00070100,
+            },
+            None,
+        ),
+        (
+            general.MultistateInput.cluster_id,
+            sensor.MultiStateInputSensor,
+            async_test_general_multistate_input,
+            {
+                "state_text": t.LVList(["Night", "Day", "Hold"]),
+                "description": "Multistate Input",
+                "number_of_states": 2,
+                "out_of_service": 0,
+                "present_value": 1,
+                "reliability": 0,
+                "status_flags": 0,
+                "application_type": 0x00000009,
+            },
+            None,
+        ),
+        (
+            general.MultistateInput.cluster_id,
+            sensor.MultiStateInputSensor,
+            async_test_general_multistate_input,
+            {
+                "description": "Multistate Input",
+                "number_of_states": 2,
+                "out_of_service": 0,
+                "present_value": 1,
+                "reliability": 0,
+                "status_flags": 0,
+                "application_type": 0x00000009,
+            },
+            None,
+        ),
     ),
 )
 async def test_sensor(
@@ -611,6 +736,12 @@ async def test_sensor(
     )
 
     await zha_gateway.async_block_till_done()
+
+    if read_plug and read_plug.get("description", None):
+        assert entity.fallback_name == read_plug.get("description", None)
+        assert entity.translation_key is None
+    else:
+        assert entity.fallback_name is None
     # test sensor associated logic
     await test_func(zha_gateway, cluster, entity)
 
