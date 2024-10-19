@@ -22,6 +22,7 @@ from tests.common import (
     SIG_EP_TYPE,
     create_mock_zigpy_device,
     join_zigpy_device,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.const import (
@@ -941,3 +942,28 @@ def test_convert_extended_pan_id() -> None:
     )
     assert isinstance(converted_extended_pan_id, zigpy.types.ExtendedPanId)
     assert converted_extended_pan_id == extended_pan_id
+
+
+async def test_extended_device_info_ser_deser(zha_gateway: Gateway) -> None:
+    """Test the serialization and deserialization of the extended device info."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller, "tests/data/devices/centralite-3320-l.json"
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    assert zha_device is not None
+
+    assert isinstance(zha_device.extended_device_info.ieee, zigpy.types.EUI64)
+    assert isinstance(zha_device.extended_device_info.nwk, zigpy.types.NWK)
+
+    # last_seen changes so we exclude it from the comparison
+    json = zha_device.extended_device_info.model_dump_json(exclude=["last_seen"])
+
+    # load the json from a file as string
+    with open(
+        "tests/data/serialization_data/centralite-3320-l-extended-device-info.json",
+        encoding="UTF-8",
+    ) as file:
+        expected_json = file.read()
+
+    assert json == expected_json

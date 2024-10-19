@@ -138,6 +138,13 @@ class DeviceInfo(BaseModel):
     device_type: str
     signature: dict[str, Any]
 
+    @field_serializer("signature", when_used="json-unless-none", check_fields=False)
+    def serialize_signature(self, signature: dict[str, Any]):
+        """Serialize signature."""
+        if "node_descriptor" in signature:
+            signature["node_descriptor"] = signature["node_descriptor"].as_dict()
+        return signature
+
 
 class NeighborInfo(BaseModel):
     """Describes a neighbor."""
@@ -247,10 +254,11 @@ class ExtendedDeviceInfo(DeviceInfo):
     """Describes a ZHA device."""
 
     active_coordinator: bool
-    entities: dict[str, BaseEntityInfo]
+    entities: dict[tuple[Platform, str], BaseEntityInfo]
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
+    device_automation_triggers: dict[tuple[str, str], dict[str, Any]]
 
 
 class Device(LogMixin, EventBase):
@@ -471,7 +479,7 @@ class Device(LogMixin, EventBase):
         return commands
 
     @cached_property
-    def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, str]]:
+    def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, Any]]:
         """Return the device automation triggers for this device."""
         return get_device_automation_triggers(self._zigpy_device)
 
@@ -745,8 +753,8 @@ class Device(LogMixin, EventBase):
             **self.device_info.__dict__,
             active_coordinator=self.is_active_coordinator,
             entities={
-                platform_entity.unique_id: platform_entity.info_object
-                for platform_entity in self.platform_entities.values()
+                platform_entity_key: platform_entity.info_object
+                for platform_entity_key, platform_entity in self.platform_entities.items()
             },
             neighbors=[
                 NeighborInfo(
@@ -774,6 +782,7 @@ class Device(LogMixin, EventBase):
                 for route in topology.routes[self.ieee]
             ],
             endpoint_names=names,
+            device_automation_triggers=self.device_automation_triggers,
         )
 
     async def async_configure(self) -> None:
