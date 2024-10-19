@@ -285,9 +285,12 @@ class DeviceProbe:
                     )
                     continue
 
-                if entity_class is sensor.Sensor:
+                if (
+                    entity_class is sensor.Sensor
+                    and entity_metadata.device_class is not None
+                ):
                     entity_class = QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS.get(
-                        entity_metadata.device_class, entity_class
+                        entity_metadata.device_class.value, entity_class
                     )
 
                 # automatically add the attribute to ZCL_INIT_ATTRS for the cluster

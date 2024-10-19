@@ -13,6 +13,9 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, get_device
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
+from zigpy.quirks.v2.homeassistant.sensor import (
+    SensorDeviceClass as SensorDeviceClassV2,
+)
 import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
@@ -1299,7 +1302,7 @@ class TimestampCluster(CustomCluster, ManufacturerSpecificCluster):
     .sensor(
         "start_time",
         TimestampCluster.cluster_id,
-        device_class=SensorDeviceClass.TIMESTAMP,
+        device_class=SensorDeviceClassV2.TIMESTAMP,  # Use the zigpy enum
         translation_key="start_time",
         fallback_name="Start Time",
     )
