@@ -20,4 +20,4 @@ def is_sonoff_presence_sensor(cluster_handler: ClusterHandler) -> bool:
     """Return true if the manufacturer and model match known Sonoff sensor models."""
     return cluster_handler.cluster.endpoint.manufacturer in (
         "SONOFF",
-    ) and cluster_handler.cluster.endpoint.model in ("SNZB-06P",)
+    ) and cluster_handler.cluster.endpoint.model in ("SNZB-06P", "SNZB-03P")
