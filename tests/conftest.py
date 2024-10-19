@@ -1,7 +1,7 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Callable, Generator
+from collections.abc import AsyncGenerator, Callable, Generator
 from contextlib import contextmanager
 import logging
 import os
@@ -10,6 +10,7 @@ import threading
 from types import TracebackType
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import aiohttp.test_utils
 import pytest
 import zigpy
 from zigpy.application import ControllerApplication
@@ -28,10 +29,13 @@ from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
     LightOptions,
+    ServerConfiguration,
     ZHAConfiguration,
     ZHAData,
 )
 from zha.async_ import ZHAJob
+from zha.websocket.client.controller import Controller
+from zha.websocket.server.gateway import WebSocketGateway
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -253,7 +257,7 @@ def caplog_fixture(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture
 @pytest.fixture(name="zha_data")
 def zha_data_fixture() -> ZHAData:
     """Fixture representing zha configuration data."""
-
+    port = aiohttp.test_utils.unused_port()
     return ZHAData(
         config=ZHAConfiguration(
             coordinator_configuration=CoordinatorConfiguration(
@@ -269,7 +273,12 @@ def zha_data_fixture() -> ZHAData:
                 master_code="4321",
                 failed_tries=2,
             ),
-        )
+        ),
+        server_config=ServerConfiguration(
+            host="localhost",
+            port=port,
+            network_auto_start=False,
+        ),
     )
 
 
@@ -297,6 +306,28 @@ class TestGateway:
         INSTANCES.remove(self.zha_gateway)
         await self.zha_gateway.shutdown()
         await asyncio.sleep(0)
+
+
+@pytest.fixture
+async def connected_client_and_server(
+    zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
+) -> AsyncGenerator[tuple[Controller, WebSocketGateway], None]:
+    """Return the connected client and server fixture."""
+
+    application_controller_patch = patch(
+        "bellows.zigbee.application.ControllerApplication.new",
+        return_value=zigpy_app_controller,
+    )
+
+    with application_controller_patch:
+        ws_gateway = await WebSocketGateway.async_from_config(zha_data)
+        async with (
+            ws_gateway as gateway,
+            Controller(f"ws://localhost:{zha_data.server_config.port}") as controller,
+        ):
+            await controller.clients.listen()
+            yield controller, gateway
 
 
 @pytest.fixture

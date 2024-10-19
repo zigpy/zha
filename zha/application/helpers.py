@@ -316,6 +316,14 @@ class DeviceOverridesConfiguration(BaseModel):
     type: Platform
 
 
+class ServerConfiguration(BaseModel):
+    """Server configuration for zhaws."""
+
+    host: str = "0.0.0.0"
+    port: int = 8001
+    network_auto_start: bool = False
+
+
 class ZHAConfiguration(BaseModel):
     """ZHA configuration."""
 
@@ -340,6 +348,7 @@ class ZHAData:
     """ZHA data stored in `gateway.data`."""
 
     config: ZHAConfiguration
+    server_config: ServerConfiguration | None = None
     zigpy_config: dict[str, Any] = dataclasses.field(default_factory=dict)
     platforms: collections.defaultdict[Platform, list] = dataclasses.field(
         default_factory=lambda: collections.defaultdict(list)
