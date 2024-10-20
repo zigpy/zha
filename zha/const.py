@@ -13,7 +13,7 @@ MESSAGE_TYPE: Final[str] = "message_type"
 class EventTypes(StrEnum):
     """WS event types."""
 
-    CONTROLLER_EVENT = "controller_event"
+    CONTROLLER_EVENT = "zha_gateway_message"
     PLATFORM_ENTITY_EVENT = "platform_entity_event"
     RAW_ZCL_EVENT = "raw_zcl_event"
     DEVICE_EVENT = "device_event"

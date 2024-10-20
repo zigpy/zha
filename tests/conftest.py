@@ -234,7 +234,21 @@ async def zigpy_app_controller_fixture():
 
     # Create a fake coordinator device
     dev = app.add_device(nwk=app.state.node_info.nwk, ieee=app.state.node_info.ieee)
-    dev.node_desc = zdo_t.NodeDescriptor()
+    dev.node_desc = zdo_t.NodeDescriptor(
+        logical_type=zdo_t.LogicalType.Coordinator,
+        complex_descriptor_available=0,
+        user_descriptor_available=0,
+        reserved=0,
+        aps_flags=0,
+        frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+        mac_capability_flags=zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress,
+        manufacturer_code=0x1234,
+        maximum_buffer_size=127,
+        maximum_incoming_transfer_size=100,
+        server_mask=10752,
+        maximum_outgoing_transfer_size=100,
+        descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+    )
     dev.node_desc.logical_type = zdo_t.LogicalType.Coordinator
     dev.manufacturer = "Coordinator Manufacturer"
     dev.model = "Coordinator Model"
@@ -312,16 +326,24 @@ class TestGateway:
 async def connected_client_and_server(
     zha_data: ZHAData,
     zigpy_app_controller: ControllerApplication,
+    caplog: pytest.LogCaptureFixture,  # pylint: disable=unused-argument
 ) -> AsyncGenerator[tuple[Controller, WebSocketGateway], None]:
     """Return the connected client and server fixture."""
 
-    application_controller_patch = patch(
-        "bellows.zigbee.application.ControllerApplication.new",
-        return_value=zigpy_app_controller,
-    )
-
-    with application_controller_patch:
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "bellows.zigbee.application.ControllerApplication",
+            return_value=zigpy_app_controller,
+        ),
+    ):
         ws_gateway = await WebSocketGateway.async_from_config(zha_data)
+        await ws_gateway.async_initialize()
+        await ws_gateway.async_block_till_done()
+        await ws_gateway.async_initialize_devices_and_entities()
         async with (
             ws_gateway as gateway,
             Controller(f"ws://localhost:{zha_data.server_config.port}") as controller,

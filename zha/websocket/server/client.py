@@ -11,11 +11,11 @@ from typing import TYPE_CHECKING, Any, Literal
 from pydantic import BaseModel, ValidationError
 from websockets.server import WebSocketServerProtocol
 
+from zha.model import BaseEvent
 from zha.websocket.const import (
     COMMAND,
     ERROR_CODE,
     ERROR_MESSAGE,
-    EVENT_TYPE,
     MESSAGE_ID,
     MESSAGE_TYPE,
     SUCCESS,
@@ -26,7 +26,7 @@ from zha.websocket.const import (
     MessageTypes,
 )
 from zha.websocket.server.api import decorators, register_api_command
-from zha.websocket.server.api.model import WebSocketCommand
+from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
 
 if TYPE_CHECKING:
     from zha.websocket.server.gateway import WebSocketGateway
@@ -59,24 +59,28 @@ class Client:
             asyncio.create_task(self._websocket.close())
         )
 
-    def send_event(self, message: dict[str, Any]) -> None:
+    def send_event(self, message: BaseEvent) -> None:
         """Send event data to this client."""
-        message[MESSAGE_TYPE] = MessageTypes.EVENT
+        message.message_type = MessageTypes.EVENT
         self._send_data(message)
 
     def send_result_success(
-        self, command: WebSocketCommand, data: dict[str, Any] | None = None
+        self, command: WebSocketCommand, data: dict[str, Any] | BaseModel | None = None
     ) -> None:
         """Send success result prompted by a client request."""
-        message = {
-            SUCCESS: True,
-            MESSAGE_ID: command.message_id,
-            MESSAGE_TYPE: MessageTypes.RESULT,
-            COMMAND: command.command,
-        }
-        if data:
-            message.update(data)
-        self._send_data(message)
+        if data and isinstance(data, BaseModel):
+            self._send_data(data)
+        else:
+            if data is None:
+                data = {}
+            self._send_data(
+                WebSocketCommandResponse(
+                    success=True,
+                    message_id=command.message_id,
+                    command=command.command,
+                    **data,
+                )
+            )
 
     def send_result_error(
         self,
@@ -169,13 +173,13 @@ class Client:
                 asyncio.create_task(self._handle_incoming_message(message))
             )
 
-    def will_accept_message(self, message: dict[str, Any]) -> bool:
+    def will_accept_message(self, message: BaseEvent) -> bool:
         """Determine if client accepts this type of message."""
         if not self.receive_events:
             return False
 
         if (
-            message[EVENT_TYPE] == EventTypes.RAW_ZCL_EVENT
+            message.event_type == EventTypes.RAW_ZCL_EVENT
             and not self.receive_raw_zcl_events
         ):
             _LOGGER.info(
@@ -269,7 +273,7 @@ class ClientManager:
         client.disconnect()
         self._clients.remove(client)
 
-    def broadcast(self, message: dict[str, Any]) -> None:
+    def broadcast(self, message: BaseEvent) -> None:
         """Broadcast a message to all connected clients."""
         clients_to_remove = []
 

@@ -3,23 +3,23 @@
 from __future__ import annotations
 
 import asyncio
-import dataclasses
 import logging
 from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeVar, Union, cast
 
 from pydantic import Field
 from zigpy.types.named import EUI64
 
-from zha.websocket.client.model.types import (
-    Device as DeviceModel,
-    Group as GroupModel,
-    GroupMemberReference,
-)
-from zha.websocket.const import DEVICES, DURATION, GROUPS, APICommands
+from zha.websocket.const import DURATION, GROUPS, APICommands
 from zha.websocket.server.api import decorators, register_api_command
-from zha.websocket.server.api.model import WebSocketCommand
+from zha.websocket.server.api.model import (
+    GetDevicesResponse,
+    ReadClusterAttributesResponse,
+    WebSocketCommand,
+    WriteClusterAttributeResponse,
+)
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group
+from zha.zigbee.model import GroupMemberReference
 
 if TYPE_CHECKING:
     from zha.websocket.server.client import Client
@@ -103,14 +103,16 @@ async def get_devices(
 ) -> None:
     """Get Zigbee devices."""
     try:
-        response_devices: dict[str, dict] = {
-            str(ieee): DeviceModel.model_validate(
-                dataclasses.asdict(device.extended_device_info)
-            ).model_dump()
-            for ieee, device in gateway.devices.items()
-        }
-        _LOGGER.info("devices: %s", response_devices)
-        client.send_result_success(command, {DEVICES: response_devices})
+        response = GetDevicesResponse(
+            success=True,
+            devices={
+                ieee: device.extended_device_info
+                for ieee, device in gateway.devices.items()
+            },
+            message_id=command.message_id,
+        )
+        _LOGGER.info("response: %s", response)
+        client.send_result_success(command, response)
     except Exception as e:
         _LOGGER.exception("Error getting devices", exc_info=e)
         client.send_result_error(command, "Error getting devices", str(e))
@@ -149,9 +151,9 @@ async def get_groups(
     """Get Zigbee groups."""
     groups: dict[int, Any] = {}
     for group_id, group in gateway.groups.items():
-        group_data = dataclasses.asdict(group.info_object)
-        group_data["id"] = group_id
-        groups[group_id] = GroupModel.model_validate(group_data).model_dump()
+        groups[int(group_id)] = (
+            group.info_object
+        )  # maybe we should change the group_id type...
     _LOGGER.info("groups: %s", groups)
     client.send_result_success(command, {GROUPS: groups})
 
@@ -243,23 +245,23 @@ async def read_cluster_attributes(
     success, failure = await cluster.read_attributes(
         attributes, allow_cache=False, only_cache=False, manufacturer=manufacturer
     )
-    client.send_result_success(
-        command,
-        {
-            "device": {
-                "ieee": command.ieee,
-            },
-            "cluster": {
-                "id": cluster.cluster_id,
-                "endpoint_id": cluster.endpoint.endpoint_id,
-                "name": cluster.name,
-                "endpoint_attribute": cluster.ep_attribute,
-            },
-            "manufacturer_code": manufacturer,
-            "succeeded": success,
-            "failed": failure,
+
+    response = ReadClusterAttributesResponse(
+        message_id=command.message_id,
+        success=True,
+        device=device.extended_device_info,
+        cluster={
+            "id": cluster.cluster_id,
+            "name": cluster.name,
+            "type": cluster.cluster_type,
+            "endpoint_id": cluster.endpoint.endpoint_id,
+            "endpoint_attribute": cluster.ep_attribute,
         },
+        manufacturer_code=manufacturer,
+        succeeded=success,
+        failed=failure,
     )
+    client.send_result_success(command, response)
 
 
 class WriteClusterAttributeCommand(WebSocketCommand):
@@ -317,25 +319,25 @@ async def write_cluster_attribute(
         cluster_type=cluster_type,
         manufacturer=manufacturer,
     )
-    client.send_result_success(
-        command,
-        {
-            "device": {
-                "ieee": str(command.ieee),
-            },
-            "cluster": {
-                "id": cluster.cluster_id,
-                "endpoint_id": cluster.endpoint.endpoint_id,
-                "name": cluster.name,
-                "endpoint_attribute": cluster.ep_attribute,
-            },
-            "manufacturer_code": manufacturer,
-            "response": {
-                "attribute": attribute,
-                "status": response[0][0].status.name,  # type: ignore
-            },  # TODO there has to be a better way to do this
+
+    api_response = WriteClusterAttributeResponse(
+        message_id=command.message_id,
+        success=True,
+        device=device.extended_device_info,
+        cluster={
+            "id": cluster.cluster_id,
+            "name": cluster.name,
+            "type": cluster.cluster_type,
+            "endpoint_id": cluster.endpoint.endpoint_id,
+            "endpoint_attribute": cluster.ep_attribute,
         },
+        manufacturer_code=manufacturer,
+        response={
+            "attribute": attribute,
+            "status": response[0][0].status.name,  # type: ignore
+        },  # TODO there has to be a better way to do this
     )
+    client.send_result_success(command, api_response)
 
 
 class CreateGroupCommand(WebSocketCommand):
@@ -357,10 +359,7 @@ async def create_group(
     members = command.members
     group_id = command.group_id
     group: Group = await gateway.async_create_zigpy_group(group_name, members, group_id)
-    ret_group = dataclasses.asdict(group.info_object)
-    ret_group["id"] = ret_group["group_id"]
-    ret_group = GroupModel.model_validate(ret_group).model_dump()
-    client.send_result_success(command, {"group": ret_group})
+    client.send_result_success(command, {"group": group.info_object})
 
 
 class RemoveGroupsCommand(WebSocketCommand):
@@ -386,10 +385,8 @@ async def remove_groups(
     else:
         await gateway.async_remove_zigpy_group(group_ids[0])
     groups: dict[int, Any] = {}
-    for id, group in gateway.groups.items():
-        group_data = dataclasses.asdict(group.info_object)
-        group_data["id"] = group_data["group_id"]
-        groups[id] = GroupModel.model_validate(group_data).model_dump()
+    for group_id, group in gateway.groups.items():
+        groups[int(group_id)] = group.info_object
     _LOGGER.info("groups: %s", groups)
     client.send_result_success(command, {GROUPS: groups})
 
@@ -420,10 +417,7 @@ async def add_group_members(
     if not group:
         client.send_result_error(command, "G1", "ZHA Group not found")
         return
-    ret_group = dataclasses.asdict(group.info_object)
-    ret_group["id"] = ret_group["group_id"]
-    ret_group = GroupModel.model_validate(ret_group).model_dump()
-    client.send_result_success(command, {GROUP: ret_group})
+    client.send_result_success(command, {GROUP: group.info_object})
 
 
 class RemoveGroupMembersCommand(AddGroupMembersCommand):
@@ -450,10 +444,7 @@ async def remove_group_members(
     if not group:
         client.send_result_error(command, "G1", "ZHA Group not found")
         return
-    ret_group = dataclasses.asdict(group.info_object)
-    ret_group["id"] = ret_group["group_id"]
-    ret_group = GroupModel.model_validate(ret_group).model_dump()
-    client.send_result_success(command, {GROUP: ret_group})
+    client.send_result_success(command, {GROUP: group.info_object})
 
 
 def load_api(gateway: WebSocketGateway) -> None:

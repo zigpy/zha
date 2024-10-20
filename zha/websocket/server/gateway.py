@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+from time import monotonic
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Final, Literal
 
@@ -16,7 +17,9 @@ from zha.application.helpers import ZHAData
 from zha.websocket.const import APICommands
 from zha.websocket.server.api import decorators, register_api_command
 from zha.websocket.server.api.model import WebSocketCommand
+from zha.websocket.server.api.platforms.api import load_platform_entity_apis
 from zha.websocket.server.client import ClientManager
+from zha.websocket.server.gateway_api import load_api as load_zigbee_controller_api
 
 if TYPE_CHECKING:
     from zha.websocket.client import Client
@@ -62,8 +65,12 @@ class WebSocketGateway(Gateway):
         )
         if self.config.server_config.network_auto_start:
             await self.async_initialize()
-            self.on_all_events(self.client_manager.broadcast)
             await self.async_initialize_devices_and_entities()
+
+    async def async_initialize(self) -> None:
+        """Initialize controller and connect radio."""
+        await super().async_initialize()
+        self.on_all_events(self.client_manager.broadcast)
 
     async def stop_server(self) -> None:
         """Stop the websocket server."""
@@ -108,6 +115,36 @@ class WebSocketGateway(Gateway):
         self._tracked_ws_tasks.add(task)
         task.add_done_callback(self._tracked_ws_tasks.remove)
 
+    async def async_block_till_done(self, wait_background_tasks=False):
+        """Block until all pending work is done."""
+        # To flush out any call_soon_threadsafe
+        await asyncio.sleep(0.001)
+        start_time: float | None = None
+
+        while self._tracked_ws_tasks:
+            pending = [task for task in self._tracked_ws_tasks if not task.done()]
+            self._tracked_ws_tasks.clear()
+            if pending:
+                await self._await_and_log_pending(pending)
+
+                if start_time is None:
+                    # Avoid calling monotonic() until we know
+                    # we may need to start logging blocked tasks.
+                    start_time = 0
+                elif start_time == 0:
+                    # If we have waited twice then we set the start
+                    # time
+                    start_time = monotonic()
+                elif monotonic() - start_time > BLOCK_LOG_TIMEOUT:
+                    # We have waited at least three loops and new tasks
+                    # continue to block. At this point we start
+                    # logging all waiting tasks.
+                    for task in pending:
+                        _LOGGER.debug("Waiting for task: %s", task)
+            else:
+                await asyncio.sleep(0.001)
+        await super().async_block_till_done(wait_background_tasks=wait_background_tasks)
+
     async def __aenter__(self) -> WebSocketGateway:
         """Enter the context manager."""
         await self.start_server()
@@ -125,6 +162,8 @@ class WebSocketGateway(Gateway):
         from zha.websocket.server.client import load_api as load_client_api
 
         register_api_command(self, stop_server)
+        load_zigbee_controller_api(self)
+        load_platform_entity_apis(self)
         load_client_api(self)
 
 

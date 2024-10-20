@@ -647,7 +647,7 @@ def test_gateway_raw_device_initialized(
                 signature={
                     "manufacturer": "FakeManufacturer",
                     "model": "FakeModel",
-                    "node_desc": {
+                    "node_descriptor": {
                         "logical_type": LogicalType.EndDevice,
                         "complex_descriptor_available": 0,
                         "user_descriptor_available": 0,
@@ -664,9 +664,9 @@ def test_gateway_raw_device_initialized(
                     },
                     "endpoints": {
                         1: {
-                            "profile_id": 260,
-                            "device_type": zha.DeviceType.ON_OFF_SWITCH,
-                            "input_clusters": [0],
+                            "profile_id": "0x0104",
+                            "device_type": "0x0000",
+                            "input_clusters": ["0x0000"],
                             "output_clusters": [],
                         }
                     },

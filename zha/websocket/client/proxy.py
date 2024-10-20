@@ -2,22 +2,23 @@
 
 from __future__ import annotations
 
+import abc
 from typing import TYPE_CHECKING, Any
 
-from zha.event import EventBase
-from zha.websocket.client.model.events import PlatformEntityStateChangedEvent
-from zha.websocket.client.model.types import (
-    ButtonEntity,
-    Device as DeviceModel,
-    Group as GroupModel,
+from zha.application.platforms.model import (
+    BasePlatformEntity,
+    EntityStateChangedEvent,
+    GroupEntity,
 )
+from zha.event import EventBase
+from zha.zigbee.model import ExtendedDeviceInfo, GroupInfo
 
 if TYPE_CHECKING:
     from zha.websocket.client.client import Client
     from zha.websocket.client.controller import Controller
 
 
-class BaseProxyObject(EventBase):
+class BaseProxyObject(EventBase, abc.ABC):
     """BaseProxyObject for the zhaws.client."""
 
     def __init__(self, controller: Controller, client: Client):
@@ -25,7 +26,7 @@ class BaseProxyObject(EventBase):
         super().__init__()
         self._controller: Controller = controller
         self._client: Client = client
-        self._proxied_object: GroupModel | DeviceModel
+        self._proxied_object: GroupInfo | ExtendedDeviceInfo
 
     @property
     def controller(self) -> Controller:
@@ -37,43 +38,46 @@ class BaseProxyObject(EventBase):
         """Return the client."""
         return self._client
 
-    def emit_platform_entity_event(
-        self, event: PlatformEntityStateChangedEvent
-    ) -> None:
+    @abc.abstractmethod
+    def _get_entity(
+        self, event: EntityStateChangedEvent
+    ) -> BasePlatformEntity | GroupEntity:
+        """Get the entity for the event."""
+
+    def emit_platform_entity_event(self, event: EntityStateChangedEvent) -> None:
         """Proxy the firing of an entity event."""
-        entity = self._proxied_object.entities.get(
-            f"{event.platform_entity.platform}.{event.platform_entity.unique_id}"
-            if event.group is None
-            else event.platform_entity.unique_id
-        )
+        entity = self._get_entity(event)
         if entity is None:
-            if isinstance(self._proxied_object, DeviceModel):
+            if isinstance(self._proxied_object, ExtendedDeviceInfo):  # type: ignore
                 raise ValueError(
                     f"Entity not found: {event.platform_entity.unique_id}",
                 )
             return  # group entities are updated to get state when created so we may not have the entity yet
-        if not isinstance(entity, ButtonEntity):
-            entity.state = event.state
-        self.emit(f"{event.platform_entity.unique_id}_{event.event}", event)
+        entity.state = event.state
+        self.emit(f"{event.unique_id}_{event.event}", event)
 
 
 class GroupProxy(BaseProxyObject):
     """Group proxy for the zhaws.client."""
 
-    def __init__(self, group_model: GroupModel, controller: Controller, client: Client):
+    def __init__(self, group_model: GroupInfo, controller: Controller, client: Client):
         """Initialize the GroupProxy class."""
         super().__init__(controller, client)
-        self._proxied_object: GroupModel = group_model
+        self._proxied_object: GroupInfo = group_model
 
     @property
-    def group_model(self) -> GroupModel:
+    def group_model(self) -> GroupInfo:
         """Return the group model."""
         return self._proxied_object
 
     @group_model.setter
-    def group_model(self, group_model: GroupModel) -> None:
+    def group_model(self, group_model: GroupInfo) -> None:
         """Set the group model."""
         self._proxied_object = group_model
+
+    def _get_entity(self, event: EntityStateChangedEvent) -> GroupEntity:
+        """Get the entity for the event."""
+        return self._proxied_object.entities.get(event.unique_id)  # type: ignore
 
     def __repr__(self) -> str:
         """Return the string representation of the group proxy."""
@@ -84,19 +88,19 @@ class DeviceProxy(BaseProxyObject):
     """Device proxy for the zhaws.client."""
 
     def __init__(
-        self, device_model: DeviceModel, controller: Controller, client: Client
+        self, device_model: ExtendedDeviceInfo, controller: Controller, client: Client
     ):
         """Initialize the DeviceProxy class."""
         super().__init__(controller, client)
-        self._proxied_object: DeviceModel = device_model
+        self._proxied_object: ExtendedDeviceInfo = device_model
 
     @property
-    def device_model(self) -> DeviceModel:
+    def device_model(self) -> ExtendedDeviceInfo:
         """Return the device model."""
         return self._proxied_object
 
     @device_model.setter
-    def device_model(self, device_model: DeviceModel) -> None:
+    def device_model(self, device_model: ExtendedDeviceInfo) -> None:
         """Set the device model."""
         self._proxied_object = device_model
 
@@ -108,6 +112,10 @@ class DeviceProxy(BaseProxyObject):
             (key.split("~")[0], key.split("~")[1]): value
             for key, value in model_triggers.items()
         }
+
+    def _get_entity(self, event: EntityStateChangedEvent) -> BasePlatformEntity:
+        """Get the entity for the event."""
+        return self._proxied_object.entities.get((event.platform, event.unique_id))  # type: ignore
 
     def __repr__(self) -> str:
         """Return the string representation of the device proxy."""

@@ -6,8 +6,7 @@ from pydantic import RootModel, field_serializer, field_validator
 from pydantic.fields import Field
 from zigpy.types.named import EUI64
 
-from zha.websocket.client.model.commands import CommandResponses
-from zha.websocket.client.model.events import Events
+from zha.websocket.server.api.model import CommandResponses, Events
 
 
 class Message(RootModel):

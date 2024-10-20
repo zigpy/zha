@@ -4,12 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Coroutine, Iterator
 import contextlib
-from enum import StrEnum
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Literal, ParamSpec, TypedDict
+from typing import TYPE_CHECKING, Any, ParamSpec, TypedDict
 
-from pydantic import field_serializer
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl
@@ -18,7 +16,6 @@ from zigpy.zcl.foundation import (
     ConfigureReportingResponseRecord,
     Status,
     ZCLAttributeDef,
-    ZCLCommandDef,
 )
 
 from zha.application.const import (
@@ -29,7 +26,6 @@ from zha.application.helpers import safe_read
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
-from zha.model import BaseEvent, BaseModel
 from zha.zigbee.cluster_handlers.const import (
     ARGS,
     ATTRIBUTE_ID,
@@ -45,6 +41,14 @@ from zha.zigbee.cluster_handlers.const import (
     SIGNAL_ATTR_UPDATED,
     UNIQUE_ID,
     VALUE,
+)
+from zha.zigbee.cluster_handlers.model import (
+    ClusterAttributeUpdatedEvent,
+    ClusterBindEvent,
+    ClusterConfigureReportingEvent,
+    ClusterHandlerInfo,
+    ClusterHandlerStatus,
+    ClusterInfo,
 )
 
 if TYPE_CHECKING:
@@ -114,99 +118,6 @@ def parse_and_log_command(cluster_handler, tsn, command_id, args):
     return name
 
 
-class ClusterHandlerStatus(StrEnum):
-    """Status of a cluster handler."""
-
-    CREATED = "created"
-    CONFIGURED = "configured"
-    INITIALIZED = "initialized"
-
-
-class ClusterAttributeUpdatedEvent(BaseEvent):
-    """Event to signal that a cluster attribute has been updated."""
-
-    attribute_id: int
-    attribute_name: str
-    attribute_value: Any
-    cluster_handler_unique_id: str
-    cluster_id: int
-    event_type: Literal["cluster_handler_event"] = "cluster_handler_event"
-    event: Literal["cluster_handler_attribute_updated"] = (
-        "cluster_handler_attribute_updated"
-    )
-
-
-class ClusterBindEvent(BaseEvent):
-    """Event generated when the cluster is bound."""
-
-    cluster_name: str
-    cluster_id: int
-    success: bool
-    cluster_handler_unique_id: str
-    event_type: Literal["zha_channel_message"] = "zha_channel_message"
-    event: Literal["zha_channel_bind"] = "zha_channel_bind"
-
-
-class ClusterConfigureReportingEvent(BaseEvent):
-    """Event generates when a cluster configures attribute reporting."""
-
-    cluster_name: str
-    cluster_id: int
-    attributes: dict[str, dict[str, Any]]
-    cluster_handler_unique_id: str
-    event_type: Literal["zha_channel_message"] = "zha_channel_message"
-    event: Literal["zha_channel_configure_reporting"] = (
-        "zha_channel_configure_reporting"
-    )
-
-
-class ClusterInfo(BaseModel):
-    """Cluster information."""
-
-    id: int
-    name: str
-    type: str
-    commands: list[ZCLCommandDef]
-
-    @field_serializer("commands", when_used="json-unless-none", check_fields=False)
-    def serialize_commands(self, commands: list[ZCLCommandDef]):
-        """Serialize commands."""
-        converted_commands = []
-        for command in commands:
-            converted_command = {
-                "id": command.id,
-                "name": command.name,
-                "schema": {
-                    "command": command.schema.command.name,
-                    "fields": [
-                        {
-                            "name": f.name,
-                            "type": f.type.__name__,
-                            "optional": f.optional,
-                        }
-                        for f in command.schema.fields
-                    ],
-                },
-                "direction": command.direction,
-                "is_manufacturer_specific": command.is_manufacturer_specific,
-            }
-            converted_commands.append(converted_command)
-        return converted_commands
-
-
-class ClusterHandlerInfo(BaseModel):
-    """Cluster handler information."""
-
-    class_name: str
-    generic_id: str
-    endpoint_id: int
-    cluster: ClusterInfo
-    id: str
-    unique_id: str
-    status: ClusterHandlerStatus
-    value_attribute: str | None = None
-
-
 class ClusterHandler(LogMixin, EventBase):
     """Base cluster handler for a Zigbee cluster."""
 
@@ -252,7 +163,8 @@ class ClusterHandler(LogMixin, EventBase):
                 id=self._cluster.cluster_id,
                 name=self._cluster.name,
                 type="client" if self._cluster.is_client else "server",
-                commands=self._cluster.commands,
+                endpoint_id=self._cluster.endpoint.endpoint_id,
+                endpoint_attribute=self._cluster.ep_attribute,
             ),
             id=self._id,
             unique_id=self._unique_id,
