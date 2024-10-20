@@ -94,6 +94,7 @@ PRESET_NONE = "none"
 ENTITY_METADATA = "entity_metadata"
 
 ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
+REPORT_CONFIG = "REPORT_CONFIG"
 
 _ControllerClsType = type[zigpy.application.ControllerApplication]
 

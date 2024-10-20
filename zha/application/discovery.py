@@ -51,6 +51,7 @@ from zha.application.registries import (
 
 # importing cluster handlers updates registries
 from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-import
+    AttrReportConfig,
     ClusterHandler,
     closures,
     general,
@@ -306,6 +307,27 @@ class DeviceProbe:
                     )
                     cluster_handler.__dict__[zha_const.ZCL_INIT_ATTRS] = init_attrs
 
+                if (
+                    hasattr(entity_metadata, "attribute_name")
+                    and hasattr(entity_metadata, "report_config")
+                    and entity_metadata.report_config
+                ):
+                    report_config = tuple(
+                        filter(
+                            lambda cfg: cfg["attr"] != entity_metadata.attribute_name,
+                            cluster_handler.REPORT_CONFIG,
+                        )
+                    )
+                    report_config += (
+                        AttrReportConfig(
+                            attr=entity_metadata.attribute_name,
+                            config=entity_metadata.report_config,
+                        ),
+                    )
+
+                    cluster_handler.__dict__[zha_const.REPORT_CONFIG] = report_config
+
+                endpoint.claim_cluster_handlers([cluster_handler])
                 endpoint.async_new_entity(
                     platform=platform,
                     entity_class=entity_class,
