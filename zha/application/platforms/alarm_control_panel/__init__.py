@@ -47,6 +47,7 @@ class AlarmControlPanelEntityInfo(BaseEntityInfo):
     code_arm_required: bool
     code_format: CodeFormat
     supported_features: int
+    max_invalid_tries: int
     translation_key: str
 
 
@@ -86,6 +87,7 @@ class AlarmControlPanel(PlatformEntity):
             code_arm_required=self.code_arm_required,
             code_format=self.code_format,
             supported_features=self.supported_features,
+            max_invalid_tries=self._cluster_handler.max_invalid_tries,
         )
 
     @property

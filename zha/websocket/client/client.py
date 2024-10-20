@@ -14,9 +14,12 @@ from aiohttp.http_websocket import WSMsgType
 from async_timeout import timeout
 
 from zha.event import EventBase
-from zha.websocket.client.model.commands import CommandResponse, ErrorResponse
 from zha.websocket.client.model.messages import Message
-from zha.websocket.server.api.model import WebSocketCommand
+from zha.websocket.server.api.model import (
+    ErrorResponse,
+    WebSocketCommand,
+    WebSocketCommandResponse,
+)
 
 SIZE_PARSE_JSON_EXECUTOR = 8192
 _LOGGER = logging.getLogger(__package__)
@@ -76,9 +79,9 @@ class Client(EventBase):
     async def async_send_command(
         self,
         command: WebSocketCommand,
-    ) -> CommandResponse:
+    ) -> WebSocketCommandResponse:
         """Send a command and get a response."""
-        future: asyncio.Future[CommandResponse] = self._loop.create_future()
+        future: asyncio.Future[WebSocketCommandResponse] = self._loop.create_future()
         message_id = command.message_id = self.new_message_id()
         self._result_futures[message_id] = future
 
@@ -90,13 +93,13 @@ class Client(EventBase):
                 return await future
         except TimeoutError:
             _LOGGER.exception("Timeout waiting for response")
-            return CommandResponse.model_validate(
-                {"message_id": message_id, "success": False}
+            return WebSocketCommandResponse.model_validate(
+                {"message_id": message_id, "success": False, "command": command.command}
             )
         except Exception as err:
             _LOGGER.exception("Error sending command", exc_info=err)
-            return CommandResponse.model_validate(
-                {"message_id": message_id, "success": False}
+            return WebSocketCommandResponse.model_validate(
+                {"message_id": message_id, "success": False, "command": command.command}
             )
         finally:
             self._result_futures.pop(message_id)

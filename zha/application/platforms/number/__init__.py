@@ -50,7 +50,7 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 class NumberEntityInfo(BaseEntityInfo):
     """Number entity info."""
 
-    engineering_units: int
+    engineering_units: int | None
     application_type: int | None
     min_value: float | None
     max_value: float | None

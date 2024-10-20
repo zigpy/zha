@@ -13,6 +13,8 @@ from pydantic import (
 )
 from zigpy.types.named import EUI64, NWK
 
+from zha.event import EventBase
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -72,14 +74,18 @@ class BaseModel(PydanticBaseModel):
     @field_serializer("ieee", "device_ieee", check_fields=False)
     def serialize_ieee(self, ieee: EUI64):
         """Customize how ieee is serialized."""
-        return str(ieee)
+        if ieee is not None:
+            return str(ieee)
+        return ieee
 
     @field_serializer(
         "nwk", "dest_nwk", "next_hop", when_used="json", check_fields=False
     )
     def serialize_nwk(self, nwk: NWK):
         """Serialize nwk as hex string."""
-        return repr(nwk)
+        if nwk is not None:
+            return repr(nwk)
+        return nwk
 
 
 class BaseEvent(BaseModel):
@@ -88,3 +94,7 @@ class BaseEvent(BaseModel):
     message_type: Literal["event"] = "event"
     event_type: str
     event: str
+
+
+class BaseEventedModel(EventBase, BaseModel):
+    """Base evented model."""

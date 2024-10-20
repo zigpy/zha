@@ -9,18 +9,8 @@ from aiohttp import ClientSession
 from async_timeout import timeout
 from zigpy.types.named import EUI64
 
-from zha.event import EventBase
-from zha.websocket.client.client import Client
-from zha.websocket.client.helpers import (
-    ClientHelper,
-    DeviceHelper,
-    GroupHelper,
-    NetworkHelper,
-    ServerHelper,
-)
-from zha.websocket.client.model.commands import CommandResponse
-from zha.websocket.client.model.events import (
-    DeviceConfiguredEvent,
+from zha.application.gateway import RawDeviceInitializedEvent
+from zha.application.model import (
     DeviceFullyInitializedEvent,
     DeviceJoinedEvent,
     DeviceLeftEvent,
@@ -29,13 +19,33 @@ from zha.websocket.client.model.events import (
     GroupMemberAddedEvent,
     GroupMemberRemovedEvent,
     GroupRemovedEvent,
-    PlatformEntityStateChangedEvent,
-    RawDeviceInitializedEvent,
-    ZHAEvent,
+)
+from zha.application.platforms.model import EntityStateChangedEvent
+from zha.event import EventBase
+from zha.websocket.client.client import Client
+from zha.websocket.client.helpers import (
+    AlarmControlPanelHelper,
+    ButtonHelper,
+    ClientHelper,
+    ClimateHelper,
+    CoverHelper,
+    DeviceHelper,
+    FanHelper,
+    GroupHelper,
+    LightHelper,
+    LockHelper,
+    NetworkHelper,
+    NumberHelper,
+    PlatformEntityHelper,
+    SelectHelper,
+    ServerHelper,
+    SirenHelper,
+    SwitchHelper,
 )
 from zha.websocket.client.proxy import DeviceProxy, GroupProxy
-from zha.websocket.const import ControllerEvents, EventTypes
-from zha.websocket.server.api.model import WebSocketCommand
+from zha.websocket.const import ControllerEvents
+from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
+from zha.zigbee.model import ZHAEvent
 
 CONNECT_TIMEOUT = 10
 
@@ -55,6 +65,21 @@ class Controller(EventBase):
         self._devices: dict[EUI64, DeviceProxy] = {}
         self._groups: dict[int, GroupProxy] = {}
 
+        # set up all of the helper objects
+        self.lights: LightHelper = LightHelper(self._client)
+        self.switches: SwitchHelper = SwitchHelper(self._client)
+        self.sirens: SirenHelper = SirenHelper(self._client)
+        self.buttons: ButtonHelper = ButtonHelper(self._client)
+        self.covers: CoverHelper = CoverHelper(self._client)
+        self.fans: FanHelper = FanHelper(self._client)
+        self.locks: LockHelper = LockHelper(self._client)
+        self.numbers: NumberHelper = NumberHelper(self._client)
+        self.selects: SelectHelper = SelectHelper(self._client)
+        self.thermostats: ClimateHelper = ClimateHelper(self._client)
+        self.alarm_control_panels: AlarmControlPanelHelper = AlarmControlPanelHelper(
+            self._client
+        )
+        self.entities: PlatformEntityHelper = PlatformEntityHelper(self._client)
         self.clients: ClientHelper = ClientHelper(self._client)
         self.groups_helper: GroupHelper = GroupHelper(self._client)
         self.devices_helper: DeviceHelper = DeviceHelper(self._client)
@@ -62,11 +87,7 @@ class Controller(EventBase):
         self.server_helper: ServerHelper = ServerHelper(self._client)
 
         # subscribe to event types we care about
-        self._client.on_event(
-            EventTypes.PLATFORM_ENTITY_EVENT, self._handle_event_protocol
-        )
-        self._client.on_event(EventTypes.DEVICE_EVENT, self._handle_event_protocol)
-        self._client.on_event(EventTypes.CONTROLLER_EVENT, self._handle_event_protocol)
+        self._client.on_all_events(self._handle_event_protocol)
 
     @property
     def client(self) -> Client:
@@ -110,7 +131,7 @@ class Controller(EventBase):
         """Disconnect from the websocket server."""
         await self.disconnect()
 
-    async def send_command(self, command: WebSocketCommand) -> CommandResponse:
+    async def send_command(self, command: WebSocketCommand) -> WebSocketCommandResponse:
         """Send a command and get a response."""
         return await self._client.async_send_command(command)
 
@@ -126,19 +147,17 @@ class Controller(EventBase):
         for group_id, group in response_groups.items():
             self._groups[group_id] = GroupProxy(group, self, self._client)
 
-    def handle_platform_entity_state_changed(
-        self, event: PlatformEntityStateChangedEvent
-    ) -> None:
+    def handle_state_changed(self, event: EntityStateChangedEvent) -> None:
         """Handle a platform_entity_event from the websocket server."""
         _LOGGER.debug("platform_entity_event: %s", event)
-        if event.device:
-            device = self.devices.get(event.device.ieee)
+        if event.device_ieee:
+            device = self.devices.get(event.device_ieee)
             if device is None:
                 _LOGGER.warning("Received event from unknown device: %s", event)
                 return
             device.emit_platform_entity_event(event)
-        elif event.group:
-            group = self.groups.get(event.group.id)
+        elif event.group_id:
+            group = self.groups.get(event.group_id)
             if not group:
                 _LOGGER.warning("Received event from unknown group: %s", event)
                 return
@@ -159,25 +178,25 @@ class Controller(EventBase):
         At this point, no information about the device is known other than its
         address
         """
-        _LOGGER.info("Device %s - %s joined", event.ieee, event.nwk)
+        _LOGGER.info(
+            "Device %s - %s joined", event.device_info.ieee, event.device_info.nwk
+        )
         self.emit(ControllerEvents.DEVICE_JOINED, event)
 
     def handle_raw_device_initialized(self, event: RawDeviceInitializedEvent) -> None:
         """Handle a device initialization without quirks loaded."""
-        _LOGGER.info("Device %s - %s raw device initialized", event.ieee, event.nwk)
+        _LOGGER.info(
+            "Device %s - %s raw device initialized",
+            event.device_info.ieee,
+            event.device_info.nwk,
+        )
         self.emit(ControllerEvents.RAW_DEVICE_INITIALIZED, event)
-
-    def handle_device_configured(self, event: DeviceConfiguredEvent) -> None:
-        """Handle device configured event."""
-        device = event.device
-        _LOGGER.info("Device %s - %s configured", device.ieee, device.nwk)
-        self.emit(ControllerEvents.DEVICE_CONFIGURED, event)
 
     def handle_device_fully_initialized(
         self, event: DeviceFullyInitializedEvent
     ) -> None:
         """Handle device joined and basic information discovered."""
-        device_model = event.device
+        device_model = event.device_info
         _LOGGER.info("Device %s - %s initialized", device_model.ieee, device_model.nwk)
         if device_model.ieee in self.devices:
             self.devices[device_model.ieee].device_model = device_model
@@ -194,7 +213,7 @@ class Controller(EventBase):
 
     def handle_device_removed(self, event: DeviceRemovedEvent) -> None:
         """Handle device being removed from the network."""
-        device = event.device
+        device = event.device_info
         _LOGGER.info(
             "Device %s - %s has been removed from the network", device.ieee, device.nwk
         )
@@ -203,26 +222,28 @@ class Controller(EventBase):
 
     def handle_group_member_removed(self, event: GroupMemberRemovedEvent) -> None:
         """Handle group member removed event."""
-        if event.group.id in self.groups:
-            self.groups[event.group.id].group_model = event.group
+        if event.group_info.group_id in self.groups:
+            self.groups[event.group_info.group_id].group_model = event.group_info
         self.emit(ControllerEvents.GROUP_MEMBER_REMOVED, event)
 
     def handle_group_member_added(self, event: GroupMemberAddedEvent) -> None:
         """Handle group member added event."""
-        if event.group.id in self.groups:
-            self.groups[event.group.id].group_model = event.group
+        if event.group_info.group_id in self.groups:
+            self.groups[event.group_info.group_id].group_model = event.group_info
         self.emit(ControllerEvents.GROUP_MEMBER_ADDED, event)
 
     def handle_group_added(self, event: GroupAddedEvent) -> None:
         """Handle group added event."""
-        if event.group.id in self.groups:
-            self.groups[event.group.id].group_model = event.group
+        if event.group_info.group_id in self.groups:
+            self.groups[event.group_info.group_id].group_model = event.group_info
         else:
-            self.groups[event.group.id] = GroupProxy(event.group, self, self._client)
+            self.groups[event.group_info.group_id] = GroupProxy(
+                event.group_info, self, self._client
+            )
         self.emit(ControllerEvents.GROUP_ADDED, event)
 
     def handle_group_removed(self, event: GroupRemovedEvent) -> None:
         """Handle group removed event."""
-        if event.group.id in self.groups:
-            self.groups.pop(event.group.id)
+        if event.group_info.group_id in self.groups:
+            self.groups.pop(event.group_info.group_id)
         self.emit(ControllerEvents.GROUP_REMOVED, event)

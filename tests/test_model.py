@@ -26,7 +26,7 @@ def test_ser_deser_zha_event():
 
     assert zha_event.model_dump() == {
         "message_type": "event",
-        "event_type": "zha_event",
+        "event_type": "device_event",
         "event": "zha_event",
         "device_ieee": "00:00:00:00:00:00:00:00",
         "unique_id": "00:00:00:00:00:00:00:00",
@@ -35,7 +35,7 @@ def test_ser_deser_zha_event():
 
     assert (
         zha_event.model_dump_json()
-        == '{"message_type":"event","event_type":"zha_event","event":"zha_event",'
+        == '{"message_type":"event","event_type":"device_event","event":"zha_event",'
         '"device_ieee":"00:00:00:00:00:00:00:00","unique_id":"00:00:00:00:00:00:00:00","data":{"key":"value"}}'
     )
 

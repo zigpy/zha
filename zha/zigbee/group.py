@@ -11,15 +11,10 @@ from typing import TYPE_CHECKING, Any
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.platforms import (
-    BaseEntityInfo,
-    EntityStateChangedEvent,
-    PlatformEntity,
-)
+from zha.application.platforms import EntityStateChangedEvent, PlatformEntity
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
-from zha.model import BaseModel
-from zha.zigbee.device import ExtendedDeviceInfo
+from zha.zigbee.model import GroupInfo, GroupMemberInfo, GroupMemberReference
 
 if TYPE_CHECKING:
     from zigpy.group import Group as ZigpyGroup, GroupEndpoint
@@ -29,39 +24,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class GroupMemberReference(BaseModel):
-    """Describes a group member."""
-
-    ieee: EUI64
-    endpoint_id: int
-
-
-class GroupEntityReference(BaseModel):
-    """Reference to a group entity."""
-
-    entity_id: str
-    name: str | None = None
-    original_name: str | None = None
-
-
-class GroupMemberInfo(BaseModel):
-    """Describes a group member."""
-
-    ieee: EUI64
-    endpoint_id: int
-    device_info: ExtendedDeviceInfo
-    entities: dict[str, BaseEntityInfo]
-
-
-class GroupInfo(BaseModel):
-    """Describes a group."""
-
-    group_id: int
-    name: str
-    members: list[GroupMemberInfo]
-    entities: dict[str, BaseEntityInfo]
 
 
 class GroupMember(LogMixin):
@@ -101,7 +63,7 @@ class GroupMember(LogMixin):
             endpoint_id=self.endpoint_id,
             device_info=self.device.extended_device_info,
             entities={
-                entity.unique_id: entity.info_object
+                entity.unique_id: entity.info_object.__dict__
                 for entity in self.associated_entities
             },
         )
@@ -202,7 +164,7 @@ class Group(LogMixin):
             name=self.name,
             members=[member.member_info for member in self.members],
             entities={
-                unique_id: entity.info_object
+                unique_id: entity.info_object.__dict__
                 for unique_id, entity in self._group_entities.items()
             },
         )

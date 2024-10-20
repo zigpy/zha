@@ -5,21 +5,25 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from contextlib import suppress
-from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Literal, Optional, final
+from typing import TYPE_CHECKING, Any, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
-from zigpy.types.named import EUI64
 
 from zha.application import Platform
+from zha.application.platforms.model import (
+    BaseEntityInfo,
+    BaseIdentifiers,
+    EntityCategory,
+    EntityStateChangedEvent,
+    GroupEntityIdentifiers,
+    PlatformEntityIdentifiers,
+)
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
-from zha.model import BaseEvent, BaseModel
-from zha.zigbee.cluster_handlers import ClusterHandlerInfo
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -31,73 +35,6 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
-
-
-class EntityCategory(StrEnum):
-    """Category of an entity."""
-
-    # Config: An entity which allows changing the configuration of a device.
-    CONFIG = "config"
-
-    # Diagnostic: An entity exposing some configuration parameter,
-    # or diagnostics of a device.
-    DIAGNOSTIC = "diagnostic"
-
-
-class BaseEntityInfo(BaseModel):
-    """Information about a base entity."""
-
-    platform: Platform
-    unique_id: str
-    class_name: str
-    translation_key: str | None
-    device_class: str | None
-    state_class: str | None
-    entity_category: str | None
-    entity_registry_enabled_default: bool
-    enabled: bool = True
-    fallback_name: str | None
-
-    # For platform entities
-    cluster_handlers: list[ClusterHandlerInfo]
-    device_ieee: EUI64 | None
-    endpoint_id: int | None
-    available: bool | None
-
-    # For group entities
-    group_id: int | None
-
-
-class BaseIdentifiers(BaseModel):
-    """Identifiers for the base entity."""
-
-    unique_id: str
-    platform: Platform
-
-
-class PlatformEntityIdentifiers(BaseIdentifiers):
-    """Identifiers for the platform entity."""
-
-    device_ieee: EUI64
-    endpoint_id: int
-
-
-class GroupEntityIdentifiers(BaseIdentifiers):
-    """Identifiers for the group entity."""
-
-    group_id: int
-
-
-class EntityStateChangedEvent(BaseEvent):
-    """Event for when an entity state changes."""
-
-    event_type: Literal["entity"] = "entity"
-    event: Literal["state_changed"] = "state_changed"
-    platform: Platform
-    unique_id: str
-    device_ieee: Optional[EUI64] = None
-    endpoint_id: Optional[int] = None
-    group_id: Optional[int] = None
 
 
 class BaseEntity(LogMixin, EventBase):
@@ -214,6 +151,7 @@ class BaseEntity(LogMixin, EventBase):
             available=None,
             # Set by group entities
             group_id=None,
+            state=self.state,
         )
 
     @property
@@ -260,7 +198,8 @@ class BaseEntity(LogMixin, EventBase):
         state = self.state
         if self.__previous_state != state:
             self.emit(
-                STATE_CHANGED, EntityStateChangedEvent(**self.identifiers.__dict__)
+                STATE_CHANGED,
+                EntityStateChangedEvent(state=self.state, **self.identifiers.__dict__),
             )
             self.__previous_state = state
 
@@ -410,6 +349,17 @@ class PlatformEntity(BaseEntity):
         state["available"] = self.available
         return state
 
+    def maybe_emit_state_changed_event(self) -> None:
+        """Send the state of this platform entity."""
+        from zha.websocket.server.gateway import WebSocketGateway
+
+        super().maybe_emit_state_changed_event()
+        if isinstance(self.device.gateway, WebSocketGateway):
+            self.device.gateway.emit(
+                STATE_CHANGED,
+                EntityStateChangedEvent(state=self.state, **self.identifiers.__dict__),
+            )
+
     async def async_update(self) -> None:
         """Retrieve latest state."""
         self.debug("polling current state")
@@ -482,6 +432,17 @@ class GroupEntity(BaseEntity):
     def group(self) -> Group:
         """Return the group."""
         return self._group
+
+    def maybe_emit_state_changed_event(self) -> None:
+        """Send the state of this platform entity."""
+        from zha.websocket.server.gateway import WebSocketGateway
+
+        super().maybe_emit_state_changed_event()
+        if isinstance(self.group.gateway, WebSocketGateway):
+            self.group.gateway.emit(
+                STATE_CHANGED,
+                EntityStateChangedEvent(state=self.state, **self.identifiers.__dict__),
+            )
 
     def debounced_update(self, _: Any | None = None) -> None:
         """Debounce updating group entity from member entity updates."""
