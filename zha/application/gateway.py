@@ -4,12 +4,10 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import suppress
-from dataclasses import dataclass
 from datetime import timedelta
-from enum import Enum
 import logging
 import time
-from typing import Any, Final, Self, TypeVar, cast
+from typing import Final, Self, TypeVar, cast
 
 from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
@@ -26,144 +24,58 @@ import zigpy.group
 from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
 from zigpy.types.named import EUI64
+from zigpy.zdo import ZDO
 
 from zha.application import discovery
 from zha.application.const import (
+    ATTR_DEVICE_TYPE,
+    ATTR_ENDPOINTS,
+    ATTR_MANUFACTURER,
+    ATTR_MODEL,
+    ATTR_NODE_DESCRIPTOR,
+    ATTR_PROFILE_ID,
     CONF_USE_THREAD,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
-    ZHA_GW_MSG,
     ZHA_GW_MSG_CONNECTION_LOST,
     ZHA_GW_MSG_DEVICE_FULL_INIT,
     ZHA_GW_MSG_DEVICE_JOINED,
     ZHA_GW_MSG_DEVICE_LEFT,
     ZHA_GW_MSG_DEVICE_REMOVED,
-    ZHA_GW_MSG_GROUP_ADDED,
-    ZHA_GW_MSG_GROUP_MEMBER_ADDED,
-    ZHA_GW_MSG_GROUP_MEMBER_REMOVED,
-    ZHA_GW_MSG_GROUP_REMOVED,
     ZHA_GW_MSG_RAW_INIT,
     RadioType,
 )
 from zha.application.helpers import DeviceAvailabilityChecker, GlobalUpdater, ZHAData
+from zha.application.model import (
+    ConnectionLostEvent,
+    DeviceFullyInitializedEvent,
+    DeviceJoinedDeviceInfo,
+    DeviceJoinedEvent,
+    DeviceLeftEvent,
+    DevicePairingStatus,
+    DeviceRemovedEvent,
+    ExtendedDeviceInfoWithPairingStatus,
+    GroupAddedEvent,
+    GroupMemberAddedEvent,
+    GroupMemberRemovedEvent,
+    GroupRemovedEvent,
+    RawDeviceInitializedDeviceInfo,
+    RawDeviceInitializedEvent,
+)
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
-from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
+from zha.zigbee.device import Device
+from zha.zigbee.endpoint import ATTR_IN_CLUSTERS, ATTR_OUT_CLUSTERS
+from zha.zigbee.group import Group, GroupMemberReference
+from zha.zigbee.model import DeviceStatus
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
-
-
-class DevicePairingStatus(Enum):
-    """Status of a device."""
-
-    PAIRED = 1
-    INTERVIEW_COMPLETE = 2
-    CONFIGURED = 3
-    INITIALIZED = 4
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceInfoWithPairingStatus(DeviceInfo):
-    """Information about a device with pairing status."""
-
-    pairing_status: DevicePairingStatus
-
-
-@dataclass(kw_only=True, frozen=True)
-class ExtendedDeviceInfoWithPairingStatus(ExtendedDeviceInfo):
-    """Information about a device with pairing status."""
-
-    pairing_status: DevicePairingStatus
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceJoinedDeviceInfo:
-    """Information about a device."""
-
-    ieee: str
-    nwk: int
-    pairing_status: DevicePairingStatus
-
-
-@dataclass(kw_only=True, frozen=True)
-class ConnectionLostEvent:
-    """Event to signal that the connection to the radio has been lost."""
-
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_CONNECTION_LOST
-    exception: Exception | None = None
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceJoinedEvent:
-    """Event to signal that a device has joined the network."""
-
-    device_info: DeviceJoinedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_JOINED
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceLeftEvent:
-    """Event to signal that a device has left the network."""
-
-    ieee: EUI64
-    nwk: int
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_LEFT
-
-
-@dataclass(kw_only=True, frozen=True)
-class RawDeviceInitializedDeviceInfo(DeviceJoinedDeviceInfo):
-    """Information about a device that has been initialized without quirks loaded."""
-
-    model: str
-    manufacturer: str
-    signature: dict[str, Any]
-
-
-@dataclass(kw_only=True, frozen=True)
-class RawDeviceInitializedEvent:
-    """Event to signal that a device has been initialized without quirks loaded."""
-
-    device_info: RawDeviceInitializedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_RAW_INIT
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceFullInitEvent:
-    """Event to signal that a device has been fully initialized."""
-
-    device_info: ExtendedDeviceInfoWithPairingStatus
-    new_join: bool = False
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_FULL_INIT
-
-
-@dataclass(kw_only=True, frozen=True)
-class GroupEvent:
-    """Event to signal a group event."""
-
-    event: str
-    group_info: GroupInfo
-    event_type: Final[str] = ZHA_GW_MSG
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceRemovedEvent:
-    """Event to signal that a device has been removed."""
-
-    device_info: ExtendedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_REMOVED
 
 
 class Gateway(AsyncUtilMixin, EventBase):
@@ -433,7 +345,33 @@ class Gateway(AsyncUtilMixin, EventBase):
                     manufacturer=device.manufacturer
                     if device.manufacturer
                     else UNKNOWN_MANUFACTURER,
-                    signature=device.get_signature(),
+                    signature={
+                        ATTR_NODE_DESCRIPTOR: device.node_desc.as_dict(),
+                        ATTR_ENDPOINTS: {
+                            ep_id: {
+                                ATTR_PROFILE_ID: f"0x{endpoint.profile_id:04x}"
+                                if endpoint.profile_id is not None
+                                else "",
+                                ATTR_DEVICE_TYPE: f"0x{endpoint.device_type:04x}"
+                                if endpoint.device_type is not None
+                                else "",
+                                ATTR_IN_CLUSTERS: [
+                                    f"0x{cluster_id:04x}"
+                                    for cluster_id in sorted(endpoint.in_clusters)
+                                ],
+                                ATTR_OUT_CLUSTERS: [
+                                    f"0x{cluster_id:04x}"
+                                    for cluster_id in sorted(endpoint.out_clusters)
+                                ],
+                            }
+                            for ep_id, endpoint in device.endpoints.items()
+                            if not isinstance(endpoint, ZDO)
+                        },
+                        ATTR_MANUFACTURER: device.manufacturer
+                        if device.manufacturer
+                        else UNKNOWN_MANUFACTURER,
+                        ATTR_MODEL: device.model if device.model else UNKNOWN_MODEL,
+                    },
                 )
             ),
         )
@@ -472,7 +410,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group.clear_caches()
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
+        self._emit_group_gateway_message(zigpy_group, GroupMemberRemovedEvent)
 
     def group_member_added(
         self, zigpy_group: zigpy.group.Group, endpoint: zigpy.endpoint.Endpoint
@@ -483,35 +421,38 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group.clear_caches()
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_added - endpoint: %s", endpoint)
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
+        self._emit_group_gateway_message(zigpy_group, GroupMemberAddedEvent)
 
     def group_added(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group added event."""
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.info("group_added")
         # need to dispatch for entity creation here
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_ADDED)
+        self._emit_group_gateway_message(zigpy_group, GroupAddedEvent)
 
     def group_removed(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group removed event."""
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_REMOVED)
+        self._emit_group_gateway_message(zigpy_group, GroupRemovedEvent)
         zha_group = self._groups.pop(zigpy_group.group_id)
         zha_group.info("group_removed")
 
     def _emit_group_gateway_message(  # pylint: disable=unused-argument
         self,
         zigpy_group: zigpy.group.Group,
-        gateway_message_type: str,
+        gateway_message_type: GroupRemovedEvent
+        | GroupAddedEvent
+        | GroupMemberAddedEvent
+        | GroupMemberRemovedEvent,
     ) -> None:
         """Send the gateway event for a zigpy group event."""
         zha_group = self._groups.get(zigpy_group.group_id)
         if zha_group is not None:
+            response = gateway_message_type(
+                group_info=zha_group.info_object,
+            )
             self.emit(
-                gateway_message_type,
-                GroupEvent(
-                    event=gateway_message_type,
-                    group_info=zha_group.info_object,
-                ),
+                response.event,
+                response,
             )
 
     def device_removed(self, device: zigpy.device.Device) -> None:
@@ -619,7 +560,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info),
+            DeviceFullyInitializedEvent(device_info=device_info),
         )
 
     async def _async_device_joined(self, zha_device: Device) -> None:
@@ -634,7 +575,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.create_platform_entities()
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info, new_join=True),
+            DeviceFullyInitializedEvent(device_info=device_info, new_join=True),
         )
 
     async def _async_device_rejoined(self, zha_device: Device) -> None:
@@ -652,7 +593,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info),
+            DeviceFullyInitializedEvent(device_info=device_info),
         )
         # force async_initialize() to fire so don't explicitly call it
         zha_device.available = False

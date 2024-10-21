@@ -542,3 +542,67 @@ def create_mock_zigpy_device(
                     cluster._attr_cache[attr_id] = value
 
     return device
+
+
+def find_entity_id(
+    domain: str, zha_device: Device, qualifier: Optional[str] = None
+) -> Optional[str]:
+    """Find the entity id under the testing.
+
+    This is used to get the entity id in order to get the state from the state
+    machine so that we can test state changes.
+    """
+    entities = find_entity_ids(domain, zha_device)
+    if not entities:
+        return None
+    if qualifier:
+        for entity_id in entities:
+            if qualifier in entity_id:
+                return entity_id
+        return None
+    else:
+        return entities[0]
+
+
+def find_entity_ids(
+    domain: str, zha_device: Device, omit: Optional[list[str]] = None
+) -> list[str]:
+    """Find the entity ids under the testing.
+
+    This is used to get the entity id in order to get the state from the state
+    machine so that we can test state changes.
+    """
+    head = f"{domain}.{str(zha_device.ieee)}"
+
+    entity_ids = [
+        f"{entity.PLATFORM}.{entity.unique_id}"
+        for entity in zha_device.platform_entities.values()
+    ]
+
+    matches = []
+    res = []
+    for entity_id in entity_ids:
+        if entity_id.startswith(head):
+            matches.append(entity_id)
+
+    if omit:
+        for entity_id in matches:
+            skip = False
+            for o in omit:
+                if o in entity_id:
+                    skip = True
+                    break
+            if not skip:
+                res.append(entity_id)
+    else:
+        res = matches
+    return res
+
+
+def async_find_group_entity_id(domain: str, group: Group) -> Optional[str]:
+    """Find the group entity id under test."""
+    entity_id = f"{domain}_zha_group_0x{group.group_id:04x}"
+
+    if entity_id in group.group_entities:
+        return entity_id
+    return None

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from dataclasses import dataclass
 from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any
@@ -12,14 +11,10 @@ from typing import TYPE_CHECKING, Any
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.platforms import (
-    BaseEntityInfo,
-    EntityStateChangedEvent,
-    PlatformEntity,
-)
+from zha.application.platforms import EntityStateChangedEvent, PlatformEntity
 from zha.const import STATE_CHANGED
 from zha.mixins import LogMixin
-from zha.zigbee.device import ExtendedDeviceInfo
+from zha.zigbee.model import GroupInfo, GroupMemberInfo, GroupMemberReference
 
 if TYPE_CHECKING:
     from zigpy.group import Group as ZigpyGroup, GroupEndpoint
@@ -29,43 +24,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupMemberReference:
-    """Describes a group member."""
-
-    ieee: EUI64
-    endpoint_id: int
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupEntityReference:
-    """Reference to a group entity."""
-
-    entity_id: int
-    name: str | None = None
-    original_name: str | None = None
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupMemberInfo:
-    """Describes a group member."""
-
-    ieee: EUI64
-    endpoint_id: int
-    device_info: ExtendedDeviceInfo
-    entities: dict[str, BaseEntityInfo]
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupInfo:
-    """Describes a group."""
-
-    group_id: int
-    name: str
-    members: list[GroupMemberInfo]
-    entities: dict[str, BaseEntityInfo]
 
 
 class GroupMember(LogMixin):
@@ -105,7 +63,7 @@ class GroupMember(LogMixin):
             endpoint_id=self.endpoint_id,
             device_info=self.device.extended_device_info,
             entities={
-                entity.unique_id: entity.info_object
+                entity.unique_id: entity.info_object.__dict__
                 for entity in self.associated_entities
             },
         )
@@ -206,7 +164,7 @@ class Group(LogMixin):
             name=self.name,
             members=[member.member_info for member in self.members],
             entities={
-                unique_id: entity.info_object
+                unique_id: entity.info_object.__dict__
                 for unique_id, entity in self._group_entities.items()
             },
         )

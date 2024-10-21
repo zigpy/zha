@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import IntFlag, StrEnum
 import functools
 import itertools
@@ -64,7 +63,6 @@ ATTR_RELEASE_URL: Final = "release_url"
 ATTR_VERSION: Final = "version"
 
 
-@dataclass(frozen=True, kw_only=True)
 class UpdateEntityInfo(BaseEntityInfo):
     """Update entity info."""
 

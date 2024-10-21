@@ -14,6 +14,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
+from pydantic import Field
 import voluptuous as vol
 import zigpy.exceptions
 import zigpy.types
@@ -31,6 +32,7 @@ from zha.application.const import (
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
+from zha.model import BaseModel
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
@@ -261,81 +263,82 @@ def qr_to_install_code(qr_code: str) -> tuple[zigpy.types.EUI64, zigpy.types.Key
     raise vol.Invalid(f"couldn't convert qr code: {qr_code}")
 
 
-@dataclass(kw_only=True, slots=True)
-class LightOptions:
+class LightOptions(BaseModel):
     """ZHA light options."""
 
-    default_light_transition: float = dataclasses.field(default=0)
-    enable_enhanced_light_transition: bool = dataclasses.field(default=False)
-    enable_light_transitioning_flag: bool = dataclasses.field(default=True)
-    always_prefer_xy_color_mode: bool = dataclasses.field(default=True)
-    group_members_assume_state: bool = dataclasses.field(default=True)
+    default_light_transition: float = Field(default=0)
+    enable_enhanced_light_transition: bool = Field(default=False)
+    enable_light_transitioning_flag: bool = Field(default=True)
+    always_prefer_xy_color_mode: bool = Field(default=True)
+    group_members_assume_state: bool = Field(default=True)
 
 
-@dataclass(kw_only=True, slots=True)
-class DeviceOptions:
+class DeviceOptions(BaseModel):
     """ZHA device options."""
 
-    enable_identify_on_join: bool = dataclasses.field(default=True)
-    consider_unavailable_mains: int = dataclasses.field(
+    enable_identify_on_join: bool = Field(default=True)
+    consider_unavailable_mains: int = Field(
         default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS
     )
-    consider_unavailable_battery: int = dataclasses.field(
+    consider_unavailable_battery: int = Field(
         default=CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY
     )
-    enable_mains_startup_polling: bool = dataclasses.field(default=True)
+    enable_mains_startup_polling: bool = Field(default=True)
 
 
-@dataclass(kw_only=True, slots=True)
-class AlarmControlPanelOptions:
+class AlarmControlPanelOptions(BaseModel):
     """ZHA alarm control panel options."""
 
-    master_code: str = dataclasses.field(default="1234")
-    failed_tries: int = dataclasses.field(default=3)
-    arm_requires_code: bool = dataclasses.field(default=False)
+    master_code: str = Field(default="1234")
+    failed_tries: int = Field(default=3)
+    arm_requires_code: bool = Field(default=False)
 
 
-@dataclass(kw_only=True, slots=True)
-class CoordinatorConfiguration:
+class CoordinatorConfiguration(BaseModel):
     """ZHA coordinator configuration."""
 
     path: str
-    baudrate: int = dataclasses.field(default=115200)
-    flow_control: str = dataclasses.field(default="hardware")
-    radio_type: str = dataclasses.field(default="ezsp")
+    baudrate: int = Field(default=115200)
+    flow_control: str = Field(default="hardware")
+    radio_type: str = Field(default="ezsp")
 
 
-@dataclass(kw_only=True, slots=True)
-class QuirksConfiguration:
+class QuirksConfiguration(BaseModel):
     """ZHA quirks configuration."""
 
-    enabled: bool = dataclasses.field(default=True)
-    custom_quirks_path: str | None = dataclasses.field(default=None)
+    enabled: bool = Field(default=True)
+    custom_quirks_path: str | None = Field(default=None)
 
 
-@dataclass(kw_only=True, slots=True)
-class DeviceOverridesConfiguration:
+class DeviceOverridesConfiguration(BaseModel):
     """ZHA device overrides configuration."""
 
     type: Platform
 
 
-@dataclass(kw_only=True, slots=True)
-class ZHAConfiguration:
+class ServerConfiguration(BaseModel):
+    """Server configuration for zhaws."""
+
+    host: str = "0.0.0.0"
+    port: int = 8001
+    network_auto_start: bool = False
+
+
+class ZHAConfiguration(BaseModel):
     """ZHA configuration."""
 
-    coordinator_configuration: CoordinatorConfiguration = dataclasses.field(
+    coordinator_configuration: CoordinatorConfiguration = Field(
         default_factory=CoordinatorConfiguration
     )
-    quirks_configuration: QuirksConfiguration = dataclasses.field(
+    quirks_configuration: QuirksConfiguration = Field(
         default_factory=QuirksConfiguration
     )
-    device_overrides: dict[str, DeviceOverridesConfiguration] = dataclasses.field(
+    device_overrides: dict[str, DeviceOverridesConfiguration] = Field(
         default_factory=dict
     )
-    light_options: LightOptions = dataclasses.field(default_factory=LightOptions)
-    device_options: DeviceOptions = dataclasses.field(default_factory=DeviceOptions)
-    alarm_control_panel_options: AlarmControlPanelOptions = dataclasses.field(
+    light_options: LightOptions = Field(default_factory=LightOptions)
+    device_options: DeviceOptions = Field(default_factory=DeviceOptions)
+    alarm_control_panel_options: AlarmControlPanelOptions = Field(
         default_factory=AlarmControlPanelOptions
     )
 
@@ -345,6 +348,7 @@ class ZHAData:
     """ZHA data stored in `gateway.data`."""
 
     config: ZHAConfiguration
+    server_config: ServerConfiguration | None = None
     zigpy_config: dict[str, Any] = dataclasses.field(default_factory=dict)
     platforms: collections.defaultdict[Platform, list] = dataclasses.field(
         default_factory=lambda: collections.defaultdict(list)

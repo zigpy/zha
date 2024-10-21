@@ -22,6 +22,7 @@ from tests.common import (
     SIG_EP_TYPE,
     create_mock_zigpy_device,
     join_zigpy_device,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.const import (
@@ -36,7 +37,13 @@ from zha.application.gateway import Gateway
 from zha.application.platforms.sensor import LQISensor, RSSISensor
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ClusterBinding, Device, get_device_automation_triggers
+from zha.zigbee.device import (
+    ClusterBinding,
+    Device,
+    NeighborInfo,
+    RouteInfo,
+    get_device_automation_triggers,
+)
 from zha.zigbee.group import Group
 
 
@@ -848,3 +855,115 @@ async def test_device_properties(
     assert zha_device.is_router is None
     assert zha_device.is_end_device is None
     assert zha_device.is_coordinator is None
+
+
+def test_neighbor_info_ser_deser() -> None:
+    """Test the serialization and deserialization of the neighbor info."""
+
+    neighbor_info = NeighborInfo(
+        ieee="00:0d:6f:00:0a:90:69:e7",
+        nwk="0x1234",
+        extended_pan_id="00:0d:6f:00:0a:90:69:e7",
+        lqi=255,
+        relationship=zdo_t._NeighborEnums.Relationship.Child.name,
+        depth=0,
+        device_type=zdo_t._NeighborEnums.DeviceType.Router.name,
+        rx_on_when_idle=zdo_t._NeighborEnums.RxOnWhenIdle.On.name,
+        permit_joining=zdo_t._NeighborEnums.PermitJoins.Accepting.name,
+    )
+
+    assert isinstance(neighbor_info.ieee, zigpy.types.EUI64)
+    assert isinstance(neighbor_info.nwk, zigpy.types.NWK)
+    assert isinstance(neighbor_info.extended_pan_id, zigpy.types.EUI64)
+    assert isinstance(neighbor_info.relationship, zdo_t._NeighborEnums.Relationship)
+    assert isinstance(neighbor_info.device_type, zdo_t._NeighborEnums.DeviceType)
+    assert isinstance(neighbor_info.rx_on_when_idle, zdo_t._NeighborEnums.RxOnWhenIdle)
+    assert isinstance(neighbor_info.permit_joining, zdo_t._NeighborEnums.PermitJoins)
+
+    assert neighbor_info.model_dump() == {
+        "ieee": "00:0d:6f:00:0a:90:69:e7",
+        "nwk": 0x1234,
+        "extended_pan_id": "00:0d:6f:00:0a:90:69:e7",
+        "lqi": 255,
+        "relationship": zdo_t._NeighborEnums.Relationship.Child.name,
+        "depth": 0,
+        "device_type": zdo_t._NeighborEnums.DeviceType.Router.name,
+        "rx_on_when_idle": zdo_t._NeighborEnums.RxOnWhenIdle.On.name,
+        "permit_joining": zdo_t._NeighborEnums.PermitJoins.Accepting.name,
+    }
+
+    assert neighbor_info.model_dump_json() == (
+        '{"device_type":"Router","rx_on_when_idle":"On","relationship":"Child",'
+        '"extended_pan_id":"00:0d:6f:00:0a:90:69:e7","ieee":"00:0d:6f:00:0a:90:69:e7","nwk":"0x1234",'
+        '"permit_joining":"Accepting","depth":0,"lqi":255}'
+    )
+
+
+def test_route_info_ser_deser() -> None:
+    """Test the serialization and deserialization of the route info."""
+
+    route_info = RouteInfo(
+        dest_nwk=0x1234,
+        next_hop=0x5678,
+        route_status=zdo_t.RouteStatus.Active.name,
+        memory_constrained=0,
+        many_to_one=1,
+        route_record_required=1,
+    )
+
+    assert isinstance(route_info.dest_nwk, zigpy.types.NWK)
+    assert isinstance(route_info.next_hop, zigpy.types.NWK)
+    assert isinstance(route_info.route_status, zdo_t.RouteStatus)
+
+    assert route_info.model_dump() == {
+        "dest_nwk": 0x1234,
+        "next_hop": 0x5678,
+        "route_status": zdo_t.RouteStatus.Active.name,
+        "memory_constrained": 0,
+        "many_to_one": 1,
+        "route_record_required": 1,
+    }
+
+    assert route_info.model_dump_json() == (
+        '{"dest_nwk":"0x1234","route_status":"Active","memory_constrained":0,"many_to_one":1,'
+        '"route_record_required":1,"next_hop":"0x5678"}'
+    )
+
+
+def test_convert_extended_pan_id() -> None:
+    """Test conversion of extended panid."""
+
+    extended_pan_id = zigpy.types.ExtendedPanId.convert("00:0d:6f:00:0a:90:69:e7")
+
+    assert NeighborInfo.convert_extended_pan_id(extended_pan_id) == extended_pan_id
+
+    converted_extended_pan_id = NeighborInfo.convert_extended_pan_id(
+        "00:0d:6f:00:0a:90:69:e7"
+    )
+    assert isinstance(converted_extended_pan_id, zigpy.types.ExtendedPanId)
+    assert converted_extended_pan_id == extended_pan_id
+
+
+async def test_extended_device_info_ser_deser(zha_gateway: Gateway) -> None:
+    """Test the serialization and deserialization of the extended device info."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller, "tests/data/devices/centralite-3320-l.json"
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    assert zha_device is not None
+
+    assert isinstance(zha_device.extended_device_info.ieee, zigpy.types.EUI64)
+    assert isinstance(zha_device.extended_device_info.nwk, zigpy.types.NWK)
+
+    # last_seen changes so we exclude it from the comparison
+    json = zha_device.extended_device_info.model_dump_json(exclude=["last_seen"])
+
+    # load the json from a file as string
+    with open(
+        "tests/data/serialization_data/centralite-3320-l-extended-device-info.json",
+        encoding="UTF-8",
+    ) as file:
+        expected_json = file.read()
+
+    assert json == expected_json
