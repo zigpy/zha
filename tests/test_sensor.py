@@ -20,6 +20,7 @@ import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
+from zigpy.zcl.foundation import ReportingConfig
 
 from tests.common import (
     SIG_EP_INPUT,
@@ -1244,6 +1245,9 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         unit=UnitOfMass.GRAMS,
         translation_key="last_feeding_size",
         fallback_name="Last feeding size",
+        reporting_config=ReportingConfig(
+            min_interval=0, max_interval=60, reportable_change=1
+        ),
     )
     .add_to_registry()
 )
