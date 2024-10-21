@@ -22,7 +22,7 @@ from zha.websocket.server.client import ClientManager
 from zha.websocket.server.gateway_api import load_api as load_zigbee_controller_api
 
 if TYPE_CHECKING:
-    from zha.websocket.client import Client
+    from zha.websocket.server.client import Client
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 _LOGGER = logging.getLogger(__name__)
@@ -159,6 +159,7 @@ class WebSocketGateway(Gateway):
 
     def _register_api_commands(self) -> None:
         """Load server API commands."""
+        # pylint: disable=import-outside-toplevel
         from zha.websocket.server.client import load_api as load_client_api
 
         register_api_command(self, stop_server)
