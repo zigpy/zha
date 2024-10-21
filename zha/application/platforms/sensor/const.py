@@ -2,6 +2,8 @@
 
 import enum
 
+from zigpy.zcl.clusters.general_const import AnalogInputType
+
 
 class SensorStateClass(enum.StrEnum):
     """State class for sensors."""
@@ -391,4 +393,21 @@ NON_NUMERIC_DEVICE_CLASSES = {
     SensorDeviceClass.TIMESTAMP,
 }
 
+ANALOG_INPUT_APPTYPE_DEV_CLASS = {
+    AnalogInputType.Temp_Degrees_C: SensorDeviceClass.TEMPERATURE,
+    AnalogInputType.Relative_Humidity_Percent: SensorDeviceClass.HUMIDITY,
+    AnalogInputType.Pressure_Pascal: SensorDeviceClass.PRESSURE,
+    AnalogInputType.Flow_Liters_Per_Sec: SensorDeviceClass.VOLUME_FLOW_RATE,
+    AnalogInputType.Percentage: None,
+    AnalogInputType.Parts_Per_Million: SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS,
+    AnalogInputType.Rotational_Speed_RPM: None,
+    AnalogInputType.Current_Amps: SensorDeviceClass.CURRENT,
+    AnalogInputType.Frequency_Hz: SensorDeviceClass.FREQUENCY,
+    AnalogInputType.Power_Watts: SensorDeviceClass.POWER,
+    AnalogInputType.Power_Kilo_Watts: SensorDeviceClass.POWER,
+    AnalogInputType.Energy_Kilo_Watt_Hours: SensorDeviceClass.ENERGY,
+    AnalogInputType.Count: None,
+    AnalogInputType.Enthalpy_KJoules_Per_Kg: None,
+    AnalogInputType.Time_Seconds: None,
+}
 UNIX_EPOCH_TO_ZCL_EPOCH = 946684800
