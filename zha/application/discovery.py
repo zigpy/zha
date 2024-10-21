@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import astuple
 import logging
 from typing import TYPE_CHECKING, cast
 
@@ -309,23 +310,23 @@ class DeviceProbe:
 
                 if (
                     hasattr(entity_metadata, "attribute_name")
-                    and hasattr(entity_metadata, "report_config")
-                    and entity_metadata.report_config
+                    and hasattr(entity_metadata, "reporting_config")
+                    and entity_metadata.reporting_config
                 ):
-                    report_config = tuple(
+                    reporting_config = tuple(
                         filter(
                             lambda cfg: cfg["attr"] != entity_metadata.attribute_name,
                             cluster_handler.REPORT_CONFIG,
                         )
                     )
-                    report_config += (
+                    reporting_config += (
                         AttrReportConfig(
                             attr=entity_metadata.attribute_name,
-                            config=entity_metadata.report_config,
+                            config=astuple(entity_metadata.reporting_config),
                         ),
                     )
 
-                    cluster_handler.__dict__[zha_const.REPORT_CONFIG] = report_config
+                    cluster_handler.__dict__[zha_const.REPORT_CONFIG] = reporting_config
 
                 endpoint.claim_cluster_handlers([cluster_handler])
                 endpoint.async_new_entity(
