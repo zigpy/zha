@@ -591,6 +591,80 @@ class ZenWithinThermostat(Thermostat):
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    manufacturers={"ZEHNDER GROUP VAUX ANDIGNY      "},
+    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
+)
+class ZehnderThermostat(Thermostat):
+    """Zehnder thermostat to adapt AUTO mode behavior."""
+
+    ZEHNDER_HVAC_MODE_2_SYSTEM = {
+        HVACMode.OFF: SystemMode.Off,
+        HVACMode.HEAT: SystemMode.Auto,
+    }
+
+    ZEHNDER_SYSTEM_MODE_2_HVAC = {
+        SystemMode.Off: HVACMode.OFF,
+        SystemMode.Auto: HVACMode.HEAT,
+        SystemMode.Heat: HVACMode.HEAT,
+    }
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set new target operation mode."""
+        if hvac_mode not in self.hvac_modes:
+            self.warning(
+                "can't set '%s' mode. Supported modes are: %s",
+                hvac_mode,
+                self.hvac_modes,
+            )
+            return
+
+        if await self._thermostat_cluster_handler.async_set_operation_mode(
+            ZehnderThermostat.ZEHNDER_HVAC_MODE_2_SYSTEM[hvac_mode]
+        ):
+            self.maybe_emit_state_changed_event()
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the lock."""
+        thermostat = self._thermostat_cluster_handler
+        system_mode = ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(
+            thermostat.system_mode, "unknown"
+        )
+
+        response = super().state
+        response["current_temperature"] = self.current_temperature
+        response["target_temperature"] = self.target_temperature
+        response["target_temperature_high"] = self.target_temperature_high
+        response["target_temperature_low"] = self.target_temperature_low
+        response["hvac_action"] = self.hvac_action
+        response["hvac_mode"] = self.hvac_mode
+        response["preset_mode"] = self.preset_mode
+        response["fan_mode"] = self.fan_mode
+
+        response[ATTR_SYS_MODE] = (
+            f"[{thermostat.system_mode}]/{system_mode}"
+            if self.hvac_mode is not None
+            else None
+        )
+        response[ATTR_OCCUPANCY] = thermostat.occupancy
+        response[ATTR_OCCP_COOL_SETPT] = thermostat.occupied_cooling_setpoint
+        response[ATTR_OCCP_HEAT_SETPT] = thermostat.occupied_heating_setpoint
+        response[ATTR_PI_HEATING_DEMAND] = thermostat.pi_heating_demand
+        response[ATTR_PI_COOLING_DEMAND] = thermostat.pi_cooling_demand
+        response[ATTR_UNOCCP_COOL_SETPT] = thermostat.unoccupied_cooling_setpoint
+        response[ATTR_UNOCCP_HEAT_SETPT] = thermostat.unoccupied_heating_setpoint
+        return response
+
+    @property
+    def hvac_mode(self) -> HVACMode | None:
+        """Return HVAC operation mode."""
+        return ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(
+            self._thermostat_cluster_handler.system_mode
+        )
+
+
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     aux_cluster_handlers=CLUSTER_HANDLER_FAN,
     manufacturers="Centralite",
     models={"3157100", "3157100-E"},
