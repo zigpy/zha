@@ -169,12 +169,15 @@ async def test_on_off_select_attribute_report(
         "motion_sensitivity",
         AqaraMotionSensitivities,
         MotionSensitivityQuirk.OppleCluster.cluster_id,
+        translation_key="motion_sensitivity",
+        fallback_name="Motion sensitivity",
     )
     .enum(
         "motion_sensitivity_disabled",
         AqaraMotionSensitivities,
         MotionSensitivityQuirk.OppleCluster.cluster_id,
         translation_key="motion_sensitivity",
+        fallback_name="Motion sensitivity",
         initially_disabled=True,
     )
     .add_to_registry()
