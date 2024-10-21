@@ -504,6 +504,9 @@ def create_mock_zigpy_device(
             descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
         )
 
+    if isinstance(node_descriptor, bytes):
+        node_descriptor = zdo_t.NodeDescriptor.deserialize(node_descriptor)[0]
+
     device.node_desc = node_descriptor
     device.last_seen = time.time()
 
