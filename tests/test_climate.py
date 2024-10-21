@@ -121,6 +121,19 @@ CLIMATE_ZEN = {
     }
 }
 
+CLIMATE_ZEHNDER = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
+        SIG_EP_INPUT: [
+            zigpy.zcl.clusters.general.Basic.cluster_id,
+            zigpy.zcl.clusters.general.Identify.cluster_id,
+            zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
+        ],
+        SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.Identify.cluster_id],
+    }
+}
+
 CLIMATE_MOES = {
     1: {
         SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
@@ -169,6 +182,7 @@ CLIMATE_ZONNSMART = {
 
 MANUF_SINOPE = "Sinope Technologies"
 MANUF_ZEN = "Zen Within"
+MANUF_ZEHNDER = "ZEHNDER GROUP VAUX ANDIGNY      "
 MANUF_MOES = "_TZE200_ckud7u2l"
 MANUF_BECA = "_TZE200_b6wax7g0"
 MANUF_ZONNSMART = "_TZE200_hue3yfsn"
@@ -266,6 +280,13 @@ async def device_climate_zen(device_climate_mock):
     """Zen Within thermostat."""
 
     return await device_climate_mock(CLIMATE_ZEN, manuf=MANUF_ZEN)
+
+
+@pytest.fixture
+async def device_climate_zehnder(device_climate_mock):
+    """Zehnder thermostat to adapt AUTO mode behavior."""
+
+    return await device_climate_mock(CLIMATE_ZEHNDER, manuf=MANUF_ZEHNDER)
 
 
 @pytest.fixture
