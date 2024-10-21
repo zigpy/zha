@@ -523,6 +523,8 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
             WindowDetectionFunctionQuirk.TuyaManufCluster.cluster_id,
             on_value=3,
             off_value=5,
+            translation_key="window_detection_function",
+            fallback_name="Window detection function",
         )
         .add_to_registry()
     )
@@ -601,6 +603,8 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
             on_value=3,
             off_value=5,
             force_inverted=True,
+            translation_key="window_detection_function",
+            fallback_name="Window detection function",
         )
         .add_to_registry()
     )
@@ -679,6 +683,8 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
             on_value=3,
             off_value=5,
             invert_attribute_name="window_detection_function_inverter",
+            translation_key="window_detection_function",
+            fallback_name="Window detection function",
         )
         .add_to_registry()
     )
