@@ -614,6 +614,72 @@ class ZenWithinThermostat(Thermostat):
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    manufacturers={"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"},
+    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
+)
+class ZehnderThermostat(Thermostat):
+    """Zehnder thermostat to adapt AUTO mode behavior."""
+
+    ZEHNDER_HVAC_MODE_2_SYSTEM = {
+        HVACMode.OFF: SystemMode.Off,
+        HVACMode.HEAT: SystemMode.Auto,
+    }
+
+    ZEHNDER_SYSTEM_MODE_2_HVAC = {
+        SystemMode.Off: HVACMode.OFF,
+        SystemMode.Auto: HVACMode.HEAT,
+    }
+
+    hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set new target operation mode."""
+        if hvac_mode not in self.hvac_modes:
+            self.warning(
+                "can't set '%s' mode. Supported modes are: %s",
+                hvac_mode,
+                self.hvac_modes,
+            )
+            return
+
+        if await self._thermostat_cluster_handler.async_set_operation_mode(
+            ZehnderThermostat.ZEHNDER_HVAC_MODE_2_SYSTEM[hvac_mode]
+        ):
+            self.maybe_emit_state_changed_event()
+
+    @property
+    def current_temperature(self):
+        """Force no current temperature."""
+        return None
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the lock."""
+        thermostat = self._thermostat_cluster_handler
+        system_mode = ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(
+            thermostat.system_mode, "unknown"
+        )
+
+        response = super().state
+
+        response[ATTR_SYS_MODE] = (
+            f"[{thermostat.system_mode}]/{system_mode}"
+            if self.hvac_mode is not None
+            else None
+        )
+
+        return response
+
+    @property
+    def hvac_mode(self) -> HVACMode | None:
+        """Return HVAC operation mode."""
+        return ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(
+            self._thermostat_cluster_handler.system_mode
+        )
+
+
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     aux_cluster_handlers=CLUSTER_HANDLER_FAN,
     manufacturers="Centralite",
     models={"3157100", "3157100-E"},
