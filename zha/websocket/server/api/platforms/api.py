@@ -11,7 +11,7 @@ from zha.websocket.server.api import decorators, register_api_command
 from zha.websocket.server.api.platforms import PlatformEntityCommand
 
 if TYPE_CHECKING:
-    from zha.websocket.client import Client
+    from zha.websocket.server.client import Client
     from zha.websocket.server.gateway import WebSocketGateway as Server
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,10 +48,10 @@ async def execute_platform_entity_command(
     try:
         action = getattr(platform_entity, method_name)
         arg_spec = inspect.getfullargspec(action)
-        if arg_spec.varkw:  # the only argument is self
+        if arg_spec.varkw:
             await action(**command.model_dump(exclude_none=True))
         else:
-            await action()
+            await action()  # the only argument is self
 
     except Exception as err:
         _LOGGER.exception("Error executing command: %s", method_name, exc_info=err)
@@ -84,6 +84,7 @@ async def refresh_state(
     await execute_platform_entity_command(server, client, command, "async_update")
 
 
+# pylint: disable=import-outside-toplevel
 def load_platform_entity_apis(server: Server) -> None:
     """Load the ws apis for all platform entities types."""
     from zha.websocket.server.api.platforms.alarm_control_panel.api import (
