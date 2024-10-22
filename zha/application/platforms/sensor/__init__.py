@@ -500,7 +500,7 @@ class EnumSensor(Sensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._attr_options = [e.name for e in self._enum]
+        self._attr_options = [e.name.lower() for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
@@ -515,7 +515,7 @@ class EnumSensor(Sensor):
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
         assert self._enum is not None
-        return self._enum(value).name
+        return self._enum(value).name.lower()
 
 
 @MULTI_MATCH(

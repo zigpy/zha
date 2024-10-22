@@ -69,20 +69,24 @@ async def test_select(
     entity = get_entity(zha_device, platform=Platform.SELECT, qualifier=select_name)
     assert entity.state["state"] is None  # unknown in HA
     assert entity.info_object.options == [
-        "Stop",
-        "Burglar",
-        "Fire",
-        "Emergency",
-        "Police Panic",
-        "Fire Panic",
-        "Emergency Panic",
+        "stop",
+        "burglar",
+        "fire",
+        "emergency",
+        "police_panic",
+        "fire_panic",
+        "emergency_panic",
     ]
     assert entity._enum == security.IasWd.Warning.WarningMode
 
     # change value from client
-    await entity.async_select_option(security.IasWd.Warning.WarningMode.Burglar.name)
+    await entity.async_select_option(
+        security.IasWd.Warning.WarningMode.Burglar.name.lower()
+    )
     await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
+    assert (
+        entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name.lower()
+    )
 
 
 class MotionSensitivityQuirk(CustomDevice):
@@ -273,11 +277,19 @@ async def test_non_zcl_select_state_restoration(
     assert entity.state["state"] is None
 
     entity.restore_external_state_attributes(
-        state=security.IasWd.Warning.WarningMode.Burglar.name
+        state=security.IasWd.Warning.WarningMode.Burglar.name.lower()
     )
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name
+    assert (
+        entity.state["state"] == security.IasWd.Warning.WarningMode.Burglar.name.lower()
+    )
 
+    entity.restore_external_state_attributes(
+        state=security.IasWd.Warning.WarningMode.Fire.name.lower()
+    )
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name.lower()
+
+    # test workaround for existing installations updating
     entity.restore_external_state_attributes(
         state=security.IasWd.Warning.WarningMode.Fire.name
     )
-    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name
+    assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name.lower()
