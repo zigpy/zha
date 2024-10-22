@@ -67,6 +67,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_DEVICE_TEMPERATURE,
     CLUSTER_HANDLER_DIAGNOSTIC,
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
+    CLUSTER_HANDLER_FLOW,
     CLUSTER_HANDLER_HUMIDITY,
     CLUSTER_HANDLER_ILLUMINANCE,
     CLUSTER_HANDLER_INOVELLI,
@@ -1130,6 +1131,23 @@ class Pressure(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_FLOW)
+class Flow(Sensor):
+    """Flow Measurement sensor."""
+
+    _attribute_name = "measured_value"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLUME_FLOW_RATE
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _divisor = 10
+    _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
+
+    def formatter(self, value: int) -> int | float | str | None:
+        """Handle unknown value state."""
+        if value == 0xFFFF:
+            return None
+        return super().formatter(value)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_TEMPERATURE)
