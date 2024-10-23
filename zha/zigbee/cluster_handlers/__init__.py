@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Coroutine, Iterator
 import contextlib
-from dataclasses import dataclass
-from enum import Enum
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Final, ParamSpec, TypedDict
+from typing import TYPE_CHECKING, Any, ParamSpec, TypedDict
 
 import zigpy.exceptions
 import zigpy.util
@@ -21,7 +19,6 @@ from zigpy.zcl.foundation import (
 )
 
 from zha.application.const import (
-    ZHA_CLUSTER_HANDLER_MSG,
     ZHA_CLUSTER_HANDLER_MSG_BIND,
     ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
 )
@@ -35,7 +32,6 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_EVENT,
     CLUSTER_HANDLER_ZDO,
     CLUSTER_ID,
     CLUSTER_READS_PER_REQ,
@@ -45,6 +41,14 @@ from zha.zigbee.cluster_handlers.const import (
     SIGNAL_ATTR_UPDATED,
     UNIQUE_ID,
     VALUE,
+)
+from zha.zigbee.cluster_handlers.model import (
+    ClusterAttributeUpdatedEvent,
+    ClusterBindEvent,
+    ClusterConfigureReportingEvent,
+    ClusterHandlerInfo,
+    ClusterHandlerStatus,
+    ClusterInfo,
 )
 
 if TYPE_CHECKING:
@@ -114,75 +118,6 @@ def parse_and_log_command(cluster_handler, tsn, command_id, args):
     return name
 
 
-class ClusterHandlerStatus(Enum):
-    """Status of a cluster handler."""
-
-    CREATED = 1
-    CONFIGURED = 2
-    INITIALIZED = 3
-
-
-@dataclass(kw_only=True, frozen=True)
-class ClusterAttributeUpdatedEvent:
-    """Event to signal that a cluster attribute has been updated."""
-
-    attribute_id: int
-    attribute_name: str
-    attribute_value: Any
-    cluster_handler_unique_id: str
-    cluster_id: int
-    event_type: Final[str] = CLUSTER_HANDLER_EVENT
-    event: Final[str] = CLUSTER_HANDLER_ATTRIBUTE_UPDATED
-
-
-@dataclass(kw_only=True, frozen=True)
-class ClusterBindEvent:
-    """Event generated when the cluster is bound."""
-
-    cluster_name: str
-    cluster_id: int
-    success: bool
-    cluster_handler_unique_id: str
-    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
-    event: Final[str] = ZHA_CLUSTER_HANDLER_MSG_BIND
-
-
-@dataclass(kw_only=True, frozen=True)
-class ClusterConfigureReportingEvent:
-    """Event generates when a cluster configures attribute reporting."""
-
-    cluster_name: str
-    cluster_id: int
-    attributes: dict[str, dict[str, Any]]
-    cluster_handler_unique_id: str
-    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
-    event: Final[str] = ZHA_CLUSTER_HANDLER_MSG_CFG_RPT
-
-
-@dataclass(kw_only=True, frozen=True)
-class ClusterInfo:
-    """Cluster information."""
-
-    id: int
-    name: str
-    type: str
-    commands: dict[int, str]
-
-
-@dataclass(kw_only=True, frozen=True)
-class ClusterHandlerInfo:
-    """Cluster handler information."""
-
-    class_name: str
-    generic_id: str
-    endpoint_id: str
-    cluster: ClusterInfo
-    id: str
-    unique_id: str
-    status: ClusterHandlerStatus
-    value_attribute: str | None = None
-
-
 class ClusterHandler(LogMixin, EventBase):
     """Base cluster handler for a Zigbee cluster."""
 
@@ -228,11 +163,12 @@ class ClusterHandler(LogMixin, EventBase):
                 id=self._cluster.cluster_id,
                 name=self._cluster.name,
                 type="client" if self._cluster.is_client else "server",
-                commands=self._cluster.commands,
+                endpoint_id=self._cluster.endpoint.endpoint_id,
+                endpoint_attribute=self._cluster.ep_attribute,
             ),
             id=self._id,
             unique_id=self._unique_id,
-            status=self._status.name,
+            status=self._status,
             value_attribute=getattr(self, "value_attribute", None),
         )
 
@@ -547,7 +483,7 @@ class ClusterHandler(LogMixin, EventBase):
 
     def _get_attribute_name(self, attrid: int) -> str | int:
         if attrid not in self.cluster.attributes:
-            return attrid
+            return "Unknown"
 
         return self.cluster.attributes[attrid].name
 

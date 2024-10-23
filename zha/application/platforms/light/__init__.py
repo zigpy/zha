@@ -9,13 +9,12 @@ import asyncio
 from collections import Counter
 from collections.abc import Callable
 import contextlib
-import dataclasses
-from dataclasses import dataclass
 import functools
 import itertools
 import logging
 from typing import TYPE_CHECKING, Any
 
+from pydantic import Field
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
@@ -87,11 +86,10 @@ STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.LIGHT)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.LIGHT)
 
 
-@dataclass(frozen=True, kw_only=True)
 class LightEntityInfo(BaseEntityInfo):
     """Light entity info."""
 
-    effect_list: list[str] | None = dataclasses.field(default=None)
+    effect_list: list[str] | None = Field(default=None)
     supported_features: LightEntityFeature
     min_mireds: int
     max_mireds: int

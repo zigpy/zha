@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING, Any
@@ -42,13 +41,13 @@ STRICT_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
 class AlarmControlPanelEntityInfo(BaseEntityInfo):
     """Alarm control panel entity info."""
 
     code_arm_required: bool
     code_format: CodeFormat
     supported_features: int
+    max_invalid_tries: int
     translation_key: str
 
 
@@ -88,6 +87,7 @@ class AlarmControlPanel(PlatformEntity):
             code_arm_required=self.code_arm_required,
             code_format=self.code_format,
             supported_features=self.supported_features,
+            max_invalid_tries=self._cluster_handler.max_invalid_tries,
         )
 
     @property
@@ -126,27 +126,27 @@ class AlarmControlPanel(PlatformEntity):
         """Handle state changed on cluster."""
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_disarm(self, code: str | None = None) -> None:
+    async def async_alarm_disarm(self, code: str | None = None, **kwargs) -> None:
         """Send disarm command."""
         self._cluster_handler.arm(IasAce.ArmMode.Disarm, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_home(self, code: str | None = None) -> None:
+    async def async_alarm_arm_home(self, code: str | None = None, **kwargs) -> None:
         """Send arm home command."""
         self._cluster_handler.arm(IasAce.ArmMode.Arm_Day_Home_Only, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_away(self, code: str | None = None) -> None:
+    async def async_alarm_arm_away(self, code: str | None = None, **kwargs) -> None:
         """Send arm away command."""
         self._cluster_handler.arm(IasAce.ArmMode.Arm_All_Zones, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_night(self, code: str | None = None) -> None:
+    async def async_alarm_arm_night(self, code: str | None = None, **kwargs) -> None:
         """Send arm night command."""
         self._cluster_handler.arm(IasAce.ArmMode.Arm_Night_Sleep_Only, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_trigger(self, code: str | None = None) -> None:  # pylint: disable=unused-argument
+    async def async_alarm_trigger(self, code: str | None = None, **kwargs) -> None:  # pylint: disable=unused-argument
         """Send alarm trigger command."""
         self._cluster_handler.panic()
         self.maybe_emit_state_changed_event()

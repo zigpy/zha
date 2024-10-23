@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
@@ -48,18 +47,16 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 
-@dataclass(frozen=True, kw_only=True)
 class NumberEntityInfo(BaseEntityInfo):
     """Number entity info."""
 
-    engineering_units: int
-    application_type: int
+    engineering_units: int | None
+    application_type: int | None
     min_value: float | None
     max_value: float | None
     step: float | None
 
 
-@dataclass(frozen=True, kw_only=True)
 class NumberConfigurationEntityInfo(BaseEntityInfo):
     """Number configuration entity info."""
 
