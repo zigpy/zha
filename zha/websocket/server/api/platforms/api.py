@@ -11,7 +11,7 @@ from zha.websocket.server.api import decorators, register_api_command
 from zha.websocket.server.api.platforms import PlatformEntityCommand
 
 if TYPE_CHECKING:
-    from zha.application.gateway import WebSocketGateway as Server
+    from zha.application.gateway import WebSocketServerGateway as Server
     from zha.websocket.server.client import Client
 
 _LOGGER = logging.getLogger(__name__)

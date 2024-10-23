@@ -715,7 +715,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             self.async_update_device(sender, available=True)
 
 
-class WebSocketGateway(Gateway):
+class WebSocketServerGateway(Gateway):
     """ZHAWSS server implementation."""
 
     def __init__(self, config: ZHAData) -> None:
@@ -832,7 +832,7 @@ class WebSocketGateway(Gateway):
                 await asyncio.sleep(0.001)
         await super().async_block_till_done(wait_background_tasks=wait_background_tasks)
 
-    async def __aenter__(self) -> WebSocketGateway:
+    async def __aenter__(self) -> WebSocketServerGateway:
         """Enter the context manager."""
         await self.start_server()
         return self

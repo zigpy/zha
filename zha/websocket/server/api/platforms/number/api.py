@@ -11,7 +11,7 @@ from zha.websocket.server.api.platforms import PlatformEntityCommand
 from zha.websocket.server.api.platforms.api import execute_platform_entity_command
 
 if TYPE_CHECKING:
-    from zha.application.gateway import WebSocketGateway as Server
+    from zha.application.gateway import WebSocketServerGateway as Server
     from zha.websocket.server.client import Client
 
 ATTR_VALUE = "value"

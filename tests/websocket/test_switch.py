@@ -14,7 +14,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from tests.common import mock_coro
 from zha.application.discovery import Platform
-from zha.application.gateway import WebSocketGateway as Server
+from zha.application.gateway import WebSocketServerGateway as Server
 from zha.application.platforms.model import (
     BasePlatformEntity,
     SwitchEntity,
@@ -65,7 +65,7 @@ def get_group_entity(
 @pytest.fixture
 def zigpy_device(connected_client_and_server: tuple[Controller, Server]) -> ZigpyDevice:
     """Device tracker zigpy device."""
-    controller, server = connected_client_and_server
+    _, server = connected_client_and_server
     zigpy_device = create_mock_zigpy_device(
         server,
         {

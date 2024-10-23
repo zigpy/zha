@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from zha.websocket.server.api.model import WebSocketCommand
 
 if TYPE_CHECKING:
-    from zha.application.gateway import WebSocketGateway
+    from zha.application.gateway import WebSocketServerGateway
     from zha.websocket.server.api.types import (
         AsyncWebSocketCommandHandler,
         T_WebSocketCommand,
@@ -24,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def _handle_async_response(
     func: AsyncWebSocketCommandHandler,
-    server: WebSocketGateway,
+    server: WebSocketServerGateway,
     client: Client,
     msg: T_WebSocketCommand,
 ) -> None:
@@ -44,7 +44,7 @@ def async_response(
 
     @wraps(func)
     def schedule_handler(
-        server: WebSocketGateway, client: Client, msg: T_WebSocketCommand
+        server: WebSocketServerGateway, client: Client, msg: T_WebSocketCommand
     ) -> None:
         """Schedule the handler."""
         # As the webserver is now started before the start

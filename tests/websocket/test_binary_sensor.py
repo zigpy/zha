@@ -8,7 +8,7 @@ import zigpy.profiles.zha
 from zigpy.zcl.clusters import general, measurement, security
 
 from zha.application.discovery import Platform
-from zha.application.gateway import WebSocketGateway as Server
+from zha.application.gateway import WebSocketServerGateway as Server
 from zha.application.platforms.model import BasePlatformEntity, BinarySensorEntity
 from zha.websocket.client.controller import Controller
 from zha.websocket.client.proxy import DeviceProxy

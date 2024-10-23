@@ -24,7 +24,7 @@ from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
 from zha.application import Platform
-from zha.application.gateway import Gateway, WebSocketGateway
+from zha.application.gateway import Gateway, WebSocketServerGateway
 from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
@@ -326,7 +326,7 @@ async def connected_client_and_server(
     zha_data: ZHAData,
     zigpy_app_controller: ControllerApplication,
     caplog: pytest.LogCaptureFixture,  # pylint: disable=unused-argument
-) -> AsyncGenerator[tuple[Controller, WebSocketGateway], None]:
+) -> AsyncGenerator[tuple[Controller, WebSocketServerGateway], None]:
     """Return the connected client and server fixture."""
 
     with (
@@ -339,7 +339,7 @@ async def connected_client_and_server(
             return_value=zigpy_app_controller,
         ),
     ):
-        ws_gateway = await WebSocketGateway.async_from_config(zha_data)
+        ws_gateway = await WebSocketServerGateway.async_from_config(zha_data)
         await ws_gateway.async_initialize()
         await ws_gateway.async_block_till_done()
         await ws_gateway.async_initialize_devices_and_entities()

@@ -16,7 +16,7 @@ from zha.application.gateway import (
     DevicePairingStatus,
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
-    WebSocketGateway as Server,
+    WebSocketServerGateway as Server,
 )
 from zha.application.model import DeviceJoinedEvent, DeviceLeftEvent
 from zha.application.platforms.model import (
@@ -117,7 +117,7 @@ async def device_switch_2(
 ) -> Device:
     """Test zha switch platform."""
 
-    controller, server = connected_client_and_server
+    _, server = connected_client_and_server
     zigpy_device = create_mock_zigpy_device(
         server,
         {

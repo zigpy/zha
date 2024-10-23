@@ -29,7 +29,7 @@ from zha.websocket.server.api import decorators, register_api_command
 from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
 
 if TYPE_CHECKING:
-    from zha.application.gateway import WebSocketGateway
+    from zha.application.gateway import WebSocketServerGateway
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -215,7 +215,7 @@ class ClientDisconnectCommand(WebSocketCommand):
 @decorators.websocket_command(ClientListenRawZCLCommand)
 @decorators.async_response
 async def listen_raw_zcl(
-    server: WebSocketGateway, client: Client, command: WebSocketCommand
+    server: WebSocketServerGateway, client: Client, command: WebSocketCommand
 ) -> None:
     """Listen for raw ZCL events."""
     client.receive_raw_zcl_events = True
@@ -225,7 +225,7 @@ async def listen_raw_zcl(
 @decorators.websocket_command(ClientListenCommand)
 @decorators.async_response
 async def listen(
-    server: WebSocketGateway, client: Client, command: WebSocketCommand
+    server: WebSocketServerGateway, client: Client, command: WebSocketCommand
 ) -> None:
     """Listen for events."""
     client.receive_events = True
@@ -235,14 +235,14 @@ async def listen(
 @decorators.websocket_command(ClientDisconnectCommand)
 @decorators.async_response
 async def disconnect(
-    server: WebSocketGateway, client: Client, command: WebSocketCommand
+    server: WebSocketServerGateway, client: Client, command: WebSocketCommand
 ) -> None:
     """Disconnect the client."""
     client.disconnect()
     server.client_manager.remove_client(client)
 
 
-def load_api(server: WebSocketGateway) -> None:
+def load_api(server: WebSocketServerGateway) -> None:
     """Load the api command handlers."""
     register_api_command(server, listen_raw_zcl)
     register_api_command(server, listen)
@@ -252,13 +252,13 @@ def load_api(server: WebSocketGateway) -> None:
 class ClientManager:
     """ZHAWSS client manager implementation."""
 
-    def __init__(self, server: WebSocketGateway):
+    def __init__(self, server: WebSocketServerGateway):
         """Initialize the client."""
-        self._server: WebSocketGateway = server
+        self._server: WebSocketServerGateway = server
         self._clients: list[Client] = []
 
     @property
-    def server(self) -> WebSocketGateway:
+    def server(self) -> WebSocketServerGateway:
         """Return the server this ClientManager belongs to."""
         return self._server
 

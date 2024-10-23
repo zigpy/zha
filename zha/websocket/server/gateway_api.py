@@ -22,7 +22,7 @@ from zha.zigbee.group import Group
 from zha.zigbee.model import GroupMemberReference
 
 if TYPE_CHECKING:
-    from zha.application.gateway import WebSocketGateway
+    from zha.application.gateway import WebSocketServerGateway
     from zha.websocket.server.client import Client
 
 GROUP = "group"
@@ -49,7 +49,7 @@ class StartNetworkCommand(WebSocketCommand):
 @decorators.websocket_command(StartNetworkCommand)
 @decorators.async_response
 async def start_network(
-    gateway: WebSocketGateway, client: Client, command: StartNetworkCommand
+    gateway: WebSocketServerGateway, client: Client, command: StartNetworkCommand
 ) -> None:
     """Start the Zigbee network."""
     await gateway.start_network()
@@ -65,7 +65,7 @@ class StopNetworkCommand(WebSocketCommand):
 @decorators.websocket_command(StopNetworkCommand)
 @decorators.async_response
 async def stop_network(
-    gateway: WebSocketGateway, client: Client, command: StopNetworkCommand
+    gateway: WebSocketServerGateway, client: Client, command: StopNetworkCommand
 ) -> None:
     """Stop the Zigbee network."""
     await gateway.stop_network()
@@ -83,7 +83,7 @@ class UpdateTopologyCommand(WebSocketCommand):
 @decorators.websocket_command(UpdateTopologyCommand)
 @decorators.async_response
 async def update_topology(
-    gateway: WebSocketGateway, client: Client, command: WebSocketCommand
+    gateway: WebSocketServerGateway, client: Client, command: WebSocketCommand
 ) -> None:
     """Update the Zigbee network topology."""
     await gateway.application_controller.topology.scan()
@@ -99,7 +99,7 @@ class GetDevicesCommand(WebSocketCommand):
 @decorators.websocket_command(GetDevicesCommand)
 @decorators.async_response
 async def get_devices(
-    gateway: WebSocketGateway, client: Client, command: GetDevicesCommand
+    gateway: WebSocketServerGateway, client: Client, command: GetDevicesCommand
 ) -> None:
     """Get Zigbee devices."""
     try:
@@ -128,7 +128,7 @@ class ReconfigureDeviceCommand(WebSocketCommand):
 @decorators.websocket_command(ReconfigureDeviceCommand)
 @decorators.async_response
 async def reconfigure_device(
-    gateway: WebSocketGateway, client: Client, command: ReconfigureDeviceCommand
+    gateway: WebSocketServerGateway, client: Client, command: ReconfigureDeviceCommand
 ) -> None:
     """Reconfigure a zigbee device."""
     device = gateway.devices.get(command.ieee)
@@ -146,7 +146,7 @@ class GetGroupsCommand(WebSocketCommand):
 @decorators.websocket_command(GetGroupsCommand)
 @decorators.async_response
 async def get_groups(
-    gateway: WebSocketGateway, client: Client, command: GetGroupsCommand
+    gateway: WebSocketServerGateway, client: Client, command: GetGroupsCommand
 ) -> None:
     """Get Zigbee groups."""
     groups: dict[int, Any] = {}
@@ -169,7 +169,7 @@ class PermitJoiningCommand(WebSocketCommand):
 @decorators.websocket_command(PermitJoiningCommand)
 @decorators.async_response
 async def permit_joining(
-    gateway: WebSocketGateway, client: Client, command: PermitJoiningCommand
+    gateway: WebSocketServerGateway, client: Client, command: PermitJoiningCommand
 ) -> None:
     """Permit joining devices to the Zigbee network."""
     # TODO add permit with code support
@@ -190,7 +190,7 @@ class RemoveDeviceCommand(WebSocketCommand):
 @decorators.websocket_command(RemoveDeviceCommand)
 @decorators.async_response
 async def remove_device(
-    gateway: WebSocketGateway, client: Client, command: RemoveDeviceCommand
+    gateway: WebSocketServerGateway, client: Client, command: RemoveDeviceCommand
 ) -> None:
     """Permit joining devices to the Zigbee network."""
     await gateway.async_remove_device(command.ieee)
@@ -214,7 +214,9 @@ class ReadClusterAttributesCommand(WebSocketCommand):
 @decorators.websocket_command(ReadClusterAttributesCommand)
 @decorators.async_response
 async def read_cluster_attributes(
-    gateway: WebSocketGateway, client: Client, command: ReadClusterAttributesCommand
+    gateway: WebSocketServerGateway,
+    client: Client,
+    command: ReadClusterAttributesCommand,
 ) -> None:
     """Read the specified cluster attributes."""
     device: Device = gateway.devices[command.ieee]
@@ -282,7 +284,9 @@ class WriteClusterAttributeCommand(WebSocketCommand):
 @decorators.websocket_command(WriteClusterAttributeCommand)
 @decorators.async_response
 async def write_cluster_attribute(
-    gateway: WebSocketGateway, client: Client, command: WriteClusterAttributeCommand
+    gateway: WebSocketServerGateway,
+    client: Client,
+    command: WriteClusterAttributeCommand,
 ) -> None:
     """Set the value of the specific cluster attribute."""
     device: Device = gateway.devices[command.ieee]
@@ -352,7 +356,7 @@ class CreateGroupCommand(WebSocketCommand):
 @decorators.websocket_command(CreateGroupCommand)
 @decorators.async_response
 async def create_group(
-    gateway: WebSocketGateway, client: Client, command: CreateGroupCommand
+    gateway: WebSocketServerGateway, client: Client, command: CreateGroupCommand
 ) -> None:
     """Create a new group."""
     group_name = command.group_name
@@ -372,7 +376,7 @@ class RemoveGroupsCommand(WebSocketCommand):
 @decorators.websocket_command(RemoveGroupsCommand)
 @decorators.async_response
 async def remove_groups(
-    gateway: WebSocketGateway, client: Client, command: RemoveGroupsCommand
+    gateway: WebSocketServerGateway, client: Client, command: RemoveGroupsCommand
 ) -> None:
     """Remove the specified groups."""
     group_ids = command.group_ids
@@ -404,7 +408,7 @@ class AddGroupMembersCommand(WebSocketCommand):
 @decorators.websocket_command(AddGroupMembersCommand)
 @decorators.async_response
 async def add_group_members(
-    gateway: WebSocketGateway, client: Client, command: AddGroupMembersCommand
+    gateway: WebSocketServerGateway, client: Client, command: AddGroupMembersCommand
 ) -> None:
     """Add members to a ZHA group."""
     group_id = command.group_id
@@ -431,7 +435,7 @@ class RemoveGroupMembersCommand(AddGroupMembersCommand):
 @decorators.websocket_command(RemoveGroupMembersCommand)
 @decorators.async_response
 async def remove_group_members(
-    gateway: WebSocketGateway, client: Client, command: RemoveGroupMembersCommand
+    gateway: WebSocketServerGateway, client: Client, command: RemoveGroupMembersCommand
 ) -> None:
     """Remove members from a ZHA group."""
     group_id = command.group_id
@@ -456,14 +460,14 @@ class StopServerCommand(WebSocketCommand):
 @decorators.websocket_command(StopServerCommand)
 @decorators.async_response
 async def stop_server(
-    server: WebSocketGateway, client: Client, command: WebSocketCommand
+    server: WebSocketServerGateway, client: Client, command: WebSocketCommand
 ) -> None:
     """Stop the Zigbee network."""
     client.send_result_success(command)
     await server.stop_server()
 
 
-def load_api(gateway: WebSocketGateway) -> None:
+def load_api(gateway: WebSocketServerGateway) -> None:
     """Load the api command handlers."""
     register_api_command(gateway, start_network)
     register_api_command(gateway, stop_network)
