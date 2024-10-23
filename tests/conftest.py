@@ -24,7 +24,7 @@ from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
 from zha.application import Platform
-from zha.application.gateway import Gateway
+from zha.application.gateway import Gateway, WebSocketGateway
 from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
@@ -35,7 +35,6 @@ from zha.application.helpers import (
 )
 from zha.async_ import ZHAJob
 from zha.websocket.client.controller import Controller
-from zha.websocket.server.gateway import WebSocketGateway
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"

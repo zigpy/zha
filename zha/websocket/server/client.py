@@ -29,7 +29,7 @@ from zha.websocket.server.api import decorators, register_api_command
 from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
 
 if TYPE_CHECKING:
-    from zha.websocket.server.gateway import WebSocketGateway
+    from zha.application.gateway import WebSocketGateway
 
 _LOGGER = logging.getLogger(__name__)
 

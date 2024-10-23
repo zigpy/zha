@@ -16,6 +16,7 @@ from zha.application.gateway import (
     DevicePairingStatus,
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
+    WebSocketGateway as Server,
 )
 from zha.application.model import DeviceJoinedEvent, DeviceLeftEvent
 from zha.application.platforms.model import (
@@ -30,7 +31,6 @@ from zha.websocket.server.api.model import (
     ReadClusterAttributesResponse,
     WriteClusterAttributeResponse,
 )
-from zha.websocket.server.gateway import WebSocketGateway as Server
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 from zha.zigbee.model import GroupInfo

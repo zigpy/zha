@@ -9,7 +9,7 @@ from zha.websocket.server.api.model import WebSocketCommand
 from zha.websocket.server.api.types import WebSocketCommandHandler
 
 if TYPE_CHECKING:
-    from zha.websocket.server.gateway import WebSocketGateway
+    from zha.application.gateway import WebSocketGateway
 
 
 def register_api_command(

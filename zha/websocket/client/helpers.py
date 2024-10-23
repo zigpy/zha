@@ -76,7 +76,6 @@ from zha.websocket.server.client import (
     ClientListenCommand,
     ClientListenRawZCLCommand,
 )
-from zha.websocket.server.gateway import StopServerCommand
 from zha.websocket.server.gateway_api import (
     AddGroupMembersCommand,
     CreateGroupCommand,
@@ -90,6 +89,7 @@ from zha.websocket.server.gateway_api import (
     RemoveGroupsCommand,
     StartNetworkCommand,
     StopNetworkCommand,
+    StopServerCommand,
     UpdateTopologyCommand,
     WriteClusterAttributeCommand,
 )

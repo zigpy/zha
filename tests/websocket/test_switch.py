@@ -14,6 +14,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from tests.common import mock_coro
 from zha.application.discovery import Platform
+from zha.application.gateway import WebSocketGateway as Server
 from zha.application.platforms.model import (
     BasePlatformEntity,
     SwitchEntity,
@@ -21,7 +22,6 @@ from zha.application.platforms.model import (
 )
 from zha.websocket.client.controller import Controller
 from zha.websocket.client.proxy import DeviceProxy, GroupProxy
-from zha.websocket.server.gateway import WebSocketGateway as Server
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 

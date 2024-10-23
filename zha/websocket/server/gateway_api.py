@@ -22,8 +22,8 @@ from zha.zigbee.group import Group
 from zha.zigbee.model import GroupMemberReference
 
 if TYPE_CHECKING:
+    from zha.application.gateway import WebSocketGateway
     from zha.websocket.server.client import Client
-    from zha.websocket.server.gateway import WebSocketGateway
 
 GROUP = "group"
 MFG_CLUSTER_ID_START = 0xFC00
@@ -447,6 +447,22 @@ async def remove_group_members(
     client.send_result_success(command, {GROUP: group.info_object})
 
 
+class StopServerCommand(WebSocketCommand):
+    """Stop the server."""
+
+    command: Literal[APICommands.STOP_SERVER] = APICommands.STOP_SERVER
+
+
+@decorators.websocket_command(StopServerCommand)
+@decorators.async_response
+async def stop_server(
+    server: WebSocketGateway, client: Client, command: WebSocketCommand
+) -> None:
+    """Stop the Zigbee network."""
+    client.send_result_success(command)
+    await server.stop_server()
+
+
 def load_api(gateway: WebSocketGateway) -> None:
     """Load the api command handlers."""
     register_api_command(gateway, start_network)
@@ -463,3 +479,4 @@ def load_api(gateway: WebSocketGateway) -> None:
     register_api_command(gateway, update_topology)
     register_api_command(gateway, read_cluster_attributes)
     register_api_command(gateway, write_cluster_attribute)
+    register_api_command(gateway, stop_server)

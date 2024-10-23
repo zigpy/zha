@@ -8,10 +8,10 @@ import zigpy.types
 from zigpy.zcl.clusters import general
 
 from zha.application.discovery import Platform
+from zha.application.gateway import WebSocketGateway as Server
 from zha.application.platforms.model import BasePlatformEntity, NumberEntity
 from zha.websocket.client.controller import Controller
 from zha.websocket.client.proxy import DeviceProxy
-from zha.websocket.server.gateway import WebSocketGateway as Server
 
 from ..common import (
     SIG_EP_INPUT,

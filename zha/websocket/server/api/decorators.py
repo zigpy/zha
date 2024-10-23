@@ -11,13 +11,13 @@ from typing import TYPE_CHECKING
 from zha.websocket.server.api.model import WebSocketCommand
 
 if TYPE_CHECKING:
+    from zha.application.gateway import WebSocketGateway
     from zha.websocket.server.api.types import (
         AsyncWebSocketCommandHandler,
         T_WebSocketCommand,
         WebSocketCommandHandler,
     )
     from zha.websocket.server.client import Client
-    from zha.websocket.server.gateway import WebSocketGateway
 
 _LOGGER = logging.getLogger(__name__)
 
