@@ -8,10 +8,9 @@ import zigpy.types
 from zigpy.zcl.clusters import general
 
 from zha.application.discovery import Platform
-from zha.application.gateway import WebSocketServerGateway as Server
+from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
 from zha.application.platforms.model import BasePlatformEntity, NumberEntity
-from zha.websocket.client.controller import Controller
-from zha.websocket.client.proxy import DeviceProxy
+from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
     SIG_EP_INPUT,
@@ -26,17 +25,17 @@ from ..common import (
 
 
 def find_entity(
-    device_proxy: DeviceProxy, platform: Platform
+    device_proxy: WebSocketClientDevice, platform: Platform
 ) -> Optional[BasePlatformEntity]:
     """Find an entity for the specified platform on the given device."""
-    for entity in device_proxy.device_model.entities.values():
+    for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:
             return entity
     return None
 
 
 async def test_number(
-    connected_client_and_server: tuple[Controller, Server],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> None:
     """Test zha number platform."""
     controller, server = connected_client_and_server
@@ -81,7 +80,9 @@ async def test_number(
     assert "engineering_units" in attr_reads
     assert "application_type" in attr_reads
 
-    client_device: Optional[DeviceProxy] = controller.devices.get(zha_device.ieee)
+    client_device: Optional[WebSocketClientDevice] = controller.devices.get(
+        zha_device.ieee
+    )
     assert client_device is not None
     entity: NumberEntity = find_entity(client_device, Platform.NUMBER)  # type: ignore
     assert entity is not None

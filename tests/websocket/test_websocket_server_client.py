@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from zha.application.gateway import WebSocketServerGateway
+from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
 from zha.application.helpers import ZHAData
 from zha.websocket.client.client import Client
-from zha.websocket.client.controller import Controller
 from zha.websocket.server.gateway_api import StopServerCommand
 
 
@@ -18,7 +17,7 @@ async def test_server_client_connect_disconnect(
         assert gateway.is_serving
         assert gateway._ws_server is not None
 
-        async with Client(f"ws://localhost:{zha_data.server_config.port}") as client:
+        async with Client(f"ws://localhost:{zha_data.ws_server_config.port}") as client:
             assert client.connected
             assert "connected" in repr(client)
 
@@ -37,7 +36,7 @@ async def test_server_client_connect_disconnect(
 
 
 async def test_client_message_id_uniqueness(
-    connected_client_and_server: tuple[Controller, WebSocketServerGateway],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> None:
     """Tests that client message IDs are unique."""
     controller, _ = connected_client_and_server
@@ -47,7 +46,7 @@ async def test_client_message_id_uniqueness(
 
 
 async def test_client_stop_server(
-    connected_client_and_server: tuple[Controller, WebSocketServerGateway],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> None:
     """Tests that the client can stop the server."""
     controller, gateway = connected_client_and_server

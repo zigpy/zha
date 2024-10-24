@@ -9,10 +9,9 @@ from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
-from zha.application.gateway import WebSocketServerGateway as Server
+from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
 from zha.application.platforms.model import AlarmControlPanelEntity
-from zha.websocket.client.controller import Controller
-from zha.websocket.client.proxy import DeviceProxy
+from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
     SIG_EP_INPUT,
@@ -31,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
 async def test_alarm_control_panel(
-    connected_client_and_server: tuple[Controller, Server],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> None:
     """Test zhaws alarm control panel platform."""
     controller, server = connected_client_and_server
@@ -51,9 +50,11 @@ async def test_alarm_control_panel(
     zhaws_device = await join_zigpy_device(server, zigpy_device)
 
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
-    client_device: Optional[DeviceProxy] = controller.devices.get(zhaws_device.ieee)
+    client_device: Optional[WebSocketClientDevice] = controller.devices.get(
+        zhaws_device.ieee
+    )
     assert client_device is not None
-    alarm_entity: AlarmControlPanelEntity = client_device.device_model.entities.get(
+    alarm_entity: AlarmControlPanelEntity = client_device.platform_entities.get(
         (Platform.ALARM_CONTROL_PANEL, "00:0d:6f:00:0a:90:69:e7-1")
     )
     assert alarm_entity is not None
@@ -223,8 +224,8 @@ async def test_alarm_control_panel(
 
 
 async def reset_alarm_panel(
-    server: Server,
-    controller: Controller,
+    server: WebSocketServerGateway,
+    controller: WebSocketClientGateway,
     cluster: security.IasAce,
     entity: AlarmControlPanelEntity,
 ) -> None:

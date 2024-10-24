@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-from typing import Optional
+from typing import Optional, cast
 from unittest.mock import call, patch
 
 import pytest
@@ -14,16 +14,14 @@ import zigpy.zcl.foundation as zcl_f
 
 from tests.common import mock_coro
 from zha.application.discovery import Platform
-from zha.application.gateway import WebSocketServerGateway as Server
+from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
 from zha.application.platforms.model import (
     BasePlatformEntity,
     SwitchEntity,
     SwitchGroupEntity,
 )
-from zha.websocket.client.controller import Controller
-from zha.websocket.client.proxy import DeviceProxy, GroupProxy
-from zha.zigbee.device import Device
-from zha.zigbee.group import Group, GroupMemberReference
+from zha.zigbee.device import Device, WebSocketClientDevice
+from zha.zigbee.group import Group, GroupMemberReference, WebSocketClientGroup
 
 from ..common import (
     SIG_EP_INPUT,
@@ -45,25 +43,27 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def find_entity(
-    device_proxy: DeviceProxy, platform: Platform
+    device_proxy: WebSocketClientDevice, platform: Platform
 ) -> Optional[BasePlatformEntity]:
     """Find an entity for the specified platform on the given device."""
-    for entity in device_proxy.device_model.entities.values():
+    for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:
             return entity
     return None
 
 
 def get_group_entity(
-    group_proxy: GroupProxy, entity_id: str
+    group_proxy: WebSocketClientGroup, entity_id: str
 ) -> Optional[SwitchGroupEntity]:
     """Get entity."""
 
-    return group_proxy.group_model.entities.get(entity_id)
+    return cast(SwitchGroupEntity, group_proxy.group_entities.get(entity_id))
 
 
 @pytest.fixture
-def zigpy_device(connected_client_and_server: tuple[Controller, Server]) -> ZigpyDevice:
+def zigpy_device(
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
+) -> ZigpyDevice:
     """Device tracker zigpy device."""
     _, server = connected_client_and_server
     zigpy_device = create_mock_zigpy_device(
@@ -82,7 +82,7 @@ def zigpy_device(connected_client_and_server: tuple[Controller, Server]) -> Zigp
 
 @pytest.fixture
 async def device_switch_1(
-    connected_client_and_server: tuple[Controller, Server],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> Device:
     """Test zha switch platform."""
 
@@ -106,7 +106,7 @@ async def device_switch_1(
 
 @pytest.fixture
 async def device_switch_2(
-    connected_client_and_server: tuple[Controller, Server],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> Device:
     """Test zha switch platform."""
 
@@ -130,14 +130,16 @@ async def device_switch_2(
 
 async def test_switch(
     zigpy_device: ZigpyDevice,
-    connected_client_and_server: tuple[Controller, Server],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> None:
     """Test zha switch platform."""
     controller, server = connected_client_and_server
     zha_device = await join_zigpy_device(server, zigpy_device)
     cluster = zigpy_device.endpoints.get(1).on_off
 
-    client_device: Optional[DeviceProxy] = controller.devices.get(zha_device.ieee)
+    client_device: Optional[WebSocketClientDevice] = controller.devices.get(
+        zha_device.ieee
+    )
     assert client_device is not None
     entity: SwitchEntity = find_entity(client_device, Platform.SWITCH)
     assert entity is not None
@@ -239,7 +241,7 @@ async def test_switch(
 async def test_zha_group_switch_entity(
     device_switch_1: Device,
     device_switch_2: Device,
-    connected_client_and_server: tuple[Controller, Server],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> None:
     """Test the switch entity for a ZHA group."""
     controller, server = connected_client_and_server
@@ -263,7 +265,7 @@ async def test_zha_group_switch_entity(
     entity_id = async_find_group_entity_id(Platform.SWITCH, zha_group)
     assert entity_id is not None
 
-    group_proxy: Optional[GroupProxy] = controller.groups.get(2)
+    group_proxy: Optional[WebSocketClientGroup] = controller.groups.get(2)
     assert group_proxy is not None
 
     entity: SwitchGroupEntity = get_group_entity(group_proxy, entity_id)  # type: ignore

@@ -24,17 +24,21 @@ from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
 from zha.application import Platform
-from zha.application.gateway import Gateway, WebSocketServerGateway
+from zha.application.gateway import (
+    Gateway,
+    WebSocketClientGateway,
+    WebSocketServerGateway,
+)
 from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
     LightOptions,
-    ServerConfiguration,
+    WebsocketClientConfiguration,
+    WebsocketServerConfiguration,
     ZHAConfiguration,
     ZHAData,
 )
 from zha.async_ import ZHAJob
-from zha.websocket.client.controller import Controller
 
 FIXTURE_GRP_ID = 0x1001
 FIXTURE_GRP_NAME = "fixture group"
@@ -287,10 +291,13 @@ def zha_data_fixture() -> ZHAData:
                 failed_tries=2,
             ),
         ),
-        server_config=ServerConfiguration(
+        ws_server_config=WebsocketServerConfiguration(
             host="localhost",
             port=port,
             network_auto_start=False,
+        ),
+        ws_client_config=WebsocketClientConfiguration(
+            host="localhost", port=port, aiohttp_session=None
         ),
     )
 
@@ -326,7 +333,7 @@ async def connected_client_and_server(
     zha_data: ZHAData,
     zigpy_app_controller: ControllerApplication,
     caplog: pytest.LogCaptureFixture,  # pylint: disable=unused-argument
-) -> AsyncGenerator[tuple[Controller, WebSocketServerGateway], None]:
+) -> AsyncGenerator[tuple[WebSocketClientGateway, WebSocketServerGateway], None]:
     """Return the connected client and server fixture."""
 
     with (
@@ -345,7 +352,7 @@ async def connected_client_and_server(
         await ws_gateway.async_initialize_devices_and_entities()
         async with (
             ws_gateway as gateway,
-            Controller(f"ws://localhost:{zha_data.server_config.port}") as controller,
+            WebSocketClientGateway(zha_data) as controller,
         ):
             await controller.clients.listen()
             yield controller, gateway

@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import asyncio
 from functools import cached_property
 import logging
@@ -56,6 +57,7 @@ from zha.application.const import (
 )
 from zha.application.helpers import convert_to_zcl_values
 from zha.application.platforms import PlatformEntity
+from zha.application.platforms.model import BasePlatformEntity, EntityStateChangedEvent
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -90,7 +92,153 @@ def get_device_automation_triggers(
     }
 
 
-class Device(LogMixin, EventBase):
+class BaseDevice(LogMixin, EventBase, ABC):
+    """Base device for Zigbee Home Automation."""
+
+    def __init__(self, _gateway: Gateway) -> None:
+        """Initialize base device."""
+        super().__init__()
+        self._gateway: Gateway = _gateway
+
+    @cached_property
+    @abstractmethod
+    def name(self) -> str:
+        """Return device name."""
+
+    @property
+    @abstractmethod
+    def ieee(self) -> EUI64:
+        """Return ieee address for device."""
+
+    @cached_property
+    @abstractmethod
+    def manufacturer(self) -> str:
+        """Return manufacturer for device."""
+
+    @cached_property
+    @abstractmethod
+    def model(self) -> str:
+        """Return model for device."""
+
+    @cached_property
+    @abstractmethod
+    def manufacturer_code(self) -> int | None:
+        """Return the manufacturer code for the device."""
+
+    @property
+    @abstractmethod
+    def nwk(self) -> NWK:
+        """Return nwk for device."""
+
+    @property
+    @abstractmethod
+    def lqi(self):
+        """Return lqi for device."""
+
+    @property
+    @abstractmethod
+    def rssi(self):
+        """Return rssi for device."""
+
+    @property
+    @abstractmethod
+    def last_seen(self) -> float | None:
+        """Return last_seen for device."""
+
+    @cached_property
+    @abstractmethod
+    def is_mains_powered(self) -> bool | None:
+        """Return true if device is mains powered."""
+
+    @cached_property
+    @abstractmethod
+    def device_type(self) -> str:
+        """Return the logical device type for the device."""
+
+    @property
+    @abstractmethod
+    def power_source(self) -> str:
+        """Return the power source for the device."""
+
+    @cached_property
+    @abstractmethod
+    def is_router(self) -> bool | None:
+        """Return true if this is a routing capable device."""
+
+    @cached_property
+    @abstractmethod
+    def is_coordinator(self) -> bool | None:
+        """Return true if this device represents a coordinator."""
+
+    @property
+    @abstractmethod
+    def is_active_coordinator(self) -> bool:
+        """Return true if this device is the active coordinator."""
+
+    @cached_property
+    @abstractmethod
+    def is_end_device(self) -> bool | None:
+        """Return true if this device is an end device."""
+
+    @property
+    @abstractmethod
+    def is_groupable(self) -> bool:
+        """Return true if this device has a group cluster."""
+
+    @cached_property
+    @abstractmethod
+    def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, Any]]:
+        """Return the device automation triggers for this device."""
+
+    @property
+    @abstractmethod
+    def available(self):
+        """Return True if device is available."""
+
+    @cached_property
+    @abstractmethod
+    def zigbee_signature(self) -> dict[str, Any]:
+        """Get zigbee signature for this device."""
+
+    @property
+    @abstractmethod
+    def sw_version(self) -> int | None:
+        """Return the software version for this device."""
+
+    @property
+    @abstractmethod
+    def platform_entities(self) -> dict[tuple[Platform, str], Any]:
+        """Return the platform entities for this device."""
+
+    @property
+    def gateway(self):
+        """Return the gateway for this device."""
+        return self._gateway
+
+    def get_platform_entity(self, platform: Platform, unique_id: str) -> Any:
+        """Get a platform entity by unique id."""
+        entity = self.platform_entities.get((platform, unique_id))
+        if entity is None:
+            raise KeyError(f"Entity {unique_id} not found")
+        return entity
+
+    @cached_property
+    def device_automation_commands(self) -> dict[str, list[tuple[str, str]]]:
+        """Return the a lookup of commands to etype/sub_type."""
+        commands: dict[str, list[tuple[str, str]]] = {}
+        for etype_subtype, trigger in self.device_automation_triggers.items():
+            if command := trigger.get(ATTR_COMMAND):
+                commands.setdefault(command, []).append(etype_subtype)
+        return commands
+
+    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
+        """Log a message."""
+        msg = f"[%s](%s): {msg}"
+        args = (self.nwk, self.model) + args
+        _LOGGER.log(level, msg, *args, **kwargs)
+
+
+class Device(BaseDevice):
     """ZHA Zigbee device object."""
 
     unique_id: str
@@ -100,12 +248,9 @@ class Device(LogMixin, EventBase):
         zigpy_device: zigpy.device.Device,
         _gateway: Gateway,
     ) -> None:
-        """Initialize the gateway."""
-        super().__init__()
-
+        """Initialize the device."""
+        super().__init__(_gateway)
         self.unique_id = str(zigpy_device.ieee)
-
-        self._gateway: Gateway = _gateway
         self._zigpy_device: ZigpyDevice = zigpy_device
         self.quirk_applied: bool = isinstance(
             self._zigpy_device, zigpy.quirks.BaseCustomDevice
@@ -967,8 +1112,142 @@ class Device(LogMixin, EventBase):
                 fmt = f"{log_msg[1]} completed: %s"
             zdo.debug(fmt, *(log_msg[2] + (outcome,)))
 
-    def log(self, level: int, msg: str, *args: Any, **kwargs: Any) -> None:
-        """Log a message."""
-        msg = f"[%s](%s): {msg}"
-        args = (self.nwk, self.model) + args
-        _LOGGER.log(level, msg, *args, **kwargs)
+
+class WebSocketClientDevice(BaseDevice):
+    """ZHA device object for the websocket client."""
+
+    def __init__(
+        self,
+        extended_device_info: ExtendedDeviceInfo,
+        _gateway: Gateway,
+    ) -> None:
+        """Initialize the device."""
+        super().__init__(_gateway)
+        self._extended_device_info = extended_device_info
+        self.unique_id = str(extended_device_info.ieee)
+
+    @cached_property
+    def name(self) -> str:
+        """Return device name."""
+        return self._extended_device_info.name
+
+    @property
+    def ieee(self) -> EUI64:
+        """Return ieee address for device."""
+        return self._extended_device_info.ieee
+
+    @cached_property
+    def manufacturer(self) -> str:
+        """Return manufacturer for device."""
+        return self._extended_device_info.manufacturer
+
+    @cached_property
+    def model(self) -> str:
+        """Return model for device."""
+        return self._extended_device_info.model
+
+    @cached_property
+    def manufacturer_code(self) -> int | None:
+        """Return the manufacturer code for the device."""
+        return self._extended_device_info.manufacturer_code
+
+    @property
+    def nwk(self) -> NWK:
+        """Return nwk for device."""
+        return self._extended_device_info.nwk
+
+    @property
+    def lqi(self):
+        """Return lqi for device."""
+
+    @property
+    def rssi(self):
+        """Return rssi for device."""
+
+    @property
+    def last_seen(self) -> float | None:
+        """Return last_seen for device."""
+        return self._extended_device_info.last_seen
+
+    @cached_property
+    def is_mains_powered(self) -> bool | None:
+        """Return true if device is mains powered."""
+        return self._extended_device_info.power_source == POWER_MAINS_POWERED
+
+    @cached_property
+    def device_type(self) -> str:
+        """Return the logical device type for the device."""
+        return self._extended_device_info.device_type
+
+    @property
+    def power_source(self) -> str:
+        """Return the power source for the device."""
+        return self._extended_device_info.power_source
+
+    @cached_property
+    def is_router(self) -> bool | None:
+        """Return true if this is a routing capable device."""
+        return (
+            self._extended_device_info.device_type == zdo_types.LogicalType.Router.name
+        )
+
+    @cached_property
+    def is_coordinator(self) -> bool | None:
+        """Return true if this device represents a coordinator."""
+        return (
+            self._extended_device_info.device_type
+            == zdo_types.LogicalType.Coordinator.name
+        )
+
+    @property
+    def is_active_coordinator(self) -> bool:
+        """Return true if this device is the active coordinator."""
+        return self._extended_device_info.active_coordinator
+
+    @cached_property
+    def is_end_device(self) -> bool | None:
+        """Return true if this device is an end device."""
+        return (
+            self._extended_device_info.device_type
+            == zdo_types.LogicalType.EndDevice.name
+        )
+
+    @property
+    def is_groupable(self) -> bool:
+        """Return true if this device has a group cluster."""
+        return self._extended_device_info.is_groupable
+
+    @cached_property
+    def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, Any]]:
+        """Return the device automation triggers for this device."""
+        return self._extended_device_info.device_automation_triggers
+
+    @property
+    def available(self):
+        """Return True if device is available."""
+        return self._extended_device_info.available
+
+    @cached_property
+    def zigbee_signature(self) -> dict[str, Any]:
+        """Get zigbee signature for this device."""
+        return self._extended_device_info.signature
+
+    @property
+    def sw_version(self) -> int | None:
+        """Return the software version for this device."""
+        return self._extended_device_info.sw_version
+
+    @property
+    def platform_entities(self) -> dict[tuple[Platform, str], BasePlatformEntity]:
+        """Return the platform entities for this device."""
+        return self._extended_device_info.entities
+
+    def emit_platform_entity_event(self, event: EntityStateChangedEvent) -> None:
+        """Proxy the firing of an entity event."""
+        entity = self.get_platform_entity(event.platform, event.unique_id)
+        if entity is None:
+            raise ValueError(
+                f"Entity not found: {event.platform}.{event.unique_id}",
+            )
+        entity.state = event.state
+        self.emit(f"{event.unique_id}_{event.event}", event)

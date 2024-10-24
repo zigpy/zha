@@ -9,10 +9,9 @@ from zigpy.zcl.clusters import general, security
 import zigpy.zcl.foundation as zcl_f
 
 from zha.application.discovery import Platform
-from zha.application.gateway import WebSocketServerGateway as Server
+from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
 from zha.application.platforms.model import BasePlatformEntity, ButtonEntity
-from zha.websocket.client.controller import Controller
-from zha.websocket.client.proxy import DeviceProxy
+from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
     SIG_EP_INPUT,
@@ -25,17 +24,17 @@ from ..common import (
 
 
 def find_entity(
-    device_proxy: DeviceProxy, platform: Platform
+    device_proxy: WebSocketClientDevice, platform: Platform
 ) -> Optional[BasePlatformEntity]:
     """Find an entity for the specified platform on the given device."""
-    for entity in device_proxy.device_model.entities.values():
+    for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:
             return entity
     return None
 
 
 async def test_button(
-    connected_client_and_server: tuple[Controller, Server],
+    connected_client_and_server: tuple[WebSocketClientGateway, WebSocketServerGateway],
 ) -> None:
     """Test zha button platform."""
     controller, server = connected_client_and_server
@@ -58,7 +57,9 @@ async def test_button(
     cluster = zigpy_device.endpoints[1].identify
 
     assert cluster is not None
-    client_device: Optional[DeviceProxy] = controller.devices.get(zhaws_device.ieee)
+    client_device: Optional[WebSocketClientDevice] = controller.devices.get(
+        zhaws_device.ieee
+    )
     assert client_device is not None
     entity: ButtonEntity = find_entity(client_device, Platform.BUTTON)  # type: ignore
     assert entity is not None

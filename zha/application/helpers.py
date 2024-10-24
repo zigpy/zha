@@ -14,6 +14,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
+from aiohttp import ClientSession
 from pydantic import Field
 import voluptuous as vol
 import zigpy.exceptions
@@ -316,12 +317,20 @@ class DeviceOverridesConfiguration(BaseModel):
     type: Platform
 
 
-class ServerConfiguration(BaseModel):
-    """Server configuration for zhaws."""
+class WebsocketServerConfiguration(BaseModel):
+    """Websocket Server configuration for zhaws."""
 
     host: str = "0.0.0.0"
     port: int = 8001
     network_auto_start: bool = False
+
+
+class WebsocketClientConfiguration(BaseModel):
+    """Websocket client configuration for zhaws."""
+
+    host: str = "0.0.0.0"
+    port: int = 8001
+    aiohttp_session: ClientSession | None = None
 
 
 class ZHAConfiguration(BaseModel):
@@ -348,7 +357,8 @@ class ZHAData:
     """ZHA data stored in `gateway.data`."""
 
     config: ZHAConfiguration
-    server_config: ServerConfiguration | None = None
+    ws_server_config: WebsocketServerConfiguration | None = None
+    ws_client_config: WebsocketClientConfiguration | None = None
     zigpy_config: dict[str, Any] = dataclasses.field(default_factory=dict)
     platforms: collections.defaultdict[Platform, list] = dataclasses.field(
         default_factory=lambda: collections.defaultdict(list)
