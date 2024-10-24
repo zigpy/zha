@@ -1,7 +1,7 @@
 """Test configuration for the ZHA component."""
 
 import asyncio
-from collections.abc import Callable, Generator
+from collections.abc import AsyncGenerator, Callable, Generator
 from contextlib import contextmanager
 import logging
 import os
@@ -10,6 +10,7 @@ import threading
 from types import TracebackType
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import aiohttp.test_utils
 import pytest
 import zigpy
 from zigpy.application import ControllerApplication
@@ -23,11 +24,17 @@ from zigpy.zcl.foundation import Status
 import zigpy.zdo.types as zdo_t
 
 from zha.application import Platform
-from zha.application.gateway import Gateway
+from zha.application.gateway import (
+    Gateway,
+    WebSocketClientGateway,
+    WebSocketServerGateway,
+)
 from zha.application.helpers import (
     AlarmControlPanelOptions,
     CoordinatorConfiguration,
     LightOptions,
+    WebsocketClientConfiguration,
+    WebsocketServerConfiguration,
     ZHAConfiguration,
     ZHAData,
 )
@@ -230,7 +237,21 @@ async def zigpy_app_controller_fixture():
 
     # Create a fake coordinator device
     dev = app.add_device(nwk=app.state.node_info.nwk, ieee=app.state.node_info.ieee)
-    dev.node_desc = zdo_t.NodeDescriptor()
+    dev.node_desc = zdo_t.NodeDescriptor(
+        logical_type=zdo_t.LogicalType.Coordinator,
+        complex_descriptor_available=0,
+        user_descriptor_available=0,
+        reserved=0,
+        aps_flags=0,
+        frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+        mac_capability_flags=zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress,
+        manufacturer_code=0x1234,
+        maximum_buffer_size=127,
+        maximum_incoming_transfer_size=100,
+        server_mask=10752,
+        maximum_outgoing_transfer_size=100,
+        descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+    )
     dev.node_desc.logical_type = zdo_t.LogicalType.Coordinator
     dev.manufacturer = "Coordinator Manufacturer"
     dev.model = "Coordinator Model"
@@ -253,7 +274,7 @@ def caplog_fixture(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture
 @pytest.fixture(name="zha_data")
 def zha_data_fixture() -> ZHAData:
     """Fixture representing zha configuration data."""
-
+    port = aiohttp.test_utils.unused_port()
     return ZHAData(
         config=ZHAConfiguration(
             coordinator_configuration=CoordinatorConfiguration(
@@ -269,7 +290,15 @@ def zha_data_fixture() -> ZHAData:
                 master_code="4321",
                 failed_tries=2,
             ),
-        )
+        ),
+        ws_server_config=WebsocketServerConfiguration(
+            host="localhost",
+            port=port,
+            network_auto_start=False,
+        ),
+        ws_client_config=WebsocketClientConfiguration(
+            host="localhost", port=port, aiohttp_session=None
+        ),
     )
 
 
@@ -297,6 +326,36 @@ class TestGateway:
         INSTANCES.remove(self.zha_gateway)
         await self.zha_gateway.shutdown()
         await asyncio.sleep(0)
+
+
+@pytest.fixture
+async def connected_client_and_server(
+    zha_data: ZHAData,
+    zigpy_app_controller: ControllerApplication,
+    caplog: pytest.LogCaptureFixture,  # pylint: disable=unused-argument
+) -> AsyncGenerator[tuple[WebSocketClientGateway, WebSocketServerGateway], None]:
+    """Return the connected client and server fixture."""
+
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "bellows.zigbee.application.ControllerApplication",
+            return_value=zigpy_app_controller,
+        ),
+    ):
+        ws_gateway = await WebSocketServerGateway.async_from_config(zha_data)
+        await ws_gateway.async_initialize()
+        await ws_gateway.async_block_till_done()
+        await ws_gateway.async_initialize_devices_and_entities()
+        async with (
+            ws_gateway as gateway,
+            WebSocketClientGateway(zha_data) as controller,
+        ):
+            await controller.clients.listen()
+            yield controller, gateway
 
 
 @pytest.fixture

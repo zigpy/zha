@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import asyncio
 from collections.abc import Callable
-from dataclasses import dataclass
 from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any
@@ -12,14 +12,11 @@ from typing import TYPE_CHECKING, Any
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.platforms import (
-    BaseEntityInfo,
-    EntityStateChangedEvent,
-    PlatformEntity,
-)
+from zha.application.platforms import EntityStateChangedEvent, PlatformEntity
 from zha.const import STATE_CHANGED
+from zha.event import EventBase
 from zha.mixins import LogMixin
-from zha.zigbee.device import ExtendedDeviceInfo
+from zha.zigbee.model import GroupInfo, GroupMemberInfo, GroupMemberReference
 
 if TYPE_CHECKING:
     from zigpy.group import Group as ZigpyGroup, GroupEndpoint
@@ -29,43 +26,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupMemberReference:
-    """Describes a group member."""
-
-    ieee: EUI64
-    endpoint_id: int
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupEntityReference:
-    """Reference to a group entity."""
-
-    entity_id: int
-    name: str | None = None
-    original_name: str | None = None
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupMemberInfo:
-    """Describes a group member."""
-
-    ieee: EUI64
-    endpoint_id: int
-    device_info: ExtendedDeviceInfo
-    entities: dict[str, BaseEntityInfo]
-
-
-@dataclass(frozen=True, kw_only=True)
-class GroupInfo:
-    """Describes a group."""
-
-    group_id: int
-    name: str
-    members: list[GroupMemberInfo]
-    entities: dict[str, BaseEntityInfo]
 
 
 class GroupMember(LogMixin):
@@ -105,7 +65,7 @@ class GroupMember(LogMixin):
             endpoint_id=self.endpoint_id,
             device_info=self.device.extended_device_info,
             entities={
-                entity.unique_id: entity.info_object
+                entity.unique_id: entity.info_object.__dict__
                 for entity in self.associated_entities
             },
         )
@@ -145,7 +105,49 @@ class GroupMember(LogMixin):
         _LOGGER.log(level, msg, *args, **kwargs)
 
 
-class Group(LogMixin):
+class BaseGroup(LogMixin, EventBase, ABC):
+    """Base class for Zigbee groups."""
+
+    def __init__(
+        self,
+        gateway: Gateway,
+    ) -> None:
+        """Initialize the group."""
+        super().__init__()
+        self._gateway = gateway
+
+    @property
+    def gateway(self) -> Gateway:
+        """Return the gateway for this group."""
+        return self._gateway
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Return group name."""
+
+    @property
+    @abstractmethod
+    def group_id(self) -> int:
+        """Return group name."""
+
+    @property
+    @abstractmethod
+    def group_entities(self) -> dict[str, GroupEntity]:
+        """Return the platform entities of the group."""
+
+    @cached_property
+    @abstractmethod
+    def members(self) -> list[GroupMember]:
+        """Return the ZHA devices that are members of this group."""
+
+    @cached_property
+    @abstractmethod
+    def info_object(self) -> GroupInfo:
+        """Get ZHA group info."""
+
+
+class Group(BaseGroup):
     """ZHA Zigbee group object."""
 
     def __init__(
@@ -154,7 +156,7 @@ class Group(LogMixin):
         zigpy_group: zigpy.group.Group,
     ) -> None:
         """Initialize the group."""
-        self._gateway = gateway
+        super().__init__(gateway)
         self._zigpy_group = zigpy_group
         self._group_entities: dict[str, GroupEntity] = {}
         self._entity_unsubs: dict[str, Callable] = {}
@@ -206,7 +208,7 @@ class Group(LogMixin):
             name=self.name,
             members=[member.member_info for member in self.members],
             entities={
-                unique_id: entity.info_object
+                unique_id: entity.info_object.__dict__
                 for unique_id, entity in self._group_entities.items()
             },
         )
@@ -349,3 +351,49 @@ class Group(LogMixin):
         """Cancel tasks this group owns."""
         for group_entity in self._group_entities.values():
             await group_entity.on_remove()
+
+
+class WebSocketClientGroup(BaseGroup):
+    """ZHA Zigbee group object for the websocket client."""
+
+    def __init__(
+        self,
+        group_info: GroupInfo,
+        gateway: Gateway,
+    ) -> None:
+        """Initialize the group."""
+        super().__init__(gateway)
+        self._group_info = group_info
+
+    @property
+    def name(self) -> str:
+        """Return group name."""
+        return self._group_info.name
+
+    @property
+    def group_id(self) -> int:
+        """Return group name."""
+        return self._group_info.group_id
+
+    @property
+    def group_entities(self) -> dict[str, GroupEntity]:
+        """Return the platform entities of the group."""
+        return self._group_info.entities
+
+    @cached_property
+    def members(self) -> list[GroupMember]:
+        """Return the ZHA devices that are members of this group."""
+        return []
+
+    @cached_property
+    def info_object(self) -> GroupInfo:
+        """Get ZHA group info."""
+        return self._group_info
+
+    def emit_platform_entity_event(self, event: EntityStateChangedEvent) -> None:
+        """Proxy the firing of an entity event."""
+        entity = self.group_entities[event.unique_id]
+        if entity is None:
+            return  # group entities are updated to get state when created so we may not have the entity yet
+        entity.state = event.state
+        self.emit(f"{event.unique_id}_{event.event}", event)

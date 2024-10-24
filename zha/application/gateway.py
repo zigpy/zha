@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import asyncio
+import contextlib
 from contextlib import suppress
-from dataclasses import dataclass
 from datetime import timedelta
-from enum import Enum
 import logging
 import time
+from types import TracebackType
 from typing import Any, Final, Self, TypeVar, cast
 
+from async_timeout import timeout
+import websockets
 from zhaquirks import setup as setup_quirks
 from zigpy.application import ControllerApplication
 from zigpy.config import (
@@ -26,166 +29,166 @@ import zigpy.group
 from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
 from zigpy.types.named import EUI64
+from zigpy.zdo import ZDO
 
 from zha.application import discovery
 from zha.application.const import (
+    ATTR_DEVICE_TYPE,
+    ATTR_ENDPOINTS,
+    ATTR_MANUFACTURER,
+    ATTR_MODEL,
+    ATTR_NODE_DESCRIPTOR,
+    ATTR_PROFILE_ID,
     CONF_USE_THREAD,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
-    ZHA_GW_MSG,
     ZHA_GW_MSG_CONNECTION_LOST,
     ZHA_GW_MSG_DEVICE_FULL_INIT,
     ZHA_GW_MSG_DEVICE_JOINED,
     ZHA_GW_MSG_DEVICE_LEFT,
     ZHA_GW_MSG_DEVICE_REMOVED,
-    ZHA_GW_MSG_GROUP_ADDED,
-    ZHA_GW_MSG_GROUP_MEMBER_ADDED,
-    ZHA_GW_MSG_GROUP_MEMBER_REMOVED,
-    ZHA_GW_MSG_GROUP_REMOVED,
     ZHA_GW_MSG_RAW_INIT,
     RadioType,
 )
 from zha.application.helpers import DeviceAvailabilityChecker, GlobalUpdater, ZHAData
+from zha.application.model import (
+    ConnectionLostEvent,
+    DeviceFullyInitializedEvent,
+    DeviceJoinedDeviceInfo,
+    DeviceJoinedEvent,
+    DeviceLeftEvent,
+    DevicePairingStatus,
+    DeviceRemovedEvent,
+    ExtendedDeviceInfoWithPairingStatus,
+    GroupAddedEvent,
+    GroupMemberAddedEvent,
+    GroupMemberRemovedEvent,
+    GroupRemovedEvent,
+    RawDeviceInitializedDeviceInfo,
+    RawDeviceInitializedEvent,
+)
+from zha.application.platforms.model import EntityStateChangedEvent
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
-from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
+from zha.websocket.client.client import Client
+from zha.websocket.client.helpers import (
+    AlarmControlPanelHelper,
+    ButtonHelper,
+    ClientHelper,
+    ClimateHelper,
+    CoverHelper,
+    DeviceHelper,
+    FanHelper,
+    GroupHelper,
+    LightHelper,
+    LockHelper,
+    NetworkHelper,
+    NumberHelper,
+    PlatformEntityHelper,
+    SelectHelper,
+    ServerHelper,
+    SirenHelper,
+    SwitchHelper,
+)
+from zha.websocket.const import ControllerEvents
+from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
+from zha.websocket.server.api.platforms.api import load_platform_entity_apis
+from zha.websocket.server.client import ClientManager, load_api as load_client_api
+from zha.websocket.server.gateway_api import load_api as load_zigbee_controller_api
+from zha.zigbee.device import BaseDevice, Device, WebSocketClientDevice
+from zha.zigbee.endpoint import ATTR_IN_CLUSTERS, ATTR_OUT_CLUSTERS
+from zha.zigbee.group import (
+    BaseGroup,
+    Group,
+    GroupMemberReference,
+    WebSocketClientGroup,
+)
+from zha.zigbee.model import DeviceStatus, ExtendedDeviceInfo, ZHAEvent
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
 
-class DevicePairingStatus(Enum):
-    """Status of a device."""
-
-    PAIRED = 1
-    INTERVIEW_COMPLETE = 2
-    CONFIGURED = 3
-    INITIALIZED = 4
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceInfoWithPairingStatus(DeviceInfo):
-    """Information about a device with pairing status."""
-
-    pairing_status: DevicePairingStatus
-
-
-@dataclass(kw_only=True, frozen=True)
-class ExtendedDeviceInfoWithPairingStatus(ExtendedDeviceInfo):
-    """Information about a device with pairing status."""
-
-    pairing_status: DevicePairingStatus
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceJoinedDeviceInfo:
-    """Information about a device."""
-
-    ieee: str
-    nwk: int
-    pairing_status: DevicePairingStatus
-
-
-@dataclass(kw_only=True, frozen=True)
-class ConnectionLostEvent:
-    """Event to signal that the connection to the radio has been lost."""
-
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_CONNECTION_LOST
-    exception: Exception | None = None
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceJoinedEvent:
-    """Event to signal that a device has joined the network."""
-
-    device_info: DeviceJoinedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_JOINED
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceLeftEvent:
-    """Event to signal that a device has left the network."""
-
-    ieee: EUI64
-    nwk: int
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_LEFT
-
-
-@dataclass(kw_only=True, frozen=True)
-class RawDeviceInitializedDeviceInfo(DeviceJoinedDeviceInfo):
-    """Information about a device that has been initialized without quirks loaded."""
-
-    model: str
-    manufacturer: str
-    signature: dict[str, Any]
-
-
-@dataclass(kw_only=True, frozen=True)
-class RawDeviceInitializedEvent:
-    """Event to signal that a device has been initialized without quirks loaded."""
-
-    device_info: RawDeviceInitializedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_RAW_INIT
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceFullInitEvent:
-    """Event to signal that a device has been fully initialized."""
-
-    device_info: ExtendedDeviceInfoWithPairingStatus
-    new_join: bool = False
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_FULL_INIT
-
-
-@dataclass(kw_only=True, frozen=True)
-class GroupEvent:
-    """Event to signal a group event."""
-
-    event: str
-    group_info: GroupInfo
-    event_type: Final[str] = ZHA_GW_MSG
-
-
-@dataclass(kw_only=True, frozen=True)
-class DeviceRemovedEvent:
-    """Event to signal that a device has been removed."""
-
-    device_info: ExtendedDeviceInfo
-    event_type: Final[str] = ZHA_GW_MSG
-    event: Final[str] = ZHA_GW_MSG_DEVICE_REMOVED
-
-
-class Gateway(AsyncUtilMixin, EventBase):
-    """Gateway that handles events that happen on the ZHA Zigbee network."""
+class BaseGateway(EventBase, ABC):
+    """Base gateway class."""
 
     def __init__(self, config: ZHAData) -> None:
         """Initialize the gateway."""
         super().__init__()
         self.config: ZHAData = config
+        self.config.gateway = self
+
+    @abstractmethod
+    async def _async_initialize(self) -> None:
+        """Initialize controller and connect radio."""
+
+    @abstractmethod
+    def _find_coordinator_device(self) -> zigpy.device.Device:
+        """Find the coordinator device."""
+
+    @abstractmethod
+    async def async_initialize_devices_and_entities(self) -> None:
+        """Initialize devices and load entities."""
+
+    @abstractmethod
+    def get_or_create_device(
+        self, zigpy_device: zigpy.device.Device | ExtendedDeviceInfo
+    ) -> BaseDevice:
+        """Get or create a ZHA device."""
+
+    @abstractmethod
+    async def async_create_zigpy_group(
+        self,
+        name: str,
+        members: list[GroupMemberReference] | None,
+        group_id: int | None = None,
+    ) -> BaseGroup | None:
+        """Create a new Zigpy Zigbee group."""
+
+    @abstractmethod
+    async def async_remove_device(self, ieee: EUI64) -> None:
+        """Remove a device from ZHA."""
+
+    @abstractmethod
+    async def async_remove_zigpy_group(self, group_id: int) -> None:
+        """Remove a Zigbee group from Zigpy."""
+
+    @abstractmethod
+    async def shutdown(self) -> None:
+        """Stop ZHA Controller Application."""
+
+
+class Gateway(AsyncUtilMixin, BaseGateway):
+    """Gateway that handles events that happen on the ZHA Zigbee network."""
+
+    def __init__(self, config: ZHAData) -> None:
+        """Initialize the gateway."""
+        super().__init__(config)
         self._devices: dict[EUI64, Device] = {}
         self._groups: dict[int, Group] = {}
-        self.application_controller: ControllerApplication = None
         self.coordinator_zha_device: Device = None  # type: ignore[assignment]
-
+        self.application_controller: ControllerApplication = None
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
-
         self.global_updater: GlobalUpdater = GlobalUpdater(self)
         self._device_availability_checker: DeviceAvailabilityChecker = (
             DeviceAvailabilityChecker(self)
         )
-        self.config.gateway = self
+
+    @property
+    def devices(self) -> dict[EUI64, Device]:
+        """Return devices."""
+        return self._devices
+
+    @property
+    def groups(self) -> dict[int, Group]:
+        """Return groups."""
+        return self._groups
 
     @property
     def radio_type(self) -> RadioType:
@@ -433,7 +436,33 @@ class Gateway(AsyncUtilMixin, EventBase):
                     manufacturer=device.manufacturer
                     if device.manufacturer
                     else UNKNOWN_MANUFACTURER,
-                    signature=device.get_signature(),
+                    signature={
+                        ATTR_NODE_DESCRIPTOR: device.node_desc.as_dict(),
+                        ATTR_ENDPOINTS: {
+                            ep_id: {
+                                ATTR_PROFILE_ID: f"0x{endpoint.profile_id:04x}"
+                                if endpoint.profile_id is not None
+                                else "",
+                                ATTR_DEVICE_TYPE: f"0x{endpoint.device_type:04x}"
+                                if endpoint.device_type is not None
+                                else "",
+                                ATTR_IN_CLUSTERS: [
+                                    f"0x{cluster_id:04x}"
+                                    for cluster_id in sorted(endpoint.in_clusters)
+                                ],
+                                ATTR_OUT_CLUSTERS: [
+                                    f"0x{cluster_id:04x}"
+                                    for cluster_id in sorted(endpoint.out_clusters)
+                                ],
+                            }
+                            for ep_id, endpoint in device.endpoints.items()
+                            if not isinstance(endpoint, ZDO)
+                        },
+                        ATTR_MANUFACTURER: device.manufacturer
+                        if device.manufacturer
+                        else UNKNOWN_MANUFACTURER,
+                        ATTR_MODEL: device.model if device.model else UNKNOWN_MODEL,
+                    },
                 )
             ),
         )
@@ -472,7 +501,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group.clear_caches()
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
+        self._emit_group_gateway_message(zigpy_group, GroupMemberRemovedEvent)
 
     def group_member_added(
         self, zigpy_group: zigpy.group.Group, endpoint: zigpy.endpoint.Endpoint
@@ -483,35 +512,38 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group.clear_caches()
         discovery.GROUP_PROBE.discover_group_entities(zha_group)
         zha_group.info("group_member_added - endpoint: %s", endpoint)
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
+        self._emit_group_gateway_message(zigpy_group, GroupMemberAddedEvent)
 
     def group_added(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group added event."""
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.info("group_added")
         # need to dispatch for entity creation here
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_ADDED)
+        self._emit_group_gateway_message(zigpy_group, GroupAddedEvent)
 
     def group_removed(self, zigpy_group: zigpy.group.Group) -> None:
         """Handle zigpy group removed event."""
-        self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_REMOVED)
+        self._emit_group_gateway_message(zigpy_group, GroupRemovedEvent)
         zha_group = self._groups.pop(zigpy_group.group_id)
         zha_group.info("group_removed")
 
     def _emit_group_gateway_message(  # pylint: disable=unused-argument
         self,
         zigpy_group: zigpy.group.Group,
-        gateway_message_type: str,
+        gateway_message_type: GroupRemovedEvent
+        | GroupAddedEvent
+        | GroupMemberAddedEvent
+        | GroupMemberRemovedEvent,
     ) -> None:
         """Send the gateway event for a zigpy group event."""
         zha_group = self._groups.get(zigpy_group.group_id)
         if zha_group is not None:
+            response = gateway_message_type(
+                group_info=zha_group.info_object,
+            )
             self.emit(
-                gateway_message_type,
-                GroupEvent(
-                    event=gateway_message_type,
-                    group_info=zha_group.info_object,
-                ),
+                response.event,
+                response,
             )
 
     def device_removed(self, device: zigpy.device.Device) -> None:
@@ -548,16 +580,6 @@ class Gateway(AsyncUtilMixin, EventBase):
     def state(self) -> State:
         """Return the active coordinator's network state."""
         return self.application_controller.state
-
-    @property
-    def devices(self) -> dict[EUI64, Device]:
-        """Return devices."""
-        return self._devices
-
-    @property
-    def groups(self) -> dict[int, Group]:
-        """Return groups."""
-        return self._groups
 
     def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> Device:
         """Get or create a ZHA device."""
@@ -619,7 +641,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info),
+            DeviceFullyInitializedEvent(device_info=device_info),
         )
 
     async def _async_device_joined(self, zha_device: Device) -> None:
@@ -634,7 +656,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.create_platform_entities()
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info, new_join=True),
+            DeviceFullyInitializedEvent(device_info=device_info, new_join=True),
         )
 
     async def _async_device_rejoined(self, zha_device: Device) -> None:
@@ -652,7 +674,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         )
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info),
+            DeviceFullyInitializedEvent(device_info=device_info),
         )
         # force async_initialize() to fire so don't explicitly call it
         zha_device.available = False
@@ -766,3 +788,382 @@ class Gateway(AsyncUtilMixin, EventBase):
         if sender.ieee in self.devices and not self.devices[sender.ieee].available:
             self.devices[sender.ieee].on_network = True
             self.async_update_device(sender, available=True)
+
+
+class WebSocketServerGateway(Gateway):
+    """ZHAWSS server implementation."""
+
+    def __init__(self, config: ZHAData) -> None:
+        """Initialize the websocket server gateway."""
+        super().__init__(config)
+        self._ws_server: websockets.WebSocketServer | None = None
+        self._client_manager: ClientManager = ClientManager(self)
+        self._stopped_event: asyncio.Event = asyncio.Event()
+        self._tracked_ws_tasks: set[asyncio.Task] = set()
+        self.data: dict[Any, Any] = {}
+        for platform in discovery.PLATFORMS:
+            self.data.setdefault(platform, [])
+        self._register_api_commands()
+
+    @property
+    def is_serving(self) -> bool:
+        """Return whether or not the websocket server is serving."""
+        return self._ws_server is not None and self._ws_server.is_serving
+
+    @property
+    def client_manager(self) -> ClientManager:
+        """Return the zigbee application controller."""
+        return self._client_manager
+
+    async def start_server(self) -> None:
+        """Start the websocket server."""
+        assert self._ws_server is None
+        self._stopped_event.clear()
+        self._ws_server = await websockets.serve(
+            self.client_manager.add_client,
+            self.config.ws_server_config.host,
+            self.config.ws_server_config.port,
+            logger=_LOGGER,
+        )
+        if self.config.ws_server_config.network_auto_start:
+            await self.async_initialize()
+            await self.async_initialize_devices_and_entities()
+
+    async def async_initialize(self) -> None:
+        """Initialize controller and connect radio."""
+        await super().async_initialize()
+        self.on_all_events(self.client_manager.broadcast)
+
+    async def stop_server(self) -> None:
+        """Stop the websocket server."""
+        if self._ws_server is None:
+            self._stopped_event.set()
+            return
+
+        assert self._ws_server is not None
+
+        await self.shutdown()
+
+        self._ws_server.close()
+        await self._ws_server.wait_closed()
+        self._ws_server = None
+
+        self._stopped_event.set()
+
+    async def wait_closed(self) -> None:
+        """Wait until the server is not running."""
+        await self._stopped_event.wait()
+        _LOGGER.info("Server stopped. Completing remaining tasks...")
+        tasks = [t for t in self._tracked_ws_tasks if not (t.done() or t.cancelled())]
+        for task in tasks:
+            _LOGGER.debug("Cancelling task: %s", task)
+            task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+        tasks = [
+            t
+            for t in self._tracked_completable_tasks
+            if not (t.done() or t.cancelled())
+        ]
+        for task in tasks:
+            _LOGGER.debug("Cancelling task: %s", task)
+            task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    def track_ws_task(self, task: asyncio.Task) -> None:
+        """Create a tracked ws task."""
+        self._tracked_ws_tasks.add(task)
+        task.add_done_callback(self._tracked_ws_tasks.remove)
+
+    async def async_block_till_done(self, wait_background_tasks=False):
+        """Block until all pending work is done."""
+        # To flush out any call_soon_threadsafe
+        await asyncio.sleep(0.001)
+        start_time: float | None = None
+
+        while self._tracked_ws_tasks:
+            pending = [task for task in self._tracked_ws_tasks if not task.done()]
+            self._tracked_ws_tasks.clear()
+            if pending:
+                await self._await_and_log_pending(pending)
+
+                if start_time is None:
+                    # Avoid calling monotonic() until we know
+                    # we may need to start logging blocked tasks.
+                    start_time = 0
+                elif start_time == 0:
+                    # If we have waited twice then we set the start
+                    # time
+                    start_time = time.monotonic()
+                elif time.monotonic() - start_time > BLOCK_LOG_TIMEOUT:
+                    # We have waited at least three loops and new tasks
+                    # continue to block. At this point we start
+                    # logging all waiting tasks.
+                    for task in pending:
+                        _LOGGER.debug("Waiting for task: %s", task)
+            else:
+                await asyncio.sleep(0.001)
+        await super().async_block_till_done(wait_background_tasks=wait_background_tasks)
+
+    async def __aenter__(self) -> WebSocketServerGateway:
+        """Enter the context manager."""
+        await self.start_server()
+        return self
+
+    async def __aexit__(
+        self, exc_type: Exception, exc_value: str, traceback: TracebackType
+    ) -> None:
+        """Exit the context manager."""
+        await self.stop_server()
+        await self.wait_closed()
+
+    def _register_api_commands(self) -> None:
+        """Load server API commands."""
+
+        load_zigbee_controller_api(self)
+        load_platform_entity_apis(self)
+        load_client_api(self)
+
+
+CONNECT_TIMEOUT = 10
+
+
+class WebSocketClientGateway(BaseGateway):
+    """ZHA gateway implementation for a websocket client."""
+
+    def __init__(self, config: ZHAData) -> None:
+        """Initialize the websocket client gateway."""
+        super().__init__(config)
+        self._ws_server_url: str = (
+            f"ws://{config.ws_client_config.host}:{config.ws_client_config.port}"
+        )
+        self._client: Client = Client(
+            self._ws_server_url, config.ws_client_config.aiohttp_session
+        )
+        self._devices: dict[EUI64, WebSocketClientDevice] = {}
+        self._groups: dict[int, WebSocketClientGroup] = {}
+        self.coordinator_zha_device: WebSocketClientDevice = None  # type: ignore[assignment]
+        self.lights: LightHelper = LightHelper(self._client)
+        self.switches: SwitchHelper = SwitchHelper(self._client)
+        self.sirens: SirenHelper = SirenHelper(self._client)
+        self.buttons: ButtonHelper = ButtonHelper(self._client)
+        self.covers: CoverHelper = CoverHelper(self._client)
+        self.fans: FanHelper = FanHelper(self._client)
+        self.locks: LockHelper = LockHelper(self._client)
+        self.numbers: NumberHelper = NumberHelper(self._client)
+        self.selects: SelectHelper = SelectHelper(self._client)
+        self.thermostats: ClimateHelper = ClimateHelper(self._client)
+        self.alarm_control_panels: AlarmControlPanelHelper = AlarmControlPanelHelper(
+            self._client
+        )
+        self.entities: PlatformEntityHelper = PlatformEntityHelper(self._client)
+        self.clients: ClientHelper = ClientHelper(self._client)
+        self.groups_helper: GroupHelper = GroupHelper(self._client)
+        self.devices_helper: DeviceHelper = DeviceHelper(self._client)
+        self.network: NetworkHelper = NetworkHelper(self._client)
+        self.server_helper: ServerHelper = ServerHelper(self._client)
+        self._client.on_all_events(self._handle_event_protocol)
+
+    @property
+    def client(self) -> Client:
+        """Return the client."""
+        return self._client
+
+    @property
+    def devices(self) -> dict[EUI64, WebSocketClientDevice]:
+        """Return devices."""
+        return self._devices
+
+    @property
+    def groups(self) -> dict[int, WebSocketClientGroup]:
+        """Return groups."""
+        return self._groups
+
+    async def connect(self) -> None:
+        """Connect to the websocket server."""
+        _LOGGER.debug("Connecting to websocket server at: %s", self._ws_server_url)
+        try:
+            async with timeout(CONNECT_TIMEOUT):
+                await self._client.connect()
+        except Exception as err:
+            _LOGGER.exception("Unable to connect to the ZHA wss", exc_info=err)
+            raise err
+
+        await self._client.listen()
+
+    async def disconnect(self) -> None:
+        """Disconnect from the websocket server."""
+        await self._client.disconnect()
+
+    async def __aenter__(self) -> WebSocketClientGateway:
+        """Connect to the websocket server."""
+        await self.connect()
+        return self
+
+    async def __aexit__(
+        self, exc_type: Exception, exc_value: str, traceback: TracebackType
+    ) -> None:
+        """Disconnect from the websocket server."""
+        await self.disconnect()
+
+    async def send_command(self, command: WebSocketCommand) -> WebSocketCommandResponse:
+        """Send a command and get a response."""
+        return await self._client.async_send_command(command)
+
+    async def load_devices(self) -> None:
+        """Restore ZHA devices from zigpy application state."""
+        response_devices = await self.devices_helper.get_devices()
+        for ieee, device in response_devices.items():
+            self._devices[ieee] = self.get_or_create_device(device)
+
+    async def load_groups(self) -> None:
+        """Initialize ZHA groups."""
+        response_groups = await self.groups_helper.get_groups()
+        for group_id, group in response_groups.items():
+            self._groups[group_id] = WebSocketClientGroup(group, self)
+
+    async def _async_initialize(self) -> None:
+        """Initialize controller and connect radio."""
+
+        await self.load_devices()
+
+        self.coordinator_zha_device = self.get_or_create_device(
+            self._find_coordinator_device()
+        )
+
+        await self.load_groups()
+
+    def _find_coordinator_device(self) -> zigpy.device.Device:
+        """Find the coordinator device."""
+        for device in self._devices.values():
+            if device.is_active_coordinator:
+                return device
+
+    async def async_initialize_devices_and_entities(self) -> None:
+        """Initialize devices and load entities."""
+
+    def get_or_create_device(
+        self, zigpy_device: zigpy.device.Device | ExtendedDeviceInfo
+    ) -> WebSocketClientDevice:
+        """Get or create a ZHA device."""
+        if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
+            zha_device = WebSocketClientDevice(zigpy_device, self)
+            self._devices[zigpy_device.ieee] = zha_device
+        else:
+            self._devices[zigpy_device.ieee]._extended_device_info = zigpy_device
+        return zha_device
+
+    async def async_create_zigpy_group(
+        self,
+        name: str,
+        members: list[GroupMemberReference] | None,
+        group_id: int | None = None,
+    ) -> WebSocketClientGroup | None:
+        """Create a new Zigpy Zigbee group."""
+
+    async def async_remove_device(self, ieee: EUI64) -> None:
+        """Remove a device from ZHA."""
+
+    async def async_remove_zigpy_group(self, group_id: int) -> None:
+        """Remove a Zigbee group from Zigpy."""
+
+    async def shutdown(self) -> None:
+        """Stop ZHA Controller Application."""
+
+    def handle_state_changed(self, event: EntityStateChangedEvent) -> None:
+        """Handle a platform_entity_event from the websocket server."""
+        _LOGGER.debug("platform_entity_event: %s", event)
+        if event.device_ieee:
+            device = self.devices.get(event.device_ieee)
+            if device is None:
+                _LOGGER.warning("Received event from unknown device: %s", event)
+                return
+            device.emit_platform_entity_event(event)
+        elif event.group_id:
+            group = self.groups.get(event.group_id)
+            if not group:
+                _LOGGER.warning("Received event from unknown group: %s", event)
+                return
+            group.emit_platform_entity_event(event)
+
+    def handle_zha_event(self, event: ZHAEvent) -> None:
+        """Handle a zha_event from the websocket server."""
+        _LOGGER.debug("zha_event: %s", event)
+        device = self.devices.get(event.device.ieee)
+        if device is None:
+            _LOGGER.warning("Received zha_event from unknown device: %s", event)
+            return
+        device.emit("zha_event", event)
+
+    def handle_device_joined(self, event: DeviceJoinedEvent) -> None:
+        """Handle device joined.
+
+        At this point, no information about the device is known other than its
+        address
+        """
+
+        self.emit(ZHA_GW_MSG_DEVICE_JOINED, event)
+
+    def handle_raw_device_initialized(self, event: RawDeviceInitializedEvent) -> None:
+        """Handle a device initialization without quirks loaded."""
+
+        self.emit(ZHA_GW_MSG_RAW_INIT, event)
+
+    def handle_device_fully_initialized(
+        self, event: DeviceFullyInitializedEvent
+    ) -> None:
+        """Handle device joined and basic information discovered."""
+        device_model = event.device_info
+        _LOGGER.info("Device %s - %s initialized", device_model.ieee, device_model.nwk)
+        if device_model.ieee in self.devices:
+            self.devices[device_model.ieee]._extended_device_info = device_model
+        else:
+            self._devices[device_model.ieee] = self.get_or_create_device(device_model)
+        self.emit(ControllerEvents.DEVICE_FULLY_INITIALIZED, event)
+
+    def handle_device_left(self, event: DeviceLeftEvent) -> None:
+        """Handle device leaving the network."""
+        _LOGGER.info("Device %s - %s left", event.ieee, event.nwk)
+        self.emit(ZHA_GW_MSG_DEVICE_LEFT, event)
+
+    def handle_device_removed(self, event: DeviceRemovedEvent) -> None:
+        """Handle device being removed from the network."""
+        device = event.device_info
+        _LOGGER.info(
+            "Device %s - %s has been removed from the network", device.ieee, device.nwk
+        )
+        self._devices.pop(device.ieee, None)
+        self.emit(ZHA_GW_MSG_DEVICE_REMOVED, event)
+
+    def handle_group_member_removed(self, event: GroupMemberRemovedEvent) -> None:
+        """Handle group member removed event."""
+        if event.group_info.group_id in self.groups:
+            self.groups[event.group_info.group_id]._group_info = event.group_info
+        self.emit(ControllerEvents.GROUP_MEMBER_REMOVED, event)
+
+    def handle_group_member_added(self, event: GroupMemberAddedEvent) -> None:
+        """Handle group member added event."""
+        if event.group_info.group_id in self.groups:
+            self.groups[event.group_info.group_id]._group_info = event.group_info
+        self.emit(ControllerEvents.GROUP_MEMBER_ADDED, event)
+
+    def handle_group_added(self, event: GroupAddedEvent) -> None:
+        """Handle group added event."""
+        if event.group_info.group_id in self.groups:
+            self.groups[event.group_info.group_id]._group_info = event.group_info
+        else:
+            self.groups[event.group_info.group_id] = WebSocketClientGroup(
+                event.group_info, self
+            )
+        self.emit(ControllerEvents.GROUP_ADDED, event)
+
+    def handle_group_removed(self, event: GroupRemovedEvent) -> None:
+        """Handle group removed event."""
+        if event.group_info.group_id in self.groups:
+            self.groups.pop(event.group_info.group_id)
+        self.emit(ControllerEvents.GROUP_REMOVED, event)
+
+    def connection_lost(self, exc: Exception) -> None:
+        """Handle connection lost event."""
