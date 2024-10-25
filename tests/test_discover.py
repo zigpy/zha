@@ -524,6 +524,7 @@ def _get_test_device(
             unit=UnitOfTime.SECONDS,
             multiplier=1,
             translation_key="on_off_transition_time",
+            fallback_name="On off transition time",
         )
         .number(
             zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
@@ -534,12 +535,14 @@ def _get_test_device(
             unit=UnitOfTime.SECONDS,
             multiplier=1,
             translation_key="on_off_transition_time",
+            fallback_name="On off transition time",
         )
         .sensor(
             zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
             zigpy.zcl.clusters.general.OnOff.cluster_id,
             entity_type=EntityType.CONFIG,
             translation_key="analog_input",
+            fallback_name="Analog input",
         )
     )
 
@@ -608,8 +611,8 @@ async def test_quirks_v2_entity_discovery_errors(
         "entity_type=<EntityType.CONFIG: 'config'>, cluster_id=6, endpoint_id=1, "
         "cluster_type=<ClusterType.Server: 0>, initially_disabled=False, "
         "attribute_initialized_from_cache=True, translation_key='analog_input', "
-        "fallback_name=None, attribute_name='off_wait_time', divisor=1, multiplier=1, "
-        "unit=None, device_class=None, state_class=None)}"
+        "fallback_name='Analog input', attribute_name='off_wait_time', divisor=1, "
+        "multiplier=1, unit=None, device_class=None, state_class=None)}"
     )
     # fmt: on
 
@@ -711,6 +714,8 @@ def bad_binary_sensor_device_class(
     return quirk_builder.binary_sensor(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.on_off.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
+        translation_key="on_off",
+        fallback_name="On off",
         device_class=BadDeviceClass.BAD,
     )
 
@@ -723,6 +728,8 @@ def bad_sensor_device_class(
     return quirk_builder.sensor(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
+        translation_key="off_wait_time",
+        fallback_name="Off wait time",
         device_class=BadDeviceClass.BAD,
     )
 
@@ -735,6 +742,8 @@ def bad_number_device_class(
     return quirk_builder.number(
         zigpy.zcl.clusters.general.OnOff.AttributeDefs.on_time.name,
         zigpy.zcl.clusters.general.OnOff.cluster_id,
+        translation_key="on_time",
+        fallback_name="On time",
         device_class=BadDeviceClass.BAD,
     )
 

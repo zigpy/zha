@@ -206,11 +206,15 @@ class FakeManufacturerCluster(CustomCluster, ManufacturerSpecificCluster):
         FakeManufacturerCluster.ServerCommandDefs.self_test.name,
         FakeManufacturerCluster.cluster_id,
         command_args=(5,),
+        translation_key="self_test",
+        fallback_name="Self test",
     )
     .write_attr_button(
         FakeManufacturerCluster.AttributeDefs.feed.name,
         2,
         FakeManufacturerCluster.cluster_id,
+        translation_key="feed",
+        fallback_name="Feed",
     )
 )
 

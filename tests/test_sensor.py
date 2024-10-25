@@ -1377,6 +1377,8 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         divisor=1,
         multiplier=1,
         unit=UnitOfMass.GRAMS,
+        translation_key="last_feeding_size",
+        fallback_name="Last feeding size",
     )
     .add_to_registry()
 )
