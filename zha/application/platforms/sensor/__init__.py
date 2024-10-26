@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from asyncio import Task
 from datetime import UTC, date, datetime
 import enum
@@ -26,9 +27,11 @@ from zha.application.platforms import (
     BaseIdentifiers,
     EntityCategory,
     PlatformEntity,
+    WebSocketClientEntity,
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.model import BaseSensorEntityInfo
 from zha.application.platforms.sensor.const import (
     UNIX_EPOCH_TO_ZCL_EPOCH,
     SensorDeviceClass,
@@ -79,6 +82,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_THERMOSTAT,
     SMARTTHINGS_HUMIDITY_CLUSTER,
 )
+from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -140,6 +144,15 @@ class DeviceCounterSensorIdentifiers(BaseIdentifiers):
     """Device counter sensor identifiers."""
 
     device_ieee: types.EUI64
+
+
+class SensorEntityInterface(ABC):
+    """Sensor interface."""
+
+    @property
+    @abstractmethod
+    def native_value(self) -> date | datetime | str | int | float | None:
+        """Return the state of the entity."""
 
 
 class Sensor(PlatformEntity):
@@ -1840,3 +1853,26 @@ class DanfossMotorStepCounter(Sensor):
     _attribute_name = "motor_step_counter"
     _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+class WebSocketClientSensorEntity(WebSocketClientEntity, SensorEntityInterface):
+    """Representation of a ZHA sensor entity."""
+
+    PLATFORM: Platform = Platform.SENSOR
+
+    def __init__(
+        self, entity_info: BaseSensorEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA alarm control device."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> BaseSensorEntityInfo:
+        """Return the info object."""
+        return self._entity_info
+
+    @property
+    def native_value(self) -> date | datetime | str | int | float | None:
+        """Return the state of the entity."""
+        return self.info_object.state.state

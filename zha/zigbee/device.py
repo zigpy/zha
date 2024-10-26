@@ -56,8 +56,11 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values
-from zha.application.platforms import PlatformEntity
-from zha.application.platforms.model import BasePlatformEntity, EntityStateChangedEvent
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
+from zha.application.platforms.model import (
+    BasePlatformEntityInfo,
+    EntityStateChangedEvent,
+)
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -1126,6 +1129,25 @@ class WebSocketClientDevice(BaseDevice):
         self._extended_device_info = extended_device_info
         self.unique_id = str(extended_device_info.ieee)
 
+    @property
+    def extended_device_info(self) -> ExtendedDeviceInfo:
+        """Get extended device information."""
+        return self._extended_device_info
+
+    @extended_device_info.setter
+    def extended_device_info(self, extended_device_info: ExtendedDeviceInfo) -> None:
+        """Set extended device information."""
+        self._extended_device_info = extended_device_info
+        self._entities: dict[tuple[Platform, str], WebSocketClientEntity] = {
+            (
+                entity.platform,
+                entity.unique_id,
+            ): discovery.ENTITY_INFO_CLASS_TO_WEBSOCKET_CLIENT_ENTITY_CLASS[
+                entity.__class__
+            ](entity, self)
+            for entity in self._extended_device_info.entities.values()
+        }
+
     @cached_property
     def name(self) -> str:
         """Return device name."""
@@ -1238,9 +1260,9 @@ class WebSocketClientDevice(BaseDevice):
         return self._extended_device_info.sw_version
 
     @property
-    def platform_entities(self) -> dict[tuple[Platform, str], BasePlatformEntity]:
+    def platform_entities(self) -> dict[tuple[Platform, str], BasePlatformEntityInfo]:
         """Return the platform entities for this device."""
-        return self._extended_device_info.entities
+        return self._entities
 
     def emit_platform_entity_event(self, event: EntityStateChangedEvent) -> None:
         """Proxy the firing of an entity event."""

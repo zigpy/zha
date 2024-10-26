@@ -463,3 +463,32 @@ class GroupEntity(BaseEntity):
     async def async_update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
         self.update()
+
+
+class WebSocketClientEntity(BaseEntity):
+    """Entity repsentation for the websocket client."""
+
+    def __init__(self, entity_info: BaseEntityInfo) -> None:
+        """Initialize the websocket client entity."""
+        super().__init__(entity_info.unique_id)
+        self.PLATFORM = entity_info.platform
+        self._entity_info: BaseEntityInfo = entity_info
+        self._attr_enabled = self._entity_info.enabled
+        self._attr_fallback_name = self._entity_info.fallback_name
+        self._attr_translation_key = self._entity_info.translation_key
+        self._attr_entity_category = self._entity_info.entity_category
+        self._attr_entity_registry_enabled_default = (
+            self._entity_info.entity_registry_enabled_default
+        )
+        self._attr_device_class = self._entity_info.device_class
+        self._attr_state_class = self._entity_info.state_class
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the arguments to use in the command."""
+        return self._entity_info.state.__dict__
+
+    @state.setter
+    def state(self, value: dict[str, Any]) -> None:
+        """Set the state of the entity."""
+        self._entity_info.state = value

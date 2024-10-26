@@ -22,7 +22,7 @@ class DisarmCommand(PlatformEntityCommand):
         APICommands.ALARM_CONTROL_PANEL_DISARM
     )
     platform: str = Platform.ALARM_CONTROL_PANEL
-    code: Union[str, None]
+    code: Union[str, None] = None
 
 
 @decorators.websocket_command(DisarmCommand)
@@ -39,7 +39,7 @@ class ArmHomeCommand(PlatformEntityCommand):
         APICommands.ALARM_CONTROL_PANEL_ARM_HOME
     )
     platform: str = Platform.ALARM_CONTROL_PANEL
-    code: Union[str, None]
+    code: Union[str, None] = None
 
 
 @decorators.websocket_command(ArmHomeCommand)
@@ -58,7 +58,7 @@ class ArmAwayCommand(PlatformEntityCommand):
         APICommands.ALARM_CONTROL_PANEL_ARM_AWAY
     )
     platform: str = Platform.ALARM_CONTROL_PANEL
-    code: Union[str, None]
+    code: Union[str, None] = None
 
 
 @decorators.websocket_command(ArmAwayCommand)
@@ -77,7 +77,7 @@ class ArmNightCommand(PlatformEntityCommand):
         APICommands.ALARM_CONTROL_PANEL_ARM_NIGHT
     )
     platform: str = Platform.ALARM_CONTROL_PANEL
-    code: Union[str, None]
+    code: Union[str, None] = None
 
 
 @decorators.websocket_command(ArmNightCommand)

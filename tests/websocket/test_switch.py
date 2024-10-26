@@ -16,9 +16,9 @@ from tests.common import mock_coro
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
 from zha.application.platforms.model import (
-    BasePlatformEntity,
-    SwitchEntity,
-    SwitchGroupEntity,
+    BasePlatformEntityInfo,
+    SwitchEntityInfo,
+    SwitchGroupEntityInfo,
 )
 from zha.zigbee.device import Device, WebSocketClientDevice
 from zha.zigbee.group import Group, GroupMemberReference, WebSocketClientGroup
@@ -44,7 +44,7 @@ _LOGGER = logging.getLogger(__name__)
 
 def find_entity(
     device_proxy: WebSocketClientDevice, platform: Platform
-) -> Optional[BasePlatformEntity]:
+) -> Optional[BasePlatformEntityInfo]:
     """Find an entity for the specified platform on the given device."""
     for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:
@@ -54,10 +54,10 @@ def find_entity(
 
 def get_group_entity(
     group_proxy: WebSocketClientGroup, entity_id: str
-) -> Optional[SwitchGroupEntity]:
+) -> Optional[SwitchGroupEntityInfo]:
     """Get entity."""
 
-    return cast(SwitchGroupEntity, group_proxy.group_entities.get(entity_id))
+    return cast(SwitchGroupEntityInfo, group_proxy.group_entities.get(entity_id))
 
 
 @pytest.fixture
@@ -141,10 +141,10 @@ async def test_switch(
         zha_device.ieee
     )
     assert client_device is not None
-    entity: SwitchEntity = find_entity(client_device, Platform.SWITCH)
+    entity: SwitchEntityInfo = find_entity(client_device, Platform.SWITCH)
     assert entity is not None
 
-    assert isinstance(entity, SwitchEntity)
+    assert isinstance(entity, SwitchEntityInfo)
 
     assert entity.state.state is False
 
@@ -268,10 +268,10 @@ async def test_zha_group_switch_entity(
     group_proxy: Optional[WebSocketClientGroup] = controller.groups.get(2)
     assert group_proxy is not None
 
-    entity: SwitchGroupEntity = get_group_entity(group_proxy, entity_id)  # type: ignore
+    entity: SwitchGroupEntityInfo = get_group_entity(group_proxy, entity_id)  # type: ignore
     assert entity is not None
 
-    assert isinstance(entity, SwitchGroupEntity)
+    assert isinstance(entity, SwitchGroupEntityInfo)
 
     group_cluster_on_off = zha_group.zigpy_group.endpoint[general.OnOff.cluster_id]
     dev1_cluster_on_off = device_switch_1.device.endpoints[1].on_off

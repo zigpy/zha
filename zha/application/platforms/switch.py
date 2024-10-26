@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self, cast
@@ -21,7 +21,9 @@ from zha.application.platforms import (
     EntityCategory,
     GroupEntity,
     PlatformEntity,
+    WebSocketClientEntity,
 )
+from zha.application.platforms.model import SwitchEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -33,6 +35,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_THERMOSTAT,
 )
 from zha.zigbee.cluster_handlers.general import OnOffClusterHandler
+from zha.zigbee.device import WebSocketClientDevice
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -59,7 +62,24 @@ class ConfigurableAttributeSwitchInfo(BaseEntityInfo):
     on_value: int
 
 
-class BaseSwitch(BaseEntity, ABC):
+class SwitchEntityInterface(ABC):
+    """Switch interface."""
+
+    @property
+    @abstractmethod
+    def is_on(self) -> bool:
+        """Return if the switch is on based on the statemachine."""
+
+    @abstractmethod
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+
+    @abstractmethod
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+
+
+class BaseSwitch(BaseEntity, SwitchEntityInterface):
     """Common base class for zhawss switches."""
 
     PLATFORM = Platform.SWITCH
@@ -859,3 +879,32 @@ class SinopeLightDoubleTapFullSwitch(ConfigurableAttributeSwitch):
     _unique_id_suffix = "double_up_full"
     _attribute_name = "double_up_full"
     _attr_translation_key: str = "double_up_full"
+
+
+class WebSocketClientSwitchEntity(WebSocketClientEntity, SwitchEntityInterface):
+    """Defines a ZHA switch that is controlled via a websocket."""
+
+    PLATFORM = Platform.SWITCH
+
+    def __init__(
+        self, entity_info: SwitchEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA switch entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> SwitchEntityInfo:
+        """Return a representation of the switch."""
+        return self._entity_info
+
+    @property
+    def is_on(self) -> bool:
+        """Return if the switch is on based on the statemachine."""
+        return self.info_object.state.state
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""

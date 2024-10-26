@@ -10,7 +10,10 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import AlarmControlPanelEntity
+from zha.application.platforms.alarm_control_panel import (
+    WebSocketClientAlarmControlPanel,
+)
+from zha.application.platforms.model import AlarmControlPanelEntityInfo
 from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
@@ -54,18 +57,20 @@ async def test_alarm_control_panel(
         zhaws_device.ieee
     )
     assert client_device is not None
-    alarm_entity: AlarmControlPanelEntity = client_device.platform_entities.get(
-        (Platform.ALARM_CONTROL_PANEL, "00:0d:6f:00:0a:90:69:e7-1")
+    alarm_entity: WebSocketClientAlarmControlPanel = (
+        client_device.platform_entities.get(
+            (Platform.ALARM_CONTROL_PANEL, "00:0d:6f:00:0a:90:69:e7-1")
+        )
     )
     assert alarm_entity is not None
-    assert isinstance(alarm_entity, AlarmControlPanelEntity)
+    assert isinstance(alarm_entity, WebSocketClientAlarmControlPanel)
 
     # test that the state is STATE_ALARM_DISARMED
     assert alarm_entity.state.state == "disarmed"
 
     # arm_away
     cluster.client_command.reset_mock()
-    await controller.alarm_control_panels.arm_away(alarm_entity, "4321")
+    await alarm_entity.async_alarm_arm_away("4321")
     assert cluster.client_command.call_count == 2
     assert cluster.client_command.await_count == 2
     assert cluster.client_command.call_args == call(
@@ -82,15 +87,15 @@ async def test_alarm_control_panel(
 
     # trip alarm from faulty code entry. First we need to arm away
     cluster.client_command.reset_mock()
-    await controller.alarm_control_panels.arm_away(alarm_entity, "4321")
+    await alarm_entity.async_alarm_arm_away("4321")
     await server.async_block_till_done()
     assert alarm_entity.state.state == "armed_away"
     cluster.client_command.reset_mock()
 
     # now simulate a faulty code entry sequence
-    await controller.alarm_control_panels.disarm(alarm_entity, "0000")
-    await controller.alarm_control_panels.disarm(alarm_entity, "0000")
-    await controller.alarm_control_panels.disarm(alarm_entity, "0000")
+    await alarm_entity.async_alarm_disarm("0000")
+    await alarm_entity.async_alarm_disarm("0000")
+    await alarm_entity.async_alarm_disarm("0000")
     await server.async_block_till_done()
 
     assert alarm_entity.state.state == "triggered"
@@ -108,7 +113,7 @@ async def test_alarm_control_panel(
     await reset_alarm_panel(server, controller, cluster, alarm_entity)
 
     # arm_home
-    await controller.alarm_control_panels.arm_home(alarm_entity, "4321")
+    await alarm_entity.async_alarm_arm_home("4321")
     await server.async_block_till_done()
     assert alarm_entity.state.state == "armed_home"
     assert cluster.client_command.call_count == 2
@@ -125,7 +130,7 @@ async def test_alarm_control_panel(
     await reset_alarm_panel(server, controller, cluster, alarm_entity)
 
     # arm_night
-    await controller.alarm_control_panels.arm_night(alarm_entity, "4321")
+    await alarm_entity.async_alarm_arm_night("4321")
     await server.async_block_till_done()
     assert alarm_entity.state.state == "armed_night"
     assert cluster.client_command.call_count == 2
@@ -214,7 +219,7 @@ async def test_alarm_control_panel(
     await reset_alarm_panel(server, controller, cluster, alarm_entity)
     assert alarm_entity.state.state == "disarmed"
 
-    await controller.alarm_control_panels.trigger(alarm_entity)
+    await alarm_entity.async_alarm_trigger()
     await server.async_block_till_done()
     assert alarm_entity.state.state == "triggered"
 
@@ -227,11 +232,11 @@ async def reset_alarm_panel(
     server: WebSocketServerGateway,
     controller: WebSocketClientGateway,
     cluster: security.IasAce,
-    entity: AlarmControlPanelEntity,
+    entity: AlarmControlPanelEntityInfo,
 ) -> None:
     """Reset the state of the alarm panel."""
     cluster.client_command.reset_mock()
-    await controller.alarm_control_panels.disarm(entity, "4321")
+    await entity.async_alarm_disarm("4321")
     await server.async_block_till_done()
     assert entity.state.state == "disarmed"
     assert cluster.client_command.call_count == 2

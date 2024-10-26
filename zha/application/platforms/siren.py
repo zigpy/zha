@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import asyncio
 import contextlib
 from enum import IntFlag
@@ -24,10 +25,15 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    PlatformEntity,
+    WebSocketClientEntity,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
 from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
+from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -60,8 +66,30 @@ class SirenEntityInfo(BaseEntityInfo):
     supported_features: SirenEntityFeature
 
 
+class SirenEntityInterface(ABC):
+    """Siren interface."""
+
+    @property
+    @abstractmethod
+    def is_on(self) -> bool:
+        """Return true if the entity is on."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> SirenEntityFeature:
+        """Return supported features."""
+
+    @abstractmethod
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn on the siren."""
+
+    @abstractmethod
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn off the siren."""
+
+
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
-class Siren(PlatformEntity):
+class Siren(PlatformEntity, SirenEntityInterface):
     """Representation of a ZHA siren."""
 
     PLATFORM = Platform.SIREN
@@ -196,3 +224,37 @@ class Siren(PlatformEntity):
 
             self._off_listener = None
         self.maybe_emit_state_changed_event()
+
+
+class WebSocketClientSirenEntity(WebSocketClientEntity, SirenEntityInterface):
+    """Siren entity for the WebSocket API."""
+
+    PLATFORM = Platform.SIREN
+
+    def __init__(
+        self, entity_info: SirenEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA siren device."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @functools.cached_property
+    def info_object(self) -> SirenEntityInfo:
+        """Return a representation of the siren."""
+        return self._entity_info
+
+    @property
+    def is_on(self) -> bool:
+        """Return true if the entity is on."""
+        return self.info_object.state.state
+
+    @property
+    def supported_features(self) -> SirenEntityFeature:
+        """Return supported features."""
+        return self.info_object.supported_features
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn on the siren."""
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn off the siren."""

@@ -7,10 +7,11 @@ from typing import Any, Literal, cast
 from zigpy.types.named import EUI64
 
 from zha.application.discovery import Platform
+from zha.application.platforms import WebSocketClientEntity
 from zha.application.platforms.model import (
     BaseEntityInfo,
-    BasePlatformEntity,
-    GroupEntity,
+    BasePlatformEntityInfo,
+    GroupEntityInfo,
 )
 from zha.websocket.client.client import Client
 from zha.websocket.server.api.model import (
@@ -96,8 +97,12 @@ from zha.websocket.server.gateway_api import (
 from zha.zigbee.model import ExtendedDeviceInfo, GroupInfo
 
 
-def ensure_platform_entity(entity: BaseEntityInfo, platform: Platform) -> None:
+def ensure_platform_entity(
+    entity: BaseEntityInfo | WebSocketClientEntity, platform: Platform
+) -> None:
     """Ensure an entity exists and is from the specified platform."""
+    if isinstance(entity, WebSocketClientEntity):
+        entity = entity.info_object
     if entity is None or entity.platform != platform:
         raise ValueError(
             f"entity must be provided and it must be a {platform} platform entity"
@@ -113,7 +118,7 @@ class LightHelper:
 
     async def turn_on(
         self,
-        light_platform_entity: BasePlatformEntity | GroupEntity,
+        light_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
         brightness: int | None = None,
         transition: int | None = None,
         flash: str | None = None,
@@ -125,10 +130,10 @@ class LightHelper:
         ensure_platform_entity(light_platform_entity, Platform.LIGHT)
         command = LightTurnOnCommand(
             ieee=light_platform_entity.device_ieee
-            if not isinstance(light_platform_entity, GroupEntity)
+            if not isinstance(light_platform_entity, GroupEntityInfo)
             else None,
             group_id=light_platform_entity.group_id
-            if isinstance(light_platform_entity, GroupEntity)
+            if isinstance(light_platform_entity, GroupEntityInfo)
             else None,
             unique_id=light_platform_entity.unique_id,
             brightness=brightness,
@@ -142,7 +147,7 @@ class LightHelper:
 
     async def turn_off(
         self,
-        light_platform_entity: BasePlatformEntity | GroupEntity,
+        light_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
         transition: int | None = None,
         flash: bool | None = None,
     ) -> WebSocketCommandResponse:
@@ -150,10 +155,10 @@ class LightHelper:
         ensure_platform_entity(light_platform_entity, Platform.LIGHT)
         command = LightTurnOffCommand(
             ieee=light_platform_entity.device_ieee
-            if not isinstance(light_platform_entity, GroupEntity)
+            if not isinstance(light_platform_entity, GroupEntityInfo)
             else None,
             group_id=light_platform_entity.group_id
-            if isinstance(light_platform_entity, GroupEntity)
+            if isinstance(light_platform_entity, GroupEntityInfo)
             else None,
             unique_id=light_platform_entity.unique_id,
             transition=transition,
@@ -171,16 +176,16 @@ class SwitchHelper:
 
     async def turn_on(
         self,
-        switch_platform_entity: BasePlatformEntity | GroupEntity,
+        switch_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
     ) -> WebSocketCommandResponse:
         """Turn on a switch."""
         ensure_platform_entity(switch_platform_entity, Platform.SWITCH)
         command = SwitchTurnOnCommand(
             ieee=switch_platform_entity.device_ieee
-            if not isinstance(switch_platform_entity, GroupEntity)
+            if not isinstance(switch_platform_entity, GroupEntityInfo)
             else None,
             group_id=switch_platform_entity.group_id
-            if isinstance(switch_platform_entity, GroupEntity)
+            if isinstance(switch_platform_entity, GroupEntityInfo)
             else None,
             unique_id=switch_platform_entity.unique_id,
         )
@@ -188,16 +193,16 @@ class SwitchHelper:
 
     async def turn_off(
         self,
-        switch_platform_entity: BasePlatformEntity | GroupEntity,
+        switch_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
     ) -> WebSocketCommandResponse:
         """Turn off a switch."""
         ensure_platform_entity(switch_platform_entity, Platform.SWITCH)
         command = SwitchTurnOffCommand(
             ieee=switch_platform_entity.device_ieee
-            if not isinstance(switch_platform_entity, GroupEntity)
+            if not isinstance(switch_platform_entity, GroupEntityInfo)
             else None,
             group_id=switch_platform_entity.group_id
-            if isinstance(switch_platform_entity, GroupEntity)
+            if isinstance(switch_platform_entity, GroupEntityInfo)
             else None,
             unique_id=switch_platform_entity.unique_id,
         )
@@ -213,7 +218,7 @@ class SirenHelper:
 
     async def turn_on(
         self,
-        siren_platform_entity: BasePlatformEntity,
+        siren_platform_entity: BasePlatformEntityInfo,
         duration: int | None = None,
         volume_level: int | None = None,
         tone: int | None = None,
@@ -230,7 +235,7 @@ class SirenHelper:
         return await self._client.async_send_command(command)
 
     async def turn_off(
-        self, siren_platform_entity: BasePlatformEntity
+        self, siren_platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Turn off a siren."""
         ensure_platform_entity(siren_platform_entity, Platform.SIREN)
@@ -249,7 +254,7 @@ class ButtonHelper:
         self._client: Client = client
 
     async def press(
-        self, button_platform_entity: BasePlatformEntity
+        self, button_platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Press a button."""
         ensure_platform_entity(button_platform_entity, Platform.BUTTON)
@@ -268,7 +273,7 @@ class CoverHelper:
         self._client: Client = client
 
     async def open_cover(
-        self, cover_platform_entity: BasePlatformEntity
+        self, cover_platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Open a cover."""
         ensure_platform_entity(cover_platform_entity, Platform.COVER)
@@ -279,7 +284,7 @@ class CoverHelper:
         return await self._client.async_send_command(command)
 
     async def close_cover(
-        self, cover_platform_entity: BasePlatformEntity
+        self, cover_platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Close a cover."""
         ensure_platform_entity(cover_platform_entity, Platform.COVER)
@@ -290,7 +295,7 @@ class CoverHelper:
         return await self._client.async_send_command(command)
 
     async def stop_cover(
-        self, cover_platform_entity: BasePlatformEntity
+        self, cover_platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Stop a cover."""
         ensure_platform_entity(cover_platform_entity, Platform.COVER)
@@ -302,7 +307,7 @@ class CoverHelper:
 
     async def set_cover_position(
         self,
-        cover_platform_entity: BasePlatformEntity,
+        cover_platform_entity: BasePlatformEntityInfo,
         position: int,
     ) -> WebSocketCommandResponse:
         """Set a cover position."""
@@ -324,7 +329,7 @@ class FanHelper:
 
     async def turn_on(
         self,
-        fan_platform_entity: BasePlatformEntity | GroupEntity,
+        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
         speed: str | None = None,
         percentage: int | None = None,
         preset_mode: str | None = None,
@@ -333,10 +338,10 @@ class FanHelper:
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanTurnOnCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntity)
+            if not isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntity)
+            if isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
             speed=speed,
@@ -347,16 +352,16 @@ class FanHelper:
 
     async def turn_off(
         self,
-        fan_platform_entity: BasePlatformEntity | GroupEntity,
+        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
     ) -> WebSocketCommandResponse:
         """Turn off a fan."""
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanTurnOffCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntity)
+            if not isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntity)
+            if isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
         )
@@ -364,17 +369,17 @@ class FanHelper:
 
     async def set_fan_percentage(
         self,
-        fan_platform_entity: BasePlatformEntity | GroupEntity,
+        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
         percentage: int,
     ) -> WebSocketCommandResponse:
         """Set a fan percentage."""
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanSetPercentageCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntity)
+            if not isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntity)
+            if isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
             percentage=percentage,
@@ -383,17 +388,17 @@ class FanHelper:
 
     async def set_fan_preset_mode(
         self,
-        fan_platform_entity: BasePlatformEntity | GroupEntity,
+        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
         preset_mode: str,
     ) -> WebSocketCommandResponse:
         """Set a fan preset mode."""
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanSetPresetModeCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntity)
+            if not isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntity)
+            if isinstance(fan_platform_entity, GroupEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
             preset_mode=preset_mode,
@@ -409,7 +414,7 @@ class LockHelper:
         self._client: Client = client
 
     async def lock(
-        self, lock_platform_entity: BasePlatformEntity
+        self, lock_platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Lock a lock."""
         ensure_platform_entity(lock_platform_entity, Platform.LOCK)
@@ -420,7 +425,7 @@ class LockHelper:
         return await self._client.async_send_command(command)
 
     async def unlock(
-        self, lock_platform_entity: BasePlatformEntity
+        self, lock_platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Unlock a lock."""
         ensure_platform_entity(lock_platform_entity, Platform.LOCK)
@@ -432,7 +437,7 @@ class LockHelper:
 
     async def set_user_lock_code(
         self,
-        lock_platform_entity: BasePlatformEntity,
+        lock_platform_entity: BasePlatformEntityInfo,
         code_slot: int,
         user_code: str,
     ) -> WebSocketCommandResponse:
@@ -448,7 +453,7 @@ class LockHelper:
 
     async def clear_user_lock_code(
         self,
-        lock_platform_entity: BasePlatformEntity,
+        lock_platform_entity: BasePlatformEntityInfo,
         code_slot: int,
     ) -> WebSocketCommandResponse:
         """Clear a user lock code."""
@@ -462,7 +467,7 @@ class LockHelper:
 
     async def enable_user_lock_code(
         self,
-        lock_platform_entity: BasePlatformEntity,
+        lock_platform_entity: BasePlatformEntityInfo,
         code_slot: int,
     ) -> WebSocketCommandResponse:
         """Enable a user lock code."""
@@ -476,7 +481,7 @@ class LockHelper:
 
     async def disable_user_lock_code(
         self,
-        lock_platform_entity: BasePlatformEntity,
+        lock_platform_entity: BasePlatformEntityInfo,
         code_slot: int,
     ) -> WebSocketCommandResponse:
         """Disable a user lock code."""
@@ -498,7 +503,7 @@ class NumberHelper:
 
     async def set_value(
         self,
-        number_platform_entity: BasePlatformEntity,
+        number_platform_entity: BasePlatformEntityInfo,
         value: int | float,
     ) -> WebSocketCommandResponse:
         """Set a number."""
@@ -520,7 +525,7 @@ class SelectHelper:
 
     async def select_option(
         self,
-        select_platform_entity: BasePlatformEntity,
+        select_platform_entity: BasePlatformEntityInfo,
         option: str | int,
     ) -> WebSocketCommandResponse:
         """Set a select."""
@@ -542,7 +547,7 @@ class ClimateHelper:
 
     async def set_hvac_mode(
         self,
-        climate_platform_entity: BasePlatformEntity,
+        climate_platform_entity: BasePlatformEntityInfo,
         hvac_mode: Literal[
             "heat_cool", "heat", "cool", "auto", "dry", "fan_only", "off"
         ],
@@ -558,7 +563,7 @@ class ClimateHelper:
 
     async def set_temperature(
         self,
-        climate_platform_entity: BasePlatformEntity,
+        climate_platform_entity: BasePlatformEntityInfo,
         hvac_mode: None
         | (
             Literal["heat_cool", "heat", "cool", "auto", "dry", "fan_only", "off"]
@@ -581,7 +586,7 @@ class ClimateHelper:
 
     async def set_fan_mode(
         self,
-        climate_platform_entity: BasePlatformEntity,
+        climate_platform_entity: BasePlatformEntityInfo,
         fan_mode: str,
     ) -> WebSocketCommandResponse:
         """Set a climate."""
@@ -595,7 +600,7 @@ class ClimateHelper:
 
     async def set_preset_mode(
         self,
-        climate_platform_entity: BasePlatformEntity,
+        climate_platform_entity: BasePlatformEntityInfo,
         preset_mode: str,
     ) -> WebSocketCommandResponse:
         """Set a climate."""
@@ -616,7 +621,7 @@ class AlarmControlPanelHelper:
         self._client: Client = client
 
     async def disarm(
-        self, alarm_control_panel_platform_entity: BasePlatformEntity, code: str
+        self, alarm_control_panel_platform_entity: BasePlatformEntityInfo, code: str
     ) -> WebSocketCommandResponse:
         """Disarm an alarm control panel."""
         ensure_platform_entity(
@@ -630,7 +635,7 @@ class AlarmControlPanelHelper:
         return await self._client.async_send_command(command)
 
     async def arm_home(
-        self, alarm_control_panel_platform_entity: BasePlatformEntity, code: str
+        self, alarm_control_panel_platform_entity: BasePlatformEntityInfo, code: str
     ) -> WebSocketCommandResponse:
         """Arm an alarm control panel in home mode."""
         ensure_platform_entity(
@@ -644,7 +649,7 @@ class AlarmControlPanelHelper:
         return await self._client.async_send_command(command)
 
     async def arm_away(
-        self, alarm_control_panel_platform_entity: BasePlatformEntity, code: str
+        self, alarm_control_panel_platform_entity: BasePlatformEntityInfo, code: str
     ) -> WebSocketCommandResponse:
         """Arm an alarm control panel in away mode."""
         ensure_platform_entity(
@@ -658,7 +663,7 @@ class AlarmControlPanelHelper:
         return await self._client.async_send_command(command)
 
     async def arm_night(
-        self, alarm_control_panel_platform_entity: BasePlatformEntity, code: str
+        self, alarm_control_panel_platform_entity: BasePlatformEntityInfo, code: str
     ) -> WebSocketCommandResponse:
         """Arm an alarm control panel in night mode."""
         ensure_platform_entity(
@@ -673,7 +678,7 @@ class AlarmControlPanelHelper:
 
     async def trigger(
         self,
-        alarm_control_panel_platform_entity: BasePlatformEntity,
+        alarm_control_panel_platform_entity: BasePlatformEntityInfo,
     ) -> WebSocketCommandResponse:
         """Trigger an alarm control panel alarm."""
         ensure_platform_entity(
@@ -694,7 +699,7 @@ class PlatformEntityHelper:
         self._client: Client = client
 
     async def refresh_state(
-        self, platform_entity: BasePlatformEntity
+        self, platform_entity: BasePlatformEntityInfo
     ) -> WebSocketCommandResponse:
         """Refresh the state of a platform entity."""
         command = PlatformEntityRefreshStateCommand(
@@ -747,7 +752,7 @@ class GroupHelper:
         self,
         name: str,
         unique_id: int | None = None,
-        members: list[BasePlatformEntity] | None = None,
+        members: list[BasePlatformEntityInfo] | None = None,
     ) -> GroupInfo:
         """Create a new group."""
         request_data: dict[str, Any] = {
@@ -780,7 +785,7 @@ class GroupHelper:
         return response.groups
 
     async def add_group_members(
-        self, group: GroupInfo, members: list[BasePlatformEntity]
+        self, group: GroupInfo, members: list[BasePlatformEntityInfo]
     ) -> GroupInfo:
         """Add members to a group."""
         request_data: dict[str, Any] = {
@@ -799,7 +804,7 @@ class GroupHelper:
         return response.group
 
     async def remove_group_members(
-        self, group: GroupInfo, members: list[BasePlatformEntity]
+        self, group: GroupInfo, members: list[BasePlatformEntityInfo]
     ) -> GroupInfo:
         """Remove members from a group."""
         request_data: dict[str, Any] = {

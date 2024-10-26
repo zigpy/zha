@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from enum import Enum
 import functools
 import logging
@@ -22,7 +23,13 @@ from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA, Strobe
-from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    EntityCategory,
+    PlatformEntity,
+    WebSocketClientEntity,
+)
+from zha.application.platforms.model import SelectEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -34,6 +41,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_THERMOSTAT,
 )
+from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -54,7 +62,28 @@ class EnumSelectInfo(BaseEntityInfo):
     options: list[str]
 
 
-class EnumSelectEntity(PlatformEntity):
+class SelectEntityInterface(ABC):
+    """Select interface for ZHA select entities."""
+
+    @property
+    @abstractmethod
+    def current_option(self) -> str | None:
+        """Return the selected entity option to represent the entity state."""
+
+    @abstractmethod
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+
+    @abstractmethod
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: str,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+
+
+class EnumSelectEntity(PlatformEntity, SelectEntityInterface):
     """Representation of a ZHA select entity."""
 
     PLATFORM = Platform.SELECT
@@ -162,7 +191,7 @@ class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_strobe"
 
 
-class ZCLEnumSelectEntity(PlatformEntity):
+class ZCLEnumSelectEntity(PlatformEntity, SelectEntityInterface):
     """Representation of a ZHA ZCL enum select entity."""
 
     PLATFORM = Platform.SELECT
@@ -886,3 +915,35 @@ class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
     _attribute_name = "on_led_color"
     _attr_translation_key: str = "on_led_color"
     _enum = SinopeLightLedColors
+
+
+class WebSocketClientSelectEntity(WebSocketClientEntity, SelectEntityInterface):
+    """Representation of a ZHA select entity controlled via a websocket."""
+
+    PLATFORM = Platform.SELECT
+
+    def __init__(
+        self, entity_info: SelectEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA select entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> SelectEntityInfo:
+        """Return a representation of the select."""
+        return self._entity_info
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the selected entity option to represent the entity state."""
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the selected option."""
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: str,
+    ) -> None:
+        """Restore extra state attributes."""

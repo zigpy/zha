@@ -1052,7 +1052,7 @@ class WebSocketClientGateway(BaseGateway):
             zha_device = WebSocketClientDevice(zigpy_device, self)
             self._devices[zigpy_device.ieee] = zha_device
         else:
-            self._devices[zigpy_device.ieee]._extended_device_info = zigpy_device
+            self._devices[zigpy_device.ieee].extended_device_info = zigpy_device
         return zha_device
 
     async def async_create_zigpy_group(
@@ -1062,6 +1062,19 @@ class WebSocketClientGateway(BaseGateway):
         group_id: int | None = None,
     ) -> WebSocketClientGroup | None:
         """Create a new Zigpy Zigbee group."""
+
+    def get_device(self, ieee: EUI64) -> WebSocketClientDevice | None:
+        """Return Device for given ieee."""
+        return self._devices.get(ieee)
+
+    def get_group(self, group_id_or_name: int | str) -> WebSocketClientGroup | None:
+        """Return Group for given group id or group name."""
+        if isinstance(group_id_or_name, str):
+            for group in self.groups.values():
+                if group.name == group_id_or_name:
+                    return group
+            return None
+        return self.groups.get(group_id_or_name)
 
     async def async_remove_device(self, ieee: EUI64) -> None:
         """Remove a device from ZHA."""
@@ -1118,7 +1131,7 @@ class WebSocketClientGateway(BaseGateway):
         device_model = event.device_info
         _LOGGER.info("Device %s - %s initialized", device_model.ieee, device_model.nwk)
         if device_model.ieee in self.devices:
-            self.devices[device_model.ieee]._extended_device_info = device_model
+            self.devices[device_model.ieee].extended_device_info = device_model
         else:
             self._devices[device_model.ieee] = self.get_or_create_device(device_model)
         self.emit(ControllerEvents.DEVICE_FULLY_INITIALIZED, event)

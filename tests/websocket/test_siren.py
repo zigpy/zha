@@ -12,7 +12,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import BasePlatformEntity
+from zha.application.platforms.model import BasePlatformEntityInfo
 from zha.zigbee.device import Device, WebSocketClientDevice
 
 from ..common import (
@@ -27,7 +27,7 @@ from ..common import (
 
 def find_entity(
     device_proxy: WebSocketClientDevice, platform: Platform
-) -> Optional[BasePlatformEntity]:
+) -> Optional[BasePlatformEntityInfo]:
     """Find an entity for the specified platform on the given device."""
     for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:

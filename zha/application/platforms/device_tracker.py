@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from enum import StrEnum
 import functools
 import time
@@ -10,7 +11,8 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
+from zha.application.platforms.model import DeviceTrackerEntityInfo
 from zha.application.platforms.sensor import Battery
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
@@ -19,6 +21,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
 )
+from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -39,8 +42,30 @@ class SourceType(StrEnum):
     BLUETOOTH_LE = "bluetooth_le"
 
 
+class DeviceTrackerEntityInterface(ABC):
+    """Device tracker interface."""
+
+    @property
+    @abstractmethod
+    def is_connected(self) -> bool:
+        """Return true if the device is connected to the network."""
+
+    @property
+    @abstractmethod
+    def source_type(self) -> SourceType:
+        """Return the source type, eg gps or router, of the device."""
+
+    @property
+    @abstractmethod
+    def battery_level(self) -> float:
+        """Return the battery level of the device.
+
+        Percentage from 0-100.
+        """
+
+
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
-class DeviceScannerEntity(PlatformEntity):
+class DeviceScannerEntity(PlatformEntity, DeviceTrackerEntityInterface):
     """Represent a tracked device."""
 
     PLATFORM = Platform.DEVICE_TRACKER
@@ -143,3 +168,41 @@ class DeviceScannerEntity(PlatformEntity):
         self._connected = True
         self._battery_level = Battery.formatter(event.attribute_value)
         self.maybe_emit_state_changed_event()
+
+
+class WebSocketClientDeviceTrackerEntity(
+    WebSocketClientEntity, DeviceTrackerEntityInterface
+):
+    """Device tracker entity for the WebSocket API."""
+
+    PLATFORM = Platform.DEVICE_TRACKER
+
+    def __init__(
+        self, entity_info: DeviceTrackerEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA device tracker."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> DeviceTrackerEntityInfo:
+        """Return a representation of the device tracker."""
+        return self._entity_info
+
+    @property
+    def is_connected(self) -> bool:
+        """Return true if the device is connected to the network."""
+        return self.info_object.state.connected
+
+    @property
+    def source_type(self) -> SourceType:
+        """Return the source type, eg gps or router, of the device."""
+        return self.info_object.source_type
+
+    @property
+    def battery_level(self) -> float:
+        """Return the battery level of the device.
+
+        Percentage from 0-100.
+        """
+        return self.info_object.state.battery_level

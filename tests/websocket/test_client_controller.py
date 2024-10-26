@@ -21,9 +21,9 @@ from zha.application.gateway import (
 )
 from zha.application.model import DeviceJoinedEvent, DeviceLeftEvent
 from zha.application.platforms.model import (
-    BasePlatformEntity,
-    SwitchEntity,
-    SwitchGroupEntity,
+    BasePlatformEntityInfo,
+    SwitchEntityInfo,
+    SwitchGroupEntityInfo,
 )
 from zha.websocket.const import ControllerEvents
 from zha.websocket.server.api.model import (
@@ -95,7 +95,9 @@ async def device_switch_1(
     return zha_device
 
 
-def get_entity(zha_dev: WebSocketClientDevice, entity_id: str) -> BasePlatformEntity:
+def get_entity(
+    zha_dev: WebSocketClientDevice, entity_id: str
+) -> BasePlatformEntityInfo:
     """Get entity."""
     entities = {
         entity.platform + "." + entity.unique_id: entity
@@ -106,7 +108,7 @@ def get_entity(zha_dev: WebSocketClientDevice, entity_id: str) -> BasePlatformEn
 
 def get_group_entity(
     group_proxy: WebSocketClientGroup, entity_id: str
-) -> Optional[SwitchGroupEntity]:
+) -> Optional[SwitchGroupEntityInfo]:
     """Get entity."""
 
     return group_proxy.group_entities.get(entity_id)
@@ -150,10 +152,10 @@ async def test_controller_devices(
         zha_device.ieee
     )
     assert client_device is not None
-    entity: SwitchEntity = get_entity(client_device, entity_id)
+    entity: SwitchEntityInfo = get_entity(client_device, entity_id)
     assert entity is not None
 
-    assert isinstance(entity, SwitchEntity)
+    assert isinstance(entity, SwitchEntityInfo)
 
     assert entity.state.state is False
 
@@ -188,7 +190,7 @@ async def test_controller_devices(
     # we removed and joined the device again so lets get the entity again
     client_device = controller.devices.get(zha_device.ieee)
     assert client_device is not None
-    entity: SwitchEntity = get_entity(client_device, entity_id)  # type: ignore
+    entity: SwitchEntityInfo = get_entity(client_device, entity_id)  # type: ignore
     assert entity is not None
 
     # test device reconfigure
@@ -339,10 +341,10 @@ async def test_controller_groups(
     )
     assert group_proxy is not None
 
-    entity: SwitchGroupEntity = get_group_entity(group_proxy, entity_id)  # type: ignore
+    entity: SwitchGroupEntityInfo = get_group_entity(group_proxy, entity_id)  # type: ignore
     assert entity is not None
 
-    assert isinstance(entity, SwitchGroupEntity)
+    assert isinstance(entity, SwitchGroupEntityInfo)
 
     assert entity is not None
 
@@ -364,7 +366,7 @@ async def test_controller_groups(
     assert client_device1 is not None
     entity_id1 = find_entity_id(Platform.SWITCH, device_switch_1)
     assert entity_id1 is not None
-    entity1: SwitchEntity = get_entity(client_device1, entity_id1)
+    entity1: SwitchEntityInfo = get_entity(client_device1, entity_id1)
     assert entity1 is not None
 
     client_device2: Optional[WebSocketClientDevice] = controller.devices.get(
@@ -373,7 +375,7 @@ async def test_controller_groups(
     assert client_device2 is not None
     entity_id2 = find_entity_id(Platform.SWITCH, device_switch_2)
     assert entity_id2 is not None
-    entity2: SwitchEntity = get_entity(client_device2, entity_id2)
+    entity2: SwitchEntityInfo = get_entity(client_device2, entity_id2)
     assert entity2 is not None
 
     response: GroupInfo = await controller.groups_helper.create_group(

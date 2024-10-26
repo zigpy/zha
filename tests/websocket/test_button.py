@@ -10,7 +10,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import BasePlatformEntity, ButtonEntity
+from zha.application.platforms.model import BasePlatformEntityInfo, ButtonEntityInfo
 from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
@@ -25,7 +25,7 @@ from ..common import (
 
 def find_entity(
     device_proxy: WebSocketClientDevice, platform: Platform
-) -> Optional[BasePlatformEntity]:
+) -> Optional[BasePlatformEntityInfo]:
     """Find an entity for the specified platform on the given device."""
     for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:
@@ -61,9 +61,9 @@ async def test_button(
         zhaws_device.ieee
     )
     assert client_device is not None
-    entity: ButtonEntity = find_entity(client_device, Platform.BUTTON)  # type: ignore
+    entity: ButtonEntityInfo = find_entity(client_device, Platform.BUTTON)  # type: ignore
     assert entity is not None
-    assert isinstance(entity, ButtonEntity)
+    assert isinstance(entity, ButtonEntityInfo)
 
     with patch(
         "zigpy.zcl.Cluster.request",

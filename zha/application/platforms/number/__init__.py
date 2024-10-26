@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
@@ -12,8 +13,14 @@ from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    EntityCategory,
+    PlatformEntity,
+    WebSocketClientEntity,
+)
 from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.model import NumberEntityInfo
 from zha.application.platforms.number.const import (
     ICONS,
     UNITS,
@@ -33,6 +40,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_THERMOSTAT,
 )
+from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -67,8 +75,56 @@ class NumberConfigurationEntityInfo(BaseEntityInfo):
     device_class: str | None
 
 
+class NumberEntityInterface(ABC):
+    """Number interface."""
+
+    @property
+    @abstractmethod
+    def native_value(self) -> float | None:
+        """Return the current value."""
+
+    @property
+    @abstractmethod
+    def native_min_value(self) -> float:
+        """Return the minimum value."""
+
+    @property
+    @abstractmethod
+    def native_max_value(self) -> float:
+        """Return the maximum value."""
+
+    @property
+    @abstractmethod
+    def native_step(self) -> float | None:
+        """Return the value step."""
+
+    @property
+    @abstractmethod
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit the value is expressed in."""
+
+    @property
+    @abstractmethod
+    def mode(self) -> NumberMode:
+        """Return the mode of the entity."""
+
+    @property
+    @abstractmethod
+    def description(self) -> str | None:
+        """Return the description of the number entity."""
+
+    @property
+    @abstractmethod
+    def icon(self) -> str | None:
+        """Return the icon to be used for this entity."""
+
+    @abstractmethod
+    async def async_set_native_value(self, value: float) -> None:
+        """Update the current value from HA."""
+
+
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_OUTPUT)
-class Number(PlatformEntity):
+class Number(PlatformEntity, NumberEntityInterface):
     """Representation of a ZHA Number entity."""
 
     PLATFORM = Platform.NUMBER
@@ -1061,3 +1117,63 @@ class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 100
     _attribute_name = "off_led_intensity"
     _attr_translation_key: str = "off_led_intensity"
+
+
+class WebSocketClientNumberEntity(WebSocketClientEntity, NumberEntityInterface):
+    """Representation of a WebSocket client number entity."""
+
+    PLATFORM: Platform = Platform.NUMBER
+
+    def __init__(
+        self, entity_info: NumberEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA number entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> NumberEntityInfo:
+        """Return the info object."""
+        return self._entity_info
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the current value."""
+        return self.info_object.state.state
+
+    @property
+    def native_min_value(self) -> float:
+        """Return the minimum value."""
+        return self.info_object.min_value
+
+    @property
+    def native_max_value(self) -> float:
+        """Return the maximum value."""
+        return self.info_object.max_value
+
+    @property
+    def native_step(self) -> float | None:
+        """Return the value step."""
+        return self.info_object.step
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit the value is expressed in."""
+
+    @property
+    def mode(self) -> NumberMode:
+        """Return the mode of the entity."""
+        return self.info_object.mode
+
+    @property
+    def description(self) -> str | None:
+        """Return the description of the number entity."""
+        return self.info_object.description
+
+    @property
+    def icon(self) -> str | None:
+        """Return the icon of the number entity."""
+        return self.info_object.icon
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Update the current value from HA."""

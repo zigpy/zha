@@ -9,7 +9,7 @@ from zigpy.zcl.clusters import general
 
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import BasePlatformEntity, NumberEntity
+from zha.application.platforms.model import BasePlatformEntityInfo, NumberEntityInfo
 from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
@@ -26,7 +26,7 @@ from ..common import (
 
 def find_entity(
     device_proxy: WebSocketClientDevice, platform: Platform
-) -> Optional[BasePlatformEntity]:
+) -> Optional[BasePlatformEntityInfo]:
     """Find an entity for the specified platform on the given device."""
     for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:
@@ -84,9 +84,9 @@ async def test_number(
         zha_device.ieee
     )
     assert client_device is not None
-    entity: NumberEntity = find_entity(client_device, Platform.NUMBER)  # type: ignore
+    entity: NumberEntityInfo = find_entity(client_device, Platform.NUMBER)  # type: ignore
     assert entity is not None
-    assert isinstance(entity, NumberEntity)
+    assert isinstance(entity, NumberEntityInfo)
 
     assert cluster.read_attributes.call_count == 3
 

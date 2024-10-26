@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 import asyncio
 from collections import Counter
 from collections.abc import Callable
@@ -25,6 +25,7 @@ from zha.application.platforms import (
     BaseEntityInfo,
     GroupEntity,
     PlatformEntity,
+    WebSocketClientEntity,
 )
 from zha.application.platforms.helpers import (
     find_state_attributes,
@@ -61,6 +62,7 @@ from zha.application.platforms.light.helpers import (
     brightness_supported,
     filter_supported_color_modes,
 )
+from zha.application.platforms.model import LightEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
 from zha.decorators import periodic
@@ -73,6 +75,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
 )
 from zha.zigbee.cluster_handlers.general import LevelChangeEvent
+from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -95,7 +98,74 @@ class LightEntityInfo(BaseEntityInfo):
     max_mireds: int
 
 
-class BaseLight(BaseEntity, ABC):
+class LightEntityInterface(ABC):
+    """Light interface."""
+
+    @property
+    @abstractmethod
+    def xy_color(self) -> tuple[float, float] | None:
+        """Return the xy color value [float, float]."""
+
+    @property
+    @abstractmethod
+    def color_temp(self) -> int | None:
+        """Return the CT color value in mireds."""
+
+    @property
+    @abstractmethod
+    def color_mode(self) -> ColorMode | None:
+        """Return the color mode."""
+
+    @property
+    @abstractmethod
+    def effect_list(self) -> list[str] | None:
+        """Return the list of supported effects."""
+
+    @property
+    @abstractmethod
+    def effect(self) -> str:
+        """Return the current effect."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> LightEntityFeature:
+        """Flag supported features."""
+
+    @property
+    @abstractmethod
+    def supported_color_modes(self) -> set[ColorMode]:
+        """Flag supported color modes."""
+
+    @property
+    @abstractmethod
+    def is_on(self) -> bool:
+        """Return true if entity is on."""
+
+    @property
+    @abstractmethod
+    def brightness(self) -> int | None:
+        """Return the brightness of this light."""
+
+    @property
+    @abstractmethod
+    def min_mireds(self) -> int | None:
+        """Return the coldest color_temp that this light supports."""
+
+    @property
+    @abstractmethod
+    def max_mireds(self) -> int | None:
+        """Return the warmest color_temp that this light supports."""
+
+    @abstractmethod
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+
+    @abstractmethod
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+
+
+class BaseLight(BaseEntity, LightEntityInterface):
     """Operations common to all light entities."""
 
     PLATFORM = Platform.LIGHT
@@ -1269,3 +1339,71 @@ class LightGroup(GroupEntity, BaseLight):
             self._off_with_transition = off_with_transition
         if off_brightness is not None:
             self._off_brightness = off_brightness
+
+
+class WebSocketClientLightEntity(WebSocketClientEntity, LightEntityInterface):
+    """Light entity that sends commands to a websocket client."""
+
+    PLATFORM: Platform = Platform.LIGHT
+
+    def __init__(
+        self, entity_info: LightEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA lock entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> LightEntityInfo:
+        """Return a representation of the select."""
+        return self._entity_info
+
+    @property
+    def xy_color(self) -> tuple[float, float] | None:
+        """Return the xy color value [float, float]."""
+
+    @property
+    def color_temp(self) -> int | None:
+        """Return the CT color value in mireds."""
+
+    @property
+    def color_mode(self) -> ColorMode | None:
+        """Return the color mode."""
+
+    @property
+    def effect_list(self) -> list[str] | None:
+        """Return the list of supported effects."""
+
+    @property
+    def effect(self) -> str:
+        """Return the current effect."""
+
+    @property
+    def supported_features(self) -> LightEntityFeature:
+        """Flag supported features."""
+
+    @property
+    def supported_color_modes(self) -> set[ColorMode]:
+        """Flag supported color modes."""
+
+    @property
+    def is_on(self) -> bool:
+        """Return true if entity is on."""
+
+    @property
+    def brightness(self) -> int | None:
+        """Return the brightness of this light."""
+
+    @property
+    def min_mireds(self) -> int | None:
+        """Return the coldest color_temp that this light supports."""
+
+    @property
+    def max_mireds(self) -> int | None:
+        """Return the warmest color_temp that this light supports."""
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from enum import IntFlag, StrEnum
+from abc import ABC, abstractmethod
+from enum import StrEnum
 import functools
 import itertools
 import logging
@@ -13,7 +14,16 @@ from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    EntityCategory,
+    PlatformEntity,
+    WebSocketClientEntity,
+)
+from zha.application.platforms.model import (
+    FirmwareUpdateEntityInfo as FirmwareUpdateEntityInfo,
+    UpdateEntityFeature,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
@@ -21,6 +31,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_OTA,
 )
+from zha.zigbee.device import WebSocketClientDevice
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
@@ -38,16 +49,6 @@ class UpdateDeviceClass(StrEnum):
     """Device class for update."""
 
     FIRMWARE = "firmware"
-
-
-class UpdateEntityFeature(IntFlag):
-    """Supported features of the update entity."""
-
-    INSTALL = 1
-    SPECIFIC_VERSION = 2
-    PROGRESS = 4
-    BACKUP = 8
-    RELEASE_NOTES = 16
 
 
 SERVICE_INSTALL: Final = "install"
@@ -71,8 +72,75 @@ class UpdateEntityInfo(BaseEntityInfo):
     entity_category: EntityCategory
 
 
+class FirmwareUpdateEntityInterface(ABC):
+    """Base class for ZHA firmware update entity."""
+
+    @property
+    @abstractmethod
+    def installed_version(self) -> str | None:
+        """Version installed and in use."""
+
+    @property
+    @abstractmethod
+    def in_progress(self) -> bool | None:
+        """Update installation progress.
+
+        Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
+
+        Returns a boolean (True if in progress, False if not).
+        """
+
+    @property
+    @abstractmethod
+    def progress(self) -> int | None:
+        """Update installation progress.
+
+        Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
+
+        Returns an integer indicating the progress from 0 to 100%.
+        """
+
+    @property
+    @abstractmethod
+    def latest_version(self) -> str | None:
+        """Latest version available for install."""
+
+    @property
+    @abstractmethod
+    def release_summary(self) -> str | None:
+        """Summary of the release notes or changelog.
+
+        This is not suitable for long changelogs, but merely suitable
+        for a short excerpt update description of max 255 characters.
+        """
+
+    @property
+    @abstractmethod
+    def release_notes(self) -> str | None:
+        """Full release notes of the latest version available."""
+
+    @property
+    @abstractmethod
+    def release_url(self) -> str | None:
+        """URL to the full release notes of the latest version available."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> UpdateEntityFeature:
+        """Flag supported features."""
+
+    @property
+    @abstractmethod
+    def state_attributes(self) -> dict[str, Any] | None:
+        """Return state attributes."""
+
+    @abstractmethod
+    async def async_install(self, version: str | None) -> None:
+        """Install an update."""
+
+
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
-class FirmwareUpdateEntity(PlatformEntity):
+class FirmwareUpdateEntity(PlatformEntity, FirmwareUpdateEntityInterface):
     """Representation of a ZHA firmware update entity."""
 
     PLATFORM = Platform.UPDATE
@@ -309,3 +377,93 @@ class FirmwareUpdateEntity(PlatformEntity):
         """Call when entity will be removed."""
         await super().on_remove()
         self._attr_in_progress = False
+
+
+class WebSocketClientFirmwareUpdateEntity(
+    WebSocketClientEntity, FirmwareUpdateEntityInterface
+):
+    """Representation of a ZHA firmware update entity."""
+
+    PLATFORM = Platform.UPDATE
+
+    def __init__(
+        self, entity_info: FirmwareUpdateEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA alarm control device."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> FirmwareUpdateEntityInfo:
+        """Return a representation of the entity."""
+        return self._entity_info
+
+    @property
+    def installed_version(self) -> str | None:
+        """Version installed and in use."""
+        return self.info_object.state.installed_version
+
+    @property
+    def in_progress(self) -> bool | None:
+        """Update installation progress.
+
+        Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
+
+        Returns a boolean (True if in progress, False if not).
+        """
+        return self.info_object.state.in_progress
+
+    @property
+    def progress(self) -> int | None:
+        """Update installation progress.
+
+        Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
+
+        Returns an integer indicating the progress from 0 to 100%.
+        """
+        return self.info_object.state.progress
+
+    @property
+    def latest_version(self) -> str | None:
+        """Latest version available for install."""
+        return self.info_object.state.latest_version
+
+    @property
+    def release_summary(self) -> str | None:
+        """Summary of the release notes or changelog.
+
+        This is not suitable for long changelogs, but merely suitable
+        for a short excerpt update description of max 255 characters.
+        """
+        return self.info_object.state.release_summary
+
+    @property
+    def release_notes(self) -> str | None:
+        """Full release notes of the latest version available."""
+        return self.info_object.state.release_notes
+
+    @property
+    def release_url(self) -> str | None:
+        """URL to the full release notes of the latest version available."""
+        return self.info_object.state.release_url
+
+    @property
+    def supported_features(self) -> UpdateEntityFeature:
+        """Flag supported features."""
+        return self.info_object.supported_features
+
+    @property
+    def state_attributes(self) -> dict[str, Any] | None:
+        """Return state attributes."""
+        return {
+            ATTR_INSTALLED_VERSION: self.installed_version,
+            ATTR_IN_PROGRESS: self.in_progress,
+            ATTR_PROGRESS: self.progress,
+            ATTR_LATEST_VERSION: self.latest_version,
+            ATTR_RELEASE_SUMMARY: self.release_summary,
+            ATTR_RELEASE_NOTES: self.release_notes,
+            ATTR_RELEASE_URL: self.release_url,
+        }
+
+    async def async_install(self, version: str | None) -> None:
+        """Install an update."""

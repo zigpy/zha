@@ -9,7 +9,10 @@ from zigpy.zcl.clusters import general, measurement, security
 
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import BasePlatformEntity, BinarySensorEntity
+from zha.application.platforms.model import (
+    BasePlatformEntityInfo,
+    BinarySensorEntityInfo,
+)
 from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
@@ -26,7 +29,7 @@ from ..common import (
 
 def find_entity(
     device_proxy: WebSocketClientDevice, platform: Platform
-) -> Optional[BasePlatformEntity]:
+) -> Optional[BasePlatformEntityInfo]:
     """Find an entity for the specified platform on the given device."""
     for entity in device_proxy.platform_entities.values():
         if entity.platform == platform:
@@ -55,7 +58,9 @@ DEVICE_OCCUPANCY = {
 
 
 async def async_test_binary_sensor_on_off(
-    server: WebSocketServerGateway, cluster: general.OnOff, entity: BinarySensorEntity
+    server: WebSocketServerGateway,
+    cluster: general.OnOff,
+    entity: BinarySensorEntityInfo,
 ) -> None:
     """Test getting on and off messages for binary sensors."""
     # binary sensor on
@@ -70,7 +75,7 @@ async def async_test_binary_sensor_on_off(
 async def async_test_iaszone_on_off(
     server: WebSocketServerGateway,
     cluster: security.IasZone,
-    entity: BinarySensorEntity,
+    entity: BinarySensorEntityInfo,
 ) -> None:
     """Test getting on and off messages for iaszone binary sensors."""
     # binary sensor on
@@ -109,9 +114,9 @@ async def test_binary_sensor(
         zhaws_device.ieee
     )
     assert client_device is not None
-    entity: BinarySensorEntity = find_entity(client_device, Platform.BINARY_SENSOR)  # type: ignore
+    entity: BinarySensorEntityInfo = find_entity(client_device, Platform.BINARY_SENSOR)  # type: ignore
     assert entity is not None
-    assert isinstance(entity, BinarySensorEntity)
+    assert isinstance(entity, BinarySensorEntityInfo)
     assert entity.state.state is False
 
     # test getting messages that trigger and reset the sensors

@@ -328,6 +328,81 @@ class TestGateway:
         await asyncio.sleep(0)
 
 
+class CombinedWebsocketGateways:
+    """Combine multiple gateways into a single one."""
+
+    def __init__(
+        self,
+        client_gateway: WebSocketClientGateway,
+        server_gateway: WebSocketServerGateway,
+    ):
+        """Initialize the CombinedWebsocketGateways class."""
+        self.client_gateway = client_gateway
+        self.server_gateway = server_gateway
+        self.application_controller = server_gateway.application_controller
+
+    async def async_block_till_done(self) -> None:
+        """Block until all gateways are done."""
+        await self.server_gateway.async_block_till_done()
+
+    async def async_device_initialized(self, device: zigpy.device.Device) -> None:
+        """Handle device joined and basic information discovered (async)."""
+        await self.server_gateway.async_device_initialized(device)
+
+    def get_device(self, ieee: zigpy.types.EUI64):
+        """Return Device for given ieee."""
+        return self.client_gateway.get_device(ieee)
+
+    async def shutdown(self) -> None:
+        """Stop ZHA Controller Application."""
+        await self.server_gateway.stop_server()
+        await self.server_gateway.wait_closed()
+
+
+class CombinedGateways:
+    """Combine multiple gateways into a single one."""
+
+    def __init__(self, zha_data: ZHAData):
+        """Initialize the CombinedGateways class."""
+        self.zha_data = zha_data
+        self.zha_gateway: Gateway
+        self.ws_gateway: CombinedWebsocketGateways
+
+    async def __aenter__(self) -> Gateway:
+        """Start the ZHA gateway."""
+        self.zha_gateway = await Gateway.async_from_config(self.zha_data)
+        await self.zha_gateway.async_initialize()
+        await self.zha_gateway.async_block_till_done()
+        await self.zha_gateway.async_initialize_devices_and_entities()
+        INSTANCES.append(self.zha_gateway)
+
+        ws_gateway = await WebSocketServerGateway.async_from_config(self.zha_data)
+        await ws_gateway.start_server()
+        await ws_gateway.async_initialize()
+        await ws_gateway.async_block_till_done()
+        await ws_gateway.async_initialize_devices_and_entities()
+
+        client_gateway = WebSocketClientGateway(self.zha_data)
+        await client_gateway.connect()
+        await client_gateway.clients.listen()
+        self.ws_gateway = CombinedWebsocketGateways(client_gateway, ws_gateway)
+        INSTANCES.append(self.ws_gateway)
+        return self
+
+    async def __aexit__(
+        self, exc_type: Exception, exc_value: str, traceback: TracebackType
+    ) -> None:
+        """Shutdown the ZHA gateway."""
+        INSTANCES.remove(self.zha_gateway)
+        await self.zha_gateway.shutdown()
+        await asyncio.sleep(0)
+
+        INSTANCES.remove(self.ws_gateway)
+        await self.ws_gateway.client_gateway.disconnect()
+        await self.ws_gateway.shutdown()
+        await asyncio.sleep(0)
+
+
 @pytest.fixture
 async def connected_client_and_server(
     zha_data: ZHAData,
@@ -363,7 +438,7 @@ async def zha_gateway(
     zha_data: ZHAData,
     zigpy_app_controller,
     caplog,  # pylint: disable=unused-argument
-):
+) -> AsyncGenerator[Gateway, None]:
     """Set up ZHA component."""
 
     with (
@@ -377,6 +452,27 @@ async def zha_gateway(
         ),
     ):
         async with TestGateway(zha_data) as gateway:
+            yield gateway
+
+
+@pytest.fixture
+async def zha_gateways(
+    zha_data: ZHAData,
+    zigpy_app_controller,
+    caplog,  # pylint: disable=unused-argument
+):
+    """Set up ZHA component with connected client and server and the regular gateway."""
+    with (
+        patch(
+            "bellows.zigbee.application.ControllerApplication.new",
+            return_value=zigpy_app_controller,
+        ),
+        patch(
+            "bellows.zigbee.application.ControllerApplication",
+            return_value=zigpy_app_controller,
+        ),
+    ):
+        async with CombinedGateways(zha_data) as gateway:
             yield gateway
 
 

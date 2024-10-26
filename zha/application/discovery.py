@@ -33,6 +33,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     fan,
     light,
     lock,
+    model,
     number,
     select,
     sensor,
@@ -166,6 +167,32 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
 
 QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS = {
     SensorDeviceClass.TIMESTAMP: sensor.TimestampSensor
+}
+
+ENTITY_INFO_CLASS_TO_WEBSOCKET_CLIENT_ENTITY_CLASS = {
+    model.AlarmControlPanelEntityInfo: alarm_control_panel.WebSocketClientAlarmControlPanel,
+    model.BinarySensorEntityInfo: binary_sensor.WebSocketClientBinarySensor,
+    model.ButtonEntityInfo: button.WebSocketClientButtonEntity,
+    model.ThermostatEntityInfo: climate.WebSocketClientThermostatEntity,
+    model.CoverEntityInfo: cover.WebSocketClientCoverEntity,
+    model.ShadeEntityInfo: cover.WebSocketClientCoverEntity,
+    model.DeviceTrackerEntityInfo: device_tracker.WebSocketClientDeviceTrackerEntity,
+    model.FanEntityInfo: fan.WebSocketClientFanEntity,
+    model.LightEntityInfo: light.WebSocketClientLightEntity,
+    model.LockEntityInfo: lock.WebSocketClientLockEntity,
+    model.NumberEntityInfo: number.WebSocketClientNumberEntity,
+    model.SelectEntityInfo: select.WebSocketClientSelectEntity,
+    model.SensorEntityInfo: sensor.WebSocketClientSensorEntity,
+    model.SirenEntityInfo: siren.WebSocketClientSirenEntity,
+    model.SwitchEntityInfo: switch.WebSocketClientSwitchEntity,
+    model.FirmwareUpdateEntityInfo: update.WebSocketClientFirmwareUpdateEntity,
+    model.FanGroupEntityInfo: fan.WebSocketClientFanEntity,
+    model.LightGroupEntityInfo: light.WebSocketClientLightEntity,
+    model.SwitchGroupEntityInfo: switch.WebSocketClientSwitchEntity,
+    model.BatteryEntityInfo: sensor.WebSocketClientSensorEntity,
+    model.ElectricalMeasurementEntityInfo: sensor.WebSocketClientSensorEntity,
+    model.SmartEnergyMeteringEntityInfo: sensor.WebSocketClientSensorEntity,
+    model.DeviceCounterSensorEntityInfo: sensor.WebSocketClientSensorEntity,
 }
 
 

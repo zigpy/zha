@@ -1,7 +1,7 @@
 """Models for the ZHA platforms module."""
 
 from datetime import datetime
-from enum import StrEnum
+from enum import IntFlag, StrEnum
 from typing import Annotated, Any, Literal, Optional, Union
 
 from pydantic import Field, ValidationInfo, field_validator
@@ -318,7 +318,7 @@ class SwitchState(BaseModel):
     state: bool
 
 
-class SmareEnergyMeteringState(BaseModel):
+class SmartEnergyMeteringState(BaseModel):
     """Smare energy metering state model."""
 
     class_name: Literal["SmartEnergyMetering", "SmartEnergySummation"]
@@ -363,7 +363,7 @@ class EntityStateChangedEvent(BaseEvent):
                 ElectricalMeasurementState,
                 LightState,
                 SwitchState,
-                SmareEnergyMeteringState,
+                SmartEnergyMeteringState,
                 GenericState,
                 BooleanState,
                 ThermostatState,
@@ -375,46 +375,57 @@ class EntityStateChangedEvent(BaseEvent):
     ]
 
 
-class BasePlatformEntity(EventBase, BaseEntityInfo):
+class BasePlatformEntityInfo(EventBase, BaseEntityInfo):
     """Base platform entity model."""
 
 
-class FirmwareUpdateEntity(BasePlatformEntity):
+class UpdateEntityFeature(IntFlag):
+    """Supported features of the update entity."""
+
+    INSTALL = 1
+    SPECIFIC_VERSION = 2
+    PROGRESS = 4
+    BACKUP = 8
+    RELEASE_NOTES = 16
+
+
+class FirmwareUpdateEntityInfo(BasePlatformEntityInfo):
     """Firmware update entity model."""
 
     class_name: Literal["FirmwareUpdateEntity"]
     state: FirmwareUpdateState
+    supported_features: UpdateEntityFeature
 
 
-class LockEntity(BasePlatformEntity):
+class LockEntityInfo(BasePlatformEntityInfo):
     """Lock entity model."""
 
     class_name: Literal["Lock", "DoorLock"]
     state: LockState
 
 
-class DeviceTrackerEntity(BasePlatformEntity):
+class DeviceTrackerEntityInfo(BasePlatformEntityInfo):
     """Device tracker entity model."""
 
     class_name: Literal["DeviceScannerEntity"]
     state: DeviceTrackerState
 
 
-class CoverEntity(BasePlatformEntity):
+class CoverEntityInfo(BasePlatformEntityInfo):
     """Cover entity model."""
 
     class_name: Literal["Cover"]
     state: CoverState
 
 
-class ShadeEntity(BasePlatformEntity):
+class ShadeEntityInfo(BasePlatformEntityInfo):
     """Shade entity model."""
 
     class_name: Literal["Shade", "KeenVent"]
     state: ShadeState
 
 
-class BinarySensorEntity(BasePlatformEntity):
+class BinarySensorEntityInfo(BasePlatformEntityInfo):
     """Binary sensor model."""
 
     class_name: Literal[
@@ -438,7 +449,7 @@ class BinarySensorEntity(BasePlatformEntity):
     state: BooleanState
 
 
-class BaseSensorEntity(BasePlatformEntity):
+class BaseSensorEntityInfo(BasePlatformEntityInfo):
     """Sensor model."""
 
     attribute: Optional[str]
@@ -448,7 +459,7 @@ class BaseSensorEntity(BasePlatformEntity):
     unit: Optional[int | str]
 
 
-class SensorEntity(BaseSensorEntity):
+class SensorEntityInfo(BaseSensorEntityInfo):
     """Sensor entity model."""
 
     class_name: Literal[
@@ -498,7 +509,7 @@ class SensorEntity(BaseSensorEntity):
     state: GenericState
 
 
-class DeviceCounterSensorEntity(BaseEventedModel, BaseEntityInfo):
+class DeviceCounterSensorEntityInfo(BaseEventedModel, BaseEntityInfo):
     """Device counter sensor model."""
 
     class_name: Literal["DeviceCounterSensor"]
@@ -527,14 +538,14 @@ class DeviceCounterSensorEntity(BaseEventedModel, BaseEntityInfo):
         return DeviceCounterSensorState(state=validation_info.data["counter_value"])
 
 
-class BatteryEntity(BaseSensorEntity):
+class BatteryEntityInfo(BaseSensorEntityInfo):
     """Battery entity model."""
 
     class_name: Literal["Battery"]
     state: BatteryState
 
 
-class ElectricalMeasurementEntity(BaseSensorEntity):
+class ElectricalMeasurementEntityInfo(BaseSensorEntityInfo):
     """Electrical measurement entity model."""
 
     class_name: Literal[
@@ -546,14 +557,14 @@ class ElectricalMeasurementEntity(BaseSensorEntity):
     state: ElectricalMeasurementState
 
 
-class SmartEnergyMeteringEntity(BaseSensorEntity):
+class SmartEnergyMeteringEntityInfo(BaseSensorEntityInfo):
     """Smare energy metering entity model."""
 
     class_name: Literal["SmartEnergyMetering", "SmartEnergySummation"]
-    state: SmareEnergyMeteringState
+    state: SmartEnergyMeteringState
 
 
-class AlarmControlPanelEntity(BasePlatformEntity):
+class AlarmControlPanelEntityInfo(BasePlatformEntityInfo):
     """Alarm control panel model."""
 
     class_name: Literal["AlarmControlPanel"]
@@ -563,8 +574,8 @@ class AlarmControlPanelEntity(BasePlatformEntity):
     state: GenericState
 
 
-class ButtonEntity(
-    BasePlatformEntity
+class ButtonEntityInfo(
+    BasePlatformEntityInfo
 ):  # TODO split into two models CommandButton and WriteAttributeButton
     """Button model."""
 
@@ -582,7 +593,7 @@ class ButtonEntity(
     state: GenericState
 
 
-class FanEntity(BasePlatformEntity):
+class FanEntityInfo(BasePlatformEntityInfo):
     """Fan model."""
 
     class_name: Literal["Fan", "IkeaFan", "KofFan"]
@@ -594,7 +605,7 @@ class FanEntity(BasePlatformEntity):
     state: FanState
 
 
-class LightEntity(BasePlatformEntity):
+class LightEntityInfo(BasePlatformEntityInfo):
     """Light model."""
 
     class_name: Literal["Light", "HueLight", "ForceOnLight", "MinTransitionLight"]
@@ -605,7 +616,7 @@ class LightEntity(BasePlatformEntity):
     state: LightState
 
 
-class NumberEntity(BasePlatformEntity):
+class NumberEntityInfo(BasePlatformEntityInfo):
     """Number entity model."""
 
     class_name: Literal[
@@ -636,7 +647,7 @@ class NumberEntity(BasePlatformEntity):
     state: GenericState
 
 
-class SelectEntity(BasePlatformEntity):
+class SelectEntityInfo(BasePlatformEntityInfo):
     """Select entity model."""
 
     class_name: Literal[
@@ -658,7 +669,7 @@ class SelectEntity(BasePlatformEntity):
     state: GenericState
 
 
-class ThermostatEntity(BasePlatformEntity):
+class ThermostatEntityInfo(BasePlatformEntityInfo):
     """Thermostat entity model."""
 
     class_name: Literal[
@@ -675,7 +686,7 @@ class ThermostatEntity(BasePlatformEntity):
     preset_modes: Optional[list[str]]
 
 
-class SirenEntity(BasePlatformEntity):
+class SirenEntityInfo(BasePlatformEntityInfo):
     """Siren entity model."""
 
     class_name: Literal["Siren"]
@@ -684,7 +695,7 @@ class SirenEntity(BasePlatformEntity):
     state: BooleanState
 
 
-class SwitchEntity(BasePlatformEntity):
+class SwitchEntityInfo(BasePlatformEntityInfo):
     """Switch entity model."""
 
     class_name: Literal[
@@ -705,25 +716,25 @@ class SwitchEntity(BasePlatformEntity):
     state: SwitchState
 
 
-class GroupEntity(EventBase, BaseEntityInfo):
+class GroupEntityInfo(EventBase, BaseEntityInfo):
     """Group entity model."""
 
 
-class LightGroupEntity(GroupEntity):
+class LightGroupEntityInfo(GroupEntityInfo):
     """Group entity model."""
 
     class_name: Literal["LightGroup"]
     state: LightState
 
 
-class FanGroupEntity(GroupEntity):
+class FanGroupEntityInfo(GroupEntityInfo):
     """Group entity model."""
 
     class_name: Literal["FanGroup"]
     state: FanState
 
 
-class SwitchGroupEntity(GroupEntity):
+class SwitchGroupEntityInfo(GroupEntityInfo):
     """Group entity model."""
 
     class_name: Literal["SwitchGroup"]
