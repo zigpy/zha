@@ -719,12 +719,14 @@ class Device(LogMixin, EventBase):
         self.debug("started configuration")
         await self._zdo_handler.async_configure()
         self._zdo_handler.debug("'async_configure' stage succeeded")
-        await asyncio.gather(
-            *(endpoint.async_configure() for endpoint in self._endpoints.values())
-        )
+
         if isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
+
+        await asyncio.gather(
+            *(endpoint.async_configure() for endpoint in self._endpoints.values())
+        )
 
         self.emit(
             ZHA_CLUSTER_HANDLER_CFG_DONE,

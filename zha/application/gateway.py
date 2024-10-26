@@ -222,11 +222,14 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         if config.config.quirks_configuration.enabled:
             for quirk in UNBUILT_QUIRK_BUILDERS:
-                _LOGGER.warning(
-                    "Found a v2 quirk that was not added to the registry: %s",
-                    quirk,
-                )
-                quirk.add_to_registry()
+                # v2 quirks with no manufacturer model metadata explicitly do not call
+                # add_to_registry. They are used to share code between v2 quirks.
+                if quirk.manufacturer_model_metadata:
+                    _LOGGER.warning(
+                        "Found a v2 quirk that was not added to the registry: %s",
+                        quirk,
+                    )
+                    quirk.add_to_registry()
 
             UNBUILT_QUIRK_BUILDERS.clear()
 
