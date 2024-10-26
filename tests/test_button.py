@@ -32,37 +32,18 @@ from tests.common import (
     mock_coro,
     update_attribute_cache,
 )
+from tests.conftest import CombinedGateways
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
-from zha.application.platforms.button import Button, WriteAttributeButton
+from zha.application.platforms.button import (
+    Button,
+    WebSocketClientButtonEntity,
+    WriteAttributeButton,
+)
 from zha.application.platforms.button.const import ButtonDeviceClass
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
-
-
-@pytest.fixture
-async def contact_sensor(zha_gateway: Gateway) -> tuple[Device, general.Identify]:
-    """Contact sensor fixture."""
-
-    zigpy_device = create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                SIG_EP_INPUT: [
-                    general.Basic.cluster_id,
-                    general.Identify.cluster_id,
-                    security.IasZone.cluster_id,
-                ],
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zha.DeviceType.IAS_ZONE,
-                SIG_EP_PROFILE: zha.PROFILE_ID,
-            }
-        },
-    )
-
-    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].identify
 
 
 class FrostLockQuirk(CustomDevice):
@@ -88,10 +69,71 @@ class FrostLockQuirk(CustomDevice):
     }
 
 
-@pytest.fixture
-async def tuya_water_valve(zha_gateway: Gateway):
-    """Tuya Water Valve fixture."""
+@pytest.mark.parametrize(
+    ("gateway_type", "entity_type"),
+    [
+        ("zha_gateway", Button),
+        ("ws_gateway", WebSocketClientButtonEntity),
+    ],
+)
+async def test_button(
+    zha_gateways: CombinedGateways,
+    gateway_type: str,
+    entity_type: type,
+) -> None:
+    """Test zha button platform."""
+    zha_gateway = getattr(zha_gateways, gateway_type)
 
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.Identify.cluster_id,
+                    security.IasZone.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.IAS_ZONE,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].identify
+    assert cluster is not None
+    entity: PlatformEntity = get_entity(zha_device, Platform.BUTTON)
+    assert isinstance(entity, entity_type)
+    assert entity.PLATFORM == Platform.BUTTON
+
+    with patch(
+        "zigpy.zcl.Cluster.request",
+        return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
+    ):
+        await entity.async_press()
+        await zha_gateway.async_block_till_done()
+        assert len(cluster.request.mock_calls) == 1
+        assert cluster.request.call_args[0][0] is False
+        assert cluster.request.call_args[0][1] == 0
+        assert cluster.request.call_args[0][3] == 5  # duration in seconds
+
+
+@pytest.mark.parametrize(
+    ("gateway_type", "entity_type"),
+    [
+        ("zha_gateway", WriteAttributeButton),
+        ("ws_gateway", WebSocketClientButtonEntity),
+    ],
+)
+async def test_frost_unlock(
+    zha_gateways: CombinedGateways,
+    gateway_type: str,
+    entity_type: type,
+) -> None:
+    """Test custom frost unlock ZHA button."""
+
+    zha_gateway = getattr(zha_gateways, gateway_type)
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
         {
@@ -114,45 +156,15 @@ async def tuya_water_valve(zha_gateway: Gateway):
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].tuya_manufacturer
-
-
-async def test_button(
-    contact_sensor: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
-    """Test zha button platform."""
-
-    zha_device, cluster = contact_sensor
-    assert cluster is not None
-    entity: PlatformEntity = get_entity(zha_device, Platform.BUTTON)
-    assert isinstance(entity, Button)
-    assert entity.PLATFORM == Platform.BUTTON
-
-    with patch(
-        "zigpy.zcl.Cluster.request",
-        return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
-    ):
-        await entity.async_press()
-        await zha_gateway.async_block_till_done()
-        assert len(cluster.request.mock_calls) == 1
-        assert cluster.request.call_args[0][0] is False
-        assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 5  # duration in seconds
-
-
-async def test_frost_unlock(
-    zha_gateway: Gateway,
-    tuya_water_valve: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
-) -> None:
-    """Test custom frost unlock ZHA button."""
-
-    zha_device, cluster = tuya_water_valve
+    cluster = zigpy_device.endpoints[1].tuya_manufacturer
     assert cluster is not None
     entity: PlatformEntity = get_entity(
-        zha_device, platform=Platform.BUTTON, entity_type=WriteAttributeButton
+        zha_device,
+        platform=Platform.BUTTON,
+        entity_type=entity_type,
+        qualifier="reset_frost_lock",
     )
-    assert isinstance(entity, WriteAttributeButton)
+    assert isinstance(entity, entity_type)
 
     assert entity._attr_device_class == ButtonDeviceClass.RESTART
     assert entity._attr_entity_category == EntityCategory.CONFIG
@@ -215,10 +227,16 @@ class FakeManufacturerCluster(CustomCluster, ManufacturerSpecificCluster):
 )
 
 
-@pytest.fixture
-async def custom_button_device(zha_gateway: Gateway):
-    """Button device fixture for quirks button tests."""
-
+@pytest.mark.parametrize(
+    "gateway_type",
+    ["zha_gateway", "ws_gateway"],
+)
+async def test_quirks_command_button(
+    zha_gateways: Gateway,
+    gateway_type: str,
+) -> None:
+    """Test ZHA button platform."""
+    zha_gateway = getattr(zha_gateways, gateway_type)
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
         {
@@ -241,16 +259,7 @@ async def custom_button_device(zha_gateway: Gateway):
     }
     update_attribute_cache(zigpy_device.endpoints[1].mfg_identify)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].mfg_identify
-
-
-async def test_quirks_command_button(
-    zha_gateway: Gateway,
-    custom_button_device: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
-) -> None:
-    """Test ZHA button platform."""
-
-    zha_device, cluster = custom_button_device
+    cluster = zigpy_device.endpoints[1].mfg_identify
     assert cluster is not None
     entity: PlatformEntity = get_entity(zha_device, platform=Platform.BUTTON)
 
@@ -266,16 +275,47 @@ async def test_quirks_command_button(
         assert cluster.request.call_args[0][3] == 5  # duration in seconds
 
 
+@pytest.mark.parametrize(
+    ("gateway_type", "entity_type"),
+    [
+        ("zha_gateway", WriteAttributeButton),
+        ("ws_gateway", WebSocketClientButtonEntity),
+    ],
+)
 async def test_quirks_write_attr_button(
-    zha_gateway: Gateway,
-    custom_button_device: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
+    zha_gateways: Gateway,
+    gateway_type: str,
+    entity_type: type,
 ) -> None:
     """Test ZHA button platform."""
 
-    zha_device, cluster = custom_button_device
+    zha_gateway = getattr(zha_gateways, gateway_type)
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    FakeManufacturerCluster.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.REMOTE_CONTROL,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Model",
+        model="Fake_Manufacturer",
+    )
+
+    zigpy_device.endpoints[1].mfg_identify.PLUGGED_ATTR_READS = {
+        FakeManufacturerCluster.AttributeDefs.feed.name: 0,
+    }
+    update_attribute_cache(zigpy_device.endpoints[1].mfg_identify)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].mfg_identify
     assert cluster is not None
     entity: PlatformEntity = get_entity(
-        zha_device, platform=Platform.BUTTON, entity_type=WriteAttributeButton
+        zha_device, platform=Platform.BUTTON, entity_type=entity_type, qualifier="feed"
     )
 
     assert cluster.get(cluster.AttributeDefs.feed.name) == 0
