@@ -97,7 +97,7 @@ class ErrorResponse(WebSocketCommandResponse):
     success: bool = False
     error_code: str
     error_message: str
-    zigbee_error_code: Optional[str]
+    zigbee_error_code: Optional[str] = None
     command: Literal[
         "error.start_network",
         "error.stop_network",
