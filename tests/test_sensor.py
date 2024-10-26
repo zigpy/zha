@@ -12,7 +12,7 @@ from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
+from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder, ReportingConfig
 from zigpy.quirks.v2.homeassistant.sensor import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
@@ -20,7 +20,6 @@ import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
-from zigpy.zcl.foundation import ReportingConfig
 
 from tests.common import (
     SIG_EP_INPUT,
