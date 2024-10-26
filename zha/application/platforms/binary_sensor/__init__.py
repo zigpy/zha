@@ -12,7 +12,6 @@ from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
     EntityCategory,
     PlatformEntity,
     WebSocketClientEntity,
@@ -51,13 +50,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
 )
 _LOGGER = logging.getLogger(__name__)
-
-
-class BinarySensorEntityInfo(BaseEntityInfo):
-    """Binary sensor entity info."""
-
-    attribute_name: str
-    device_class: BinarySensorDeviceClass | None
 
 
 class BinarySensorEntityInterface(ABC):
@@ -438,3 +430,8 @@ class WebSocketClientBinarySensor(WebSocketClientEntity, BinarySensorEntityInter
     def is_on(self) -> bool:
         """Return True if the switch is on based on the state machine."""
         return self.info_object.state.state
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await self._device.gateway.entities.refresh_state(self._entity_info)
