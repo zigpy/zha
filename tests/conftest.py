@@ -8,6 +8,7 @@ import os
 import reprlib
 import threading
 from types import TracebackType
+from typing import Self
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp.test_utils
@@ -214,6 +215,7 @@ async def zigpy_app_controller_fixture():
             zigpy.config.CONF_DATABASE: None,
             zigpy.config.CONF_DEVICE: {zigpy.config.CONF_DEVICE_PATH: "/dev/null"},
             zigpy.config.CONF_STARTUP_ENERGY_SCAN: False,
+            zigpy.config.CONF_WATCHDOG_ENABLED: False,
             zigpy.config.CONF_NWK_BACKUP_ENABLED: False,
             zigpy.config.CONF_TOPO_SCAN_ENABLED: False,
             zigpy.config.CONF_OTA: {
@@ -368,7 +370,7 @@ class CombinedGateways:
         self.zha_gateway: Gateway
         self.ws_gateway: CombinedWebsocketGateways
 
-    async def __aenter__(self) -> Gateway:
+    async def __aenter__(self) -> Self:
         """Start the ZHA gateway."""
         self.zha_gateway = await Gateway.async_from_config(self.zha_data)
         await self.zha_gateway.async_initialize()
