@@ -349,10 +349,6 @@ class PlatformEntity(BaseEntity):
 
         if entity_metadata.translation_key:
             self._attr_translation_key = entity_metadata.translation_key
-        elif has_attribute_name:
-            self._attr_translation_key = entity_metadata.attribute_name
-        elif has_command_name:
-            self._attr_translation_key = entity_metadata.command_name
 
         if has_attribute_name:
             self._unique_id_suffix = entity_metadata.attribute_name
