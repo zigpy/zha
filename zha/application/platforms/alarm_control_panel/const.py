@@ -1,16 +1,8 @@
 """Constants for the alarm control panel platform."""
 
 from enum import IntFlag, StrEnum
-from typing import Final
 
 from zigpy.zcl.clusters.security import IasAce
-
-SUPPORT_ALARM_ARM_HOME: Final[int] = 1
-SUPPORT_ALARM_ARM_AWAY: Final[int] = 2
-SUPPORT_ALARM_ARM_NIGHT: Final[int] = 4
-SUPPORT_ALARM_TRIGGER: Final[int] = 8
-SUPPORT_ALARM_ARM_CUSTOM_BYPASS: Final[int] = 16
-SUPPORT_ALARM_ARM_VACATION: Final[int] = 32
 
 
 class AlarmState(StrEnum):
@@ -36,9 +28,6 @@ IAS_ACE_STATE_MAP = {
     IasAce.PanelStatus.Armed_Away: AlarmState.ARMED_AWAY,
     IasAce.PanelStatus.In_Alarm: AlarmState.TRIGGERED,
 }
-
-ATTR_CHANGED_BY: Final[str] = "changed_by"
-ATTR_CODE_ARM_REQUIRED: Final[str] = "code_arm_required"
 
 
 class CodeFormat(StrEnum):
