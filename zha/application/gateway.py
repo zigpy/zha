@@ -1159,19 +1159,19 @@ class WebSocketClientGateway(BaseGateway):
     def handle_group_member_removed(self, event: GroupMemberRemovedEvent) -> None:
         """Handle group member removed event."""
         if event.group_info.group_id in self.groups:
-            self.groups[event.group_info.group_id]._group_info = event.group_info
+            self.groups[event.group_info.group_id].info_object = event.group_info
         self.emit(ControllerEvents.GROUP_MEMBER_REMOVED, event)
 
     def handle_group_member_added(self, event: GroupMemberAddedEvent) -> None:
         """Handle group member added event."""
         if event.group_info.group_id in self.groups:
-            self.groups[event.group_info.group_id]._group_info = event.group_info
+            self.groups[event.group_info.group_id].info_object = event.group_info
         self.emit(ControllerEvents.GROUP_MEMBER_ADDED, event)
 
     def handle_group_added(self, event: GroupAddedEvent) -> None:
         """Handle group added event."""
         if event.group_info.group_id in self.groups:
-            self.groups[event.group_info.group_id]._group_info = event.group_info
+            self.groups[event.group_info.group_id].info_object = event.group_info
         else:
             self.groups[event.group_info.group_id] = WebSocketClientGroup(
                 event.group_info, self

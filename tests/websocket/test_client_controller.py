@@ -20,8 +20,8 @@ from zha.application.gateway import (
     WebSocketServerGateway,
 )
 from zha.application.model import DeviceJoinedEvent, DeviceLeftEvent
-from zha.application.platforms.model import BasePlatformEntityInfo
-from zha.application.platforms.switch.model import SwitchEntityInfo
+from zha.application.platforms import WebSocketClientEntity
+from zha.application.platforms.switch import WebSocketClientSwitchEntity
 from zha.websocket.const import ControllerEvents
 from zha.websocket.server.api.model import (
     ReadClusterAttributesResponse,
@@ -38,7 +38,7 @@ from ..common import (
     SIG_EP_TYPE,
     async_find_group_entity_id,
     create_mock_zigpy_device,
-    find_entity_id,
+    find_entity,
     join_zigpy_device,
     update_attribute_cache,
 )
@@ -92,20 +92,9 @@ async def device_switch_1(
     return zha_device
 
 
-def get_entity(
-    zha_dev: WebSocketClientDevice, entity_id: str
-) -> BasePlatformEntityInfo:
-    """Get entity."""
-    entities = {
-        entity.platform + "." + entity.unique_id: entity
-        for entity in zha_dev.platform_entities.values()
-    }
-    return entities[entity_id]
-
-
 def get_group_entity(
     group_proxy: WebSocketClientGroup, entity_id: str
-) -> Optional[SwitchEntityInfo]:
+) -> Optional[WebSocketClientEntity]:
     """Get entity."""
 
     return group_proxy.group_entities.get(entity_id)
@@ -142,19 +131,18 @@ async def test_controller_devices(
     """Test client controller device related functionality."""
     controller, server = connected_client_and_server
     zha_device = await join_zigpy_device(server, zigpy_device)
-    entity_id = find_entity_id(Platform.SWITCH, zha_device)
-    assert entity_id is not None
 
     client_device: Optional[WebSocketClientDevice] = controller.devices.get(
         zha_device.ieee
     )
     assert client_device is not None
-    entity: SwitchEntityInfo = get_entity(client_device, entity_id)
+
+    entity = find_entity(client_device, Platform.SWITCH)
     assert entity is not None
 
-    assert isinstance(entity, SwitchEntityInfo)
+    assert isinstance(entity, WebSocketClientSwitchEntity)
 
-    assert entity.state.state is False
+    assert entity.state["state"] is False
 
     await controller.load_devices()
     devices: dict[EUI64, WebSocketClientDevice] = controller.devices
@@ -187,7 +175,8 @@ async def test_controller_devices(
     # we removed and joined the device again so lets get the entity again
     client_device = controller.devices.get(zha_device.ieee)
     assert client_device is not None
-    entity: SwitchEntityInfo = get_entity(client_device, entity_id)  # type: ignore
+
+    entity = find_entity(client_device, Platform.SWITCH)
     assert entity is not None
 
     # test device reconfigure
@@ -205,7 +194,7 @@ async def test_controller_devices(
     assert cluster is not None
     cluster.PLUGGED_ATTR_READS = {general.OnOff.AttributeDefs.on_off.name: 1}
     update_attribute_cache(cluster)
-    await controller.entities.refresh_state(entity)
+    await controller.entities.refresh_state(entity.info_object)
     await server.async_block_till_done()
     read_response: ReadClusterAttributesResponse = (
         await controller.devices_helper.read_cluster_attributes(
@@ -229,7 +218,7 @@ async def test_controller_devices(
         == general.OnOff.AttributeDefs.on_off.name
     )
     assert read_response.cluster.name == general.OnOff.name
-    assert entity.state.state is True
+    assert entity.state["state"] is True
 
     # test write cluster attribute
     write_response: WriteClusterAttributeResponse = (
@@ -252,9 +241,9 @@ async def test_controller_devices(
     )
     assert write_response.cluster.name == general.OnOff.name
 
-    await controller.entities.refresh_state(entity)
+    await controller.entities.refresh_state(entity.info_object)
     await server.async_block_till_done()
-    assert entity.state.state is False
+    assert entity.state["state"] is False
 
     # test controller events
     listener = MagicMock()
@@ -338,10 +327,10 @@ async def test_controller_groups(
     )
     assert group_proxy is not None
 
-    entity: SwitchEntityInfo = get_group_entity(group_proxy, entity_id)  # type: ignore
+    entity: WebSocketClientSwitchEntity = get_group_entity(group_proxy, entity_id)  # type: ignore
     assert entity is not None
 
-    assert isinstance(entity, SwitchEntityInfo)
+    assert isinstance(entity, WebSocketClientSwitchEntity)
 
     assert entity is not None
 
@@ -361,22 +350,20 @@ async def test_controller_groups(
         device_switch_1.ieee
     )
     assert client_device1 is not None
-    entity_id1 = find_entity_id(Platform.SWITCH, device_switch_1)
-    assert entity_id1 is not None
-    entity1: SwitchEntityInfo = get_entity(client_device1, entity_id1)
+
+    entity1: WebSocketClientSwitchEntity = find_entity(client_device1, Platform.SWITCH)
     assert entity1 is not None
 
     client_device2: Optional[WebSocketClientDevice] = controller.devices.get(
         device_switch_2.ieee
     )
     assert client_device2 is not None
-    entity_id2 = find_entity_id(Platform.SWITCH, device_switch_2)
-    assert entity_id2 is not None
-    entity2: SwitchEntityInfo = get_entity(client_device2, entity_id2)
+
+    entity2: WebSocketClientSwitchEntity = find_entity(client_device2, Platform.SWITCH)
     assert entity2 is not None
 
     response: GroupInfo = await controller.groups_helper.create_group(
-        members=[entity1, entity2], name="Test Group Controller"
+        members=[entity1.info_object, entity2.info_object], name="Test Group Controller"
     )
     await server.async_block_till_done()
     assert len(controller.groups) == 2
@@ -386,7 +373,9 @@ async def test_controller_groups(
     assert client_device2.ieee in response.members_by_ieee
 
     # test remove member from group from controller
-    response = await controller.groups_helper.remove_group_members(response, [entity2])
+    response = await controller.groups_helper.remove_group_members(
+        response, [entity2.info_object]
+    )
     await server.async_block_till_done()
     assert len(controller.groups) == 2
     assert response.group_id in controller.groups
@@ -395,7 +384,9 @@ async def test_controller_groups(
     assert client_device2.ieee not in response.members_by_ieee
 
     # test add member to group from controller
-    response = await controller.groups_helper.add_group_members(response, [entity2])
+    response = await controller.groups_helper.add_group_members(
+        response, [entity2.info_object]
+    )
     await server.async_block_till_done()
     assert len(controller.groups) == 2
     assert response.group_id in controller.groups

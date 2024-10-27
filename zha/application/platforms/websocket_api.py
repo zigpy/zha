@@ -37,16 +37,15 @@ async def execute_platform_entity_command(
 ) -> None:
     """Get the platform entity and execute a method based on the command."""
     try:
-        if command.ieee:
-            _LOGGER.debug("command: %s", command)
-            device = server.get_device(command.ieee)
-            platform_entity: Any = device.get_platform_entity(
-                command.platform, command.unique_id
-            )
-        else:
-            assert command.group_id
+        _LOGGER.debug("command: %s", command)
+        if command.group_id:
             group = server.get_group(command.group_id)
             platform_entity = group.group_entities[command.unique_id]
+        else:
+            device = server.get_device(command.ieee)
+            platform_entity = device.get_platform_entity(
+                command.platform, command.unique_id
+            )
     except ValueError as err:
         _LOGGER.exception(
             "Error executing command: %s method_name: %s",

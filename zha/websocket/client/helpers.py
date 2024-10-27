@@ -55,7 +55,6 @@ from zha.application.platforms.siren.websocket_api import (
     SirenTurnOffCommand,
     SirenTurnOnCommand,
 )
-from zha.application.platforms.switch.model import SwitchEntityInfo
 from zha.application.platforms.switch.websocket_api import (
     SwitchTurnOffCommand,
     SwitchTurnOnCommand,
@@ -180,12 +179,8 @@ class SwitchHelper:
         """Turn on a switch."""
         ensure_platform_entity(switch_platform_entity, Platform.SWITCH)
         command = SwitchTurnOnCommand(
-            ieee=switch_platform_entity.device_ieee
-            if not isinstance(switch_platform_entity, SwitchEntityInfo)
-            else None,
-            group_id=switch_platform_entity.group_id
-            if isinstance(switch_platform_entity, SwitchEntityInfo)
-            else None,
+            ieee=switch_platform_entity.device_ieee,
+            group_id=switch_platform_entity.group_id,
             unique_id=switch_platform_entity.unique_id,
         )
         return await self._client.async_send_command(command)
@@ -197,12 +192,8 @@ class SwitchHelper:
         """Turn off a switch."""
         ensure_platform_entity(switch_platform_entity, Platform.SWITCH)
         command = SwitchTurnOffCommand(
-            ieee=switch_platform_entity.device_ieee
-            if not isinstance(switch_platform_entity, SwitchEntityInfo)
-            else None,
-            group_id=switch_platform_entity.group_id
-            if isinstance(switch_platform_entity, SwitchEntityInfo)
-            else None,
+            ieee=switch_platform_entity.device_ieee,
+            group_id=switch_platform_entity.group_id,
             unique_id=switch_platform_entity.unique_id,
         )
         return await self._client.async_send_command(command)
