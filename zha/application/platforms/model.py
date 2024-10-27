@@ -1,5 +1,7 @@
 """Models for the ZHA platforms module."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import IntFlag, StrEnum
 from typing import Annotated, Any, Literal, Optional, Union
@@ -562,16 +564,6 @@ class SmartEnergyMeteringEntityInfo(BaseSensorEntityInfo):
 
     class_name: Literal["SmartEnergyMetering", "SmartEnergySummation"]
     state: SmartEnergyMeteringState
-
-
-class AlarmControlPanelEntityInfo(BasePlatformEntityInfo):
-    """Alarm control panel model."""
-
-    class_name: Literal["AlarmControlPanel"]
-    supported_features: int
-    code_arm_required: bool
-    max_invalid_tries: int
-    state: GenericState
 
 
 class ButtonEntityInfo(

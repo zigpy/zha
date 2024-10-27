@@ -41,6 +41,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
 )
+from zha.application.platforms.alarm_control_panel import model as alarm_model
 from zha.application.platforms.sensor.const import SensorDeviceClass
 from zha.application.registries import (
     DEVICE_CLASS,
@@ -170,7 +171,7 @@ QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS = {
 }
 
 ENTITY_INFO_CLASS_TO_WEBSOCKET_CLIENT_ENTITY_CLASS = {
-    model.AlarmControlPanelEntityInfo: alarm_control_panel.WebSocketClientAlarmControlPanel,
+    alarm_model.AlarmControlPanelEntityInfo: alarm_control_panel.WebSocketClientAlarmControlPanel,
     model.BinarySensorEntityInfo: binary_sensor.WebSocketClientBinarySensor,
     model.ButtonEntityInfo: button.WebSocketClientButtonEntity,
     model.ThermostatEntityInfo: climate.WebSocketClientThermostatEntity,

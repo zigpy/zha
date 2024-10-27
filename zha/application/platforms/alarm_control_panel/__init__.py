@@ -10,21 +10,16 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
-from zha.application.platforms import (
-    BaseEntityInfo,
-    PlatformEntity,
-    WebSocketClientEntity,
-)
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.alarm_control_panel.const import (
     IAS_ACE_STATE_MAP,
-    SUPPORT_ALARM_ARM_AWAY,
-    SUPPORT_ALARM_ARM_HOME,
-    SUPPORT_ALARM_ARM_NIGHT,
-    SUPPORT_ALARM_TRIGGER,
+    AlarmControlPanelEntityFeature,
     AlarmState,
     CodeFormat,
 )
-from zha.application.platforms.model import AlarmControlPanelEntityInfo
+from zha.application.platforms.alarm_control_panel.model import (
+    AlarmControlPanelEntityInfo,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_IAS_ACE,
@@ -48,20 +43,8 @@ STRICT_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-class AlarmControlPanelEntityInfo(BaseEntityInfo):
-    """Alarm control panel entity info."""
-
-    code_arm_required: bool
-    code_format: CodeFormat
-    supported_features: int
-    max_invalid_tries: int
-    translation_key: str
-
-
 class AlarmControlPanelEntityInterface(ABC):
     """Base class for alarm control panels."""
-
-    _attr_translation_key: str = "alarm_control_panel"
 
     @property
     @abstractmethod
@@ -104,6 +87,7 @@ class AlarmControlPanel(PlatformEntity, AlarmControlPanelEntityInterface):
     """Entity for ZHA alarm control devices."""
 
     PLATFORM = Platform.ALARM_CONTROL_PANEL
+    _attr_translation_key: str = "alarm_control_panel"
 
     def __init__(
         self,
@@ -157,13 +141,13 @@ class AlarmControlPanel(PlatformEntity, AlarmControlPanelEntityInterface):
         return CodeFormat.NUMBER
 
     @functools.cached_property
-    def supported_features(self) -> int:
+    def supported_features(self) -> AlarmControlPanelEntityFeature:
         """Return the list of supported features."""
         return (
-            SUPPORT_ALARM_ARM_HOME
-            | SUPPORT_ALARM_ARM_AWAY
-            | SUPPORT_ALARM_ARM_NIGHT
-            | SUPPORT_ALARM_TRIGGER
+            AlarmControlPanelEntityFeature.ARM_HOME
+            | AlarmControlPanelEntityFeature.ARM_AWAY
+            | AlarmControlPanelEntityFeature.ARM_NIGHT
+            | AlarmControlPanelEntityFeature.TRIGGER
         )
 
     def handle_cluster_handler_state_changed(
@@ -205,6 +189,7 @@ class WebSocketClientAlarmControlPanel(
     """Alarm control panel entity for the WebSocket API."""
 
     PLATFORM = Platform.ALARM_CONTROL_PANEL
+    _attr_translation_key: str = "alarm_control_panel"
 
     def __init__(
         self, entity_info: AlarmControlPanelEntityInfo, device: WebSocketClientDevice

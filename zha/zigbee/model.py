@@ -9,8 +9,10 @@ from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.zdo.types import RouteStatus, _NeighborEnums
 
 from zha.application import Platform
-from zha.application.platforms.model import (
+from zha.application.platforms.alarm_control_panel.model import (
     AlarmControlPanelEntityInfo,
+)
+from zha.application.platforms.model import (
     BatteryEntityInfo,
     BinarySensorEntityInfo,
     ButtonEntityInfo,
