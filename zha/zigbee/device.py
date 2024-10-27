@@ -9,7 +9,7 @@ import asyncio
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Generic, Self
 
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
@@ -56,8 +56,7 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values
-from zha.application.platforms import PlatformEntity
-from zha.application.platforms.model import BasePlatformEntity, EntityStateChangedEvent
+from zha.application.platforms import PlatformEntity, T, WebSocketClientEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -77,6 +76,7 @@ from zha.zigbee.model import (
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
+    from zha.application.platforms.events import EntityStateChangedEvent
 
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
@@ -92,7 +92,7 @@ def get_device_automation_triggers(
     }
 
 
-class BaseDevice(LogMixin, EventBase, ABC):
+class BaseDevice(LogMixin, EventBase, ABC, Generic[T]):
     """Base device for Zigbee Home Automation."""
 
     def __init__(self, _gateway: Gateway) -> None:
@@ -207,7 +207,7 @@ class BaseDevice(LogMixin, EventBase, ABC):
 
     @property
     @abstractmethod
-    def platform_entities(self) -> dict[tuple[Platform, str], Any]:
+    def platform_entities(self) -> dict[tuple[Platform, str], T]:
         """Return the platform entities for this device."""
 
     @property
@@ -695,7 +695,8 @@ class Device(BaseDevice):
             power_source=self.power_source,
             lqi=self.lqi,
             rssi=self.rssi,
-            last_seen=update_time,
+            last_seen=self.last_seen,
+            last_seen_time=update_time,
             available=self.available,
             device_type=self.device_type,
             signature=self.zigbee_signature,
@@ -1126,6 +1127,25 @@ class WebSocketClientDevice(BaseDevice):
         self._extended_device_info = extended_device_info
         self.unique_id = str(extended_device_info.ieee)
 
+    @property
+    def extended_device_info(self) -> ExtendedDeviceInfo:
+        """Get extended device information."""
+        return self._extended_device_info
+
+    @extended_device_info.setter
+    def extended_device_info(self, extended_device_info: ExtendedDeviceInfo) -> None:
+        """Set extended device information."""
+        self._extended_device_info = extended_device_info
+        self._entities: dict[tuple[Platform, str], WebSocketClientEntity] = {
+            (
+                entity_info.platform,
+                entity_info.unique_id,
+            ): discovery.ENTITY_INFO_CLASS_TO_WEBSOCKET_CLIENT_ENTITY_CLASS[
+                entity_info.__class__
+            ](entity_info, self)
+            for entity_info in self._extended_device_info.entities.values()
+        }
+
     @cached_property
     def name(self) -> str:
         """Return device name."""
@@ -1238,9 +1258,9 @@ class WebSocketClientDevice(BaseDevice):
         return self._extended_device_info.sw_version
 
     @property
-    def platform_entities(self) -> dict[tuple[Platform, str], BasePlatformEntity]:
+    def platform_entities(self) -> dict[tuple[Platform, str], WebSocketClientEntity]:
         """Return the platform entities for this device."""
-        return self._extended_device_info.entities
+        return self._entities
 
     def emit_platform_entity_event(self, event: EntityStateChangedEvent) -> None:
         """Proxy the firing of an entity event."""

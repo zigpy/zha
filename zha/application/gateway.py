@@ -10,7 +10,7 @@ from datetime import timedelta
 import logging
 import time
 from types import TracebackType
-from typing import Any, Final, Self, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Final, Self, TypeVar, cast
 
 from async_timeout import timeout
 import websockets
@@ -67,7 +67,8 @@ from zha.application.model import (
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
 )
-from zha.application.platforms.model import EntityStateChangedEvent
+from zha.application.platforms.websocket_api import load_platform_entity_apis
+from zha.application.websocket_api import load_api as load_zigbee_controller_api
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
@@ -95,10 +96,7 @@ from zha.websocket.client.helpers import (
     SwitchHelper,
 )
 from zha.websocket.const import ControllerEvents
-from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
-from zha.websocket.server.api.platforms.api import load_platform_entity_apis
 from zha.websocket.server.client import ClientManager, load_api as load_client_api
-from zha.websocket.server.gateway_api import load_api as load_zigbee_controller_api
 from zha.zigbee.device import BaseDevice, Device, WebSocketClientDevice
 from zha.zigbee.endpoint import ATTR_IN_CLUSTERS, ATTR_OUT_CLUSTERS
 from zha.zigbee.group import (
@@ -107,7 +105,15 @@ from zha.zigbee.group import (
     GroupMemberReference,
     WebSocketClientGroup,
 )
-from zha.zigbee.model import DeviceStatus, ExtendedDeviceInfo, ZHAEvent
+from zha.zigbee.model import DeviceStatus
+
+if TYPE_CHECKING:
+    from zha.application.platforms.events import EntityStateChangedEvent
+    from zha.websocket.server.api.model import (
+        WebSocketCommand,
+        WebSocketCommandResponse,
+    )
+    from zha.zigbee.model import ExtendedDeviceInfo, ZHAEvent
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 _R = TypeVar("_R")
@@ -880,7 +886,7 @@ class WebSocketServerGateway(Gateway):
     async def async_block_till_done(self, wait_background_tasks=False):
         """Block until all pending work is done."""
         # To flush out any call_soon_threadsafe
-        await asyncio.sleep(0.001)
+        await asyncio.sleep(0.1)
         start_time: float | None = None
 
         while self._tracked_ws_tasks:
@@ -904,7 +910,7 @@ class WebSocketServerGateway(Gateway):
                     for task in pending:
                         _LOGGER.debug("Waiting for task: %s", task)
             else:
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
         await super().async_block_till_done(wait_background_tasks=wait_background_tasks)
 
     async def __aenter__(self) -> WebSocketServerGateway:
@@ -1052,7 +1058,7 @@ class WebSocketClientGateway(BaseGateway):
             zha_device = WebSocketClientDevice(zigpy_device, self)
             self._devices[zigpy_device.ieee] = zha_device
         else:
-            self._devices[zigpy_device.ieee]._extended_device_info = zigpy_device
+            self._devices[zigpy_device.ieee].extended_device_info = zigpy_device
         return zha_device
 
     async def async_create_zigpy_group(
@@ -1062,6 +1068,19 @@ class WebSocketClientGateway(BaseGateway):
         group_id: int | None = None,
     ) -> WebSocketClientGroup | None:
         """Create a new Zigpy Zigbee group."""
+
+    def get_device(self, ieee: EUI64) -> WebSocketClientDevice | None:
+        """Return Device for given ieee."""
+        return self._devices.get(ieee)
+
+    def get_group(self, group_id_or_name: int | str) -> WebSocketClientGroup | None:
+        """Return Group for given group id or group name."""
+        if isinstance(group_id_or_name, str):
+            for group in self.groups.values():
+                if group.name == group_id_or_name:
+                    return group
+            return None
+        return self.groups.get(group_id_or_name)
 
     async def async_remove_device(self, ieee: EUI64) -> None:
         """Remove a device from ZHA."""
@@ -1118,7 +1137,7 @@ class WebSocketClientGateway(BaseGateway):
         device_model = event.device_info
         _LOGGER.info("Device %s - %s initialized", device_model.ieee, device_model.nwk)
         if device_model.ieee in self.devices:
-            self.devices[device_model.ieee]._extended_device_info = device_model
+            self.devices[device_model.ieee].extended_device_info = device_model
         else:
             self._devices[device_model.ieee] = self.get_or_create_device(device_model)
         self.emit(ControllerEvents.DEVICE_FULLY_INITIALIZED, event)
@@ -1140,19 +1159,19 @@ class WebSocketClientGateway(BaseGateway):
     def handle_group_member_removed(self, event: GroupMemberRemovedEvent) -> None:
         """Handle group member removed event."""
         if event.group_info.group_id in self.groups:
-            self.groups[event.group_info.group_id]._group_info = event.group_info
+            self.groups[event.group_info.group_id].info_object = event.group_info
         self.emit(ControllerEvents.GROUP_MEMBER_REMOVED, event)
 
     def handle_group_member_added(self, event: GroupMemberAddedEvent) -> None:
         """Handle group member added event."""
         if event.group_info.group_id in self.groups:
-            self.groups[event.group_info.group_id]._group_info = event.group_info
+            self.groups[event.group_info.group_id].info_object = event.group_info
         self.emit(ControllerEvents.GROUP_MEMBER_ADDED, event)
 
     def handle_group_added(self, event: GroupAddedEvent) -> None:
         """Handle group added event."""
         if event.group_info.group_id in self.groups:
-            self.groups[event.group_info.group_id]._group_info = event.group_info
+            self.groups[event.group_info.group_id].info_object = event.group_info
         else:
             self.groups[event.group_info.group_id] = WebSocketClientGroup(
                 event.group_info, self

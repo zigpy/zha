@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 import functools
 import math
 from typing import TYPE_CHECKING, Any
@@ -12,9 +12,9 @@ from zigpy.zcl.clusters import hvac
 from zha.application import Platform
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
     GroupEntity,
     PlatformEntity,
+    WebSocketClientEntity,
 )
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
@@ -37,37 +37,97 @@ from zha.application.platforms.fan.helpers import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
+from zha.application.platforms.fan.model import FanEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import (
-    ClusterAttributeUpdatedEvent,
-    wrap_zigpy_exceptions,
-)
+from zha.zigbee.cluster_handlers import wrap_zigpy_exceptions
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
 )
-from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.group import Group
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.FAN)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
 
 
-class FanEntityInfo(BaseEntityInfo):
-    """Fan entity info."""
+class FanEntityInterface(ABC):
+    """Fan interface."""
 
-    preset_modes: list[str]
-    supported_features: FanEntityFeature
-    speed_count: int
-    speed_list: list[str]
+    @property
+    @abstractmethod
+    def preset_modes(self) -> list[str]:
+        """Return the available preset modes."""
+
+    @property
+    @abstractmethod
+    def default_on_percentage(self) -> int:
+        """Return the default on percentage."""
+
+    @property
+    @abstractmethod
+    def speed_list(self) -> list[str]:
+        """Get the list of available speeds."""
+
+    @property
+    @abstractmethod
+    def speed_count(self) -> int:
+        """Return the number of speeds the fan supports."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> FanEntityFeature:
+        """Flag supported features."""
+
+    @property
+    @abstractmethod
+    def is_on(self) -> bool:
+        """Return true if the entity is on."""
+
+    @property
+    @abstractmethod
+    def percentage(self) -> int | None:
+        """Return the current speed percentage."""
+
+    @property
+    @abstractmethod
+    def preset_mode(self) -> str | None:
+        """Return the current preset mode."""
+
+    @property
+    @abstractmethod
+    def speed(self) -> str | None:
+        """Return the current speed."""
+
+    @abstractmethod
+    async def async_turn_on(
+        self,
+        speed: str | None = None,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Turn the entity on."""
+
+    @abstractmethod
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the entity off."""
+
+    @abstractmethod
+    async def async_set_percentage(self, percentage: int) -> None:
+        """Set the speed percentage of the fan."""
+
+    @abstractmethod
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set the preset mode for the fan."""
 
 
-class BaseFan(BaseEntity):
+class BaseFan(BaseEntity, FanEntityInterface):
     """Base representation of a ZHA fan."""
 
     PLATFORM = Platform.FAN
@@ -476,3 +536,70 @@ class KofFan(Fan):
     def preset_modes_to_name(self) -> dict[int, str]:
         """Return a dict from preset mode to name."""
         return {6: PRESET_MODE_SMART}
+
+
+class WebSocketClientFanEntity(WebSocketClientEntity, FanEntityInterface):
+    """Representation of a ZHA fan over WebSocket."""
+
+    PLATFORM: Platform = Platform.FAN
+
+    def __init__(
+        self, entity_info: FanEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA fan entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> FanEntityInfo:
+        """Return the fan entity info."""
+        return self._entity_info
+
+    @property
+    def preset_modes(self) -> list[str]:
+        """Return the available preset modes."""
+        return self.info_object.preset_modes
+
+    @property
+    def speed_list(self) -> list[str]:
+        """Get the list of available speeds."""
+        return self.info_object.speed_list
+
+    @property
+    def speed_count(self) -> int:
+        """Return the number of speeds the fan supports."""
+        return self.info_object.speed_count
+
+    @property
+    def supported_features(self) -> FanEntityFeature:
+        """Flag supported features."""
+        return self.info_object.supported_features
+
+    @property
+    def is_on(self) -> bool:
+        """Return true if the entity is on."""
+        return self.info_object.state.is_on
+
+    @property
+    def percentage(self) -> int | None:
+        """Return the current speed percentage."""
+        return self.info_object.state.percentage
+
+    @property
+    def preset_mode(self) -> str | None:
+        """Return the current preset mode."""
+        return self.info_object.state.preset_mode
+
+    @property
+    def speed(self) -> str | None:
+        """Return the current speed."""
+        return self.info_object.state.speed
+
+    async def async_turn_on(
+        self,
+        speed: str | None = None,
+        percentage: int | None = None,
+        preset_mode: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Turn the entity on."""

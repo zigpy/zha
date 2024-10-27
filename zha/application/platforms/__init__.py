@@ -7,23 +7,25 @@ import asyncio
 from contextlib import suppress
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, final
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
+from zigpy.types.named import EUI64
 
 from zha.application import Platform
+from zha.application.platforms.const import EntityCategory
 from zha.application.platforms.model import (
     BaseEntityInfo,
     BaseIdentifiers,
-    EntityCategory,
-    EntityStateChangedEvent,
     GroupEntityIdentifiers,
     PlatformEntityIdentifiers,
+    T as BaseEntityInfoType,
 )
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
+from zha.model import BaseEvent
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -35,6 +37,20 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
+
+
+# this class exists solely to break circular imports
+class EntityStateChangedEvent(BaseEvent):
+    """Event for when an entity state changes."""
+
+    event_type: Literal["entity"] = "entity"
+    event: Literal["state_changed"] = "state_changed"
+    platform: Platform
+    unique_id: str
+    device_ieee: EUI64 | None = None
+    endpoint_id: int | None = None
+    group_id: int | None = None
+    state: Any
 
 
 class BaseEntity(LogMixin, EventBase):
@@ -208,6 +224,9 @@ class BaseEntity(LogMixin, EventBase):
         msg = f"%s: {msg}"
         args = (self._unique_id,) + args
         _LOGGER.log(level, msg, *args, **kwargs)
+
+
+T = TypeVar("T", bound=BaseEntity)
 
 
 class PlatformEntity(BaseEntity):
@@ -463,3 +482,32 @@ class GroupEntity(BaseEntity):
     async def async_update(self, _: Any | None = None) -> None:
         """Update the state of this group entity."""
         self.update()
+
+
+class WebSocketClientEntity(BaseEntity, Generic[BaseEntityInfoType]):
+    """Entity repsentation for the websocket client."""
+
+    def __init__(self, entity_info: BaseEntityInfoType) -> None:
+        """Initialize the websocket client entity."""
+        super().__init__(entity_info.unique_id)
+        self.PLATFORM = entity_info.platform
+        self._entity_info: BaseEntityInfoType = entity_info
+        self._attr_enabled = self._entity_info.enabled
+        self._attr_fallback_name = self._entity_info.fallback_name
+        self._attr_translation_key = self._entity_info.translation_key
+        self._attr_entity_category = self._entity_info.entity_category
+        self._attr_entity_registry_enabled_default = (
+            self._entity_info.entity_registry_enabled_default
+        )
+        self._attr_device_class = self._entity_info.device_class
+        self._attr_state_class = self._entity_info.state_class
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the arguments to use in the command."""
+        return self._entity_info.state.__dict__
+
+    @state.setter
+    def state(self, value: dict[str, Any]) -> None:
+        """Set the state of the entity."""
+        self._entity_info.state = value

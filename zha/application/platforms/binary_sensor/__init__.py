@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import functools
 import logging
 from typing import TYPE_CHECKING
@@ -10,14 +11,15 @@ from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
     BinarySensorDeviceClass,
 )
+from zha.application.platforms.binary_sensor.model import BinarySensorEntityInfo
+from zha.application.platforms.const import EntityCategory
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ACCELEROMETER,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -30,8 +32,8 @@ from zha.zigbee.cluster_handlers.const import (
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 
@@ -45,14 +47,16 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-class BinarySensorEntityInfo(BaseEntityInfo):
-    """Binary sensor entity info."""
+class BinarySensorEntityInterface(ABC):
+    """Base class for binary sensors."""
 
-    attribute_name: str
-    device_class: BinarySensorDeviceClass | None
+    @property
+    @abstractmethod
+    def is_on(self) -> bool:
+        """Return True if the switch is on based on the state machine."""
 
 
-class BinarySensor(PlatformEntity):
+class BinarySensor(PlatformEntity, BinarySensorEntityInterface):
     """ZHA BinarySensor."""
 
     _attr_device_class: BinarySensorDeviceClass | None
@@ -398,3 +402,31 @@ class DanfossPreheatStatus(BinarySensor):
     _attr_translation_key: str = "preheat_status"
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+class WebSocketClientBinarySensor(WebSocketClientEntity, BinarySensorEntityInterface):
+    """Base class for binary sensors that are updated via a websocket client."""
+
+    PLATFORM: Platform = Platform.BINARY_SENSOR
+
+    def __init__(
+        self, entity_info: BinarySensorEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA alarm control device."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @functools.cached_property
+    def info_object(self) -> BinarySensorEntityInfo:
+        """Return a representation of the binary sensor."""
+        return self._entity_info
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if the switch is on based on the state machine."""
+        return self.info_object.state.state
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await self._device.gateway.entities.refresh_state(self._entity_info)

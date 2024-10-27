@@ -52,7 +52,8 @@ def test_ser_deser_zha_event():
         power_source="test",
         lqi=1,
         rssi=2,
-        last_seen="",
+        last_seen=123456789.0,
+        last_seen_time=None,
         available=True,
         device_type="test",
         signature={"foo": "bar"},
@@ -75,7 +76,8 @@ def test_ser_deser_zha_event():
         "power_source": "test",
         "lqi": 1,
         "rssi": 2,
-        "last_seen": "",
+        "last_seen": 123456789.0,
+        "last_seen_time": None,
         "available": True,
         "device_type": "test",
         "signature": {"foo": "bar"},
@@ -85,7 +87,8 @@ def test_ser_deser_zha_event():
         '{"ieee":"00:00:00:00:00:00:00:00","nwk":"0x0000",'
         '"manufacturer":"test","model":"test","name":"test","quirk_applied":true,'
         '"quirk_class":"test","quirk_id":"test","manufacturer_code":0,"power_source":"test",'
-        '"lqi":1,"rssi":2,"last_seen":"","available":true,"device_type":"test","signature":{"foo":"bar"}}'
+        '"lqi":1,"rssi":2,"last_seen":123456789.0,"last_seen_time":null,"available":true,'
+        '"device_type":"test","signature":{"foo":"bar"}}'
     )
 
 

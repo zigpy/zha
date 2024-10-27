@@ -7,12 +7,13 @@ import asyncio
 from collections.abc import Callable
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Generic
 
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.platforms import EntityStateChangedEvent, PlatformEntity
+from zha.application import discovery
+from zha.application.platforms import PlatformEntity, T, WebSocketClientEntity
 from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.mixins import LogMixin
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
 
     from zha.application.gateway import Gateway
     from zha.application.platforms import GroupEntity
+    from zha.application.platforms.events import EntityStateChangedEvent
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -105,7 +107,7 @@ class GroupMember(LogMixin):
         _LOGGER.log(level, msg, *args, **kwargs)
 
 
-class BaseGroup(LogMixin, EventBase, ABC):
+class BaseGroup(LogMixin, EventBase, ABC, Generic[T]):
     """Base class for Zigbee groups."""
 
     def __init__(
@@ -133,7 +135,7 @@ class BaseGroup(LogMixin, EventBase, ABC):
 
     @property
     @abstractmethod
-    def group_entities(self) -> dict[str, GroupEntity]:
+    def group_entities(self) -> dict[str, T]:
         """Return the platform entities of the group."""
 
     @cached_property
@@ -364,6 +366,7 @@ class WebSocketClientGroup(BaseGroup):
         """Initialize the group."""
         super().__init__(gateway)
         self._group_info = group_info
+        self._entities: dict[str, WebSocketClientEntity] = {}
 
     @property
     def name(self) -> str:
@@ -376,24 +379,34 @@ class WebSocketClientGroup(BaseGroup):
         return self._group_info.group_id
 
     @property
-    def group_entities(self) -> dict[str, GroupEntity]:
+    def group_entities(self) -> dict[str, WebSocketClientEntity]:
         """Return the platform entities of the group."""
-        return self._group_info.entities
+        return self._entities
 
     @cached_property
     def members(self) -> list[GroupMember]:
         """Return the ZHA devices that are members of this group."""
         return []
 
-    @cached_property
+    @property
     def info_object(self) -> GroupInfo:
         """Get ZHA group info."""
         return self._group_info
 
+    @info_object.setter
+    def info_object(self, group_info: GroupInfo) -> None:
+        """Set ZHA group info."""
+        self._group_info = group_info
+        self._entities = {
+            entity_info.unique_id: discovery.ENTITY_INFO_CLASS_TO_WEBSOCKET_CLIENT_ENTITY_CLASS[
+                entity_info.__class__
+            ](entity_info, self)
+            for entity_info in self.info_object.entities.values()
+        }
+
     def emit_platform_entity_event(self, event: EntityStateChangedEvent) -> None:
         """Proxy the firing of an entity event."""
-        entity = self.group_entities[event.unique_id]
-        if entity is None:
-            return  # group entities are updated to get state when created so we may not have the entity yet
-        entity.state = event.state
-        self.emit(f"{event.unique_id}_{event.event}", event)
+        entity = self.group_entities.get(event.unique_id)
+        if entity is not None:
+            entity.state = event.state
+            self.emit(f"{event.unique_id}_{event.event}", event)

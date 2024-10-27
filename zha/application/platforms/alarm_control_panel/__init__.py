@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import functools
 import logging
 from typing import TYPE_CHECKING, Any
@@ -9,29 +10,29 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.alarm_control_panel.const import (
     IAS_ACE_STATE_MAP,
-    SUPPORT_ALARM_ARM_AWAY,
-    SUPPORT_ALARM_ARM_HOME,
-    SUPPORT_ALARM_ARM_NIGHT,
-    SUPPORT_ALARM_TRIGGER,
+    AlarmControlPanelEntityFeature,
     AlarmState,
     CodeFormat,
+)
+from zha.application.platforms.alarm_control_panel.model import (
+    AlarmControlPanelEntityInfo,
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_IAS_ACE,
     CLUSTER_HANDLER_STATE_CHANGED,
 )
-from zha.zigbee.cluster_handlers.security import (
-    ClusterHandlerStateChangedEvent,
-    IasAceClusterHandler,
-)
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers.security import (
+        ClusterHandlerStateChangedEvent,
+        IasAceClusterHandler,
+    )
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(
@@ -41,22 +42,51 @@ STRICT_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-class AlarmControlPanelEntityInfo(BaseEntityInfo):
-    """Alarm control panel entity info."""
+class AlarmControlPanelEntityInterface(ABC):
+    """Base class for alarm control panels."""
 
-    code_arm_required: bool
-    code_format: CodeFormat
-    supported_features: int
-    max_invalid_tries: int
-    translation_key: str
+    @property
+    @abstractmethod
+    def code_arm_required(self) -> bool:
+        """Whether the code is required for arm actions."""
+
+    @functools.cached_property
+    @abstractmethod
+    def code_format(self) -> CodeFormat:
+        """Code format or None if no code is required."""
+
+    @functools.cached_property
+    @abstractmethod
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+
+    @abstractmethod
+    async def async_alarm_disarm(self, code: str | None = None, **kwargs) -> None:
+        """Send disarm command."""
+
+    @abstractmethod
+    async def async_alarm_arm_home(self, code: str | None = None, **kwargs) -> None:
+        """Send arm home command."""
+
+    @abstractmethod
+    async def async_alarm_arm_away(self, code: str | None = None, **kwargs) -> None:
+        """Send arm away command."""
+
+    @abstractmethod
+    async def async_alarm_arm_night(self, code: str | None = None, **kwargs) -> None:
+        """Send arm night command."""
+
+    @abstractmethod
+    async def async_alarm_trigger(self, code: str | None = None, **kwargs) -> None:
+        """Send alarm trigger command."""
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_ACE)
-class AlarmControlPanel(PlatformEntity):
+class AlarmControlPanel(PlatformEntity, AlarmControlPanelEntityInterface):
     """Entity for ZHA alarm control devices."""
 
-    _attr_translation_key: str = "alarm_control_panel"
     PLATFORM = Platform.ALARM_CONTROL_PANEL
+    _attr_translation_key: str = "alarm_control_panel"
 
     def __init__(
         self,
@@ -110,13 +140,13 @@ class AlarmControlPanel(PlatformEntity):
         return CodeFormat.NUMBER
 
     @functools.cached_property
-    def supported_features(self) -> int:
+    def supported_features(self) -> AlarmControlPanelEntityFeature:
         """Return the list of supported features."""
         return (
-            SUPPORT_ALARM_ARM_HOME
-            | SUPPORT_ALARM_ARM_AWAY
-            | SUPPORT_ALARM_ARM_NIGHT
-            | SUPPORT_ALARM_TRIGGER
+            AlarmControlPanelEntityFeature.ARM_HOME
+            | AlarmControlPanelEntityFeature.ARM_AWAY
+            | AlarmControlPanelEntityFeature.ARM_NIGHT
+            | AlarmControlPanelEntityFeature.TRIGGER
         )
 
     def handle_cluster_handler_state_changed(
@@ -150,3 +180,65 @@ class AlarmControlPanel(PlatformEntity):
         """Send alarm trigger command."""
         self._cluster_handler.panic()
         self.maybe_emit_state_changed_event()
+
+
+class WebSocketClientAlarmControlPanel(
+    WebSocketClientEntity, AlarmControlPanelEntityInterface
+):
+    """Alarm control panel entity for the WebSocket API."""
+
+    PLATFORM = Platform.ALARM_CONTROL_PANEL
+    _attr_translation_key: str = "alarm_control_panel"
+
+    def __init__(
+        self, entity_info: AlarmControlPanelEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA alarm control device."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @functools.cached_property
+    def info_object(self) -> AlarmControlPanelEntityInfo:
+        """Return a representation of the alarm control panel."""
+        return self._entity_info
+
+    @property
+    def code_arm_required(self) -> bool:
+        """Whether the code is required for arm actions."""
+        return self._entity_info.code_arm_required
+
+    @functools.cached_property
+    def code_format(self) -> CodeFormat:
+        """Code format or None if no code is required."""
+        return self._entity_info.code_format
+
+    @functools.cached_property
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+        return self._entity_info.supported_features
+
+    async def async_alarm_disarm(self, code: str | None = None, **kwargs) -> None:
+        """Send disarm command."""
+        await self._device.gateway.alarm_control_panels.disarm(self._entity_info, code)
+
+    async def async_alarm_arm_home(self, code: str | None = None, **kwargs) -> None:
+        """Send arm home command."""
+        await self._device.gateway.alarm_control_panels.arm_home(
+            self._entity_info, code
+        )
+
+    async def async_alarm_arm_away(self, code: str | None = None, **kwargs) -> None:
+        """Send arm away command."""
+        await self._device.gateway.alarm_control_panels.arm_away(
+            self._entity_info, code
+        )
+
+    async def async_alarm_arm_night(self, code: str | None = None, **kwargs) -> None:
+        """Send arm night command."""
+        await self._device.gateway.alarm_control_panels.arm_night(
+            self._entity_info, code
+        )
+
+    async def async_alarm_trigger(self, code: str | None = None, **kwargs) -> None:
+        """Send alarm trigger command."""
+        await self._device.gateway.alarm_control_panels.trigger(self._entity_info)

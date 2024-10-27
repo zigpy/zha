@@ -18,7 +18,7 @@ from zha.application.model import (
     GroupRemovedEvent,
     RawDeviceInitializedEvent,
 )
-from zha.application.platforms.model import EntityStateChangedEvent
+from zha.application.platforms.events import EntityStateChangedEvent
 from zha.model import BaseModel
 from zha.websocket.const import APICommands
 from zha.zigbee.cluster_handlers.model import ClusterInfo
@@ -97,7 +97,7 @@ class ErrorResponse(WebSocketCommandResponse):
     success: bool = False
     error_code: str
     error_message: str
-    zigbee_error_code: Optional[str]
+    zigbee_error_code: Optional[str] = None
     command: Literal[
         "error.start_network",
         "error.stop_network",

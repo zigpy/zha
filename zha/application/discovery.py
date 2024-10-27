@@ -33,6 +33,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     fan,
     light,
     lock,
+    model,
     number,
     select,
     sensor,
@@ -40,7 +41,28 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
 )
+from zha.application.platforms.alarm_control_panel import AlarmControlPanelEntityInfo
+from zha.application.platforms.binary_sensor.model import BinarySensorEntityInfo
+from zha.application.platforms.button.model import ButtonEntityInfo
+from zha.application.platforms.climate.model import ThermostatEntityInfo
+from zha.application.platforms.cover.model import CoverEntityInfo, ShadeEntityInfo
+from zha.application.platforms.device_tracker.model import DeviceTrackerEntityInfo
+from zha.application.platforms.fan.model import FanEntityInfo
+from zha.application.platforms.light.model import LightEntityInfo
+from zha.application.platforms.lock.model import LockEntityInfo
+from zha.application.platforms.number.model import NumberEntityInfo
+from zha.application.platforms.select.model import SelectEntityInfo
 from zha.application.platforms.sensor.const import SensorDeviceClass
+from zha.application.platforms.sensor.model import (
+    BatteryEntityInfo,
+    DeviceCounterSensorEntityInfo,
+    ElectricalMeasurementEntityInfo,
+    SensorEntityInfo,
+    SmartEnergyMeteringEntityInfo,
+)
+from zha.application.platforms.siren.model import SirenEntityInfo
+from zha.application.platforms.switch.model import SwitchEntityInfo
+from zha.application.platforms.update.model import FirmwareUpdateEntityInfo
 from zha.application.registries import (
     DEVICE_CLASS,
     PLATFORM_ENTITIES,
@@ -166,6 +188,29 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
 
 QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS = {
     SensorDeviceClass.TIMESTAMP: sensor.TimestampSensor
+}
+
+ENTITY_INFO_CLASS_TO_WEBSOCKET_CLIENT_ENTITY_CLASS = {
+    AlarmControlPanelEntityInfo: alarm_control_panel.WebSocketClientAlarmControlPanel,
+    BinarySensorEntityInfo: binary_sensor.WebSocketClientBinarySensor,
+    ButtonEntityInfo: button.WebSocketClientButtonEntity,
+    ThermostatEntityInfo: climate.WebSocketClientThermostatEntity,
+    CoverEntityInfo: cover.WebSocketClientCoverEntity,
+    ShadeEntityInfo: cover.WebSocketClientCoverEntity,
+    DeviceTrackerEntityInfo: device_tracker.WebSocketClientDeviceTrackerEntity,
+    FanEntityInfo: fan.WebSocketClientFanEntity,
+    LightEntityInfo: light.WebSocketClientLightEntity,
+    LockEntityInfo: lock.WebSocketClientLockEntity,
+    NumberEntityInfo: number.WebSocketClientNumberEntity,
+    SelectEntityInfo: select.WebSocketClientSelectEntity,
+    SensorEntityInfo: sensor.WebSocketClientSensorEntity,
+    SirenEntityInfo: siren.WebSocketClientSirenEntity,
+    SwitchEntityInfo: switch.WebSocketClientSwitchEntity,
+    FirmwareUpdateEntityInfo: update.WebSocketClientFirmwareUpdateEntity,
+    BatteryEntityInfo: sensor.WebSocketClientSensorEntity,
+    ElectricalMeasurementEntityInfo: sensor.WebSocketClientSensorEntity,
+    SmartEnergyMeteringEntityInfo: sensor.WebSocketClientSensorEntity,
+    DeviceCounterSensorEntityInfo: sensor.WebSocketClientSensorEntity,
 }
 
 

@@ -9,31 +9,29 @@ from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.zdo.types import RouteStatus, _NeighborEnums
 
 from zha.application import Platform
-from zha.application.platforms.model import (
-    AlarmControlPanelEntity,
-    BatteryEntity,
-    BinarySensorEntity,
-    ButtonEntity,
-    CoverEntity,
-    DeviceCounterSensorEntity,
-    DeviceTrackerEntity,
-    ElectricalMeasurementEntity,
-    FanEntity,
-    FanGroupEntity,
-    FirmwareUpdateEntity,
-    LightEntity,
-    LightGroupEntity,
-    LockEntity,
-    NumberEntity,
-    SelectEntity,
-    SensorEntity,
-    ShadeEntity,
-    SirenEntity,
-    SmartEnergyMeteringEntity,
-    SwitchEntity,
-    SwitchGroupEntity,
-    ThermostatEntity,
+from zha.application.platforms.alarm_control_panel.model import (
+    AlarmControlPanelEntityInfo,
 )
+from zha.application.platforms.binary_sensor.model import BinarySensorEntityInfo
+from zha.application.platforms.button.model import ButtonEntityInfo
+from zha.application.platforms.climate.model import ThermostatEntityInfo
+from zha.application.platforms.cover.model import CoverEntityInfo, ShadeEntityInfo
+from zha.application.platforms.device_tracker.model import DeviceTrackerEntityInfo
+from zha.application.platforms.fan.model import FanEntityInfo
+from zha.application.platforms.light.model import LightEntityInfo
+from zha.application.platforms.lock.model import LockEntityInfo
+from zha.application.platforms.number.model import NumberEntityInfo
+from zha.application.platforms.select.model import SelectEntityInfo
+from zha.application.platforms.sensor.model import (
+    BatteryEntityInfo,
+    DeviceCounterSensorEntityInfo,
+    ElectricalMeasurementEntityInfo,
+    SensorEntityInfo,
+    SmartEnergyMeteringEntityInfo,
+)
+from zha.application.platforms.siren.model import SirenEntityInfo
+from zha.application.platforms.switch.model import SwitchEntityInfo
+from zha.application.platforms.update.model import FirmwareUpdateEntityInfo
 from zha.model import BaseEvent, BaseModel, convert_enum, convert_int
 
 
@@ -87,7 +85,8 @@ class DeviceInfo(BaseModel):
     power_source: str
     lqi: int | None
     rssi: int | None
-    last_seen: str
+    last_seen: float | None = None
+    last_seen_time: str | None = None
     available: bool
     device_type: str
     signature: dict[str, Any]
@@ -214,26 +213,26 @@ class ExtendedDeviceInfo(DeviceInfo):
         tuple[Platform, str],
         Annotated[
             Union[
-                SirenEntity,
-                SelectEntity,
-                NumberEntity,
-                LightEntity,
-                FanEntity,
-                FirmwareUpdateEntity,
-                ButtonEntity,
-                AlarmControlPanelEntity,
-                SensorEntity,
-                BinarySensorEntity,
-                DeviceTrackerEntity,
-                ShadeEntity,
-                CoverEntity,
-                LockEntity,
-                SwitchEntity,
-                BatteryEntity,
-                ElectricalMeasurementEntity,
-                SmartEnergyMeteringEntity,
-                ThermostatEntity,
-                DeviceCounterSensorEntity,
+                SirenEntityInfo,
+                SelectEntityInfo,
+                NumberEntityInfo,
+                LightEntityInfo,
+                FanEntityInfo,
+                FirmwareUpdateEntityInfo,
+                ButtonEntityInfo,
+                AlarmControlPanelEntityInfo,
+                SensorEntityInfo,
+                BinarySensorEntityInfo,
+                DeviceTrackerEntityInfo,
+                ShadeEntityInfo,
+                CoverEntityInfo,
+                LockEntityInfo,
+                SwitchEntityInfo,
+                BatteryEntityInfo,
+                ElectricalMeasurementEntityInfo,
+                SmartEnergyMeteringEntityInfo,
+                ThermostatEntityInfo,
+                DeviceCounterSensorEntityInfo,
             ],
             Field(discriminator="class_name"),
         ],
@@ -284,25 +283,25 @@ class GroupMemberInfo(BaseModel):
         str,
         Annotated[
             Union[
-                SirenEntity,
-                SelectEntity,
-                NumberEntity,
-                LightEntity,
-                FanEntity,
-                ButtonEntity,
-                AlarmControlPanelEntity,
-                FirmwareUpdateEntity,
-                SensorEntity,
-                BinarySensorEntity,
-                DeviceTrackerEntity,
-                ShadeEntity,
-                CoverEntity,
-                LockEntity,
-                SwitchEntity,
-                BatteryEntity,
-                ElectricalMeasurementEntity,
-                SmartEnergyMeteringEntity,
-                ThermostatEntity,
+                SirenEntityInfo,
+                SelectEntityInfo,
+                NumberEntityInfo,
+                LightEntityInfo,
+                FanEntityInfo,
+                ButtonEntityInfo,
+                AlarmControlPanelEntityInfo,
+                FirmwareUpdateEntityInfo,
+                SensorEntityInfo,
+                BinarySensorEntityInfo,
+                DeviceTrackerEntityInfo,
+                ShadeEntityInfo,
+                CoverEntityInfo,
+                LockEntityInfo,
+                SwitchEntityInfo,
+                BatteryEntityInfo,
+                ElectricalMeasurementEntityInfo,
+                SmartEnergyMeteringEntityInfo,
+                ThermostatEntityInfo,
             ],
             Field(discriminator="class_name"),
         ],
@@ -318,7 +317,7 @@ class GroupInfo(BaseModel):
     entities: dict[
         str,
         Annotated[
-            Union[LightGroupEntity, FanGroupEntity, SwitchGroupEntity],
+            Union[LightEntityInfo, FanEntityInfo, SwitchEntityInfo],
             Field(discriminator="class_name"),
         ],
     ]

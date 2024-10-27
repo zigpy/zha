@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import functools
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -9,29 +10,63 @@ from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.lock.const import (
     STATE_LOCKED,
     STATE_UNLOCKED,
     VALUE_TO_STATE,
 )
+from zha.application.platforms.lock.model import LockEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_DOORLOCK,
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.LOCK)
 
 
+class LockEntityInterface(ABC):
+    """Lock interface."""
+
+    @property
+    @abstractmethod
+    def is_locked(self) -> bool:
+        """Return true if the lock is locked."""
+
+    async def async_lock(self) -> None:
+        """Lock the lock."""
+
+    async def async_unlock(self) -> None:
+        """Unlock the lock."""
+
+    async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
+        """Set the user_code to index X on the lock."""
+
+    async def async_enable_lock_user_code(self, code_slot: int) -> None:
+        """Enable user_code at index X on the lock."""
+
+    async def async_disable_lock_user_code(self, code_slot: int) -> None:
+        """Disable user_code at index X on the lock."""
+
+    async def async_clear_lock_user_code(self, code_slot: int) -> None:
+        """Clear the user_code at index X on the lock."""
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: Literal["locked", "unlocked"] | None,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""
+
+
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DOORLOCK)
-class DoorLock(PlatformEntity):
+class DoorLock(PlatformEntity, LockEntityInterface):
     """Representation of a ZHA lock."""
 
     PLATFORM = Platform.LOCK
@@ -134,3 +169,51 @@ class DoorLock(PlatformEntity):
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
         self._state = state
+
+
+class WebSocketClientLockEntity(WebSocketClientEntity, LockEntityInterface):
+    """Representation of a ZHA lock on the client side."""
+
+    PLATFORM: Platform = Platform.LOCK
+
+    def __init__(
+        self, entity_info: LockEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA lock entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> LockEntityInfo:
+        """Return a representation of the lock."""
+        return self._entity_info
+
+    @property
+    def is_locked(self) -> bool:
+        """Return true if the lock is locked."""
+        return self.info_object.state.is_locked
+
+    async def async_lock(self) -> None:
+        """Lock the lock."""
+
+    async def async_unlock(self) -> None:
+        """Unlock the lock."""
+
+    async def async_set_lock_user_code(self, code_slot: int, user_code: str) -> None:
+        """Set the user_code to index X on the lock."""
+
+    async def async_enable_lock_user_code(self, code_slot: int) -> None:
+        """Enable user_code at index X on the lock."""
+
+    async def async_disable_lock_user_code(self, code_slot: int) -> None:
+        """Disable user_code at index X on the lock."""
+
+    async def async_clear_lock_user_code(self, code_slot: int) -> None:
+        """Clear the user_code at index X on the lock."""
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: Literal["locked", "unlocked"] | None,
+    ) -> None:
+        """Restore extra state attributes that are stored outside of the ZCL cache."""

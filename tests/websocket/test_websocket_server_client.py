@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
 from zha.application.helpers import ZHAData
+from zha.application.websocket_api import StopServerCommand
 from zha.websocket.client.client import Client
-from zha.websocket.server.gateway_api import StopServerCommand
 
 
 async def test_server_client_connect_disconnect(

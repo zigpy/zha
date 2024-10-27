@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from asyncio import Task
 from datetime import UTC, date, datetime
 import enum
@@ -20,19 +21,23 @@ from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import (
-    BaseEntity,
-    BaseEntityInfo,
-    BaseIdentifiers,
-    EntityCategory,
-    PlatformEntity,
-)
+from zha.application.platforms import BaseEntity, PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.climate.const import HVACAction
+from zha.application.platforms.const import EntityCategory
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.sensor.const import (
     UNIX_EPOCH_TO_ZCL_EPOCH,
     SensorDeviceClass,
     SensorStateClass,
+)
+from zha.application.platforms.sensor.model import (
+    BaseSensorEntityInfo,
+    BatteryEntityInfo,
+    DeviceCounterEntityInfo,
+    DeviceCounterSensorIdentifiers,
+    ElectricalMeasurementEntityInfo,
+    SensorEntityInfo,
+    SmartEnergyMeteringEntityInfo,
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
@@ -58,7 +63,6 @@ from zha.units import (
     UnitOfVolumeFlowRate,
     validate_unit,
 )
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_INPUT,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -81,8 +85,8 @@ from zha.zigbee.cluster_handlers.const import (
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 BATTERY_SIZES = {
@@ -113,33 +117,13 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 
-class SensorEntityInfo(BaseEntityInfo):
-    """Sensor entity info."""
+class SensorEntityInterface(ABC):
+    """Sensor interface."""
 
-    decimals: int
-    divisor: int
-    multiplier: int
-    attribute: str | None = None  # LQI and RSSI have no attribute
-    unit: str | None = None
-    device_class: SensorDeviceClass | None = None
-    state_class: SensorStateClass | None = None
-
-
-class DeviceCounterEntityInfo(BaseEntityInfo):
-    """Device counter entity info."""
-
-    device_ieee: types.EUI64
-    available: bool
-    counter: str
-    counter_value: int
-    counter_groups: str
-    counter_group: str
-
-
-class DeviceCounterSensorIdentifiers(BaseIdentifiers):
-    """Device counter sensor identifiers."""
-
-    device_ieee: types.EUI64
+    @property
+    @abstractmethod
+    def native_value(self) -> date | datetime | str | int | float | None:
+        """Return the state of the entity."""
 
 
 class Sensor(PlatformEntity):
@@ -576,6 +560,22 @@ class Battery(Sensor):
         return value
 
     @property
+    def info_object(self) -> BatteryEntityInfo:
+        """Return a representation of the sensor."""
+        return BatteryEntityInfo(
+            **super(PlatformEntity, self).info_object.__dict__,
+            attribute=self._attribute_name,
+            decimals=self._decimals,
+            divisor=self._divisor,
+            multiplier=self._multiplier,
+            unit=(
+                getattr(self, "entity_description").native_unit_of_measurement
+                if getattr(self, "entity_description", None) is not None
+                else self._attr_native_unit_of_measurement
+            ),
+        )
+
+    @property
     def state(self) -> dict[str, Any]:
         """Return the state for battery sensors."""
         response = super().state
@@ -620,6 +620,23 @@ class ElectricalMeasurement(PollableSensor):
             "measurement_type",
             f"{self._attribute_name}_max",
         }
+
+    @property
+    def info_object(self) -> ElectricalMeasurementEntityInfo:
+        """Return a representation of the sensor."""
+        return ElectricalMeasurementEntityInfo(
+            **super(PlatformEntity, self).info_object.__dict__,
+            attribute=self._attribute_name,
+            decimals=self._decimals,
+            divisor=self._divisor,
+            multiplier=self._multiplier,
+            unit=(
+                getattr(self, "entity_description").native_unit_of_measurement
+                if getattr(self, "entity_description", None) is not None
+                else self._attr_native_unit_of_measurement
+            ),
+            measurement_type=self._cluster_handler.measurement_type,
+        )
 
     @property
     def state(self) -> dict[str, Any]:
@@ -886,6 +903,22 @@ class SmartEnergyMetering(PollableSensor):
             self.entity_description = entity_description
             self._attr_device_class = entity_description.device_class
             self._attr_state_class = entity_description.state_class
+
+    @property
+    def info_object(self) -> SmartEnergyMeteringEntityInfo:
+        """Return a representation of the sensor."""
+        return SmartEnergyMeteringEntityInfo(
+            **super(PlatformEntity, self).info_object.__dict__,
+            attribute=self._attribute_name,
+            decimals=self._decimals,
+            divisor=self._divisor,
+            multiplier=self._multiplier,
+            unit=(
+                getattr(self, "entity_description").native_unit_of_measurement
+                if getattr(self, "entity_description", None) is not None
+                else self._attr_native_unit_of_measurement
+            ),
+        )
 
     @property
     def state(self) -> dict[str, Any]:
@@ -1840,3 +1873,26 @@ class DanfossMotorStepCounter(Sensor):
     _attribute_name = "motor_step_counter"
     _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+class WebSocketClientSensorEntity(WebSocketClientEntity, SensorEntityInterface):
+    """Representation of a ZHA sensor entity."""
+
+    PLATFORM: Platform = Platform.SENSOR
+
+    def __init__(
+        self, entity_info: BaseSensorEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA alarm control device."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> BaseSensorEntityInfo:
+        """Return the info object."""
+        return self._entity_info
+
+    @property
+    def native_value(self) -> date | datetime | str | int | float | None:
+        """Return the state of the entity."""
+        return self.info_object.state.state

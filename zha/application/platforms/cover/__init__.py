@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import asyncio
 import functools
 import logging
@@ -11,7 +12,7 @@ from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.cover.const import (
     ATTR_CURRENT_POSITION,
     ATTR_POSITION,
@@ -26,9 +27,9 @@ from zha.application.platforms.cover.const import (
     CoverEntityFeature,
     WCAttrs,
 )
+from zha.application.platforms.cover.model import CoverEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import WindowCoveringClusterHandler
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -38,11 +39,11 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_SHADE,
 )
-from zha.zigbee.cluster_handlers.general import LevelChangeEvent
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.cluster_handlers.general import LevelChangeEvent
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
@@ -50,8 +51,66 @@ _LOGGER = logging.getLogger(__name__)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
 
+class CoverEntityInterface(ABC):
+    """Representation of a ZHA cover."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> CoverEntityFeature:
+        """Return supported features."""
+
+    @property
+    @abstractmethod
+    def is_closed(self) -> bool | None:
+        """Return True if the cover is closed."""
+
+    @property
+    @abstractmethod
+    def is_opening(self) -> bool:
+        """Return if the cover is opening or not."""
+
+    @property
+    @abstractmethod
+    def is_closing(self) -> bool:
+        """Return if the cover is closing or not."""
+
+    @property
+    @abstractmethod
+    def current_cover_position(self) -> int | None:
+        """Return the current position of the cover."""
+
+    @property
+    @abstractmethod
+    def current_cover_tilt_position(self) -> int | None:
+        """Return the current tilt position of the cover."""
+
+    async def async_open_cover(self, **kwargs: Any) -> None:
+        """Open the cover."""
+
+    async def async_open_cover_tilt(self, **kwargs: Any) -> None:
+        """Open the cover tilt."""
+
+    async def async_close_cover(self, **kwargs: Any) -> None:
+        """Close the cover."""
+
+    async def async_close_cover_tilt(self, **kwargs: Any) -> None:
+        """Close the cover tilt."""
+
+    async def async_set_cover_position(self, **kwargs: Any) -> None:
+        """Move the cover to a specific position."""
+
+    async def async_set_cover_tilt_position(self, **kwargs: Any) -> None:
+        """Move the cover tilt to a specific position."""
+
+    async def async_stop_cover(self, **kwargs: Any) -> None:
+        """Stop the cover."""
+
+    async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
+        """Stop the cover tilt."""
+
+
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
-class Cover(PlatformEntity):
+class Cover(PlatformEntity, CoverEntityInterface):
     """Representation of a ZHA cover."""
 
     PLATFORM = Platform.COVER
@@ -535,3 +594,75 @@ class KeenVent(Shade):
         self._is_open = True
         self._position = position
         self.maybe_emit_state_changed_event()
+
+
+class WebSocketClientCoverEntity(WebSocketClientEntity, CoverEntityInterface):
+    """Representation of a ZHA cover."""
+
+    PLATFORM: Platform = Platform.COVER
+
+    def __init__(
+        self, entity_info: CoverEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA fan entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> CoverEntityInfo:
+        """Return the info object for this entity."""
+        return self._entity_info
+
+    @property
+    def supported_features(self) -> CoverEntityFeature:
+        """Return supported features."""
+        return self.info_object.supported_features
+
+    @property
+    def is_closed(self) -> bool | None:
+        """Return True if the cover is closed."""
+        return self.info_object.state.is_closed
+
+    @property
+    def is_opening(self) -> bool:
+        """Return if the cover is opening or not."""
+        return self.info_object.state.is_opening
+
+    @property
+    def is_closing(self) -> bool:
+        """Return if the cover is closing or not."""
+        return self.info_object.state.is_closing
+
+    @property
+    def current_cover_position(self) -> int | None:
+        """Return the current position of the cover."""
+        return self.info_object.state.current_cover_position
+
+    @property
+    def current_cover_tilt_position(self) -> int | None:
+        """Return the current tilt position of the cover."""
+        return self.info_object.state.current_cover_tilt_position
+
+    async def async_open_cover(self, **kwargs: Any) -> None:
+        """Open the cover."""
+
+    async def async_open_cover_tilt(self, **kwargs: Any) -> None:
+        """Open the cover tilt."""
+
+    async def async_close_cover(self, **kwargs: Any) -> None:
+        """Close the cover."""
+
+    async def async_close_cover_tilt(self, **kwargs: Any) -> None:
+        """Close the cover tilt."""
+
+    async def async_set_cover_position(self, **kwargs: Any) -> None:
+        """Move the cover to a specific position."""
+
+    async def async_set_cover_tilt_position(self, **kwargs: Any) -> None:
+        """Move the cover tilt to a specific position."""
+
+    async def async_stop_cover(self, **kwargs: Any) -> None:
+        """Stop the cover."""
+
+    async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
+        """Stop the cover tilt."""

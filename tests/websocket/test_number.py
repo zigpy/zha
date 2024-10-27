@@ -1,6 +1,6 @@
 """Test zha analog output."""
 
-from typing import Optional
+from typing import Optional, cast
 from unittest.mock import call
 
 from zigpy.profiles import zha
@@ -9,7 +9,8 @@ from zigpy.zcl.clusters import general
 
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import BasePlatformEntity, NumberEntity
+from zha.application.platforms.number import WebSocketClientNumberEntity
+from zha.application.platforms.number.model import NumberEntityInfo
 from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (
@@ -26,11 +27,11 @@ from ..common import (
 
 def find_entity(
     device_proxy: WebSocketClientDevice, platform: Platform
-) -> Optional[BasePlatformEntity]:
+) -> Optional[WebSocketClientNumberEntity]:
     """Find an entity for the specified platform on the given device."""
     for entity in device_proxy.platform_entities.values():
-        if entity.platform == platform:
-            return entity
+        if platform == entity.PLATFORM:
+            return cast(WebSocketClientNumberEntity, entity)
     return None
 
 
@@ -84,37 +85,37 @@ async def test_number(
         zha_device.ieee
     )
     assert client_device is not None
-    entity: NumberEntity = find_entity(client_device, Platform.NUMBER)  # type: ignore
+    entity: WebSocketClientNumberEntity = find_entity(client_device, Platform.NUMBER)  # type: ignore
     assert entity is not None
-    assert isinstance(entity, NumberEntity)
+    assert isinstance(entity.info_object, NumberEntityInfo)
 
     assert cluster.read_attributes.call_count == 3
 
     # test that the state is 15.0
-    assert entity.state.state == 15.0
+    assert entity.state["state"] == 15.0
 
     # test attributes
-    assert entity.min_value == 1.0
-    assert entity.max_value == 100.0
-    assert entity.step == 1.1
+    assert entity.native_min_value == 1.0
+    assert entity.native_max_value == 100.0
+    assert entity.native_step == 1.1
 
     # change value from device
     assert cluster.read_attributes.call_count == 3
     await send_attributes_report(server, cluster, {0x0055: 15})
     await server.async_block_till_done()
-    assert entity.state.state == 15.0
+    assert entity.state["state"] == 15.0
 
     # update value from device
     await send_attributes_report(server, cluster, {0x0055: 20})
     await server.async_block_till_done()
-    assert entity.state.state == 20.0
+    assert entity.state["state"] == 20.0
 
     # change value from client
-    await controller.numbers.set_value(entity, 30.0)
+    await controller.numbers.set_value(entity.info_object, 30.0)
     await server.async_block_till_done()
 
     assert len(cluster.write_attributes.mock_calls) == 1
     assert cluster.write_attributes.call_args == call(
         {"present_value": 30.0}, manufacturer=None
     )
-    assert entity.state.state == 30.0
+    assert entity.state["state"] == 30.0

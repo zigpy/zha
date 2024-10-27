@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Self
@@ -10,14 +11,20 @@ from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetada
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
+from zha.application.platforms.button.model import (
+    ButtonEntityInfo,
+    CommandButtonEntityInfo,
+    WriteAttributeButtonEntityInfo,
+)
+from zha.application.platforms.const import EntityCategory
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 
@@ -29,22 +36,15 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 _LOGGER = logging.getLogger(__name__)
 
 
-class CommandButtonEntityInfo(BaseEntityInfo):
-    """Command button entity info."""
+class ButtonEntityInterface(ABC):
+    """Base class for ZHA button."""
 
-    command: str
-    args: list[Any]
-    kwargs: dict[str, Any]
-
-
-class WriteAttributeButtonEntityInfo(BaseEntityInfo):
-    """Write attribute button entity info."""
-
-    attribute_name: str
-    attribute_value: Any
+    @abstractmethod
+    async def async_press(self) -> None:
+        """Press the button."""
 
 
-class Button(PlatformEntity):
+class Button(PlatformEntity, ButtonEntityInterface):
     """Defines a ZHA button."""
 
     PLATFORM = Platform.BUTTON
@@ -232,3 +232,35 @@ class AqaraSelfTestButton(WriteAttributeButton):
     _attribute_value = 1
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "self_test"
+
+
+class WebSocketClientButtonEntity(WebSocketClientEntity, ButtonEntityInterface):
+    """Defines a ZHA button that is controlled via a websocket."""
+
+    PLATFORM = Platform.BUTTON
+
+    def __init__(
+        self, entity_info: ButtonEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA alarm control device."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @functools.cached_property
+    def info_object(self) -> ButtonEntityInfo:
+        """Return a representation of the button."""
+        return self._entity_info
+
+    @functools.cached_property
+    def args(self) -> list[Any]:
+        """Return the arguments to use in the command."""
+        return self._entity_info.args or []
+
+    @functools.cached_property
+    def kwargs(self) -> dict[str, Any]:
+        """Return the keyword arguments to use in the command."""
+        return self._entity_info.kwargs or {}
+
+    async def async_press(self) -> None:
+        """Press the button."""
+        await self._device.gateway.buttons.press(self._entity_info)

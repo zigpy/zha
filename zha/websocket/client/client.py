@@ -14,12 +14,9 @@ from aiohttp.http_websocket import WSMsgType
 from async_timeout import timeout
 
 from zha.event import EventBase
+from zha.exceptions import ZHAException
 from zha.websocket.client.model.messages import Message
-from zha.websocket.server.api.model import (
-    ErrorResponse,
-    WebSocketCommand,
-    WebSocketCommandResponse,
-)
+from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
 
 SIZE_PARSE_JSON_EXECUTOR = 8192
 _LOGGER = logging.getLogger(__package__)
@@ -93,11 +90,6 @@ class Client(EventBase):
                 return await future
         except TimeoutError:
             _LOGGER.exception("Timeout waiting for response")
-            return WebSocketCommandResponse.model_validate(
-                {"message_id": message_id, "success": False, "command": command.command}
-            )
-        except Exception as err:
-            _LOGGER.exception("Error sending command", exc_info=err)
             return WebSocketCommandResponse.model_validate(
                 {"message_id": message_id, "success": False, "command": command.command}
             )
@@ -217,14 +209,14 @@ class Client(EventBase):
                 # no listener for this result
                 return
 
-            if message.success or isinstance(message, ErrorResponse):
+            if message.success:
                 future.set_result(message)
                 return
 
             if msg["error_code"] != "zigbee_error":
-                error = Exception(msg["message_id"], msg["error_code"])
+                error = ZHAException(msg["message_id"], msg["error_code"])
             else:
-                error = Exception(
+                error = ZHAException(
                     msg["message_id"],
                     msg["zigbee_error_code"],
                     msg["zigbee_error_message"],

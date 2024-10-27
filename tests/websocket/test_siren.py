@@ -1,7 +1,7 @@
 """Test zha siren."""
 
 import asyncio
-from typing import Optional
+from typing import Optional, cast
 from unittest.mock import patch
 
 import pytest
@@ -12,7 +12,7 @@ import zigpy.zcl.foundation as zcl_f
 
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import BasePlatformEntity
+from zha.application.platforms.siren import WebSocketClientSirenEntity
 from zha.zigbee.device import Device, WebSocketClientDevice
 
 from ..common import (
@@ -27,11 +27,11 @@ from ..common import (
 
 def find_entity(
     device_proxy: WebSocketClientDevice, platform: Platform
-) -> Optional[BasePlatformEntity]:
+) -> Optional[WebSocketClientSirenEntity]:
     """Find an entity for the specified platform on the given device."""
     for entity in device_proxy.platform_entities.values():
-        if entity.platform == platform:
-            return entity
+        if platform == entity.PLATFORM:
+            return cast(WebSocketClientSirenEntity, entity)
     return None
 
 
@@ -75,14 +75,14 @@ async def test_siren(
     entity = find_entity(client_device, Platform.SIREN)
     assert entity is not None
 
-    assert entity.state.state is False
+    assert entity.state["state"] is False
 
     # turn on from client
     with patch(
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await controller.sirens.turn_on(entity)
+        await controller.sirens.turn_on(entity.info_object)
         await server.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
@@ -94,14 +94,14 @@ async def test_siren(
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state.state is True
+    assert entity.state["state"] is True
 
     # turn off from client
     with patch(
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await controller.sirens.turn_off(entity)
+        await controller.sirens.turn_off(entity.info_object)
         await server.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
@@ -113,14 +113,16 @@ async def test_siren(
         cluster.request.reset_mock()
 
     # test that the state has changed to off
-    assert entity.state.state is False
+    assert entity.state["state"] is False
 
     # turn on from client with options
     with patch(
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await controller.sirens.turn_on(entity, duration=100, volume_level=3, tone=3)
+        await controller.sirens.turn_on(
+            entity.info_object, duration=100, volume_level=3, tone=3
+        )
         await server.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
@@ -132,7 +134,7 @@ async def test_siren(
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state.state is True
+    assert entity.state["state"] is True
 
 
 @pytest.mark.looptime
@@ -152,14 +154,14 @@ async def test_siren_timed_off(
     entity = find_entity(client_device, Platform.SIREN)
     assert entity is not None
 
-    assert entity.state.state is False
+    assert entity.state["state"] is False
 
     # turn on from client
     with patch(
         "zigpy.zcl.Cluster.request",
         return_value=mock_coro([0x00, zcl_f.Status.SUCCESS]),
     ):
-        await controller.sirens.turn_on(entity)
+        await controller.sirens.turn_on(entity.info_object)
         await server.async_block_till_done()
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
@@ -171,9 +173,9 @@ async def test_siren_timed_off(
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state.state is True
+    assert entity.state["state"] is True
 
     await asyncio.sleep(6)
 
     # test that the state has changed to off from the timer
-    assert entity.state.state is False
+    assert entity.state["state"] is False

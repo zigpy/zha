@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from asyncio import Task
 import datetime as dt
 import functools
@@ -10,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.climate.const import (
     ATTR_HVAC_MODE,
     ATTR_OCCP_COOL_SETPT,
@@ -36,10 +37,10 @@ from zha.application.platforms.climate.const import (
     HVACMode,
     Preset,
 )
+from zha.application.platforms.climate.model import ThermostatEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import UnitOfTemperature
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
@@ -47,23 +48,111 @@ from zha.zigbee.cluster_handlers.const import (
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.CLIMATE)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.CLIMATE)
 
 
-class ThermostatEntityInfo(BaseEntityInfo):
-    """Thermostat entity info."""
+class ClimateEntityInterface(ABC):
+    """Climate interface."""
 
-    max_temp: float
-    min_temp: float
-    supported_features: ClimateEntityFeature
-    fan_modes: list[str] | None
-    preset_modes: list[str] | None
-    hvac_modes: list[HVACMode]
+    @property
+    @abstractmethod
+    def current_temperature(self) -> float | None:
+        """Return the current temperature."""
+
+    @property
+    @abstractmethod
+    def outdoor_temperature(self) -> float | None:
+        """Return the outdoor temperature."""
+
+    @property
+    @abstractmethod
+    def fan_mode(self) -> str | None:
+        """Return current FAN mode."""
+
+    @property
+    @abstractmethod
+    def fan_modes(self) -> list[str] | None:
+        """Return supported FAN modes."""
+
+    @property
+    @abstractmethod
+    def hvac_action(self) -> HVACAction | None:
+        """Return the current HVAC action."""
+
+    @property
+    @abstractmethod
+    def hvac_mode(self) -> HVACMode | None:
+        """Return HVAC operation mode."""
+
+    @property
+    @abstractmethod
+    def hvac_modes(self) -> list[HVACMode]:
+        """Return the list of available HVAC operation modes."""
+
+    @property
+    @abstractmethod
+    def preset_mode(self) -> str:
+        """Return current preset mode."""
+
+    @property
+    @abstractmethod
+    def preset_modes(self) -> list[str] | None:
+        """Return supported preset modes."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> ClimateEntityFeature:
+        """Return the list of supported features."""
+
+    @property
+    @abstractmethod
+    def target_temperature(self) -> float | None:
+        """Return the temperature we try to reach."""
+
+    @property
+    @abstractmethod
+    def target_temperature_high(self) -> float | None:
+        """Return the upper bound temperature we try to reach."""
+
+    @property
+    @abstractmethod
+    def target_temperature_low(self) -> float | None:
+        """Return the lower bound temperature we try to reach."""
+
+    @property
+    @abstractmethod
+    def max_temp(self) -> float:
+        """Return the maximum temperature."""
+
+    @property
+    @abstractmethod
+    def min_temp(self) -> float:
+        """Return the minimum temperature."""
+
+    @abstractmethod
+    async def async_set_fan_mode(self, fan_mode: str) -> None:
+        """Set fan mode."""
+
+    @abstractmethod
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set new target operation mode."""
+
+    @abstractmethod
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set new preset mode."""
+
+    @abstractmethod
+    async def async_set_temperature(self, **kwargs: Any) -> None:
+        """Set new target temperature."""
+
+    @abstractmethod
+    async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
+        """Set the preset mode via handler."""
 
 
 @MULTI_MATCH(
@@ -71,7 +160,7 @@ class ThermostatEntityInfo(BaseEntityInfo):
     aux_cluster_handlers=CLUSTER_HANDLER_FAN,
     stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
 )
-class Thermostat(PlatformEntity):
+class Thermostat(PlatformEntity, ClimateEntityInterface):
     """Representation of a ZHA Thermostat device."""
 
     PLATFORM = Platform.CLIMATE
@@ -871,3 +960,111 @@ class ZONNSMARTThermostat(Thermostat):
             return await self._thermostat_cluster_handler.write_attributes_safe(
                 {"operation_preset": 4}, manufacturer=mfg_code
             )
+
+
+class WebSocketClientThermostatEntity(WebSocketClientEntity, ClimateEntityInterface):
+    """Representation of a ZHA Thermostat device."""
+
+    PLATFORM: Platform = Platform.CLIMATE
+
+    def __init__(
+        self, entity_info: ThermostatEntityInfo, device: WebSocketClientDevice
+    ) -> None:
+        """Initialize the ZHA climate entity."""
+        super().__init__(entity_info)
+        self._device: WebSocketClientDevice = device
+
+    @property
+    def info_object(self) -> ThermostatEntityInfo:
+        """Return a representation of the thermostat."""
+        return self._entity_info
+
+    @property
+    def current_temperature(self) -> float | None:
+        """Return the current temperature."""
+        return self.info_object.state.current_temperature
+
+    @property
+    def outdoor_temperature(self) -> float | None:
+        """Return the outdoor temperature."""
+        return self.info_object.state.outdoor_temperature
+
+    @property
+    def fan_mode(self) -> str | None:
+        """Return current FAN mode."""
+        return self.info_object.state.fan_mode
+
+    @property
+    def fan_modes(self) -> list[str] | None:
+        """Return supported FAN modes."""
+        return self.info_object.fan_modes
+
+    @property
+    def hvac_action(self) -> HVACAction | None:
+        """Return the current HVAC action."""
+        return self.info_object.state.hvac_action
+
+    @property
+    def hvac_mode(self) -> HVACMode | None:
+        """Return HVAC operation mode."""
+        return self.info_object.state.hvac_mode
+
+    @property
+    def hvac_modes(self) -> list[HVACMode]:
+        """Return the list of available HVAC operation modes."""
+        return self.info_object.hvac_modes
+
+    @property
+    def preset_mode(self) -> str:
+        """Return current preset mode."""
+        return self.info_object.state.preset_mode
+
+    @property
+    def preset_modes(self) -> list[str] | None:
+        """Return supported preset modes."""
+        return self.info_object.preset_modes
+
+    @property
+    def supported_features(self) -> ClimateEntityFeature:
+        """Return the list of supported features."""
+        return self.info_object.supported_features
+
+    @property
+    def target_temperature(self) -> float | None:
+        """Return the temperature we try to reach."""
+        return self.info_object.state.target_temperature
+
+    @property
+    def target_temperature_high(self) -> float | None:
+        """Return the upper bound temperature we try to reach."""
+        return self.info_object.state.target_temperature_high
+
+    @property
+    def target_temperature_low(self) -> float | None:
+        """Return the lower bound temperature we try to reach."""
+        return self.info_object.state.target_temperature_low
+
+    @property
+    def max_temp(self) -> float:
+        """Return the maximum temperature."""
+        return self.info_object.max_temp
+
+    @property
+    def min_temp(self) -> float:
+        """Return the minimum temperature."""
+        return self.info_object.min_temp
+
+    async def async_set_fan_mode(self, fan_mode: str) -> None:
+        """Set fan mode."""
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set new target operation mode."""
+
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set new preset mode."""
+
+    async def async_set_temperature(self, **kwargs: Any) -> None:
+        """Set new target temperature."""
+
+    async def async_preset_handler(self, preset: str, enable: bool = False) -> None:
+        """Set the preset mode via handler."""
