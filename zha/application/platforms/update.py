@@ -15,13 +15,12 @@ from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
     EntityCategory,
     PlatformEntity,
     WebSocketClientEntity,
 )
 from zha.application.platforms.model import (
-    FirmwareUpdateEntityInfo as FirmwareUpdateEntityInfo,
+    FirmwareUpdateEntityInfo,
     UpdateEntityFeature,
 )
 from zha.application.registries import PLATFORM_ENTITIES
@@ -62,14 +61,6 @@ ATTR_RELEASE_SUMMARY: Final = "release_summary"
 ATTR_RELEASE_NOTES: Final = "release_notes"
 ATTR_RELEASE_URL: Final = "release_url"
 ATTR_VERSION: Final = "version"
-
-
-class UpdateEntityInfo(BaseEntityInfo):
-    """Update entity info."""
-
-    supported_features: UpdateEntityFeature
-    device_class: UpdateDeviceClass
-    entity_category: EntityCategory
 
 
 class FirmwareUpdateEntityInterface(ABC):
@@ -188,9 +179,9 @@ class FirmwareUpdateEntity(PlatformEntity, FirmwareUpdateEntityInterface):
         )
 
     @functools.cached_property
-    def info_object(self) -> UpdateEntityInfo:
+    def info_object(self) -> FirmwareUpdateEntityInfo:
         """Return a representation of the entity."""
-        return UpdateEntityInfo(
+        return FirmwareUpdateEntityInfo(
             **super().info_object.__dict__,
             supported_features=self.supported_features,
         )
