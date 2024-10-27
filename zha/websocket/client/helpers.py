@@ -8,10 +8,59 @@ from zigpy.types.named import EUI64
 
 from zha.application.discovery import Platform
 from zha.application.platforms import WebSocketClientEntity
+from zha.application.platforms.alarm_control_panel.websocket_api import (
+    ArmAwayCommand,
+    ArmHomeCommand,
+    ArmNightCommand,
+    DisarmCommand,
+    TriggerAlarmCommand,
+)
+from zha.application.platforms.button.websocket_api import ButtonPressCommand
+from zha.application.platforms.climate.websocket_api import (
+    ClimateSetFanModeCommand,
+    ClimateSetHVACModeCommand,
+    ClimateSetPresetModeCommand,
+    ClimateSetTemperatureCommand,
+)
+from zha.application.platforms.cover.websocket_api import (
+    CoverCloseCommand,
+    CoverOpenCommand,
+    CoverSetPositionCommand,
+    CoverStopCommand,
+)
 from zha.application.platforms.fan.model import FanEntityInfo
+from zha.application.platforms.fan.websocket_api import (
+    FanSetPercentageCommand,
+    FanSetPresetModeCommand,
+    FanTurnOffCommand,
+    FanTurnOnCommand,
+)
 from zha.application.platforms.light.model import LightEntityInfo
+from zha.application.platforms.light.websocket_api import (
+    LightTurnOffCommand,
+    LightTurnOnCommand,
+)
+from zha.application.platforms.lock.websocket_api import (
+    LockClearUserLockCodeCommand,
+    LockDisableUserLockCodeCommand,
+    LockEnableUserLockCodeCommand,
+    LockLockCommand,
+    LockSetUserLockCodeCommand,
+    LockUnlockCommand,
+)
 from zha.application.platforms.model import BaseEntityInfo, BasePlatformEntityInfo
+from zha.application.platforms.number.websocket_api import NumberSetValueCommand
+from zha.application.platforms.select.websocket_api import SelectSelectOptionCommand
+from zha.application.platforms.siren.websocket_api import (
+    SirenTurnOffCommand,
+    SirenTurnOnCommand,
+)
 from zha.application.platforms.switch.model import SwitchEntityInfo
+from zha.application.platforms.switch.websocket_api import (
+    SwitchTurnOffCommand,
+    SwitchTurnOnCommand,
+)
+from zha.application.platforms.websocket_api import PlatformEntityRefreshStateCommand
 from zha.websocket.client.client import Client
 from zha.websocket.server.api.model import (
     GetDevicesResponse,
@@ -21,55 +70,6 @@ from zha.websocket.server.api.model import (
     UpdateGroupResponse,
     WebSocketCommandResponse,
     WriteClusterAttributeResponse,
-)
-from zha.websocket.server.api.platforms.alarm_control_panel.api import (
-    ArmAwayCommand,
-    ArmHomeCommand,
-    ArmNightCommand,
-    DisarmCommand,
-    TriggerAlarmCommand,
-)
-from zha.websocket.server.api.platforms.api import PlatformEntityRefreshStateCommand
-from zha.websocket.server.api.platforms.button.api import ButtonPressCommand
-from zha.websocket.server.api.platforms.climate.api import (
-    ClimateSetFanModeCommand,
-    ClimateSetHVACModeCommand,
-    ClimateSetPresetModeCommand,
-    ClimateSetTemperatureCommand,
-)
-from zha.websocket.server.api.platforms.cover.api import (
-    CoverCloseCommand,
-    CoverOpenCommand,
-    CoverSetPositionCommand,
-    CoverStopCommand,
-)
-from zha.websocket.server.api.platforms.fan.api import (
-    FanSetPercentageCommand,
-    FanSetPresetModeCommand,
-    FanTurnOffCommand,
-    FanTurnOnCommand,
-)
-from zha.websocket.server.api.platforms.light.api import (
-    LightTurnOffCommand,
-    LightTurnOnCommand,
-)
-from zha.websocket.server.api.platforms.lock.api import (
-    LockClearUserLockCodeCommand,
-    LockDisableUserLockCodeCommand,
-    LockEnableUserLockCodeCommand,
-    LockLockCommand,
-    LockSetUserLockCodeCommand,
-    LockUnlockCommand,
-)
-from zha.websocket.server.api.platforms.number.api import NumberSetValueCommand
-from zha.websocket.server.api.platforms.select.api import SelectSelectOptionCommand
-from zha.websocket.server.api.platforms.siren.api import (
-    SirenTurnOffCommand,
-    SirenTurnOnCommand,
-)
-from zha.websocket.server.api.platforms.switch.api import (
-    SwitchTurnOffCommand,
-    SwitchTurnOnCommand,
 )
 from zha.websocket.server.client import (
     ClientDisconnectCommand,

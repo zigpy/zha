@@ -6,15 +6,27 @@ import inspect
 import logging
 from typing import TYPE_CHECKING, Any, Literal
 
+from zigpy.types.named import EUI64
+
+from zha.application import Platform
 from zha.websocket.const import ATTR_UNIQUE_ID, IEEE, APICommands
 from zha.websocket.server.api import decorators, register_api_command
-from zha.websocket.server.api.platforms import PlatformEntityCommand
+from zha.websocket.server.api.model import WebSocketCommand
 
 if TYPE_CHECKING:
     from zha.application.gateway import WebSocketServerGateway as Server
     from zha.websocket.server.client import Client
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class PlatformEntityCommand(WebSocketCommand):
+    """Base class for platform entity commands."""
+
+    ieee: EUI64 | None = None
+    group_id: int | None = None
+    unique_id: str
+    platform: Platform
 
 
 async def execute_platform_entity_command(
@@ -87,27 +99,27 @@ async def refresh_state(
 # pylint: disable=import-outside-toplevel
 def load_platform_entity_apis(server: Server) -> None:
     """Load the ws apis for all platform entities types."""
-    from zha.websocket.server.api.platforms.alarm_control_panel.api import (
+    from zha.application.platforms.alarm_control_panel.websocket_api import (
         load_api as load_alarm_control_panel_api,
     )
-    from zha.websocket.server.api.platforms.button.api import (
+    from zha.application.platforms.button.websocket_api import (
         load_api as load_button_api,
     )
-    from zha.websocket.server.api.platforms.climate.api import (
+    from zha.application.platforms.climate.websocket_api import (
         load_api as load_climate_api,
     )
-    from zha.websocket.server.api.platforms.cover.api import load_api as load_cover_api
-    from zha.websocket.server.api.platforms.fan.api import load_api as load_fan_api
-    from zha.websocket.server.api.platforms.light.api import load_api as load_light_api
-    from zha.websocket.server.api.platforms.lock.api import load_api as load_lock_api
-    from zha.websocket.server.api.platforms.number.api import (
+    from zha.application.platforms.cover.websocket_api import load_api as load_cover_api
+    from zha.application.platforms.fan.websocket_api import load_api as load_fan_api
+    from zha.application.platforms.light.websocket_api import load_api as load_light_api
+    from zha.application.platforms.lock.websocket_api import load_api as load_lock_api
+    from zha.application.platforms.number.websocket_api import (
         load_api as load_number_api,
     )
-    from zha.websocket.server.api.platforms.select.api import (
+    from zha.application.platforms.select.websocket_api import (
         load_api as load_select_api,
     )
-    from zha.websocket.server.api.platforms.siren.api import load_api as load_siren_api
-    from zha.websocket.server.api.platforms.switch.api import (
+    from zha.application.platforms.siren.websocket_api import load_api as load_siren_api
+    from zha.application.platforms.switch.websocket_api import (
         load_api as load_switch_api,
     )
 

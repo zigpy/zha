@@ -5,10 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 from zha.application.discovery import Platform
+from zha.application.platforms.websocket_api import (
+    PlatformEntityCommand,
+    execute_platform_entity_command,
+)
 from zha.websocket.const import APICommands
 from zha.websocket.server.api import decorators, register_api_command
-from zha.websocket.server.api.platforms import PlatformEntityCommand
-from zha.websocket.server.api.platforms.api import execute_platform_entity_command
 
 if TYPE_CHECKING:
     from zha.application.gateway import WebSocketServerGateway as Server
