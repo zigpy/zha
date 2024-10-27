@@ -61,22 +61,7 @@ from zha.application.platforms.switch.websocket_api import (
     SwitchTurnOnCommand,
 )
 from zha.application.platforms.websocket_api import PlatformEntityRefreshStateCommand
-from zha.websocket.client.client import Client
-from zha.websocket.server.api.model import (
-    GetDevicesResponse,
-    GroupsResponse,
-    PermitJoiningResponse,
-    ReadClusterAttributesResponse,
-    UpdateGroupResponse,
-    WebSocketCommandResponse,
-    WriteClusterAttributeResponse,
-)
-from zha.websocket.server.client import (
-    ClientDisconnectCommand,
-    ClientListenCommand,
-    ClientListenRawZCLCommand,
-)
-from zha.websocket.server.gateway_api import (
+from zha.application.websocket_api import (
     AddGroupMembersCommand,
     CreateGroupCommand,
     GetDevicesCommand,
@@ -92,6 +77,21 @@ from zha.websocket.server.gateway_api import (
     StopServerCommand,
     UpdateTopologyCommand,
     WriteClusterAttributeCommand,
+)
+from zha.websocket.client.client import Client
+from zha.websocket.server.api.model import (
+    GetDevicesResponse,
+    GroupsResponse,
+    PermitJoiningResponse,
+    ReadClusterAttributesResponse,
+    UpdateGroupResponse,
+    WebSocketCommandResponse,
+    WriteClusterAttributeResponse,
+)
+from zha.websocket.server.client import (
+    ClientDisconnectCommand,
+    ClientListenCommand,
+    ClientListenRawZCLCommand,
 )
 from zha.zigbee.model import ExtendedDeviceInfo, GroupInfo
 

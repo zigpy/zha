@@ -68,6 +68,7 @@ from zha.application.model import (
     RawDeviceInitializedEvent,
 )
 from zha.application.platforms.websocket_api import load_platform_entity_apis
+from zha.application.websocket_api import load_api as load_zigbee_controller_api
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
@@ -96,7 +97,6 @@ from zha.websocket.client.helpers import (
 )
 from zha.websocket.const import ControllerEvents
 from zha.websocket.server.client import ClientManager, load_api as load_client_api
-from zha.websocket.server.gateway_api import load_api as load_zigbee_controller_api
 from zha.zigbee.device import BaseDevice, Device, WebSocketClientDevice
 from zha.zigbee.endpoint import ATTR_IN_CLUSTERS, ATTR_OUT_CLUSTERS
 from zha.zigbee.group import (
