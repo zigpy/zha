@@ -6,6 +6,7 @@ import asyncio
 import binascii
 import collections
 from collections.abc import Callable
+import contextlib
 import dataclasses
 from dataclasses import dataclass
 import datetime
@@ -126,6 +127,41 @@ async def get_matched_clusters(
     return clusters_to_bind
 
 
+def convert_zcl_value(value: Any, field_type: Any) -> Any:
+    """Convert user input to ZCL value."""
+    if issubclass(field_type, enum.Flag):
+        if isinstance(value, str):
+            with contextlib.suppress(ValueError):
+                value = int(value)
+
+        if isinstance(value, int):
+            value = field_type(value)
+        elif isinstance(value, str):
+            # List of flags: `SomeFlag.field1 | field2
+            value = [v.strip() for v in value.split(".", 1)[-1].split("|")]
+
+        if isinstance(value, list):
+            new_value = 0
+
+            for flag in value:
+                if isinstance(flag, str):
+                    new_value |= field_type[flag.replace(" ", "_")]
+                else:
+                    new_value |= flag
+
+            value = field_type(new_value)
+    elif issubclass(field_type, enum.Enum):
+        value = (
+            field_type[value.replace(" ", "_")]
+            if isinstance(value, str)
+            else field_type(value)
+        )
+    else:
+        value = field_type(value)
+
+    return value
+
+
 def convert_to_zcl_values(
     fields: dict[str, Any], schema: CommandSchema
 ) -> dict[str, Any]:
@@ -134,32 +170,17 @@ def convert_to_zcl_values(
     for field in schema.fields:
         if field.name not in fields:
             continue
+
         value = fields[field.name]
-        if issubclass(field.type, enum.Flag) and isinstance(value, list):
-            new_value = 0
+        converted_fields[field.name] = convert_zcl_value(value, field.type)
 
-            for flag in value:
-                if isinstance(flag, str):
-                    new_value |= field.type[flag.replace(" ", "_")]
-                else:
-                    new_value |= flag
-
-            value = field.type(new_value)
-        elif issubclass(field.type, enum.Enum):
-            value = (
-                field.type[value.replace(" ", "_")]
-                if isinstance(value, str)
-                else field.type(value)
-            )
-        else:
-            value = field.type(value)
         _LOGGER.debug(
             "Converted ZCL schema field(%s) value from: %s to: %s",
             field.name,
-            fields[field.name],
             value,
+            fields[field.name],
         )
-        converted_fields[field.name] = value
+
     return converted_fields
 
 

@@ -59,7 +59,7 @@ from zha.application.const import (
     ZHA_CLUSTER_HANDLER_MSG,
     ZHA_EVENT,
 )
-from zha.application.helpers import convert_to_zcl_values
+from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
 from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
@@ -864,6 +864,9 @@ class Device(LogMixin, EventBase):
                 f"Cluster {cluster_id} not found on endpoint {endpoint_id} while"
                 f" writing attribute {attribute} with value {value}"
             ) from exc
+
+        attr_def = cluster.find_attribute(attribute)
+        value = convert_zcl_value(value, attr_def.type)
 
         try:
             response = await cluster.write_attributes(
