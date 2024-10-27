@@ -886,7 +886,7 @@ class WebSocketServerGateway(Gateway):
     async def async_block_till_done(self, wait_background_tasks=False):
         """Block until all pending work is done."""
         # To flush out any call_soon_threadsafe
-        await asyncio.sleep(0.001)
+        await asyncio.sleep(0.1)
         start_time: float | None = None
 
         while self._tracked_ws_tasks:
@@ -910,7 +910,7 @@ class WebSocketServerGateway(Gateway):
                     for task in pending:
                         _LOGGER.debug("Waiting for task: %s", task)
             else:
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.1)
         await super().async_block_till_done(wait_background_tasks=wait_background_tasks)
 
     async def __aenter__(self) -> WebSocketServerGateway:
