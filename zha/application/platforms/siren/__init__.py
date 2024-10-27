@@ -5,9 +5,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import asyncio
 import contextlib
-from enum import IntFlag
 import functools
-from typing import TYPE_CHECKING, Any, Final, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters.security import IasWd as WD
 
@@ -25,45 +24,25 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
-from zha.application.platforms import (
-    BaseEntityInfo,
-    PlatformEntity,
-    WebSocketClientEntity,
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
+from zha.application.platforms.siren.const import (
+    ATTR_DURATION,
+    ATTR_TONE,
+    ATTR_VOLUME_LEVEL,
+    DEFAULT_DURATION,
+    SirenEntityFeature,
 )
+from zha.application.platforms.siren.model import SirenEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
 from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SIREN)
-DEFAULT_DURATION = 5  # seconds
-
-ATTR_AVAILABLE_TONES: Final[str] = "available_tones"
-ATTR_DURATION: Final[str] = "duration"
-ATTR_VOLUME_LEVEL: Final[str] = "volume_level"
-ATTR_TONE: Final[str] = "tone"
-
-
-class SirenEntityFeature(IntFlag):
-    """Supported features of the siren entity."""
-
-    TURN_ON = 1
-    TURN_OFF = 2
-    TONES = 4
-    VOLUME_SET = 8
-    DURATION = 16
-
-
-class SirenEntityInfo(BaseEntityInfo):
-    """Siren entity info."""
-
-    available_tones: dict[int, str]
-    supported_features: SirenEntityFeature
 
 
 class SirenEntityInterface(ABC):

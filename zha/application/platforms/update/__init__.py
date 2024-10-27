@@ -3,64 +3,47 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from enum import StrEnum
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING, Any, Final, final
+from typing import TYPE_CHECKING, Any, final
 
 from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
 from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import (
-    EntityCategory,
-    PlatformEntity,
-    WebSocketClientEntity,
-)
-from zha.application.platforms.model import (
-    FirmwareUpdateEntityInfo,
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
+from zha.application.platforms.const import EntityCategory
+from zha.application.platforms.update.const import (
+    ATTR_IN_PROGRESS,
+    ATTR_INSTALLED_VERSION,
+    ATTR_LATEST_VERSION,
+    ATTR_PROGRESS,
+    ATTR_RELEASE_NOTES,
+    ATTR_RELEASE_SUMMARY,
+    ATTR_RELEASE_URL,
+    UpdateDeviceClass,
     UpdateEntityFeature,
 )
+from zha.application.platforms.update.model import FirmwareUpdateEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_OTA,
 )
-from zha.zigbee.device import WebSocketClientDevice
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
 
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.UPDATE
 )
-
-
-class UpdateDeviceClass(StrEnum):
-    """Device class for update."""
-
-    FIRMWARE = "firmware"
-
-
-SERVICE_INSTALL: Final = "install"
-
-ATTR_BACKUP: Final = "backup"
-ATTR_INSTALLED_VERSION: Final = "installed_version"
-ATTR_IN_PROGRESS: Final = "in_progress"
-ATTR_PROGRESS: Final = "progress"
-ATTR_LATEST_VERSION: Final = "latest_version"
-ATTR_RELEASE_SUMMARY: Final = "release_summary"
-ATTR_RELEASE_NOTES: Final = "release_notes"
-ATTR_RELEASE_URL: Final = "release_url"
-ATTR_VERSION: Final = "version"
 
 
 class FirmwareUpdateEntityInterface(ABC):

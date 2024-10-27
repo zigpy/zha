@@ -17,15 +17,16 @@ from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
-    EntityCategory,
     GroupEntity,
     PlatformEntity,
     WebSocketClientEntity,
 )
-from zha.application.platforms.model import SwitchEntityInfo
+from zha.application.platforms.const import EntityCategory
+from zha.application.platforms.switch.model import (
+    ConfigurableAttributeSwitchInfo,
+    SwitchEntityInfo,
+)
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
@@ -35,13 +36,12 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_THERMOSTAT,
 )
 from zha.zigbee.cluster_handlers.general import OnOffClusterHandler
-from zha.zigbee.device import WebSocketClientDevice
-from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.group import Group
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.SWITCH)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.SWITCH)
@@ -50,16 +50,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class ConfigurableAttributeSwitchInfo(BaseEntityInfo):
-    """Switch configuration entity info."""
-
-    attribute_name: str
-    invert_attribute_name: str | None
-    force_inverted: bool
-    off_value: int
-    on_value: int
 
 
 class SwitchEntityInterface(ABC):

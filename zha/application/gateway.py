@@ -10,7 +10,7 @@ from datetime import timedelta
 import logging
 import time
 from types import TracebackType
-from typing import Any, Final, Self, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Final, Self, TypeVar, cast
 
 from async_timeout import timeout
 import websockets
@@ -67,7 +67,6 @@ from zha.application.model import (
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
 )
-from zha.application.platforms.model import EntityStateChangedEvent
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
@@ -95,7 +94,6 @@ from zha.websocket.client.helpers import (
     SwitchHelper,
 )
 from zha.websocket.const import ControllerEvents
-from zha.websocket.server.api.model import WebSocketCommand, WebSocketCommandResponse
 from zha.websocket.server.api.platforms.api import load_platform_entity_apis
 from zha.websocket.server.client import ClientManager, load_api as load_client_api
 from zha.websocket.server.gateway_api import load_api as load_zigbee_controller_api
@@ -107,7 +105,15 @@ from zha.zigbee.group import (
     GroupMemberReference,
     WebSocketClientGroup,
 )
-from zha.zigbee.model import DeviceStatus, ExtendedDeviceInfo, ZHAEvent
+from zha.zigbee.model import DeviceStatus
+
+if TYPE_CHECKING:
+    from zha.application.platforms.events import EntityStateChangedEvent
+    from zha.websocket.server.api.model import (
+        WebSocketCommand,
+        WebSocketCommandResponse,
+    )
+    from zha.zigbee.model import ExtendedDeviceInfo, ZHAEvent
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
 _R = TypeVar("_R")

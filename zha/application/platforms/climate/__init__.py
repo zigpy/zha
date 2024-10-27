@@ -11,11 +11,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
 
 from zha.application import Platform
-from zha.application.platforms import (
-    BaseEntityInfo,
-    PlatformEntity,
-    WebSocketClientEntity,
-)
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.climate.const import (
     ATTR_HVAC_MODE,
     ATTR_OCCP_COOL_SETPT,
@@ -41,36 +37,23 @@ from zha.application.platforms.climate.const import (
     HVACMode,
     Preset,
 )
-from zha.application.platforms.model import ThermostatEntityInfo
+from zha.application.platforms.climate.model import ThermostatEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import UnitOfTemperature
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
     CLUSTER_HANDLER_THERMOSTAT,
 )
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.CLIMATE)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.CLIMATE)
-
-
-class ThermostatEntityInfo(BaseEntityInfo):
-    """Thermostat entity info."""
-
-    max_temp: float
-    min_temp: float
-    supported_features: ClimateEntityFeature
-    fan_modes: list[str] | None
-    preset_modes: list[str] | None
-    hvac_modes: list[HVACMode]
 
 
 class ClimateEntityInterface(ABC):

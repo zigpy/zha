@@ -57,10 +57,7 @@ from zha.application.const import (
 )
 from zha.application.helpers import convert_to_zcl_values
 from zha.application.platforms import PlatformEntity, WebSocketClientEntity
-from zha.application.platforms.model import (
-    BasePlatformEntityInfo,
-    EntityStateChangedEvent,
-)
+from zha.application.platforms.model import BasePlatformEntityInfo
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -80,6 +77,7 @@ from zha.zigbee.model import (
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
+    from zha.application.platforms.events import EntityStateChangedEvent
 
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
@@ -1140,12 +1138,12 @@ class WebSocketClientDevice(BaseDevice):
         self._extended_device_info = extended_device_info
         self._entities: dict[tuple[Platform, str], WebSocketClientEntity] = {
             (
-                entity.platform,
-                entity.unique_id,
+                entity_info.platform,
+                entity_info.unique_id,
             ): discovery.ENTITY_INFO_CLASS_TO_WEBSOCKET_CLIENT_ENTITY_CLASS[
-                entity.__class__
-            ](entity, self)
-            for entity in self._extended_device_info.entities.values()
+                entity_info.__class__
+            ](entity_info, self)
+            for entity_info in self._extended_device_info.entities.values()
         }
 
     @cached_property

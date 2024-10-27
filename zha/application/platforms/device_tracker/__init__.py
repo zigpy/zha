@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from enum import StrEnum
 import functools
 import time
 from typing import TYPE_CHECKING, Any
@@ -12,34 +11,24 @@ from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
 from zha.application.platforms import PlatformEntity, WebSocketClientEntity
-from zha.application.platforms.model import DeviceTrackerEntityInfo
+from zha.application.platforms.device_tracker.const import SourceType
+from zha.application.platforms.device_tracker.model import DeviceTrackerEntityInfo
 from zha.application.platforms.sensor import Battery
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
 )
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 STRICT_MATCH = functools.partial(
     PLATFORM_ENTITIES.strict_match, Platform.DEVICE_TRACKER
 )
-
-
-class SourceType(StrEnum):
-    """Source type for device trackers."""
-
-    GPS = "gps"
-    ROUTER = "router"
-    BLUETOOTH = "bluetooth"
-    BLUETOOTH_LE = "bluetooth_le"
 
 
 class DeviceTrackerEntityInterface(ABC):

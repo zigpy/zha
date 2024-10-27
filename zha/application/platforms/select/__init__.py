@@ -23,15 +23,10 @@ from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA, Strobe
-from zha.application.platforms import (
-    BaseEntityInfo,
-    EntityCategory,
-    PlatformEntity,
-    WebSocketClientEntity,
-)
-from zha.application.platforms.model import SelectEntityInfo
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
+from zha.application.platforms.const import EntityCategory
+from zha.application.platforms.select.model import EnumSelectInfo, SelectEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_HUE_OCCUPANCY,
@@ -41,11 +36,10 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_THERMOSTAT,
 )
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 
@@ -53,13 +47,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.SELECT
 )
 _LOGGER = logging.getLogger(__name__)
-
-
-class EnumSelectInfo(BaseEntityInfo):
-    """Enum select entity info."""
-
-    enum: str
-    options: list[str]
 
 
 class SelectEntityInterface(ABC):

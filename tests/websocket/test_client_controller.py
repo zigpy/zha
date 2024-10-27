@@ -20,11 +20,8 @@ from zha.application.gateway import (
     WebSocketServerGateway,
 )
 from zha.application.model import DeviceJoinedEvent, DeviceLeftEvent
-from zha.application.platforms.model import (
-    BasePlatformEntityInfo,
-    SwitchEntityInfo,
-    SwitchGroupEntityInfo,
-)
+from zha.application.platforms.model import BasePlatformEntityInfo
+from zha.application.platforms.switch.model import SwitchEntityInfo
 from zha.websocket.const import ControllerEvents
 from zha.websocket.server.api.model import (
     ReadClusterAttributesResponse,
@@ -108,7 +105,7 @@ def get_entity(
 
 def get_group_entity(
     group_proxy: WebSocketClientGroup, entity_id: str
-) -> Optional[SwitchGroupEntityInfo]:
+) -> Optional[SwitchEntityInfo]:
     """Get entity."""
 
     return group_proxy.group_entities.get(entity_id)
@@ -341,10 +338,10 @@ async def test_controller_groups(
     )
     assert group_proxy is not None
 
-    entity: SwitchGroupEntityInfo = get_group_entity(group_proxy, entity_id)  # type: ignore
+    entity: SwitchEntityInfo = get_group_entity(group_proxy, entity_id)  # type: ignore
     assert entity is not None
 
-    assert isinstance(entity, SwitchGroupEntityInfo)
+    assert isinstance(entity, SwitchEntityInfo)
 
     assert entity is not None
 

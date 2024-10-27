@@ -11,19 +11,15 @@ from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import BinarySensorMetadata
 
 from zha.application import Platform
-from zha.application.platforms import (
-    EntityCategory,
-    PlatformEntity,
-    WebSocketClientEntity,
-)
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
     BinarySensorDeviceClass,
 )
+from zha.application.platforms.binary_sensor.model import BinarySensorEntityInfo
+from zha.application.platforms.const import EntityCategory
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.model import BinarySensorEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ACCELEROMETER,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -34,11 +30,10 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_THERMOSTAT,
     CLUSTER_HANDLER_ZONE,
 )
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 

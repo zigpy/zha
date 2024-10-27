@@ -15,11 +15,8 @@ import zigpy.zcl.foundation as zcl_f
 from tests.common import mock_coro
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import (
-    BasePlatformEntityInfo,
-    SwitchEntityInfo,
-    SwitchGroupEntityInfo,
-)
+from zha.application.platforms.model import BasePlatformEntityInfo
+from zha.application.platforms.switch.model import SwitchEntityInfo
 from zha.zigbee.device import Device, WebSocketClientDevice
 from zha.zigbee.group import Group, GroupMemberReference, WebSocketClientGroup
 
@@ -54,10 +51,10 @@ def find_entity(
 
 def get_group_entity(
     group_proxy: WebSocketClientGroup, entity_id: str
-) -> Optional[SwitchGroupEntityInfo]:
+) -> Optional[SwitchEntityInfo]:
     """Get entity."""
 
-    return cast(SwitchGroupEntityInfo, group_proxy.group_entities.get(entity_id))
+    return cast(SwitchEntityInfo, group_proxy.group_entities.get(entity_id))
 
 
 @pytest.fixture
@@ -268,10 +265,10 @@ async def test_zha_group_switch_entity(
     group_proxy: Optional[WebSocketClientGroup] = controller.groups.get(2)
     assert group_proxy is not None
 
-    entity: SwitchGroupEntityInfo = get_group_entity(group_proxy, entity_id)  # type: ignore
+    entity: SwitchEntityInfo = get_group_entity(group_proxy, entity_id)  # type: ignore
     assert entity is not None
 
-    assert isinstance(entity, SwitchGroupEntityInfo)
+    assert isinstance(entity, SwitchEntityInfo)
 
     group_cluster_on_off = zha_group.zigpy_group.endpoint[general.OnOff.cluster_id]
     dev1_cluster_on_off = device_switch_1.device.endpoints[1].on_off

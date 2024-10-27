@@ -11,21 +11,20 @@ from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetada
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import (
-    BaseEntityInfo,
-    EntityCategory,
-    PlatformEntity,
-    WebSocketClientEntity,
-)
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
-from zha.application.platforms.model import ButtonEntityInfo
+from zha.application.platforms.button.model import (
+    ButtonEntityInfo,
+    CommandButtonEntityInfo,
+    WriteAttributeButtonEntityInfo,
+)
+from zha.application.platforms.const import EntityCategory
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 
@@ -35,21 +34,6 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class CommandButtonEntityInfo(BaseEntityInfo):
-    """Command button entity info."""
-
-    command: str
-    args: list[Any]
-    kwargs: dict[str, Any]
-
-
-class WriteAttributeButtonEntityInfo(BaseEntityInfo):
-    """Write attribute button entity info."""
-
-    attribute_name: str
-    attribute_value: Any
 
 
 class ButtonEntityInterface(ABC):

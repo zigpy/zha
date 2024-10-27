@@ -13,23 +13,21 @@ from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import (
-    BaseEntityInfo,
-    EntityCategory,
-    PlatformEntity,
-    WebSocketClientEntity,
-)
+from zha.application.platforms import PlatformEntity, WebSocketClientEntity
+from zha.application.platforms.const import EntityCategory
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.model import NumberEntityInfo
 from zha.application.platforms.number.const import (
     ICONS,
     UNITS,
     NumberDeviceClass,
     NumberMode,
 )
+from zha.application.platforms.number.model import (
+    NumberConfigurationEntityInfo,
+    NumberEntityInfo,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime, validate_unit
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_OUTPUT,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -40,11 +38,10 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_THERMOSTAT,
 )
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,26 +50,6 @@ STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.NUMBER
 CONFIG_DIAGNOSTIC_MATCH = functools.partial(
     PLATFORM_ENTITIES.config_diagnostic_match, Platform.NUMBER
 )
-
-
-class NumberEntityInfo(BaseEntityInfo):
-    """Number entity info."""
-
-    engineering_units: int | None
-    application_type: int | None
-    min_value: float | None
-    max_value: float | None
-    step: float | None
-
-
-class NumberConfigurationEntityInfo(BaseEntityInfo):
-    """Number configuration entity info."""
-
-    min_value: float | None
-    max_value: float | None
-    step: float | None
-    multiplier: float | None
-    device_class: str | None
 
 
 class NumberEntityInterface(ABC):

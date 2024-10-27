@@ -12,7 +12,6 @@ from zigpy.zcl.clusters import hvac
 from zha.application import Platform
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
     GroupEntity,
     PlatformEntity,
     WebSocketClientEntity,
@@ -38,36 +37,23 @@ from zha.application.platforms.fan.helpers import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
-from zha.application.platforms.model import FanEntityInfo
+from zha.application.platforms.fan.model import FanEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.zigbee.cluster_handlers import (
-    ClusterAttributeUpdatedEvent,
-    wrap_zigpy_exceptions,
-)
+from zha.zigbee.cluster_handlers import wrap_zigpy_exceptions
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
 )
-from zha.zigbee.device import WebSocketClientDevice
-from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
+    from zha.zigbee.group import Group
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.FAN)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
-
-
-class FanEntityInfo(BaseEntityInfo):
-    """Fan entity info."""
-
-    preset_modes: list[str]
-    supported_features: FanEntityFeature
-    speed_count: int
-    speed_list: list[str]
 
 
 class FanEntityInterface(ABC):

@@ -18,7 +18,7 @@ from zha.application.model import (
     GroupRemovedEvent,
     RawDeviceInitializedEvent,
 )
-from zha.application.platforms.model import EntityStateChangedEvent
+from zha.application.platforms.events import EntityStateChangedEvent
 from zha.model import BaseModel
 from zha.websocket.const import APICommands
 from zha.zigbee.cluster_handlers.model import ClusterInfo

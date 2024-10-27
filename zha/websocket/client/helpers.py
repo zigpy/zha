@@ -8,11 +8,10 @@ from zigpy.types.named import EUI64
 
 from zha.application.discovery import Platform
 from zha.application.platforms import WebSocketClientEntity
-from zha.application.platforms.model import (
-    BaseEntityInfo,
-    BasePlatformEntityInfo,
-    GroupEntityInfo,
-)
+from zha.application.platforms.fan.model import FanEntityInfo
+from zha.application.platforms.light.model import LightEntityInfo
+from zha.application.platforms.model import BaseEntityInfo, BasePlatformEntityInfo
+from zha.application.platforms.switch.model import SwitchEntityInfo
 from zha.websocket.client.client import Client
 from zha.websocket.server.api.model import (
     GetDevicesResponse,
@@ -118,7 +117,7 @@ class LightHelper:
 
     async def turn_on(
         self,
-        light_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        light_platform_entity: BasePlatformEntityInfo,
         brightness: int | None = None,
         transition: int | None = None,
         flash: str | None = None,
@@ -130,10 +129,10 @@ class LightHelper:
         ensure_platform_entity(light_platform_entity, Platform.LIGHT)
         command = LightTurnOnCommand(
             ieee=light_platform_entity.device_ieee
-            if not isinstance(light_platform_entity, GroupEntityInfo)
+            if not isinstance(light_platform_entity, LightEntityInfo)
             else None,
             group_id=light_platform_entity.group_id
-            if isinstance(light_platform_entity, GroupEntityInfo)
+            if isinstance(light_platform_entity, LightEntityInfo)
             else None,
             unique_id=light_platform_entity.unique_id,
             brightness=brightness,
@@ -147,7 +146,7 @@ class LightHelper:
 
     async def turn_off(
         self,
-        light_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        light_platform_entity: BasePlatformEntityInfo,
         transition: int | None = None,
         flash: bool | None = None,
     ) -> WebSocketCommandResponse:
@@ -155,10 +154,10 @@ class LightHelper:
         ensure_platform_entity(light_platform_entity, Platform.LIGHT)
         command = LightTurnOffCommand(
             ieee=light_platform_entity.device_ieee
-            if not isinstance(light_platform_entity, GroupEntityInfo)
+            if not isinstance(light_platform_entity, LightEntityInfo)
             else None,
             group_id=light_platform_entity.group_id
-            if isinstance(light_platform_entity, GroupEntityInfo)
+            if isinstance(light_platform_entity, LightEntityInfo)
             else None,
             unique_id=light_platform_entity.unique_id,
             transition=transition,
@@ -176,16 +175,16 @@ class SwitchHelper:
 
     async def turn_on(
         self,
-        switch_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        switch_platform_entity: BasePlatformEntityInfo,
     ) -> WebSocketCommandResponse:
         """Turn on a switch."""
         ensure_platform_entity(switch_platform_entity, Platform.SWITCH)
         command = SwitchTurnOnCommand(
             ieee=switch_platform_entity.device_ieee
-            if not isinstance(switch_platform_entity, GroupEntityInfo)
+            if not isinstance(switch_platform_entity, SwitchEntityInfo)
             else None,
             group_id=switch_platform_entity.group_id
-            if isinstance(switch_platform_entity, GroupEntityInfo)
+            if isinstance(switch_platform_entity, SwitchEntityInfo)
             else None,
             unique_id=switch_platform_entity.unique_id,
         )
@@ -193,16 +192,16 @@ class SwitchHelper:
 
     async def turn_off(
         self,
-        switch_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        switch_platform_entity: BasePlatformEntityInfo,
     ) -> WebSocketCommandResponse:
         """Turn off a switch."""
         ensure_platform_entity(switch_platform_entity, Platform.SWITCH)
         command = SwitchTurnOffCommand(
             ieee=switch_platform_entity.device_ieee
-            if not isinstance(switch_platform_entity, GroupEntityInfo)
+            if not isinstance(switch_platform_entity, SwitchEntityInfo)
             else None,
             group_id=switch_platform_entity.group_id
-            if isinstance(switch_platform_entity, GroupEntityInfo)
+            if isinstance(switch_platform_entity, SwitchEntityInfo)
             else None,
             unique_id=switch_platform_entity.unique_id,
         )
@@ -329,7 +328,7 @@ class FanHelper:
 
     async def turn_on(
         self,
-        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        fan_platform_entity: BasePlatformEntityInfo,
         speed: str | None = None,
         percentage: int | None = None,
         preset_mode: str | None = None,
@@ -338,10 +337,10 @@ class FanHelper:
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanTurnOnCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntityInfo)
+            if not isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntityInfo)
+            if isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
             speed=speed,
@@ -352,16 +351,16 @@ class FanHelper:
 
     async def turn_off(
         self,
-        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        fan_platform_entity: FanEntityInfo,
     ) -> WebSocketCommandResponse:
         """Turn off a fan."""
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanTurnOffCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntityInfo)
+            if not isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntityInfo)
+            if isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
         )
@@ -369,17 +368,17 @@ class FanHelper:
 
     async def set_fan_percentage(
         self,
-        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        fan_platform_entity: FanEntityInfo,
         percentage: int,
     ) -> WebSocketCommandResponse:
         """Set a fan percentage."""
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanSetPercentageCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntityInfo)
+            if not isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntityInfo)
+            if isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
             percentage=percentage,
@@ -388,17 +387,17 @@ class FanHelper:
 
     async def set_fan_preset_mode(
         self,
-        fan_platform_entity: BasePlatformEntityInfo | GroupEntityInfo,
+        fan_platform_entity: FanEntityInfo,
         preset_mode: str,
     ) -> WebSocketCommandResponse:
         """Set a fan preset mode."""
         ensure_platform_entity(fan_platform_entity, Platform.FAN)
         command = FanSetPresetModeCommand(
             ieee=fan_platform_entity.device_ieee
-            if not isinstance(fan_platform_entity, GroupEntityInfo)
+            if not isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             group_id=fan_platform_entity.group_id
-            if isinstance(fan_platform_entity, GroupEntityInfo)
+            if isinstance(fan_platform_entity, FanEntityInfo)
             else None,
             unique_id=fan_platform_entity.unique_id,
             preset_mode=preset_mode,

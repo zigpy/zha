@@ -7,16 +7,16 @@ import asyncio
 from contextlib import suppress
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, final
+from typing import TYPE_CHECKING, Any, Literal, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
+from zigpy.types.named import EUI64
 
 from zha.application import Platform
+from zha.application.platforms.const import EntityCategory
 from zha.application.platforms.model import (
     BaseEntityInfo,
     BaseIdentifiers,
-    EntityCategory,
-    EntityStateChangedEvent,
     GroupEntityIdentifiers,
     PlatformEntityIdentifiers,
 )
@@ -24,6 +24,7 @@ from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
+from zha.model import BaseEvent
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -35,6 +36,20 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
+
+
+# this class exists solely to break circular imports
+class EntityStateChangedEvent(BaseEvent):
+    """Event for when an entity state changes."""
+
+    event_type: Literal["entity"] = "entity"
+    event: Literal["state_changed"] = "state_changed"
+    platform: Platform
+    unique_id: str
+    device_ieee: EUI64 | None = None
+    endpoint_id: int | None = None
+    group_id: int | None = None
+    state: Any
 
 
 class BaseEntity(LogMixin, EventBase):

@@ -14,7 +14,6 @@ import itertools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from pydantic import Field
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
@@ -22,7 +21,6 @@ from zigpy.zcl.foundation import Status
 from zha.application import Platform
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
     GroupEntity,
     PlatformEntity,
     WebSocketClientEntity,
@@ -62,11 +60,10 @@ from zha.application.platforms.light.helpers import (
     brightness_supported,
     filter_supported_color_modes,
 )
-from zha.application.platforms.model import LightEntityInfo
+from zha.application.platforms.light.model import LightEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_COLOR,
@@ -74,12 +71,11 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
 )
-from zha.zigbee.cluster_handlers.general import LevelChangeEvent
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.cluster_handlers.general import LevelChangeEvent
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
 
@@ -87,15 +83,6 @@ _LOGGER = logging.getLogger(__name__)
 
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.LIGHT)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.LIGHT)
-
-
-class LightEntityInfo(BaseEntityInfo):
-    """Light entity info."""
-
-    effect_list: list[str] | None = Field(default=None)
-    supported_features: LightEntityFeature
-    min_mireds: int
-    max_mireds: int
 
 
 class LightEntityInterface(ABC):

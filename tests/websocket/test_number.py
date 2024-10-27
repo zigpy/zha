@@ -9,7 +9,8 @@ from zigpy.zcl.clusters import general
 
 from zha.application.discovery import Platform
 from zha.application.gateway import WebSocketClientGateway, WebSocketServerGateway
-from zha.application.platforms.model import BasePlatformEntityInfo, NumberEntityInfo
+from zha.application.platforms.model import BasePlatformEntityInfo
+from zha.application.platforms.number.model import NumberEntityInfo
 from zha.zigbee.device import WebSocketClientDevice
 
 from ..common import (

@@ -12,30 +12,26 @@ from zha.application import Platform
 from zha.application.platforms.alarm_control_panel.model import (
     AlarmControlPanelEntityInfo,
 )
-from zha.application.platforms.model import (
+from zha.application.platforms.binary_sensor.model import BinarySensorEntityInfo
+from zha.application.platforms.button.model import ButtonEntityInfo
+from zha.application.platforms.climate.model import ThermostatEntityInfo
+from zha.application.platforms.cover.model import CoverEntityInfo, ShadeEntityInfo
+from zha.application.platforms.device_tracker.model import DeviceTrackerEntityInfo
+from zha.application.platforms.fan.model import FanEntityInfo
+from zha.application.platforms.light.model import LightEntityInfo
+from zha.application.platforms.lock.model import LockEntityInfo
+from zha.application.platforms.number.model import NumberEntityInfo
+from zha.application.platforms.select.model import SelectEntityInfo
+from zha.application.platforms.sensor.model import (
     BatteryEntityInfo,
-    BinarySensorEntityInfo,
-    ButtonEntityInfo,
-    CoverEntityInfo,
     DeviceCounterSensorEntityInfo,
-    DeviceTrackerEntityInfo,
     ElectricalMeasurementEntityInfo,
-    FanEntityInfo,
-    FanGroupEntityInfo,
-    FirmwareUpdateEntityInfo,
-    LightEntityInfo,
-    LightGroupEntityInfo,
-    LockEntityInfo,
-    NumberEntityInfo,
-    SelectEntityInfo,
     SensorEntityInfo,
-    ShadeEntityInfo,
-    SirenEntityInfo,
     SmartEnergyMeteringEntityInfo,
-    SwitchEntityInfo,
-    SwitchGroupEntityInfo,
-    ThermostatEntityInfo,
 )
+from zha.application.platforms.siren.model import SirenEntityInfo
+from zha.application.platforms.switch.model import SwitchEntityInfo
+from zha.application.platforms.update.model import FirmwareUpdateEntityInfo
 from zha.model import BaseEvent, BaseModel, convert_enum, convert_int
 
 
@@ -320,7 +316,7 @@ class GroupInfo(BaseModel):
     entities: dict[
         str,
         Annotated[
-            Union[LightGroupEntityInfo, FanGroupEntityInfo, SwitchGroupEntityInfo],
+            Union[LightEntityInfo, FanEntityInfo, SwitchEntityInfo],
             Field(discriminator="class_name"),
         ],
     ]

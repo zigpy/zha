@@ -27,10 +27,9 @@ from zha.application.platforms.cover.const import (
     CoverEntityFeature,
     WCAttrs,
 )
-from zha.application.platforms.model import CoverEntityInfo
+from zha.application.platforms.cover.model import CoverEntityInfo
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import WindowCoveringClusterHandler
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -40,12 +39,11 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_SHADE,
 )
-from zha.zigbee.cluster_handlers.general import LevelChangeEvent
-from zha.zigbee.device import WebSocketClientDevice
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
-    from zha.zigbee.device import Device
+    from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent, ClusterHandler
+    from zha.zigbee.cluster_handlers.general import LevelChangeEvent
+    from zha.zigbee.device import Device, WebSocketClientDevice
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)

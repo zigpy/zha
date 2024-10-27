@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 import zigpy.exceptions
 from zigpy.types.named import EUI64
 
-from zha.application.platforms import EntityStateChangedEvent, PlatformEntity
+from zha.application.platforms import PlatformEntity
 from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.mixins import LogMixin
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
     from zha.application.gateway import Gateway
     from zha.application.platforms import GroupEntity
+    from zha.application.platforms.events import EntityStateChangedEvent
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
