@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import NumberMetadata
@@ -1116,7 +1116,9 @@ class WebSocketClientNumberEntity(WebSocketClientEntity, NumberEntityInterface):
     @property
     def native_value(self) -> float | None:
         """Return the current value."""
-        return self.info_object.state.state
+        return cast(
+            float, self.info_object.state.state
+        )  # TODO make a proper state class for number entities
 
     @property
     def native_min_value(self) -> float:

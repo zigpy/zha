@@ -800,6 +800,7 @@ class Light(PlatformEntity, BaseLight):
             supported_features=self.supported_features,
             min_mireds=self.min_mireds,
             max_mireds=self.max_mireds,
+            supported_color_modes=self.supported_color_modes,
         )
 
     def start_polling(self) -> None:
@@ -1151,6 +1152,7 @@ class LightGroup(GroupEntity, BaseLight):
             supported_features=self.supported_features,
             min_mireds=self.min_mireds,
             max_mireds=self.max_mireds,
+            supported_color_modes=self.supported_color_modes,
         )
 
     async def on_remove(self) -> None:
@@ -1348,46 +1350,57 @@ class WebSocketClientLightEntity(WebSocketClientEntity, LightEntityInterface):
     @property
     def xy_color(self) -> tuple[float, float] | None:
         """Return the xy color value [float, float]."""
+        return self.info_object.state.xy_color
 
     @property
     def color_temp(self) -> int | None:
         """Return the CT color value in mireds."""
+        return self.info_object.state.color_temp
 
     @property
     def color_mode(self) -> ColorMode | None:
         """Return the color mode."""
+        return self.info_object.state.color_mode
 
     @property
     def effect_list(self) -> list[str] | None:
         """Return the list of supported effects."""
+        return self.info_object.effect_list
 
     @property
     def effect(self) -> str:
         """Return the current effect."""
+        return self.info_object.state.effect
 
     @property
     def supported_features(self) -> LightEntityFeature:
         """Flag supported features."""
+        return self.info_object.supported_features
 
     @property
     def supported_color_modes(self) -> set[ColorMode]:
         """Flag supported color modes."""
+        return self.info_object.supported_color_modes
 
     @property
     def is_on(self) -> bool:
         """Return true if entity is on."""
+        return self.info_object.state.on
 
     @property
     def brightness(self) -> int | None:
         """Return the brightness of this light."""
+        return self.info_object.state.brightness
 
     @property
     def min_mireds(self) -> int | None:
         """Return the coldest color_temp that this light supports."""
+        return self.info_object.min_mireds
 
     @property
     def max_mireds(self) -> int | None:
         """Return the warmest color_temp that this light supports."""
+        return self.info_object.max_mireds
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""

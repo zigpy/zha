@@ -46,7 +46,7 @@ class DeviceTrackerEntityInterface(ABC):
 
     @property
     @abstractmethod
-    def battery_level(self) -> float:
+    def battery_level(self) -> float | None:
         """Return the battery level of the device.
 
         Percentage from 0-100.
@@ -189,7 +189,7 @@ class WebSocketClientDeviceTrackerEntity(
         return self.info_object.source_type
 
     @property
-    def battery_level(self) -> float:
+    def battery_level(self) -> float | None:
         """Return the battery level of the device.
 
         Percentage from 0-100.

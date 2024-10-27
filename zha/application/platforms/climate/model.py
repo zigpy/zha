@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from typing import Literal
 
-from zha.application.platforms.climate.const import ClimateEntityFeature, HVACMode
+from zha.application.platforms.climate.const import (
+    ClimateEntityFeature,
+    HVACAction,
+    HVACMode,
+)
 from zha.application.platforms.model import BasePlatformEntityInfo
 from zha.model import BaseModel
 
@@ -24,9 +28,9 @@ class ThermostatState(BaseModel):
     target_temperature: float | None = None
     target_temperature_low: float | None = None
     target_temperature_high: float | None = None
-    hvac_action: str | None = None
-    hvac_mode: str | None = None
-    preset_mode: str | None = None
+    hvac_action: HVACAction | None = None
+    hvac_mode: HVACMode | None = None
+    preset_mode: str
     fan_mode: str | None = None
 
 

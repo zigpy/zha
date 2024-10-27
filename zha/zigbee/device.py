@@ -9,7 +9,7 @@ import asyncio
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Generic, Self
 
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
@@ -56,8 +56,7 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values
-from zha.application.platforms import PlatformEntity, WebSocketClientEntity
-from zha.application.platforms.model import BasePlatformEntityInfo
+from zha.application.platforms import PlatformEntity, T, WebSocketClientEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -93,7 +92,7 @@ def get_device_automation_triggers(
     }
 
 
-class BaseDevice(LogMixin, EventBase, ABC):
+class BaseDevice(LogMixin, EventBase, ABC, Generic[T]):
     """Base device for Zigbee Home Automation."""
 
     def __init__(self, _gateway: Gateway) -> None:
@@ -208,7 +207,7 @@ class BaseDevice(LogMixin, EventBase, ABC):
 
     @property
     @abstractmethod
-    def platform_entities(self) -> dict[tuple[Platform, str], Any]:
+    def platform_entities(self) -> dict[tuple[Platform, str], T]:
         """Return the platform entities for this device."""
 
     @property
@@ -696,7 +695,8 @@ class Device(BaseDevice):
             power_source=self.power_source,
             lqi=self.lqi,
             rssi=self.rssi,
-            last_seen=update_time,
+            last_seen=self.last_seen,
+            last_seen_time=update_time,
             available=self.available,
             device_type=self.device_type,
             signature=self.zigbee_signature,
@@ -1258,7 +1258,7 @@ class WebSocketClientDevice(BaseDevice):
         return self._extended_device_info.sw_version
 
     @property
-    def platform_entities(self) -> dict[tuple[Platform, str], BasePlatformEntityInfo]:
+    def platform_entities(self) -> dict[tuple[Platform, str], WebSocketClientEntity]:
         """Return the platform entities for this device."""
         return self._entities
 

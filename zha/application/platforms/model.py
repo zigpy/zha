@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 from zigpy.types.named import EUI64
 
@@ -36,6 +36,9 @@ class BaseEntityInfo(BaseModel):
 
     # For group entities
     group_id: int | None = None
+
+
+T = TypeVar("T", bound=BaseEntityInfo)
 
 
 class BaseIdentifiers(BaseModel):

@@ -7,7 +7,7 @@ import asyncio
 from contextlib import suppress
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Literal, final
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
@@ -19,6 +19,7 @@ from zha.application.platforms.model import (
     BaseIdentifiers,
     GroupEntityIdentifiers,
     PlatformEntityIdentifiers,
+    T as BaseEntityInfoType,
 )
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
@@ -223,6 +224,9 @@ class BaseEntity(LogMixin, EventBase):
         msg = f"%s: {msg}"
         args = (self._unique_id,) + args
         _LOGGER.log(level, msg, *args, **kwargs)
+
+
+T = TypeVar("T", bound=BaseEntity)
 
 
 class PlatformEntity(BaseEntity):
@@ -480,14 +484,14 @@ class GroupEntity(BaseEntity):
         self.update()
 
 
-class WebSocketClientEntity(BaseEntity):
+class WebSocketClientEntity(BaseEntity, Generic[BaseEntityInfoType]):
     """Entity repsentation for the websocket client."""
 
-    def __init__(self, entity_info: BaseEntityInfo) -> None:
+    def __init__(self, entity_info: BaseEntityInfoType) -> None:
         """Initialize the websocket client entity."""
         super().__init__(entity_info.unique_id)
         self.PLATFORM = entity_info.platform
-        self._entity_info: BaseEntityInfo = entity_info
+        self._entity_info: BaseEntityInfoType = entity_info
         self._attr_enabled = self._entity_info.enabled
         self._attr_fallback_name = self._entity_info.fallback_name
         self._attr_translation_key = self._entity_info.translation_key

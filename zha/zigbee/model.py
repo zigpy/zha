@@ -85,7 +85,8 @@ class DeviceInfo(BaseModel):
     power_source: str
     lqi: int | None
     rssi: int | None
-    last_seen: str
+    last_seen: float | None = None
+    last_seen_time: str | None = None
     available: bool
     device_type: str
     signature: dict[str, Any]

@@ -957,7 +957,9 @@ async def test_extended_device_info_ser_deser(zha_gateway: Gateway) -> None:
     assert isinstance(zha_device.extended_device_info.nwk, zigpy.types.NWK)
 
     # last_seen changes so we exclude it from the comparison
-    json = zha_device.extended_device_info.model_dump_json(exclude=["last_seen"])
+    json = zha_device.extended_device_info.model_dump_json(
+        exclude=["last_seen", "last_seen_time"]
+    )
 
     # load the json from a file as string
     with open(

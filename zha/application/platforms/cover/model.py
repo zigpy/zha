@@ -14,8 +14,8 @@ class CoverState(BaseModel):
     class_name: Literal["Cover"] = "Cover"
     current_position: int | None = None
     state: str | None = None
-    is_opening: bool | None = None
-    is_closing: bool | None = None
+    is_opening: bool
+    is_closing: bool
     is_closed: bool | None = None
 
 
@@ -26,7 +26,7 @@ class ShadeState(BaseModel):
     current_position: int | None = (
         None  # TODO: how should we represent this when it is None?
     )
-    is_closed: bool
+    is_closed: bool | None = None
     state: str | None = None
 
 
