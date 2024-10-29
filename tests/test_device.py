@@ -152,7 +152,6 @@ async def _send_time_changed(zha_gateway: Gateway, seconds: int):
     "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
     new=mock.AsyncMock(),
 )
-@pytest.mark.looptime
 async def test_check_available_success(
     zha_gateway: Gateway,
     device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
@@ -247,7 +246,6 @@ async def test_check_available_success(
     "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
     new=mock.AsyncMock(),
 )
-@pytest.mark.looptime
 async def test_check_available_unsuccessful(
     zha_gateway: Gateway,
     device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
@@ -317,7 +315,6 @@ async def test_check_available_unsuccessful(
     "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
     new=mock.AsyncMock(),
 )
-@pytest.mark.looptime
 async def test_check_available_no_basic_cluster_handler(
     zha_gateway: Gateway,
     device_without_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name

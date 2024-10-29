@@ -281,7 +281,6 @@ async def eWeLink_light(
     return zha_device
 
 
-@pytest.mark.looptime
 async def test_light_refresh(
     zha_gateway: Gateway,
 ):
@@ -365,7 +364,6 @@ async def test_light_refresh(
     "device, reporting",
     [(LIGHT_ON_OFF, (1, 0, 0)), (LIGHT_LEVEL, (1, 1, 0)), (LIGHT_COLOR, (1, 1, 3))],
 )
-@pytest.mark.looptime
 async def test_light(
     zha_gateway: Gateway,
     device: dict,
@@ -599,7 +597,6 @@ async def _async_shift_time(zha_gateway: Gateway):
     await zha_gateway.async_block_till_done()
 
 
-@pytest.mark.looptime
 async def async_test_level_on_off_from_client(
     zha_gateway: Gateway,
     on_off_cluster: general.OnOff,
@@ -751,7 +748,6 @@ async def async_test_flash_from_client(
     "zigpy.zcl.clusters.general.OnOff.request",
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
-@pytest.mark.looptime
 async def test_zha_group_light_entity(
     device_light_1: Device,  # pylint: disable=redefined-outer-name
     device_light_2: Device,  # pylint: disable=redefined-outer-name
@@ -1896,7 +1892,6 @@ async def test_on_with_off_color(
     "zigpy.zcl.clusters.general.LevelControl.request",
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
-@pytest.mark.looptime
 async def test_group_member_assume_state(
     zha_gateway: Gateway,
     coordinator,  # pylint: disable=redefined-outer-name

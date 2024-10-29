@@ -12,7 +12,6 @@ from zha.debounce import Debouncer
 _LOGGER = logging.getLogger(__name__)
 
 
-@pytest.mark.looptime
 async def test_immediate_works(zha_gateway: Gateway) -> None:
     """Test immediate works."""
     calls: list[None] = []
@@ -67,7 +66,6 @@ async def test_immediate_works(zha_gateway: Gateway) -> None:
     assert debouncer._job.target == debouncer.function
 
 
-@pytest.mark.looptime
 async def test_immediate_works_with_schedule_call(zha_gateway: Gateway) -> None:
     """Test immediate works with scheduled calls."""
     calls: list[None] = []
@@ -168,7 +166,6 @@ async def test_immediate_works_with_executor_function(zha_gateway: Gateway) -> N
     debouncer.async_cancel()
 
 
-@pytest.mark.looptime
 async def test_immediate_works_with_passed_callback_function_raises(
     zha_gateway: Gateway,
 ) -> None:
@@ -232,7 +229,6 @@ async def test_immediate_works_with_passed_callback_function_raises(
     assert debouncer._job.target == debouncer.function
 
 
-@pytest.mark.looptime
 async def test_immediate_works_with_passed_coroutine_raises(
     zha_gateway: Gateway,
 ) -> None:
@@ -296,7 +292,6 @@ async def test_immediate_works_with_passed_coroutine_raises(
     assert debouncer._job.target == debouncer.function
 
 
-@pytest.mark.looptime
 async def test_not_immediate_works(zha_gateway: Gateway) -> None:
     """Test immediate works."""
     calls: list[None] = []
@@ -348,7 +343,6 @@ async def test_not_immediate_works(zha_gateway: Gateway) -> None:
     assert debouncer._job.target == debouncer.function
 
 
-@pytest.mark.looptime
 async def test_not_immediate_works_schedule_call(zha_gateway: Gateway) -> None:
     """Test immediate works with schedule call."""
     calls: list[None] = []
@@ -404,7 +398,6 @@ async def test_not_immediate_works_schedule_call(zha_gateway: Gateway) -> None:
     assert debouncer._job.target == debouncer.function
 
 
-@pytest.mark.looptime
 async def test_immediate_works_with_function_swapped(zha_gateway: Gateway) -> None:
     """Test immediate works and we can change out the function."""
     calls: list[None] = []
@@ -501,7 +494,6 @@ async def test_shutdown(zha_gateway: Gateway, caplog: pytest.LogCaptureFixture) 
     assert debouncer._timer_task is None
 
 
-@pytest.mark.looptime
 async def test_background(zha_gateway: Gateway) -> None:
     """Test background tasks are created when background is True."""
     calls: list[None] = []

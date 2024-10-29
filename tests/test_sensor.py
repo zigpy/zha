@@ -625,7 +625,6 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     assert entity.info_object.unit == unit_of_measurement
 
 
-@pytest.mark.looptime
 async def test_electrical_measurement_init(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
@@ -1039,7 +1038,6 @@ async def test_elec_measurement_sensor_type(
     assert entity.state["measurement_type"] == expected_type
 
 
-@pytest.mark.looptime
 async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
     elec_measurement_zigpy_dev: ZigpyDevice,
@@ -1300,7 +1298,6 @@ async def test_last_feeding_size_sensor_v2(
     assert_state(entity, 5.0, "g")
 
 
-@pytest.mark.looptime
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     """Test coordinator counter sensor."""
 
@@ -1341,7 +1338,6 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     assert len(zha_gateway.global_updater._update_listeners) == 3
 
 
-@pytest.mark.looptime
 async def test_device_unavailable_or_disabled_skips_entity_polling(
     zha_gateway: Gateway,
     elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name

@@ -234,7 +234,6 @@ async def test_switch(
     assert bool(entity.state["state"]) is True
 
 
-@pytest.mark.looptime
 async def test_zha_group_switch_entity(
     device_switch_1: Device,  # pylint: disable=redefined-outer-name
     device_switch_2: Device,  # pylint: disable=redefined-outer-name

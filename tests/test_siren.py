@@ -124,7 +124,6 @@ async def test_siren(
     assert entity.state["state"] is True
 
 
-@pytest.mark.looptime
 async def test_siren_timed_off(
     siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,

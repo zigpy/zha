@@ -44,7 +44,6 @@ def zigpy_device_dt(zha_gateway: Gateway) -> zigpy.device.Device:
     return create_mock_zigpy_device(zha_gateway, endpoints)
 
 
-@pytest.mark.looptime
 async def test_device_tracker(
     zha_gateway: Gateway,
     zigpy_device_dt,  # pylint: disable=redefined-outer-name

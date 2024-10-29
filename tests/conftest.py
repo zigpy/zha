@@ -366,3 +366,10 @@ def cluster_handler() -> Callable:
         return ch
 
     return cluster_handler_factory
+
+
+def pytest_collection_modifyitems(config, items):
+    """Add the looptime marker to all tests except the test_async.py file."""
+    for item in items:
+        if "test_async_.py" not in item.nodeid:
+            item.add_marker(pytest.mark.looptime)
