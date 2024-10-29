@@ -26,26 +26,18 @@ from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.number.const import NumberMode
 from zha.exceptions import ZHAException
-from zha.zigbee.device import Device
 
-
-@pytest.fixture
-def zigpy_analog_output_device(zha_gateway: Gateway) -> ZigpyDevice:
-    """Zigpy analog_output device."""
-
-    endpoints = {
-        1: {
-            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.LEVEL_CONTROL_SWITCH,
-            SIG_EP_INPUT: [general.AnalogOutput.cluster_id, general.Basic.cluster_id],
-            SIG_EP_OUTPUT: [],
-            SIG_EP_PROFILE: zha.PROFILE_ID,
-        }
+ZIGPY_ANALOG_OUTPUT_DEVICE = {
+    1: {
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.LEVEL_CONTROL_SWITCH,
+        SIG_EP_INPUT: [general.AnalogOutput.cluster_id, general.Basic.cluster_id],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_PROFILE: zha.PROFILE_ID,
     }
-    return create_mock_zigpy_device(zha_gateway, endpoints)
+}
 
 
-@pytest.fixture
-async def light(zha_gateway: Gateway) -> ZigpyDevice:
+async def light_mock(zha_gateway: Gateway) -> ZigpyDevice:
     """Siren fixture."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -88,10 +80,12 @@ async def light(zha_gateway: Gateway) -> ZigpyDevice:
 
 
 async def test_number(
-    zigpy_analog_output_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test zha number platform."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
     cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
         1
     ).analog_output
@@ -197,8 +191,7 @@ async def test_number(
     ),
 )
 async def test_level_control_number(
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
-    light: Device,  # pylint: disable=redefined-outer-name
+    zha_gateway: Gateway,
     attr: str,
     initial_value: int,
     new_value: int,
@@ -206,6 +199,7 @@ async def test_level_control_number(
 ) -> None:
     """Test ZHA level control number entities - new join."""
 
+    light = await light_mock(zha_gateway)
     level_control_cluster = light.endpoints[1].level
     level_control_cluster.PLUGGED_ATTR_READS = {
         attr: initial_value,
@@ -321,14 +315,14 @@ async def test_level_control_number(
     (("start_up_color_temperature", 500, 350),),
 )
 async def test_color_number(
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
-    light: Device,  # pylint: disable=redefined-outer-name
+    zha_gateway: Gateway,
     attr: str,
     initial_value: int,
     new_value: int,
 ) -> None:
     """Test ZHA color number entities - new join."""
 
+    light = await light_mock(zha_gateway)
     color_cluster = light.endpoints[1].light_color
     color_cluster.PLUGGED_ATTR_READS = {
         attr: initial_value,

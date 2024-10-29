@@ -24,8 +24,7 @@ from zha.application.platforms.siren import SirenEntityFeature
 from zha.zigbee.device import Device
 
 
-@pytest.fixture
-async def siren(
+async def siren_mock(
     zha_gateway: Gateway,
 ) -> tuple[Device, security.IasWd]:
     """Siren fixture."""
@@ -46,13 +45,10 @@ async def siren(
     return zha_device, zigpy_device.endpoints[1].ias_wd
 
 
-async def test_siren(
-    siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
+async def test_siren(zha_gateway: Gateway) -> None:
     """Test zha siren platform."""
 
-    zha_device, cluster = siren
+    zha_device, cluster = await siren_mock(zha_gateway)
     assert cluster is not None
 
     entity = get_entity(zha_device, platform=Platform.SIREN)
@@ -125,12 +121,9 @@ async def test_siren(
 
 
 @pytest.mark.looptime
-async def test_siren_timed_off(
-    siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
+async def test_siren_timed_off(zha_gateway: Gateway) -> None:
     """Test zha siren platform."""
-    zha_device, cluster = siren
+    zha_device, cluster = await siren_mock(zha_gateway)
     assert cluster is not None
 
     entity = get_entity(zha_device, platform=Platform.SIREN)

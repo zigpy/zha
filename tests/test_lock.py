@@ -2,7 +2,6 @@
 
 from unittest.mock import patch
 
-import pytest
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import closures, general
 import zigpy.zcl.foundation as zcl_f
@@ -22,7 +21,6 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.lock.const import STATE_LOCKED, STATE_UNLOCKED
-from zha.zigbee.device import Device
 
 LOCK_DOOR = 0
 UNLOCK_DOOR = 1
@@ -31,35 +29,22 @@ CLEAR_PIN_CODE = 7
 SET_USER_STATUS = 9
 
 
-@pytest.fixture
-async def lock(
-    zha_gateway: Gateway,
-) -> tuple[Device, closures.DoorLock]:
-    """Lock cluster fixture."""
-
-    zigpy_device = create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                SIG_EP_INPUT: [closures.DoorLock.cluster_id, general.Basic.cluster_id],
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.DOOR_LOCK,
-                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-            }
-        },
-    )
-
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].door_lock
+ZIGPY_LOCK = {
+    1: {
+        SIG_EP_INPUT: [closures.DoorLock.cluster_id, general.Basic.cluster_id],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.DOOR_LOCK,
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+    }
+}
 
 
-async def test_lock(
-    lock: tuple[Device, closures.DoorLock],  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
+async def test_lock(zha_gateway: Gateway) -> None:
     """Test zha lock platform."""
 
-    zha_device, cluster = lock
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_LOCK)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].door_lock
     entity = get_entity(zha_device, platform=Platform.LOCK)
 
     assert entity.state["is_locked"] is False
@@ -220,12 +205,11 @@ async def async_disable_user_code(
         assert cluster.request.call_args[0][4] == closures.DoorLock.UserStatus.Disabled
 
 
-async def test_lock_state_restoration(
-    lock: tuple[Device, closures.DoorLock],  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
+async def test_lock_state_restoration(zha_gateway: Gateway) -> None:
     """Test the lock state restoration."""
-    zha_device, _ = lock
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_LOCK)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
     entity = get_entity(zha_device, platform=Platform.LOCK)
 
     assert entity.state["is_locked"] is False

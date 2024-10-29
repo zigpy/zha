@@ -40,29 +40,18 @@ from zha.application.platforms.button.const import ButtonDeviceClass
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 
-
-@pytest.fixture
-async def contact_sensor(zha_gateway: Gateway) -> tuple[Device, general.Identify]:
-    """Contact sensor fixture."""
-
-    zigpy_device = create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                SIG_EP_INPUT: [
-                    general.Basic.cluster_id,
-                    general.Identify.cluster_id,
-                    security.IasZone.cluster_id,
-                ],
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zha.DeviceType.IAS_ZONE,
-                SIG_EP_PROFILE: zha.PROFILE_ID,
-            }
-        },
-    )
-
-    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].identify
+ZIGPY_DEVICE = {
+    1: {
+        SIG_EP_INPUT: [
+            general.Basic.cluster_id,
+            general.Identify.cluster_id,
+            security.IasZone.cluster_id,
+        ],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_TYPE: zha.DeviceType.IAS_ZONE,
+        SIG_EP_PROFILE: zha.PROFILE_ID,
+    }
+}
 
 
 class FrostLockQuirk(CustomDevice):
@@ -88,42 +77,33 @@ class FrostLockQuirk(CustomDevice):
     }
 
 
-@pytest.fixture
-async def tuya_water_valve(zha_gateway: Gateway):
-    """Tuya Water Valve fixture."""
-
-    zigpy_device = create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                PROFILE_ID: zha.PROFILE_ID,
-                DEVICE_TYPE: zha.DeviceType.ON_OFF_SWITCH,
-                INPUT_CLUSTERS: [
-                    general.Basic.cluster_id,
-                    general.Identify.cluster_id,
-                    general.Groups.cluster_id,
-                    general.Scenes.cluster_id,
-                    general.OnOff.cluster_id,
-                    ParksideTuyaValveManufCluster.cluster_id,
-                ],
-                OUTPUT_CLUSTERS: [general.Time.cluster_id, general.Ota.cluster_id],
-            },
-        },
-        manufacturer="_TZE200_htnnfasr",
-        model="TS0601",
-    )
-
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].tuya_manufacturer
+TUYA_WATER_VALVE = {
+    1: {
+        PROFILE_ID: zha.PROFILE_ID,
+        DEVICE_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+        INPUT_CLUSTERS: [
+            general.Basic.cluster_id,
+            general.Identify.cluster_id,
+            general.Groups.cluster_id,
+            general.Scenes.cluster_id,
+            general.OnOff.cluster_id,
+            ParksideTuyaValveManufCluster.cluster_id,
+        ],
+        OUTPUT_CLUSTERS: [general.Time.cluster_id, general.Ota.cluster_id],
+    },
+}
 
 
 async def test_button(
-    contact_sensor: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test zha button platform."""
-
-    zha_device, cluster = contact_sensor
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_DEVICE,
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].identify
     assert cluster is not None
     entity: PlatformEntity = get_entity(zha_device, Platform.BUTTON)
     assert isinstance(entity, Button)
@@ -143,11 +123,16 @@ async def test_button(
 
 async def test_frost_unlock(
     zha_gateway: Gateway,
-    tuya_water_valve: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test custom frost unlock ZHA button."""
-
-    zha_device, cluster = tuya_water_valve
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        TUYA_WATER_VALVE,
+        manufacturer="_TZE200_htnnfasr",
+        model="TS0601",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster = zigpy_device.endpoints[1].tuya_manufacturer
     assert cluster is not None
     entity: PlatformEntity = get_entity(
         zha_device, platform=Platform.BUTTON, entity_type=WriteAttributeButton
@@ -219,7 +204,6 @@ class FakeManufacturerCluster(CustomCluster, ManufacturerSpecificCluster):
 )
 
 
-@pytest.fixture
 async def custom_button_device(zha_gateway: Gateway):
     """Button device fixture for quirks button tests."""
 
@@ -250,11 +234,9 @@ async def custom_button_device(zha_gateway: Gateway):
 
 async def test_quirks_command_button(
     zha_gateway: Gateway,
-    custom_button_device: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA button platform."""
-
-    zha_device, cluster = custom_button_device
+    zha_device, cluster = await custom_button_device(zha_gateway)
     assert cluster is not None
     entity: PlatformEntity = get_entity(zha_device, platform=Platform.BUTTON)
 
@@ -272,11 +254,9 @@ async def test_quirks_command_button(
 
 async def test_quirks_write_attr_button(
     zha_gateway: Gateway,
-    custom_button_device: tuple[Device, general.Identify],  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA button platform."""
-
-    zha_device, cluster = custom_button_device
+    zha_device, cluster = await custom_button_device(zha_gateway)
     assert cluster is not None
     entity: PlatformEntity = get_entity(
         zha_device, platform=Platform.BUTTON, entity_type=WriteAttributeButton

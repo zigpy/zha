@@ -2,7 +2,6 @@
 
 from unittest.mock import call, patch
 
-import pytest
 from zhaquirks import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -32,15 +31,10 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory
 from zha.application.platforms.select import AqaraMotionSensitivities
-from zha.zigbee.device import Device
 
 
-@pytest.fixture
-async def siren(
-    zha_gateway: Gateway,
-) -> tuple[Device, security.IasWd]:
-    """Siren fixture."""
-
+async def test_select(zha_gateway: Gateway) -> None:
+    """Test zha select platform."""
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
         {
@@ -54,15 +48,7 @@ async def siren(
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].ias_wd
-
-
-async def test_select(
-    siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
-    """Test zha select platform."""
-    zha_device, cluster = siren
+    cluster = zigpy_device.endpoints[1].ias_wd
     assert cluster is not None
     select_name = security.IasWd.Warning.WarningMode.__name__
 
@@ -121,9 +107,8 @@ class MotionSensitivityQuirk(CustomDevice):
     }
 
 
-@pytest.fixture
-async def aqara_sensor(zha_gateway: Gateway) -> Device:
-    """Device tracker zigpy Aqara motion sensor device."""
+async def test_on_off_select_attribute_report(zha_gateway: Gateway) -> None:
+    """Test ZHA attribute report parsing for select platform."""
 
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
@@ -140,16 +125,7 @@ async def aqara_sensor(zha_gateway: Gateway) -> Device:
     )
 
     zigpy_device = get_device(zigpy_device)
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device
-
-
-async def test_on_off_select_attribute_report(
-    zha_gateway: Gateway,
-    aqara_sensor,  # pylint: disable=redefined-outer-name
-) -> None:
-    """Test ZHA attribute report parsing for select platform."""
-
+    aqara_sensor = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = aqara_sensor.device.endpoints.get(1).opple_cluster
 
     entity = get_entity(aqara_sensor, platform=Platform.SELECT)
@@ -184,11 +160,10 @@ async def test_on_off_select_attribute_report(
 )
 
 
-@pytest.fixture
-async def zigpy_device_aqara_sensor_v2(
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
-):
-    """Device tracker zigpy Aqara motion sensor device."""
+async def test_on_off_select_attribute_report_v2(
+    zha_gateway: Gateway,
+) -> None:
+    """Test ZHA attribute report parsing for select platform."""
 
     zigpy_device = create_mock_zigpy_device(
         zha_gateway,
@@ -208,16 +183,7 @@ async def zigpy_device_aqara_sensor_v2(
     zigpy_device = get_device(zigpy_device)
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    return zha_device, zigpy_device.endpoints[1].opple_cluster
-
-
-async def test_on_off_select_attribute_report_v2(
-    zha_gateway: Gateway,
-    zigpy_device_aqara_sensor_v2,  # pylint: disable=redefined-outer-name
-) -> None:
-    """Test ZHA attribute report parsing for select platform."""
-
-    zha_device, cluster = zigpy_device_aqara_sensor_v2
+    cluster = zigpy_device.endpoints[1].opple_cluster
     assert isinstance(zha_device.device, CustomDeviceV2)
 
     entity = get_entity(zha_device, platform=Platform.SELECT)
@@ -262,12 +228,22 @@ async def test_on_off_select_attribute_report_v2(
         )
 
 
-async def test_non_zcl_select_state_restoration(
-    siren: tuple[Device, security.IasWd],  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
+async def test_non_zcl_select_state_restoration(zha_gateway: Gateway) -> None:
     """Test the non-ZCL select state restoration."""
-    zha_device, cluster = siren
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, security.IasWd.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.IAS_WARNING_DEVICE,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
     entity = get_entity(zha_device, platform=Platform.SELECT, qualifier="WarningMode")
 
     assert entity.state["state"] is None

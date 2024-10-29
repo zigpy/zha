@@ -12,7 +12,6 @@ from zhaquirks.const import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
-from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.quirks import _DEVICE_REGISTRY, CustomCluster, CustomDevice
@@ -49,43 +48,30 @@ IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 _LOGGER = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
-    """Device tracker zigpy device."""
-    endpoints = {
-        1: {
-            SIG_EP_INPUT: [general.Basic.cluster_id, general.OnOff.cluster_id],
-            SIG_EP_OUTPUT: [],
-            SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
-            SIG_EP_PROFILE: zha.PROFILE_ID,
-        }
+ZIGPY_DEVICE = {
+    1: {
+        SIG_EP_INPUT: [general.Basic.cluster_id, general.OnOff.cluster_id],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+        SIG_EP_PROFILE: zha.PROFILE_ID,
     }
-    zigpy_dev: ZigpyDevice = create_mock_zigpy_device(zha_gateway, endpoints)
-    # this one is mains powered
-    zigpy_dev.node_desc.mac_capability_flags |= 0b_0000_0100
-    return zigpy_dev
+}
 
 
-@pytest.fixture
-def zigpy_cover_device(zha_gateway: Gateway):
-    """Zigpy cover device."""
-
-    endpoints = {
-        1: {
-            SIG_EP_PROFILE: zha.PROFILE_ID,
-            SIG_EP_TYPE: zha.DeviceType.WINDOW_COVERING_DEVICE,
-            SIG_EP_INPUT: [
-                general.Basic.cluster_id,
-                closures.WindowCovering.cluster_id,
-            ],
-            SIG_EP_OUTPUT: [],
-        }
+ZIGPY_COVER_DEVICE = {
+    1: {
+        SIG_EP_PROFILE: zha.PROFILE_ID,
+        SIG_EP_TYPE: zha.DeviceType.WINDOW_COVERING_DEVICE,
+        SIG_EP_INPUT: [
+            general.Basic.cluster_id,
+            closures.WindowCovering.cluster_id,
+        ],
+        SIG_EP_OUTPUT: [],
     }
-    return create_mock_zigpy_device(zha_gateway, endpoints)
+}
 
 
-@pytest.fixture
-async def device_switch_1(zha_gateway: Gateway) -> Device:
+async def device_switch_1_mock(zha_gateway: Gateway) -> Device:
     """Test zha switch platform."""
 
     zigpy_dev = create_mock_zigpy_device(
@@ -104,8 +90,7 @@ async def device_switch_1(zha_gateway: Gateway) -> Device:
     return zha_device
 
 
-@pytest.fixture
-async def device_switch_2(zha_gateway: Gateway) -> Device:
+async def device_switch_2_mock(zha_gateway: Gateway) -> Device:
     """Test zha switch platform."""
 
     zigpy_dev = create_mock_zigpy_device(
@@ -124,11 +109,12 @@ async def device_switch_2(zha_gateway: Gateway) -> Device:
     return zha_device
 
 
-async def test_switch(
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
+async def test_switch(zha_gateway: Gateway) -> None:
     """Test zha switch platform."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE)
+    zigpy_device.node_desc.mac_capability_flags |= (
+        0b_0000_0100  # this one is mains powered
+    )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = zigpy_device.endpoints.get(1).on_off
     entity: PlatformEntity = get_entity(zha_device, Platform.SWITCH)
@@ -235,12 +221,10 @@ async def test_switch(
 
 
 @pytest.mark.looptime
-async def test_zha_group_switch_entity(
-    device_switch_1: Device,  # pylint: disable=redefined-outer-name
-    device_switch_2: Device,  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-) -> None:
+async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
     """Test the switch entity for a ZHA group."""
+    device_switch_1 = await device_switch_1_mock(zha_gateway)
+    device_switch_2 = await device_switch_2_mock(zha_gateway)
     member_ieee_addresses = [device_switch_1.ieee, device_switch_2.ieee]
     members = [
         GroupMemberReference(ieee=device_switch_1.ieee, endpoint_id=1),
@@ -745,13 +729,11 @@ WCCS = closures.WindowCovering.ConfigStatus
 WCM = closures.WindowCovering.WindowCoveringMode
 
 
-async def test_cover_inversion_switch(
-    zha_gateway: Gateway,
-    zigpy_cover_device,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
     """Test ZHA cover platform."""
 
     # load up cover domain
+    zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     cluster = zigpy_cover_device.endpoints[1].window_covering
     cluster.PLUGGED_ATTR_READS = {
         WCAttrs.current_position_lift_percentage.name: 65,
@@ -839,13 +821,11 @@ async def test_cover_inversion_switch(
         assert bool(entity.state["state"]) is False
 
 
-async def test_cover_inversion_switch_not_created(
-    zha_gateway: Gateway,
-    zigpy_cover_device,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_cover_inversion_switch_not_created(zha_gateway: Gateway) -> None:
     """Test ZHA cover platform."""
 
     # load up cover domain
+    zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     cluster = zigpy_cover_device.endpoints[1].window_covering
     cluster.PLUGGED_ATTR_READS = {
         WCAttrs.current_position_lift_percentage.name: 65,
