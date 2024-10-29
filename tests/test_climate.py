@@ -337,7 +337,6 @@ async def test_climate_hvac_action_running_state(
     assert len(subscriber.mock_calls) == 2 * 6
 
 
-@pytest.mark.looptime
 async def test_sinope_time(
     zha_gateway: Gateway,
 ):

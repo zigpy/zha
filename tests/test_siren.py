@@ -3,7 +3,6 @@
 import asyncio
 from unittest.mock import patch
 
-import pytest
 from zigpy.const import SIG_EP_PROFILE
 from zigpy.profiles import zha
 from zigpy.zcl.clusters import general, security
@@ -120,7 +119,6 @@ async def test_siren(zha_gateway: Gateway) -> None:
     assert entity.state["state"] is True
 
 
-@pytest.mark.looptime
 async def test_siren_timed_off(zha_gateway: Gateway) -> None:
     """Test zha siren platform."""
     zha_device, cluster = await siren_mock(zha_gateway)

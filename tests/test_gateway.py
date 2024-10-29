@@ -476,7 +476,6 @@ async def test_gateway_initialize_bellows_thread(
 
 
 @pytest.mark.parametrize("radio_concurrency", [1, 2, 8])
-@pytest.mark.looptime
 async def test_startup_concurrency_limit(
     radio_concurrency: int,
     zigpy_app_controller: ControllerApplication,
@@ -694,7 +693,6 @@ def test_gateway_connection_lost(zha_gateway: Gateway) -> None:
     )
 
 
-@pytest.mark.looptime
 async def test_pollers_skip(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,

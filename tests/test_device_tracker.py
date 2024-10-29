@@ -4,7 +4,6 @@ import asyncio
 import time
 from unittest.mock import AsyncMock
 
-import pytest
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general
 
@@ -24,7 +23,6 @@ from zha.application.platforms.device_tracker import SourceType
 from zha.application.registries import SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
 
 
-@pytest.mark.looptime
 async def test_device_tracker(
     zha_gateway: Gateway,
 ) -> None:

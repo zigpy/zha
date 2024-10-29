@@ -274,7 +274,6 @@ async def async_set_preset_mode(
     "zigpy.zcl.clusters.hvac.Fan.write_attributes",
     new=AsyncMock(return_value=zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]),
 )
-@pytest.mark.looptime
 async def test_zha_group_fan_entity(
     zha_gateway: Gateway,
 ):

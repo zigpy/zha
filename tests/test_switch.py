@@ -220,7 +220,6 @@ async def test_switch(zha_gateway: Gateway) -> None:
     assert bool(entity.state["state"]) is True
 
 
-@pytest.mark.looptime
 async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
     """Test the switch entity for a ZHA group."""
     device_switch_1 = await device_switch_1_mock(zha_gateway)
