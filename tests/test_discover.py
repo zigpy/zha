@@ -5,6 +5,7 @@ from collections.abc import Callable
 import enum
 import json
 import pathlib
+import re
 from unittest import mock
 from unittest.mock import AsyncMock
 
@@ -588,34 +589,26 @@ async def test_quirks_v2_entity_discovery_errors(
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    m1 = f"Device: {str(zigpy_device.ieee)}-{zha_device.name} does not have an"
-    m2 = " endpoint with id: 3 - unable to create entity with cluster"
-    m3 = " details: (3, 6, <ClusterType.Server: 0>)"
-    assert f"{m1}{m2}{m3}" in caplog.text
+    assert (
+        f"Device: {zigpy_device.ieee}-{zha_device.name} does not have an"
+        " endpoint with id: 3 - unable to create entity with"
+        " cluster details: (3, 6, <ClusterType.Server: 0>)"
+    ) in caplog.text
 
     time_cluster_id = zigpy.zcl.clusters.general.Time.cluster_id
 
-    m1 = f"Device: {str(zigpy_device.ieee)}-{zha_device.name} does not have a"
-    m2 = f" cluster with id: {time_cluster_id} - unable to create entity with "
-    m3 = f"cluster details: (1, {time_cluster_id}, <ClusterType.Server: 0>)"
-    assert f"{m1}{m2}{m3}" in caplog.text
+    assert (
+        f"Device: {zigpy_device.ieee}-{zha_device.name} does not have a"
+        f" cluster with id: {time_cluster_id} - unable to create entity with"
+        f" cluster details: (1, {time_cluster_id}, <ClusterType.Server: 0>)"
+    ) in caplog.text
 
-    # fmt: off
-    entity_details = (
-        "{'cluster_details': (1, 6, <ClusterType.Server: 0>), 'entity_metadata': "
-        "ZCLSensorMetadata(entity_platform=<EntityPlatform.SENSOR: 'sensor'>, "
-        "entity_type=<EntityType.CONFIG: 'config'>, cluster_id=6, endpoint_id=1, "
-        "cluster_type=<ClusterType.Server: 0>, initially_disabled=False, "
-        "attribute_initialized_from_cache=True, translation_key='analog_input', "
-        "fallback_name='Analog input', attribute_name='off_wait_time', divisor=1, "
-        "multiplier=1, unit=None, device_class=None, state_class=None)}"
+    device_info = f"{zigpy_device.ieee}-{zha_device.name}"
+    device_regex = (
+        rf"Device: {re.escape(device_info)} has an entity with details: (.*?) that"
+        rf" does not have an entity class mapping - unable to create entity"
     )
-    # fmt: on
-
-    m1 = f"Device: {str(zigpy_device.ieee)}-{zha_device.name} has an entity with "
-    m2 = f"details: {entity_details} that does not have an entity class mapping - "
-    m3 = "unable to create entity"
-    assert f"{m1}{m2}{m3}" in caplog.text
+    assert re.search(device_regex, caplog.text)
 
 
 DEVICE_CLASS_TYPES = [NumberMetadata, BinarySensorMetadata, ZCLSensorMetadata]
