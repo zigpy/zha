@@ -9,6 +9,8 @@ from unittest.mock import call, patch
 import pytest
 from zigpy.exceptions import ZigbeeException
 import zigpy.profiles.zha
+from zigpy.quirks.registry import DeviceRegistry
+from zigpy.quirks.v2 import QuirkBuilder
 import zigpy.types
 from zigpy.zcl.clusters import general
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
@@ -20,6 +22,7 @@ from tests.common import (
     SIG_EP_TYPE,
     create_mock_zigpy_device,
     join_zigpy_device,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.const import (
@@ -795,3 +798,25 @@ async def test_device_properties(
     assert zha_device.is_router is None
     assert zha_device.is_end_device is None
     assert zha_device.is_coordinator is None
+
+
+async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
+    """Test quirks v2 device renaming."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .friendly_name(manufacturer="Lowe's", model="IRIS Keypad V2")
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    assert zha_device.model == "IRIS Keypad V2"
+    assert zha_device.manufacturer == "Lowe's"
