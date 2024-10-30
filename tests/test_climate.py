@@ -42,6 +42,7 @@ from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
     Thermostat as ThermostatEntity,
+    ZehnderThermostat,
 )
 from zha.application.platforms.climate.const import FanState
 from zha.application.platforms.sensor import (
@@ -120,6 +121,19 @@ CLIMATE_ZEN = {
     }
 }
 
+CLIMATE_ZEHNDER = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
+        SIG_EP_INPUT: [
+            zigpy.zcl.clusters.general.Basic.cluster_id,
+            zigpy.zcl.clusters.general.Identify.cluster_id,
+            zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
+        ],
+        SIG_EP_OUTPUT: [zigpy.zcl.clusters.general.Identify.cluster_id],
+    }
+}
+
 CLIMATE_MOES = {
     1: {
         SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
@@ -168,6 +182,7 @@ CLIMATE_ZONNSMART = {
 
 MANUF_SINOPE = "Sinope Technologies"
 MANUF_ZEN = "Zen Within"
+MANUF_ZEHNDER = "ZEHNDER GROUP VAUX ANDIGNY      "
 MANUF_MOES = "_TZE200_ckud7u2l"
 MANUF_BECA = "_TZE200_b6wax7g0"
 MANUF_ZONNSMART = "_TZE200_hue3yfsn"
@@ -487,6 +502,118 @@ async def test_climate_hvac_action_running_state_zen(
     )
     assert entity.state["hvac_action"] == "idle"
     assert sensor_entity.state["state"] == "idle"
+
+
+async def test_climate_hvac_action_running_state_zehnder(
+    zha_gateway: Gateway,
+):
+    """Test Zehnder hvac action via running state."""
+    device_climate_zehnder = await device_climate_mock(
+        zha_gateway, CLIMATE_ZEHNDER, manuf=MANUF_ZEHNDER
+    )
+
+    thrm_cluster = device_climate_zehnder.device.endpoints[1].thermostat
+
+    entity: ThermostatEntity = get_entity(
+        device_climate_zehnder, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    assert entity.state["hvac_action"] is None
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Cool_2nd_Stage_On}
+    )
+    assert entity.state["hvac_action"] == "cooling"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Fan_State_On}
+    )
+    assert entity.state["hvac_action"] == "fan"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Heat_2nd_Stage_On}
+    )
+    assert entity.state["hvac_action"] == "heating"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Fan_2nd_Stage_On}
+    )
+    assert entity.state["hvac_action"] == "fan"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Cool_State_On}
+    )
+    assert entity.state["hvac_action"] == "cooling"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Fan_3rd_Stage_On}
+    )
+    assert entity.state["hvac_action"] == "fan"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Heat_State_On}
+    )
+    assert entity.state["hvac_action"] == "heating"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x0029: Thermostat.RunningState.Idle}
+    )
+    assert entity.state["hvac_action"] == "off"
+
+    await send_attributes_report(
+        zha_gateway, thrm_cluster, {0x001C: Thermostat.SystemMode.Heat}
+    )
+    assert entity.state["hvac_action"] == "idle"
+
+
+@pytest.mark.parametrize(
+    "hvac_mode, sys_mode",
+    (
+        ("heat", Thermostat.SystemMode.Auto),
+        ("off", Thermostat.SystemMode.Off),
+        ("heat_cool", None),
+    ),
+)
+async def test_set_hvac_mode_zehnder(
+    zha_gateway: Gateway,
+    hvac_mode,
+    sys_mode,
+):
+    """Test setting hvac mode."""
+    device_climate_zehnder = await device_climate_mock(
+        zha_gateway, CLIMATE_ZEHNDER, manuf=MANUF_ZEHNDER
+    )
+
+    thrm_cluster = device_climate_zehnder.device.endpoints[1].thermostat
+    entity: ThermostatEntity = get_entity(
+        device_climate_zehnder, platform=Platform.CLIMATE, entity_type=ZehnderThermostat
+    )
+
+    assert entity.state["hvac_mode"] == "off"
+
+    await entity.async_set_hvac_mode(hvac_mode)
+    await zha_gateway.async_block_till_done()
+
+    if sys_mode is not None:
+        assert entity.state["hvac_mode"] == hvac_mode
+        assert thrm_cluster.write_attributes.call_count == 1
+        assert thrm_cluster.write_attributes.call_args[0][0] == {
+            "system_mode": sys_mode
+        }
+    else:
+        assert thrm_cluster.write_attributes.call_count == 0
+        assert entity.state["hvac_mode"] == "off"
+
+    # turn off
+    thrm_cluster.write_attributes.reset_mock()
+    await entity.async_set_hvac_mode("off")
+    await zha_gateway.async_block_till_done()
+
+    assert entity.state["hvac_mode"] == "off"
+    assert thrm_cluster.write_attributes.call_count == 1
+    assert thrm_cluster.write_attributes.call_args[0][0] == {
+        "system_mode": Thermostat.SystemMode.Off
+    }
 
 
 async def test_climate_hvac_action_pi_demand(
