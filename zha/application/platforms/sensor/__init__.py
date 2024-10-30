@@ -1143,7 +1143,7 @@ class Flow(Sensor):
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
 
-    def formatter(self, value: int) -> int | float | str | None:
+    def formatter(self, value: int) -> datetime | int | float | str | None:
         """Handle unknown value state."""
         if value == 0xFFFF:
             return None
