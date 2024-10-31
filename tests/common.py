@@ -552,3 +552,14 @@ def create_mock_zigpy_device(
                     cluster._attr_cache[attr_id] = value
 
     return device
+
+
+class ZhaJsonEncoder(json.JSONEncoder):
+    """JSON encoder to handle common Python data types, currently just `set`."""
+
+    def default(self, obj):
+        """Convert non-JSON types."""
+        if isinstance(obj, set):
+            return list(obj)
+
+        return super().default(obj)

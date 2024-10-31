@@ -770,7 +770,7 @@ def pytest_generate_tests(metafunc):
 
 async def test_devices_from_files(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    file_path: str,
+    file_path: pathlib.Path,
 ) -> None:
     """Test all devices."""
     with mock.patch(
