@@ -3,6 +3,7 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 from contextlib import suppress
+from datetime import datetime
 import itertools
 import json
 import logging
@@ -334,8 +335,9 @@ def zigpy_device_from_device_data(
     device = zigpy.device.Device(app, ieee, nwk)
     device.manufacturer = manufacturer
     device.model = model
+    device.last_seen = datetime.fromisoformat(device_data["last_seen"])
 
-    node_desc = zdo_t.NodeDescriptor(
+    device.node_desc = zdo_t.NodeDescriptor(
         logical_type=node_descriptor["logical_type"],
         complex_descriptor_available=node_descriptor["complex_descriptor_available"],
         user_descriptor_available=node_descriptor["user_descriptor_available"],
@@ -354,8 +356,6 @@ def zigpy_device_from_device_data(
         ],
         descriptor_capability_field=node_descriptor["descriptor_capability_field"],
     )
-    device.node_desc = node_desc
-    device.last_seen = time.time()
 
     orig_endpoints = (
         device_data["original_signature"]["endpoints"]
