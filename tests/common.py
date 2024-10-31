@@ -336,6 +336,8 @@ def zigpy_device_from_device_data(
     device.manufacturer = manufacturer
     device.model = model
     device.last_seen = datetime.fromisoformat(device_data["last_seen"])
+    device.lqi = int(device_data["lqi"]) if device_data["lqi"] is not None else None
+    device.rssi = int(device_data["rssi"]) if device_data["rssi"] is not None else None
 
     device.node_desc = zdo_t.NodeDescriptor(
         logical_type=node_descriptor["logical_type"],
