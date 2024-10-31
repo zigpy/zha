@@ -441,6 +441,35 @@ def zigpy_device_from_device_data(
                 else:
                     real_cluster.unsupported_attributes.add(unsupported_attr)
 
+    for obj in device_data["neighbors"]:
+        app.topology.neighbors[ieee].append(
+            zdo_t.Neighbor(
+                device_type=zdo_t.Neighbor.DeviceType[obj["device_type"]],
+                rx_on_when_idle=zdo_t.Neighbor.RxOnWhenIdle[obj["rx_on_when_idle"]],
+                relationship=zdo_t.Neighbor.Relationship[obj["relationship"]],
+                extended_pan_id=t.ExtendedPanId.convert(obj["extended_pan_id"]),
+                ieee=t.EUI64.convert(obj["ieee"]),
+                nwk=t.NWK.convert(obj["nwk"][2:]),
+                permit_joining=zdo_t.Neighbor.PermitJoins[obj["permit_joining"]],
+                reserved2=0,
+                depth=obj["depth"],
+                lqi=obj["lqi"],
+            )
+        )
+
+    for obj in device_data["routes"]:
+        app.topology.routes[ieee].append(
+            zdo_t.Route(
+                DstNWK=t.NWK.convert(obj["dest_nwk"][2:]),
+                RouteStatus=zdo_t.RouteStatus[obj["route_status"]],
+                MemoryConstrained=obj["memory_constrained"],
+                ManyToOne=obj["many_to_one"],
+                RouteRecordRequired=obj["route_record_required"],
+                Reserved=0,
+                NextHop=t.NWK.convert(obj["next_hop"][2:]),
+            )
+        )
+
     return device
 
 
