@@ -1294,13 +1294,19 @@ class Device(LogMixin, EventBase):
         for endpoint in self.device.non_zdo_endpoints:
             info["endpoints"][endpoint.endpoint_id] = {
                 "profile_id": endpoint.profile_id,
-                "device_type": endpoint.device_type,
-                "device_type_name": (
-                    PROFILES[endpoint.profile_id].DeviceType(endpoint.device_type).name
-                    if endpoint.profile_id in PROFILES
-                    and endpoint.device_type is not None
-                    else UNKNOWN
-                ),
+                "device_type": {
+                    "name": (
+                        (
+                            PROFILES[endpoint.profile_id]
+                            .DeviceType(endpoint.device_type)
+                            .name
+                        )
+                        if endpoint.profile_id in PROFILES
+                        and endpoint.device_type is not None
+                        else UNKNOWN
+                    ),
+                    "id": endpoint.device_type,
+                },
                 "in_clusters": [
                     {
                         "cluster_id": f"0x{cluster_id:04x}",
