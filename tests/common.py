@@ -591,6 +591,6 @@ class ZhaJsonEncoder(json.JSONEncoder):
     def default(self, obj):
         """Convert non-JSON types."""
         if isinstance(obj, set):
-            return list(obj)
+            return sorted(obj, key=repr)
 
         return super().default(obj)

@@ -77,20 +77,17 @@ _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
 
 
-def get_cluster_attr_data(cluster: Cluster) -> dict:
+def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
     """Return cluster attribute data."""
-    return {
-        "attributes": {
-            f"0x{attr_id:04x}": {
-                "attribute": repr(attr_def),
-                "value": cluster.get(attr_def.name),
-            }
-            for attr_id, attr_def in cluster.attributes.items()
-        },
-        "unsupported_attributes": sorted(
-            cluster.unsupported_attributes, key=lambda v: (isinstance(v, str), v)
-        ),
-    }
+    return [
+        {
+            "id": f"0x{attr_def.id:04x}",
+            "name": attr_def.name,
+            "value": cluster.get(attr_def.name),
+            "unsupported": (attr_def.id in cluster.unsupported_attributes),
+        }
+        for attr_def in cluster.attributes.values()
+    ]
 
 
 def get_device_automation_triggers(
@@ -1261,6 +1258,25 @@ class Device(LogMixin, EventBase):
         info["device_type"] = self.device_type
         info["active_coordinator"] = self.is_active_coordinator
 
+        node_desc = self.device.node_desc
+        info["node_descriptor"] = {
+            "logical_type": node_desc.logical_type.name,
+            "complex_descriptor_available": bool(
+                node_desc.complex_descriptor_available
+            ),
+            "user_descriptor_available": bool(node_desc.user_descriptor_available),
+            "reserved": node_desc.reserved,
+            "aps_flags": node_desc.aps_flags,
+            "frequency_band": node_desc.frequency_band,
+            "mac_capability_flags": node_desc.mac_capability_flags,
+            "manufacturer_code": node_desc.manufacturer_code,
+            "maximum_buffer_size": node_desc.maximum_buffer_size,
+            "maximum_incoming_transfer_size": node_desc.maximum_incoming_transfer_size,
+            "server_mask": node_desc.server_mask,
+            "maximum_outgoing_transfer_size": node_desc.maximum_outgoing_transfer_size,
+            "descriptor_capability_field": node_desc.descriptor_capability_field,
+        }
+
         topology = self.gateway.application_controller.topology
         info["neighbors"] = [
             {
@@ -1311,7 +1327,7 @@ class Device(LogMixin, EventBase):
                     {
                         "cluster_id": f"0x{cluster_id:04x}",
                         "endpoint_attribute": cluster.ep_attribute,
-                        **get_cluster_attr_data(cluster),
+                        "attributes": get_cluster_attr_data(cluster),
                     }
                     for cluster_id, cluster in endpoint.in_clusters.items()
                 ],
@@ -1319,7 +1335,7 @@ class Device(LogMixin, EventBase):
                     {
                         "cluster_id": f"0x{cluster_id:04x}",
                         "endpoint_attribute": cluster.ep_attribute,
-                        **get_cluster_attr_data(cluster),
+                        "attributes": get_cluster_attr_data(cluster),
                     }
                     for cluster_id, cluster in endpoint.out_clusters.items()
                 ],
@@ -1365,6 +1381,7 @@ class Device(LogMixin, EventBase):
 
         for (platform, _unique_id), platform_entity in self.platform_entities.items():
             info_object = dataclasses.asdict(platform_entity.info_object)
+            info_object["cluster_handlers"].sort(key=lambda i: i["unique_id"])
 
             for cluster_handler_info in info_object["cluster_handlers"]:
                 cluster_info = cluster_handler_info["cluster"]
