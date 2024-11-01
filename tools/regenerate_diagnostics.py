@@ -11,11 +11,7 @@ import pathlib
 from unittest.mock import patch
 
 from tests.common import ZhaJsonEncoder, join_zigpy_device, zigpy_device_from_json
-from tests.conftest import (
-    zha_data_fixture,
-    zha_gateway as zha_gateway_fixture,
-    zigpy_app_controller_fixture,
-)
+from tests.conftest import TestGateway, make_zha_data, make_zigpy_app_controller
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 
@@ -24,12 +20,11 @@ REPO_ROOT = pathlib.Path(__file__).parent.parent
 async def create_zha_gateway():
     """Turn a pytest fixture into a normal context manager."""
     # This isn't the way Pytest is meant to be used :)
-    async for zigpy_app_controller in zigpy_app_controller_fixture.__wrapped__():
-        async for zha_gateway in zha_gateway_fixture.__wrapped__(
-            zha_data=zha_data_fixture.__wrapped__(),
-            zigpy_app_controller=zigpy_app_controller,
-            caplog=None,
-        ):
+    with make_zigpy_app_controller() as zigpy_app_controller:
+        async with TestGateway(
+            data=make_zha_data(),
+            app=zigpy_app_controller,
+        ) as zha_gateway:
             yield zha_gateway
 
 

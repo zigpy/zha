@@ -792,6 +792,7 @@ async def test_devices_from_files(
         # in this state, this will compound the "fix" repeatedly.
         with mock.patch("zigpy.zcl.Cluster._update_attribute"):
             zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+            await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
