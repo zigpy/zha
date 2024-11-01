@@ -780,7 +780,12 @@ async def test_devices_from_files(
         zigpy_device = await zigpy_device_from_json(
             zha_gateway.application_controller, file_path
         )
-        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+        # XXX: attribute updates during device initialization unfortunately triggers
+        # logic within quirks to "fix" attributes. Since these attributes are *read out*
+        # in this state, this will compound the "fix" repeatedly.
+        with mock.patch("zigpy.zcl.Cluster._update_attribute"):
+            zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():

@@ -8,6 +8,7 @@ import asyncio
 import contextlib
 import json
 import pathlib
+from unittest.mock import patch
 
 from tests.common import ZhaJsonEncoder, join_zigpy_device, zigpy_device_from_json
 from tests.conftest import (
@@ -41,7 +42,9 @@ async def main():
                 device_json,
             )
 
-            zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+            with patch("zigpy.zcl.Cluster._update_attribute"):
+                zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
             new_json = json.dumps(
                 zha_device.get_diagnostics_json(), indent=2, cls=ZhaJsonEncoder
             )
