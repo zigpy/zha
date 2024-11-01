@@ -277,18 +277,31 @@ def zha_data_fixture() -> ZHAData:
 class TestGateway:
     """Test ZHA gateway context manager."""
 
-    def __init__(self, data: ZHAData):
+    def __init__(self, data: ZHAData, app: ControllerApplication):
         """Initialize the ZHA gateway."""
         self.zha_data: ZHAData = data
         self.zha_gateway: Gateway
+        self.app = app
 
     async def __aenter__(self) -> Gateway:
         """Start the ZHA gateway."""
-        self.zha_gateway = await Gateway.async_from_config(self.zha_data)
-        await self.zha_gateway.async_initialize()
-        await self.zha_gateway.async_block_till_done()
-        await self.zha_gateway.async_initialize_devices_and_entities()
-        INSTANCES.append(self.zha_gateway)
+
+        with (
+            patch(
+                "bellows.zigbee.application.ControllerApplication.new",
+                return_value=self.app,
+            ),
+            patch(
+                "bellows.zigbee.application.ControllerApplication",
+                return_value=self.app,
+            ),
+        ):
+            self.zha_gateway = await Gateway.async_from_config(self.zha_data)
+            await self.zha_gateway.async_initialize()
+            await self.zha_gateway.async_block_till_done()
+            await self.zha_gateway.async_initialize_devices_and_entities()
+            INSTANCES.append(self.zha_gateway)
+
         return self.zha_gateway
 
     async def __aexit__(
@@ -307,19 +320,8 @@ async def zha_gateway(
     caplog,  # pylint: disable=unused-argument
 ):
     """Set up ZHA component."""
-
-    with (
-        patch(
-            "bellows.zigbee.application.ControllerApplication.new",
-            return_value=zigpy_app_controller,
-        ),
-        patch(
-            "bellows.zigbee.application.ControllerApplication",
-            return_value=zigpy_app_controller,
-        ),
-    ):
-        async with TestGateway(zha_data) as gateway:
-            yield gateway
+    async with TestGateway(zha_data, zigpy_app_controller) as gateway:
+        yield gateway
 
 
 @pytest.fixture(scope="session", autouse=True)
