@@ -812,6 +812,7 @@ async def test_devices_from_files(
                 unique_id_migrations[key] = entity
 
         assert zha_device is not None
+        zha_device.get_diagnostics_json()
 
         device_data = json.loads(
             await asyncio.get_running_loop().run_in_executor(None, file_path.read_text)
