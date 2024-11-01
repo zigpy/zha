@@ -2,7 +2,6 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from contextlib import suppress
 from datetime import datetime
 import itertools
 import json
@@ -335,40 +334,21 @@ def zigpy_device_from_device_data(
     device.last_seen = datetime.fromisoformat(device_data["last_seen"])
     device.lqi = int(device_data["lqi"]) if device_data["lqi"] is not None else None
     device.rssi = int(device_data["rssi"]) if device_data["rssi"] is not None else None
-
-    node_desc = device_data["node_descriptor"]
-    device.node_desc = zdo_t.NodeDescriptor(
-        logical_type=node_desc["logical_type"],
-        complex_descriptor_available=node_desc["complex_descriptor_available"],
-        user_descriptor_available=node_desc["user_descriptor_available"],
-        reserved=node_desc["reserved"],
-        aps_flags=node_desc["aps_flags"],
-        frequency_band=node_desc["frequency_band"],
-        mac_capability_flags=node_desc["mac_capability_flags"],
-        manufacturer_code=node_desc["manufacturer_code"],
-        maximum_buffer_size=node_desc["maximum_buffer_size"],
-        maximum_incoming_transfer_size=node_desc["maximum_incoming_transfer_size"],
-        server_mask=node_desc["server_mask"],
-        maximum_outgoing_transfer_size=node_desc["maximum_outgoing_transfer_size"],
-        descriptor_capability_field=node_desc["descriptor_capability_field"],
-    )
+    device.node_desc = zdo_t.NodeDescriptor(**device_data["node_descriptor"])
 
     if device_data.get("original_signature", {}):
         for epid, ep in device_data["original_signature"]["endpoints"].items():
             endpoint = device.add_endpoint(int(epid))
-            profile = None
-            with suppress(Exception):
-                profile = zigpy.profiles.PROFILES[int(ep["profile_id"], 16)]
+            profile_id = int(ep["profile_id"], 16)
+            device_type = int(ep["device_type"], 16)
 
-            endpoint.profile_id = (
-                profile.PROFILE_ID if profile is not None else int(ep["profile_id"], 16)
-            )
-
-            endpoint.device_type = (
-                profile.DeviceType(int(ep["device_type"], 16))
-                if profile is not None
-                else int(ep["device_type"], 16)
-            )
+            if profile_id in zigpy.profiles.PROFILES:
+                profile = zigpy.profiles.PROFILES[profile_id]
+                endpoint.profile_id = profile.PROFILE_ID
+                endpoint.device_type = profile.DeviceType(device_type)
+            else:
+                endpoint.profile_id = profile_id
+                endpoint.device_type = device_type
 
             for cluster_id in ep["input_clusters"]:
                 endpoint.add_input_cluster(int(cluster_id, 16))
@@ -378,19 +358,17 @@ def zigpy_device_from_device_data(
     else:
         for epid, ep in device_data["endpoints"].items():
             endpoint = device.add_endpoint(int(epid))
-            profile = None
-            with suppress(Exception):
-                profile = zigpy.profiles.PROFILES[ep["profile_id"]]
 
-            endpoint.profile_id = (
-                profile.PROFILE_ID if profile is not None else ep["profile_id"]
-            )
+            profile_id = ep["profile_id"]
+            device_type = ep["device_type"]["id"]
 
-            endpoint.device_type = (
-                profile.DeviceType(ep["device_type"]["id"])
-                if profile is not None
-                else ep["device_type"]["id"]
-            )
+            if profile_id in zigpy.profiles.PROFILES:
+                profile = zigpy.profiles.PROFILES[profile_id]
+                endpoint.profile_id = profile.PROFILE_ID
+                endpoint.device_type = profile.DeviceType(device_type)
+            else:
+                endpoint.profile_id = profile_id
+                endpoint.device_type = device_type
 
             for cluster in ep["in_clusters"]:
                 endpoint.add_input_cluster(int(cluster["cluster_id"], 16))

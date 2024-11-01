@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable
+from collections import defaultdict, Iterable
 import copy
 import dataclasses
 from dataclasses import dataclass
@@ -1377,7 +1377,7 @@ class Device(LogMixin, EventBase):
 
             info["original_signature"] = original_signature
 
-        info["zha_lib_entities"] = {}
+        info["zha_lib_entities"] = defaultdict(list)
 
         for (platform, _unique_id), platform_entity in self.platform_entities.items():
             info_object = dataclasses.asdict(platform_entity.info_object)
@@ -1388,9 +1388,6 @@ class Device(LogMixin, EventBase):
 
                 if cluster_info is not None:
                     cluster_info.pop("commands", None)
-
-            if platform not in info["zha_lib_entities"]:
-                info["zha_lib_entities"][platform] = []
 
             info["zha_lib_entities"][platform].append(
                 {
