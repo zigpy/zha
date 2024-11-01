@@ -44,6 +44,7 @@ async def main():
 
             with patch("zigpy.zcl.Cluster._update_attribute"):
                 zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+                await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
             new_json = json.dumps(
                 zha_device.get_diagnostics_json(), indent=2, cls=ZhaJsonEncoder
