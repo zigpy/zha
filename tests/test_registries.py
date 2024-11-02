@@ -26,17 +26,6 @@ QUIRK_ID = "quirk_id"
 
 
 @pytest.fixture
-def zha_device():
-    """Return a mock of ZHA device."""
-    dev = mock.MagicMock()
-    dev.manufacturer = MANUFACTURER
-    dev.model = MODEL
-    dev.quirk_class = QUIRK_CLASS
-    dev.quirk_id = QUIRK_ID
-    return dev
-
-
-@pytest.fixture
 def cluster_handlers(cluster_handler):
     """Return a mock of cluster_handlers."""
 

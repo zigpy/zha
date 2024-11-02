@@ -1,16 +1,16 @@
 """Test ZHA device switch."""
 
 import asyncio
-from collections.abc import Callable
 import logging
 import time
 from unittest import mock
 from unittest.mock import call, patch
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
 import zigpy.profiles.zha
+from zigpy.quirks.registry import DeviceRegistry
+from zigpy.quirks.v2 import QuirkBuilder
 import zigpy.types
 from zigpy.zcl.clusters import general
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
@@ -22,6 +22,7 @@ from tests.common import (
     SIG_EP_TYPE,
     create_mock_zigpy_device,
     join_zigpy_device,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.const import (
@@ -36,110 +37,63 @@ from zha.application.gateway import Gateway
 from zha.application.platforms.sensor import LQISensor, RSSISensor
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ClusterBinding, Device, get_device_automation_triggers
+from zha.zigbee.device import ClusterBinding, get_device_automation_triggers
 from zha.zigbee.group import Group
 
 
-@pytest.fixture
-def zigpy_device(zha_gateway: Gateway) -> Callable[..., ZigpyDevice]:
-    """Device tracker zigpy device."""
+def zigpy_device(
+    zha_gateway: Gateway, with_basic_cluster_handler: bool = True, **kwargs
+):
+    """Return a ZigpyDevice with a switch cluster."""
+    in_clusters = [general.OnOff.cluster_id]
+    if with_basic_cluster_handler:
+        in_clusters.append(general.Basic.cluster_id)
 
-    def _dev(with_basic_cluster_handler: bool = True, **kwargs):
-        in_clusters = [general.OnOff.cluster_id]
-        if with_basic_cluster_handler:
-            in_clusters.append(general.Basic.cluster_id)
-
-        endpoints = {
-            3: {
-                SIG_EP_INPUT: in_clusters,
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
-            }
+    endpoints = {
+        3: {
+            SIG_EP_INPUT: in_clusters,
+            SIG_EP_OUTPUT: [],
+            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
         }
-        return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)
+    }
+    return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)
 
-    return _dev
 
+def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster_handler: bool = True):
+    """Return a ZigpyDevice with a switch cluster."""
+    in_clusters = [general.OnOff.cluster_id]
+    if with_basic_cluster_handler:
+        in_clusters.append(general.Basic.cluster_id)
 
-@pytest.fixture
-def zigpy_device_mains(zha_gateway: Gateway) -> Callable[..., ZigpyDevice]:
-    """Device tracker zigpy device."""
-
-    def _dev(with_basic_cluster_handler: bool = True):
-        in_clusters = [general.OnOff.cluster_id]
-        if with_basic_cluster_handler:
-            in_clusters.append(general.Basic.cluster_id)
-
-        endpoints = {
-            3: {
-                SIG_EP_INPUT: in_clusters,
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
-            }
+    endpoints = {
+        3: {
+            SIG_EP_INPUT: in_clusters,
+            SIG_EP_OUTPUT: [],
+            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
         }
-        return create_mock_zigpy_device(
-            zha_gateway,
-            endpoints,
-            node_descriptor=zdo_t.NodeDescriptor(
-                logical_type=zdo_t.LogicalType.EndDevice,
-                complex_descriptor_available=0,
-                user_descriptor_available=0,
-                reserved=0,
-                aps_flags=0,
-                frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
-                mac_capability_flags=(
-                    zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
-                    | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
-                ),
-                manufacturer_code=4447,
-                maximum_buffer_size=127,
-                maximum_incoming_transfer_size=100,
-                server_mask=11264,
-                maximum_outgoing_transfer_size=100,
-                descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
-            ),
-        )
-
-    return _dev
-
-
-@pytest.fixture
-def device_with_basic_cluster_handler(
-    zigpy_device_mains: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
-) -> ZigpyDevice:
-    """Return a ZHA device with a basic cluster handler present."""
-    return zigpy_device_mains(with_basic_cluster_handler=True)
-
-
-@pytest.fixture
-def device_without_basic_cluster_handler(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
-) -> ZigpyDevice:
-    """Return a ZHA device without a basic cluster handler present."""
-    return zigpy_device(with_basic_cluster_handler=False)
-
-
-@pytest.fixture
-async def ota_zha_device(
-    zha_gateway: Gateway,
-) -> Device:
-    """ZHA device with OTA cluster fixture."""
-    zigpy_dev = create_mock_zigpy_device(
+    }
+    return create_mock_zigpy_device(
         zha_gateway,
-        {
-            1: {
-                SIG_EP_INPUT: [general.Basic.cluster_id],
-                SIG_EP_OUTPUT: [general.Ota.cluster_id],
-                SIG_EP_TYPE: 0x1234,
-            }
-        },
-        "00:11:22:33:44:55:66:77",
-        "test manufacturer",
-        "test model",
+        endpoints,
+        node_descriptor=zdo_t.NodeDescriptor(
+            logical_type=zdo_t.LogicalType.EndDevice,
+            complex_descriptor_available=0,
+            user_descriptor_available=0,
+            reserved=0,
+            aps_flags=0,
+            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
+            mac_capability_flags=(
+                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
+                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
+            ),
+            manufacturer_code=4447,
+            maximum_buffer_size=127,
+            maximum_incoming_transfer_size=100,
+            server_mask=11264,
+            maximum_outgoing_transfer_size=100,
+            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
+        ),
     )
-
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
-    return zha_device
 
 
 async def _send_time_changed(zha_gateway: Gateway, seconds: int):
@@ -152,13 +106,14 @@ async def _send_time_changed(zha_gateway: Gateway, seconds: int):
     "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
     new=mock.AsyncMock(),
 )
-@pytest.mark.looptime
 async def test_check_available_success(
     zha_gateway: Gateway,
-    device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability success on 1st try."""
+    device_with_basic_cluster_handler = zigpy_device_mains(
+        zha_gateway, with_basic_cluster_handler=True
+    )
     zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster_handler)
     basic_ch = device_with_basic_cluster_handler.endpoints[3].basic
 
@@ -247,13 +202,14 @@ async def test_check_available_success(
     "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
     new=mock.AsyncMock(),
 )
-@pytest.mark.looptime
 async def test_check_available_unsuccessful(
     zha_gateway: Gateway,
-    device_with_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Check device availability all tries fail."""
 
+    device_with_basic_cluster_handler = zigpy_device_mains(
+        zha_gateway, with_basic_cluster_handler=True
+    )
     zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster_handler)
     basic_ch = device_with_basic_cluster_handler.endpoints[3].basic
 
@@ -317,13 +273,14 @@ async def test_check_available_unsuccessful(
     "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
     new=mock.AsyncMock(),
 )
-@pytest.mark.looptime
 async def test_check_available_no_basic_cluster_handler(
     zha_gateway: Gateway,
-    device_without_basic_cluster_handler: ZigpyDevice,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability for a device without basic cluster."""
+    device_without_basic_cluster_handler = zigpy_device(
+        zha_gateway, with_basic_cluster_handler=False
+    )
     caplog.set_level(logging.DEBUG, logger="homeassistant.components.zha")
 
     zha_device = await join_zigpy_device(
@@ -346,17 +303,20 @@ async def test_check_available_no_basic_cluster_handler(
 
 
 async def test_device_is_active_coordinator(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test that the current coordinator is uniquely detected."""
 
-    current_coord_dev = zigpy_device(ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000)
+    current_coord_dev = zigpy_device(
+        zha_gateway, ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000
+    )
     current_coord_dev.node_desc = current_coord_dev.node_desc.replace(
         logical_type=zdo_t.LogicalType.Coordinator
     )
 
-    old_coord_dev = zigpy_device(ieee="aa:bb:cc:dd:ee:ff:00:12", nwk=0x0000)
+    old_coord_dev = zigpy_device(
+        zha_gateway, ieee="aa:bb:cc:dd:ee:ff:00:12", nwk=0x0000
+    )
     old_coord_dev.node_desc = old_coord_dev.node_desc.replace(
         logical_type=zdo_t.LogicalType.Coordinator
     )
@@ -377,12 +337,13 @@ async def test_device_is_active_coordinator(
 
 
 async def test_coordinator_info_uses_node_info(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test that the current coordinator uses strings from `node_info`."""
 
-    current_coord_dev = zigpy_device(ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000)
+    current_coord_dev = zigpy_device(
+        zha_gateway, ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000
+    )
     current_coord_dev.node_desc = current_coord_dev.node_desc.replace(
         logical_type=zdo_t.LogicalType.Coordinator
     )
@@ -400,12 +361,13 @@ async def test_coordinator_info_uses_node_info(
 
 
 async def test_coordinator_info_generic_name(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test that the current coordinator uses strings from `node_info`."""
 
-    current_coord_dev = zigpy_device(ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000)
+    current_coord_dev = zigpy_device(
+        zha_gateway, ieee="aa:bb:cc:dd:ee:ff:00:11", nwk=0x0000
+    )
     current_coord_dev.node_desc = current_coord_dev.node_desc.replace(
         logical_type=zdo_t.LogicalType.Coordinator
     )
@@ -423,11 +385,10 @@ async def test_coordinator_info_generic_name(
 
 
 async def test_async_get_clusters(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_clusters method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_clusters() == {
@@ -446,11 +407,10 @@ async def test_async_get_clusters(
 
 
 async def test_async_get_groupable_endpoints(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_groupable_endpoints method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -458,11 +418,10 @@ async def test_async_get_groupable_endpoints(
 
 
 async def test_async_get_std_clusters(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_std_clusters method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zigpy_dev.endpoints[3].profile_id = zigpy.profiles.zha.PROFILE_ID
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -482,11 +441,10 @@ async def test_async_get_std_clusters(
 
 
 async def test_async_get_cluster(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_cluster(3, general.OnOff.cluster_id) == (
@@ -495,11 +453,10 @@ async def test_async_get_cluster(
 
 
 async def test_async_get_cluster_attributes(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster_attributes method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert (
@@ -515,11 +472,10 @@ async def test_async_get_cluster_attributes(
 
 
 async def test_async_get_cluster_commands(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster_commands method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_cluster_commands(3, general.OnOff.cluster_id) == {
@@ -529,11 +485,10 @@ async def test_async_get_cluster_commands(
 
 
 async def test_write_zigbee_attribute(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test write_zigbee_attribute method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with pytest.raises(
@@ -590,11 +545,10 @@ async def test_write_zigbee_attribute(
 
 
 async def test_issue_cluster_command(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test issue_cluster_command method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with pytest.raises(
@@ -626,12 +580,11 @@ async def test_issue_cluster_command(
 
 
 async def test_async_add_to_group_remove_from_group(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test async_add_to_group and async_remove_from_group methods."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -696,16 +649,15 @@ async def test_async_add_to_group_remove_from_group(
 
 
 async def test_async_bind_to_group(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test async_bind_to_group method."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    zigpy_dev_remote = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev_remote = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zigpy_dev_remote._ieee = zigpy.types.EUI64.convert("00:0d:7f:00:0a:90:69:e8")
     zigpy_dev_remote.endpoints[3].add_output_cluster(general.OnOff.cluster_id)
     zha_device_remote = await join_zigpy_device(zha_gateway, zigpy_dev_remote)
@@ -737,11 +689,10 @@ async def test_async_bind_to_group(
 
 
 async def test_device_automation_triggers(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test device automation triggers."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert get_device_automation_triggers(zha_device) == {
@@ -755,11 +706,10 @@ async def test_device_automation_triggers(
 
 
 async def test_device_properties(
-    zigpy_device: Callable[..., ZigpyDevice],  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test device properties."""
-    zigpy_dev = zigpy_device(with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.is_mains_powered is False
@@ -848,3 +798,25 @@ async def test_device_properties(
     assert zha_device.is_router is None
     assert zha_device.is_end_device is None
     assert zha_device.is_coordinator is None
+
+
+async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
+    """Test quirks v2 device renaming."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .friendly_name(manufacturer="Lowe's", model="IRIS Keypad V2")
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    assert zha_device.model == "IRIS Keypad V2"
+    assert zha_device.manufacturer == "Lowe's"

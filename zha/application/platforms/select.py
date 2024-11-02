@@ -704,7 +704,7 @@ class SonoffPresenceDetectionSensitivityEnum(types.enum8):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY, models={"SNZB-06P"}
+    cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY, models={"SNZB-06P", "SNZB-03P"}
 )
 class SonoffPresenceDetectionSensitivity(ZCLEnumSelectEntity):
     """Entity to set the detection sensitivity of the Sonoff SNZB-06P."""

@@ -27,20 +27,28 @@ from zha.zigbee.device import Device
 _LOGGER = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
-    """Device tracker zigpy device."""
-    endpoints = {
-        1: {
-            SIG_EP_INPUT: [security.IasAce.cluster_id],
-            SIG_EP_OUTPUT: [],
-            SIG_EP_TYPE: zha.DeviceType.IAS_ANCILLARY_CONTROL,
-            SIG_EP_PROFILE: zha.PROFILE_ID,
-        }
+ZIGPY_DEVICE = {
+    1: {
+        SIG_EP_INPUT: [security.IasAce.cluster_id],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_TYPE: zha.DeviceType.IAS_ANCILLARY_CONTROL,
+        SIG_EP_PROFILE: zha.PROFILE_ID,
     }
-    return create_mock_zigpy_device(
+}
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test zhaws alarm control panel platform."""
+    zigpy_device: ZigpyDevice = create_mock_zigpy_device(
         zha_gateway,
-        endpoints,
+        ZIGPY_DEVICE,
         node_descriptor=zdo_t.NodeDescriptor(
             logical_type=zdo_t.LogicalType.EndDevice,
             complex_descriptor_available=0,
@@ -61,18 +69,6 @@ def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
             descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
         ),
     )
-
-
-@patch(
-    "zigpy.zcl.clusters.security.IasAce.client_command",
-    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
-)
-async def test_alarm_control_panel(
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
-    """Test zhaws alarm control panel platform."""
     zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
     alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(

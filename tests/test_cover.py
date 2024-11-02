@@ -6,7 +6,6 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from zigpy.device import Device as ZigpyDevice
 import zigpy.profiles.zha
 import zigpy.types
 from zigpy.zcl.clusters import closures, general
@@ -42,70 +41,48 @@ from zha.exceptions import ZHAException
 Default_Response = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Default_Response].schema
 
 
-@pytest.fixture
-def zigpy_cover_device(zha_gateway: Gateway) -> ZigpyDevice:
-    """Zigpy cover device."""
-
-    endpoints = {
-        1: {
-            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_DEVICE,
-            SIG_EP_INPUT: [closures.WindowCovering.cluster_id],
-            SIG_EP_OUTPUT: [],
-        }
+ZIGPY_COVER_DEVICE = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_DEVICE,
+        SIG_EP_INPUT: [closures.WindowCovering.cluster_id],
+        SIG_EP_OUTPUT: [],
     }
-    return create_mock_zigpy_device(zha_gateway, endpoints)
+}
 
 
-@pytest.fixture
-def zigpy_cover_remote(zha_gateway: Gateway) -> ZigpyDevice:
-    """Zigpy cover remote device."""
-
-    endpoints = {
-        1: {
-            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_CONTROLLER,
-            SIG_EP_INPUT: [],
-            SIG_EP_OUTPUT: [closures.WindowCovering.cluster_id],
-        }
+ZIGPY_COVER_REMOTE = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.WINDOW_COVERING_CONTROLLER,
+        SIG_EP_INPUT: [],
+        SIG_EP_OUTPUT: [closures.WindowCovering.cluster_id],
     }
-    return create_mock_zigpy_device(zha_gateway, endpoints)
+}
 
 
-@pytest.fixture
-def zigpy_shade_device(zha_gateway: Gateway) -> ZigpyDevice:
-    """Zigpy shade device."""
-
-    endpoints = {
-        1: {
-            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SHADE,
-            SIG_EP_INPUT: [
-                closures.Shade.cluster_id,
-                general.LevelControl.cluster_id,
-                general.OnOff.cluster_id,
-            ],
-            SIG_EP_OUTPUT: [],
-        }
+ZIGPY_SHADE_DEVICE = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SHADE,
+        SIG_EP_INPUT: [
+            closures.Shade.cluster_id,
+            general.LevelControl.cluster_id,
+            general.OnOff.cluster_id,
+        ],
+        SIG_EP_OUTPUT: [],
     }
-    return create_mock_zigpy_device(zha_gateway, endpoints)
+}
 
 
-@pytest.fixture
-def zigpy_keen_vent(zha_gateway: Gateway) -> ZigpyDevice:
-    """Zigpy Keen Vent device."""
-
-    endpoints = {
-        1: {
-            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-            SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT,
-            SIG_EP_INPUT: [general.LevelControl.cluster_id, general.OnOff.cluster_id],
-            SIG_EP_OUTPUT: [],
-        }
+ZIGPY_KEEN_VENT = {
+    1: {
+        SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+        SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT,
+        SIG_EP_INPUT: [general.LevelControl.cluster_id, general.OnOff.cluster_id],
+        SIG_EP_OUTPUT: [],
     }
-    return create_mock_zigpy_device(
-        zha_gateway, endpoints, manufacturer="Keen Home Inc", model="SV02-612-MP-1.3"
-    )
+}
 
 
 WCAttrs = closures.WindowCovering.AttributeDefs
@@ -116,11 +93,11 @@ WCCS = closures.WindowCovering.ConfigStatus
 
 async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     zha_gateway: Gateway,
-    zigpy_cover_device,
 ) -> None:
     """Test ZHA cover platform."""
 
     # load up cover domain
+    zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     cluster = zigpy_cover_device.endpoints[1].window_covering
     cluster.PLUGGED_ATTR_READS = {
         WCAttrs.current_position_lift_percentage.name: 0,
@@ -165,11 +142,11 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
 
 
 async def test_cover(
-    zigpy_cover_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test zha cover platform."""
 
+    zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     cluster = zigpy_cover_device.endpoints.get(1).window_covering
     cluster.PLUGGED_ATTR_READS = {
         WCAttrs.current_position_lift_percentage.name: 0,
@@ -393,10 +370,11 @@ async def test_cover(
         assert cluster.request.call_args[1]["expect_reply"] is True
 
 
-async def test_cover_failures(zha_gateway: Gateway, zigpy_cover_device) -> None:
+async def test_cover_failures(zha_gateway: Gateway) -> None:
     """Test ZHA cover platform failure cases."""
 
     # load up cover domain
+    zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     cluster = zigpy_cover_device.endpoints[1].window_covering
     cluster.PLUGGED_ATTR_READS = {
         WCAttrs.current_position_tilt_percentage.name: 42,
@@ -551,11 +529,11 @@ async def test_cover_failures(zha_gateway: Gateway, zigpy_cover_device) -> None:
 
 
 async def test_shade(
-    zigpy_shade_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test zha cover platform for shade device type."""
 
+    zigpy_shade_device = create_mock_zigpy_device(zha_gateway, ZIGPY_SHADE_DEVICE)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_shade_device)
     cluster_on_off = zigpy_shade_device.endpoints.get(1).on_off
     cluster_level = zigpy_shade_device.endpoints.get(1).level
@@ -712,11 +690,16 @@ async def test_shade(
 
 
 async def test_keen_vent(
-    zigpy_keen_vent: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test keen vent."""
 
+    zigpy_keen_vent = create_mock_zigpy_device(
+        zha_gateway,
+        ZIGPY_KEEN_VENT,
+        manufacturer="Keen Home Inc",
+        model="SV02-612-MP-1.3",
+    )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_keen_vent)
     cluster_on_off = zigpy_keen_vent.endpoints.get(1).on_off
     cluster_level = zigpy_keen_vent.endpoints.get(1).level
@@ -772,10 +755,11 @@ async def test_keen_vent(
         assert entity.state["current_position"] == 100
 
 
-async def test_cover_remote(zha_gateway: Gateway, zigpy_cover_remote) -> None:
+async def test_cover_remote(zha_gateway: Gateway) -> None:
     """Test ZHA cover remote."""
 
     # load up cover domain
+    zigpy_cover_remote = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_REMOTE)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_remote)
     zha_device.emit_zha_event = MagicMock(wraps=zha_device.emit_zha_event)
 
@@ -807,10 +791,10 @@ async def test_cover_remote(zha_gateway: Gateway, zigpy_cover_remote) -> None:
 
 
 async def test_cover_state_restoration(
-    zigpy_cover_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test the cover state restoration."""
+    zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
     entity = get_entity(zha_device, platform=Platform.COVER)
 

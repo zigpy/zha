@@ -34,8 +34,7 @@ from zha.application.platforms.update import (
 from zha.exceptions import ZHAException
 
 
-@pytest.fixture
-def zigpy_device(zha_gateway: Gateway):
+def zigpy_device_mock(zha_gateway: Gateway):
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -130,7 +129,7 @@ def make_packet(
 
 async def setup_test_data(
     zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
+    zigpy_device: ZigpyDevice,
 ):
     """Set up test data for the tests."""
     installed_fw_version = 0x12345678
@@ -157,11 +156,9 @@ async def setup_test_data(
     return zha_device, ota_cluster, fw_image, installed_fw_version
 
 
-async def test_firmware_update_notification_from_zigpy(
-    zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_firmware_update_notification_from_zigpy(zha_gateway: Gateway) -> None:
     """Test ZHA update platform - firmware update notification."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
@@ -197,11 +194,9 @@ async def test_firmware_update_notification_from_zigpy(
 
 
 @patch("zigpy.device.AFTER_OTA_ATTR_READ_DELAY", 0.01)
-async def test_firmware_update_success(
-    zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_firmware_update_success(zha_gateway: Gateway) -> None:
     """Test ZHA update platform - firmware update success."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
@@ -374,11 +369,9 @@ async def test_firmware_update_success(
     assert not entity.state[ATTR_IN_PROGRESS]
 
 
-async def test_firmware_update_raises(
-    zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_firmware_update_raises(zha_gateway: Gateway) -> None:
     """Test ZHA update platform - firmware update raises."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
@@ -453,11 +446,9 @@ async def test_firmware_update_raises(
         await zha_gateway.async_block_till_done()
 
 
-async def test_firmware_update_downgrade(
-    zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_firmware_update_downgrade(zha_gateway: Gateway) -> None:
     """Test ZHA update platform - force a firmware downgrade."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
@@ -530,11 +521,9 @@ async def test_firmware_update_downgrade(
     )
 
 
-async def test_firmware_update_no_image(
-    zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_firmware_update_no_image(zha_gateway: Gateway) -> None:
     """Test ZHA update platform - no images exist."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
@@ -577,9 +566,9 @@ async def test_firmware_update_no_image(
 
 async def test_firmware_update_latest_version_even_if_downgrade(
     zha_gateway: Gateway,
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA update platform - `latest_version` always reflects the latest."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )

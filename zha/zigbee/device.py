@@ -16,6 +16,7 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 import zigpy.quirks
+from zigpy.quirks.v2 import QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.zcl.clusters import Cluster
@@ -266,6 +267,11 @@ class Device(LogMixin, EventBase):
         """Return ieee address for device."""
         return self._zigpy_device.ieee
 
+    @property
+    def quirk_metadata(self) -> QuirksV2RegistryEntry | None:
+        """Return the quirk metadata for this device."""
+        return getattr(self._zigpy_device, "quirk_metadata", None)
+
     @cached_property
     def manufacturer(self) -> str:
         """Return manufacturer for device."""
@@ -276,6 +282,12 @@ class Device(LogMixin, EventBase):
             if manufacturer is None:
                 return ""
             return manufacturer
+
+        if (
+            self.quirk_metadata is not None
+            and self.quirk_metadata.friendly_name is not None
+        ):
+            return self.quirk_metadata.friendly_name.manufacturer
 
         if self._zigpy_device.manufacturer is None:
             return UNKNOWN_MANUFACTURER
@@ -290,6 +302,12 @@ class Device(LogMixin, EventBase):
             if model is None:
                 return f"Generic Zigbee Coordinator ({self.gateway.radio_type.pretty_name})"
             return model
+
+        if (
+            self.quirk_metadata is not None
+            and self.quirk_metadata.friendly_name is not None
+        ):
+            return self.quirk_metadata.friendly_name.model
 
         if self._zigpy_device.model is None:
             return UNKNOWN_MODEL

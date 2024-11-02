@@ -31,6 +31,7 @@ from zha.zigbee.cluster_handlers.const import (
     IKEA_REMOTE_CLUSTER,
     INOVELLI_CLUSTER,
     OSRAM_BUTTON_CLUSTER,
+    PHILIPS_CONTACT_CLUSTER,
     PHILLIPS_REMOTE_CLUSTER,
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_DEFAULT,
@@ -76,6 +77,17 @@ class OsramButtonClusterHandler(ClusterHandler):
     """Osram button cluster handler."""
 
     REPORT_CONFIG = ()
+
+
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(PHILIPS_CONTACT_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(PHILIPS_CONTACT_CLUSTER)
+class PhillipsContactClusterHandler(ClusterHandler):
+    """Phillips contact cluster handler."""
+
+    REPORT_CONFIG = (
+        AttrReportConfig(attr="contact", config=REPORT_CONFIG_IMMEDIATE),
+        AttrReportConfig(attr="tamper", config=REPORT_CONFIG_IMMEDIATE),
+    )
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(PHILLIPS_REMOTE_CLUSTER)

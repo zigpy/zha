@@ -4,7 +4,6 @@ import asyncio
 import time
 from unittest.mock import AsyncMock
 
-import pytest
 import zigpy.profiles.zha
 from zigpy.zcl.clusters import general
 
@@ -24,33 +23,27 @@ from zha.application.platforms.device_tracker import SourceType
 from zha.application.registries import SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
 
 
-@pytest.fixture
-def zigpy_device_dt(zha_gateway: Gateway) -> zigpy.device.Device:
-    """Device tracker zigpy device."""
-    endpoints = {
-        1: {
-            SIG_EP_INPUT: [
-                general.Basic.cluster_id,
-                general.PowerConfiguration.cluster_id,
-                general.Identify.cluster_id,
-                general.PollControl.cluster_id,
-                general.BinaryInput.cluster_id,
-            ],
-            SIG_EP_OUTPUT: [general.Identify.cluster_id, general.Ota.cluster_id],
-            SIG_EP_TYPE: SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE,
-            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
-        }
-    }
-    return create_mock_zigpy_device(zha_gateway, endpoints)
-
-
-@pytest.mark.looptime
 async def test_device_tracker(
     zha_gateway: Gateway,
-    zigpy_device_dt,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA device tracker platform."""
-
+    zigpy_device_dt = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.PowerConfiguration.cluster_id,
+                    general.Identify.cluster_id,
+                    general.PollControl.cluster_id,
+                    general.BinaryInput.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [general.Identify.cluster_id, general.Ota.cluster_id],
+                SIG_EP_TYPE: SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+    )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_dt)
     cluster = zigpy_device_dt.endpoints.get(1).power
     entity = get_entity(zha_device, platform=Platform.DEVICE_TRACKER)

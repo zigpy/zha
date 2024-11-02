@@ -43,8 +43,7 @@ from zha.zigbee.device import Device
 EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
 
 
-@pytest.fixture
-async def elec_measurement_zigpy_dev(
+def elec_measurement_zigpy_device_mock(
     zha_gateway: Gateway,
 ) -> ZigpyDevice:
     """Electric Measurement zigpy device."""
@@ -78,23 +77,23 @@ async def elec_measurement_zigpy_dev(
     return zigpy_device
 
 
-@pytest.fixture
-async def elec_measurement_zha_dev(
-    zha_gateway: Gateway,
-    elec_measurement_zigpy_dev: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> Device:
-    """Electric Measurement ZHA device."""
-
-    zha_dev = await join_zigpy_device(zha_gateway, elec_measurement_zigpy_dev)
-    return zha_dev
-
-
 async def async_test_humidity(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test humidity sensor."""
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 1000, 2: 100})
     assert_state(entity, 10.0, "%")
+
+
+async def async_test_flow(
+    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+) -> None:
+    """Test flow sensor."""
+    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 40})
+    assert_state(entity, 4.0, "m³/h")
+
+    await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 0xFFFF})
+    assert_state(entity, None, "m³/h")
 
 
 async def async_test_temperature(
@@ -480,6 +479,13 @@ async def async_test_general_multistate_input(
             None,
         ),
         (
+            measurement.FlowMeasurement.cluster_id,
+            sensor.Flow,
+            async_test_flow,
+            None,
+            None,
+        ),
+        (
             measurement.TemperatureMeasurement.cluster_id,
             sensor.Temperature,
             async_test_temperature,
@@ -756,7 +762,6 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     assert entity.info_object.unit == unit_of_measurement
 
 
-@pytest.mark.looptime
 async def test_electrical_measurement_init(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
@@ -1152,14 +1157,13 @@ async def test_se_summation_uom(
     ),
 )
 async def test_elec_measurement_sensor_type(
-    elec_measurement_zigpy_dev: ZigpyDevice,  # pylint: disable=redefined-outer-name
     raw_measurement_type: int,
     expected_type: str,
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
+    zha_gateway: Gateway,
 ) -> None:
     """Test zha electrical measurement sensor type."""
 
-    zigpy_dev = elec_measurement_zigpy_dev
+    zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
     zigpy_dev.endpoints[1].electrical_measurement.PLUGGED_ATTR_READS[
         "measurement_type"
     ] = raw_measurement_type
@@ -1170,14 +1174,10 @@ async def test_elec_measurement_sensor_type(
     assert entity.state["measurement_type"] == expected_type
 
 
-@pytest.mark.looptime
-async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-outer-name
-    zha_gateway: Gateway,
-    elec_measurement_zigpy_dev: ZigpyDevice,
-) -> None:
+async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
     """Test ZHA electrical measurement sensor polling."""
 
-    zigpy_dev = elec_measurement_zigpy_dev
+    zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
     zigpy_dev.endpoints[1].electrical_measurement.PLUGGED_ATTR_READS["active_power"] = (
         20
     )
@@ -1239,12 +1239,12 @@ async def test_elec_measurement_sensor_polling(  # pylint: disable=redefined-out
 )
 async def test_elec_measurement_skip_unsupported_attribute(
     zha_gateway: Gateway,
-    elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
     supported_attributes: set[str],
 ) -> None:
     """Test zha electrical measurement skipping update of unsupported attributes."""
 
-    zha_dev = elec_measurement_zha_dev
+    elec_measurement_zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
+    zha_dev = await join_zigpy_device(zha_gateway, elec_measurement_zigpy_dev)
 
     cluster = zha_dev.device.endpoints[1].electrical_measurement
 
@@ -1310,8 +1310,7 @@ class TimestampCluster(CustomCluster, ManufacturerSpecificCluster):
 )
 
 
-@pytest.fixture
-async def zigpy_device_timestamp_sensor_v2(
+async def zigpy_device_timestamp_sensor_v2_mock(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ):
     """Timestamp Test device."""
@@ -1338,13 +1337,10 @@ async def zigpy_device_timestamp_sensor_v2(
     return zha_device, zigpy_device.endpoints[1].time_test_cluster
 
 
-async def test_timestamp_sensor_v2(
-    zha_gateway: Gateway,
-    zigpy_device_timestamp_sensor_v2,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_timestamp_sensor_v2(zha_gateway: Gateway) -> None:
     """Test quirks defined sensor."""
 
-    zha_device, cluster = zigpy_device_timestamp_sensor_v2
+    zha_device, cluster = await zigpy_device_timestamp_sensor_v2_mock(zha_gateway)
     assert isinstance(zha_device.device, CustomDeviceV2)
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="start_time")
 
@@ -1384,8 +1380,7 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
 )
 
 
-@pytest.fixture
-async def zigpy_device_aqara_sensor_v2(
+async def zigpy_device_aqara_sensor_v2_mock(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ):
     """Device tracker zigpy Aqara motion sensor device."""
@@ -1412,13 +1407,10 @@ async def zigpy_device_aqara_sensor_v2(
     return zha_device, zigpy_device.endpoints[1].opple_cluster
 
 
-async def test_last_feeding_size_sensor_v2(
-    zha_gateway: Gateway,
-    zigpy_device_aqara_sensor_v2,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_last_feeding_size_sensor_v2(zha_gateway: Gateway) -> None:
     """Test quirks defined sensor."""
 
-    zha_device, cluster = zigpy_device_aqara_sensor_v2
+    zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
     assert isinstance(zha_device.device, CustomDeviceV2)
     entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="last_feeding_size"
@@ -1431,7 +1423,6 @@ async def test_last_feeding_size_sensor_v2(
     assert_state(entity, 5.0, "g")
 
 
-@pytest.mark.looptime
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     """Test coordinator counter sensor."""
 
@@ -1472,14 +1463,16 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     assert len(zha_gateway.global_updater._update_listeners) == 3
 
 
-@pytest.mark.looptime
 async def test_device_unavailable_or_disabled_skips_entity_polling(
     zha_gateway: Gateway,
-    elec_measurement_zha_dev: Device,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test polling is skipped for unavailable devices."""
 
+    elec_measurement_zigpy_dev = elec_measurement_zigpy_device_mock(zha_gateway)
+    elec_measurement_zha_dev = await join_zigpy_device(
+        zha_gateway, elec_measurement_zigpy_dev
+    )
     assert not elec_measurement_zha_dev.is_coordinator
     assert not elec_measurement_zha_dev.is_active_coordinator
     entity = get_entity(
@@ -1540,8 +1533,7 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
     )
 
 
-@pytest.fixture
-async def zigpy_device_danfoss_thermostat(
+async def zigpy_device_danfoss_thermostat_mock(
     zha_gateway: Gateway,
 ) -> tuple[Device, zigpy.device.Device]:
     """Danfoss thermostat device."""
@@ -1573,13 +1565,10 @@ async def zigpy_device_danfoss_thermostat(
     return zha_device, zigpy_device
 
 
-async def test_danfoss_thermostat_sw_error(
-    zha_gateway: Gateway,
-    zigpy_device_danfoss_thermostat,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_danfoss_thermostat_sw_error(zha_gateway: Gateway) -> None:
     """Test quirks defined thermostat."""
 
-    zha_device, zigpy_device = zigpy_device_danfoss_thermostat
+    zha_device, zigpy_device = await zigpy_device_danfoss_thermostat_mock(zha_gateway)
 
     entity = get_entity(
         zha_device,

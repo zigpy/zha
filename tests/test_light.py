@@ -90,8 +90,7 @@ LIGHT_COLOR = {
 }
 
 
-@pytest.fixture
-async def coordinator(
+async def coordinator_mock(
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
@@ -133,8 +132,7 @@ async def coordinator(
     return zha_device
 
 
-@pytest.fixture
-async def device_light_1(
+async def device_light_1_mock(
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
@@ -169,8 +167,7 @@ async def device_light_1(
     return zha_device
 
 
-@pytest.fixture
-async def device_light_2(
+async def device_light_2_mock(
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
@@ -204,8 +201,7 @@ async def device_light_2(
     return zha_device
 
 
-@pytest.fixture
-async def device_light_3(
+async def device_light_3_mock(
     zha_gateway: Gateway,
 ) -> Device:
     """Test zha light platform."""
@@ -242,8 +238,7 @@ async def device_light_3(
     return zha_device
 
 
-@pytest.fixture
-async def eWeLink_light(
+async def eWeLink_light_mock(
     zha_gateway: Gateway,
 ):
     """Mock eWeLink light."""
@@ -281,7 +276,6 @@ async def eWeLink_light(
     return zha_device
 
 
-@pytest.mark.looptime
 async def test_light_refresh(
     zha_gateway: Gateway,
 ):
@@ -365,7 +359,6 @@ async def test_light_refresh(
     "device, reporting",
     [(LIGHT_ON_OFF, (1, 0, 0)), (LIGHT_LEVEL, (1, 1, 0)), (LIGHT_COLOR, (1, 1, 3))],
 )
-@pytest.mark.looptime
 async def test_light(
     zha_gateway: Gateway,
     device: dict,
@@ -599,7 +592,6 @@ async def _async_shift_time(zha_gateway: Gateway):
     await zha_gateway.async_block_till_done()
 
 
-@pytest.mark.looptime
 async def async_test_level_on_off_from_client(
     zha_gateway: Gateway,
     on_off_cluster: general.OnOff,
@@ -751,15 +743,15 @@ async def async_test_flash_from_client(
     "zigpy.zcl.clusters.general.OnOff.request",
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
-@pytest.mark.looptime
 async def test_zha_group_light_entity(
-    device_light_1: Device,  # pylint: disable=redefined-outer-name
-    device_light_2: Device,  # pylint: disable=redefined-outer-name
-    device_light_3: Device,  # pylint: disable=redefined-outer-name
-    coordinator: Device,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test the light entity for a ZHA group."""
+
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+    device_light_3 = await device_light_3_mock(zha_gateway)
 
     member_ieee_addresses = [device_light_1.ieee, device_light_2.ieee]
     members = [
@@ -1109,12 +1101,12 @@ async def test_light_initialization(
 )
 async def test_transitions(
     zha_gateway: Gateway,
-    device_light_1,  # pylint: disable=redefined-outer-name
-    device_light_2,  # pylint: disable=redefined-outer-name
-    eWeLink_light,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test ZHA light transition code."""
 
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
+    eWeLink_light = await eWeLink_light_mock(zha_gateway)
     member_ieee_addresses = [device_light_1.ieee, device_light_2.ieee]
     members = [
         GroupMemberReference(ieee=device_light_1.ieee, endpoint_id=1),
@@ -1768,11 +1760,9 @@ async def test_transitions(
     "zigpy.zcl.clusters.general.OnOff.request",
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
-async def test_on_with_off_color(
-    zha_gateway: Gateway,
-    device_light_1,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_on_with_off_color(zha_gateway: Gateway) -> None:
     """Test turning on the light and sending color commands before on/level commands for supporting lights."""
+    device_light_1 = await device_light_1_mock(zha_gateway)
     dev1_cluster_on_off = device_light_1.device.endpoints[1].on_off
     dev1_cluster_level = device_light_1.device.endpoints[1].level
     dev1_cluster_color = device_light_1.device.endpoints[1].light_color
@@ -1896,14 +1886,12 @@ async def test_on_with_off_color(
     "zigpy.zcl.clusters.general.LevelControl.request",
     new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
 )
-@pytest.mark.looptime
-async def test_group_member_assume_state(
-    zha_gateway: Gateway,
-    coordinator,  # pylint: disable=redefined-outer-name
-    device_light_1,  # pylint: disable=redefined-outer-name
-    device_light_2,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_group_member_assume_state(zha_gateway: Gateway) -> None:
     """Test the group members assume state function."""
+
+    coordinator = await coordinator_mock(zha_gateway)
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
 
     zha_gateway.config.config.light_options.group_members_assume_state = True
 
@@ -1990,10 +1978,9 @@ async def test_group_member_assume_state(
     assert device_2_light_entity.state["brightness"] == 100
 
 
-async def test_light_state_restoration(
-    device_light_3,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_light_state_restoration(zha_gateway: Gateway) -> None:
     """Test the light state restoration function."""
+    device_light_3 = await device_light_3_mock(zha_gateway)
     entity = get_entity(device_light_3, platform=Platform.LIGHT)
     entity.restore_external_state_attributes(
         state=True,

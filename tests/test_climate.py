@@ -3,7 +3,6 @@
 # pylint: disable=redefined-outer-name,too-many-lines
 
 import asyncio
-from collections.abc import Awaitable, Callable, Coroutine
 import logging
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, call, patch
@@ -199,103 +198,38 @@ ZCL_ATTR_PLUG = {
 ATTR_PRESET_MODE = "preset_mode"
 
 
-@pytest.fixture
-def device_climate_mock(
+async def device_climate_mock(
     zha_gateway: Gateway,
-) -> Callable[
-    [
-        dict[int, dict[str, Any]],
-        dict[str, Any] | None,
-        str | None,
-        type[zigpy.quirks.CustomDevice] | None,
-    ],
-    Coroutine[Any, Any, Device],
-]:
+    endpoints: dict[int, dict[str, Any]],
+    plug: dict[str, Any] | None = None,
+    manuf: str | None = None,
+    quirk: type[zigpy.quirks.CustomDevice] | None = None,
+) -> Device:
     """Test regular thermostat device."""
 
-    async def _dev(
-        clusters: dict[int, dict[str, Any]],
-        plug: dict[str, Any] | None = None,
-        manuf: str | None = None,
-        quirk: type[zigpy.quirks.CustomDevice] | None = None,
-    ) -> Device:
-        plugged_attrs = ZCL_ATTR_PLUG if plug is None else {**ZCL_ATTR_PLUG, **plug}
-        zigpy_device = create_mock_zigpy_device(
-            zha_gateway, clusters, manufacturer=manuf, quirk=quirk
-        )
-        zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
-        zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = plugged_attrs
-        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-        return zha_device
-
-    return _dev
+    plugged_attrs = ZCL_ATTR_PLUG if plug is None else {**ZCL_ATTR_PLUG, **plug}
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway, endpoints, manufacturer=manuf, quirk=quirk
+    )
+    zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
+    zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = plugged_attrs
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    return zha_device
 
 
-@pytest.fixture
-async def device_climate(device_climate_mock):
-    """Plain Climate device."""
-
-    return await device_climate_mock(CLIMATE)
-
-
-@pytest.fixture
-async def device_climate_fan(device_climate_mock):
-    """Test thermostat with fan device."""
-
-    return await device_climate_mock(CLIMATE_FAN)
-
-
-@pytest.fixture
 @patch.object(
     zigpy.zcl.clusters.manufacturer_specific.ManufacturerSpecificCluster,
     "ep_attribute",
     "sinope_manufacturer_specific",
 )
-async def device_climate_sinope(device_climate_mock):
+async def device_climate_sinope(zha_gateway: Gateway):
     """Sinope thermostat."""
 
     return await device_climate_mock(
+        zha_gateway,
         CLIMATE_SINOPE,
         manuf=MANUF_SINOPE,
         quirk=zhaquirks.sinope.thermostat.SinopeTechnologiesThermostat,
-    )
-
-
-@pytest.fixture
-async def device_climate_zen(device_climate_mock):
-    """Zen Within thermostat."""
-
-    return await device_climate_mock(CLIMATE_ZEN, manuf=MANUF_ZEN)
-
-
-@pytest.fixture
-async def device_climate_moes(device_climate_mock):
-    """MOES thermostat."""
-
-    return await device_climate_mock(
-        CLIMATE_MOES, manuf=MANUF_MOES, quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1
-    )
-
-
-@pytest.fixture
-async def device_climate_beca(device_climate_mock) -> Device:
-    """Beca thermostat."""
-
-    return await device_climate_mock(
-        CLIMATE_BECA,
-        manuf=MANUF_BECA,
-        quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1new,
-    )
-
-
-@pytest.fixture
-async def device_climate_zonnsmart(device_climate_mock):
-    """ZONNSMART thermostat."""
-
-    return await device_climate_mock(
-        CLIMATE_ZONNSMART,
-        manuf=MANUF_ZONNSMART,
-        quirk=zhaquirks.tuya.ts0601_trv.ZonnsmartTV01_ZG,
     )
 
 
@@ -309,11 +243,10 @@ def test_sequence_mappings():
 
 
 async def test_climate_local_temperature(
-    device_climate: Device,
     zha_gateway: Gateway,
 ) -> None:
     """Test local temperature."""
-
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -325,11 +258,10 @@ async def test_climate_local_temperature(
 
 
 async def test_climate_outdoor_temperature(
-    device_climate: Device,
     zha_gateway: Gateway,
 ) -> None:
     """Test outdoor temperature."""
-
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -345,18 +277,17 @@ async def test_climate_outdoor_temperature(
 
 
 async def test_climate_hvac_action_running_state(
-    device_climate_sinope: Device,
     zha_gateway: Gateway,
 ):
     """Test hvac action via running state."""
-
-    thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
+    dev_climate_sinope = await device_climate_sinope(zha_gateway)
+    thrm_cluster = dev_climate_sinope.device.endpoints[1].thermostat
 
     entity: ThermostatEntity = get_entity(
-        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+        dev_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
     )
     sensor_entity: SinopeHVACAction = get_entity(
-        device_climate_sinope, platform=Platform.SENSOR, entity_type=SinopeHVACAction
+        dev_climate_sinope, platform=Platform.SENSOR, entity_type=SinopeHVACAction
     )
 
     subscriber = MagicMock()
@@ -406,18 +337,17 @@ async def test_climate_hvac_action_running_state(
     assert len(subscriber.mock_calls) == 2 * 6
 
 
-@pytest.mark.looptime
 async def test_sinope_time(
-    device_climate_sinope: Device,
     zha_gateway: Gateway,
 ):
     """Test hvac action via running state."""
 
-    mfg_cluster = device_climate_sinope.device.endpoints[1].sinope_manufacturer_specific
+    dev_climate_sinope = await device_climate_sinope(zha_gateway)
+    mfg_cluster = dev_climate_sinope.device.endpoints[1].sinope_manufacturer_specific
     assert mfg_cluster is not None
 
     entity: ThermostatEntity = get_entity(
-        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+        dev_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
     )
 
     entity._async_update_time = AsyncMock(wraps=entity._async_update_time)
@@ -473,10 +403,12 @@ async def test_sinope_time(
 
 
 async def test_climate_hvac_action_running_state_zen(
-    device_climate_zen: Device,
     zha_gateway: Gateway,
 ):
     """Test Zen hvac action via running state."""
+    device_climate_zen = await device_climate_mock(
+        zha_gateway, CLIMATE_ZEN, manuf=MANUF_ZEN
+    )
 
     thrm_cluster = device_climate_zen.device.endpoints[1].thermostat
 
@@ -548,11 +480,10 @@ async def test_climate_hvac_action_running_state_zen(
 
 
 async def test_climate_hvac_action_pi_demand(
-    device_climate: Device,
     zha_gateway: Gateway,
 ):
     """Test hvac action based on pi_heating/cooling_demand attrs."""
-
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -594,13 +525,12 @@ async def test_climate_hvac_action_pi_demand(
     ),
 )
 async def test_hvac_mode(
-    device_climate: Device,
     zha_gateway: Gateway,
     sys_mode,
     hvac_mode,
 ):
     """Test HVAC mode."""
-
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -633,7 +563,6 @@ async def test_hvac_mode(
     ),
 )
 async def test_hvac_modes(  # pylint: disable=unused-argument
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     seq_of_op,
     modes,
@@ -641,7 +570,7 @@ async def test_hvac_modes(  # pylint: disable=unused-argument
     """Test HVAC modes from sequence of operations."""
 
     dev_climate = await device_climate_mock(
-        CLIMATE, {"ctrl_sequence_of_oper": seq_of_op}
+        zha_gateway, CLIMATE, {"ctrl_sequence_of_oper": seq_of_op}
     )
     entity: ThermostatEntity = get_entity(
         dev_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -659,7 +588,6 @@ async def test_hvac_modes(  # pylint: disable=unused-argument
     ),
 )
 async def test_target_temperature(
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     sys_mode,
     preset,
@@ -668,6 +596,7 @@ async def test_target_temperature(
     """Test target temperature property."""
 
     dev_climate = await device_climate_mock(
+        zha_gateway,
         CLIMATE_SINOPE,
         {
             "occupied_cooling_setpoint": 2500,
@@ -698,7 +627,6 @@ async def test_target_temperature(
     ),
 )
 async def test_target_temperature_high(
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     preset,
     unoccupied,
@@ -707,6 +635,7 @@ async def test_target_temperature_high(
     """Test target temperature high property."""
 
     dev_climate = await device_climate_mock(
+        zha_gateway,
         CLIMATE_SINOPE,
         {
             "occupied_cooling_setpoint": 1700,
@@ -735,7 +664,6 @@ async def test_target_temperature_high(
     ),
 )
 async def test_target_temperature_low(
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
     preset,
     unoccupied,
@@ -744,6 +672,7 @@ async def test_target_temperature_low(
     """Test target temperature low property."""
 
     dev_climate = await device_climate_mock(
+        zha_gateway,
         CLIMATE_SINOPE,
         {
             "occupied_heating_setpoint": 2100,
@@ -775,13 +704,13 @@ async def test_target_temperature_low(
     ),
 )
 async def test_set_hvac_mode(
-    device_climate: Device,
     zha_gateway: Gateway,
     hvac_mode,
     sys_mode,
 ):
     """Test setting hvac mode."""
 
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -815,14 +744,13 @@ async def test_set_hvac_mode(
 
 
 async def test_preset_setting(
-    device_climate_sinope: Device,
     zha_gateway: Gateway,
 ):
     """Test preset setting."""
-
-    thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
+    dev_climate_sinope = await device_climate_sinope(zha_gateway)
+    thrm_cluster = dev_climate_sinope.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
-        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+        dev_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
     )
 
     assert entity.state["preset_mode"] == "none"
@@ -896,14 +824,13 @@ async def test_preset_setting(
 
 
 async def test_preset_setting_invalid(
-    device_climate_sinope: Device,
     zha_gateway: Gateway,
 ):
     """Test invalid preset setting."""
-
-    thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
+    dev_climate_sinope = await device_climate_sinope(zha_gateway)
+    thrm_cluster = dev_climate_sinope.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
-        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+        dev_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
     )
 
     assert entity.state["preset_mode"] == "none"
@@ -915,11 +842,11 @@ async def test_preset_setting_invalid(
 
 
 async def test_set_temperature_hvac_mode(
-    device_climate: Device,
     zha_gateway: Gateway,
 ):
     """Test setting HVAC mode in temperature service call."""
 
+    device_climate = await device_climate_mock(zha_gateway, CLIMATE)
     thrm_cluster = device_climate.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -937,12 +864,12 @@ async def test_set_temperature_hvac_mode(
 
 
 async def test_set_temperature_heat_cool(
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call in heating/cooling HVAC mode."""
 
     device_climate = await device_climate_mock(
+        zha_gateway,
         CLIMATE_SINOPE,
         {
             "occupied_cooling_setpoint": 2500,
@@ -1000,12 +927,12 @@ async def test_set_temperature_heat_cool(
 
 
 async def test_set_temperature_heat(
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call in heating HVAC mode."""
 
     device_climate = await device_climate_mock(
+        zha_gateway,
         CLIMATE_SINOPE,
         {
             "occupied_cooling_setpoint": 2500,
@@ -1060,12 +987,12 @@ async def test_set_temperature_heat(
 
 
 async def test_set_temperature_cool(
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call in cooling HVAC mode."""
 
     device_climate = await device_climate_mock(
+        zha_gateway,
         CLIMATE_SINOPE,
         {
             "occupied_cooling_setpoint": 2500,
@@ -1120,7 +1047,6 @@ async def test_set_temperature_cool(
 
 
 async def test_set_temperature_wrong_mode(
-    device_climate_mock: Callable[..., Awaitable[Device]],
     zha_gateway: Gateway,
 ):
     """Test setting temperature service call for wrong HVAC mode."""
@@ -1131,6 +1057,7 @@ async def test_set_temperature_wrong_mode(
         "sinope_manufacturer_specific",
     ):
         device_climate = await device_climate_mock(
+            zha_gateway,
             CLIMATE_SINOPE,
             {
                 "occupied_cooling_setpoint": 2500,
@@ -1158,14 +1085,13 @@ async def test_set_temperature_wrong_mode(
 
 
 async def test_occupancy_reset(
-    device_climate_sinope: Device,
     zha_gateway: Gateway,
 ):
     """Test away preset reset."""
-
-    thrm_cluster = device_climate_sinope.device.endpoints[1].thermostat
+    dev_climate_sinope = await device_climate_sinope(zha_gateway)
+    thrm_cluster = dev_climate_sinope.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
-        device_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+        dev_climate_sinope, platform=Platform.CLIMATE, entity_type=ThermostatEntity
     )
 
     assert entity.state["preset_mode"] == "none"
@@ -1185,11 +1111,10 @@ async def test_occupancy_reset(
 
 
 async def test_fan_mode(
-    device_climate_fan: Device,
     zha_gateway: Gateway,
 ):
     """Test fan mode."""
-
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
     thrm_cluster = device_climate_fan.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -1219,11 +1144,10 @@ async def test_fan_mode(
 
 
 async def test_set_fan_mode_not_supported(
-    device_climate_fan: Device,
     zha_gateway: Gateway,
 ):
     """Test fan setting unsupported mode."""
-
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
     fan_cluster = device_climate_fan.device.endpoints[1].fan
     entity: ThermostatEntity = get_entity(
         device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -1235,11 +1159,10 @@ async def test_set_fan_mode_not_supported(
 
 
 async def test_set_fan_mode(
-    device_climate_fan: Device,
     zha_gateway: Gateway,
 ):
     """Test fan mode setting."""
-
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
     fan_cluster = device_climate_fan.device.endpoints[1].fan
     entity: ThermostatEntity = get_entity(
         device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -1260,9 +1183,15 @@ async def test_set_fan_mode(
     assert fan_cluster.write_attributes.call_args[0][0] == {"fan_mode": 5}
 
 
-async def test_set_moes_preset(device_climate_moes: Device, zha_gateway: Gateway):
+async def test_set_moes_preset(zha_gateway: Gateway):
     """Test setting preset for moes trv."""
 
+    device_climate_moes = await device_climate_mock(
+        zha_gateway,
+        CLIMATE_MOES,
+        manuf=MANUF_MOES,
+        quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1,
+    )
     thrm_cluster = device_climate_moes.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate_moes, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -1348,11 +1277,14 @@ async def test_set_moes_preset(device_climate_moes: Device, zha_gateway: Gateway
     }
 
 
-async def test_set_moes_operation_mode(
-    device_climate_moes: Device, zha_gateway: Gateway
-):
+async def test_set_moes_operation_mode(zha_gateway: Gateway):
     """Test setting preset for moes trv."""
-
+    device_climate_moes = await device_climate_mock(
+        zha_gateway,
+        CLIMATE_MOES,
+        manuf=MANUF_MOES,
+        quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1,
+    )
     thrm_cluster = device_climate_moes.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate_moes, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -1404,12 +1336,16 @@ PRESET_ECO = "eco"
 )
 async def test_beca_operation_mode_update(
     zha_gateway: Gateway,
-    device_climate_beca: Device,
     preset_attr: int,
     preset_mode: str,
 ) -> None:
     """Test beca trv operation mode attribute update."""
-
+    device_climate_beca = await device_climate_mock(
+        zha_gateway,
+        CLIMATE_BECA,
+        manuf=MANUF_BECA,
+        quirk=zhaquirks.tuya.ts0601_trv.MoesHY368_Type1new,
+    )
     thrm_cluster = device_climate_beca.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate_beca, platform=Platform.CLIMATE, entity_type=ThermostatEntity
@@ -1433,11 +1369,14 @@ async def test_beca_operation_mode_update(
     ]
 
 
-async def test_set_zonnsmart_preset(
-    zha_gateway: Gateway, device_climate_zonnsmart
-) -> None:
+async def test_set_zonnsmart_preset(zha_gateway: Gateway) -> None:
     """Test setting preset from homeassistant for zonnsmart trv."""
-
+    device_climate_zonnsmart = await device_climate_mock(
+        zha_gateway,
+        CLIMATE_ZONNSMART,
+        manuf=MANUF_ZONNSMART,
+        quirk=zhaquirks.tuya.ts0601_trv.ZonnsmartTV01_ZG,
+    )
     thrm_cluster = device_climate_zonnsmart.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate_zonnsmart,
@@ -1490,11 +1429,14 @@ async def test_set_zonnsmart_preset(
     }
 
 
-async def test_set_zonnsmart_operation_mode(
-    zha_gateway: Gateway, device_climate_zonnsmart
-) -> None:
+async def test_set_zonnsmart_operation_mode(zha_gateway: Gateway) -> None:
     """Test setting preset from trv for zonnsmart trv."""
-
+    device_climate_zonnsmart = await device_climate_mock(
+        zha_gateway,
+        CLIMATE_ZONNSMART,
+        manuf=MANUF_ZONNSMART,
+        quirk=zhaquirks.tuya.ts0601_trv.ZonnsmartTV01_ZG,
+    )
     thrm_cluster = device_climate_zonnsmart.device.endpoints[1].thermostat
     entity: ThermostatEntity = get_entity(
         device_climate_zonnsmart,

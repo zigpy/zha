@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
 from zigpy.application import ControllerApplication
-from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
@@ -49,35 +48,17 @@ IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
 IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 
 
-@pytest.fixture
-def zigpy_dev_basic(zha_gateway: Gateway) -> ZigpyDevice:
-    """Zigpy device with just a basic cluster."""
-    return create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                SIG_EP_INPUT: [general.Basic.cluster_id],
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
-                SIG_EP_PROFILE: zha.PROFILE_ID,
-            }
-        },
-    )
+ZIGPY_DEVICE_BASIC = {
+    1: {
+        SIG_EP_INPUT: [general.Basic.cluster_id],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+        SIG_EP_PROFILE: zha.PROFILE_ID,
+    }
+}
 
 
-@pytest.fixture
-async def zha_dev_basic(
-    zha_gateway: Gateway,
-    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
-) -> Device:
-    """ZHA device with just a basic cluster."""
-
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev_basic)
-    return zha_device
-
-
-@pytest.fixture
-async def coordinator(zha_gateway: Gateway) -> Device:
+async def coordinator_mock(zha_gateway: Gateway) -> Device:
     """Test ZHA light platform."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -118,8 +99,7 @@ async def coordinator(zha_gateway: Gateway) -> Device:
     return zha_device
 
 
-@pytest.fixture
-async def device_light_1(zha_gateway: Gateway) -> Device:
+async def device_light_1_mock(zha_gateway: Gateway) -> Device:
     """Test ZHA light platform."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -145,8 +125,7 @@ async def device_light_1(zha_gateway: Gateway) -> Device:
     return zha_device
 
 
-@pytest.fixture
-async def device_light_2(zha_gateway: Gateway) -> Device:
+async def device_light_2_mock(zha_gateway: Gateway) -> Device:
     """Test ZHA light platform."""
 
     zigpy_device = create_mock_zigpy_device(
@@ -171,13 +150,10 @@ async def device_light_2(zha_gateway: Gateway) -> Device:
     return zha_device
 
 
-async def test_device_left(
-    zha_gateway: Gateway,
-    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_device_left(zha_gateway: Gateway) -> None:
     """Device leaving the network should become unavailable."""
-
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_dev_basic = await join_zigpy_device(zha_gateway, zigpy_dev_basic)
     assert zha_dev_basic.available is True
 
     zha_gateway.device_left(zigpy_dev_basic)
@@ -272,15 +248,14 @@ async def test_mains_devices_startup_polling_config(
 
 async def test_gateway_group_methods(
     zha_gateway: Gateway,
-    device_light_1,  # pylint: disable=redefined-outer-name
-    device_light_2,  # pylint: disable=redefined-outer-name
-    coordinator,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test creating a group with 2 members."""
-
+    coordinator = await coordinator_mock(zha_gateway)
     zha_gateway.coordinator_zha_device = coordinator
     coordinator._zha_gateway = zha_gateway
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
     device_light_1._zha_gateway = zha_gateway
     device_light_2._zha_gateway = zha_gateway
 
@@ -365,15 +340,13 @@ async def test_gateway_group_methods(
     assert zha_gateway.get_group(zha_group.group_id) == zha_group
 
 
-async def test_gateway_create_group_with_id_without_id(
-    zha_gateway: Gateway,
-    device_light_1,  # pylint: disable=redefined-outer-name
-    coordinator,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_gateway_create_group_with_id_without_id(zha_gateway: Gateway) -> None:
     """Test creating a group with a specific ID."""
 
     assert zha_gateway is not None
+    coordinator = await coordinator_mock(zha_gateway)
     zha_gateway.coordinator_zha_device = coordinator
+    device_light_1 = await device_light_1_mock(zha_gateway)
     coordinator._zha_gateway = zha_gateway
     device_light_1._zha_gateway = zha_gateway
 
@@ -411,15 +384,15 @@ async def test_gateway_create_group_with_id_without_id(
 
 async def test_remove_device_cleans_up_group_membership(
     zha_gateway: Gateway,
-    device_light_1,  # pylint: disable=redefined-outer-name
-    device_light_2,  # pylint: disable=redefined-outer-name
-    coordinator,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test group membership cleanup when removing a device in a group."""
 
+    coordinator = await coordinator_mock(zha_gateway)
     zha_gateway.coordinator_zha_device = coordinator
     coordinator._zha_gateway = zha_gateway
+    device_light_1 = await device_light_1_mock(zha_gateway)
+    device_light_2 = await device_light_2_mock(zha_gateway)
     device_light_1._zha_gateway = zha_gateway
     device_light_2._zha_gateway = zha_gateway
 
@@ -503,7 +476,6 @@ async def test_gateway_initialize_bellows_thread(
 
 
 @pytest.mark.parametrize("radio_concurrency", [1, 2, 8])
-@pytest.mark.looptime
 async def test_startup_concurrency_limit(
     radio_concurrency: int,
     zigpy_app_controller: ControllerApplication,
@@ -580,13 +552,11 @@ async def test_startup_concurrency_limit(
         assert 1 == max(concurrencies) == zha_gw.radio_concurrency
 
 
-async def test_gateway_device_removed(
-    zha_gateway: Gateway,
-    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
-) -> None:
+async def test_gateway_device_removed(zha_gateway: Gateway) -> None:
     """Test ZHA device removal."""
 
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_dev_basic = await join_zigpy_device(zha_gateway, zigpy_dev_basic)
     zha_gateway.device_removed(zigpy_dev_basic)
     await zha_gateway.async_block_till_done()
     assert zha_dev_basic.ieee not in zha_gateway.devices
@@ -594,11 +564,11 @@ async def test_gateway_device_removed(
 
 async def test_gateway_device_initialized(
     zha_gateway: Gateway,
-    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test ZHA device initialization."""
 
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
     zha_gateway.async_device_initialized = AsyncMock(
         wraps=zha_gateway.async_device_initialized
     )
@@ -632,10 +602,10 @@ async def test_gateway_device_initialized(
 
 def test_gateway_raw_device_initialized(
     zha_gateway: Gateway,
-    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test Zigpy raw device initialized."""
 
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
     zha_gateway.emit = MagicMock(wraps=zha_gateway.emit)
     zha_gateway.raw_device_initialized(zigpy_dev_basic)
 
@@ -685,10 +655,10 @@ def test_gateway_raw_device_initialized(
 
 def test_gateway_device_joined(
     zha_gateway: Gateway,
-    zigpy_dev_basic: ZigpyDevice,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test Zigpy raw device initialized."""
 
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
     zha_gateway.emit = MagicMock(wraps=zha_gateway.emit)
     zha_gateway.device_joined(zigpy_dev_basic)
 
@@ -723,7 +693,6 @@ def test_gateway_connection_lost(zha_gateway: Gateway) -> None:
     )
 
 
-@pytest.mark.looptime
 async def test_pollers_skip(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
@@ -786,10 +755,11 @@ async def test_global_updater_guards(
 
 async def test_gateway_handle_message(
     zha_gateway: Gateway,
-    zha_dev_basic: Device,  # pylint: disable=redefined-outer-name
 ) -> None:
     """Test handle message."""
 
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+    zha_dev_basic = await join_zigpy_device(zha_gateway, zigpy_dev_basic)
     assert zha_dev_basic.available is True
     assert zha_dev_basic.on_network is True
 

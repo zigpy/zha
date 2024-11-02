@@ -1,6 +1,5 @@
 """Test zha application helpers."""
 
-import pytest
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.general import Basic, OnOff
@@ -21,64 +20,50 @@ IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
 IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 
 
-@pytest.fixture
-def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
-    """Device tracker zigpy device."""
-    endpoints = {
-        1: {
-            SIG_EP_INPUT: [Basic.cluster_id, OnOff.cluster_id],
-            SIG_EP_OUTPUT: [],
-            SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
-            SIG_EP_PROFILE: zha.PROFILE_ID,
-        }
+ZIGPY_DEVICE = {
+    1: {
+        SIG_EP_INPUT: [Basic.cluster_id, OnOff.cluster_id],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+        SIG_EP_PROFILE: zha.PROFILE_ID,
     }
-    zigpy_dev: ZigpyDevice = create_mock_zigpy_device(zha_gateway, endpoints)
-    # this one is mains powered
-    zigpy_dev.node_desc.mac_capability_flags |= 0b_0000_0100
-    return zigpy_dev
+}
 
-
-@pytest.fixture
-def zigpy_device_not_bindable(zha_gateway: Gateway) -> ZigpyDevice:
-    """Device tracker zigpy device."""
-    endpoints = {
-        1: {
-            SIG_EP_INPUT: [Basic.cluster_id, IasZone.cluster_id],
-            SIG_EP_OUTPUT: [],
-            SIG_EP_TYPE: zha.DeviceType.IAS_ZONE,
-            SIG_EP_PROFILE: zha.PROFILE_ID,
-        }
+ZIGPY_DEVICE_NOT_BINDABLE = {
+    1: {
+        SIG_EP_INPUT: [Basic.cluster_id, IasZone.cluster_id],
+        SIG_EP_OUTPUT: [],
+        SIG_EP_TYPE: zha.DeviceType.IAS_ZONE,
+        SIG_EP_PROFILE: zha.PROFILE_ID,
     }
-    zigpy_dev: ZigpyDevice = create_mock_zigpy_device(
-        zha_gateway, endpoints, ieee=IEEE_GROUPABLE_DEVICE2, nwk=0x2345
-    )
-    return zigpy_dev
+}
 
 
-@pytest.fixture
-def remote_zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
-    """Device tracker zigpy device."""
-    endpoints = {
-        1: {
-            SIG_EP_INPUT: [Basic.cluster_id],
-            SIG_EP_OUTPUT: [OnOff.cluster_id],
-            SIG_EP_TYPE: zha.DeviceType.REMOTE_CONTROL,
-            SIG_EP_PROFILE: zha.PROFILE_ID,
-        }
+REMOTE_ZIGPY_DEVICE = {
+    1: {
+        SIG_EP_INPUT: [Basic.cluster_id],
+        SIG_EP_OUTPUT: [OnOff.cluster_id],
+        SIG_EP_TYPE: zha.DeviceType.REMOTE_CONTROL,
+        SIG_EP_PROFILE: zha.PROFILE_ID,
     }
-    remote_zigpy_dev: ZigpyDevice = create_mock_zigpy_device(
-        zha_gateway, endpoints, ieee=IEEE_GROUPABLE_DEVICE, nwk=0x1234
-    )
-    return remote_zigpy_dev
+}
 
 
 async def test_async_is_bindable_target(
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zigpy_device_not_bindable: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    remote_zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test zha if a device is a binding target for another device."""
+    zigpy_device: ZigpyDevice = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE)
+    zigpy_device.node_desc.mac_capability_flags |= (
+        0b_0000_0100  # this one is mains powered
+    )
+    zigpy_device_not_bindable: ZigpyDevice = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_DEVICE_NOT_BINDABLE, ieee=IEEE_GROUPABLE_DEVICE2, nwk=0x2345
+    )
+    remote_zigpy_device: ZigpyDevice = create_mock_zigpy_device(
+        zha_gateway, REMOTE_ZIGPY_DEVICE, ieee=IEEE_GROUPABLE_DEVICE, nwk=0x1234
+    )
+
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     not_bindable_zha_device = await join_zigpy_device(
         zha_gateway, zigpy_device_not_bindable
@@ -91,12 +76,19 @@ async def test_async_is_bindable_target(
 
 
 async def test_get_matched_clusters(
-    zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    zigpy_device_not_bindable: ZigpyDevice,  # pylint: disable=redefined-outer-name
-    remote_zigpy_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
     """Test getting matched clusters for 2 zha devices."""
+    zigpy_device: ZigpyDevice = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE)
+    zigpy_device.node_desc.mac_capability_flags |= (
+        0b_0000_0100  # this one is mains powered
+    )
+    zigpy_device_not_bindable: ZigpyDevice = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_DEVICE_NOT_BINDABLE, ieee=IEEE_GROUPABLE_DEVICE2, nwk=0x2345
+    )
+    remote_zigpy_device: ZigpyDevice = create_mock_zigpy_device(
+        zha_gateway, REMOTE_ZIGPY_DEVICE, ieee=IEEE_GROUPABLE_DEVICE, nwk=0x1234
+    )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     not_bindable_zha_device = await join_zigpy_device(
         zha_gateway, zigpy_device_not_bindable

@@ -53,8 +53,7 @@ IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
 _LOGGER = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_mock(zha_gateway: Gateway) -> ZigpyDevice:
     """Device tracker zigpy device."""
     endpoints = {
         1: {
@@ -89,8 +88,7 @@ def zigpy_device(zha_gateway: Gateway) -> ZigpyDevice:
     )
 
 
-@pytest.fixture
-async def device_fan_1(zha_gateway: Gateway) -> Device:
+async def device_fan_1_mock(zha_gateway: Gateway) -> Device:
     """Test zha fan platform."""
 
     zigpy_dev = create_mock_zigpy_device(
@@ -113,8 +111,7 @@ async def device_fan_1(zha_gateway: Gateway) -> Device:
     return zha_device
 
 
-@pytest.fixture
-async def device_fan_2(zha_gateway: Gateway) -> Device:
+async def device_fan_2_mock(zha_gateway: Gateway) -> Device:
     """Test zha fan platform."""
 
     zigpy_dev = create_mock_zigpy_device(
@@ -139,11 +136,11 @@ async def device_fan_2(zha_gateway: Gateway) -> Device:
 
 
 async def test_fan(
-    zigpy_device: ZigpyDevice,
     zha_gateway: Gateway,
 ) -> None:
     """Test zha fan platform."""
 
+    zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster = zigpy_device.endpoints.get(1).fan
 
@@ -277,14 +274,12 @@ async def async_set_preset_mode(
     "zigpy.zcl.clusters.hvac.Fan.write_attributes",
     new=AsyncMock(return_value=zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]),
 )
-@pytest.mark.looptime
 async def test_zha_group_fan_entity(
-    device_fan_1: Device,
-    device_fan_2: Device,
     zha_gateway: Gateway,
 ):
     """Test the fan entity for a ZHAWS group."""
-
+    device_fan_1 = await device_fan_1_mock(zha_gateway)
+    device_fan_2 = await device_fan_2_mock(zha_gateway)
     member_ieee_addresses = [device_fan_1.ieee, device_fan_2.ieee]
     members = [
         GroupMemberReference(ieee=device_fan_1.ieee, endpoint_id=1),
@@ -395,13 +390,13 @@ async def test_zha_group_fan_entity(
     new=AsyncMock(side_effect=ZigbeeException),
 )
 async def test_zha_group_fan_entity_failure_state(
-    device_fan_1: Device,
-    device_fan_2: Device,
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ):
     """Test the fan entity for a ZHA group when writing attributes generates an exception."""
 
+    device_fan_1 = await device_fan_1_mock(zha_gateway)
+    device_fan_2 = await device_fan_2_mock(zha_gateway)
     member_ieee_addresses = [device_fan_1.ieee, device_fan_2.ieee]
     members = [
         GroupMemberReference(ieee=device_fan_1.ieee, endpoint_id=1),
@@ -448,7 +443,6 @@ async def test_zha_group_fan_entity_failure_state(
     ),
 )
 async def test_fan_init(
-    zigpy_device: ZigpyDevice,
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     plug_read: dict,
     expected_state: bool,
@@ -457,6 +451,7 @@ async def test_fan_init(
 ):
     """Test zha fan platform."""
 
+    zigpy_device = zigpy_device_mock(zha_gateway)
     cluster = zigpy_device.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = plug_read
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -470,11 +465,11 @@ async def test_fan_init(
 
 
 async def test_fan_update_entity(
-    zigpy_device: ZigpyDevice,
     zha_gateway: Gateway,
 ):
     """Test zha fan refresh state."""
 
+    zigpy_device = zigpy_device_mock(zha_gateway)
     cluster = zigpy_device.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
@@ -505,8 +500,7 @@ async def test_fan_update_entity(
     assert cluster.read_attributes.await_count == 4
 
 
-@pytest.fixture
-def zigpy_device_ikea(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_ikea_mock(zha_gateway: Gateway) -> ZigpyDevice:
     """Ikea fan zigpy device."""
     endpoints = {
         1: {
@@ -552,9 +546,9 @@ def zigpy_device_ikea(zha_gateway: Gateway) -> ZigpyDevice:
 
 async def test_fan_ikea(
     zha_gateway: Gateway,
-    zigpy_device_ikea: ZigpyDevice,
 ) -> None:
     """Test ZHA fan Ikea platform."""
+    zigpy_device_ikea = zigpy_device_ikea_mock(zha_gateway)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_ikea)
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
     entity = get_entity(zha_device, platform=Platform.FAN)
@@ -645,7 +639,6 @@ async def test_fan_ikea(
     ],
 )
 async def test_fan_ikea_init(
-    zigpy_device_ikea: ZigpyDevice,
     ikea_plug_read: dict,
     ikea_expected_state: bool,
     ikea_expected_percentage: int,
@@ -653,6 +646,7 @@ async def test_fan_ikea_init(
     zha_gateway: Gateway,
 ) -> None:
     """Test ZHA fan platform."""
+    zigpy_device_ikea = zigpy_device_ikea_mock(zha_gateway)
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
     cluster.PLUGGED_ATTR_READS = ikea_plug_read
 
@@ -665,9 +659,9 @@ async def test_fan_ikea_init(
 
 async def test_fan_ikea_update_entity(
     zha_gateway: Gateway,
-    zigpy_device_ikea: ZigpyDevice,
 ) -> None:
     """Test ZHA fan platform."""
+    zigpy_device_ikea = zigpy_device_ikea_mock(zha_gateway)
     cluster = zigpy_device_ikea.endpoints.get(1).ikea_airpurifier
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0, "fan_speed": 0}
 
@@ -690,8 +684,7 @@ async def test_fan_ikea_update_entity(
     assert entity.percentage_step == 100 / 10
 
 
-@pytest.fixture
-def zigpy_device_kof(zha_gateway: Gateway) -> ZigpyDevice:
+def zigpy_device_kof_mock(zha_gateway: Gateway) -> ZigpyDevice:
     """Fan by King of Fans zigpy device."""
     endpoints = {
         1: {
@@ -737,9 +730,9 @@ def zigpy_device_kof(zha_gateway: Gateway) -> ZigpyDevice:
 
 async def test_fan_kof(
     zha_gateway: Gateway,
-    zigpy_device_kof: ZigpyDevice,
 ) -> None:
     """Test ZHA fan platform for King of Fans."""
+    zigpy_device_kof = zigpy_device_kof_mock(zha_gateway)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device_kof)
     cluster = zigpy_device_kof.endpoints.get(1).fan
     entity = get_entity(zha_device, platform=Platform.FAN)
@@ -802,7 +795,6 @@ async def test_fan_kof(
     ],
 )
 async def test_fan_kof_init(
-    zigpy_device_kof: ZigpyDevice,
     zha_gateway: Gateway,
     plug_read: dict,
     expected_state: bool,
@@ -811,6 +803,7 @@ async def test_fan_kof_init(
 ) -> None:
     """Test ZHA fan platform for King of Fans."""
 
+    zigpy_device_kof = zigpy_device_kof_mock(zha_gateway)
     cluster = zigpy_device_kof.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = plug_read
 
@@ -824,10 +817,10 @@ async def test_fan_kof_init(
 
 async def test_fan_kof_update_entity(
     zha_gateway: Gateway,
-    zigpy_device_kof: ZigpyDevice,
 ) -> None:
     """Test ZHA fan platform for King of Fans."""
 
+    zigpy_device_kof = zigpy_device_kof_mock(zha_gateway)
     cluster = zigpy_device_kof.endpoints.get(1).fan
     cluster.PLUGGED_ATTR_READS = {"fan_mode": 0}
 
