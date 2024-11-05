@@ -16,6 +16,7 @@ from zigpy.zcl.foundation import Status
 from zha.application import Platform
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.registries import PLATFORM_ENTITIES
+from zha.debounce import Debouncer
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -51,8 +52,6 @@ class UpdateEntityFeature(IntFlag):
     RELEASE_NOTES = 16
 
 
-SERVICE_INSTALL: Final = "install"
-
 ATTR_BACKUP: Final = "backup"
 ATTR_INSTALLED_VERSION: Final = "installed_version"
 ATTR_IN_PROGRESS: Final = "in_progress"
@@ -62,6 +61,10 @@ ATTR_RELEASE_SUMMARY: Final = "release_summary"
 ATTR_RELEASE_NOTES: Final = "release_notes"
 ATTR_RELEASE_URL: Final = "release_url"
 ATTR_VERSION: Final = "version"
+
+# Mains-powered devices can update quickly. We don't want to flood the receiving end
+# with unnecessary updates.
+PROGRESS_CHANGE_COOLDOWN = 0.25  # seconds
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -89,7 +92,7 @@ class FirmwareUpdateEntity(PlatformEntity):
     )
     _attr_installed_version: str | None = None
     _attr_in_progress: bool = False
-    _attr_progress: int = 0
+    _attr_progress: float = 0
     _attr_latest_version: str | None = None
     _attr_release_summary: str | None = None
     _attr_release_notes: str | None = None
@@ -119,6 +122,17 @@ class FirmwareUpdateEntity(PlatformEntity):
         self._ota_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
+        )
+
+        # To prevent unnecessary progress state changes, we debounce the progress
+        # percentage
+        self._raw_progress: float = 0
+        self._progress_debouncer = Debouncer(
+            gateway=self.device.gateway,
+            logger=_LOGGER,
+            cooldown=PROGRESS_CHANGE_COOLDOWN,
+            immediate=True,
+            function=self._emit_progress_update,
         )
 
     @functools.cached_property
@@ -152,12 +166,12 @@ class FirmwareUpdateEntity(PlatformEntity):
         return self._attr_in_progress
 
     @property
-    def progress(self) -> int | None:
+    def progress(self) -> float | None:
         """Update installation progress.
 
         Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
 
-        Returns an integer indicating the progress from 0 to 100%.
+        Returns a number indicating the progress from 0 to 100%.
         """
         return self._attr_progress
 
@@ -254,14 +268,24 @@ class FirmwareUpdateEntity(PlatformEntity):
 
         self.maybe_emit_state_changed_event()
 
-    def _update_progress(self, current: int, total: int, progress: float) -> None:
+    def _emit_progress_update(self) -> None:
+        self._attr_progress = self._raw_progress
+        self.maybe_emit_state_changed_event()
+
+    def _raw_progress_callback(self, current: int, total: int, progress: float) -> None:
         """Update install progress on event."""
         # If we are not supposed to be updating, do nothing
         if not self._attr_in_progress:
             return
 
-        self._attr_progress = int(progress)
-        self.maybe_emit_state_changed_event()
+        self._raw_progress = progress
+
+        if progress < 100.0:
+            # Debounce progress updates
+            self._progress_debouncer.async_schedule_call()
+        else:
+            # Unless we are at 100%, then we can update immediately
+            self._emit_progress_update()
 
     async def async_install(self, version: str | None) -> None:
         """Install an update."""
@@ -284,13 +308,13 @@ class FirmwareUpdateEntity(PlatformEntity):
                 raise ZHAException(f"Version {version!r} is not available")
 
         self._attr_in_progress = True
-        self._attr_progress = 0
+        self._attr_progress = 0.0
         self.maybe_emit_state_changed_event()
 
         try:
             result = await self.device.device.update_firmware(
                 image=firmware,
-                progress_callback=self._update_progress,
+                progress_callback=self._raw_progress_callback,
             )
         except Exception as ex:
             self._attr_in_progress = False
@@ -309,5 +333,7 @@ class FirmwareUpdateEntity(PlatformEntity):
 
     async def on_remove(self) -> None:
         """Call when entity will be removed."""
-        await super().on_remove()
         self._attr_in_progress = False
+        self._progress_debouncer.async_cancel()
+        self.device.device.remove_listener(self)
+        await super().on_remove()
