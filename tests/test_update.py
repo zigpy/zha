@@ -309,7 +309,7 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
                         == f"0x{installed_fw_version:08x}"
                     )
                     assert entity.state[ATTR_IN_PROGRESS] is True
-                    assert entity.state[ATTR_PROGRESS] == 57
+                    assert entity.state[ATTR_PROGRESS] == pytest.approx(100 * (40 / 70))
                     assert (
                         entity.state[ATTR_LATEST_VERSION]
                         == f"0x{fw_image.firmware.header.file_version:08x}"
@@ -364,7 +364,8 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
     assert entity.state[ATTR_LATEST_VERSION] == entity.state[ATTR_INSTALLED_VERSION]
 
     # If we send a progress notification incorrectly, it won't be handled
-    entity._update_progress(50, 100, 0.50)
+    entity._raw_progress_callback(50, 100, 0.50)
+    entity._emit_progress_update()
 
     assert not entity.state[ATTR_IN_PROGRESS]
 
