@@ -364,8 +364,7 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
     assert entity.state[ATTR_LATEST_VERSION] == entity.state[ATTR_INSTALLED_VERSION]
 
     # If we send a progress notification incorrectly, it won't be handled
-    entity._raw_progress_callback(50, 100, 0.50)
-    entity._emit_progress_update()
+    entity._update_progress(50, 100, 0.50)
 
     assert not entity.state[ATTR_IN_PROGRESS]
 
