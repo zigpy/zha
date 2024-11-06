@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import asyncio
 import binascii
 import collections
@@ -156,6 +157,13 @@ def convert_zcl_value(value: Any, field_type: Any) -> Any:
             if isinstance(value, str)
             else field_type(value)
         )
+    elif issubclass(field_type, zigpy.types.SerializableBytes):
+        if value.startswith(("b'", 'b"')):
+            value = ast.from_literal(value)
+        else:
+            value = bytes.fromhex(value)
+
+        value = field_type(value)
     else:
         value = field_type(value)
 
