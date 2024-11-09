@@ -51,12 +51,10 @@ class UpdateEntityFeature(IntFlag):
     RELEASE_NOTES = 16
 
 
-SERVICE_INSTALL: Final = "install"
-
 ATTR_BACKUP: Final = "backup"
 ATTR_INSTALLED_VERSION: Final = "installed_version"
 ATTR_IN_PROGRESS: Final = "in_progress"
-ATTR_PROGRESS: Final = "progress"
+ATTR_UPDATE_PERCENTAGE: Final = "update_percentage"
 ATTR_LATEST_VERSION: Final = "latest_version"
 ATTR_RELEASE_SUMMARY: Final = "release_summary"
 ATTR_RELEASE_NOTES: Final = "release_notes"
@@ -89,7 +87,7 @@ class FirmwareUpdateEntity(PlatformEntity):
     )
     _attr_installed_version: str | None = None
     _attr_in_progress: bool = False
-    _attr_progress: int = 0
+    _attr_update_percentage: float | None = None
     _attr_latest_version: str | None = None
     _attr_release_summary: str | None = None
     _attr_release_notes: str | None = None
@@ -152,14 +150,13 @@ class FirmwareUpdateEntity(PlatformEntity):
         return self._attr_in_progress
 
     @property
-    def progress(self) -> int | None:
+    def update_percentage(self) -> float | None:
         """Update installation progress.
 
-        Needs UpdateEntityFeature.PROGRESS flag to be set for it to be used.
-
-        Returns an integer indicating the progress from 0 to 100%.
+        Returns a number indicating the progress from 0 to 100%. If an update's progress
+        is indeterminate, this will return None.
         """
-        return self._attr_progress
+        return self._attr_update_percentage
 
     @property
     def latest_version(self) -> str | None:
@@ -200,7 +197,7 @@ class FirmwareUpdateEntity(PlatformEntity):
         return {
             ATTR_INSTALLED_VERSION: self.installed_version,
             ATTR_IN_PROGRESS: self.in_progress,
-            ATTR_PROGRESS: self.progress,
+            ATTR_UPDATE_PERCENTAGE: self.update_percentage,
             ATTR_LATEST_VERSION: self.latest_version,
             ATTR_RELEASE_SUMMARY: release_summary,
             ATTR_RELEASE_NOTES: self.release_notes,
@@ -260,7 +257,7 @@ class FirmwareUpdateEntity(PlatformEntity):
         if not self._attr_in_progress:
             return
 
-        self._attr_progress = int(progress)
+        self._attr_update_percentage = progress
         self.maybe_emit_state_changed_event()
 
     async def async_install(self, version: str | None) -> None:
@@ -284,7 +281,7 @@ class FirmwareUpdateEntity(PlatformEntity):
                 raise ZHAException(f"Version {version!r} is not available")
 
         self._attr_in_progress = True
-        self._attr_progress = 0
+        self._attr_update_percentage = None
         self.maybe_emit_state_changed_event()
 
         try:
@@ -309,5 +306,6 @@ class FirmwareUpdateEntity(PlatformEntity):
 
     async def on_remove(self) -> None:
         """Call when entity will be removed."""
-        await super().on_remove()
         self._attr_in_progress = False
+        self.device.device.remove_listener(self)
+        await super().on_remove()

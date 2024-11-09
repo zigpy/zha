@@ -29,7 +29,7 @@ from zha.application.platforms.update import (
     ATTR_IN_PROGRESS,
     ATTR_INSTALLED_VERSION,
     ATTR_LATEST_VERSION,
-    ATTR_PROGRESS,
+    ATTR_UPDATE_PERCENTAGE,
 )
 from zha.exceptions import ZHAException
 
@@ -309,7 +309,9 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
                         == f"0x{installed_fw_version:08x}"
                     )
                     assert entity.state[ATTR_IN_PROGRESS] is True
-                    assert entity.state[ATTR_PROGRESS] == 57
+                    assert entity.state[ATTR_UPDATE_PERCENTAGE] == pytest.approx(
+                        100 * (40 / 70)
+                    )
                     assert (
                         entity.state[ATTR_LATEST_VERSION]
                         == f"0x{fw_image.firmware.header.file_version:08x}"
