@@ -206,7 +206,6 @@ async def zigpy_app_controller_fixture():
         {
             zigpy.config.CONF_DATABASE: None,
             zigpy.config.CONF_DEVICE: {zigpy.config.CONF_DEVICE_PATH: "/dev/null"},
-            zigpy.config.CONF_STARTUP_ENERGY_SCAN: False,
             zigpy.config.CONF_NWK_BACKUP_ENABLED: False,
             zigpy.config.CONF_TOPO_SCAN_ENABLED: False,
             zigpy.config.CONF_OTA: {
