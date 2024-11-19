@@ -459,7 +459,7 @@
           "translation_key": null,
           "device_class": "current",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -512,7 +512,7 @@
           "translation_key": null,
           "device_class": "voltage",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -566,7 +566,7 @@
           "translation_key": "ac_frequency",
           "device_class": "frequency",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -724,7 +724,7 @@
           "translation_key": null,
           "device_class": "temperature",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -776,7 +776,7 @@
           "translation_key": null,
           "device_class": "temperature",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -830,7 +830,7 @@
           "translation_key": "switch",
           "device_class": null,
           "state_class": null,
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {

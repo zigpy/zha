@@ -1399,7 +1399,7 @@
           "translation_key": "instantaneous_demand",
           "device_class": "power",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -1454,7 +1454,7 @@
           "translation_key": "summation_delivered",
           "device_class": "energy",
           "state_class": "total_increasing",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -1511,7 +1511,7 @@
           "translation_key": "switch",
           "device_class": null,
           "state_class": null,
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {

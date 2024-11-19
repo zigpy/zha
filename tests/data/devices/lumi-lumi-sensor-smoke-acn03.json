@@ -660,7 +660,7 @@
           "translation_key": "linkage_alarm_state",
           "device_class": "smoke",
           "state_class": null,
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -708,7 +708,7 @@
           "translation_key": null,
           "device_class": "smoke",
           "state_class": null,
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -859,7 +859,7 @@
           "translation_key": "smoke_density",
           "device_class": null,
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {

@@ -571,7 +571,7 @@
           "translation_key": null,
           "device_class": "temperature",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -623,7 +623,7 @@
           "translation_key": null,
           "device_class": "pm25",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
@@ -779,7 +779,7 @@
           "translation_key": null,
           "device_class": "humidity",
           "state_class": "measurement",
-          "entity_category": null,
+          "entity_category": "control",
           "entity_registry_enabled_default": true,
           "cluster_handlers": [
             {
