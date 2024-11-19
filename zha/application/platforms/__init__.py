@@ -36,6 +36,9 @@ DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 class EntityCategory(StrEnum):
     """Category of an entity."""
 
+    # Control: An entity which allows controlling a device.
+    CONTROL = "control"
+
     # Config: An entity which allows changing the configuration of a device.
     CONFIG = "config"
 
@@ -112,7 +115,7 @@ class BaseEntity(LogMixin, EventBase):
 
     _attr_fallback_name: str | None
     _attr_translation_key: str | None
-    _attr_entity_category: EntityCategory | None
+    _attr_entity_category: EntityCategory = EntityCategory.CONTROL
     _attr_entity_registry_enabled_default: bool = True
     _attr_device_class: str | None
     _attr_state_class: str | None
@@ -158,11 +161,9 @@ class BaseEntity(LogMixin, EventBase):
         return None
 
     @property
-    def entity_category(self) -> EntityCategory | None:
+    def entity_category(self) -> EntityCategory:
         """Return the entity category."""
-        if hasattr(self, "_attr_entity_category"):
-            return self._attr_entity_category
-        return None
+        return self._attr_entity_category
 
     @property
     def entity_registry_enabled_default(self) -> bool:
@@ -360,7 +361,7 @@ class PlatformEntity(BaseEntity):
         elif entity_metadata.entity_type is EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
         else:
-            self._attr_entity_category = None
+            self._attr_entity_category = EntityCategory.CONTROL
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
