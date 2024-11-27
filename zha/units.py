@@ -117,6 +117,19 @@ class UnitOfTime(StrEnum):
     YEARS = "y"
 
 
+class UnitOfLength(StrEnum):
+    """Length units."""
+
+    MILLIMETERS = "mm"
+    CENTIMETERS = "cm"
+    METERS = "m"
+    KILOMETERS = "km"
+    INCHES = "in"
+    FEET = "ft"
+    YARDS = "yd"
+    MILES = "mi"
+
+
 class UnitOfEnergy(StrEnum):
     """Energy units."""
 
@@ -158,6 +171,7 @@ UNITS_OF_MEASURE = {
     UnitOfPressure.__name__: UnitOfPressure,
     UnitOfVolume.__name__: UnitOfVolume,
     UnitOfVolumeFlowRate.__name__: UnitOfVolumeFlowRate,
+    UnitOfLength.__name__: UnitOfLength,
     UnitOfMass.__name__: UnitOfMass,
 }
 

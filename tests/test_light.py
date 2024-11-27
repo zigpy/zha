@@ -1075,8 +1075,8 @@ async def test_light_initialization(
     zigpy_device.endpoints[1].light_color.PLUGGED_ATTR_READS = plugged_attr_reads
 
     light_options = zha_gateway.config.config.light_options
-    for key in config_override:
-        setattr(light_options, key, config_override[key])
+    for key, value in config_override.items():
+        setattr(light_options, key, value)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     _entity = get_entity(zha_device, platform=Platform.LIGHT)
 

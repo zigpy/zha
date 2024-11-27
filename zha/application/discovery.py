@@ -112,6 +112,11 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         WriteAttributeButtonMetadata,
         EntityType.STANDARD,
     ): button.WriteAttributeButton,
+    (
+        Platform.BUTTON,
+        WriteAttributeButtonMetadata,
+        EntityType.DIAGNOSTIC,
+    ): button.WriteAttributeButton,
     (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.CONFIG): button.Button,
     (
         Platform.BUTTON,
