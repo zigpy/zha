@@ -153,15 +153,20 @@ def convert_zcl_value(value: Any, field_type: Any) -> Any:
             value = field_type(new_value)
     elif issubclass(field_type, enum.Enum):
         value = (
-            field_type[value.replace(" ", "_")]
+            field_type[value.replace(" ", "_").split(".", 1)[-1]]
             if isinstance(value, str)
             else field_type(value)
         )
     elif issubclass(field_type, zigpy.types.SerializableBytes):
         if value.startswith(("b'", 'b"')):
-            value = ast.from_literal(value)
+            value = ast.literal_eval(value)
         else:
             value = bytes.fromhex(value)
+
+        value = field_type(value)
+    elif issubclass(field_type, int):
+        if isinstance(value, str) and value.startswith("0x"):
+            value = int(value, 16)
 
         value = field_type(value)
     else:
