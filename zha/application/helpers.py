@@ -138,7 +138,7 @@ def convert_zcl_value(value: Any, field_type: Any) -> Any:
         if isinstance(value, int):
             value = field_type(value)
         elif isinstance(value, str):
-            # List of flags: `SomeFlag.field1 | field2
+            # List of flags: `SomeFlag.field1 | field2`
             value = [v.strip() for v in value.split(".", 1)[-1].split("|")]
 
         if isinstance(value, list):
@@ -185,13 +185,13 @@ def convert_to_zcl_values(
             continue
 
         value = fields[field.name]
-        converted_fields[field.name] = convert_zcl_value(value, field.type)
+        new_value = converted_fields[field.name] = convert_zcl_value(value, field.type)
 
         _LOGGER.debug(
             "Converted ZCL schema field(%s) value from: %s to: %s",
             field.name,
             value,
-            fields[field.name],
+            new_value,
         )
 
     return converted_fields
