@@ -10,7 +10,7 @@ import pytest
 from zigpy.exceptions import ZigbeeException
 import zigpy.profiles.zha
 from zigpy.quirks.registry import DeviceRegistry
-from zigpy.quirks.v2 import QuirkBuilder
+from zigpy.quirks.v2 import DeviceAlertLevel, DeviceAlertMetadata, QuirkBuilder
 import zigpy.types
 from zigpy.zcl.clusters import general
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
@@ -820,3 +820,36 @@ async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     assert zha_device.model == "IRIS Keypad V2"
     assert zha_device.manufacturer == "Lowe's"
+
+
+async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
+    """Test quirks v2 device alerts."""
+
+    # Normal device, no alerts
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    assert not zha_device.device_alerts
+
+    # Explicit alerts
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .device_alert(level=DeviceAlertLevel.WARNING, message="Test warning")
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    assert zha_device.device_alerts == (
+        DeviceAlertMetadata(level=DeviceAlertLevel.WARNING, message="Test warning"),
+    )
