@@ -182,10 +182,12 @@ async def test_number(
 
 
 async def test_number_missing_description_attr(
-    zigpy_analog_output_device: ZigpyDevice,  # pylint: disable=redefined-outer-name
     zha_gateway: Gateway,
 ) -> None:
     """Test zha number platform - missing description attribute."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
     cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
         1
     ).analog_output
