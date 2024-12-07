@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -16,7 +17,7 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 import zigpy.quirks
-from zigpy.quirks.v2 import QuirksV2RegistryEntry
+from zigpy.quirks.v2 import DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.zcl.clusters import Cluster
@@ -59,7 +60,7 @@ from zha.application.const import (
     ZHA_CLUSTER_HANDLER_MSG,
     ZHA_EVENT,
 )
-from zha.application.helpers import convert_to_zcl_values
+from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
 from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
@@ -313,6 +314,14 @@ class Device(LogMixin, EventBase):
             return UNKNOWN_MODEL
 
         return self._zigpy_device.model
+
+    @cached_property
+    def device_alerts(self) -> Iterable[DeviceAlertMetadata]:
+        """Return device alerts for this device."""
+        if self.quirk_metadata is None:
+            return []
+
+        return self.quirk_metadata.device_alerts
 
     @cached_property
     def manufacturer_code(self) -> int | None:
@@ -864,6 +873,9 @@ class Device(LogMixin, EventBase):
                 f"Cluster {cluster_id} not found on endpoint {endpoint_id} while"
                 f" writing attribute {attribute} with value {value}"
             ) from exc
+
+        attr_def = cluster.find_attribute(attribute)
+        value = convert_zcl_value(value, attr_def.type)
 
         try:
             response = await cluster.write_attributes(

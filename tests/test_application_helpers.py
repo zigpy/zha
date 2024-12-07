@@ -1,8 +1,12 @@
 """Test zha application helpers."""
 
+from typing import Any
+
+import pytest
 from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
-from zigpy.zcl.clusters.general import Basic, OnOff
+import zigpy.types as t
+from zigpy.zcl.clusters.general import Basic, Identify, OnOff
 from zigpy.zcl.clusters.security import IasZone
 
 from tests.common import (
@@ -14,7 +18,12 @@ from tests.common import (
     join_zigpy_device,
 )
 from zha.application.gateway import Gateway
-from zha.application.helpers import async_is_bindable_target, get_matched_clusters
+from zha.application.helpers import (
+    async_is_bindable_target,
+    convert_to_zcl_values,
+    convert_zcl_value,
+    get_matched_clusters,
+)
 
 IEEE_GROUPABLE_DEVICE = "01:2d:6f:00:0a:90:69:e8"
 IEEE_GROUPABLE_DEVICE2 = "02:2d:6f:00:0a:90:69:e8"
@@ -105,3 +114,76 @@ async def test_get_matched_clusters(
     assert matches[0].target_ep_id == 1
 
     assert not await get_matched_clusters(not_bindable_zha_device, remote_zha_device)
+
+
+class SomeEnum(t.enum8):
+    """Some enum."""
+
+    value_1 = 0x12
+    value_2 = 0x34
+    value_3 = 0x56
+
+
+class SomeFlag(t.bitmap8):
+    """Some bitmap."""
+
+    flag_1 = 0b00000001
+    flag_2 = 0b00000010
+    flag_3 = 0b00000100
+
+
+@pytest.mark.parametrize(
+    ("text", "field_type", "result"),
+    [
+        # Bytes
+        (
+            "b'Some data\\x00\\x01'",
+            t.SerializableBytes,
+            t.SerializableBytes(b"Some data\x00\x01"),
+        ),
+        (
+            'b"Some data\\x00\\x01"',
+            t.SerializableBytes,
+            t.SerializableBytes(b"Some data\x00\x01"),
+        ),
+        (
+            b"Some data\x00\x01".hex(),
+            t.SerializableBytes,
+            t.SerializableBytes(b"Some data\x00\x01"),
+        ),
+        # Enum
+        ("value 1", SomeEnum, SomeEnum.value_1),
+        ("value_1", SomeEnum, SomeEnum.value_1),
+        ("SomeEnum.value_1", SomeEnum, SomeEnum.value_1),
+        (0x12, SomeEnum, SomeEnum.value_1),
+        # Flag
+        ("flag 1", SomeFlag, SomeFlag.flag_1),
+        ("flag_1", SomeFlag, SomeFlag.flag_1),
+        ("SomeFlag.flag_1", SomeFlag, SomeFlag.flag_1),
+        ("SomeFlag.flag_1|flag_2", SomeFlag, SomeFlag.flag_1 | SomeFlag.flag_2),
+        (0b00000001, SomeFlag, SomeFlag.flag_1),
+        ([0b00000001], SomeFlag, SomeFlag.flag_1),
+        ([0b00000001, 0b00000010], SomeFlag, SomeFlag.flag_1 | SomeFlag.flag_2),
+        (["flag_1", "flag_2"], SomeFlag, SomeFlag.flag_1 | SomeFlag.flag_2),
+        # Int
+        (0x1234, t.uint16_t, 0x1234),
+        ("0x1234", t.uint16_t, 0x1234),
+        ("4660", t.uint16_t, 0x1234),
+        # Some fallthrough type
+        (1.000, t.Single, t.Single(1.000)),
+        ("1.000", t.Single, t.Single(1.000)),
+    ],
+)
+def test_convert_zcl_value(text: Any, field_type: Any, result: Any) -> None:
+    """Test converting ZCL values."""
+    assert convert_zcl_value(text, field_type) == result
+
+
+def test_convert_to_zcl_values() -> None:
+    """Test converting ZCL values."""
+
+    identify_schema = Identify.ServerCommandDefs.identify.schema
+    assert convert_to_zcl_values(
+        fields={"identify_time": "1"},
+        schema=identify_schema,
+    ) == {"identify_time": 1}
