@@ -144,7 +144,7 @@ class Thermostat(PlatformEntity):
 
     @property
     def state(self) -> dict[str, Any]:
-        """Get the state of the lock."""
+        """Get the state of the thermostat."""
         thermostat = self._thermostat_cluster_handler
         system_mode = SYSTEM_MODE_2_HVAC.get(thermostat.system_mode, "unknown")
 
