@@ -3,6 +3,7 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
+from functools import partial
 import math
 from typing import Any, Optional
 from unittest.mock import AsyncMock, MagicMock
@@ -298,22 +299,27 @@ async def async_test_em_power_factor(
 
 
 async def async_test_em_rms_current(
-    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
+    current_attrid: int,
+    current_max_attrid: int,
+    current_max_attr_name: str,
+    zha_gateway: Gateway,
+    cluster: Cluster,
+    entity: PlatformEntity,
 ) -> None:
     """Test electrical measurement RMS Current sensor."""
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0508: 1234})
+    await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1234})
     assert_state(entity, 1.2, "A")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_current_divisor": 10})
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0508: 236})
+    await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 236})
     assert_state(entity, 23.6, "A")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0508: 1236})
+    await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1236})
     assert_state(entity, 124, "A")
 
-    await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050A: 88})
-    assert entity.state["rms_current_max"] == 8.8
+    await send_attributes_report(zha_gateway, cluster, {0: 1, current_max_attrid: 88})
+    assert entity.state[current_max_attr_name] == 8.8
 
 
 async def async_test_em_rms_voltage(
@@ -515,8 +521,30 @@ async def async_test_change_source_timestamp(
         (
             homeautomation.ElectricalMeasurement.cluster_id,
             sensor.ElectricalMeasurementRMSCurrent,
-            async_test_em_rms_current,
+            partial(async_test_em_rms_current, 0x0508, 0x050A, "rms_current_max"),
             {"ac_current_divisor": 1000, "ac_current_multiplier": 1},
+            {"active_power", "apparent_power", "rms_voltage"},
+        ),
+        (
+            homeautomation.ElectricalMeasurement.cluster_id,
+            sensor.ElectricalMeasurementRMSCurrentPhB,
+            partial(async_test_em_rms_current, 0x0908, 0x090A, "rms_current_max_ph_b"),
+            {
+                "ac_current_divisor": 1000,
+                "ac_current_multiplier": 1,
+                "rms_current_ph_b": 0,
+            },
+            {"active_power", "apparent_power", "rms_voltage"},
+        ),
+        (
+            homeautomation.ElectricalMeasurement.cluster_id,
+            sensor.ElectricalMeasurementRMSCurrentPhC,
+            partial(async_test_em_rms_current, 0x0A08, 0x0A0A, "rms_current_max_ph_c"),
+            {
+                "ac_current_divisor": 1000,
+                "ac_current_multiplier": 1,
+                "rms_current_ph_c": 0,
+            },
             {"active_power", "apparent_power", "rms_voltage"},
         ),
         (
@@ -1122,7 +1150,11 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "active_power_max",
         "apparent_power",
         "rms_current",
+        "rms_current_ph_b",
+        "rms_current_ph_c",
         "rms_current_max",
+        "rms_current_max_ph_b",
+        "rms_current_max_ph_c",
         "rms_voltage",
         "rms_voltage_max",
         "power_factor",

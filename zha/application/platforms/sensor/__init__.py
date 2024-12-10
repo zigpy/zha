@@ -617,8 +617,13 @@ class ElectricalMeasurement(PollableSensor):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {
             "measurement_type",
-            f"{self._attribute_name}_max",
+            self._max_attribute_name,
         }
+
+    @property
+    def _max_attribute_name(self) -> str:
+        """Return the max attribute name."""
+        return f"{self._attribute_name}_max"
 
     @property
     def state(self) -> dict[str, Any]:
@@ -627,7 +632,7 @@ class ElectricalMeasurement(PollableSensor):
         if self._cluster_handler.measurement_type is not None:
             response["measurement_type"] = self._cluster_handler.measurement_type
 
-        max_attr_name = f"{self._attribute_name}_max"
+        max_attr_name = self._max_attribute_name
         if not hasattr(self._cluster_handler.cluster.AttributeDefs, max_attr_name):
             return response
 
@@ -694,6 +699,11 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     _unique_id_suffix = "rms_current_ph_b"
     _attr_translation_key: str = "rms_current_ph_b"
 
+    @property
+    def _max_attribute_name(self) -> str:
+        """Return the max attribute name."""
+        return "rms_current_max_ph_b"
+
     @classmethod
     def create_platform_entity(
         cls: type[Self],
@@ -718,6 +728,11 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     _attribute_name: str = "rms_current_ph_c"
     _unique_id_suffix: str = "rms_current_ph_c"
     _attr_translation_key: str = "rms_current_ph_c"
+
+    @property
+    def _max_attribute_name(self) -> str:
+        """Return the max attribute name."""
+        return "rms_current_max_ph_c"
 
     @classmethod
     def create_platform_entity(
