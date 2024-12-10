@@ -157,6 +157,7 @@ class Sensor(PlatformEntity):
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
+    _skip_creation_if_none: bool = False
 
     @classmethod
     def create_platform_entity(
@@ -181,6 +182,12 @@ class Sensor(PlatformEntity):
                 cls._attribute_name,
                 cls.__name__,
             )
+            return None
+
+        if (
+            cls._skip_creation_if_none
+            and cluster_handlers[0].cluster.get(cls._attribute_name) is None
+        ):
             return None
 
         return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
@@ -698,27 +705,12 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     _attribute_name = "rms_current_ph_b"
     _unique_id_suffix = "rms_current_ph_b"
     _attr_translation_key: str = "rms_current_ph_b"
+    _skip_creation_if_none = True
 
     @property
     def _max_attribute_name(self) -> str:
         """Return the max attribute name."""
         return "rms_current_max_ph_b"
-
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory."""
-        if cluster_handlers[0].cluster.get(cls._attribute_name) is None:
-            return None
-        return super().create_platform_entity(
-            unique_id, cluster_handlers, endpoint, device, **kwargs
-        )
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -728,27 +720,12 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     _attribute_name: str = "rms_current_ph_c"
     _unique_id_suffix: str = "rms_current_ph_c"
     _attr_translation_key: str = "rms_current_ph_c"
+    _skip_creation_if_none = True
 
     @property
     def _max_attribute_name(self) -> str:
         """Return the max attribute name."""
         return "rms_current_max_ph_c"
-
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory."""
-        if cluster_handlers[0].cluster.get(cls._attribute_name) is None:
-            return None
-        return super().create_platform_entity(
-            unique_id, cluster_handlers, endpoint, device, **kwargs
-        )
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -1162,29 +1139,14 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        This attribute only started to be initialized in HA 2024.2.0,
+    """ This attribute only started to be initialized in HA 2024.2.0,
         so the entity would be created on the first HA start after the
         upgrade for existing devices, as the initialization to see if
         an attribute is unsupported happens later in the background.
         To avoid creating unnecessary entities for existing devices,
         wait until the attribute was properly initialized once for now.
         """
-        if cluster_handlers[0].cluster.get(cls._attribute_name) is None:
-            return None
-        return super().create_platform_entity(
-            unique_id, cluster_handlers, endpoint, device, **kwargs
-        )
+    _skip_creation_if_none = True
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_PRESSURE)
