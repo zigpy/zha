@@ -868,6 +868,24 @@ class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    models={
+        "RBSH-RTH0-ZB-EU",
+        "RBSH-TRV0-ZB-EU",
+        "RBSH-TRV1-ZB-EU",
+        "RBSH-RTH0-BAT-ZB-EU",
+    },
+    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
+)
+class BoschThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
+    """Local temperature calibration for the Bosch TRV/RTH."""
+
+    _attr_native_min_value: float = -5.0
+    _attr_native_max_value: float = 5.0
+    _attr_native_step: float = 0.1
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY, models={"SNZB-06P", "SNZB-03P"}
 )
 class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
