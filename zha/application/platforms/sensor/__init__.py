@@ -714,13 +714,12 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
+class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrentPhB):
     """RMS current measurement."""
 
     _attribute_name: str = "rms_current_ph_c"
     _unique_id_suffix: str = "rms_current_ph_c"
     _attr_translation_key: str = "rms_current_ph_c"
-    _skip_creation_if_none = True
 
     @property
     def _max_attribute_name(self) -> str:
