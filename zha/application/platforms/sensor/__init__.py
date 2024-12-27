@@ -835,6 +835,7 @@ class ElectricalMeasurementRMSPowerFactorPhB(ElectricalMeasurementPowerFactor):
     _attribute_name = "power_factor_ph_b"
     _unique_id_suffix = "power_factor_ph_b"
     _attr_translation_key: str = "power_factor_ph_b"
+    _skip_creation_if_none = True
 
     @property
     def _max_attribute_name(self) -> str:
