@@ -455,9 +455,10 @@ class ClusterHandler(LogMixin, EventBase):
             return
 
         self.debug("initializing cluster handler: from_cache: %s", from_cache)
-        cached = [a for a, cached in self.ZCL_INIT_ATTRS.items() if cached]
-        uncached = [a for a, cached in self.ZCL_INIT_ATTRS.items() if not cached]
-        uncached.extend([cfg["attr"] for cfg in self.REPORT_CONFIG])
+        cache_config = self.ZCL_INIT_ATTRS.copy()
+        cache_config |= {cfg["attr"]: False for cfg in self.REPORT_CONFIG}
+        cached = [a for a, cached in cache_config.items() if cached]
+        uncached = [a for a, cached in cache_config.items() if not cached]
 
         if cached:
             self.debug("initializing cached cluster handler attributes: %s", cached)
