@@ -1266,6 +1266,13 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         device_class=SensorDeviceClass.ENERGY,
         fallback_name="Measurement",
     )
+    .sensor(
+        "energy_invalid_state_class",
+        OppleCluster.cluster_id,
+        state_class=SensorDeviceClass.ENERGY,
+        device_class=SensorDeviceClass.ENERGY,
+        fallback_name="Measurement",
+    )
     .add_to_registry()
 )
 
@@ -1323,10 +1330,14 @@ async def test_state_class(zha_gateway: Gateway) -> None:
     energy_delivered_entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="energy_delivered"
     )
+    energy_invalid_state_class = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="energy_invalid_state_class"
+    )
 
     assert power_entity.state_class == SensorStateClass.MEASUREMENT
     assert energy_entity.state_class == SensorStateClass.TOTAL
     assert energy_delivered_entity.state_class == SensorStateClass.TOTAL_INCREASING
+    assert energy_invalid_state_class.state_class is None
 
 
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
