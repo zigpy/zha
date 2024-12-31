@@ -1320,7 +1320,9 @@ async def test_last_feeding_size_sensor_v2(zha_gateway: Gateway) -> None:
     assert_state(entity, 5.0, "g")
 
 
-async def test_state_class(zha_gateway: Gateway) -> None:
+async def test_state_class(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
     """Test quirks defined sensor."""
 
     zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
@@ -1338,6 +1340,7 @@ async def test_state_class(zha_gateway: Gateway) -> None:
     assert energy_entity.state_class == SensorStateClass.TOTAL
     assert energy_delivered_entity.state_class == SensorStateClass.TOTAL_INCREASING
     assert energy_invalid_state_class.state_class is None
+    assert "Quirks provided an invalid state class: energy" in caplog.text
 
 
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
