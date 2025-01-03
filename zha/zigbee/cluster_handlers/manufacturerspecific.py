@@ -453,9 +453,7 @@ class XiaomiVibrationAQ1ClusterHandler(MultistateInputClusterHandler):
 class SonoffSensorClusterHandler(ClusterHandler):
     """Sonoff Sensor cluster handler."""
 
-    REPORT_CONFIG = (
-        AttrReportConfig(attr="tamper", config=REPORT_CONFIG_IMMEDIATE),
-    )
+    REPORT_CONFIG = (AttrReportConfig(attr="tamper", config=REPORT_CONFIG_IMMEDIATE),)
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize SonoffPresenceSensor cluster handler."""
