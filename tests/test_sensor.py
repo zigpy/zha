@@ -37,7 +37,7 @@ from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
 from zha.application.platforms.sensor import DanfossSoftwareErrorCode, UnitOfMass
-from zha.application.platforms.sensor.const import SensorDeviceClass
+from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
 from zha.units import PERCENTAGE, UnitOfEnergy, UnitOfPressure, UnitOfVolume
 from zha.zigbee.device import Device
 
@@ -1277,6 +1277,34 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         translation_key="last_feeding_size",
         fallback_name="Last feeding size",
     )
+    .sensor(
+        "power",
+        OppleCluster.cluster_id,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.POWER,
+        fallback_name="Measurement",
+    )
+    .sensor(
+        "energy",
+        OppleCluster.cluster_id,
+        state_class=SensorStateClass.TOTAL,
+        device_class=SensorDeviceClass.ENERGY,
+        fallback_name="Measurement",
+    )
+    .sensor(
+        "energy_delivered",
+        OppleCluster.cluster_id,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        device_class=SensorDeviceClass.ENERGY,
+        fallback_name="Measurement",
+    )
+    .sensor(
+        "energy_invalid_state_class",
+        OppleCluster.cluster_id,
+        state_class=SensorDeviceClass.ENERGY,
+        device_class=SensorDeviceClass.ENERGY,
+        fallback_name="Measurement",
+    )
     .add_to_registry()
 )
 
@@ -1322,6 +1350,29 @@ async def test_last_feeding_size_sensor_v2(zha_gateway: Gateway) -> None:
 
     await send_attributes_report(zha_gateway, cluster, {0x010C: 5})
     assert_state(entity, 5.0, "g")
+
+
+async def test_state_class(
+    zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Test quirks defined sensor."""
+
+    zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
+    assert isinstance(zha_device.device, CustomDeviceV2)
+    power_entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="power")
+    energy_entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="energy")
+    energy_delivered_entity = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="energy_delivered"
+    )
+    energy_invalid_state_class = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="energy_invalid_state_class"
+    )
+
+    assert power_entity.state_class == SensorStateClass.MEASUREMENT
+    assert energy_entity.state_class == SensorStateClass.TOTAL
+    assert energy_delivered_entity.state_class == SensorStateClass.TOTAL_INCREASING
+    assert energy_invalid_state_class.state_class is None
+    assert "Quirks provided an invalid state class: energy" in caplog.text
 
 
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
