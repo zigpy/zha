@@ -212,6 +212,21 @@ class Sensor(PlatformEntity):
             self._attr_translation_key = None
             self._attr_fallback_name: str = self._cluster_handler.description
 
+    def _validate_state_class(
+        self,
+        state_class_value: SensorStateClass,
+    ) -> SensorStateClass | None:
+        """Validate and return a state class."""
+        try:
+            return SensorStateClass(state_class_value.value)
+        except ValueError as ex:
+            _LOGGER.warning(
+                "Quirks provided an invalid state class: %s: %s",
+                state_class_value,
+                ex,
+            )
+            return None
+
     def _init_from_quirks_metadata(self, entity_metadata: ZCLSensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
@@ -226,6 +241,10 @@ class Sensor(PlatformEntity):
                 entity_metadata.device_class,
                 Platform.SENSOR.value,
                 _LOGGER,
+            )
+        if entity_metadata.state_class is not None:
+            self._attr_state_class = self._validate_state_class(
+                entity_metadata.state_class
             )
         if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = validate_unit(
