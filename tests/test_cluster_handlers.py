@@ -172,7 +172,7 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
 @pytest.mark.parametrize(
     ("cluster_id", "bind_count", "attrs"),
     [
-        (zigpy.zcl.clusters.general.Basic.cluster_id, 0, {}),
+        (zigpy.zcl.clusters.general.Basic.cluster_id, 0, set()),
         (
             zigpy.zcl.clusters.general.PowerConfiguration.cluster_id,
             1,
@@ -183,13 +183,13 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
             1,
             {"current_temperature"},
         ),
-        (zigpy.zcl.clusters.general.Identify.cluster_id, 0, {}),
-        (zigpy.zcl.clusters.general.Groups.cluster_id, 0, {}),
-        (zigpy.zcl.clusters.general.Scenes.cluster_id, 1, {}),
+        (zigpy.zcl.clusters.general.Identify.cluster_id, 0, set()),
+        (zigpy.zcl.clusters.general.Groups.cluster_id, 0, set()),
+        (zigpy.zcl.clusters.general.Scenes.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.OnOff.cluster_id, 1, {"on_off"}),
-        (zigpy.zcl.clusters.general.OnOffConfiguration.cluster_id, 1, {}),
+        (zigpy.zcl.clusters.general.OnOffConfiguration.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.LevelControl.cluster_id, 1, {"current_level"}),
-        (zigpy.zcl.clusters.general.Alarms.cluster_id, 1, {}),
+        (zigpy.zcl.clusters.general.Alarms.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.AnalogInput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.AnalogOutput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.AnalogValue.cluster_id, 1, {"present_value"}),
@@ -199,13 +199,13 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
         (zigpy.zcl.clusters.general.MultistateInput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.MultistateOutput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.MultistateValue.cluster_id, 1, {"present_value"}),
-        (zigpy.zcl.clusters.general.Commissioning.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.Partition.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.Ota.cluster_id, 0, {}),
-        (zigpy.zcl.clusters.general.PowerProfile.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.ApplianceControl.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.PollControl.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.GreenPowerProxy.cluster_id, 0, {}),
+        (zigpy.zcl.clusters.general.Commissioning.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.Partition.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.Ota.cluster_id, 0, set()),
+        (zigpy.zcl.clusters.general.PowerProfile.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.ApplianceControl.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.PollControl.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.GreenPowerProxy.cluster_id, 0, set()),
         (zigpy.zcl.clusters.closures.DoorLock.cluster_id, 1, {"lock_state"}),
         (
             zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
@@ -332,15 +332,15 @@ async def test_in_cluster_handler_config(
     assert cluster_handler.status == ClusterHandlerStatus.CONFIGURED
 
     assert cluster.bind.call_count == bind_count
+
+    reported_attrs = set()
+
+    for mock_call in cluster.configure_reporting_multiple.mock_calls:
+        reported_attrs.update(mock_call.args[0].keys())
+
+    assert attrs == reported_attrs
     assert cluster.configure_reporting.call_count == 0
     assert cluster.configure_reporting_multiple.call_count == math.ceil(len(attrs) / 3)
-    reported_attrs = {
-        a
-        for a in attrs
-        for attr in cluster.configure_reporting_multiple.call_args_list
-        for attrs in attr[0][0]
-    }
-    assert set(attrs) == reported_attrs
 
 
 async def test_cluster_handler_bind_error(
