@@ -626,8 +626,9 @@ class ElectricalMeasurement(PollableSensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _divisor_attribute_name: str | None = "ac_power_divisor"
+    _multiplier_attribute_name: str | None = "ac_power_multiplier"
     _attr_max_attribute_name: str = None
-    _div_mul_prefix: str | None = "ac_power"
 
     def __init__(
         self,
@@ -667,14 +668,16 @@ class ElectricalMeasurement(PollableSensor):
 
     def formatter(self, value: int) -> int | float:
         """Return 'normalized' value."""
-        if self._div_mul_prefix:
-            multiplier = getattr(
-                self._cluster_handler, f"{self._div_mul_prefix}_multiplier"
-            )
-            divisor = getattr(self._cluster_handler, f"{self._div_mul_prefix}_divisor")
+        if self._multiplier_attribute_name:
+            multiplier = getattr(self._cluster_handler, self._multiplier_attribute_name)
         else:
             multiplier = self._multiplier
+
+        if self._divisor_attribute_name:
+            divisor = getattr(self._cluster_handler, self._divisor_attribute_name)
+        else:
             divisor = self._divisor
+
         value = float(value * multiplier) / divisor
         if value < 100 and divisor > 1:
             return round(value, self._decimals)
@@ -724,7 +727,8 @@ class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
-    _div_mul_prefix = "ac_power"
+    _divisor_attribute_name = "ac_power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -736,7 +740,8 @@ class ElectricalMeasurementRMSCurrent(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
-    _div_mul_prefix = "ac_current"
+    _divisor_attribute_name = "ac_current_divisor"
+    _multiplier_attribute_name = "ac_current_multiplier"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -770,7 +775,8 @@ class ElectricalMeasurementRMSVoltage(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
-    _div_mul_prefix = "ac_voltage"
+    _divisor_attribute_name = "ac_voltage_divisor"
+    _multiplier_attribute_name = "ac_voltage_multiplier"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -805,7 +811,8 @@ class ElectricalMeasurementFrequency(PolledElectricalMeasurement):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_translation_key: str = "ac_frequency"
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
-    _div_mul_prefix = "ac_frequency"
+    _divisor_attribute_name = "ac_frequency_divisor"
+    _multiplier_attribute_name = "ac_frequency_multiplier"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -817,7 +824,8 @@ class ElectricalMeasurementPowerFactor(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
-    _div_mul_prefix = None
+    _divisor_attribute_name = None
+    _multiplier_attribute_name = None
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
