@@ -16,6 +16,7 @@ from zigpy.zcl.clusters.homeautomation import (
 from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
+    REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_OP,
 )
 
@@ -60,6 +61,30 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         POWER_QUALITY_MEASUREMENT = 256
 
     REPORT_CONFIG = (
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_voltage_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_current_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_current_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_power_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_power_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
         AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.active_power.name,
             config=REPORT_CONFIG_OP,
