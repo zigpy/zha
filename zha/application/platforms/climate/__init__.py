@@ -600,6 +600,38 @@ class CentralitePearl(ZenWithinThermostat):
     """Centralite Pearl Thermostat implementation."""
 
 
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
+    aux_cluster_handlers=CLUSTER_HANDLER_FAN,
+    manufacturers="Centralite",
+    models={"3156105"},
+    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
+)
+class Centralite(Thermostat):
+    """Centralite Thermostat implementation."""
+
+    @property
+    def _rm_rs_action(self) -> HVACAction:
+        """Return the current HVAC action based on running mode and running state."""
+
+        running_mode = self._thermostat_cluster_handler.running_mode
+        if running_mode == SystemMode.Heat:
+            return HVACAction.HEATING
+        if running_mode == SystemMode.Cool:
+            return HVACAction.COOLING
+
+        running_state = self._thermostat_cluster_handler.running_state
+        if running_state and running_state & (
+            RunningState.Fan_State_On
+            | RunningState.Fan_2nd_Stage_On
+            | RunningState.Fan_3rd_Stage_On
+        ):
+            return HVACAction.FAN
+        if self.hvac_mode != HVACMode.OFF and running_mode == SystemMode.Off:
+            return HVACAction.IDLE
+        return HVACAction.OFF
+
+
 @STRICT_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     manufacturers={
