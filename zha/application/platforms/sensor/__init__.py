@@ -157,7 +157,7 @@ class Sensor(PlatformEntity):
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
-    _skip_creation_if_none: bool = False
+    _skip_creation_if_no_attr_cache: bool = False
 
     @classmethod
     def create_platform_entity(
@@ -185,7 +185,7 @@ class Sensor(PlatformEntity):
             return None
 
         if (
-            cls._skip_creation_if_none
+            cls._skip_creation_if_no_attr_cache
             and cluster_handlers[0].cluster.get(cls._attribute_name) is None
         ):
             return None
@@ -629,6 +629,7 @@ class ElectricalMeasurement(PollableSensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_max_attribute_name: str = None
     _div_mul_prefix: str | None = "ac_power"
 
     def __init__(
@@ -649,7 +650,7 @@ class ElectricalMeasurement(PollableSensor):
     @property
     def _max_attribute_name(self) -> str:
         """Return the max attribute name."""
-        return f"{self._attribute_name}_max"
+        return self._attr_max_attribute_name or f"{self._attribute_name}_max"
 
     @property
     def state(self) -> dict[str, Any]:
@@ -724,12 +725,8 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     _attribute_name = "rms_current_ph_b"
     _unique_id_suffix = "rms_current_ph_b"
     _attr_translation_key: str = "rms_current_ph_b"
-    _skip_creation_if_none = True
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "rms_current_max_ph_b"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name: str = "rms_current_max_ph_b"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -739,12 +736,8 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     _attribute_name: str = "rms_current_ph_c"
     _unique_id_suffix: str = "rms_current_ph_c"
     _attr_translation_key: str = "rms_current_ph_c"
-    _skip_creation_if_none = True
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "rms_current_max_ph_c"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name: str = "rms_current_max_ph_c"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -1157,15 +1150,15 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
     _attribute_name = "current_summ_received"
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"
-
-    """ This attribute only started to be initialized in HA 2024.2.0,
-        so the entity would be created on the first HA start after the
-        upgrade for existing devices, as the initialization to see if
-        an attribute is unsupported happens later in the background.
-        To avoid creating unnecessary entities for existing devices,
-        wait until the attribute was properly initialized once for now.
-        """
-    _skip_creation_if_none = True
+    """
+    This attribute only started to be initialized in HA 2024.2.0,
+    so the entity would be created on the first HA start after the
+    upgrade for existing devices, as the initialization to see if
+    an attribute is unsupported happens later in the background.
+    To avoid creating unnecessary entities for existing devices,
+    wait until the attribute was properly initialized once for now.
+    """
+    _skip_creation_if_no_attr_cache = True
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_PRESSURE)
