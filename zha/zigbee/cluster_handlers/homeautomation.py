@@ -86,6 +86,14 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_IMMEDIATE,
         ),
         AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.power_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.power_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.active_power.name,
             config=REPORT_CONFIG_OP,
         ),
