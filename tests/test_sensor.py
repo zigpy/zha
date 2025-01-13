@@ -1176,6 +1176,8 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "ac_voltage_multiplier",
         "ac_power_multiplier",
         "ac_current_multiplier",
+        "power_divisor",
+        "power_multiplier",
     }
     for attr in all_attrs - supported_attributes:
         cluster.add_unsupported_attribute(attr)
