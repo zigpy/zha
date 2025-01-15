@@ -157,7 +157,7 @@ class Sensor(PlatformEntity):
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
-    _skip_creation_if_none: bool = False
+    _skip_creation_if_no_attr_cache: bool = False
 
     @classmethod
     def create_platform_entity(
@@ -185,14 +185,9 @@ class Sensor(PlatformEntity):
             return None
 
         if (
-            cls._skip_creation_if_none
+            cls._skip_creation_if_no_attr_cache
             and cluster_handlers[0].cluster.get(cls._attribute_name) is None
         ):
-            _LOGGER.debug(
-                "%s has no value - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
-            )
             return None
 
         return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
@@ -213,6 +208,21 @@ class Sensor(PlatformEntity):
             self.handle_cluster_handler_attribute_updated,
         )
 
+    def _validate_state_class(
+        self,
+        state_class_value: SensorStateClass,
+    ) -> SensorStateClass | None:
+        """Validate and return a state class."""
+        try:
+            return SensorStateClass(state_class_value.value)
+        except ValueError as ex:
+            _LOGGER.warning(
+                "Quirks provided an invalid state class: %s: %s",
+                state_class_value,
+                ex,
+            )
+            return None
+
     def _init_from_quirks_metadata(self, entity_metadata: ZCLSensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
@@ -227,6 +237,10 @@ class Sensor(PlatformEntity):
                 entity_metadata.device_class,
                 Platform.SENSOR.value,
                 _LOGGER,
+            )
+        if entity_metadata.state_class is not None:
+            self._attr_state_class = self._validate_state_class(
+                entity_metadata.state_class
             )
         if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = validate_unit(
@@ -615,6 +629,7 @@ class ElectricalMeasurement(PollableSensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_max_attribute_name: str = None
     _div_mul_prefix: str | None = "ac_power"
 
     def __init__(
@@ -635,7 +650,7 @@ class ElectricalMeasurement(PollableSensor):
     @property
     def _max_attribute_name(self) -> str:
         """Return the max attribute name."""
-        return f"{self._attribute_name}_max"
+        return self._attr_max_attribute_name or f"{self._attribute_name}_max"
 
     @property
     def state(self) -> dict[str, Any]:
@@ -687,12 +702,8 @@ class ElectricalMeasurementRMSActivePowerPhB(PolledElectricalMeasurement):
     _unique_id_suffix = "active_power_ph_b"
     _attr_translation_key: str = "active_power_ph_b"
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
-    _skip_creation_if_none = True
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "active_power_max_ph_b"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "active_power_max_ph_b"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -702,11 +713,7 @@ class ElectricalMeasurementRMSActivePowerPhC(ElectricalMeasurementRMSActivePower
     _attribute_name = "active_power_ph_c"
     _unique_id_suffix = "active_power_ph_c"
     _attr_translation_key: str = "active_power_ph_c"
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "active_power_max_ph_c"
+    _attr_max_attribute_name = "active_power_max_ph_c"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -740,26 +747,19 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     _attribute_name = "rms_current_ph_b"
     _unique_id_suffix = "rms_current_ph_b"
     _attr_translation_key: str = "rms_current_ph_b"
-    _skip_creation_if_none = True
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "rms_current_max_ph_b"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name: str = "rms_current_max_ph_b"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrentPhB):
+class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     """RMS current phase C measurement."""
 
     _attribute_name: str = "rms_current_ph_c"
     _unique_id_suffix: str = "rms_current_ph_c"
     _attr_translation_key: str = "rms_current_ph_c"
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "rms_current_max_ph_c"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name: str = "rms_current_max_ph_c"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -781,12 +781,8 @@ class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
     _attribute_name = "rms_voltage_ph_b"
     _unique_id_suffix = "rms_voltage_ph_b"
     _attr_translation_key: str = "rms_voltage_ph_b"
-    _skip_creation_if_none = True
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "rms_voltage_max_ph_b"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "rms_voltage_max_ph_b"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -796,11 +792,7 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltagePhB):
     _attribute_name = "rms_voltage_ph_c"
     _unique_id_suffix = "rms_voltage_ph_c"
     _attr_translation_key: str = "rms_voltage_ph_c"
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "rms_voltage_max_ph_c"
+    _attr_max_attribute_name = "rms_voltage_max_ph_c"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -829,32 +821,24 @@ class ElectricalMeasurementPowerFactor(PolledElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementRMSPowerFactorPhB(ElectricalMeasurementPowerFactor):
+class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
     """Power factor phase B measurement."""
 
     _attribute_name = "power_factor_ph_b"
     _unique_id_suffix = "power_factor_ph_b"
     _attr_translation_key: str = "power_factor_ph_b"
-    _skip_creation_if_none = True
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "power_factor_max_ph_b"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "power_factor_max_ph_b"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
-class ElectricalMeasurementRMSPowerFactorPhC(ElectricalMeasurementRMSPowerFactorPhB):
+class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactorPhB):
     """Power factor phase C measurement."""
 
     _attribute_name = "power_factor_ph_c"
     _unique_id_suffix = "power_factor_ph_c"
     _attr_translation_key: str = "power_factor_ph_c"
-
-    @property
-    def _max_attribute_name(self) -> str:
-        """Return the max attribute name."""
-        return "power_factor_max_ph_c"
+    _attr_max_attribute_name = "power_factor_max_ph_c"
 
 
 @MULTI_MATCH(
@@ -1230,15 +1214,15 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
     _attribute_name = "current_summ_received"
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"
-
-    """ This attribute only started to be initialized in HA 2024.2.0,
-        so the entity would be created on the first HA start after the
-        upgrade for existing devices, as the initialization to see if
-        an attribute is unsupported happens later in the background.
-        To avoid creating unnecessary entities for existing devices,
-        wait until the attribute was properly initialized once for now.
-        """
-    _skip_creation_if_none = True
+    """
+    This attribute only started to be initialized in HA 2024.2.0,
+    so the entity would be created on the first HA start after the
+    upgrade for existing devices, as the initialization to see if
+    an attribute is unsupported happens later in the background.
+    To avoid creating unnecessary entities for existing devices,
+    wait until the attribute was properly initialized once for now.
+    """
+    _skip_creation_if_no_attr_cache = True
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_PRESSURE)

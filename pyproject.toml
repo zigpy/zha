@@ -14,13 +14,13 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.12"
 dependencies = [
-    "zigpy==0.73.3",
+    "zigpy==0.74.0",
     "bellows==0.42.6",
     "zigpy-znp==0.13.1",
     "zigpy-deconz==0.24.1",
     "zigpy-xbee==0.21.0",
     "zigpy-zigate==0.13.2",
-    "zha-quirks==0.0.128",
+    "zha-quirks==0.0.130",
     "pyserial==3.5",
     "pyserial-asyncio-fast",
 ]

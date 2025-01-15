@@ -66,7 +66,23 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.active_power_ph_b.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.active_power_ph_c.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.active_power_max.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.active_power_max_ph_b.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.active_power_max_ph_c.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
         AttrReportConfig(
@@ -102,7 +118,23 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.rms_voltage_max.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
         AttrReportConfig(
@@ -112,6 +144,18 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.ac_frequency_max.name,
             config=REPORT_CONFIG_DEFAULT,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.power_factor.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.power_factor_ph_b.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.power_factor_ph_c.name,
+            config=REPORT_CONFIG_OP,
         ),
     )
     ZCL_INIT_ATTRS = {
@@ -126,7 +170,6 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         ElectricalMeasurement.AttributeDefs.measurement_type.name: True,
         ElectricalMeasurement.AttributeDefs.power_divisor.name: True,
         ElectricalMeasurement.AttributeDefs.power_multiplier.name: True,
-        ElectricalMeasurement.AttributeDefs.power_factor.name: True,
     }
 
     async def async_update(self):
