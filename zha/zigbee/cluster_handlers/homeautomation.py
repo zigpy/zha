@@ -78,7 +78,23 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_current_ph_b.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_current_ph_c.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.rms_current_max.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b.name,
+            config=REPORT_CONFIG_DEFAULT,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
         AttrReportConfig(
