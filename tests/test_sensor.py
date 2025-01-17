@@ -1111,17 +1111,26 @@ async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
         set(),
         {
             "active_power",
+            "active_power_max",
             "rms_current",
+            "rms_current_max",
             "rms_voltage",
+            "rms_voltage_max",
         },
         {
             "active_power",
         },
         {
+            "active_power",
+            "active_power_max",
+        },
+        {
             "rms_current",
+            "rms_current_max",
         },
         {
             "rms_voltage",
+            "rms_voltage_max",
         },
     ),
 )
