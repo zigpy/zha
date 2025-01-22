@@ -1022,8 +1022,7 @@ class HueEffectLight(HueLight):
     async def async_turn_on(self, **kwargs: Any) -> None:
         # If only change of brightness is requested, the effect doesn't have to be interupted
         if kwargs.get(ATTR_BRIGHTNESS) is not None and all(
-            attr == ATTR_BRIGHTNESS or kwargs.get(attr) is None
-            for attr in kwargs.keys()
+            attr == ATTR_BRIGHTNESS or kwargs.get(attr) is None for attr in kwargs
         ):
             effect = self._effect
         else:
