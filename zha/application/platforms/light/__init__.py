@@ -1001,6 +1001,8 @@ class HueLight(Light):
     manufacturers={"Philips", "Signify Netherlands B.V."},
 )
 class HueEffectLight(HueLight):
+    """Specialization of a HUE light with effects."""
+
     # Supported effects and their ID used in commands
     HUE_EFFECTS = {"candle": 1, "fireplace": 2, "prism": 3}
 
@@ -1020,6 +1022,7 @@ class HueEffectLight(HueLight):
         self._effect_list.extend(self.HUE_EFFECTS.keys())
 
     async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
         # If only change of brightness is requested, the effect doesn't have to be interupted
         if kwargs.get(ATTR_BRIGHTNESS) is not None and all(
             attr == ATTR_BRIGHTNESS or kwargs.get(attr) is None for attr in kwargs
@@ -1040,8 +1043,8 @@ class HueEffectLight(HueLight):
             )
             self._effect = effect
         elif (
-            effect is None or effect == EFFECT_OFF and self._effect in self.HUE_EFFECTS
-        ):
+            effect is None or effect == EFFECT_OFF
+        ) and self._effect in self.HUE_EFFECTS:
             # Only stop effect if it was started by us
             # Following command will stop the effect while preserving brightness
             await self._hue_cluster.multicolor(data=bytearray([0x20, 0x00, 0x00, 0x00]))
