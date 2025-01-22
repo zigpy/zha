@@ -993,6 +993,69 @@ class HueLight(Light):
 
 @STRICT_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
+    aux_cluster_handlers={
+        CLUSTER_HANDLER_COLOR,
+        CLUSTER_HANDLER_LEVEL,
+        "philips_hue_cluster",
+    },
+    manufacturers={"Philips", "Signify Netherlands B.V."},
+)
+class HueEffectLight(HueLight):
+    # Supported effects and their ID used in commands
+    HUE_EFFECTS = {"candle": 1, "fireplace": 2, "prism": 3}
+
+    """Representation of a HUE light with effects."""
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs,
+    ) -> None:
+        """Initialize the ZHA light."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._hue_cluster = self.cluster_handlers.get("philips_hue_cluster")
+        self._effect_list.extend(self.HUE_EFFECTS.keys())
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        # If only change of brightness is requested, the effect doesn't have to be interupted
+        if kwargs.get(ATTR_BRIGHTNESS) is not None and all(
+            attr == ATTR_BRIGHTNESS or kwargs.get(attr) is None
+            for attr in kwargs.keys()
+        ):
+            effect = self._effect
+        else:
+            effect = kwargs.get(ATTR_EFFECT)
+
+        await super().async_turn_on(**kwargs)
+
+        if effect == self._effect:
+            return
+
+        if effect in self.HUE_EFFECTS:
+            effect_id = self.HUE_EFFECTS[effect]
+            await self._hue_cluster.multicolor(
+                data=bytearray([0x22, 0x00, self._brightness, effect_id])
+            )
+            self._effect = effect
+        elif (
+            effect is None or effect == EFFECT_OFF and self._effect in self.HUE_EFFECTS
+        ):
+            # Only stop effect if it was started by us
+            # Following command will stop the effect while preserving brightness
+            await self._hue_cluster.multicolor(data=bytearray([0x20, 0x00, 0x00, 0x00]))
+            self._effect = EFFECT_OFF
+        else:
+            # Don't react on unknown effects, for example 'colorloop'
+            return
+
+        self.maybe_emit_state_changed_event()
+
+
+@STRICT_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
     aux_cluster_handlers={CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL},
     manufacturers={"Jasco", "Jasco Products", "Quotra-Vision", "eWeLight", "eWeLink"},
 )
