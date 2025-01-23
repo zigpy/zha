@@ -139,6 +139,14 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         ),
     )
     ZCL_POLLING_ATTRS = [
+        ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier.name,
+        ElectricalMeasurement.AttributeDefs.ac_voltage_divisor.name,
+        ElectricalMeasurement.AttributeDefs.ac_current_multiplier.name,
+        ElectricalMeasurement.AttributeDefs.ac_current_divisor.name,
+        ElectricalMeasurement.AttributeDefs.ac_power_multiplier.name,
+        ElectricalMeasurement.AttributeDefs.ac_power_divisor.name,
+        ElectricalMeasurement.AttributeDefs.power_multiplier.name,
+        ElectricalMeasurement.AttributeDefs.power_divisor.name,
         ElectricalMeasurement.AttributeDefs.ac_frequency.name,
         ElectricalMeasurement.AttributeDefs.ac_frequency_max.name,
         ElectricalMeasurement.AttributeDefs.active_power.name,
