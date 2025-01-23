@@ -295,7 +295,6 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
                 "power_multiplier",
                 "ac_current_multiplier",
                 "ac_frequency",
-                "ac_frequency_max",
                 "active_power",
                 "active_power_ph_b",
                 "active_power_ph_c",
