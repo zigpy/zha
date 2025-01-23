@@ -584,7 +584,7 @@ def test_cluster_handler_registry() -> None:
                 cluster_quirk_id_map[metadata.cluster.cluster_id] = {None}
 
     # loop over custom clusters in v1 quirks registry
-    for manufacturer in _DEVICE_REGISTRY.registry.values():
+    for manufacturer in _DEVICE_REGISTRY.registry_v1.values():
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
                 quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
