@@ -56,7 +56,6 @@ from zha.units import (
     UnitOfTime,
     UnitOfVolume,
     UnitOfVolumeFlowRate,
-    validate_unit,
 )
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -243,9 +242,7 @@ class Sensor(PlatformEntity):
                 entity_metadata.state_class
             )
         if entity_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = validate_unit(
-                entity_metadata.unit
-            ).value
+            self._attr_native_unit_of_measurement = entity_metadata.unit
 
     @functools.cached_property
     def info_object(self) -> SensorEntityInfo:
