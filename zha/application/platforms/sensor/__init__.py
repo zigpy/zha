@@ -616,7 +616,7 @@ class Battery(Sensor):
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    models={"VZM31-SN", "SP 234", "outletv4"},
+    models={"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"},
 )
 class ElectricalMeasurement(PollableSensor):
     """Active power measurement."""
