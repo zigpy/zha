@@ -333,7 +333,8 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         for platform in discovery.PLATFORMS:
             for entity in self.config.platforms[platform]:
-                entity.on_add()
+                if entity is not None:
+                    entity.on_add()
 
             self.config.platforms[platform].clear()
 

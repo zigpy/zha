@@ -236,7 +236,10 @@ class Device(LogMixin, EventBase):
 
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
+
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
+        self._zdo_handler.on_add()
+
         self.status: DeviceStatus = DeviceStatus.CREATED
 
         self._endpoints: dict[int, Endpoint] = {}
@@ -797,6 +800,8 @@ class Device(LogMixin, EventBase):
 
     async def on_remove(self) -> None:
         """Cancel tasks this device owns."""
+        self._zdo_handler.on_remove()
+
         for platform_entity in self._platform_entities.values():
             await platform_entity.on_remove()
 

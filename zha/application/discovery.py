@@ -396,7 +396,13 @@ class EndpointProbe:
 
     def __init__(self) -> None:
         """Initialize instance."""
+        self._gateway: Gateway
         self._device_configs: dict[str, DeviceOverridesConfiguration] = {}
+
+    @property
+    def platforms(self) -> dict[Platform, list]:
+        """Platform entity mapping."""
+        return self._gateway.config.platforms
 
     def discover_entities(self, endpoint: Endpoint) -> None:
         """Process an endpoint on a zigpy device."""
@@ -612,6 +618,8 @@ class EndpointProbe:
 
     def initialize(self, gateway: Gateway) -> None:
         """Update device overrides config."""
+        self._gateway = gateway
+
         if overrides := gateway.config.config.device_overrides:
             self._device_configs.update(overrides)
 

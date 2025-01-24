@@ -492,8 +492,7 @@ class PlatformEntityRegistry:
 
     def prevent_entity_creation(self, platform: Platform, ieee: EUI64, key: str):
         """Return True if the entity should not be created."""
-        platform_restrictions = self.single_device_matches[platform]
-        device_restrictions = platform_restrictions[ieee]
+        device_restrictions = self.single_device_matches[platform][ieee]
         if key in device_restrictions:
             return True
         device_restrictions.append(key)
