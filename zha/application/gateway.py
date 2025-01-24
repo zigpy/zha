@@ -324,29 +324,17 @@ class Gateway(AsyncUtilMixin, EventBase):
             zha_group = self.get_or_create_group(group)
             # we can do this here because the entities are in the
             # entity registry tied to the devices
-            discovery.GROUP_PROBE.discover_group_entities(zha_group)
+
+            for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+                entity.on_add()
 
     def create_platform_entities(self) -> None:
         """Create platform entities."""
 
         for platform in discovery.PLATFORMS:
-            for platform_entity_class, args, kw_args in self.config.platforms[platform]:
-                try:
-                    platform_entity = platform_entity_class.create_platform_entity(
-                        *args, **kw_args
-                    )
-                except Exception:  # pylint: disable=broad-except
-                    _LOGGER.exception(
-                        "Failed to create platform entity: %s [args=%s, kwargs=%s]",
-                        platform_entity_class,
-                        args,
-                        kw_args,
-                    )
-                    continue
-                if platform_entity:
-                    _LOGGER.debug(
-                        "Platform entity data: %s", platform_entity.info_object
-                    )
+            for entity in self.config.platforms[platform]:
+                entity.on_add()
+
             self.config.platforms[platform].clear()
 
     @property
@@ -473,7 +461,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         # need to handle endpoint correctly on groups
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
-        discovery.GROUP_PROBE.discover_group_entities(zha_group)
+
+        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+            entity.on_add()
+
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
 
@@ -484,7 +475,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         # need to handle endpoint correctly on groups
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
-        discovery.GROUP_PROBE.discover_group_entities(zha_group)
+
+        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+            entity.on_add()
+
         zha_group.info("group_member_added - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
 

@@ -113,12 +113,6 @@ class FirmwareUpdateEntity(PlatformEntity):
             upgrades=(), downgrades=()
         )
 
-        self.device.device.add_listener(self)
-        self._ota_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
-        )
-
     @functools.cached_property
     def info_object(self) -> UpdateEntityInfo:
         """Return a representation of the entity."""
@@ -303,6 +297,16 @@ class FirmwareUpdateEntity(PlatformEntity):
         # Clear the state
         self._attr_in_progress = False
         self.maybe_emit_state_changed_event()
+
+    def on_add(self) -> None:
+        """Call when entity is added."""
+        super().on_add()
+
+        self.device.device.add_listener(self)
+        self._ota_cluster_handler.on_event(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            self.handle_cluster_handler_attribute_updated,
+        )
 
     async def on_remove(self) -> None:
         """Call when entity will be removed."""

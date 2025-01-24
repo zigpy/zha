@@ -8,7 +8,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, TypeVar
 
-from zha.application import Platform, const, discovery
+from zha.application import const, discovery
 from zha.async_ import gather_with_limited_concurrency
 from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.cluster_handlers.const import (
@@ -209,30 +209,6 @@ class Endpoint:
                 )
             else:
                 cluster_handler.debug("'%s' stage succeeded", func_name)
-
-    def async_new_entity(
-        self,
-        platform: Platform,
-        entity_class: CALLABLE_T,
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        **kwargs: Any,
-    ) -> None:
-        """Create a new entity."""
-        from zha.zigbee.device import (  # pylint: disable=import-outside-toplevel
-            DeviceStatus,
-        )
-
-        if self.device.status == DeviceStatus.INITIALIZED:
-            return
-
-        self.device.gateway.config.platforms[platform].append(
-            (
-                entity_class,
-                (unique_id, cluster_handlers, self, self.device),
-                kwargs or {},
-            )
-        )
 
     def emit_zha_event(self, event_data: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""

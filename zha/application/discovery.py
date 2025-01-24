@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Generator
 from dataclasses import astuple
 import logging
 from typing import TYPE_CHECKING, cast
@@ -70,10 +71,12 @@ from zha.zigbee.cluster_handlers.registries import (
     CLUSTER_HANDLER_ONLY_CLUSTERS,
     CLUSTER_HANDLER_REGISTRY,
 )
+from zha.zigbee.device import DeviceStatus
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
+    from zha.application.platforms import GroupEntity
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -186,6 +189,11 @@ class DeviceProbe:
     def initialize(self, gateway: Gateway) -> None:
         """Initialize the group probe."""
         self._gateway = gateway
+
+    @property
+    def platforms(self) -> dict[Platform, list]:
+        """Platform entity mapping."""
+        return self._gateway.config.platforms
 
     def discover_device_entities(self, device: Device) -> None:
         """Discover entities for a ZHA device."""
@@ -332,12 +340,14 @@ class DeviceProbe:
                             entity_metadata.attribute_initialized_from_cache
                         )
 
-                endpoint.async_new_entity(
-                    platform=platform,
-                    entity_class=entity_class,
-                    unique_id=endpoint.unique_id,
-                    cluster_handlers=[cluster_handler],
-                    entity_metadata=entity_metadata,
+                self.platforms[platform].append(
+                    entity_class.create_platform_entity(
+                        unique_id=endpoint.unique_id,
+                        cluster_handlers=[cluster_handler],
+                        endpoint=endpoint,
+                        device=device,
+                        entity_metadata=entity_metadata,
+                    )
                 )
 
                 _LOGGER.debug(
@@ -355,34 +365,30 @@ class DeviceProbe:
             device.name,
         )
         state: State = device.gateway.application_controller.state
-        platforms: dict[Platform, list] = self._gateway.config.platforms
 
-        def process_counters(counter_groups: str) -> None:
+        for counter_groups in (
+            "counters",
+            "broadcast_counters",
+            "device_counters",
+            "group_counters",
+        ):
             for counter_group, counters in getattr(state, counter_groups).items():
                 for counter in counters:
-                    platforms[Platform.SENSOR].append(
-                        (
-                            sensor.DeviceCounterSensor,
-                            (
-                                device,
-                                counter_groups,
-                                counter_group,
-                                counter,
-                            ),
-                            {},
+                    self.platforms[Platform.SENSOR].append(
+                        sensor.DeviceCounterSensor.create_platform_entity(
+                            zha_device=device,
+                            counter_groups=counter_groups,
+                            counter_group=counter_group,
+                            counter=counter,
                         )
                     )
+
                     _LOGGER.debug(
                         "'%s' platform -> '%s' using %s",
                         Platform.SENSOR,
                         sensor.DeviceCounterSensor.__name__,
                         f"counter groups[{counter_groups}] counter group[{counter_group}] counter[{counter}]",
                     )
-
-        process_counters("counters")
-        process_counters("broadcast_counters")
-        process_counters("device_counters")
-        process_counters("group_counters")
 
 
 class EndpointProbe:
@@ -431,9 +437,51 @@ class EndpointProbe:
             )
             if platform_entity_class is None:
                 return
+
             endpoint.claim_cluster_handlers(claimed)
-            endpoint.async_new_entity(
-                platform, platform_entity_class, unique_id, claimed
+
+            if endpoint.device.status != DeviceStatus.INITIALIZED:
+                self.platforms[platform].append(
+                    platform_entity_class.create_platform_entity(
+                        unique_id=unique_id,
+                        endpoint=endpoint,
+                        device=endpoint.device,
+                        cluster_handlers=claimed,
+                    )
+                )
+
+    def probe_single_cluster(
+        self,
+        platform: Platform | None,
+        cluster_handler: ClusterHandler,
+        endpoint: Endpoint,
+    ) -> None:
+        """Probe specified cluster for specific platform."""
+        if platform is None or platform not in PLATFORMS:
+            return
+        cluster_handler_list = [cluster_handler]
+        unique_id = f"{endpoint.unique_id}-{cluster_handler.cluster.cluster_id}"
+
+        entity_class, claimed = PLATFORM_ENTITIES.get_entity(
+            platform,
+            endpoint.device.manufacturer,
+            endpoint.device.model,
+            cluster_handler_list,
+            endpoint.device.quirk_id,
+        )
+        if entity_class is None:
+            return
+
+        endpoint.claim_cluster_handlers(claimed)
+
+        if endpoint.device.status != DeviceStatus.INITIALIZED:
+            self.platforms[platform].append(
+                entity_class.create_platform_entity(
+                    unique_id=unique_id,
+                    endpoint=endpoint,
+                    device=endpoint.device,
+                    cluster_handlers=claimed,
+                )
             )
 
     def discover_by_cluster_id(self, endpoint: Endpoint) -> None:
@@ -465,30 +513,6 @@ class EndpointProbe:
         # until we can get rid of registries
         self.handle_on_off_output_cluster_exception(endpoint)
 
-    @staticmethod
-    def probe_single_cluster(
-        platform: Platform | None,
-        cluster_handler: ClusterHandler,
-        endpoint: Endpoint,
-    ) -> None:
-        """Probe specified cluster for specific platform."""
-        if platform is None or platform not in PLATFORMS:
-            return
-        cluster_handler_list = [cluster_handler]
-        unique_id = f"{endpoint.unique_id}-{cluster_handler.cluster.cluster_id}"
-
-        entity_class, claimed = PLATFORM_ENTITIES.get_entity(
-            platform,
-            endpoint.device.manufacturer,
-            endpoint.device.model,
-            cluster_handler_list,
-            endpoint.device.quirk_id,
-        )
-        if entity_class is None:
-            return
-        endpoint.claim_cluster_handlers(claimed)
-        endpoint.async_new_entity(platform, entity_class, unique_id, claimed)
-
     def handle_on_off_output_cluster_exception(self, endpoint: Endpoint) -> None:
         """Process output clusters of the endpoint."""
 
@@ -519,8 +543,8 @@ class EndpointProbe:
             cluster_handler = cluster_handler_class(cluster, endpoint)
             self.probe_single_cluster(platform, cluster_handler, endpoint)
 
-    @staticmethod
     def discover_multi_entities(
+        self,
         endpoint: Endpoint,
         config_diagnostic_entities: bool = False,
     ) -> None:
@@ -564,20 +588,27 @@ class EndpointProbe:
                 if platform == cmpt_by_dev_type:
                     # for well known device types,
                     # like thermostats we'll take only 1st class
-                    endpoint.async_new_entity(
-                        platform,
-                        entity_and_handler.entity_class,
-                        endpoint.unique_id,
-                        entity_and_handler.claimed_cluster_handlers,
-                    )
+                    if endpoint.device.status != DeviceStatus.INITIALIZED:
+                        self.platforms[platform].append(
+                            entity_and_handler.entity_class.create_platform_entity(
+                                unique_id=endpoint.unique_id,
+                                endpoint=endpoint,
+                                device=endpoint.device,
+                                cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                            )
+                        )
                     break
+
                 first_ch = entity_and_handler.claimed_cluster_handlers[0]
-                endpoint.async_new_entity(
-                    platform,
-                    entity_and_handler.entity_class,
-                    f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
-                    entity_and_handler.claimed_cluster_handlers,
-                )
+                if endpoint.device.status != DeviceStatus.INITIALIZED:
+                    self.platforms[platform].append(
+                        entity_and_handler.entity_class.create_platform_entity(
+                            unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
+                            endpoint=endpoint,
+                            device=endpoint.device,
+                            cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                        )
+                    )
 
     def initialize(self, gateway: Gateway) -> None:
         """Update device overrides config."""
@@ -596,7 +627,9 @@ class GroupProbe:
         """Initialize the group probe."""
         self._gateway = gateway
 
-    def discover_group_entities(self, group: Group) -> None:
+    def discover_group_entities(
+        self, group: Group
+    ) -> Generator[GroupEntity, None, None]:
         """Process a group and create any entities that are needed."""
         # only create a group entity if there are 2 or more members in a group
         if len(group.members) < 2:
@@ -620,7 +653,7 @@ class GroupProbe:
             if entity_class is None:
                 continue
             _LOGGER.info("Creating entity : %s for group %s", entity_class, group.name)
-            entity_class(group)
+            yield entity_class(group)
 
     @staticmethod
     def determine_entity_platforms(group: Group) -> list[Platform]:

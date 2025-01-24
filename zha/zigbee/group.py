@@ -231,6 +231,12 @@ class Group(LogMixin):
             )
         self.update_entity_subscriptions()
 
+    def unregister_group_entity(self, group_entity: GroupEntity) -> None:
+        """Unregister a group entity."""
+        if group_entity.unique_id in self._group_entities:
+            self._group_entities.pop(group_entity.unique_id)
+            self._entity_unsubs.pop(group_entity.unique_id)()
+
     def _handle_maybe_update_group_members(self, event: EntityStateChangedEvent):
         """Handle the maybe update group members event."""
         self.gateway.async_create_task(self._maybe_update_group_members(event))
