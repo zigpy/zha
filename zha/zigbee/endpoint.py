@@ -114,8 +114,7 @@ class Endpoint:
         endpoint = cls(zigpy_endpoint, device)
         endpoint.add_all_cluster_handlers()
         endpoint.add_client_cluster_handlers()
-        if not device.is_coordinator:
-            discovery.ENDPOINT_PROBE.discover_entities(endpoint)
+
         return endpoint
 
     def add_all_cluster_handlers(self) -> None:

@@ -316,22 +316,6 @@ class PlatformEntity(BaseEntity):
         self._device: Device = device
         self._endpoint = endpoint
 
-    def on_add(self) -> None:
-        """Run when entity is added."""
-        super().on_add()
-
-        # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if (self.PLATFORM, self.unique_id) in self._device.platform_entities:
-            _LOGGER.debug(
-                "Not registering entity %r, unique id %r already exists: %r",
-                self,
-                (self.PLATFORM, self.unique_id),
-                self._device.platform_entities[(self.PLATFORM, self.unique_id)],
-            )
-            return
-
-        self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
-
     @classmethod
     def create_platform_entity(
         cls: type[PlatformEntity],

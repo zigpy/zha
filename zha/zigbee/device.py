@@ -30,7 +30,7 @@ from zigpy.zcl.foundation import (
 import zigpy.zdo.types as zdo_types
 from zigpy.zdo.types import RouteStatus, _NeighborEnums
 
-from zha.application import Platform, discovery
+from zha.application import Platform
 from zha.application.const import (
     ATTR_ARGS,
     ATTR_ATTRIBUTE,
@@ -550,9 +550,7 @@ class Device(LogMixin, EventBase):
         gateway: Gateway,
     ) -> Self:
         """Create new device."""
-        zha_dev = cls(zigpy_dev, gateway)
-        discovery.DEVICE_PROBE.discover_device_entities(zha_dev)
-        return zha_dev
+        return cls(zigpy_dev, gateway)
 
     def async_update_sw_build_id(self, sw_version: int) -> None:
         """Update device sw version."""

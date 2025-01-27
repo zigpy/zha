@@ -90,6 +90,9 @@ class Cover(PlatformEntity):
         self._target_tilt_position: int | None = None
         self._state: str = STATE_OPEN
         self._determine_initial_state()
+
+    def on_add(self) -> None:
+        super().on_add()
         self._cover_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,

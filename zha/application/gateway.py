@@ -242,10 +242,6 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     async def _async_initialize(self) -> None:
         """Initialize controller and connect radio."""
-        discovery.DEVICE_PROBE.initialize(self)
-        discovery.ENDPOINT_PROBE.initialize(self)
-        discovery.GROUP_PROBE.initialize(self)
-
         self.shutting_down = False
 
         app_controller_cls, app_config = self.get_application_controller_data()
@@ -314,7 +310,13 @@ class Gateway(AsyncUtilMixin, EventBase):
                 delta_msg,
                 zha_device.consider_unavailable_time,
             )
-        self.create_platform_entities()
+
+            for entity in discovery.DEVICE_PROBE.discover_device_entities(zha_device):
+                if entity is not None:
+                    entity.on_add()
+                    zha_device.platform_entities[
+                        (entity.PLATFORM, entity.unique_id)
+                    ] = entity
 
     def load_groups(self) -> None:
         """Initialize ZHA groups."""
@@ -328,20 +330,12 @@ class Gateway(AsyncUtilMixin, EventBase):
             for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
                 entity.on_add()
 
-    def create_platform_entities(self) -> None:
-        """Create platform entities."""
-
-        for platform in discovery.PLATFORMS:
-            for entity in self.config.platforms[platform]:
-                if entity is not None:
-                    entity.on_add()
-
-            self.config.platforms[platform].clear()
-
     @property
     def radio_concurrency(self) -> int:
         """Maximum configured radio concurrency."""
-        return self.application_controller._concurrent_requests_semaphore.max_value  # pylint: disable=protected-access
+        return (
+            self.application_controller._concurrent_requests_semaphore.max_value
+        )  # pylint: disable=protected-access
 
     async def async_fetch_updated_state_mains(self) -> None:
         """Fetch updated state for mains powered devices."""
@@ -411,7 +405,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             ),
         )
 
-    def raw_device_initialized(self, device: zigpy.device.Device) -> None:  # pylint: disable=unused-argument
+    def raw_device_initialized(
+        self, device: zigpy.device.Device
+    ) -> None:  # pylint: disable=unused-argument
         """Handle a device initialization without quirks loaded."""
 
         self.emit(
@@ -562,6 +558,14 @@ class Gateway(AsyncUtilMixin, EventBase):
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
             zha_device = Device.new(zigpy_device, self)
             self._devices[zigpy_device.ieee] = zha_device
+
+            for entity in discovery.DEVICE_PROBE.discover_device_entities(zha_device):
+                if entity is not None:
+                    entity.on_add()
+                    zha_device.platform_entities[
+                        (entity.PLATFORM, entity.unique_id)
+                    ] = entity
+
         return zha_device
 
     def get_or_create_group(self, zigpy_group: zigpy.group.Group) -> Group:
@@ -629,7 +633,14 @@ class Gateway(AsyncUtilMixin, EventBase):
             **zha_device.extended_device_info.__dict__,
         )
         await zha_device.async_initialize(from_cache=False)
-        self.create_platform_entities()
+
+        for entity in discovery.DEVICE_PROBE.discover_device_entities(zha_device):
+            if entity is not None:
+                entity.on_add()
+                zha_device.platform_entities[
+                    (entity.PLATFORM, entity.unique_id)
+                ] = entity
+
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
             DeviceFullInitEvent(device_info=device_info, new_join=True),

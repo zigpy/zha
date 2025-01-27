@@ -353,5 +353,5 @@ class Group(LogMixin):
 
     async def on_remove(self) -> None:
         """Cancel tasks this group owns."""
-        for group_entity in self._group_entities.values():
+        for group_entity in tuple(self._group_entities.values()):
             await group_entity.on_remove()
