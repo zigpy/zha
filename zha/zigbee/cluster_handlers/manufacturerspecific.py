@@ -533,6 +533,11 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize Sinope cluster handler."""
         super().__init__(cluster, endpoint)
+
+        if self.cluster.endpoint.model == "TH1300ZB":
+            self.ZCL_INIT_ATTRS["room_temperature"] = True
+            return  # Don't apply switch-specific attributes below
+
         self.ZCL_INIT_ATTRS = {
             "double_up_full": True,
             "on_led_color": True,
@@ -572,9 +577,10 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
             "DM2550ZB",
             "DM2550ZB-G2",
         )
+        thermostats = ("TH1300ZB",)
 
         _LOGGER.debug(
             "matching sinope device to cluster handler %s", cluster.endpoint.model
         )
 
-        return cluster.endpoint.model in switches
+        return cluster.endpoint.model in (switches + thermostats)
