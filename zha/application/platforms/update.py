@@ -303,13 +303,17 @@ class FirmwareUpdateEntity(PlatformEntity):
         super().on_add()
 
         self.device.device.add_listener(self)
-        self._ota_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+        self._on_remove_callbacks.append(
+            self._ota_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
+        )
+        self._on_remove_callbacks.append(
+            lambda: self.device.device.remove_listener(self)
         )
 
     async def on_remove(self) -> None:
         """Call when entity will be removed."""
         self._attr_in_progress = False
-        self.device.device.remove_listener(self)
         await super().on_remove()

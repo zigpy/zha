@@ -66,12 +66,18 @@ class DeviceScannerEntity(PlatformEntity):
         self._keepalive_interval: int = 60
         self._should_poll: bool = True
         self._battery_level: float | None = None
-        self._battery_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._battery_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
+
         self._tracked_tasks.append(
-            device.gateway.async_create_background_task(
+            self.device.gateway.async_create_background_task(
                 self._refresh(),
                 name=f"device_tracker_refresh_{self.unique_id}",
                 eager_start=True,

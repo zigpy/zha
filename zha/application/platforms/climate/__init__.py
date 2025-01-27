@@ -114,10 +114,6 @@ class Thermostat(PlatformEntity):
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_FAN
         )
-        self._thermostat_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
-        )
 
         self._supported_features = (
             ClimateEntityFeature.TARGET_TEMPERATURE
@@ -128,6 +124,15 @@ class Thermostat(PlatformEntity):
             self._supported_features |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
         if self._fan_cluster_handler is not None:
             self._supported_features |= ClimateEntityFeature.FAN_MODE
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._thermostat_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
+        )
 
     @functools.cached_property
     def info_object(self) -> ThermostatEntityInfo:
@@ -504,6 +509,9 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._supported_features |= ClimateEntityFeature.PRESET_MODE
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
         self._time_update_task: Task | None = None
+
+    def on_add(self) -> None:
+        super().on_add()
         self.start_polling()
 
     def start_polling(self) -> None:

@@ -75,9 +75,14 @@ class BinarySensor(PlatformEntity):
         self._cluster_handler = cluster_handlers[0]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._state: bool = self.is_on
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:

@@ -53,9 +53,14 @@ class DoorLock(PlatformEntity):
         self._state: str | None = VALUE_TO_STATE.get(
             self._doorlock_cluster_handler.cluster.get("lock_state"), None
         )
-        self._doorlock_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._doorlock_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     @property

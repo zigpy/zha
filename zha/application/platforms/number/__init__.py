@@ -91,9 +91,14 @@ class Number(PlatformEntity):
         self._analog_output_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
-        self._analog_output_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._analog_output_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     @functools.cached_property

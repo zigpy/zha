@@ -214,11 +214,15 @@ class Fan(PlatformEntity, BaseFan):
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_FAN
         )
-        if self._fan_cluster_handler:
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
             self._fan_cluster_handler.on_event(
                 CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 self.handle_cluster_handler_attribute_updated,
             )
+        )
 
     @functools.cached_property
     def info_object(self) -> FanEntityInfo:

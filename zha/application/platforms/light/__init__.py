@@ -722,18 +722,24 @@ class Light(PlatformEntity, BaseLight):
         self._zha_config_enable_light_transitioning_flag = (
             light_options.enable_light_transitioning_flag
         )
+        self._refresh_task: asyncio.Task | None = None
 
-        self._on_off_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._on_off_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
         if self._level_cluster_handler:
-            self._level_cluster_handler.on_event(
-                CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+            self._on_remove_callbacks.append(
+                self._level_cluster_handler.on_event(
+                    CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+                )
             )
 
-        self._refresh_task: asyncio.Task | None = None
         self.start_polling()
 
     @functools.cached_property

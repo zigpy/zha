@@ -336,6 +336,9 @@ class PollableSensor(Sensor):
         """Init this sensor."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._polling_task: Task | None = None
+
+    def on_add(self) -> None:
+        super().on_add()
         self.maybe_start_polling()
 
     @property
@@ -440,11 +443,14 @@ class DeviceCounterSensor(BaseEntity):
         # even if they do not exist.
         # self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
 
+    def on_add(self) -> None:
+        super().on_add()
         self._device.gateway.global_updater.register_update_listener(self.update)
-
-        # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
-            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
+        self._on_remove_callbacks.append(
+            lambda: self._device.gateway.global_updater.remove_update_listener(
+                self.update
+            )
+        )
 
     @functools.cached_property
     def identifiers(self) -> DeviceCounterSensorIdentifiers:
@@ -508,11 +514,6 @@ class DeviceCounterSensor(BaseEntity):
                 self._device.gateway.config.allow_polling,
             )
 
-    async def on_remove(self) -> None:
-        """Cancel tasks this entity owns."""
-        self._device.gateway.global_updater.remove_update_listener(self.update)
-        await super().on_remove()
-
 
 class EnumSensor(Sensor):
     """Sensor with value from enum."""
@@ -540,7 +541,9 @@ class EnumSensor(Sensor):
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
 
-        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
+        PlatformEntity._init_from_quirks_metadata(
+            self, entity_metadata
+        )  # pylint: disable=protected-access
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
@@ -1576,7 +1579,13 @@ class RSSISensor(Sensor):
     ) -> None:
         """Init."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+
+    def on_add(self) -> None:
+        super().on_add()
         self.device.gateway.global_updater.register_update_listener(self.update)
+        self._on_remove_callbacks.append(
+            lambda: self.device.gateway.global_updater.remove_update_listener(self.update)
+        )
 
     @property
     def state(self) -> dict:
@@ -1611,11 +1620,6 @@ class RSSISensor(Sensor):
                 self._device.available,
                 self._device.gateway.config.allow_polling,
             )
-
-    async def on_remove(self) -> None:
-        """Cancel tasks this entity owns."""
-        self._device.gateway.global_updater.remove_update_listener(self.update)
-        await super().on_remove()
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BASIC)

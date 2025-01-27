@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 import asyncio
+from collections.abc import Callable
 from contextlib import suppress
 import dataclasses
 from enum import StrEnum
@@ -127,6 +128,7 @@ class BaseEntity(LogMixin, EventBase):
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
         self._tracked_handles: list[asyncio.Handle] = []
+        self._on_remove_callbacks: list[Callable[[], None]] = []
 
     @property
     def enabled(self) -> bool:
@@ -253,6 +255,11 @@ class BaseEntity(LogMixin, EventBase):
 
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
+        while self._on_remove_callbacks:
+            callback = self._on_remove_callbacks.pop()
+            self.debug("Running remove callback: %s", callback)
+            callback()
+
         for handle in self._tracked_handles:
             self.debug("Cancelling handle: %s", handle)
             handle.cancel()
