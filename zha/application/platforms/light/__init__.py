@@ -626,6 +626,10 @@ class BaseLight(BaseEntity, ABC):
                     "zha.light-refresh-debounced-member",
                 )
 
+    async def on_remove(self) -> None:
+        self._async_unsub_transition_listener()
+        await super().on_remove()
+
 
 @STRICT_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
