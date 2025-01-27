@@ -310,13 +310,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 delta_msg,
                 zha_device.consider_unavailable_time,
             )
-
-            for entity in discovery.DEVICE_PROBE.discover_device_entities(zha_device):
-                if entity is not None:
-                    entity.on_add()
-                    zha_device.platform_entities[
-                        (entity.PLATFORM, entity.unique_id)
-                    ] = entity
+            self._maybe_create_device_entities(zha_device)
 
     def load_groups(self) -> None:
         """Initialize ZHA groups."""
@@ -553,18 +547,24 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Return groups."""
         return self._groups
 
+    def _maybe_create_device_entities(self, device: Device) -> None:
+        """Create entities for a device if it is already initialized."""
+        for entity in discovery.DEVICE_PROBE.discover_device_entities(device):
+            if entity is None:
+                continue
+
+            if (entity.PLATFORM, entity.unique_id) in device.platform_entities:
+                continue
+
+            entity.on_add()
+            device.platform_entities[(entity.PLATFORM, entity.unique_id)] = entity
+
     def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> Device:
         """Get or create a ZHA device."""
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
             zha_device = Device.new(zigpy_device, self)
             self._devices[zigpy_device.ieee] = zha_device
-
-            for entity in discovery.DEVICE_PROBE.discover_device_entities(zha_device):
-                if entity is not None:
-                    entity.on_add()
-                    zha_device.platform_entities[
-                        (entity.PLATFORM, entity.unique_id)
-                    ] = entity
+            self._maybe_create_device_entities(zha_device)
 
         return zha_device
 
@@ -633,13 +633,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             **zha_device.extended_device_info.__dict__,
         )
         await zha_device.async_initialize(from_cache=False)
-
-        for entity in discovery.DEVICE_PROBE.discover_device_entities(zha_device):
-            if entity is not None:
-                entity.on_add()
-                zha_device.platform_entities[
-                    (entity.PLATFORM, entity.unique_id)
-                ] = entity
+        self._maybe_create_device_entities(zha_device)
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
