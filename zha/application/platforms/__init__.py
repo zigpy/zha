@@ -118,6 +118,7 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None
     _attr_state_class: str | None
     _attr_enabled: bool = True
+    _attr_always_supported: bool = False
 
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
@@ -131,6 +132,12 @@ class BaseEntity(LogMixin, EventBase):
         self._on_remove_callbacks: list[Callable[[], None]] = []
 
     def is_supported(self) -> bool:
+        if self._attr_always_supported:
+            return True
+
+        return self._is_supported()
+
+    def _is_supported(self) -> bool:
         return True
 
     def recompute_capabilities(self) -> None:
@@ -333,6 +340,9 @@ class PlatformEntity(BaseEntity):
         """Init this entity from the quirks metadata."""
         if entity_metadata.initially_disabled:
             self._attr_entity_registry_enabled_default = False
+
+        # v2 quirks entities are assumed to always be supported
+        self._attr_always_supported = True
 
         has_attribute_name = hasattr(entity_metadata, "attribute_name")
         has_command_name = hasattr(entity_metadata, "command_name")

@@ -226,7 +226,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         self._off_value = entity_metadata.off_value
         self._on_value = entity_metadata.on_value
 
-    def is_supported(self) -> bool:
+    def _is_supported(self) -> bool:
         if (
             self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
             or self._attribute_name
@@ -240,7 +240,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             )
             return False
 
-        return True
+        return super()._is_supported()
 
     @functools.cached_property
     def info_object(self) -> ConfigurableAttributeSwitchInfo:
@@ -656,18 +656,14 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
     _attribute_name = WindowCovering.AttributeDefs.config_status.name
     _attr_translation_key = "inverted"
 
-    def is_supported(self) -> bool:
+    def _is_supported(self) -> bool:
         window_covering_mode_attr = (
             WindowCovering.AttributeDefs.window_covering_mode.name
         )
 
-        # this entity needs 2 attributes to function
+        # this entity needs a second attribute to function
         if (
-            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
-            or self._attribute_name
-            not in self._cluster_handler.cluster.attributes_by_name
-            or self._cluster_handler.cluster.get(self._attribute_name) is None
-            or (
+            (
                 window_covering_mode_attr
                 in self._cluster_handler.cluster.unsupported_attributes
             )
@@ -684,7 +680,7 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
             )
             return False
 
-        return True
+        return super()._is_supported()
 
     @property
     def is_on(self) -> bool:

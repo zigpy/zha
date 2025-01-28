@@ -182,7 +182,7 @@ class Sensor(PlatformEntity):
             )
         )
 
-    def is_supported(self) -> bool:
+    def _is_supported(self) -> bool:
         if (
             self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
             or self._attribute_name
@@ -201,7 +201,7 @@ class Sensor(PlatformEntity):
         ):
             return False
 
-        return True
+        return super()._is_supported()
 
     def _validate_state_class(
         self,
@@ -416,6 +416,7 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
+        self._always_supported: bool = True
 
         # TODO: why do entities get created with " None" as a name suffix instead of
         # falling back to `fallback_name`? We should be able to provide translation keys
@@ -430,9 +431,6 @@ class DeviceCounterSensor(BaseEntity):
                 self.update
             )
         )
-
-    def is_supported(self) -> bool:
-        return True
 
     @functools.cached_property
     def identifiers(self) -> DeviceCounterSensorIdentifiers:
@@ -558,11 +556,8 @@ class Battery(Sensor):
         "battery_voltage",
     }
 
-    def is_supported(self) -> bool:
-        if self.device.is_mains_powered:
-            return False
-
-        return True
+    def _is_supported(self) -> bool:
+        return super()._is_supported() and not self.device.is_mains_powered
 
     @staticmethod
     def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
@@ -1384,8 +1379,8 @@ class ThermostatHVACAction(Sensor):
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
 
-    def is_supported(self) -> bool:
-        return True
+    def _is_supported(self) -> bool:
+        return PlatformEntity.is_supported(self)
 
     @property
     def state(self) -> dict:
@@ -1528,14 +1523,15 @@ class RSSISensor(Sensor):
             )
         )
 
-    def is_supported(self) -> bool:
+    def _is_supported(self) -> bool:
         key = f"{CLUSTER_HANDLER_BASIC}_{self._unique_id_suffix}"
+
         if PLATFORM_ENTITIES.prevent_entity_creation(
             Platform.SENSOR, self.device.ieee, key
         ):
             return False
 
-        return True
+        return super()._is_supported()
 
     @property
     def state(self) -> dict:

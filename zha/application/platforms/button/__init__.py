@@ -117,13 +117,13 @@ class IdentifyButton(Button):
     _kwargs = {}
     _args = [DEFAULT_DURATION]
 
-    def is_supported(self) -> bool:
+    def _is_supported(self) -> bool:
         if PLATFORM_ENTITIES.prevent_entity_creation(
             Platform.BUTTON, self.device.ieee, CLUSTER_HANDLER_IDENTIFY
         ):
             return False
 
-        return True
+        return super()._is_supported()
 
 
 class WriteAttributeButton(PlatformEntity):

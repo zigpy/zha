@@ -218,7 +218,7 @@ class NumberConfigurationEntity(PlatformEntity):
         self._attr_device_class: NumberDeviceClass | None = None
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
-    def is_supported(self) -> bool:
+    def _is_supported(self) -> bool:
         if (
             self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
             or self._attribute_name
@@ -232,7 +232,7 @@ class NumberConfigurationEntity(PlatformEntity):
             )
             return False
 
-        return True
+        return super()._is_supported()
 
     def on_add(self) -> None:
         super().on_add()

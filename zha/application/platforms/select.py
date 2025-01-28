@@ -194,7 +194,7 @@ class ZCLEnumSelectEntity(PlatformEntity):
             )
         )
 
-    def is_supported(self) -> bool:
+    def _is_supported(self) -> bool:
         if (
             self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
             or self._attribute_name
@@ -208,7 +208,7 @@ class ZCLEnumSelectEntity(PlatformEntity):
             )
             return False
 
-        return True
+        return super()._is_supported()
 
     def _init_from_quirks_metadata(self, entity_metadata: ZCLEnumMetadata) -> None:
         """Init this entity from the quirks metadata."""
