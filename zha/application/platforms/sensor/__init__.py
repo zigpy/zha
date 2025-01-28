@@ -160,38 +160,26 @@ class Sensor(PlatformEntity):
     _attr_state_class: SensorStateClass | None = None
     _skip_creation_if_no_attr_cache: bool = False
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA not in kwargs and (
-            cls._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
+    def is_supported(self) -> bool:
+        if (
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
         ):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
+                self._attribute_name,
+                self.__name__,
             )
-            return None
+            return False
 
         if (
-            cls._skip_creation_if_no_attr_cache
-            and cluster_handlers[0].cluster.get(cls._attribute_name) is None
+            self._skip_creation_if_no_attr_cache
+            and self._cluster_handler.cluster.get(self._attribute_name) is None
         ):
-            return None
+            return False
 
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        return True
 
     def __init__(
         self,
@@ -204,9 +192,14 @@ class Sensor(PlatformEntity):
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     def _validate_state_class(
@@ -397,21 +390,6 @@ class DeviceCounterSensor(BaseEntity):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
 
-    @classmethod
-    def create_platform_entity(
-        cls,
-        zha_device: Device,
-        counter_groups: str,
-        counter_group: str,
-        counter: str,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        return cls(zha_device, counter_groups, counter_group, counter, **kwargs)
-
     def __init__(
         self,
         zha_device: Device,
@@ -451,6 +429,9 @@ class DeviceCounterSensor(BaseEntity):
                 self.update
             )
         )
+
+    def is_supported(self) -> bool:
+        return True
 
     @functools.cached_property
     def identifiers(self) -> DeviceCounterSensorIdentifiers:
@@ -541,9 +522,7 @@ class EnumSensor(Sensor):
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
 
-        PlatformEntity._init_from_quirks_metadata(
-            self, entity_metadata
-        )  # pylint: disable=protected-access
+        PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
 
     def formatter(self, value: int) -> str | None:
         """Use name of enum."""
@@ -578,24 +557,11 @@ class Battery(Sensor):
         "battery_voltage",
     }
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
+    def is_supported(self) -> bool:
+        if self.device.is_mains_powered:
+            return False
 
-        Unlike any other entity, PowerConfiguration cluster may not support
-        battery_percent_remaining attribute, but zha-device-handlers takes care of it
-        so create the entity regardless
-        """
-        if device.is_mains_powered:
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        return True
 
     @staticmethod
     def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
@@ -1414,21 +1380,8 @@ class ThermostatHVACAction(Sensor):
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def is_supported(self) -> bool:
+        return True
 
     @property
     def state(self) -> dict:
@@ -1551,24 +1504,6 @@ class RSSISensor(Sensor):
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        key = f"{CLUSTER_HANDLER_BASIC}_{cls._unique_id_suffix}"
-        if PLATFORM_ENTITIES.prevent_entity_creation(Platform.SENSOR, device.ieee, key):
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
         unique_id: str,
@@ -1584,8 +1519,17 @@ class RSSISensor(Sensor):
         super().on_add()
         self.device.gateway.global_updater.register_update_listener(self.update)
         self._on_remove_callbacks.append(
-            lambda: self.device.gateway.global_updater.remove_update_listener(self.update)
+            lambda: self.device.gateway.global_updater.remove_update_listener(
+                self.update
+            )
         )
+
+    def is_supported(self) -> bool:
+        key = f"{CLUSTER_HANDLER_BASIC}_{cls._unique_id_suffix}"
+        if PLATFORM_ENTITIES.prevent_entity_creation(Platform.SENSOR, device.ieee, key):
+            return False
+
+        return True
 
     @property
     def state(self) -> dict:

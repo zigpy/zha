@@ -111,30 +111,19 @@ class Button(PlatformEntity):
 class IdentifyButton(Button):
     """Defines a ZHA identify button."""
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        if PLATFORM_ENTITIES.prevent_entity_creation(
-            Platform.BUTTON, device.ieee, CLUSTER_HANDLER_IDENTIFY
-        ):
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     _attr_device_class = ButtonDeviceClass.IDENTIFY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _command_name = "identify"
     _kwargs = {}
     _args = [DEFAULT_DURATION]
+
+    def is_supported(self) -> bool:
+        if PLATFORM_ENTITIES.prevent_entity_creation(
+            Platform.BUTTON, self.device.ieee, CLUSTER_HANDLER_IDENTIFY
+        ):
+            return False
+
+        return True
 
 
 class WriteAttributeButton(PlatformEntity):

@@ -331,14 +331,12 @@ class DeviceProbe:
                             entity_metadata.attribute_initialized_from_cache
                         )
 
-                yield (
-                    entity_class.create_platform_entity(
-                        unique_id=endpoint.unique_id,
-                        cluster_handlers=[cluster_handler],
-                        endpoint=endpoint,
-                        device=device,
-                        entity_metadata=entity_metadata,
-                    )
+                yield entity_class(
+                    unique_id=endpoint.unique_id,
+                    cluster_handlers=[cluster_handler],
+                    endpoint=endpoint,
+                    device=device,
+                    entity_metadata=entity_metadata,
                 )
 
                 _LOGGER.debug(
@@ -365,13 +363,11 @@ class DeviceProbe:
         ):
             for counter_group, counters in getattr(state, counter_groups).items():
                 for counter in counters:
-                    yield (
-                        sensor.DeviceCounterSensor.create_platform_entity(
-                            zha_device=device,
-                            counter_groups=counter_groups,
-                            counter_group=counter_group,
-                            counter=counter,
-                        )
+                    yield sensor.DeviceCounterSensor(
+                        zha_device=device,
+                        counter_groups=counter_groups,
+                        counter_group=counter_group,
+                        counter=counter,
                     )
 
                     _LOGGER.debug(
@@ -433,7 +429,7 @@ class EndpointProbe:
             endpoint.claim_cluster_handlers(claimed)
 
             if endpoint.device.status != DeviceStatus.INITIALIZED:
-                yield platform_entity_class.create_platform_entity(
+                yield platform_entity_class(
                     unique_id=unique_id,
                     endpoint=endpoint,
                     device=endpoint.device,
@@ -465,13 +461,11 @@ class EndpointProbe:
         endpoint.claim_cluster_handlers(claimed)
 
         if endpoint.device.status != DeviceStatus.INITIALIZED:
-            yield (
-                entity_class.create_platform_entity(
-                    unique_id=unique_id,
-                    endpoint=endpoint,
-                    device=endpoint.device,
-                    cluster_handlers=claimed,
-                )
+            yield entity_class(
+                unique_id=unique_id,
+                endpoint=endpoint,
+                device=endpoint.device,
+                cluster_handlers=claimed,
             )
 
     def discover_by_cluster_id(self, endpoint: Endpoint) -> None:
@@ -579,25 +573,21 @@ class EndpointProbe:
                     # for well known device types,
                     # like thermostats we'll take only 1st class
                     if endpoint.device.status != DeviceStatus.INITIALIZED:
-                        yield (
-                            entity_and_handler.entity_class.create_platform_entity(
-                                unique_id=endpoint.unique_id,
-                                endpoint=endpoint,
-                                device=endpoint.device,
-                                cluster_handlers=entity_and_handler.claimed_cluster_handlers,
-                            )
+                        yield entity_and_handler.entity_class(
+                            unique_id=endpoint.unique_id,
+                            endpoint=endpoint,
+                            device=endpoint.device,
+                            cluster_handlers=entity_and_handler.claimed_cluster_handlers,
                         )
                     break
 
                 first_ch = entity_and_handler.claimed_cluster_handlers[0]
                 if endpoint.device.status != DeviceStatus.INITIALIZED:
-                    yield (
-                        entity_and_handler.entity_class.create_platform_entity(
-                            unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
-                            endpoint=endpoint,
-                            device=endpoint.device,
-                            cluster_handlers=entity_and_handler.claimed_cluster_handlers,
-                        )
+                    yield entity_and_handler.entity_class(
+                        unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
+                        endpoint=endpoint,
+                        device=endpoint.device,
+                        cluster_handlers=entity_and_handler.claimed_cluster_handlers,
                     )
 
 

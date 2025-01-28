@@ -601,6 +601,7 @@ class ClusterHandler(LogMixin, EventBase):
                     only_cache=only_cache,
                     manufacturer=manufacturer,
                 )
+                self.debug("Got attributes: %s", read)
                 result.update(read)
             except (TimeoutError, zigpy.exceptions.ZigbeeException) as ex:
                 self.debug(

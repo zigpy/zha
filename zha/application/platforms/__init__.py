@@ -323,21 +323,6 @@ class PlatformEntity(BaseEntity):
         self._device: Device = device
         self._endpoint = endpoint
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[PlatformEntity],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> PlatformEntity | None:
-        """Entity Factory.
-
-        Return a platform entity if it is a supported configuration, otherwise return None
-        """
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
         if entity_metadata.initially_disabled:

@@ -205,34 +205,6 @@ class NumberConfigurationEntity(PlatformEntity):
     _attribute_name: str
     _attr_mode: NumberMode = NumberMode.AUTO
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA not in kwargs and (
-            cls._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
-            or cluster_handler.cluster.get(cls._attribute_name) is None
-        ):
-            _LOGGER.debug(
-                "%s is not supported - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
-            )
-            return None
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
         unique_id: str,
@@ -245,6 +217,22 @@ class NumberConfigurationEntity(PlatformEntity):
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attr_device_class: NumberDeviceClass | None = None
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+
+    def is_supported(self) -> bool:
+        if (
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
+            or self._cluster_handler.cluster.get(self._attribute_name) is None
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                self._attribute_name,
+                self.__class__.__name__,
+            )
+            return False
+
+        return True
 
     def on_add(self) -> None:
         super().on_add()
