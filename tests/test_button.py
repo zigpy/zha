@@ -11,7 +11,7 @@ from zhaquirks.const import (
     OUTPUT_CLUSTERS,
     PROFILE_ID,
 )
-from zhaquirks.tuya.ts0601_valve import ParksideTuyaValveManufCluster
+from zhaquirks.tuya.tuya_valve import ParksideTuyaValveManufCluster
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, DeviceRegistry
