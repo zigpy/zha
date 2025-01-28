@@ -554,9 +554,6 @@ class Gateway(AsyncUtilMixin, EventBase):
             if (entity.PLATFORM, entity.unique_id) in device.platform_entities:
                 continue
 
-            if not entity.is_supported():
-                continue
-
             entity.on_add()
             device.platform_entities[(entity.PLATFORM, entity.unique_id)] = entity
 
@@ -641,6 +638,10 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         for entity in entities:
             entity.recompute_capabilities()
+
+            if not entity.is_supported():
+                del zha_device.platform_entities[(entity.PLATFORM, entity.unique_id)]
+                await entity.on_remove()
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
