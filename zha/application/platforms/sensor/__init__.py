@@ -160,27 +160,6 @@ class Sensor(PlatformEntity):
     _attr_state_class: SensorStateClass | None = None
     _skip_creation_if_no_attr_cache: bool = False
 
-    def is_supported(self) -> bool:
-        if (
-            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
-            or self._attribute_name
-            not in self._cluster_handler.cluster.attributes_by_name
-        ):
-            _LOGGER.debug(
-                "%s is not supported - skipping %s entity creation",
-                self._attribute_name,
-                self.__class__.__name__,
-            )
-            return False
-
-        if (
-            self._skip_creation_if_no_attr_cache
-            and self._cluster_handler.cluster.get(self._attribute_name) is None
-        ):
-            return False
-
-        return True
-
     def __init__(
         self,
         unique_id: str,
@@ -201,6 +180,27 @@ class Sensor(PlatformEntity):
                 self.handle_cluster_handler_attribute_updated,
             )
         )
+
+    def is_supported(self) -> bool:
+        if (
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                self._attribute_name,
+                self.__class__.__name__,
+            )
+            return False
+
+        if (
+            self._skip_creation_if_no_attr_cache
+            and self._cluster_handler.cluster.get(self._attribute_name) is None
+        ):
+            return False
+
+        return True
 
     def _validate_state_class(
         self,
