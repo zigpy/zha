@@ -630,8 +630,8 @@ class Gateway(AsyncUtilMixin, EventBase):
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
-        await zha_device.async_initialize(from_cache=False)
         self._maybe_create_device_entities(zha_device)
+        await zha_device.async_initialize(from_cache=False)
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,

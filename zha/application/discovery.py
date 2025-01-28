@@ -191,7 +191,6 @@ class DeviceProbe:
             yield from self.discover_coordinator_device_entities(device)
         else:
             yield from self.discover_quirks_v2_entities(device)
-            PLATFORM_ENTITIES.clean_up()
 
         for ep_id, endpoint in device.endpoints.items():
             if ep_id != 0:
@@ -199,6 +198,8 @@ class DeviceProbe:
                     endpoint,
                     device.gateway.config.config.device_overrides,
                 )
+
+        PLATFORM_ENTITIES.clean_up()
 
     def discover_quirks_v2_entities(self, device: Device) -> None:
         """Discover entities for a ZHA device exposed by quirks v2."""
