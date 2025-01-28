@@ -171,6 +171,7 @@ class Sensor(PlatformEntity):
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self.recompute_capabilities()
 
     def on_add(self) -> None:
         super().on_add()

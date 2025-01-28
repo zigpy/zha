@@ -700,6 +700,7 @@ class Light(PlatformEntity, BaseLight):
         self.start_polling()
 
     def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
         effect_list = [EFFECT_OFF]
         light_options = self.device.gateway.config.config.light_options
 
@@ -1035,16 +1036,42 @@ class LightGroup(GroupEntity, BaseLight):
         """Initialize a light group."""
         # light groups change the update_group_from_child_delay so we need to do this
         # before calling super
-        light_options = group.gateway.config.config.light_options
-        self._zha_config_group_members_assume_state = (
-            light_options.group_members_assume_state
-        )
         kwargs = {}
         if self._zha_config_group_members_assume_state:
             kwargs["update_group_from_member_delay"] = (
                 ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
             )
         super().__init__(group, **kwargs)
+
+        self._on_off_cluster_handler: ClusterHandler = group.zigpy_group.endpoint[
+            OnOff.cluster_id
+        ]
+        self._level_cluster_handler: None | (
+            ClusterHandler
+        ) = group.zigpy_group.endpoint[LevelControl.cluster_id]
+        self._color_cluster_handler: None | (
+            ClusterHandler
+        ) = group.zigpy_group.endpoint[Color.cluster_id]
+        self._identify_cluster_handler: None | (
+            ClusterHandler
+        ) = group.zigpy_group.endpoint[Identify.cluster_id]
+
+        self._debounced_member_refresh: Debouncer | None = Debouncer(
+            self.group.gateway,
+            _LOGGER,
+            cooldown=3,
+            immediate=True,
+            function=self._force_member_updates,
+        )
+
+        self.recompute_capabilities()
+
+    def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
+        light_options = self.group.gateway.config.config.light_options
+        self._zha_config_group_members_assume_state = (
+            light_options.group_members_assume_state
+        )
         self._zha_config_transition = light_options.default_light_transition
         self._zha_config_enable_light_transitioning_flag = (
             light_options.enable_light_transitioning_flag
@@ -1052,7 +1079,7 @@ class LightGroup(GroupEntity, BaseLight):
         self._zha_config_enhanced_light_transition = False
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
-        for member in group.members:
+        for member in self.group.members:
             # Ensure we do not send group commands that violate the minimum transition
             # time of any members.
             if member.device.manufacturer in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
@@ -1072,29 +1099,8 @@ class LightGroup(GroupEntity, BaseLight):
                         self._GROUP_SUPPORTS_EXECUTE_IF_OFF = False
                         break
 
-        self._on_off_cluster_handler: ClusterHandler = group.zigpy_group.endpoint[
-            OnOff.cluster_id
-        ]
-        self._level_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[LevelControl.cluster_id]
-        self._color_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[Color.cluster_id]
-        self._identify_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[Identify.cluster_id]
-
         self._color_mode = ColorMode.UNKNOWN
         self._supported_color_modes = {ColorMode.ONOFF}
-
-        self._debounced_member_refresh: Debouncer | None = Debouncer(
-            self.group.gateway,
-            _LOGGER,
-            cooldown=3,
-            immediate=True,
-            function=self._force_member_updates,
-        )
 
         if hasattr(self, "info_object"):
             delattr(self, "info_object")

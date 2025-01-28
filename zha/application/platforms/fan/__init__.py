@@ -214,6 +214,7 @@ class Fan(PlatformEntity, BaseFan):
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_FAN
         )
+        self.recompute_capabilities()
 
     def on_add(self) -> None:
         super().on_add()

@@ -147,6 +147,7 @@ class WriteAttributeButton(PlatformEntity):
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self.recompute_capabilities()
 
     def _init_from_quirks_metadata(
         self, entity_metadata: WriteAttributeButtonMetadata

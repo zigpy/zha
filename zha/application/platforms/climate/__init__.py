@@ -115,13 +115,20 @@ class Thermostat(PlatformEntity):
             CLUSTER_HANDLER_FAN
         )
 
+        self._supported_features = ClimateEntityFeature(0)
+        self.recompute_capabilities()
+
+    def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
         self._supported_features = (
             ClimateEntityFeature.TARGET_TEMPERATURE
             | ClimateEntityFeature.TURN_OFF
             | ClimateEntityFeature.TURN_ON
         )
+
         if HVACMode.HEAT_COOL in self.hvac_modes:
             self._supported_features |= ClimateEntityFeature.TARGET_TEMPERATURE_RANGE
+
         if self._fan_cluster_handler is not None:
             self._supported_features |= ClimateEntityFeature.FAN_MODE
 
@@ -281,12 +288,12 @@ class Thermostat(PlatformEntity):
         """Return current preset mode."""
         return self._preset
 
-    @functools.cached_property
+    @property
     def preset_modes(self) -> list[str] | None:
         """Return supported preset modes."""
         return self._presets
 
-    @functools.cached_property
+    @property
     def supported_features(self) -> ClimateEntityFeature:
         """Return the list of supported features."""
         return self._supported_features
@@ -506,9 +513,12 @@ class SinopeTechnologiesThermostat(Thermostat):
         """Initialize ZHA Thermostat instance."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._presets = [Preset.AWAY, Preset.NONE]
-        self._supported_features |= ClimateEntityFeature.PRESET_MODE
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
         self._time_update_task: Task | None = None
+
+    def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
+        self._supported_features |= ClimateEntityFeature.PRESET_MODE
 
     def on_add(self) -> None:
         super().on_add()
@@ -629,16 +639,8 @@ class CentralitePearl(ZenWithinThermostat):
 class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
 
-    def __init__(
-        self,
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs,
-    ):
-        """Initialize ZHA Thermostat instance."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
         self._presets = [
             Preset.NONE,
             Preset.AWAY,
@@ -718,16 +720,8 @@ class MoesThermostat(Thermostat):
 class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
 
-    def __init__(
-        self,
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs,
-    ):
-        """Initialize ZHA Thermostat instance."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
         self._presets = [
             Preset.NONE,
             Preset.AWAY,
@@ -829,16 +823,8 @@ class ZONNSMARTThermostat(Thermostat):
     PRESET_HOLIDAY = "holiday"
     PRESET_FROST = "frost protect"
 
-    def __init__(
-        self,
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs,
-    ):
-        """Initialize ZHA Thermostat instance."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
         self._presets = [
             Preset.NONE,
             self.PRESET_HOLIDAY,
