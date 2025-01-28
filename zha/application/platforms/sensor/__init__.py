@@ -557,7 +557,8 @@ class Battery(Sensor):
     }
 
     def _is_supported(self) -> bool:
-        return super()._is_supported() and not self.device.is_mains_powered
+        # XXX: We intentionally ignore the presence of this attribute
+        return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
 
     @staticmethod
     def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
@@ -1380,7 +1381,7 @@ class ThermostatHVACAction(Sensor):
     _attr_translation_key: str = "hvac_action"
 
     def _is_supported(self) -> bool:
-        return PlatformEntity.is_supported(self)
+        return PlatformEntity._is_supported(self)
 
     @property
     def state(self) -> dict:
@@ -1531,7 +1532,7 @@ class RSSISensor(Sensor):
         ):
             return False
 
-        return super()._is_supported()
+        return PlatformEntity._is_supported(self)
 
     @property
     def state(self) -> dict:

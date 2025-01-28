@@ -276,7 +276,7 @@ class Thermostat(PlatformEntity):
         """Return HVAC operation mode."""
         return SYSTEM_MODE_2_HVAC.get(self._thermostat_cluster_handler.system_mode)
 
-    @functools.cached_property
+    @property
     def hvac_modes(self) -> list[HVACMode]:
         """Return the list of available HVAC operation modes."""
         return SEQ_OF_OPERATION.get(

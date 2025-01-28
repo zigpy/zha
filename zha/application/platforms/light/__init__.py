@@ -22,6 +22,7 @@ from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
+    DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
     BaseEntity,
     BaseEntityInfo,
     GroupEntity,
@@ -1032,16 +1033,11 @@ class MinTransitionLight(Light):
 class LightGroup(GroupEntity, BaseLight):
     """Representation of a light group."""
 
+    _attr_always_supported = True
+
     def __init__(self, group: Group):
         """Initialize a light group."""
-        # light groups change the update_group_from_child_delay so we need to do this
-        # before calling super
-        kwargs = {}
-        if self._zha_config_group_members_assume_state:
-            kwargs["update_group_from_member_delay"] = (
-                ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
-            )
-        super().__init__(group, **kwargs)
+        super().__init__(group)
 
         self._on_off_cluster_handler: ClusterHandler = group.zigpy_group.endpoint[
             OnOff.cluster_id
@@ -1078,6 +1074,15 @@ class LightGroup(GroupEntity, BaseLight):
         )
         self._zha_config_enhanced_light_transition = False
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
+
+        if self.group.gateway.config.config.light_options.group_members_assume_state:
+            self._change_listener_debouncer.cooldown = (
+                ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
+            )
+        else:
+            self._change_listener_debouncer.cooldown = (
+                DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY
+            )
 
         for member in self.group.members:
             # Ensure we do not send group commands that violate the minimum transition
