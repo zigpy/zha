@@ -8,7 +8,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, TypeVar
 
-from zha.application import const, discovery
+from zha.application import const
 from zha.async_ import gather_with_limited_concurrency
 from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.cluster_handlers.const import (
@@ -160,7 +160,9 @@ class Endpoint:
                 self._device.identify_ch = cluster_handler
             elif cluster_handler.name == CLUSTER_HANDLER_BASIC:
                 self._device.basic_ch = cluster_handler
+
             self._all_cluster_handlers[cluster_handler.id] = cluster_handler
+            cluster_handler.on_add()
 
     def add_client_cluster_handlers(self) -> None:
         """Create client cluster handlers for all output clusters if in the registry."""
@@ -172,6 +174,7 @@ class Endpoint:
             if cluster is not None:
                 cluster_handler = cluster_handler_class(cluster, self)
                 self.client_cluster_handlers[cluster_handler.id] = cluster_handler
+                cluster_handler.on_add()
 
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize claimed cluster handlers."""

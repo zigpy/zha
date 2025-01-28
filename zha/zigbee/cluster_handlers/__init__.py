@@ -212,9 +212,6 @@ class ClusterHandler(LogMixin, EventBase):
         self._status: ClusterHandlerStatus = ClusterHandlerStatus.CREATED
         self.data_cache: dict[str, Any] = {}
 
-        # TODO: better lifecycle!
-        self.on_add()
-
     def on_add(self) -> None:
         """Call when cluster handler is added."""
         self._cluster.add_listener(self)
