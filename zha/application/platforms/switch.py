@@ -227,11 +227,11 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         self._on_value = entity_metadata.on_value
 
     def is_supported(self) -> bool:
-        cluster_handler = cluster_handlers[0]
         if (
-            self._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or self._attribute_name not in cluster_handler.cluster.attributes_by_name
-            or cluster_handler.cluster.get(self._attribute_name) is None
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
+            or self._cluster_handler.cluster.get(self._attribute_name) is None
         ):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
@@ -682,9 +682,9 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
                 self._attribute_name,
                 self.__class__.__name__,
             )
-            return None
+            return False
 
-        return self(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        return True
 
     @property
     def is_on(self) -> bool:

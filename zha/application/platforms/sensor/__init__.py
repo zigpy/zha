@@ -169,7 +169,7 @@ class Sensor(PlatformEntity):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
                 self._attribute_name,
-                self.__name__,
+                self.__class__.__name__,
             )
             return False
 
@@ -1525,8 +1525,10 @@ class RSSISensor(Sensor):
         )
 
     def is_supported(self) -> bool:
-        key = f"{CLUSTER_HANDLER_BASIC}_{cls._unique_id_suffix}"
-        if PLATFORM_ENTITIES.prevent_entity_creation(Platform.SENSOR, device.ieee, key):
+        key = f"{CLUSTER_HANDLER_BASIC}_{self._unique_id_suffix}"
+        if PLATFORM_ENTITIES.prevent_entity_creation(
+            Platform.SENSOR, self.device.ieee, key
+        ):
             return False
 
         return True

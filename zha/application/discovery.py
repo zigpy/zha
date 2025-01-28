@@ -70,7 +70,6 @@ from zha.zigbee.cluster_handlers.registries import (
     CLUSTER_HANDLER_ONLY_CLUSTERS,
     CLUSTER_HANDLER_REGISTRY,
 )
-from zha.zigbee.device import DeviceStatus
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -428,13 +427,12 @@ class EndpointProbe:
 
             endpoint.claim_cluster_handlers(claimed)
 
-            if endpoint.device.status != DeviceStatus.INITIALIZED:
-                yield platform_entity_class(
-                    unique_id=unique_id,
-                    endpoint=endpoint,
-                    device=endpoint.device,
-                    cluster_handlers=claimed,
-                )
+            yield platform_entity_class(
+                unique_id=unique_id,
+                endpoint=endpoint,
+                device=endpoint.device,
+                cluster_handlers=claimed,
+            )
 
     def probe_single_cluster(
         self,
@@ -460,13 +458,12 @@ class EndpointProbe:
 
         endpoint.claim_cluster_handlers(claimed)
 
-        if endpoint.device.status != DeviceStatus.INITIALIZED:
-            yield entity_class(
-                unique_id=unique_id,
-                endpoint=endpoint,
-                device=endpoint.device,
-                cluster_handlers=claimed,
-            )
+        yield entity_class(
+            unique_id=unique_id,
+            endpoint=endpoint,
+            device=endpoint.device,
+            cluster_handlers=claimed,
+        )
 
     def discover_by_cluster_id(self, endpoint: Endpoint) -> None:
         """Process an endpoint on a zigpy device."""
@@ -572,23 +569,21 @@ class EndpointProbe:
                 if platform == cmpt_by_dev_type:
                     # for well known device types,
                     # like thermostats we'll take only 1st class
-                    if endpoint.device.status != DeviceStatus.INITIALIZED:
-                        yield entity_and_handler.entity_class(
-                            unique_id=endpoint.unique_id,
-                            endpoint=endpoint,
-                            device=endpoint.device,
-                            cluster_handlers=entity_and_handler.claimed_cluster_handlers,
-                        )
-                    break
-
-                first_ch = entity_and_handler.claimed_cluster_handlers[0]
-                if endpoint.device.status != DeviceStatus.INITIALIZED:
                     yield entity_and_handler.entity_class(
-                        unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
+                        unique_id=endpoint.unique_id,
                         endpoint=endpoint,
                         device=endpoint.device,
                         cluster_handlers=entity_and_handler.claimed_cluster_handlers,
                     )
+                    break
+
+                first_ch = entity_and_handler.claimed_cluster_handlers[0]
+                yield entity_and_handler.entity_class(
+                    unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
+                    endpoint=endpoint,
+                    device=endpoint.device,
+                    cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                )
 
 
 class GroupProbe:

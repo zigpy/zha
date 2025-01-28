@@ -130,6 +130,9 @@ class BaseEntity(LogMixin, EventBase):
         self._tracked_handles: list[asyncio.Handle] = []
         self._on_remove_callbacks: list[Callable[[], None]] = []
 
+    def is_supported(self) -> bool:
+        return True
+
     @property
     def enabled(self) -> bool:
         """Return the entity enabled state."""
