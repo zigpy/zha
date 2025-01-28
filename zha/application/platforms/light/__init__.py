@@ -668,9 +668,40 @@ class Light(PlatformEntity, BaseLight):
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
-        effect_list = [EFFECT_OFF]
 
-        light_options = device.gateway.config.config.light_options
+        light_options = self.device.gateway.config.config.light_options
+        self._zha_config_transition = light_options.default_light_transition
+        self._zha_config_enhanced_light_transition = (
+            light_options.enable_enhanced_light_transition
+        )
+        self._zha_config_enable_light_transitioning_flag = (
+            light_options.enable_light_transitioning_flag
+        )
+        self._refresh_task: asyncio.Task | None = None
+
+        self.recompute_capabilities()
+
+    def on_add(self) -> None:
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._on_off_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
+        )
+
+        if self._level_cluster_handler:
+            self._on_remove_callbacks.append(
+                self._level_cluster_handler.on_event(
+                    CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+                )
+            )
+
+        self.start_polling()
+
+    def recompute_capabilities(self) -> None:
+        effect_list = [EFFECT_OFF]
+        light_options = self.device.gateway.config.config.light_options
 
         self._supported_color_modes = {ColorMode.ONOFF}
         if self._level_cluster_handler:
@@ -716,35 +747,7 @@ class Light(PlatformEntity, BaseLight):
         if self._identify_cluster_handler:
             self._supported_features |= LightEntityFeature.FLASH
 
-        if effect_list:
-            self._effect_list = effect_list
-
-        self._zha_config_transition = light_options.default_light_transition
-        self._zha_config_enhanced_light_transition = (
-            light_options.enable_enhanced_light_transition
-        )
-        self._zha_config_enable_light_transitioning_flag = (
-            light_options.enable_light_transitioning_flag
-        )
-        self._refresh_task: asyncio.Task | None = None
-
-    def on_add(self) -> None:
-        super().on_add()
-        self._on_remove_callbacks.append(
-            self._on_off_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
-            )
-        )
-
-        if self._level_cluster_handler:
-            self._on_remove_callbacks.append(
-                self._level_cluster_handler.on_event(
-                    CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
-                )
-            )
-
-        self.start_polling()
+        self._effect_list = effect_list
 
     @functools.cached_property
     def info_object(self) -> LightEntityInfo:

@@ -133,6 +133,9 @@ class BaseEntity(LogMixin, EventBase):
     def is_supported(self) -> bool:
         return True
 
+    def recompute_capabilities(self) -> None:
+        pass
+
     @property
     def enabled(self) -> bool:
         """Return the entity enabled state."""

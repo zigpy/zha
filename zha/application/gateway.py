@@ -543,8 +543,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Return groups."""
         return self._groups
 
-    def _maybe_create_device_entities(self, device: Device) -> None:
+    def _maybe_create_device_entities(self, device: Device) -> list:
         """Create entities for a device if it is already initialized."""
+        entities = []
+
         for entity in discovery.DEVICE_PROBE.discover_device_entities(device):
             if entity is None:
                 continue
@@ -557,6 +559,10 @@ class Gateway(AsyncUtilMixin, EventBase):
 
             entity.on_add()
             device.platform_entities[(entity.PLATFORM, entity.unique_id)] = entity
+
+            entities.append(entity)
+
+        return entities
 
     def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> Device:
         """Get or create a ZHA device."""
@@ -630,8 +636,11 @@ class Gateway(AsyncUtilMixin, EventBase):
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
-        self._maybe_create_device_entities(zha_device)
+        entities = self._maybe_create_device_entities(zha_device)
         await zha_device.async_initialize(from_cache=False)
+
+        for entity in entities:
+            entity.recompute_capabilities()
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
@@ -651,7 +660,10 @@ class Gateway(AsyncUtilMixin, EventBase):
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
-        self._maybe_create_device_entities(zha_device)
+        entities = self._maybe_create_device_entities(zha_device)
+
+        for entity in entities:
+            entity.recompute_capabilities()
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
