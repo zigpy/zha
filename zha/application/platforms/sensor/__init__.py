@@ -981,7 +981,10 @@ class SmartEnergyMetering(PollableSensor):
     ) -> None:
         """Init."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self.recompute_capabilities()
 
+    def recompute_capabilities(self) -> None:
+        super().recompute_capabilities()
         entity_description = self._ENTITY_DESCRIPTION_MAP.get(
             self._cluster_handler.unit_of_measurement
         )
