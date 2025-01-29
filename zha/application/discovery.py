@@ -523,6 +523,8 @@ class EndpointProbe:
             )
 
             cluster_handler = cluster_handler_class(cluster, endpoint)
+            cluster_handler.on_add()
+
             yield from self.probe_single_cluster(platform, cluster_handler, endpoint)
 
     def discover_multi_entities(
