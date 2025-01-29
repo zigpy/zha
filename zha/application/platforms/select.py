@@ -15,6 +15,7 @@ from zhaquirks.quirk_ids import (
     TUYA_PLUG_ONOFF,
 )
 from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCluster
+from zhaquirks.xiaomi.aqara.opple_switch import OppleOperationMode
 from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata
@@ -510,6 +511,19 @@ class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
     _attribute_name = "decoupled_mode"
     _enum = T2RelayOppleCluster.DecoupledMode
     _attr_translation_key: str = "decoupled_mode"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="opple_cluster",
+    models={"lumi.switch.n1aeu1", "lumi.switch.n2aeu1"},
+)
+class AqaraH1OperationMode(ZCLEnumSelectEntity):
+    """Representation of a ZHA switch operation mode configuration entity."""
+
+    _unique_id_suffix = "operation_mode"
+    _attribute_name = "operation_mode"
+    _enum = OppleOperationMode
+    _attr_translation_key: str = "operation_mode"
 
 
 class InovelliOutputMode(types.enum1):

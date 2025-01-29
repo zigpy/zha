@@ -374,6 +374,42 @@ class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="opple_cluster",
+    models={"lumi.switch.n1aeu1", "lumi.switch.n2aeu1"},
+)
+class AqaraH1OutageMemorySwitch(ConfigurableAttributeSwitch):
+    """Representation of a ZHA power outage memory configuration entity."""
+
+    _unique_id_suffix = "power_outage_memory"
+    _attribute_name = "power_outage_memory"
+    _attr_translation_key = "power_outage_memory"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="opple_cluster",
+    models={"lumi.switch.n1aeu1", "lumi.switch.n2aeu1"},
+)
+class AqaraH1ReverseIndicationLightSwitch(ConfigurableAttributeSwitch):
+    """Representation of a ZHA reverse indication light."""
+
+    _unique_id_suffix = "reverse_indicator_light"
+    _attribute_name = "reverse_indicator_light"
+    _attr_translation_key = "reverse_indicator_light"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names="opple_cluster",
+    models={"lumi.switch.n1aeu1", "lumi.switch.n2aeu1"},
+)
+class AqaraH1DoNotDisturbSwitch(ConfigurableAttributeSwitch):
+    """Representation of a ZHA do not disturb mode."""
+
+    _unique_id_suffix = "do_not_disturb"
+    _attribute_name = "do_not_disturb"
+    _attr_translation_key = "do_not_disturb"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_BASIC,
     manufacturers={"Philips", "Signify Netherlands B.V."},
     models={"SML001", "SML002", "SML003", "SML004"},
