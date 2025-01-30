@@ -24,6 +24,7 @@ from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters.general import Ota
 
 from zha.application import Platform, const as zha_const
+from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     PlatformEntity,
     alarm_control_panel,
@@ -427,9 +428,12 @@ class EndpointProbe:
     """All discovered cluster handlers and entities of an endpoint."""
 
     def discover_entities(
-        self, endpoint: Endpoint, device_overrides
+        self,
+        endpoint: Endpoint,
+        device_overrides: dict[str, DeviceOverridesConfiguration],
     ) -> Iterator[PlatformEntity]:
         """Process an endpoint on a zigpy device."""
+
         if endpoint.device.is_coordinator:
             return
 
@@ -447,7 +451,9 @@ class EndpointProbe:
         )
 
     def discover_by_device_type(
-        self, endpoint: Endpoint, device_overrides
+        self,
+        endpoint: Endpoint,
+        device_overrides: dict[str, DeviceOverridesConfiguration],
     ) -> Iterator[PlatformEntity]:
         """Process an endpoint on a zigpy device."""
 
