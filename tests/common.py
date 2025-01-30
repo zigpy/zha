@@ -229,8 +229,11 @@ def get_entity(
     exact_entity_type: type[BaseEntity] | None = None,
     qualifier: str | None = None,
     qualifier_func: Callable[[BaseEntity], bool] = lambda e: True,
+    strict: bool = False,
 ) -> PlatformEntity:
     """Get the first entity of the specified platform on the given device."""
+    results = []
+
     for entity in device.platform_entities.values():
         if platform != entity.PLATFORM:
             continue
@@ -247,11 +250,19 @@ def get_entity(
         if not qualifier_func(entity):
             continue
 
-        return entity
+        results.append(entity)
 
-    raise KeyError(
-        f"No {entity_type} entity found for platform {platform!r} on device {device}: {device.platform_entities}"
-    )
+    if len(results) == 0:
+        raise KeyError(
+            f"No {entity_type} entity found for platform {platform!r} on device {device}: {device.platform_entities}"
+        )
+
+    if strict and len(results) != 1:
+        raise KeyError(
+            f"Multiple {entity_type} entities found for platform {platform!r} on device {device}: {results}"
+        )
+
+    return results[0]
 
 
 async def group_entity_availability_test(
