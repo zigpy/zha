@@ -143,7 +143,6 @@ async def test_frost_unlock(
         zha_device,
         platform=Platform.BUTTON,
         entity_type=FrostLockResetButton,
-        strict=True,
     )
     assert isinstance(entity, FrostLockResetButton)
 
@@ -253,7 +252,9 @@ async def test_quirks_command_button(
     """Test ZHA button platform."""
     zha_device, cluster = await custom_button_device(zha_gateway)
     assert cluster is not None
-    entity: PlatformEntity = get_entity(zha_device, platform=Platform.BUTTON)
+    entity: PlatformEntity = get_entity(
+        zha_device, platform=Platform.BUTTON, entity_type=Button
+    )
 
     with patch(
         "zigpy.zcl.Cluster.request",
