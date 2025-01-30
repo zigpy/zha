@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import astuple
+import functools
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast
 
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
@@ -218,9 +219,33 @@ QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS = {
 }
 
 
+P = ParamSpec("P")
+T = TypeVar("T")
+
+
+def ignore_exceptions_during_iteration(
+    func: Callable[P, Iterator[T]],
+) -> Callable[P, Iterator[T]]:
+    """Ignore exceptions during iteration for wrapped function."""
+
+    @functools.wraps(func)
+    def inner(*args: P.args, **kwargs: P.kwargs) -> Iterator[T]:
+        iterator = func(*args, **kwargs)
+        while True:
+            try:
+                yield next(iterator)
+            except StopIteration:
+                break
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Failed to create entity during discovery")
+
+    return inner
+
+
 class DeviceProbe:
     """Probe to discover entities for a device."""
 
+    @ignore_exceptions_during_iteration
     def discover_device_entities(
         self, device: Device
     ) -> Iterator[PlatformEntity | sensor.DeviceCounterSensor]:
@@ -649,8 +674,8 @@ class EndpointProbe:
 class GroupProbe:
     """Determine the appropriate platform for a group."""
 
-    @staticmethod
-    def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
+    @ignore_exceptions_during_iteration
+    def discover_group_entities(self, group: Group) -> Iterator[GroupEntity]:
         """Process a group and create any entities that are needed."""
         # only create a group entity if there are 2 or more members in a group
         if len(group.members) < 2:
@@ -662,7 +687,7 @@ class GroupProbe:
             group.group_entities.clear()
             return
 
-        entity_platforms = GroupProbe.determine_entity_platforms(group)
+        entity_platforms = self.determine_entity_platforms(group)
 
         if not entity_platforms:
             _LOGGER.info("No entity platforms discovered for group %s", group.name)
@@ -675,8 +700,7 @@ class GroupProbe:
             _LOGGER.info("Creating entity : %s for group %s", entity_class, group.name)
             yield entity_class(group)
 
-    @staticmethod
-    def determine_entity_platforms(group: Group) -> list[Platform]:
+    def determine_entity_platforms(self, group: Group) -> list[Platform]:
         """Determine the entity platforms for this group."""
         entity_domains: list[Platform] = []
         all_platform_occurrences = []
