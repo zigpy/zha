@@ -230,6 +230,7 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
         cover_ch,
         multistate_ch,
         ias_ch,
+        analog_ch,
     ]
 
     with (
@@ -238,9 +239,9 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
             {
                 zigpy.zcl.clusters.closures.DoorLock.cluster_id: Platform.LOCK,
                 zigpy.zcl.clusters.closures.WindowCovering.cluster_id: Platform.COVER,
-                zigpy.zcl.clusters.general.AnalogInput: Platform.SENSOR,
-                zigpy.zcl.clusters.general.MultistateInput: Platform.SENSOR,
-                zigpy.zcl.clusters.security.IasZone: Platform.BINARY_SENSOR,
+                zigpy.zcl.clusters.general.AnalogInput.cluster_id: Platform.SENSOR,
+                zigpy.zcl.clusters.general.MultistateInput.cluster_id: Platform.SENSOR,
+                zigpy.zcl.clusters.security.IasZone.cluster_id: Platform.BINARY_SENSOR,
             },
             clear=True,
         ),
