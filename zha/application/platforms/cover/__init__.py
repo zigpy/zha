@@ -92,6 +92,7 @@ class Cover(PlatformEntity):
         self._determine_initial_state()
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._cover_cluster_handler.on_event(
@@ -409,6 +410,7 @@ class Shade(PlatformEntity):
         )
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._on_off_cluster_handler.on_event(

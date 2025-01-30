@@ -10,7 +10,7 @@ import functools
 import logging
 import numbers
 import typing
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
@@ -21,7 +21,6 @@ from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -174,6 +173,7 @@ class Sensor(PlatformEntity):
         self.recompute_capabilities()
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._cluster_handler.on_event(
@@ -332,6 +332,7 @@ class PollableSensor(Sensor):
         self._polling_task: Task | None = None
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self.maybe_start_polling()
 
@@ -424,6 +425,7 @@ class DeviceCounterSensor(BaseEntity):
         # self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._device.gateway.global_updater.register_update_listener(self.update)
         self._on_remove_callbacks.append(
@@ -980,6 +982,7 @@ class SmartEnergyMetering(PollableSensor):
         self.recompute_capabilities()
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
         entity_description = self._ENTITY_DESCRIPTION_MAP.get(
             self._cluster_handler.unit_of_measurement
@@ -1516,6 +1519,7 @@ class RSSISensor(Sensor):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self.device.gateway.global_updater.register_update_listener(self.update)
         self._on_remove_callbacks.append(

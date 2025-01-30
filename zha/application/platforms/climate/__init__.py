@@ -119,6 +119,7 @@ class Thermostat(PlatformEntity):
         self.recompute_capabilities()
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
         self._supported_features = (
             ClimateEntityFeature.TARGET_TEMPERATURE
@@ -133,6 +134,7 @@ class Thermostat(PlatformEntity):
             self._supported_features |= ClimateEntityFeature.FAN_MODE
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._thermostat_cluster_handler.on_event(
@@ -517,10 +519,12 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._time_update_task: Task | None = None
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
         self._supported_features |= ClimateEntityFeature.PRESET_MODE
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self.start_polling()
 
@@ -640,6 +644,7 @@ class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
         self._presets = [
             Preset.NONE,
@@ -721,6 +726,7 @@ class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
         self._presets = [
             Preset.NONE,
@@ -824,6 +830,7 @@ class ZONNSMARTThermostat(Thermostat):
     PRESET_FROST = "frost protect"
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
         super().recompute_capabilities()
         self._presets = [
             Preset.NONE,

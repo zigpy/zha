@@ -217,6 +217,7 @@ class Fan(PlatformEntity, BaseFan):
         self.recompute_capabilities()
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._fan_cluster_handler.on_event(

@@ -121,6 +121,7 @@ class Switch(PlatformEntity, BaseSwitch):
         )
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._on_off_cluster_handler.on_event(

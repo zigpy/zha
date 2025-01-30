@@ -132,15 +132,18 @@ class BaseEntity(LogMixin, EventBase):
         self._on_remove_callbacks: list[Callable[[], None]] = []
 
     def is_supported(self) -> bool:
+        """Return if the entity is supported for the device."""
         if self._attr_always_supported:
             return True
 
         return self._is_supported()
 
     def _is_supported(self) -> bool:
+        """Return if the entity is supported for the device, internal."""
         return True
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
         pass
 
     @property

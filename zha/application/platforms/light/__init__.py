@@ -628,6 +628,7 @@ class BaseLight(BaseEntity, ABC):
                 )
 
     async def on_remove(self) -> None:
+        """Clean up when entity is removed."""
         self._async_unsub_transition_listener()
         await super().on_remove()
 
@@ -683,6 +684,7 @@ class Light(PlatformEntity, BaseLight):
         self.recompute_capabilities()
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._on_off_cluster_handler.on_event(
@@ -701,9 +703,9 @@ class Light(PlatformEntity, BaseLight):
         self.start_polling()
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
         super().recompute_capabilities()
         effect_list = [EFFECT_OFF]
-        light_options = self.device.gateway.config.config.light_options
 
         self._supported_color_modes = {ColorMode.ONOFF}
         if self._level_cluster_handler:
@@ -1063,6 +1065,7 @@ class LightGroup(GroupEntity, BaseLight):
         self.recompute_capabilities()
 
     def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
         super().recompute_capabilities()
         light_options = self.group.gateway.config.config.light_options
         self._zha_config_group_members_assume_state = (

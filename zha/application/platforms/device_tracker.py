@@ -68,6 +68,7 @@ class DeviceScannerEntity(PlatformEntity):
         self._battery_level: float | None = None
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._battery_cluster_handler.on_event(

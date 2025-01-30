@@ -77,6 +77,7 @@ class BinarySensor(PlatformEntity):
         self._state: bool = self.is_on
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._cluster_handler.on_event(

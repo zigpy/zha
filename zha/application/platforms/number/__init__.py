@@ -5,14 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import NumberMetadata
 from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import (
@@ -93,6 +92,7 @@ class Number(PlatformEntity):
         ]
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._analog_output_cluster_handler.on_event(
@@ -219,6 +219,7 @@ class NumberConfigurationEntity(PlatformEntity):
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def _is_supported(self) -> bool:
+        """Return if the entity is supported for the device, internal."""
         if (
             self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
             or self._attribute_name
@@ -235,6 +236,7 @@ class NumberConfigurationEntity(PlatformEntity):
         return super()._is_supported()
 
     def on_add(self) -> None:
+        """Initialize entity."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._cluster_handler.on_event(

@@ -548,9 +548,6 @@ class Gateway(AsyncUtilMixin, EventBase):
         entities = []
 
         for entity in discovery.DEVICE_PROBE.discover_device_entities(device):
-            if entity is None:
-                continue
-
             if (entity.PLATFORM, entity.unique_id) in device.platform_entities:
                 continue
 

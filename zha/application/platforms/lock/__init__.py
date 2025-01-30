@@ -55,6 +55,7 @@ class DoorLock(PlatformEntity):
         )
 
     def on_add(self) -> None:
+        """Run when entity is added."""
         super().on_add()
         self._on_remove_callbacks.append(
             self._doorlock_cluster_handler.on_event(
