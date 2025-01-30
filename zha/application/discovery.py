@@ -119,13 +119,21 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         WriteAttributeButtonMetadata,
         EntityType.DIAGNOSTIC,
     ): button.WriteAttributeButton,
-    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.CONFIG): button.Button,
+    (
+        Platform.BUTTON,
+        ZCLCommandButtonMetadata,
+        EntityType.CONFIG,
+    ): button.Button,
     (
         Platform.BUTTON,
         ZCLCommandButtonMetadata,
         EntityType.DIAGNOSTIC,
     ): button.Button,
-    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.STANDARD): button.Button,
+    (
+        Platform.BUTTON,
+        ZCLCommandButtonMetadata,
+        EntityType.STANDARD,
+    ): button.Button,
     (
         Platform.BINARY_SENSOR,
         BinarySensorMetadata,
@@ -141,12 +149,36 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         BinarySensorMetadata,
         EntityType.STANDARD,
     ): binary_sensor.BinarySensor,
-    (Platform.SENSOR, ZCLEnumMetadata, EntityType.DIAGNOSTIC): sensor.EnumSensor,
-    (Platform.SENSOR, ZCLEnumMetadata, EntityType.STANDARD): sensor.EnumSensor,
-    (Platform.SENSOR, ZCLSensorMetadata, EntityType.DIAGNOSTIC): sensor.Sensor,
-    (Platform.SENSOR, ZCLSensorMetadata, EntityType.STANDARD): sensor.Sensor,
-    (Platform.SELECT, ZCLEnumMetadata, EntityType.CONFIG): select.ZCLEnumSelectEntity,
-    (Platform.SELECT, ZCLEnumMetadata, EntityType.STANDARD): select.ZCLEnumSelectEntity,
+    (
+        Platform.SENSOR,
+        ZCLEnumMetadata,
+        EntityType.DIAGNOSTIC,
+    ): sensor.EnumSensor,
+    (
+        Platform.SENSOR,
+        ZCLEnumMetadata,
+        EntityType.STANDARD,
+    ): sensor.EnumSensor,
+    (
+        Platform.SENSOR,
+        ZCLSensorMetadata,
+        EntityType.DIAGNOSTIC,
+    ): sensor.Sensor,
+    (
+        Platform.SENSOR,
+        ZCLSensorMetadata,
+        EntityType.STANDARD,
+    ): sensor.Sensor,
+    (
+        Platform.SELECT,
+        ZCLEnumMetadata,
+        EntityType.CONFIG,
+    ): select.ZCLEnumSelectEntity,
+    (
+        Platform.SELECT,
+        ZCLEnumMetadata,
+        EntityType.STANDARD,
+    ): select.ZCLEnumSelectEntity,
     (
         Platform.SELECT,
         ZCLEnumMetadata,
@@ -157,8 +189,16 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         NumberMetadata,
         EntityType.CONFIG,
     ): number.NumberConfigurationEntity,
-    (Platform.NUMBER, NumberMetadata, EntityType.DIAGNOSTIC): number.Number,
-    (Platform.NUMBER, NumberMetadata, EntityType.STANDARD): number.Number,
+    (
+        Platform.NUMBER,
+        NumberMetadata,
+        EntityType.DIAGNOSTIC,
+    ): number.Number,
+    (
+        Platform.NUMBER,
+        NumberMetadata,
+        EntityType.STANDARD,
+    ): number.Number,
     (
         Platform.SWITCH,
         SwitchMetadata,
