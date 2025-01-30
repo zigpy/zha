@@ -310,7 +310,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 delta_msg,
                 zha_device.consider_unavailable_time,
             )
-            self._maybe_create_device_entities(zha_device)
+            self._maybe_create_entities(zha_device)
 
     def load_groups(self) -> None:
         """Initialize ZHA groups."""
@@ -543,7 +543,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Return groups."""
         return self._groups
 
-    def _maybe_create_device_entities(self, device: Device) -> list:
+    def _maybe_create_entities(self, device: Device) -> list:
         """Create entities for a device if it is already initialized."""
         entities = []
 
@@ -630,7 +630,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
-        entities = self._maybe_create_device_entities(zha_device)
+        entities = self._maybe_create_entities(zha_device)
         await zha_device.async_initialize(from_cache=False)
 
         for entity in entities:
@@ -658,7 +658,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
-        entities = self._maybe_create_device_entities(zha_device)
+        entities = self._maybe_create_entities(zha_device)
 
         for entity in entities:
             entity.recompute_capabilities()
