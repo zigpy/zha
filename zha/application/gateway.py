@@ -611,17 +611,19 @@ class Gateway(AsyncUtilMixin, EventBase):
     async def _async_device_joined(self, zha_device: Device) -> None:
         zha_device.available = True
         zha_device.on_network = True
-        await zha_device.async_configure()
-        device_info = ExtendedDeviceInfoWithPairingStatus(
-            pairing_status=DevicePairingStatus.CONFIGURED,
-            **zha_device.extended_device_info.__dict__,
-        )
 
+        await zha_device.async_configure()
         await zha_device.async_initialize()
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info, new_join=True),
+            DeviceFullInitEvent(
+                device_info=ExtendedDeviceInfoWithPairingStatus(
+                    pairing_status=DevicePairingStatus.CONFIGURED,
+                    **zha_device.extended_device_info.__dict__,
+                ),
+                new_join=True,
+            ),
         )
 
     async def _async_device_rejoined(self, zha_device: Device) -> None:
@@ -633,16 +635,16 @@ class Gateway(AsyncUtilMixin, EventBase):
         # we don't have to do this on a nwk swap
         # but we don't have a way to tell currently
         await zha_device.async_configure()
-        device_info = ExtendedDeviceInfoWithPairingStatus(
-            pairing_status=DevicePairingStatus.CONFIGURED,
-            **zha_device.extended_device_info.__dict__,
-        )
-
         await zha_device.async_initialize(from_cache=True)
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info),
+            DeviceFullInitEvent(
+                device_info=ExtendedDeviceInfoWithPairingStatus(
+                    pairing_status=DevicePairingStatus.CONFIGURED,
+                    **zha_device.extended_device_info.__dict__,
+                )
+            ),
         )
         # force async_initialize() to fire so don't explicitly call it
         zha_device.available = False
