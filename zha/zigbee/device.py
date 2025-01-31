@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -30,7 +30,7 @@ from zigpy.zcl.foundation import (
 import zigpy.zdo.types as zdo_types
 from zigpy.zdo.types import RouteStatus, _NeighborEnums
 
-from zha.application import Platform
+from zha.application import Platform, discovery
 from zha.application.const import (
     ATTR_ARGS,
     ATTR_ATTRIBUTE,
@@ -61,7 +61,7 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import BaseEntity, BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -741,9 +741,6 @@ class Device(LogMixin, EventBase):
 
     async def async_configure(self) -> None:
         """Configure the device."""
-        should_identify = (
-            self.gateway.config.config.device_options.enable_identify_on_join
-        )
         self.debug("started configuration")
         await self._zdo_handler.async_configure()
         self._zdo_handler.debug("'async_configure' stage succeeded")
@@ -767,7 +764,7 @@ class Device(LogMixin, EventBase):
         self.debug("completed configuration")
 
         if (
-            should_identify
+            self.gateway.config.config.device_options.enable_identify_on_join
             and self.identify_ch is not None
             and not self.skip_configuration
         ):
@@ -776,9 +773,50 @@ class Device(LogMixin, EventBase):
                 effect_variant=Identify.EffectVariant.Default,
             )
 
+    def _maybe_add_new_entities(self) -> Sequence[BaseEntity]:
+        if self.is_active_coordinator:
+            new_entities = discovery.DEVICE_PROBE.discover_coordinator_device_entities(
+                self
+            )
+        else:
+            new_entities = discovery.DEVICE_PROBE.discover_device_entities(self)
+
+        added_entities = []
+
+        # Discover all applicable entities
+        for entity in new_entities:
+            key = (entity.PLATFORM, entity.unique_id)
+
+            if key in self.platform_entities:
+                continue
+
+            self.platform_entities[key] = entity
+            entity.on_add()
+            added_entities.append(entity)
+
+        return added_entities
+
+    async def _maybe_remove_unsupported_entities(self) -> Sequence[BaseEntity]:
+        removed_entities = []
+
+        # Finally, remove inapplicable entities
+        for key, entity in list(self.platform_entities.items()):
+            entity.recompute_capabilities()
+
+            if not entity.is_supported():
+                del self.platform_entities[key]
+                await entity.on_remove()
+
+                removed_entities.append(entity)
+
+        return removed_entities
+
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize cluster handlers."""
         self.debug("started initialization")
+
+        self._maybe_add_new_entities()
+
         await self._zdo_handler.async_initialize(from_cache)
         self._zdo_handler.debug("'async_initialize' stage succeeded")
 
@@ -791,6 +829,9 @@ class Device(LogMixin, EventBase):
                 await endpoint.async_initialize(from_cache)
             except Exception:  # pylint: disable=broad-exception-caught
                 self.debug("Failed to initialize endpoint", exc_info=True)
+
+        # Finally, remove inapplicable entities
+        await self._maybe_remove_unsupported_entities()
 
         self.debug("power source: %s", self.power_source)
         self.status = DeviceStatus.INITIALIZED

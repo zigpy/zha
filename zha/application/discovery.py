@@ -27,6 +27,7 @@ from zigpy.zcl.clusters.general import Ota
 from zha.application import Platform, const as zha_const
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
+    BaseEntity,
     PlatformEntity,
     alarm_control_panel,
     binary_sensor,
@@ -246,9 +247,7 @@ class DeviceProbe:
     """Probe to discover entities for a device."""
 
     @ignore_exceptions_during_iteration
-    def discover_device_entities(
-        self, device: Device
-    ) -> Iterator[PlatformEntity | sensor.DeviceCounterSensor]:
+    def discover_device_entities(self, device: Device) -> Iterator[BaseEntity]:
         """Discover entities for a ZHA device."""
         _LOGGER.debug(
             "Discovering entities for device: %s-%s",
@@ -256,10 +255,9 @@ class DeviceProbe:
             device.name,
         )
 
-        if device.is_active_coordinator:
-            yield from self.discover_coordinator_device_entities(device)
-        else:
-            yield from self.discover_quirks_v2_entities(device)
+        assert not device.is_active_coordinator
+
+        yield from self.discover_quirks_v2_entities(device)
 
         for ep_id, endpoint in device.endpoints.items():
             if ep_id != 0:
@@ -415,6 +413,7 @@ class DeviceProbe:
                     [cluster_handler.name],
                 )
 
+    @ignore_exceptions_during_iteration
     def discover_coordinator_device_entities(
         self, device: Device
     ) -> Iterator[sensor.DeviceCounterSensor]:

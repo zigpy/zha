@@ -437,7 +437,7 @@ async def test_remove_device_cleans_up_group_membership(
 
 @patch(
     "zha.application.gateway.Gateway.load_devices",
-    MagicMock(),
+    AsyncMock(),
 )
 @patch(
     "zha.application.gateway.Gateway.load_groups",

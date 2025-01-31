@@ -257,7 +257,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             self._find_coordinator_device()
         )
 
-        self.load_devices()
+        await self.load_devices()
         self.load_groups()
 
         self.application_controller.add_listener(self)
@@ -289,7 +289,7 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         return zigpy_coordinator
 
-    def load_devices(self) -> None:
+    async def load_devices(self) -> None:
         """Restore ZHA devices from zigpy application state."""
 
         assert self.application_controller
@@ -310,7 +310,8 @@ class Gateway(AsyncUtilMixin, EventBase):
                 delta_msg,
                 zha_device.consider_unavailable_time,
             )
-            self._maybe_create_entities(zha_device)
+
+            await zha_device.async_initialize(from_cache=True)
 
     def load_groups(self) -> None:
         """Initialize ZHA groups."""
@@ -543,21 +544,6 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Return groups."""
         return self._groups
 
-    def _maybe_create_entities(self, device: Device) -> list:
-        """Create entities for a device if it is already initialized."""
-        entities = []
-
-        for entity in discovery.DEVICE_PROBE.discover_device_entities(device):
-            if (entity.PLATFORM, entity.unique_id) in device.platform_entities:
-                continue
-
-            entity.on_add()
-            device.platform_entities[(entity.PLATFORM, entity.unique_id)] = entity
-
-            entities.append(entity)
-
-        return entities
-
     def get_or_create_device(self, zigpy_device: zigpy.device.Device) -> Device:
         """Get or create a ZHA device."""
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
@@ -630,15 +616,8 @@ class Gateway(AsyncUtilMixin, EventBase):
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
-        entities = self._maybe_create_entities(zha_device)
-        await zha_device.async_initialize(from_cache=False)
 
-        for entity in entities:
-            entity.recompute_capabilities()
-
-            if not entity.is_supported():
-                del zha_device.platform_entities[(entity.PLATFORM, entity.unique_id)]
-                await entity.on_remove()
+        await zha_device.async_initialize()
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
@@ -658,10 +637,8 @@ class Gateway(AsyncUtilMixin, EventBase):
             pairing_status=DevicePairingStatus.CONFIGURED,
             **zha_device.extended_device_info.__dict__,
         )
-        entities = self._maybe_create_entities(zha_device)
 
-        for entity in entities:
-            entity.recompute_capabilities()
+        await zha_device.async_initialize(from_cache=True)
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
