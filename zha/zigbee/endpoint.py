@@ -50,6 +50,18 @@ class Endpoint:
         self._client_cluster_handlers: dict[str, ClientClusterHandler] = {}
         self._unique_id: str = f"{device.unique_id}-{zigpy_endpoint.endpoint_id}"
 
+    def on_remove(self) -> None:
+        """Run when endpoint is removed."""
+        for handler in self.all_cluster_handlers.values():
+            handler.on_remove()
+
+        self.all_cluster_handlers.clear()
+
+        for handler in self.client_cluster_handlers.values():
+            handler.on_remove()
+
+        self.client_cluster_handlers.clear()
+
     @functools.cached_property
     def device(self) -> Device:
         """Return the device this endpoint belongs to."""

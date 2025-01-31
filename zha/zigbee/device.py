@@ -800,6 +800,9 @@ class Device(LogMixin, EventBase):
         """Cancel tasks this device owns."""
         self._zdo_handler.on_remove()
 
+        for endpoint in self._endpoints.values():
+            endpoint.on_remove()
+
         for platform_entity in self._platform_entities.values():
             await platform_entity.on_remove()
 
