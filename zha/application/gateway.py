@@ -635,7 +635,6 @@ class Gateway(AsyncUtilMixin, EventBase):
         # we don't have to do this on a nwk swap
         # but we don't have a way to tell currently
         await zha_device.async_configure()
-        await zha_device.async_initialize(from_cache=True)
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
@@ -646,7 +645,7 @@ class Gateway(AsyncUtilMixin, EventBase):
                 )
             ),
         )
-        # force async_initialize() to fire so don't explicitly call it
+        # Mark the device as unavailable, `async_initialize` will be called later
         zha_device.available = False
         zha_device.on_network = True
 
