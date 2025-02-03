@@ -181,10 +181,7 @@ def _ch_mock(cluster):
 
 
 @mock.patch(
-    (
-        "zha.application.discovery.EndpointProbe"
-        ".handle_on_off_output_cluster_exception"
-    ),
+    ("zha.application.discovery.EndpointProbe.handle_on_off_output_cluster_exception"),
     new=mock.MagicMock(),
 )
 @mock.patch("zha.application.discovery.EndpointProbe.probe_single_cluster")
