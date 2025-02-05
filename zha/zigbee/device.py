@@ -801,7 +801,7 @@ class Device(LogMixin, EventBase):
                 continue
 
             if disabled_meta.function is not None and not disabled_meta.function(
-                self, entity
+                entity
             ):
                 continue
 
