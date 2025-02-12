@@ -76,6 +76,7 @@ CLUSTER_HANDLER_ZDO: Final[str] = "zdo"
 CLUSTER_HANDLER_ZONE: Final[str] = "ias_zone"
 ZONE: Final[str] = CLUSTER_HANDLER_ZONE
 CLUSTER_HANDLER_INOVELLI = "inovelli_vzm31sn_cluster"
+CLUSTER_HANDLER_PHILIPS_HUE_LIGHT: Final[str] = "philips_hue_light_cluster"
 
 AQARA_OPPLE_CLUSTER: Final[int] = 0xFCC0
 IKEA_AIR_PURIFIER_CLUSTER: Final[int] = 0xFC7D
