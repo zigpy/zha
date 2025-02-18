@@ -386,10 +386,11 @@ class Cover(PlatformEntity):
 
     def _cancel_movement_timer(self) -> None:
         """Cancel the movement timer."""
+        if not self._movement_timer:
+            return
         _LOGGER.debug("Movement timer cancelled")
-        if self._movement_timer:
-            self._movement_timer.cancel()
-            self._movement_timer = None
+        self._movement_timer.cancel()
+        self._movement_timer = None
 
     def _clear_movement_state(self, duration: float, _=None) -> None:
         """Clear the movement state due to inactivity."""
