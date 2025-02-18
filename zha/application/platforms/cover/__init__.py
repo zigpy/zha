@@ -373,13 +373,12 @@ class Cover(PlatformEntity):
         # Return the longest axis movement timeout
         return max(lift_timeout, tilt_timeout)
 
-    def _start_movement_timer(self, seconds: float = 0) -> None:
+    def _start_movement_timer(self) -> None:
         """Start timer for clearing the movement state (opening/closing)."""
         if self._movement_timer:
             self._movement_timer.cancel()
-        duration = seconds or self._dynamic_timeout() or DEFAULT_MOVEMENT_TIMEOUT
-        if duration <= 0:
-            raise ZHAException(f"Invalid movement timer duration: {duration}")
+        duration = self._dynamic_timeout() or DEFAULT_MOVEMENT_TIMEOUT
+        assert duration > 0
         _LOGGER.debug("Movement timer started with a duration of %s seconds", duration)
         self._movement_timer = self._loop.call_later(
             duration, self._clear_movement_state, duration
@@ -395,8 +394,8 @@ class Cover(PlatformEntity):
     def _clear_movement_state(self, duration: float, _=None) -> None:
         """Clear the movement state due to inactivity."""
         _LOGGER.debug("No movement reported for %s seconds", duration)
-        self._target_lift_position = None
-        self._target_tilt_position = None
+        self._track_target_lift_position(None)
+        self._track_target_tilt_position(None)
         self._determine_state(refresh=True)
         self.maybe_emit_state_changed_event()
 
