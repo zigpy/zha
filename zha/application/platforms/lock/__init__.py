@@ -36,6 +36,7 @@ class DoorLock(PlatformEntity):
 
     PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
+    _attr_primary_weight = 10
 
     def __init__(
         self,

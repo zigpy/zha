@@ -61,6 +61,7 @@ class Cover(PlatformEntity):
         "target_lift_position",
         "target_tilt_position",
     }
+    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -379,6 +380,7 @@ class Shade(PlatformEntity):
 
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
+    _attr_primary_weight = 10
 
     def __init__(
         self,

@@ -840,6 +840,7 @@ class Humidity(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_SOIL_MOISTURE)
@@ -852,6 +853,7 @@ class SoilMoisture(Sensor):
     _attr_translation_key: str = "soil_moisture"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEAF_WETNESS)
@@ -864,6 +866,7 @@ class LeafWetness(Sensor):
     _attr_translation_key: str = "leaf_wetness"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ILLUMINANCE)
@@ -874,6 +877,7 @@ class Illuminance(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ILLUMINANCE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
+    _attr_primary_weight = 1
 
     def formatter(self, value: int) -> int | None:
         """Convert illumination data."""
@@ -911,6 +915,7 @@ class SmartEnergyMetering(PollableSensor):
         "status",
         "zcl_unit_of_measurement",
     }
+    _attr_primary_weight = 1
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(
@@ -1221,6 +1226,7 @@ class Pressure(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_FLOW)
@@ -1232,6 +1238,7 @@ class Flow(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
+    _attr_primary_weight = 1
 
     def formatter(self, value: int) -> datetime | int | float | str | None:
         """Handle unknown value state."""
@@ -1249,6 +1256,7 @@ class Temperature(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DEVICE_TEMPERATURE)
@@ -1262,6 +1270,7 @@ class DeviceTemperature(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
@@ -1304,6 +1313,7 @@ class CarbonDioxideConcentration(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names="carbon_monoxide_concentration")
@@ -1316,6 +1326,7 @@ class CarbonMonoxideConcentration(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(generic_ids="cluster_handler_0x042e", stop_on_match_group="voc_level")
@@ -1329,6 +1340,7 @@ class VOCLevel(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(
@@ -1347,6 +1359,7 @@ class PPBVOCLevel(Sensor):
     _decimals = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_BILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names="pm25")
@@ -1359,6 +1372,7 @@ class PM25(Sensor):
     _decimals = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names="formaldehyde_concentration")
@@ -1371,6 +1385,7 @@ class FormaldehydeConcentration(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(

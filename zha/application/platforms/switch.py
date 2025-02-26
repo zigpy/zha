@@ -64,6 +64,7 @@ class BaseSwitch(BaseEntity, ABC):
     """Common base class for zhawss switches."""
 
     PLATFORM = Platform.SWITCH
+    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -105,6 +106,7 @@ class Switch(PlatformEntity, BaseSwitch):
     """ZHA switch."""
 
     _attr_translation_key = "switch"
+    _attr_primary_weight = 10
 
     def __init__(
         self,

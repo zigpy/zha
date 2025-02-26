@@ -108,6 +108,7 @@ class BaseLight(BaseEntity, ABC):
         "off_with_transition",
         "off_brightness",
     }
+    _attr_primary_weight = 10
 
     def __init__(self, *args, **kwargs):
         """Initialize the light."""

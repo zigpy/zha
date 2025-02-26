@@ -94,6 +94,7 @@ class Thermostat(PlatformEntity):
         ATTR_UNOCCP_COOL_SETPT,
         ATTR_UNOCCP_HEAT_SETPT,
     }
+    _attr_primary_weight = 10
 
     def __init__(
         self,

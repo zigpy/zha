@@ -167,6 +167,7 @@ class Occupancy(BinarySensor):
 
     _attribute_name = "occupancy"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
+    _attr_primary_weight = 2
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_HUE_OCCUPANCY)
@@ -174,6 +175,7 @@ class HueOccupancy(Occupancy):
     """ZHA Hue occupancy."""
 
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
+    _attr_primary_weight = 3
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
@@ -182,6 +184,7 @@ class Opening(BinarySensor):
 
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -215,6 +218,7 @@ class IASZone(BinarySensor):
     """ZHA IAS BinarySensor."""
 
     _attribute_name = "zone_status"
+    _attr_primary_weight = 3
 
     def __init__(
         self,
@@ -259,6 +263,7 @@ class SinopeLeakStatus(BinarySensor):
 
     _attribute_name = "leak_status"
     _attr_device_class = BinarySensorDeviceClass.MOISTURE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(

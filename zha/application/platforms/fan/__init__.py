@@ -80,6 +80,7 @@ class BaseFan(BaseEntity):
         | FanEntityFeature.TURN_ON
     )
     _attr_translation_key: str = "fan"
+    _attr_primary_weight = 10
 
     @functools.cached_property
     def preset_modes(self) -> list[str]:

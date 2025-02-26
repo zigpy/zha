@@ -835,6 +835,9 @@ class Device(LogMixin, EventBase):
         # Finally, remove inapplicable entities
         await self._maybe_remove_unsupported_entities()
 
+        # At this point we can compute a primary entity
+        self._compute_primary_entity()
+
         self.debug("power source: %s", self.power_source)
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
@@ -1148,3 +1151,39 @@ class Device(LogMixin, EventBase):
         msg = f"[%s](%s): {msg}"
         args = (self.nwk, self.model) + args
         _LOGGER.log(level, msg, *args, **kwargs)
+
+    def _compute_primary_entity(self) -> None:
+        """Compute the primary entity for this device."""
+
+        # Only consider non-counter entities
+        candidates = [
+            e
+            for e in self._platform_entities.values()
+            if e.enabled and hasattr(e, "info_object")
+        ]
+        candidates.sort(reverse=True, key=lambda e: e.primary_weight)
+
+        if not candidates:
+            return
+
+        winner = candidates[0]
+        others = candidates[1:]
+
+        # We have a clear winner
+        if not others or winner.primary_weight > others[0].primary_weight:
+            winner.primary = True
+            del winner.info_object
+
+            for entity in others:
+                entity.primary = False
+                del entity.info_object
+
+            return
+
+        self.debug(
+            "Primary entity tie between %s and %s, no primary entity", winner, others[0]
+        )
+
+        for entity in candidates:
+            entity.primary = False
+            del entity.info_object

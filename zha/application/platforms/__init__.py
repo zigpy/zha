@@ -59,6 +59,7 @@ class BaseEntityInfo:
     entity_category: str | None
     entity_registry_enabled_default: bool
     enabled: bool = True
+    primary: bool
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -119,6 +120,11 @@ class BaseEntity(LogMixin, EventBase):
     _attr_state_class: str | None
     _attr_enabled: bool = True
     _attr_always_supported: bool = False
+    _attr_primary: bool = False
+
+    # When two entities both want to be primary, the one with the higher weight will be
+    # chosen. If there is a tie, both lose.
+    _attr_primary_weight: int = 0
 
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
@@ -155,6 +161,21 @@ class BaseEntity(LogMixin, EventBase):
     def enabled(self, value: bool) -> None:
         """Set the entity enabled state."""
         self._attr_enabled = value
+
+    @property
+    def primary(self) -> bool:
+        """Return if the entity is the primary device control."""
+        return self._attr_primary
+
+    @primary.setter
+    def primary(self, value: bool) -> None:
+        """Set the entity as the primary device control."""
+        self._attr_primary = value
+
+    @property
+    def primary_weight(self) -> int:
+        """Return the primary weight of the entity."""
+        return self._attr_primary_weight
 
     @property
     def fallback_name(self) -> str | None:
@@ -230,6 +251,7 @@ class BaseEntity(LogMixin, EventBase):
             entity_category=self.entity_category,
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
+            primary=self.primary,
             # Set by platform entities
             cluster_handlers=[],
             device_ieee=None,
