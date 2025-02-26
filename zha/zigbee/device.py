@@ -799,8 +799,10 @@ class Device(LogMixin, EventBase):
     async def _maybe_remove_unsupported_entities(self) -> Sequence[BaseEntity]:
         removed_entities = []
 
-        # Finally, remove inapplicable entities
-        for key, entity in list(self.platform_entities.items()):
+        # Finally, remove inapplicable entities. We iterate backwards to give entities
+        # that have uniqueness constraints (i.e. LQI, RSSI, and Identify) to always pick
+        # the first-created entity, not the last.
+        for key, entity in reversed(list(self.platform_entities.items())):
             entity.recompute_capabilities()
 
             if not entity.is_supported():
