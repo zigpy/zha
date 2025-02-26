@@ -266,8 +266,6 @@ class DeviceProbe:
                     device.gateway.config.config.device_overrides,
                 )
 
-        PLATFORM_ENTITIES.clean_up()
-
     def discover_quirks_v2_entities(self, device: Device) -> Iterator[PlatformEntity]:
         """Discover entities for a ZHA device exposed by quirks v2."""
         _LOGGER.debug(

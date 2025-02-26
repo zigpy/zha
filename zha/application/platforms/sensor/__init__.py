@@ -1529,10 +1529,11 @@ class RSSISensor(Sensor):
         )
 
     def _is_supported(self) -> bool:
-        key = f"{CLUSTER_HANDLER_BASIC}_{self._unique_id_suffix}"
-
-        if PLATFORM_ENTITIES.prevent_entity_creation(
-            Platform.SENSOR, self.device.ieee, key
+        cls = type(self)
+        if any(
+            type(entity) is cls
+            for entity in self.device.platform_entities.values()
+            if entity is not self
         ):
             return False
 

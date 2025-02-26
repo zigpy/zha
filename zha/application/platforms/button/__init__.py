@@ -118,8 +118,11 @@ class IdentifyButton(Button):
     _args = [DEFAULT_DURATION]
 
     def _is_supported(self) -> bool:
-        if PLATFORM_ENTITIES.prevent_entity_creation(
-            Platform.BUTTON, self.device.ieee, CLUSTER_HANDLER_IDENTIFY
+        cls = type(self)
+        if any(
+            type(entity) is cls
+            for entity in self.device.platform_entities.values()
+            if entity is not self
         ):
             return False
 
