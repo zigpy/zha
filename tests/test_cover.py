@@ -359,6 +359,10 @@ async def test_cover(
         await entity.async_set_cover_position(position=47)
         assert entity.state["state"] == CoverState.OPEN
 
+        # wait for transition timeout to clear the target
+        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        assert entity.state["state"] == CoverState.OPEN
+
     # test set tilt position command, starting at 100 % / 0 ZCL (open) from previous tilt test
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
         assert entity.state["current_tilt_position"] == 100
@@ -394,6 +398,10 @@ async def test_cover(
 
         # verify that a subsequent go_to command does not change the state to closing/opening
         await entity.async_set_cover_tilt_position(tilt_position=47)
+        assert entity.state["state"] == CoverState.OPEN
+
+        # wait for transition timeout to clear the target
+        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPEN
 
     # test interrupted movement (e.g. device button press), starting from 47 %
@@ -536,6 +544,55 @@ async def test_cover(
             (50 * 0.01 * TILT_MOVEMENT_TIMEOUT_RANGE) - DEFAULT_MOVEMENT_TIMEOUT
         )
         assert entity.state["current_tilt_position"] == 40
+        assert entity.state["state"] == CoverState.OPEN
+
+    # test concurrent movement of both axis, lift and tilt starting at 40 %
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
+        assert entity.state["current_position"] == 40
+        assert entity.state["current_tilt_position"] == 40
+
+        await entity.async_set_cover_position(position=90)  # 10 when inverted for ZCL
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 1
+        assert cluster.request.call_args[0][0] is False
+        assert cluster.request.call_args[0][1] == 0x05
+        assert cluster.request.call_args[0][2].command.name == "go_to_lift_percentage"
+        assert cluster.request.call_args[0][3] == 10
+        assert cluster.request.call_args[1]["expect_reply"] is True
+
+        # verify the cover is opening due to the lift direction
+        assert entity.state["state"] == CoverState.OPENING
+
+        await entity.async_set_cover_tilt_position(
+            tilt_position=1
+        )  # 99 when inverted for ZCL
+        await zha_gateway.async_block_till_done()
+        assert cluster.request.call_count == 2
+        assert cluster.request.call_args[0][0] is False
+        assert cluster.request.call_args[0][1] == 0x08
+        assert cluster.request.call_args[0][2].command.name == "go_to_tilt_percentage"
+        assert cluster.request.call_args[0][3] == 99
+        assert cluster.request.call_args[1]["expect_reply"] is True
+
+        # the last action's direction takes state precedence (tilt)
+        assert entity.state["state"] == CoverState.CLOSING
+
+        # report that tilt has reached its target
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 99}
+        )
+        assert entity.state["current_tilt_position"] == 1
+
+        # state should have reverted to opening because there is still an active lift target transition
+        assert entity.state["state"] == CoverState.OPENING
+
+        # report that lift has reached its target
+        await send_attributes_report(
+            zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 10}
+        )
+        assert entity.state["current_position"] == 90
+
+        # the state should now be open (static)
         assert entity.state["state"] == CoverState.OPEN
 
     # stop from client

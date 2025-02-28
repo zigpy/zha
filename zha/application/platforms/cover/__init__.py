@@ -50,7 +50,7 @@ _LOGGER = logging.getLogger(__name__)
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
-# Timeout for device movement following a position attribute update
+# Timeout for device transition state following a position attribute update
 DEFAULT_MOVEMENT_TIMEOUT: float = 5
 
 # Upper limit for dynamic timeout
@@ -95,8 +95,6 @@ class Cover(PlatformEntity):
 
         self._target_lift_position: int | None = None
         self._target_tilt_position: int | None = None
-        self._lift_update_received: bool | None = None
-        self._tilt_update_received: bool | None = None
         self._lift_state: CoverState | None = None
         self._tilt_state: CoverState | None = None
         self._lift_position_history: deque[int | None] = deque(
@@ -106,7 +104,8 @@ class Cover(PlatformEntity):
             [self.current_cover_tilt_position], maxlen=2
         )
         self._loop = asyncio.get_running_loop()
-        self._movement_timer: asyncio.TimerHandle | None = None
+        self._lift_transition_timer: asyncio.TimerHandle | None = None
+        self._tilt_transition_timer: asyncio.TimerHandle | None = None
 
         self._state: CoverState | None = CoverState.OPEN
         self._determine_state(refresh=True)
@@ -287,25 +286,18 @@ class Cover(PlatformEntity):
             self._tilt_position_history,
         )
 
-        # Clear target position if the cover axis is not moving
+        # Clear transition if the cover axis is not moving, else update the timer
         if self._lift_state not in (CoverState.OPENING, CoverState.CLOSING):
-            self._track_target_lift_position(None)
+            self._clear_lift_transition()
+        elif is_lift_update:
+            self._start_lift_transition(is_position_update=True)
+
         if self._tilt_state not in (CoverState.OPENING, CoverState.CLOSING):
-            self._track_target_tilt_position(None)
+            self._clear_tilt_transition()
+        elif is_tilt_update:
+            self._start_tilt_transition(is_position_update=True)
 
-        # Update the movement timeout if the cover is moving, else clear it
-        if CoverState.CLOSING in (
-            self._lift_state,
-            self._tilt_state,
-        ) or CoverState.OPENING in (
-            self._lift_state,
-            self._tilt_state,
-        ):
-            self._start_movement_timer()
-        else:
-            self._clear_movement_timer()
-
-        # Keep the last movement direction if either axis is still moving
+        # Keep the last direction if either axis is still moving
         if (
             self.is_closing
             and CoverState.CLOSING in (self._lift_state, self._tilt_state)
@@ -326,92 +318,95 @@ class Cover(PlatformEntity):
         # Pick lift state in preference over tilt
         self._state = self._lift_state or self._tilt_state
 
-    def _dynamic_timeout(self) -> float:
-        """Return a timer duration in seconds based on expected movement distance.
+    def _start_lift_transition(self, is_position_update: bool = False) -> None:
+        """Start the lift transition."""
+        if self._lift_transition_timer:
+            self._lift_transition_timer.cancel()
+            self._lift_transition_timer = None
+            transition_update = True
+        else:
+            transition_update = False
 
-        This is required because some devices only report a position update after stopping.
-        """
-
-        lift_timeout = 0
-        tilt_timeout = 0
-
-        # Calculate dynamic timeout durations if a target is defined and the device has not reported a new position
         if (
-            self._target_lift_position is not None
-            and self.current_cover_position is not None
-            and not self._lift_update_received
+            self._target_lift_position is None
+            or self.current_cover_position is None
+            or self._target_lift_position == self.current_cover_position
         ):
-            lift_timeout = (
+            duration = DEFAULT_MOVEMENT_TIMEOUT
+        else:
+            duration = (
                 abs(self._target_lift_position - self.current_cover_position)
                 * 0.01
                 * LIFT_MOVEMENT_TIMEOUT_RANGE
             )
+        if is_position_update:
+            duration = min(DEFAULT_MOVEMENT_TIMEOUT, duration)
+        assert duration > 0
+
+        if not transition_update:
+            _LOGGER.debug("Lift transition started")
+        self._lift_transition_timer = self._loop.call_later(
+            duration, self._clear_lift_transition, True
+        )
+
+    def _start_tilt_transition(self, is_position_update: bool = False) -> None:
+        """Start the tilt transition."""
+        if self._tilt_transition_timer:
+            self._tilt_transition_timer.cancel()
+            self._tilt_transition_timer = None
+            transition_update = True
+        else:
+            transition_update = False
+
         if (
-            self._target_tilt_position is not None
-            and self.current_cover_tilt_position is not None
-            and not self._tilt_update_received
+            self._target_tilt_position is None
+            or self.current_cover_tilt_position is None
+            or self._target_tilt_position == self.current_cover_tilt_position
         ):
-            tilt_timeout = (
+            duration = DEFAULT_MOVEMENT_TIMEOUT
+        else:
+            duration = (
                 abs(self._target_tilt_position - self.current_cover_tilt_position)
                 * 0.01
                 * TILT_MOVEMENT_TIMEOUT_RANGE
             )
-
-        _LOGGER.debug(
-            "_dynamic_timeout: lift=(timeout: %s, current: %s, target: %s, update_received: %s), tilt=(timeout: %s, current: %s, target: %s, update_received: %s)",
-            lift_timeout,
-            self.current_cover_position,
-            self._target_lift_position,
-            self._lift_update_received,
-            tilt_timeout,
-            self.current_cover_tilt_position,
-            self._target_tilt_position,
-            self._tilt_update_received,
-        )
-
-        # Return the longest axis movement timeout
-        return max(lift_timeout, tilt_timeout)
-
-    def _start_movement_timer(self) -> None:
-        """Start timer for clearing the movement state (opening/closing)."""
-        if self._movement_timer:
-            self._movement_timer.cancel()
-        duration = self._dynamic_timeout() or DEFAULT_MOVEMENT_TIMEOUT
+        if is_position_update:
+            duration = min(DEFAULT_MOVEMENT_TIMEOUT, duration)
         assert duration > 0
-        _LOGGER.debug("Movement timer started with a duration of %s seconds", duration)
-        self._movement_timer = self._loop.call_later(
-            duration, self._clear_movement_state, duration
+
+        if not transition_update:
+            _LOGGER.debug("Tilt transition started")
+        self._tilt_transition_timer = self._loop.call_later(
+            duration, self._clear_tilt_transition, True
         )
 
-    def _clear_movement_timer(self) -> None:
-        """Clear the movement timer."""
-        if not self._movement_timer:
-            return
-        _LOGGER.debug("Movement timer cleared")
-        self._movement_timer.cancel()
-        self._movement_timer = None
+    def _clear_lift_transition(self, determine_state: bool = False) -> None:
+        """Clear the lift transition."""
+        self._target_lift_position = None
 
-    def _clear_movement_state(self, duration: float, _=None) -> None:
-        """Clear the movement state due to inactivity."""
-        _LOGGER.debug("No movement reported for %s seconds", duration)
-        self._track_target_lift_position(None)
-        self._track_target_tilt_position(None)
+        if self._lift_transition_timer:
+            self._lift_transition_timer.cancel()
+            self._lift_transition_timer = None
+            _LOGGER.debug("Lift transition cleared")
+
+        if not determine_state:
+            return
         self._determine_state(refresh=True)
         self.maybe_emit_state_changed_event()
 
-    def _track_target_lift_position(self, position: int | None):
-        """Track locally instigated lift target."""
-        self._target_lift_position = position
-        if position is not None:
-            self._lift_update_received = False
-            self._lift_state = None
+    def _clear_tilt_transition(self, determine_state: bool = False) -> None:
+        """Clear the tilt transition."""
+        self._target_tilt_position = None
 
-    def _track_target_tilt_position(self, position: int | None):
-        """Track locally instigated tilt target."""
-        self._target_tilt_position = position
-        if position is not None:
-            self._tilt_update_received = False
-            self._tilt_state = None
+        if self._tilt_transition_timer:
+            self._tilt_transition_timer.cancel()
+            self._tilt_transition_timer = None
+            _LOGGER.debug("Tilt transition cleared")
+
+        if not determine_state:
+            return
+        self._determine_state(refresh=True)
+        self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -423,123 +418,127 @@ class Cover(PlatformEntity):
         _LOGGER.debug("handle_cluster_handler_attribute_updated=%s", event)
         if event.attribute_id == WCAttrs.current_position_lift_percentage.id:
             self._lift_position_history.append(self.current_cover_position)
-            self._lift_update_received = True
             self._determine_state(is_lift_update=True)
-        if event.attribute_id == WCAttrs.current_position_tilt_percentage.id:
+        elif event.attribute_id == WCAttrs.current_position_tilt_percentage.id:
             self._tilt_position_history.append(self.current_cover_tilt_position)
-            self._tilt_update_received = True
             self._determine_state(is_tilt_update=True)
         self.maybe_emit_state_changed_event()
 
-    def async_update_state(self, state):
+    def async_update_state(self, state, is_lift: bool = False, is_tilt: bool = False):
         """Handle state update from HA operations below."""
         _LOGGER.debug("async_update_state=%s", state)
         self._state = state
+        if is_lift:
+            self._lift_state = state
+        elif is_tilt:
+            self._tilt_state = state
         self.maybe_emit_state_changed_event()
-        if state in (CoverState.OPENING, CoverState.CLOSING):
-            self._start_movement_timer()
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover."""
-        self._track_target_lift_position(POSITION_OPEN)
+        self._target_lift_position = POSITION_OPEN
         res = await self._cover_cluster_handler.up_open()
         if res[1] is not Status.SUCCESS:
-            self._track_target_lift_position(None)
+            self._clear_lift_transition()
             raise ZHAException(f"Failed to open cover: {res[1]}")
 
-        if self.current_cover_position == POSITION_OPEN:
-            return
-        self.async_update_state(CoverState.OPENING)
+        if self.current_cover_position != POSITION_OPEN:
+            self.async_update_state(CoverState.OPENING, is_lift=True)
+        self._start_lift_transition()
 
     async def async_open_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover tilt."""
-        self._track_target_tilt_position(POSITION_OPEN)
+        self._target_tilt_position = POSITION_OPEN
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(POSITION_OPEN)
         )
         if res[1] is not Status.SUCCESS:
-            self._track_target_tilt_position(None)
+            self._clear_tilt_transition()
             raise ZHAException(f"Failed to open cover tilt: {res[1]}")
 
-        if self.current_cover_tilt_position == POSITION_OPEN:
-            return
-        self.async_update_state(CoverState.OPENING)
+        if self.current_cover_tilt_position != POSITION_OPEN:
+            self.async_update_state(CoverState.OPENING, is_tilt=True)
+        self._start_tilt_transition()
 
     async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Close the cover."""
-        self._track_target_lift_position(POSITION_CLOSED)
+        self._target_lift_position = POSITION_CLOSED
         res = await self._cover_cluster_handler.down_close()
         if res[1] is not Status.SUCCESS:
-            self._track_target_lift_position(None)
+            self._clear_lift_transition()
             raise ZHAException(f"Failed to close cover: {res[1]}")
 
-        if self.current_cover_position == POSITION_CLOSED:
-            return
-        self.async_update_state(CoverState.CLOSING)
+        if self.current_cover_position != POSITION_CLOSED:
+            self.async_update_state(CoverState.CLOSING, is_lift=True)
+        self._start_lift_transition()
 
     async def async_close_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Close the cover tilt."""
-        self._track_target_tilt_position(POSITION_CLOSED)
+        self._target_tilt_position = POSITION_CLOSED
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(POSITION_CLOSED)
         )
         if res[1] is not Status.SUCCESS:
-            self._track_target_tilt_position(None)
+            self._clear_tilt_transition()
             raise ZHAException(f"Failed to close cover tilt: {res[1]}")
 
-        if self.current_cover_tilt_position == POSITION_CLOSED:
-            return
-        self.async_update_state(CoverState.CLOSING)
+        if self.current_cover_tilt_position != POSITION_CLOSED:
+            self.async_update_state(CoverState.CLOSING, is_tilt=True)
+        self._start_tilt_transition()
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
         """Move the cover to a specific position."""
         assert self.current_cover_position is not None
         target_position = kwargs[ATTR_POSITION]
         assert target_position is not None
-        self._track_target_lift_position(target_position)
+
+        self._target_lift_position = target_position
         res = await self._cover_cluster_handler.go_to_lift_percentage(
             self._ha_position_to_zcl(target_position)
         )
         if res[1] is not Status.SUCCESS:
-            self._track_target_lift_position(None)
+            self._clear_lift_transition()
             raise ZHAException(f"Failed to set cover position: {res[1]}")
 
-        if target_position == self.current_cover_position:
-            return
-        self.async_update_state(
-            CoverState.CLOSING
-            if target_position < self.current_cover_position
-            else CoverState.OPENING
-        )
+        if target_position != self.current_cover_position:
+            self.async_update_state(
+                CoverState.CLOSING
+                if target_position < self.current_cover_position
+                else CoverState.OPENING,
+                is_lift=True,
+            )
+        self._start_lift_transition()
 
     async def async_set_cover_tilt_position(self, **kwargs: Any) -> None:
         """Move the cover tilt to a specific position."""
         assert self.current_cover_tilt_position is not None
         target_position = kwargs[ATTR_TILT_POSITION]
         assert target_position is not None
-        self._track_target_tilt_position(target_position)
+
+        self._target_tilt_position = target_position
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(target_position)
         )
         if res[1] is not Status.SUCCESS:
-            self._track_target_tilt_position(None)
+            self._clear_tilt_transition()
             raise ZHAException(f"Failed to set cover tilt position: {res[1]}")
 
-        if target_position == self.current_cover_tilt_position:
-            return
-        self.async_update_state(
-            CoverState.CLOSING
-            if target_position < self.current_cover_tilt_position
-            else CoverState.OPENING
-        )
+        if target_position != self.current_cover_tilt_position:
+            self.async_update_state(
+                CoverState.CLOSING
+                if target_position < self.current_cover_tilt_position
+                else CoverState.OPENING,
+                is_tilt=True,
+            )
+        self._start_tilt_transition()
 
     async def async_stop_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Stop the cover.
 
         Upon receipt of this command the cover stops both lift and tilt movement.
         """
-        self._track_target_lift_position(None)
-        self._track_target_tilt_position(None)
+        self._clear_lift_transition()
+        self._clear_tilt_transition()
         res = await self._cover_cluster_handler.stop()
         if res[1] is not Status.SUCCESS:
             raise ZHAException(f"Failed to stop cover: {res[1]}")
