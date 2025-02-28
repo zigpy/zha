@@ -65,6 +65,7 @@ class Cover(PlatformEntity):
     PLATFORM = Platform.COVER
 
     _attr_translation_key: str = "cover"
+    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -109,9 +110,15 @@ class Cover(PlatformEntity):
 
         self._state: CoverState | None = CoverState.OPEN
         self._determine_state(refresh=True)
-        self._cover_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cover_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     def restore_external_state_attributes(
@@ -580,6 +587,7 @@ class Shade(PlatformEntity):
         | CoverEntityFeature.STOP
         | CoverEntityFeature.SET_POSITION
     )
+    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -601,12 +609,20 @@ class Shade(PlatformEntity):
         self._position: int | None = self._zcl_level_to_ha_position(
             self._level_cluster_handler.current_level
         )
-        self._on_off_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._on_off_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
-        self._level_cluster_handler.on_event(
-            CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+        self._on_remove_callbacks.append(
+            self._level_cluster_handler.on_event(
+                CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+            )
         )
 
     @property

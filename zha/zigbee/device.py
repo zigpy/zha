@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -61,7 +61,7 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import BaseEntity, BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -236,7 +236,10 @@ class Device(LogMixin, EventBase):
 
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
+
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
+        self._zdo_handler.on_add()
+
         self.status: DeviceStatus = DeviceStatus.CREATED
 
         self._endpoints: dict[int, Endpoint] = {}
@@ -547,9 +550,7 @@ class Device(LogMixin, EventBase):
         gateway: Gateway,
     ) -> Self:
         """Create new device."""
-        zha_dev = cls(zigpy_dev, gateway)
-        discovery.DEVICE_PROBE.discover_device_entities(zha_dev)
-        return zha_dev
+        return cls(zigpy_dev, gateway)
 
     def async_update_sw_build_id(self, sw_version: int) -> None:
         """Update device sw version."""
@@ -740,9 +741,6 @@ class Device(LogMixin, EventBase):
 
     async def async_configure(self) -> None:
         """Configure the device."""
-        should_identify = (
-            self.gateway.config.config.device_options.enable_identify_on_join
-        )
         self.debug("started configuration")
         await self._zdo_handler.async_configure()
         self._zdo_handler.debug("'async_configure' stage succeeded")
@@ -766,7 +764,7 @@ class Device(LogMixin, EventBase):
         self.debug("completed configuration")
 
         if (
-            should_identify
+            self.gateway.config.config.device_options.enable_identify_on_join
             and self.identify_ch is not None
             and not self.skip_configuration
         ):
@@ -775,9 +773,52 @@ class Device(LogMixin, EventBase):
                 effect_variant=Identify.EffectVariant.Default,
             )
 
+    def _maybe_add_new_entities(self) -> Sequence[BaseEntity]:
+        if self.is_active_coordinator:
+            new_entities = discovery.DEVICE_PROBE.discover_coordinator_device_entities(
+                self
+            )
+        else:
+            new_entities = discovery.DEVICE_PROBE.discover_device_entities(self)
+
+        added_entities = []
+
+        # Discover all applicable entities
+        for entity in new_entities:
+            key = (entity.PLATFORM, entity.unique_id)
+
+            if key in self.platform_entities:
+                continue
+
+            self.platform_entities[key] = entity
+            entity.on_add()
+            added_entities.append(entity)
+
+        return added_entities
+
+    async def _maybe_remove_unsupported_entities(self) -> Sequence[BaseEntity]:
+        removed_entities = []
+
+        # Finally, remove inapplicable entities. We iterate backwards to give entities
+        # that have uniqueness constraints (i.e. LQI, RSSI, and Identify) to always pick
+        # the first-created entity, not the last.
+        for key, entity in reversed(list(self.platform_entities.items())):
+            entity.recompute_capabilities()
+
+            if not entity.is_supported():
+                del self.platform_entities[key]
+                await entity.on_remove()
+
+                removed_entities.append(entity)
+
+        return removed_entities
+
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize cluster handlers."""
         self.debug("started initialization")
+
+        self._maybe_add_new_entities()
+
         await self._zdo_handler.async_initialize(from_cache)
         self._zdo_handler.debug("'async_initialize' stage succeeded")
 
@@ -791,12 +832,23 @@ class Device(LogMixin, EventBase):
             except Exception:  # pylint: disable=broad-exception-caught
                 self.debug("Failed to initialize endpoint", exc_info=True)
 
+        # Finally, remove inapplicable entities
+        await self._maybe_remove_unsupported_entities()
+
+        # At this point we can compute a primary entity
+        self._compute_primary_entity()
+
         self.debug("power source: %s", self.power_source)
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
 
     async def on_remove(self) -> None:
         """Cancel tasks this device owns."""
+        self._zdo_handler.on_remove()
+
+        for endpoint in self._endpoints.values():
+            endpoint.on_remove()
+
         for platform_entity in self._platform_entities.values():
             await platform_entity.on_remove()
 
@@ -1099,3 +1151,39 @@ class Device(LogMixin, EventBase):
         msg = f"[%s](%s): {msg}"
         args = (self.nwk, self.model) + args
         _LOGGER.log(level, msg, *args, **kwargs)
+
+    def _compute_primary_entity(self) -> None:
+        """Compute the primary entity for this device."""
+
+        # Only consider non-counter entities
+        candidates = [
+            e
+            for e in self._platform_entities.values()
+            if e.enabled and hasattr(e, "info_object")
+        ]
+        candidates.sort(reverse=True, key=lambda e: e.primary_weight)
+
+        if not candidates:
+            return
+
+        winner = candidates[0]
+        others = candidates[1:]
+
+        # We have a clear winner
+        if not others or winner.primary_weight > others[0].primary_weight:
+            winner.primary = True
+            del winner.info_object
+
+            for entity in others:
+                entity.primary = False
+                del entity.info_object
+
+            return
+
+        self.debug(
+            "Primary entity tie between %s and %s, no primary entity", winner, others[0]
+        )
+
+        for entity in candidates:
+            entity.primary = False
+            del entity.info_object

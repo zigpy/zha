@@ -21,6 +21,7 @@ from tests.common import (
     SIG_EP_OUTPUT,
     SIG_EP_TYPE,
     create_mock_zigpy_device,
+    get_entity,
     join_zigpy_device,
     zigpy_device_from_json,
 )
@@ -34,6 +35,9 @@ from zha.application.const import (
     UNKNOWN,
 )
 from zha.application.gateway import Gateway
+from zha.application.platforms import PlatformEntity
+from zha.application.platforms.binary_sensor import IASZone
+from zha.application.platforms.light import Light
 from zha.application.platforms.sensor import LQISensor, RSSISensor
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
@@ -853,3 +857,63 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     assert zha_device.device_alerts == (
         DeviceAlertMetadata(level=DeviceAlertLevel.WARNING, message="Test warning"),
     )
+
+
+@pytest.mark.parametrize(
+    ("json_path", "primary_platform", "primary_entity_type"),
+    [
+        # Light bulb
+        (
+            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+            Platform.LIGHT,
+            Light,
+        ),
+        # Night light with a bulb and a motion sensor
+        (
+            "tests/data/devices/third-reality-inc-3rsnl02043z.json",
+            Platform.LIGHT,
+            Light,
+        ),
+        # Door sensor
+        (
+            "tests/data/devices/centralite-3320-l.json",
+            Platform.BINARY_SENSOR,
+            IASZone,
+        ),
+        # Smart plug with energy monitoring
+        (
+            "tests/data/devices/innr-sp-234.json",
+            Platform.SWITCH,
+            Switch,
+        ),
+        # Atmosphere sensor with humidity, temperature, and pressure
+        (
+            "tests/data/devices/lumi-lumi-weather.json",
+            None,
+            None,
+        ),
+    ],
+)
+async def test_primary_entity_computation(
+    json_path: str,
+    primary_platform: Platform | None,
+    primary_entity_type: PlatformEntity | None,
+    zha_gateway: Gateway,
+) -> None:
+    """Test primary entity computation."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        json_path,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # There is a single light entity
+    primary = [e for e in zha_device.platform_entities.values() if e.primary]
+
+    if primary_platform is None:
+        assert not primary
+    else:
+        assert primary == [
+            get_entity(zha_device, primary_platform, entity_type=primary_entity_type)
+        ]

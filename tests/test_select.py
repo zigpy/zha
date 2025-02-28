@@ -186,7 +186,11 @@ async def test_on_off_select_attribute_report_v2(
     cluster = zigpy_device.endpoints[1].opple_cluster
     assert isinstance(zha_device.device, CustomDeviceV2)
 
-    entity = get_entity(zha_device, platform=Platform.SELECT)
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SELECT,
+        qualifier_func=lambda e: e.info_object.unique_id.endswith("motion_sensitivity"),
+    )
 
     # test that the state is in default medium state
     assert entity.state["state"] == AqaraMotionSensitivities.Medium.name

@@ -210,8 +210,15 @@ class ClusterHandler(LogMixin, EventBase):
             ]
             self.value_attribute = attr_def.name
         self._status: ClusterHandlerStatus = ClusterHandlerStatus.CREATED
-        self._cluster.add_listener(self)
         self.data_cache: dict[str, Any] = {}
+
+    def on_add(self) -> None:
+        """Call when cluster handler is added."""
+        self._cluster.add_listener(self)
+
+    def on_remove(self) -> None:
+        """Call when cluster handler will be removed."""
+        self._cluster.remove_listener(self)
 
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:  # pylint: disable=unused-argument
@@ -591,6 +598,7 @@ class ClusterHandler(LogMixin, EventBase):
                     only_cache=only_cache,
                     manufacturer=manufacturer,
                 )
+                self.debug("Got attributes: %s", read)
                 result.update(read)
             except (TimeoutError, zigpy.exceptions.ZigbeeException) as ex:
                 self.debug(
@@ -664,7 +672,14 @@ class ZDOClusterHandler(LogMixin):
         self._zha_device = device
         self._status = ClusterHandlerStatus.CREATED
         self._unique_id = f"{str(device.ieee)}:{device.name}_ZDO"
+
+    def on_add(self) -> None:
+        """Call when cluster handler is added."""
         self._cluster.add_listener(self)
+
+    def on_remove(self) -> None:
+        """Call when cluster handler will be removed."""
+        self._cluster.remove_listener(self)
 
     @property
     def unique_id(self):

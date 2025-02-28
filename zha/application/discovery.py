@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Callable, Iterator
 from dataclasses import astuple
+import functools
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast
 
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
@@ -25,6 +27,8 @@ from zigpy.zcl.clusters.general import Ota
 from zha.application import Platform, const as zha_const
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
+    BaseEntity,
+    PlatformEntity,
     alarm_control_panel,
     binary_sensor,
     button,
@@ -73,7 +77,7 @@ from zha.zigbee.cluster_handlers.registries import (
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.application.gateway import Gateway
+    from zha.application.platforms import GroupEntity
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -119,13 +123,21 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         WriteAttributeButtonMetadata,
         EntityType.DIAGNOSTIC,
     ): button.WriteAttributeButton,
-    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.CONFIG): button.Button,
+    (
+        Platform.BUTTON,
+        ZCLCommandButtonMetadata,
+        EntityType.CONFIG,
+    ): button.Button,
     (
         Platform.BUTTON,
         ZCLCommandButtonMetadata,
         EntityType.DIAGNOSTIC,
     ): button.Button,
-    (Platform.BUTTON, ZCLCommandButtonMetadata, EntityType.STANDARD): button.Button,
+    (
+        Platform.BUTTON,
+        ZCLCommandButtonMetadata,
+        EntityType.STANDARD,
+    ): button.Button,
     (
         Platform.BINARY_SENSOR,
         BinarySensorMetadata,
@@ -141,12 +153,36 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         BinarySensorMetadata,
         EntityType.STANDARD,
     ): binary_sensor.BinarySensor,
-    (Platform.SENSOR, ZCLEnumMetadata, EntityType.DIAGNOSTIC): sensor.EnumSensor,
-    (Platform.SENSOR, ZCLEnumMetadata, EntityType.STANDARD): sensor.EnumSensor,
-    (Platform.SENSOR, ZCLSensorMetadata, EntityType.DIAGNOSTIC): sensor.Sensor,
-    (Platform.SENSOR, ZCLSensorMetadata, EntityType.STANDARD): sensor.Sensor,
-    (Platform.SELECT, ZCLEnumMetadata, EntityType.CONFIG): select.ZCLEnumSelectEntity,
-    (Platform.SELECT, ZCLEnumMetadata, EntityType.STANDARD): select.ZCLEnumSelectEntity,
+    (
+        Platform.SENSOR,
+        ZCLEnumMetadata,
+        EntityType.DIAGNOSTIC,
+    ): sensor.EnumSensor,
+    (
+        Platform.SENSOR,
+        ZCLEnumMetadata,
+        EntityType.STANDARD,
+    ): sensor.EnumSensor,
+    (
+        Platform.SENSOR,
+        ZCLSensorMetadata,
+        EntityType.DIAGNOSTIC,
+    ): sensor.Sensor,
+    (
+        Platform.SENSOR,
+        ZCLSensorMetadata,
+        EntityType.STANDARD,
+    ): sensor.Sensor,
+    (
+        Platform.SELECT,
+        ZCLEnumMetadata,
+        EntityType.CONFIG,
+    ): select.ZCLEnumSelectEntity,
+    (
+        Platform.SELECT,
+        ZCLEnumMetadata,
+        EntityType.STANDARD,
+    ): select.ZCLEnumSelectEntity,
     (
         Platform.SELECT,
         ZCLEnumMetadata,
@@ -157,8 +193,16 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         NumberMetadata,
         EntityType.CONFIG,
     ): number.NumberConfigurationEntity,
-    (Platform.NUMBER, NumberMetadata, EntityType.DIAGNOSTIC): number.Number,
-    (Platform.NUMBER, NumberMetadata, EntityType.STANDARD): number.Number,
+    (
+        Platform.NUMBER,
+        NumberMetadata,
+        EntityType.DIAGNOSTIC,
+    ): number.Number,
+    (
+        Platform.NUMBER,
+        NumberMetadata,
+        EntityType.STANDARD,
+    ): number.Number,
     (
         Platform.SWITCH,
         SwitchMetadata,
@@ -176,18 +220,34 @@ QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS = {
 }
 
 
+P = ParamSpec("P")
+T = TypeVar("T")
+
+
+def ignore_exceptions_during_iteration(
+    func: Callable[P, Iterator[T]],
+) -> Callable[P, Iterator[T]]:
+    """Ignore exceptions during iteration for wrapped function."""
+
+    @functools.wraps(func)
+    def inner(*args: P.args, **kwargs: P.kwargs) -> Iterator[T]:
+        iterator = func(*args, **kwargs)
+        while True:
+            try:
+                yield next(iterator)
+            except StopIteration:
+                break
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Failed to create entity during discovery")
+
+    return inner
+
+
 class DeviceProbe:
     """Probe to discover entities for a device."""
 
-    def __init__(self) -> None:
-        """Initialize instance."""
-        self._gateway: Gateway
-
-    def initialize(self, gateway: Gateway) -> None:
-        """Initialize the group probe."""
-        self._gateway = gateway
-
-    def discover_device_entities(self, device: Device) -> None:
+    @ignore_exceptions_during_iteration
+    def discover_device_entities(self, device: Device) -> Iterator[BaseEntity]:
         """Discover entities for a ZHA device."""
         _LOGGER.debug(
             "Discovering entities for device: %s-%s",
@@ -195,14 +255,18 @@ class DeviceProbe:
             device.name,
         )
 
-        if device.is_active_coordinator:
-            self.discover_coordinator_device_entities(device)
-            return
+        assert not device.is_active_coordinator
 
-        self.discover_quirks_v2_entities(device)
-        PLATFORM_ENTITIES.clean_up()
+        yield from self.discover_quirks_v2_entities(device)
 
-    def discover_quirks_v2_entities(self, device: Device) -> None:
+        for ep_id, endpoint in device.endpoints.items():
+            if ep_id != 0:
+                yield from ENDPOINT_PROBE.discover_entities(
+                    endpoint,
+                    device.gateway.config.config.device_overrides,
+                )
+
+    def discover_quirks_v2_entities(self, device: Device) -> Iterator[PlatformEntity]:
         """Discover entities for a ZHA device exposed by quirks v2."""
         _LOGGER.debug(
             "Attempting to discover quirks v2 entities for device: %s-%s",
@@ -332,11 +396,11 @@ class DeviceProbe:
                             entity_metadata.attribute_initialized_from_cache
                         )
 
-                endpoint.async_new_entity(
-                    platform=platform,
-                    entity_class=entity_class,
+                yield entity_class(
                     unique_id=endpoint.unique_id,
                     cluster_handlers=[cluster_handler],
+                    endpoint=endpoint,
+                    device=device,
                     entity_metadata=entity_metadata,
                 )
 
@@ -347,7 +411,10 @@ class DeviceProbe:
                     [cluster_handler.name],
                 )
 
-    def discover_coordinator_device_entities(self, device: Device) -> None:
+    @ignore_exceptions_during_iteration
+    def discover_coordinator_device_entities(
+        self, device: Device
+    ) -> Iterator[sensor.DeviceCounterSensor]:
         """Discover entities for the coordinator device."""
         _LOGGER.debug(
             "Discovering entities for coordinator device: %s-%s",
@@ -355,23 +422,22 @@ class DeviceProbe:
             device.name,
         )
         state: State = device.gateway.application_controller.state
-        platforms: dict[Platform, list] = self._gateway.config.platforms
 
-        def process_counters(counter_groups: str) -> None:
+        for counter_groups in (
+            "counters",
+            "broadcast_counters",
+            "device_counters",
+            "group_counters",
+        ):
             for counter_group, counters in getattr(state, counter_groups).items():
                 for counter in counters:
-                    platforms[Platform.SENSOR].append(
-                        (
-                            sensor.DeviceCounterSensor,
-                            (
-                                device,
-                                counter_groups,
-                                counter_group,
-                                counter,
-                            ),
-                            {},
-                        )
+                    yield sensor.DeviceCounterSensor(
+                        zha_device=device,
+                        counter_groups=counter_groups,
+                        counter_group=counter_group,
+                        counter=counter,
                     )
+
                     _LOGGER.debug(
                         "'%s' platform -> '%s' using %s",
                         Platform.SENSOR,
@@ -379,40 +445,45 @@ class DeviceProbe:
                         f"counter groups[{counter_groups}] counter group[{counter_group}] counter[{counter}]",
                     )
 
-        process_counters("counters")
-        process_counters("broadcast_counters")
-        process_counters("device_counters")
-        process_counters("group_counters")
-
 
 class EndpointProbe:
     """All discovered cluster handlers and entities of an endpoint."""
 
-    def __init__(self) -> None:
-        """Initialize instance."""
-        self._device_configs: dict[str, DeviceOverridesConfiguration] = {}
-
-    def discover_entities(self, endpoint: Endpoint) -> None:
+    def discover_entities(
+        self,
+        endpoint: Endpoint,
+        device_overrides: dict[str, DeviceOverridesConfiguration],
+    ) -> Iterator[PlatformEntity]:
         """Process an endpoint on a zigpy device."""
+
+        if endpoint.device.is_coordinator:
+            return
+
         _LOGGER.debug(
             "Discovering entities for endpoint: %s-%s",
             str(endpoint.device.ieee),
             endpoint.id,
         )
-        self.discover_by_device_type(endpoint)
-        self.discover_multi_entities(endpoint)
-        self.discover_by_cluster_id(endpoint)
-        self.discover_multi_entities(endpoint, config_diagnostic_entities=True)
-        PLATFORM_ENTITIES.clean_up()
 
-    def discover_by_device_type(self, endpoint: Endpoint) -> None:
+        yield from self.discover_by_device_type(endpoint, device_overrides)
+        yield from self.discover_multi_entities(endpoint)
+        yield from self.discover_by_cluster_id(endpoint)
+        yield from self.discover_multi_entities(
+            endpoint, config_diagnostic_entities=True
+        )
+
+    def discover_by_device_type(
+        self,
+        endpoint: Endpoint,
+        device_overrides: dict[str, DeviceOverridesConfiguration],
+    ) -> Iterator[PlatformEntity]:
         """Process an endpoint on a zigpy device."""
 
         unique_id = endpoint.unique_id
 
         platform: str | None = None
-        if unique_id in self._device_configs:
-            platform = self._device_configs.get(unique_id).type
+        if unique_id in device_overrides:
+            platform = device_overrides.get(unique_id).type
         if platform is None:
             ep_profile_id = endpoint.zigpy_endpoint.profile_id
             ep_device_type = endpoint.zigpy_endpoint.device_type
@@ -431,12 +502,48 @@ class EndpointProbe:
             )
             if platform_entity_class is None:
                 return
+
             endpoint.claim_cluster_handlers(claimed)
-            endpoint.async_new_entity(
-                platform, platform_entity_class, unique_id, claimed
+
+            yield platform_entity_class(
+                unique_id=unique_id,
+                endpoint=endpoint,
+                device=endpoint.device,
+                cluster_handlers=claimed,
             )
 
-    def discover_by_cluster_id(self, endpoint: Endpoint) -> None:
+    def probe_single_cluster(
+        self,
+        platform: Platform | None,
+        cluster_handler: ClusterHandler,
+        endpoint: Endpoint,
+    ) -> Iterator[PlatformEntity]:
+        """Probe specified cluster for specific platform."""
+        if platform is None or platform not in PLATFORMS:
+            return
+        cluster_handler_list = [cluster_handler]
+        unique_id = f"{endpoint.unique_id}-{cluster_handler.cluster.cluster_id}"
+
+        entity_class, claimed = PLATFORM_ENTITIES.get_entity(
+            platform,
+            endpoint.device.manufacturer,
+            endpoint.device.model,
+            cluster_handler_list,
+            endpoint.device.quirk_id,
+        )
+        if entity_class is None:
+            return
+
+        endpoint.claim_cluster_handlers(claimed)
+
+        yield entity_class(
+            unique_id=unique_id,
+            endpoint=endpoint,
+            device=endpoint.device,
+            cluster_handlers=claimed,
+        )
+
+    def discover_by_cluster_id(self, endpoint: Endpoint) -> Iterator[PlatformEntity]:
         """Process an endpoint on a zigpy device."""
 
         items = SINGLE_INPUT_CLUSTER_DEVICE_CLASS.items()
@@ -460,36 +567,14 @@ class EndpointProbe:
                         platform = match
                         break
 
-            self.probe_single_cluster(platform, cluster_handler, endpoint)
+            yield from self.probe_single_cluster(platform, cluster_handler, endpoint)
 
         # until we can get rid of registries
-        self.handle_on_off_output_cluster_exception(endpoint)
+        yield from self.handle_on_off_output_cluster_exception(endpoint)
 
-    @staticmethod
-    def probe_single_cluster(
-        platform: Platform | None,
-        cluster_handler: ClusterHandler,
-        endpoint: Endpoint,
-    ) -> None:
-        """Probe specified cluster for specific platform."""
-        if platform is None or platform not in PLATFORMS:
-            return
-        cluster_handler_list = [cluster_handler]
-        unique_id = f"{endpoint.unique_id}-{cluster_handler.cluster.cluster_id}"
-
-        entity_class, claimed = PLATFORM_ENTITIES.get_entity(
-            platform,
-            endpoint.device.manufacturer,
-            endpoint.device.model,
-            cluster_handler_list,
-            endpoint.device.quirk_id,
-        )
-        if entity_class is None:
-            return
-        endpoint.claim_cluster_handlers(claimed)
-        endpoint.async_new_entity(platform, entity_class, unique_id, claimed)
-
-    def handle_on_off_output_cluster_exception(self, endpoint: Endpoint) -> None:
+    def handle_on_off_output_cluster_exception(
+        self, endpoint: Endpoint
+    ) -> Iterator[PlatformEntity]:
         """Process output clusters of the endpoint."""
 
         profile_id = endpoint.zigpy_endpoint.profile_id
@@ -517,13 +602,15 @@ class EndpointProbe:
             )
 
             cluster_handler = cluster_handler_class(cluster, endpoint)
-            self.probe_single_cluster(platform, cluster_handler, endpoint)
+            cluster_handler.on_add()
 
-    @staticmethod
+            yield from self.probe_single_cluster(platform, cluster_handler, endpoint)
+
     def discover_multi_entities(
+        self,
         endpoint: Endpoint,
         config_diagnostic_entities: bool = False,
-    ) -> None:
+    ) -> Iterator[PlatformEntity]:
         """Process an endpoint on and discover multiple entities."""
 
         ep_profile_id = endpoint.zigpy_endpoint.profile_id
@@ -564,39 +651,28 @@ class EndpointProbe:
                 if platform == cmpt_by_dev_type:
                     # for well known device types,
                     # like thermostats we'll take only 1st class
-                    endpoint.async_new_entity(
-                        platform,
-                        entity_and_handler.entity_class,
-                        endpoint.unique_id,
-                        entity_and_handler.claimed_cluster_handlers,
+                    yield entity_and_handler.entity_class(
+                        unique_id=endpoint.unique_id,
+                        endpoint=endpoint,
+                        device=endpoint.device,
+                        cluster_handlers=entity_and_handler.claimed_cluster_handlers,
                     )
                     break
-                first_ch = entity_and_handler.claimed_cluster_handlers[0]
-                endpoint.async_new_entity(
-                    platform,
-                    entity_and_handler.entity_class,
-                    f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
-                    entity_and_handler.claimed_cluster_handlers,
-                )
 
-    def initialize(self, gateway: Gateway) -> None:
-        """Update device overrides config."""
-        if overrides := gateway.config.config.device_overrides:
-            self._device_configs.update(overrides)
+                first_ch = entity_and_handler.claimed_cluster_handlers[0]
+                yield entity_and_handler.entity_class(
+                    unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
+                    endpoint=endpoint,
+                    device=endpoint.device,
+                    cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                )
 
 
 class GroupProbe:
     """Determine the appropriate platform for a group."""
 
-    def __init__(self) -> None:
-        """Initialize instance."""
-        self._gateway: Gateway
-
-    def initialize(self, gateway: Gateway) -> None:
-        """Initialize the group probe."""
-        self._gateway = gateway
-
-    def discover_group_entities(self, group: Group) -> None:
+    @ignore_exceptions_during_iteration
+    def discover_group_entities(self, group: Group) -> Iterator[GroupEntity]:
         """Process a group and create any entities that are needed."""
         # only create a group entity if there are 2 or more members in a group
         if len(group.members) < 2:
@@ -608,8 +684,7 @@ class GroupProbe:
             group.group_entities.clear()
             return
 
-        assert self._gateway
-        entity_platforms = GroupProbe.determine_entity_platforms(group)
+        entity_platforms = self.determine_entity_platforms(group)
 
         if not entity_platforms:
             _LOGGER.info("No entity platforms discovered for group %s", group.name)
@@ -620,10 +695,9 @@ class GroupProbe:
             if entity_class is None:
                 continue
             _LOGGER.info("Creating entity : %s for group %s", entity_class, group.name)
-            entity_class(group)
+            yield entity_class(group)
 
-    @staticmethod
-    def determine_entity_platforms(group: Group) -> list[Platform]:
+    def determine_entity_platforms(self, group: Group) -> list[Platform]:
         """Determine the entity platforms for this group."""
         entity_domains: list[Platform] = []
         all_platform_occurrences = []

@@ -36,7 +36,11 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
-from zha.application.platforms.button import Button, WriteAttributeButton
+from zha.application.platforms.button import (
+    Button,
+    FrostLockResetButton,
+    WriteAttributeButton,
+)
 from zha.application.platforms.button.const import ButtonDeviceClass
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
@@ -136,9 +140,11 @@ async def test_frost_unlock(
     cluster = zigpy_device.endpoints[1].tuya_manufacturer
     assert cluster is not None
     entity: PlatformEntity = get_entity(
-        zha_device, platform=Platform.BUTTON, entity_type=WriteAttributeButton
+        zha_device,
+        platform=Platform.BUTTON,
+        entity_type=FrostLockResetButton,
     )
-    assert isinstance(entity, WriteAttributeButton)
+    assert isinstance(entity, FrostLockResetButton)
 
     assert entity._attr_device_class == ButtonDeviceClass.RESTART
     assert entity._attr_entity_category == EntityCategory.CONFIG
@@ -246,7 +252,9 @@ async def test_quirks_command_button(
     """Test ZHA button platform."""
     zha_device, cluster = await custom_button_device(zha_gateway)
     assert cluster is not None
-    entity: PlatformEntity = get_entity(zha_device, platform=Platform.BUTTON)
+    entity: PlatformEntity = get_entity(
+        zha_device, platform=Platform.BUTTON, entity_type=Button
+    )
 
     with patch(
         "zigpy.zcl.Cluster.request",

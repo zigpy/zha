@@ -76,8 +76,14 @@ class AlarmControlPanel(PlatformEntity):
             alarm_options.arm_requires_code
         )
         self._cluster_handler.max_invalid_tries = alarm_options.failed_tries
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_STATE_CHANGED, self._handle_event_protocol
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_STATE_CHANGED, self._handle_event_protocol
+            )
         )
 
     @functools.cached_property

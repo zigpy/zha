@@ -1103,7 +1103,11 @@ async def test_elec_measurement_sensor_type(
 
     zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    entity = get_entity(zha_dev, platform=Platform.SENSOR)
+    entity = get_entity(
+        zha_dev,
+        platform=Platform.SENSOR,
+        entity_type=sensor.ElectricalMeasurementApparentPower,
+    )
     assert entity.state["measurement_type"] == expected_type
 
 
@@ -1450,8 +1454,16 @@ async def test_state_class(
 
     zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
     assert isinstance(zha_device.device, CustomDeviceV2)
-    power_entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="power")
-    energy_entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="energy")
+    power_entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        qualifier_func=lambda e: e.info_object.unique_id.endswith("power"),
+    )
+    energy_entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        qualifier_func=lambda e: e.info_object.unique_id.endswith("energy"),
+    )
     energy_delivered_entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="energy_delivered"
     )
@@ -1518,7 +1530,13 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
 
     coordinator = zha_gateway.coordinator_zha_device
     assert coordinator.is_coordinator
-    entity = get_entity(coordinator, platform=Platform.SENSOR)
+    entity = get_entity(
+        coordinator,
+        platform=Platform.SENSOR,
+        qualifier_func=lambda e: e.info_object.unique_id.endswith(
+            "ezsp_counters_counter_1"
+        ),
+    )
 
     assert entity.state["state"] == 1
 
