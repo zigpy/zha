@@ -240,10 +240,7 @@ class Cover(PlatformEntity):
             target is not None
             and current != target
             and (not is_update or previous != current or history[0] is None)
-            and (
-                previous <= current < target
-                or target < current <= previous
-            )
+            and (previous <= current < target or target < current <= previous)
         ):
             # ZHA thinks the cover is moving
             return CoverState.OPENING if target > current else CoverState.CLOSING
