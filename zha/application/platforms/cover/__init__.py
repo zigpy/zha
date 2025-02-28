@@ -50,9 +50,6 @@ _LOGGER = logging.getLogger(__name__)
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
-# Some devices do not stop on the exact target percentage
-POSITION_TOLERANCE: int = 1
-
 # Timeout for device movement following a position attribute update
 DEFAULT_MOVEMENT_TIMEOUT: float = 5
 
@@ -237,8 +234,8 @@ class Cover(PlatformEntity):
             and current != target
             and (not is_update or previous != current or history[0] is None)
             and (
-                previous <= current < target - POSITION_TOLERANCE
-                or target + POSITION_TOLERANCE < current <= previous
+                previous <= current < target
+                or target < current <= previous
             )
         ):
             # ZHA thinks the cover is moving
