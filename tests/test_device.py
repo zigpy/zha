@@ -917,3 +917,36 @@ async def test_primary_entity_computation(
         assert primary == [
             get_entity(zha_device, primary_platform, entity_type=primary_entity_type)
         ]
+
+
+async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
+    """Test quirks v2 can prevent creating default entities."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .prevent_default_entity_creation(endpoint_id=123)
+        .prevent_default_entity_creation(cluster_id=0x4567)
+        .prevent_default_entity_creation(unique_id_suffix="_something")
+        .prevent_default_entity_creation(function=lambda entity: None)
+        .prevent_default_entity_creation(
+            function=lambda entity: entity.__class__.__name__ == "IdentifyButton"
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    with pytest.raises(KeyError):
+        zha_device.get_platform_entity(
+            Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
+        )
+
+    assert len(zha_device.platform_entities) == 8
