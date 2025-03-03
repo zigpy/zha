@@ -773,36 +773,28 @@ class Device(LogMixin, EventBase):
                 effect_variant=Identify.EffectVariant.Default,
             )
 
-    def _is_entity_disabled_by_default(self, entity: PlatformEntity) -> bool:
+    def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
         if self.quirk_metadata is None:
             return False
 
-        for disabled_meta in self.quirk_metadata.disabled_default_entities:
-            _LOGGER.debug(
-                "Checking if entity %s is disabled by %s", entity, disabled_meta
-            )
+        for meta in self.quirk_metadata.disabled_default_entities:
+            _LOGGER.debug("Checking if entity %s is removed by %s", entity, meta)
 
-            if (
-                disabled_meta.unique_id_suffix is not None
-                and not entity.unique_id.endswith(disabled_meta.unique_id_suffix)
+            if meta.unique_id_suffix is not None and not entity.unique_id.endswith(
+                meta.unique_id_suffix
             ):
                 continue
 
-            if (
-                disabled_meta.endpoint_id is not None
-                and entity.endpoint.id != disabled_meta.endpoint_id
-            ):
+            if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
                 continue
 
-            if disabled_meta.cluster_id is not None and not any(
-                cluster_handler.cluster.cluster_id == disabled_meta.cluster_id
+            if meta.cluster_id is not None and not any(
+                cluster_handler.cluster.cluster_id == meta.cluster_id
                 for cluster_handler in entity.cluster_handlers.values()
             ):
                 continue
 
-            if disabled_meta.function is not None and not disabled_meta.function(
-                entity
-            ):
+            if meta.function is not None and not meta.function(entity):
                 continue
 
             return True
@@ -825,7 +817,7 @@ class Device(LogMixin, EventBase):
             if key in self.platform_entities:
                 continue
 
-            if self._is_entity_disabled_by_default(entity):
+            if self._is_entity_removed_by_quirk(entity):
                 continue
 
             self.platform_entities[key] = entity
