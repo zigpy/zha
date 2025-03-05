@@ -424,14 +424,12 @@ class Cover(PlatformEntity):
             self._determine_state(is_tilt_update=True)
         self.maybe_emit_state_changed_event()
 
-    def async_update_state(self, state, is_lift: bool = False, is_tilt: bool = False):
+    def async_update_state(self, state):
         """Handle state update from HA operations below."""
         _LOGGER.debug("async_update_state=%s", state)
         self._state = state
-        if is_lift:
-            self._lift_state = state
-        elif is_tilt:
-            self._tilt_state = state
+        self._lift_state = None
+        self._tilt_state = None
         self.maybe_emit_state_changed_event()
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -443,7 +441,7 @@ class Cover(PlatformEntity):
             raise ZHAException(f"Failed to open cover: {res[1]}")
 
         if self.current_cover_position != POSITION_OPEN:
-            self.async_update_state(CoverState.OPENING, is_lift=True)
+            self.async_update_state(CoverState.OPENING)
         self._start_lift_transition()
 
     async def async_open_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -457,7 +455,7 @@ class Cover(PlatformEntity):
             raise ZHAException(f"Failed to open cover tilt: {res[1]}")
 
         if self.current_cover_tilt_position != POSITION_OPEN:
-            self.async_update_state(CoverState.OPENING, is_tilt=True)
+            self.async_update_state(CoverState.OPENING)
         self._start_tilt_transition()
 
     async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -469,7 +467,7 @@ class Cover(PlatformEntity):
             raise ZHAException(f"Failed to close cover: {res[1]}")
 
         if self.current_cover_position != POSITION_CLOSED:
-            self.async_update_state(CoverState.CLOSING, is_lift=True)
+            self.async_update_state(CoverState.CLOSING)
         self._start_lift_transition()
 
     async def async_close_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
@@ -483,7 +481,7 @@ class Cover(PlatformEntity):
             raise ZHAException(f"Failed to close cover tilt: {res[1]}")
 
         if self.current_cover_tilt_position != POSITION_CLOSED:
-            self.async_update_state(CoverState.CLOSING, is_tilt=True)
+            self.async_update_state(CoverState.CLOSING)
         self._start_tilt_transition()
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
@@ -504,8 +502,7 @@ class Cover(PlatformEntity):
             self.async_update_state(
                 CoverState.CLOSING
                 if target_position < self.current_cover_position
-                else CoverState.OPENING,
-                is_lift=True,
+                else CoverState.OPENING
             )
         self._start_lift_transition()
 
@@ -527,8 +524,7 @@ class Cover(PlatformEntity):
             self.async_update_state(
                 CoverState.CLOSING
                 if target_position < self.current_cover_tilt_position
-                else CoverState.OPENING,
-                is_tilt=True,
+                else CoverState.OPENING
             )
         self._start_tilt_transition()
 
