@@ -626,6 +626,14 @@ class ElectricalMeasurement(PollableSensor):
         self._pending_state_update_attributes: set[str] = set()
         self._pending_state_update_timer: asyncio.TimerHandle | None = None
 
+    async def on_remove(self) -> None:
+        """Run when entity is removed."""
+        if self._pending_state_update_timer is not None:
+            self._pending_state_update_timer.cancel()
+            self._pending_state_update_timer = None
+
+        await super().on_remove()
+
     def handle_cluster_handler_attribute_updated(
         self,
         event: ClusterAttributeUpdatedEvent,
