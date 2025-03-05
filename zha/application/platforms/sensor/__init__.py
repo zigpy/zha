@@ -606,7 +606,7 @@ class ElectricalMeasurement(PollableSensor):
 
     # The final state is computed from up to three attributes, wait for them all to come
     # in before emitting a change
-    _aggregate_attribute_reports_timeout: float = 1.0
+    _aggregate_attribute_reports_timeout: float = 4.0
 
     def __init__(
         self,
