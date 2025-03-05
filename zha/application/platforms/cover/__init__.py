@@ -108,7 +108,7 @@ class Cover(PlatformEntity):
         self._tilt_transition_timer: asyncio.TimerHandle | None = None
 
         self._state: CoverState | None = CoverState.OPEN
-        self._determine_state(refresh=True)
+        self._determine_cover_state(refresh=True)
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -189,6 +189,16 @@ class Cover(PlatformEntity):
         """
         return self._cover_cluster_handler.current_position_tilt_percentage
 
+    @property
+    def _previous_cover_position(self) -> int | None:
+        """Return the previous position of ZHA cover."""
+        return self._lift_position_history[0]
+
+    @property
+    def _previous_cover_tilt_position(self) -> int | None:
+        """Return the previous tilt position of ZHA cover."""
+        return self._tilt_position_history[0]
+
     def _determine_supported_features(self) -> CoverEntityFeature:
         """Determine the supported cover features."""
         supported_features: CoverEntityFeature = (
@@ -213,11 +223,12 @@ class Cover(PlatformEntity):
         return supported_features
 
     @staticmethod
-    def _determine_state_of_axis(
+    def _determine_state(
         current: int | None,
         target: int | None,
-        history: deque[int | None],
-        is_update: bool = False,
+        previous: int | None,
+        is_position_update: bool = False,
+        is_transition: bool = False,
     ):
         """Determine cover axis state (lift/tilt).
 
@@ -225,29 +236,39 @@ class Cover(PlatformEntity):
         When a target is defined the logic aims to mitigate split-brain scenarios
         where a HA command is interrupted by a device button press/physical obstruction.
 
-        The logic considers previous position to determine if the cover is moving.
+        Consider previous position and transition status to determine if the cover is moving.
         """
 
         if current is None:
             return None
-        previous = history[0] if history[0] is not None else current
 
-        if target is None and is_update and previous != current:
+        if previous is None:
+            previous_avaliable = False
+            previous = current
+        else:
+            previous_avaliable = True
+
+        if target is None and is_position_update and previous != current:
             target = POSITION_OPEN if current > previous else POSITION_CLOSED
 
         if (
             target is not None
             and current != target
-            and (not is_update or previous != current or history[0] is None)
+            and (
+                previous != current
+                or not is_position_update
+                or not is_transition
+                or not previous_avaliable
+            )
             and (previous <= current < target or target < current <= previous)
         ):
-            # ZHA thinks the cover is moving
+            # The cover is moving
             return CoverState.OPENING if target > current else CoverState.CLOSING
 
-        # Return the static position
+        # The cover is not moving
         return CoverState.OPEN if current > POSITION_CLOSED else CoverState.CLOSED
 
-    def _determine_state(
+    def _determine_cover_state(
         self,
         is_lift_update: bool = False,
         is_tilt_update: bool = False,
@@ -258,22 +279,24 @@ class Cover(PlatformEntity):
         This considers current state of both the lift and tilt axis.
         """
         if self._lift_state is None or is_lift_update or refresh:
-            self._lift_state = self._determine_state_of_axis(
+            self._lift_state = self._determine_state(
                 self.current_cover_position,
                 self._target_lift_position,
-                self._lift_position_history,
+                self._previous_cover_position,
                 is_lift_update,
+                self._lift_transition_timer is not None,
             )
         if self._tilt_state is None or is_tilt_update or refresh:
-            self._tilt_state = self._determine_state_of_axis(
+            self._tilt_state = self._determine_state(
                 self.current_cover_tilt_position,
                 self._target_tilt_position,
-                self._tilt_position_history,
+                self._previous_cover_tilt_position,
                 is_tilt_update,
+                self._tilt_transition_timer is not None,
             )
 
         _LOGGER.debug(
-            "_determine_state: lift=(state: %s, is_update: %s, current: %s, target: %s, history: %s), tilt=(state: %s, is_update: %s, current: %s, target: %s, history: %s)",
+            "_determine_state: lift=(state: %s, is_position_update: %s, current: %s, target: %s, history: %s), tilt=(state: %s, is_position_update: %s, current: %s, target: %s, history: %s)",
             self._lift_state,
             is_lift_update,
             self.current_cover_position,
@@ -317,6 +340,16 @@ class Cover(PlatformEntity):
 
         # Pick lift state in preference over tilt
         self._state = self._lift_state or self._tilt_state
+
+    def _set_lift_transition_target(self, target: int) -> None:
+        """Set target position for the tilt transition."""
+        self._clear_lift_transition()
+        self._target_lift_position = target
+
+    def _set_tilt_transition_target(self, target: int) -> None:
+        """Set target position for the tilt transition."""
+        self._clear_tilt_transition()
+        self._target_tilt_position = target
 
     def _start_lift_transition(self, is_position_update: bool = False) -> None:
         """Start the lift transition."""
@@ -391,7 +424,7 @@ class Cover(PlatformEntity):
 
         if not determine_state:
             return
-        self._determine_state(refresh=True)
+        self._determine_cover_state(refresh=True)
         self.maybe_emit_state_changed_event()
 
     def _clear_tilt_transition(self, determine_state: bool = False) -> None:
@@ -405,7 +438,7 @@ class Cover(PlatformEntity):
 
         if not determine_state:
             return
-        self._determine_state(refresh=True)
+        self._determine_cover_state(refresh=True)
         self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_attribute_updated(
@@ -418,10 +451,10 @@ class Cover(PlatformEntity):
         _LOGGER.debug("handle_cluster_handler_attribute_updated=%s", event)
         if event.attribute_id == WCAttrs.current_position_lift_percentage.id:
             self._lift_position_history.append(self.current_cover_position)
-            self._determine_state(is_lift_update=True)
+            self._determine_cover_state(is_lift_update=True)
         elif event.attribute_id == WCAttrs.current_position_tilt_percentage.id:
             self._tilt_position_history.append(self.current_cover_tilt_position)
-            self._determine_state(is_tilt_update=True)
+            self._determine_cover_state(is_tilt_update=True)
         self.maybe_emit_state_changed_event()
 
     def async_update_state(self, state):
@@ -434,7 +467,7 @@ class Cover(PlatformEntity):
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover."""
-        self._target_lift_position = POSITION_OPEN
+        self._set_lift_transition_target(POSITION_OPEN)
         res = await self._cover_cluster_handler.up_open()
         if res[1] is not Status.SUCCESS:
             self._clear_lift_transition()
@@ -446,7 +479,7 @@ class Cover(PlatformEntity):
 
     async def async_open_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover tilt."""
-        self._target_tilt_position = POSITION_OPEN
+        self._set_tilt_transition_target(POSITION_OPEN)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(POSITION_OPEN)
         )
@@ -460,7 +493,7 @@ class Cover(PlatformEntity):
 
     async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Close the cover."""
-        self._target_lift_position = POSITION_CLOSED
+        self._set_lift_transition_target(POSITION_CLOSED)
         res = await self._cover_cluster_handler.down_close()
         if res[1] is not Status.SUCCESS:
             self._clear_lift_transition()
@@ -472,7 +505,7 @@ class Cover(PlatformEntity):
 
     async def async_close_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Close the cover tilt."""
-        self._target_tilt_position = POSITION_CLOSED
+        self._set_tilt_transition_target(POSITION_CLOSED)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(POSITION_CLOSED)
         )
@@ -490,7 +523,7 @@ class Cover(PlatformEntity):
         target_position = kwargs[ATTR_POSITION]
         assert target_position is not None
 
-        self._target_lift_position = target_position
+        self._set_lift_transition_target(target_position)
         res = await self._cover_cluster_handler.go_to_lift_percentage(
             self._ha_position_to_zcl(target_position)
         )
@@ -512,7 +545,7 @@ class Cover(PlatformEntity):
         target_position = kwargs[ATTR_TILT_POSITION]
         assert target_position is not None
 
-        self._target_tilt_position = target_position
+        self._set_tilt_transition_target(target_position)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(target_position)
         )
@@ -533,13 +566,13 @@ class Cover(PlatformEntity):
 
         Upon receipt of this command the cover stops both lift and tilt movement.
         """
-        self._clear_lift_transition()
-        self._clear_tilt_transition()
         res = await self._cover_cluster_handler.stop()
         if res[1] is not Status.SUCCESS:
             raise ZHAException(f"Failed to stop cover: {res[1]}")
+        self._clear_lift_transition()
+        self._clear_tilt_transition()
 
-        self._determine_state(refresh=True)
+        self._determine_cover_state(refresh=True)
         self.maybe_emit_state_changed_event()
 
     async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
