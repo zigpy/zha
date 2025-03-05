@@ -679,14 +679,19 @@ class ElectricalMeasurement(PollableSensor):
                 self._emit_state_change_after_attributes_received,
             )
 
-        self._pending_state_update_attributes.discard(event.attribute_name)
-        _LOGGER.debug(
-            "Waiting for attributes to be reported before changing state: %s",
-            self._pending_state_update_attributes,
-        )
-
-        if not self._pending_state_update_attributes:
+        # If we have no attributes to wait for *or* we receive a new attribute report
+        # for an existing attribute during a timeout window, we need to emit immediately
+        if (
+            not self._pending_state_update_attributes
+            or event.attribute_name not in self._pending_state_update_attributes
+        ):
             self._emit_state_change_after_attributes_received()
+        else:
+            self._pending_state_update_attributes.discard(event.attribute_name)
+            _LOGGER.debug(
+                "Waiting for attributes to be reported before changing state: %s",
+                self._pending_state_update_attributes,
+            )
 
     def _emit_state_change_after_attributes_received(self) -> None:
         """Emit a state change after all attributes have been received."""
