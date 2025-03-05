@@ -626,6 +626,26 @@ class ElectricalMeasurement(PollableSensor):
         self._pending_state_update_attributes: set[str] = set()
         self._pending_state_update_timer: asyncio.TimerHandle | None = None
 
+    @property
+    def _all_state_update_attributes(self) -> set[str]:
+        """Return a set of attributes that are required to compute state."""
+        return {
+            attr_name
+            for attr_name in (
+                (
+                    self._attribute_name,
+                    self._divisor_attribute_name,
+                    self._multiplier_attribute_name,
+                )
+                + tuple(self._attr_extra_state_attribute_names)
+            )
+            if (
+                attr_name is not None
+                and attr_name
+                not in self._cluster_handler.cluster.unsupported_attributes
+            )
+        } - {"measurement_type"}
+
     async def on_remove(self) -> None:
         """Run when entity is removed."""
         if self._pending_state_update_timer is not None:
@@ -639,7 +659,9 @@ class ElectricalMeasurement(PollableSensor):
         event: ClusterAttributeUpdatedEvent,
     ) -> None:
         """Handle attribute updates from the cluster handler."""
-        if not (
+        state_update_attrs = self._all_state_update_attributes
+
+        if len(state_update_attrs) == 1 or not (
             event.attribute_name == self._attribute_name
             or event.attribute_name in self._attr_extra_state_attribute_names
         ):
@@ -649,14 +671,7 @@ class ElectricalMeasurement(PollableSensor):
         # We need to wait for all of the relevant attributes to be received before we
         # can emit a state change event
         if not self._pending_state_update_attributes:
-            self._pending_state_update_attributes = {
-                attr_name
-                for attr_name in (
-                    (self._attribute_name,)
-                    + tuple(self._attr_extra_state_attribute_names)
-                )
-                if attr_name not in self._cluster_handler.cluster.unsupported_attributes
-            }
+            self._pending_state_update_attributes = state_update_attrs
 
             loop = asyncio.get_running_loop()
             self._pending_state_update_timer = loop.call_later(
