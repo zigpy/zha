@@ -509,7 +509,7 @@ class BaseLight(BaseEntity, ABC):
         if self._zha_config_enable_light_transitioning_flag:
             self.async_transition_start_timer(transition_time)
         self.debug("turned off: %s", result)
-        if result[1] is not Status.SUCCESS:
+        if not result or result[1] is not Status.SUCCESS:
             return
         self._state = False
 
