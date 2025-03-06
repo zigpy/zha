@@ -238,29 +238,27 @@ class Cover(PlatformEntity):
 
         Consider previous position and transition status to determine if the cover is moving.
         """
-
         if current is None:
             return None
 
-        if previous is None:
-            previous_avaliable = False
-            previous = current
-        else:
-            previous_avaliable = True
-
-        if target is None and is_position_update and previous != current:
+        if (
+            target is None
+            and is_position_update
+            and previous is not None
+            and previous != current
+        ):
             target = POSITION_OPEN if current > previous else POSITION_CLOSED
 
         if (
             target is not None
             and current != target
             and (
-                previous != current
+                previous is None
                 or not is_position_update
                 or not is_transition
-                or not previous_avaliable
+                or previous < current < target
+                or target < current < previous
             )
-            and (previous <= current < target or target < current <= previous)
         ):
             # The cover is moving
             return CoverState.OPENING if target > current else CoverState.CLOSING
