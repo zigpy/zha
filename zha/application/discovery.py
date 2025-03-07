@@ -257,14 +257,14 @@ class DeviceProbe:
 
         assert not device.is_active_coordinator
 
-        yield from self.discover_quirks_v2_entities(device)
-
         for ep_id, endpoint in device.endpoints.items():
             if ep_id != 0:
                 yield from ENDPOINT_PROBE.discover_entities(
                     endpoint,
                     device.gateway.config.config.device_overrides,
                 )
+
+        yield from self.discover_quirks_v2_entities(device)
 
     def discover_quirks_v2_entities(self, device: Device) -> Iterator[PlatformEntity]:
         """Discover entities for a ZHA device exposed by quirks v2."""
