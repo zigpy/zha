@@ -132,7 +132,7 @@ class Cover(PlatformEntity):
             self._attr_supported_features |= CoverEntityFeature.OPEN_TILT
             self._attr_supported_features |= CoverEntityFeature.CLOSE_TILT
             self._attr_supported_features |= CoverEntityFeature.STOP_TILT
-    
+
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
