@@ -89,9 +89,7 @@ class Cover(PlatformEntity):
                     self._cover_cluster_handler.window_covering_type
                 )
             )
-        self._attr_supported_features: CoverEntityFeature = (
-            self._determine_supported_features()
-        )
+        self._attr_supported_features: CoverEntityFeature = CoverEntityFeature(0)
 
         self._target_lift_position: int | None = None
         self._target_tilt_position: int | None = None
@@ -108,8 +106,33 @@ class Cover(PlatformEntity):
         self._tilt_transition_timer: asyncio.TimerHandle | None = None
 
         self._state: CoverState | None = CoverState.OPEN
+        self.recompute_capabilities()
         self._determine_cover_state(refresh=True)
 
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
+        super().recompute_capabilities()
+
+        self._attr_supported_features = (
+            CoverEntityFeature.OPEN
+            | CoverEntityFeature.CLOSE
+            | CoverEntityFeature.STOP
+            | CoverEntityFeature.SET_POSITION
+        )
+        if (
+            self._cover_cluster_handler.window_covering_type
+            and self._cover_cluster_handler.window_covering_type
+            in (
+                WCT.Shutter,
+                WCT.Tilt_blind_tilt_only,
+                WCT.Tilt_blind_tilt_and_lift,
+            )
+        ):
+            self._attr_supported_features |= CoverEntityFeature.SET_TILT_POSITION
+            self._attr_supported_features |= CoverEntityFeature.OPEN_TILT
+            self._attr_supported_features |= CoverEntityFeature.CLOSE_TILT
+            self._attr_supported_features |= CoverEntityFeature.STOP_TILT
+    
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
@@ -198,29 +221,6 @@ class Cover(PlatformEntity):
     def _previous_cover_tilt_position(self) -> int | None:
         """Return the previous tilt position of ZHA cover."""
         return self._tilt_position_history[0]
-
-    def _determine_supported_features(self) -> CoverEntityFeature:
-        """Determine the supported cover features."""
-        supported_features: CoverEntityFeature = (
-            CoverEntityFeature.OPEN
-            | CoverEntityFeature.CLOSE
-            | CoverEntityFeature.STOP
-            | CoverEntityFeature.SET_POSITION
-        )
-        if (
-            self._cover_cluster_handler.window_covering_type
-            and self._cover_cluster_handler.window_covering_type
-            in (
-                WCT.Shutter,
-                WCT.Tilt_blind_tilt_only,
-                WCT.Tilt_blind_tilt_and_lift,
-            )
-        ):
-            supported_features |= CoverEntityFeature.SET_TILT_POSITION
-            supported_features |= CoverEntityFeature.OPEN_TILT
-            supported_features |= CoverEntityFeature.CLOSE_TILT
-            supported_features |= CoverEntityFeature.STOP_TILT
-        return supported_features
 
     @staticmethod
     def _determine_state(
@@ -632,6 +632,7 @@ class Shade(PlatformEntity):
         self._position: int | None = self._zcl_level_to_ha_position(
             self._level_cluster_handler.current_level
         )
+        self.recompute_capabilities()
 
     def on_add(self) -> None:
         """Run when entity is added."""
