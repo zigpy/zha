@@ -154,7 +154,7 @@ class Cover(PlatformEntity):
         self._state = state
         # Target positions have been removed
 
-    @functools.cached_property
+    @property
     def supported_features(self) -> CoverEntityFeature:
         """Return supported features."""
         return self._attr_supported_features
