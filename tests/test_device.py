@@ -950,3 +950,27 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
         )
 
     assert len(zha_device.platform_entities) == 8
+
+
+async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
+    """Test that new joins go through binding and attribute reporting."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/espressif-zigbeecarbondioxidesensor.json",
+    )
+
+    co2 = zigpy_dev.endpoints[10].carbon_dioxide_concentration
+
+    with (
+        patch.object(co2, "bind", wraps=co2.bind) as mock_bind,
+        patch.object(
+            co2, "configure_reporting_multiple", wraps=co2.configure_reporting_multiple
+        ) as mock_reporting_config,
+    ):
+        await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    assert mock_bind.mock_calls == [call()]
+    assert mock_reporting_config.mock_calls == [
+        call({"measured_value": (30, 900, 1e-6)})
+    ]
