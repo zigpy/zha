@@ -749,6 +749,9 @@ class Device(LogMixin, EventBase):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 
+        # Try to add entities to claim the cluster handlers
+        self._maybe_add_new_entities()
+
         await asyncio.gather(
             *(endpoint.async_configure() for endpoint in self._endpoints.values())
         )
