@@ -41,6 +41,7 @@ from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONCENTRATION_PARTS_PER_BILLION,
     CONCENTRATION_PARTS_PER_MILLION,
+    ELECTRICAL_CONDUCTIVITY_DECISIEMENS_PER_METER,
     LIGHT_LUX,
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
@@ -65,6 +66,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_COVER,
     CLUSTER_HANDLER_DEVICE_TEMPERATURE,
     CLUSTER_HANDLER_DIAGNOSTIC,
+    CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY,
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     CLUSTER_HANDLER_FLOW,
     CLUSTER_HANDLER_HUMIDITY,
@@ -1947,3 +1949,14 @@ class DanfossMotorStepCounter(Sensor):
     _attribute_name = "motor_step_counter"
     _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY)
+class ElectricalConductivity(Sensor):
+    """Electrical Conductivity sensor."""
+
+    _attribute_name = "measured_value"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.CONDUCTIVITY
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_translation_key: str = "electrical_conductivity"
+    _attr_native_unit_of_measurement = ELECTRICAL_CONDUCTIVITY_DECISIEMENS_PER_METER

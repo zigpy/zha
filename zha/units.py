@@ -157,3 +157,6 @@ LIGHT_LUX: Final = "lx"
 
 # Percentage units
 PERCENTAGE: Final[str] = "%"
+
+# Electrical conductivity units
+ELECTRICAL_CONDUCTIVITY_DECISIEMENS_PER_METER: Final[str] = "dS/m"
