@@ -140,6 +140,14 @@ class UnitOfEnergy(StrEnum):
     WATT_HOUR = "Wh"
 
 
+class UnitOfConductivity(StrEnum):
+    """Conductivity units."""
+
+    SIEMENS_PER_CM = "S/cm"
+    MICROSIEMENS_PER_CM = "µS/cm"
+    MILLISIEMENS_PER_CM = "mS/cm"
+
+
 # Concentration units
 CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "µg/m³"
 CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER: Final = "mg/m³"
@@ -157,6 +165,3 @@ LIGHT_LUX: Final = "lx"
 
 # Percentage units
 PERCENTAGE: Final[str] = "%"
-
-# Electrical conductivity units
-ELECTRICAL_CONDUCTIVITY_DECISIEMENS_PER_METER: Final[str] = "dS/m"
