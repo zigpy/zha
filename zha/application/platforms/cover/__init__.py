@@ -206,7 +206,7 @@ class Cover(PlatformEntity):
         Keep in mind the values have already been flipped to match HA
         in the WindowCovering cluster handler.
         """
-        if not self._attr_supported_features & CoverEntityFeature.OPEN:
+        if not self.supported_features & CoverEntityFeature.OPEN:
             return None
         return self._cover_cluster_handler.current_position_lift_percentage
 
@@ -219,7 +219,7 @@ class Cover(PlatformEntity):
         Keep in mind the values have already been flipped to match HA
         in the WindowCovering cluster handler.
         """
-        if not self._attr_supported_features & CoverEntityFeature.OPEN_TILT:
+        if not self.supported_features & CoverEntityFeature.OPEN_TILT:
             return None
         return self._cover_cluster_handler.current_position_tilt_percentage
 
