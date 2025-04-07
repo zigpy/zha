@@ -89,7 +89,7 @@ class Cover(PlatformEntity):
                     self._cover_cluster_handler.window_covering_type
                 )
             )
-        self._attr_supported_features: CoverEntityFeature = CoverEntityFeature(0)
+        self._supported_features: CoverEntityFeature = CoverEntityFeature(0)
 
         self._target_lift_position: int | None = None
         self._target_tilt_position: int | None = None
@@ -112,20 +112,19 @@ class Cover(PlatformEntity):
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags based on the window covering type."""
         super().recompute_capabilities()
+        self._supported_features = CoverEntityFeature(0)
 
         # Enable lift features if the window covering type is not tilt only
         if self._cover_cluster_handler.window_covering_type not in (
             WCT.Shutter,
             WCT.Tilt_blind_tilt_only,
         ):
-            self._attr_supported_features = (
+            self._supported_features |= (
                 CoverEntityFeature.OPEN
                 | CoverEntityFeature.CLOSE
                 | CoverEntityFeature.STOP
                 | CoverEntityFeature.SET_POSITION
             )
-        else:
-            self._attr_supported_features = CoverEntityFeature(0)
 
         # Enable tilt features if the window covering type supports tilt
         if self._cover_cluster_handler.window_covering_type in (
@@ -133,7 +132,7 @@ class Cover(PlatformEntity):
             WCT.Tilt_blind_tilt_only,
             WCT.Tilt_blind_tilt_and_lift,
         ):
-            self._attr_supported_features |= (
+            self._supported_features |= (
                 CoverEntityFeature.OPEN_TILT
                 | CoverEntityFeature.CLOSE_TILT
                 | CoverEntityFeature.STOP_TILT
@@ -164,7 +163,7 @@ class Cover(PlatformEntity):
     @property
     def supported_features(self) -> CoverEntityFeature:
         """Return supported features."""
-        return self._attr_supported_features
+        return self._supported_features
 
     @property
     def state(self) -> dict[str, Any]:
@@ -615,7 +614,7 @@ class Shade(PlatformEntity):
 
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
-    _attr_supported_features: CoverEntityFeature = (
+    _supported_features: CoverEntityFeature = (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
         | CoverEntityFeature.STOP
@@ -680,7 +679,7 @@ class Shade(PlatformEntity):
     @functools.cached_property
     def supported_features(self) -> CoverEntityFeature:
         """Return supported features."""
-        return self._attr_supported_features
+        return self._supported_features
 
     @property
     def current_cover_position(self) -> int | None:
