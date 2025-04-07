@@ -110,28 +110,35 @@ class Cover(PlatformEntity):
         self._determine_cover_state(refresh=True)
 
     def recompute_capabilities(self) -> None:
-        """Recompute capabilities and feature flags."""
+        """Recompute capabilities and feature flags based on the window covering type."""
         super().recompute_capabilities()
 
-        self._attr_supported_features = (
-            CoverEntityFeature.OPEN
-            | CoverEntityFeature.CLOSE
-            | CoverEntityFeature.STOP
-            | CoverEntityFeature.SET_POSITION
-        )
-        if (
-            self._cover_cluster_handler.window_covering_type
-            and self._cover_cluster_handler.window_covering_type
-            in (
-                WCT.Shutter,
-                WCT.Tilt_blind_tilt_only,
-                WCT.Tilt_blind_tilt_and_lift,
-            )
+        # Enable lift features if the window covering type is not tilt only
+        if self._cover_cluster_handler.window_covering_type not in (
+            WCT.Shutter,
+            WCT.Tilt_blind_tilt_only,
         ):
-            self._attr_supported_features |= CoverEntityFeature.SET_TILT_POSITION
-            self._attr_supported_features |= CoverEntityFeature.OPEN_TILT
-            self._attr_supported_features |= CoverEntityFeature.CLOSE_TILT
-            self._attr_supported_features |= CoverEntityFeature.STOP_TILT
+            self._attr_supported_features = (
+                CoverEntityFeature.OPEN
+                | CoverEntityFeature.CLOSE
+                | CoverEntityFeature.STOP
+                | CoverEntityFeature.SET_POSITION
+            )
+        else:
+            self._attr_supported_features = CoverEntityFeature(0)
+
+        # Enable tilt features if the window covering type supports tilt
+        if self._cover_cluster_handler.window_covering_type in (
+            WCT.Shutter,
+            WCT.Tilt_blind_tilt_only,
+            WCT.Tilt_blind_tilt_and_lift,
+        ):
+            self._attr_supported_features |= (
+                CoverEntityFeature.OPEN_TILT
+                | CoverEntityFeature.CLOSE_TILT
+                | CoverEntityFeature.STOP_TILT
+                | CoverEntityFeature.SET_TILT_POSITION
+            )
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -199,6 +206,8 @@ class Cover(PlatformEntity):
         Keep in mind the values have already been flipped to match HA
         in the WindowCovering cluster handler.
         """
+        if not self._attr_supported_features & CoverEntityFeature.OPEN:
+            return None
         return self._cover_cluster_handler.current_position_lift_percentage
 
     @property
@@ -210,6 +219,8 @@ class Cover(PlatformEntity):
         Keep in mind the values have already been flipped to match HA
         in the WindowCovering cluster handler.
         """
+        if not self._attr_supported_features & CoverEntityFeature.OPEN_TILT:
+            return None
         return self._cover_cluster_handler.current_position_tilt_percentage
 
     @property
