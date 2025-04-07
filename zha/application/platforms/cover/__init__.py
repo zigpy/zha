@@ -90,6 +90,7 @@ class Cover(PlatformEntity):
                 )
             )
         self._supported_features: CoverEntityFeature = CoverEntityFeature(0)
+        self.recompute_capabilities()
 
         self._target_lift_position: int | None = None
         self._target_tilt_position: int | None = None
@@ -106,7 +107,6 @@ class Cover(PlatformEntity):
         self._tilt_transition_timer: asyncio.TimerHandle | None = None
 
         self._state: CoverState | None = CoverState.OPEN
-        self.recompute_capabilities()
         self._determine_cover_state(refresh=True)
 
     def recompute_capabilities(self) -> None:
