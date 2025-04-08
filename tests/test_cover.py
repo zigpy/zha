@@ -577,7 +577,8 @@ async def test_cover(
 
         # wait the remainder of the dynamic timeout and check if the movement timed out: (50% * 300 seconds) - default
         await asyncio.sleep(
-            (50 * 0.01 * Cover.LIFT_MOVEMENT_TIMEOUT_RANGE) - Cover.DEFAULT_MOVEMENT_TIMEOUT
+            (50 * 0.01 * Cover.LIFT_MOVEMENT_TIMEOUT_RANGE)
+            - Cover.DEFAULT_MOVEMENT_TIMEOUT
         )
         assert entity.state[ATTR_CURRENT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN
@@ -606,7 +607,8 @@ async def test_cover(
 
         # wait the remainder of the dynamic timeout and check if the movement timed out: (50% * 30 seconds) - default
         await asyncio.sleep(
-            (50 * 0.01 * Cover.TILT_MOVEMENT_TIMEOUT_RANGE) - Cover.DEFAULT_MOVEMENT_TIMEOUT
+            (50 * 0.01 * Cover.TILT_MOVEMENT_TIMEOUT_RANGE)
+            - Cover.DEFAULT_MOVEMENT_TIMEOUT
         )
         assert entity.state[ATTR_CURRENT_TILT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN
