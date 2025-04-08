@@ -26,6 +26,7 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.const import ATTR_COMMAND
 from zha.application.gateway import Gateway
+from zha.application.platforms.cover import Cover
 from zha.application.platforms.cover.const import (
     ATTR_CURRENT_POSITION,
     ATTR_CURRENT_TILT_POSITION,
@@ -211,13 +212,6 @@ async def test_cover(
     zha_gateway: Gateway,
 ) -> None:
     """Test zha cover platform."""
-
-    # Timeout for device movement following a position attribute update
-    DEFAULT_MOVEMENT_TIMEOUT: float = 5
-
-    # Upper limit for dynamic timeout
-    LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
-    TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
 
     zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     cluster = zigpy_cover_device.endpoints.get(1).window_covering
@@ -431,7 +425,7 @@ async def test_cover(
         assert entity.state["state"] == CoverState.OPEN
 
         # wait for transition timeout to clear the target
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPEN
 
     # test set tilt position command, starting at 100 % / 0 ZCL (open) from previous tilt test
@@ -472,7 +466,7 @@ async def test_cover(
         assert entity.state["state"] == CoverState.OPEN
 
         # wait for transition timeout to clear the target
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPEN
 
     # test interrupted movement (e.g. device button press), starting from 47 %
@@ -498,7 +492,7 @@ async def test_cover(
         assert entity.state["state"] == CoverState.CLOSING
 
         # wait the timer duration
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPEN
 
     # test interrupted tilt movement (e.g. device button press), starting from 47 %
@@ -526,7 +520,7 @@ async def test_cover(
         assert entity.state["state"] == CoverState.CLOSING
 
         # wait the timer duration
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPEN
 
     # test device instigated movement (e.g. device button press), starting from 30 %
@@ -542,7 +536,7 @@ async def test_cover(
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the default timer duration
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPEN
 
     # test device instigated tilt movement (e.g. device button press), starting from 30 %
@@ -558,7 +552,7 @@ async def test_cover(
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the default timer duration
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPEN
 
     # test dynamic movement timeout, starting from 40 % and moving to 90 %
@@ -578,12 +572,12 @@ async def test_cover(
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the default timer duration and verify status is still opening
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the remainder of the dynamic timeout and check if the movement timed out: (50% * 300 seconds) - default
         await asyncio.sleep(
-            (50 * 0.01 * LIFT_MOVEMENT_TIMEOUT_RANGE) - DEFAULT_MOVEMENT_TIMEOUT
+            (50 * 0.01 * Cover.LIFT_MOVEMENT_TIMEOUT_RANGE) - Cover.DEFAULT_MOVEMENT_TIMEOUT
         )
         assert entity.state[ATTR_CURRENT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN
@@ -607,12 +601,12 @@ async def test_cover(
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the default timer duration and verify status is still opening
-        await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
+        await asyncio.sleep(Cover.DEFAULT_MOVEMENT_TIMEOUT)
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the remainder of the dynamic timeout and check if the movement timed out: (50% * 30 seconds) - default
         await asyncio.sleep(
-            (50 * 0.01 * TILT_MOVEMENT_TIMEOUT_RANGE) - DEFAULT_MOVEMENT_TIMEOUT
+            (50 * 0.01 * Cover.TILT_MOVEMENT_TIMEOUT_RANGE) - Cover.DEFAULT_MOVEMENT_TIMEOUT
         )
         assert entity.state[ATTR_CURRENT_TILT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN

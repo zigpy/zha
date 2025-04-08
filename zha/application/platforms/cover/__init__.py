@@ -50,19 +50,16 @@ _LOGGER = logging.getLogger(__name__)
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
-# Timeout for device transition state following a position attribute update
-DEFAULT_MOVEMENT_TIMEOUT: float = 5
-
-# Upper limit for dynamic timeout
-LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
-TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
-
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
 class Cover(PlatformEntity):
     """Representation of a ZHA cover."""
 
     PLATFORM = Platform.COVER
+
+    DEFAULT_MOVEMENT_TIMEOUT: float = 5
+    LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
+    TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
 
     _attr_translation_key: str = "cover"
     _attr_primary_weight = 10
@@ -373,15 +370,15 @@ class Cover(PlatformEntity):
             or self.current_cover_position is None
             or self._target_lift_position == self.current_cover_position
         ):
-            duration = DEFAULT_MOVEMENT_TIMEOUT
+            duration = self.DEFAULT_MOVEMENT_TIMEOUT
         else:
             duration = (
                 abs(self._target_lift_position - self.current_cover_position)
                 * 0.01
-                * LIFT_MOVEMENT_TIMEOUT_RANGE
+                * self.LIFT_MOVEMENT_TIMEOUT_RANGE
             )
         if is_position_update:
-            duration = min(DEFAULT_MOVEMENT_TIMEOUT, duration)
+            duration = min(self.DEFAULT_MOVEMENT_TIMEOUT, duration)
         assert duration > 0
 
         if not transition_update:
@@ -404,15 +401,15 @@ class Cover(PlatformEntity):
             or self.current_cover_tilt_position is None
             or self._target_tilt_position == self.current_cover_tilt_position
         ):
-            duration = DEFAULT_MOVEMENT_TIMEOUT
+            duration = self.DEFAULT_MOVEMENT_TIMEOUT
         else:
             duration = (
                 abs(self._target_tilt_position - self.current_cover_tilt_position)
                 * 0.01
-                * TILT_MOVEMENT_TIMEOUT_RANGE
+                * self.TILT_MOVEMENT_TIMEOUT_RANGE
             )
         if is_position_update:
-            duration = min(DEFAULT_MOVEMENT_TIMEOUT, duration)
+            duration = min(self.DEFAULT_MOVEMENT_TIMEOUT, duration)
         assert duration > 0
 
         if not transition_update:
