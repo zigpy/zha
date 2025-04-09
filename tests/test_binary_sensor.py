@@ -223,6 +223,7 @@ async def test_quirks_binary_sensor_attr_converter(zha_gateway: Gateway) -> None
                 SIG_EP_INPUT: [general.Basic.cluster_id, general.OnOff.cluster_id],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
             }
         },
         manufacturer="manufacturer",
