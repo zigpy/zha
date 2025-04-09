@@ -17,6 +17,7 @@ import zigpy.config
 import zigpy.device
 import zigpy.group
 import zigpy.profiles
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 import zigpy.types
 from zigpy.zcl.clusters.general import Basic, Groups
 from zigpy.zcl.foundation import Status
@@ -237,6 +238,7 @@ async def zigpy_app_controller_fixture():
     ep = dev.add_endpoint(1)
     ep.add_input_cluster(Basic.cluster_id)
     ep.add_input_cluster(Groups.cluster_id)
+    ep.profile_id = ZHA_PROFILE_ID
 
     with patch("zigpy.device.Device.request", return_value=[Status.SUCCESS]):
         yield app
