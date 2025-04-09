@@ -163,7 +163,7 @@ class Cover(BaseCover):
         self._lift_transition_timer: asyncio.TimerHandle | None = None
         self._tilt_transition_timer: asyncio.TimerHandle | None = None
 
-        self._state: CoverState | None = CoverState.OPEN
+        self._state: CoverState | None = None
         self._determine_cover_state(refresh=True)
 
     def recompute_capabilities(self) -> None:
@@ -223,7 +223,12 @@ class Cover(BaseCover):
             return
         if state == CoverState.CLOSING and self.is_closed:
             return
-        if state == CoverState.OPENING and self._is_completely_open:
+        if (
+            state == CoverState.OPENING
+            and self._state == CoverState.OPEN
+            and self.current_cover_position in (100, None)
+            and self.current_cover_tilt_position in (100, None)
+        ):
             return
 
         self._state = state
@@ -303,17 +308,6 @@ class Cover(BaseCover):
     def _previous_cover_tilt_position(self) -> int | None:
         """Return the previous tilt position of ZHA cover."""
         return self._tilt_position_history[0]
-
-    @property
-    def _is_completely_open(self) -> bool | None:
-        """Return True if the cover is completely open."""
-        if not self._state:
-            return None
-        return (
-            self._state == CoverState.OPEN
-            and self.current_cover_position in (100, None)
-            and self.current_cover_tilt_position in (100, None)
-        )
 
     @staticmethod
     def _determine_state(
