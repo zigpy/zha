@@ -17,6 +17,7 @@ from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
+from zigpy.zcl import foundation
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
@@ -297,10 +298,25 @@ class Sensor(PlatformEntity):
         ):
             self.maybe_emit_state_changed_event()
 
+    def _is_non_value(self, value: int) -> bool:
+        # Ignore "non-value" values
+        try:
+            attr_def = self._cluster_handler.cluster.find_attribute(
+                self._attribute_name
+            )
+        except ValueError:
+            return False
+
+        data_type = foundation.DataType.from_type_id(attr_def.zcl_type)
+        return value == data_type.non_value
+
     def formatter(
         self, value: int | enum.IntEnum
     ) -> datetime | int | float | str | None:
         """Numeric pass-through formatter."""
+        if self._is_non_value(value):
+            return None
+
         if self._decimals > 0:
             return round(
                 float(value * self._multiplier) / self._divisor, self._decimals
@@ -885,10 +901,10 @@ class Illuminance(Sensor):
 
     def formatter(self, value: int) -> int | None:
         """Convert illumination data."""
+        if self._is_non_value(value):
+            return None
         if value == 0:
             return 0
-        if value == 0xFFFF:
-            return None
         return round(pow(10, ((value - 1) / 10000)))
 
 
@@ -1243,12 +1259,6 @@ class Flow(Sensor):
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
     _attr_primary_weight = 1
-
-    def formatter(self, value: int) -> datetime | int | float | str | None:
-        """Handle unknown value state."""
-        if value == 0xFFFF:
-            return None
-        return super().formatter(value)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_TEMPERATURE)
