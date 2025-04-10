@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
@@ -61,7 +61,7 @@ from zha.application.const import (
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
-from zha.application.platforms import BaseEntity, BaseEntityInfo, PlatformEntity
+from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -235,6 +235,7 @@ class Device(LogMixin, EventBase):
         self._on_network: bool = True
 
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
+        self._pending_entities: list[PlatformEntity] = []
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
 
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
@@ -750,7 +751,7 @@ class Device(LogMixin, EventBase):
             await self._zigpy_device.apply_custom_configuration()
 
         # Try to add entities to claim the cluster handlers
-        self._maybe_add_new_entities()
+        self._discover_new_entities()
 
         await asyncio.gather(
             *(endpoint.async_configure() for endpoint in self._endpoints.values())
@@ -804,7 +805,7 @@ class Device(LogMixin, EventBase):
 
         return False
 
-    def _maybe_add_new_entities(self) -> Sequence[BaseEntity]:
+    def _discover_new_entities(self) -> None:
         if self.is_active_coordinator:
             new_entities = discovery.DEVICE_PROBE.discover_coordinator_device_entities(
                 self
@@ -812,45 +813,19 @@ class Device(LogMixin, EventBase):
         else:
             new_entities = discovery.DEVICE_PROBE.discover_device_entities(self)
 
-        added_entities = []
-
         # Discover all applicable entities
         for entity in new_entities:
-            key = (entity.PLATFORM, entity.unique_id)
-            if key in self.platform_entities:
-                continue
-
             if self._is_entity_removed_by_quirk(entity):
                 continue
 
-            self.platform_entities[key] = entity
             entity.on_add()
-            added_entities.append(entity)
-
-        return added_entities
-
-    async def _maybe_remove_unsupported_entities(self) -> Sequence[BaseEntity]:
-        removed_entities = []
-
-        # Finally, remove inapplicable entities. We iterate backwards to give entities
-        # that have uniqueness constraints (i.e. LQI, RSSI, and Identify) to always pick
-        # the first-created entity, not the last.
-        for key, entity in reversed(list(self.platform_entities.items())):
-            entity.recompute_capabilities()
-
-            if not entity.is_supported():
-                del self.platform_entities[key]
-                await entity.on_remove()
-
-                removed_entities.append(entity)
-
-        return removed_entities
+            self._pending_entities.append(entity)
 
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize cluster handlers."""
         self.debug("started initialization")
 
-        self._maybe_add_new_entities()
+        self._discover_new_entities()
 
         await self._zdo_handler.async_initialize(from_cache)
         self._zdo_handler.debug("'async_initialize' stage succeeded")
@@ -865,8 +840,28 @@ class Device(LogMixin, EventBase):
             except Exception:  # pylint: disable=broad-exception-caught
                 self.debug("Failed to initialize endpoint", exc_info=True)
 
-        # Finally, remove inapplicable entities
-        await self._maybe_remove_unsupported_entities()
+        # Compute the final entities
+        entities: dict[tuple[Platform, str], PlatformEntity] = {}
+
+        for entity in self._pending_entities:
+            entity.recompute_capabilities()
+
+            # Ignore unsupported entities
+            if not entity.is_supported() or not entity.is_supported_in_list(
+                entities.values()
+            ):
+                await entity.on_remove()
+                continue
+
+            key = (entity.PLATFORM, entity.unique_id)
+
+            if key in entities:
+                _LOGGER.debug("Duplicate entity %s, skipping %s", key, entity)
+                continue
+
+            entities[key] = entity
+
+        self._platform_entities = entities
 
         # At this point we can compute a primary entity
         self._compute_primary_entity()
@@ -884,6 +879,9 @@ class Device(LogMixin, EventBase):
 
         for platform_entity in self._platform_entities.values():
             await platform_entity.on_remove()
+
+        for entity in self._pending_entities:
+            await entity.on_remove()
 
     def async_get_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get all clusters for this device."""

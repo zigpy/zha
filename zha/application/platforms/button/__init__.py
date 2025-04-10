@@ -11,7 +11,12 @@ from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetada
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
-from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
+from zha.application.platforms import (
+    BaseEntity,
+    BaseEntityInfo,
+    EntityCategory,
+    PlatformEntity,
+)
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
@@ -117,16 +122,10 @@ class IdentifyButton(Button):
     _kwargs = {}
     _args = [DEFAULT_DURATION]
 
-    def _is_supported(self) -> bool:
+    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+        """Check if this button is supported given the list of entities."""
         cls = type(self)
-        if any(
-            type(entity) is cls
-            for entity in self.device.platform_entities.values()
-            if entity is not self
-        ):
-            return False
-
-        return super()._is_supported()
+        return not any(type(entity) is cls for entity in entities)
 
 
 class WriteAttributeButton(PlatformEntity):

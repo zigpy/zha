@@ -1558,15 +1558,14 @@ class RSSISensor(Sensor):
         )
 
     def _is_supported(self) -> bool:
-        cls = type(self)
-        if any(
-            type(entity) is cls
-            for entity in self.device.platform_entities.values()
-            if entity is not self
-        ):
-            return False
+        # This entity is not actually tied to an endpoint or cluster and will always be
+        # supported
+        return True
 
-        return PlatformEntity._is_supported(self)
+    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+        """Check if the sensor is supported given the list of entities."""
+        cls = type(self)
+        return not any(type(entity) is cls for entity in entities)
 
     @property
     def state(self) -> dict:

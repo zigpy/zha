@@ -151,6 +151,10 @@ class BaseEntity(LogMixin, EventBase):
         """Return if the entity is supported for the device, internal."""
         return True
 
+    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+        """Return if the entity is supported given all other entities."""
+        return True
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
         pass
