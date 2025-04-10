@@ -140,6 +140,27 @@ class UnitOfEnergy(StrEnum):
     WATT_HOUR = "Wh"
 
 
+class UnitOfConductivity(StrEnum):
+    """Conductivity units."""
+
+    SIEMENS_PER_CM = "S/cm"
+    MICROSIEMENS_PER_CM = "µS/cm"
+    MILLISIEMENS_PER_CM = "mS/cm"
+
+
+class UnitOfSpeed(StrEnum):
+    """Speed units."""
+
+    BEAUFORT = "Beaufort"
+    FEET_PER_SECOND = "ft/s"
+    INCHES_PER_SECOND = "in/s"
+    METERS_PER_SECOND = "m/s"
+    KILOMETERS_PER_HOUR = "km/h"
+    KNOTS = "kn"
+    MILES_PER_HOUR = "mph"
+    MILLIMETERS_PER_SECOND = "mm/s"
+
+
 # Concentration units
 CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "µg/m³"
 CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER: Final = "mg/m³"

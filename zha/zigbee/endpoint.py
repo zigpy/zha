@@ -8,7 +8,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, TypeVar
 
-from zha.application import Platform, const, discovery
+from zha.application import const
 from zha.async_ import gather_with_limited_concurrency
 from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.cluster_handlers.const import (
@@ -49,6 +49,18 @@ class Endpoint:
         self._claimed_cluster_handlers: dict[str, ClusterHandler] = {}
         self._client_cluster_handlers: dict[str, ClientClusterHandler] = {}
         self._unique_id: str = f"{device.unique_id}-{zigpy_endpoint.endpoint_id}"
+
+    def on_remove(self) -> None:
+        """Run when endpoint is removed."""
+        for handler in self.all_cluster_handlers.values():
+            handler.on_remove()
+
+        self.all_cluster_handlers.clear()
+
+        for handler in self.client_cluster_handlers.values():
+            handler.on_remove()
+
+        self.client_cluster_handlers.clear()
 
     @functools.cached_property
     def device(self) -> Device:
@@ -114,8 +126,7 @@ class Endpoint:
         endpoint = cls(zigpy_endpoint, device)
         endpoint.add_all_cluster_handlers()
         endpoint.add_client_cluster_handlers()
-        if not device.is_coordinator:
-            discovery.ENDPOINT_PROBE.discover_entities(endpoint)
+
         return endpoint
 
     def add_all_cluster_handlers(self) -> None:
@@ -161,7 +172,9 @@ class Endpoint:
                 self._device.identify_ch = cluster_handler
             elif cluster_handler.name == CLUSTER_HANDLER_BASIC:
                 self._device.basic_ch = cluster_handler
+
             self._all_cluster_handlers[cluster_handler.id] = cluster_handler
+            cluster_handler.on_add()
 
     def add_client_cluster_handlers(self) -> None:
         """Create client cluster handlers for all output clusters if in the registry."""
@@ -173,6 +186,7 @@ class Endpoint:
             if cluster is not None:
                 cluster_handler = cluster_handler_class(cluster, self)
                 self.client_cluster_handlers[cluster_handler.id] = cluster_handler
+                cluster_handler.on_add()
 
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize claimed cluster handlers."""
@@ -209,30 +223,6 @@ class Endpoint:
                 )
             else:
                 cluster_handler.debug("'%s' stage succeeded", func_name)
-
-    def async_new_entity(
-        self,
-        platform: Platform,
-        entity_class: CALLABLE_T,
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        **kwargs: Any,
-    ) -> None:
-        """Create a new entity."""
-        from zha.zigbee.device import (  # pylint: disable=import-outside-toplevel
-            DeviceStatus,
-        )
-
-        if self.device.status == DeviceStatus.INITIALIZED:
-            return
-
-        self.device.gateway.config.platforms[platform].append(
-            (
-                entity_class,
-                (unique_id, cluster_handlers, self, self.device),
-                kwargs or {},
-            )
-        )
 
     def emit_zha_event(self, event_data: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""

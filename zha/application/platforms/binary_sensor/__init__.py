@@ -75,9 +75,15 @@ class BinarySensor(PlatformEntity):
         self._cluster_handler = cluster_handlers[0]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._state: bool = self.is_on
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
@@ -161,6 +167,7 @@ class Occupancy(BinarySensor):
 
     _attribute_name = "occupancy"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
+    _attr_primary_weight = 2
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_HUE_OCCUPANCY)
@@ -168,6 +175,7 @@ class HueOccupancy(Occupancy):
     """ZHA Hue occupancy."""
 
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
+    _attr_primary_weight = 3
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
@@ -176,6 +184,7 @@ class Opening(BinarySensor):
 
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -209,6 +218,7 @@ class IASZone(BinarySensor):
     """ZHA IAS BinarySensor."""
 
     _attribute_name = "zone_status"
+    _attr_primary_weight = 3
 
     def __init__(
         self,
@@ -253,6 +263,7 @@ class SinopeLeakStatus(BinarySensor):
 
     _attribute_name = "leak_status"
     _attr_device_class = BinarySensorDeviceClass.MOISTURE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(

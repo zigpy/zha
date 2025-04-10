@@ -197,7 +197,7 @@ async def test_gateway_starts_entity_exception(
             return_value=zigpy_app_controller,
         ),
         patch(
-            "zha.application.platforms.sensor.DeviceCounterSensor.create_platform_entity",
+            "zha.application.platforms.sensor.DeviceCounterSensor.__init__",
             side_effect=Exception,
         ),
     ):
@@ -206,7 +206,7 @@ async def test_gateway_starts_entity_exception(
         await zha_gateway.async_block_till_done()
         await zha_gateway.async_initialize_devices_and_entities()
 
-        assert "Failed to create platform entity" in caplog.text
+        assert "Failed to create entity" in caplog.text
 
         await zha_gateway.shutdown()
 
@@ -437,7 +437,7 @@ async def test_remove_device_cleans_up_group_membership(
 
 @patch(
     "zha.application.gateway.Gateway.load_devices",
-    MagicMock(),
+    AsyncMock(),
 )
 @patch(
     "zha.application.gateway.Gateway.load_groups",

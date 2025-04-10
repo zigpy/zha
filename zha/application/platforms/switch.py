@@ -6,7 +6,7 @@ from abc import ABC
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy.quirks.v2 import SwitchMetadata
@@ -15,7 +15,6 @@ from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -65,6 +64,7 @@ class BaseSwitch(BaseEntity, ABC):
     """Common base class for zhawss switches."""
 
     PLATFORM = Platform.SWITCH
+    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -106,6 +106,7 @@ class Switch(PlatformEntity, BaseSwitch):
     """ZHA switch."""
 
     _attr_translation_key = "switch"
+    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -120,9 +121,15 @@ class Switch(PlatformEntity, BaseSwitch):
         self._on_off_cluster_handler: OnOffClusterHandler = cast(
             OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
         )
-        self._on_off_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._on_off_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     def handle_cluster_handler_attribute_updated(
@@ -195,34 +202,6 @@ class ConfigurableAttributeSwitch(PlatformEntity):
     _off_value: int = 0
     _on_value: int = 1
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA not in kwargs and (
-            cls._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
-            or cluster_handler.cluster.get(cls._attribute_name) is None
-        ):
-            _LOGGER.debug(
-                "%s is not supported - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
-            )
-            return None
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
         unique_id: str,
@@ -249,6 +228,22 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             self._force_inverted = entity_metadata.force_inverted
         self._off_value = entity_metadata.off_value
         self._on_value = entity_metadata.on_value
+
+    def _is_supported(self) -> bool:
+        if (
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
+            or self._cluster_handler.cluster.get(self._attribute_name) is None
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                self._attribute_name,
+                self.__class__.__name__,
+            )
+            return False
+
+        return super()._is_supported()
 
     @functools.cached_property
     def info_object(self) -> ConfigurableAttributeSwitchInfo:
@@ -664,42 +659,31 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
     _attribute_name = WindowCovering.AttributeDefs.config_status.name
     _attr_translation_key = "inverted"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        cluster_handler = cluster_handlers[0]
+    def _is_supported(self) -> bool:
         window_covering_mode_attr = (
             WindowCovering.AttributeDefs.window_covering_mode.name
         )
-        # this entity needs 2 attributes to function
+
+        # this entity needs a second attribute to function
         if (
-            cls._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
-            or cluster_handler.cluster.get(cls._attribute_name) is None
-            or window_covering_mode_attr
-            in cluster_handler.cluster.unsupported_attributes
-            or window_covering_mode_attr
-            not in cluster_handler.cluster.attributes_by_name
-            or cluster_handler.cluster.get(window_covering_mode_attr) is None
+            (
+                window_covering_mode_attr
+                in self._cluster_handler.cluster.unsupported_attributes
+            )
+            or (
+                window_covering_mode_attr
+                not in self._cluster_handler.cluster.attributes_by_name
+            )
+            or self._cluster_handler.cluster.get(window_covering_mode_attr) is None
         ):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
+                self._attribute_name,
+                self.__class__.__name__,
             )
-            return None
+            return False
 
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        return super()._is_supported()
 
     @property
     def is_on(self) -> bool:

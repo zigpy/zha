@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetadata
 
@@ -111,30 +111,22 @@ class Button(PlatformEntity):
 class IdentifyButton(Button):
     """Defines a ZHA identify button."""
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        if PLATFORM_ENTITIES.prevent_entity_creation(
-            Platform.BUTTON, device.ieee, CLUSTER_HANDLER_IDENTIFY
-        ):
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     _attr_device_class = ButtonDeviceClass.IDENTIFY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _command_name = "identify"
     _kwargs = {}
     _args = [DEFAULT_DURATION]
+
+    def _is_supported(self) -> bool:
+        cls = type(self)
+        if any(
+            type(entity) is cls
+            for entity in self.device.platform_entities.values()
+            if entity is not self
+        ):
+            return False
+
+        return super()._is_supported()
 
 
 class WriteAttributeButton(PlatformEntity):
@@ -158,6 +150,7 @@ class WriteAttributeButton(PlatformEntity):
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self.recompute_capabilities()
 
     def _init_from_quirks_metadata(
         self, entity_metadata: WriteAttributeButtonMetadata

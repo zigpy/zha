@@ -840,7 +840,7 @@
           "platform": "cover",
           "class_name": "Cover",
           "translation_key": "cover",
-          "device_class": null,
+          "device_class": "shade",
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,

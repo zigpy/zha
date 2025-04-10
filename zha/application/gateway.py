@@ -242,10 +242,6 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     async def _async_initialize(self) -> None:
         """Initialize controller and connect radio."""
-        discovery.DEVICE_PROBE.initialize(self)
-        discovery.ENDPOINT_PROBE.initialize(self)
-        discovery.GROUP_PROBE.initialize(self)
-
         self.shutting_down = False
 
         app_controller_cls, app_config = self.get_application_controller_data()
@@ -261,7 +257,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             self._find_coordinator_device()
         )
 
-        self.load_devices()
+        await self.load_devices()
         self.load_groups()
 
         self.application_controller.add_listener(self)
@@ -293,7 +289,7 @@ class Gateway(AsyncUtilMixin, EventBase):
 
         return zigpy_coordinator
 
-    def load_devices(self) -> None:
+    async def load_devices(self) -> None:
         """Restore ZHA devices from zigpy application state."""
 
         assert self.application_controller
@@ -314,7 +310,8 @@ class Gateway(AsyncUtilMixin, EventBase):
                 delta_msg,
                 zha_device.consider_unavailable_time,
             )
-        self.create_platform_entities()
+
+            await zha_device.async_initialize(from_cache=True)
 
     def load_groups(self) -> None:
         """Initialize ZHA groups."""
@@ -324,30 +321,9 @@ class Gateway(AsyncUtilMixin, EventBase):
             zha_group = self.get_or_create_group(group)
             # we can do this here because the entities are in the
             # entity registry tied to the devices
-            discovery.GROUP_PROBE.discover_group_entities(zha_group)
 
-    def create_platform_entities(self) -> None:
-        """Create platform entities."""
-
-        for platform in discovery.PLATFORMS:
-            for platform_entity_class, args, kw_args in self.config.platforms[platform]:
-                try:
-                    platform_entity = platform_entity_class.create_platform_entity(
-                        *args, **kw_args
-                    )
-                except Exception:  # pylint: disable=broad-except
-                    _LOGGER.exception(
-                        "Failed to create platform entity: %s [args=%s, kwargs=%s]",
-                        platform_entity_class,
-                        args,
-                        kw_args,
-                    )
-                    continue
-                if platform_entity:
-                    _LOGGER.debug(
-                        "Platform entity data: %s", platform_entity.info_object
-                    )
-            self.config.platforms[platform].clear()
+            for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+                entity.on_add()
 
     @property
     def radio_concurrency(self) -> int:
@@ -473,7 +449,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         # need to handle endpoint correctly on groups
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
-        discovery.GROUP_PROBE.discover_group_entities(zha_group)
+
+        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+            entity.on_add()
+
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_REMOVED)
 
@@ -484,7 +463,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         # need to handle endpoint correctly on groups
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
-        discovery.GROUP_PROBE.discover_group_entities(zha_group)
+
+        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+            entity.on_add()
+
         zha_group.info("group_member_added - endpoint: %s", endpoint)
         self._emit_group_gateway_message(zigpy_group, ZHA_GW_MSG_GROUP_MEMBER_ADDED)
 
@@ -567,6 +549,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         if (zha_device := self._devices.get(zigpy_device.ieee)) is None:
             zha_device = Device.new(zigpy_device, self)
             self._devices[zigpy_device.ieee] = zha_device
+
         return zha_device
 
     def get_or_create_group(self, zigpy_group: zigpy.group.Group) -> Group:
@@ -628,16 +611,19 @@ class Gateway(AsyncUtilMixin, EventBase):
     async def _async_device_joined(self, zha_device: Device) -> None:
         zha_device.available = True
         zha_device.on_network = True
+
         await zha_device.async_configure()
-        device_info = ExtendedDeviceInfoWithPairingStatus(
-            pairing_status=DevicePairingStatus.CONFIGURED,
-            **zha_device.extended_device_info.__dict__,
-        )
-        await zha_device.async_initialize(from_cache=False)
-        self.create_platform_entities()
+        await zha_device.async_initialize()
+
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info, new_join=True),
+            DeviceFullInitEvent(
+                device_info=ExtendedDeviceInfoWithPairingStatus(
+                    pairing_status=DevicePairingStatus.CONFIGURED,
+                    **zha_device.extended_device_info.__dict__,
+                ),
+                new_join=True,
+            ),
         )
 
     async def _async_device_rejoined(self, zha_device: Device) -> None:
@@ -649,15 +635,17 @@ class Gateway(AsyncUtilMixin, EventBase):
         # we don't have to do this on a nwk swap
         # but we don't have a way to tell currently
         await zha_device.async_configure()
-        device_info = ExtendedDeviceInfoWithPairingStatus(
-            pairing_status=DevicePairingStatus.CONFIGURED,
-            **zha_device.extended_device_info.__dict__,
-        )
+
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
-            DeviceFullInitEvent(device_info=device_info),
+            DeviceFullInitEvent(
+                device_info=ExtendedDeviceInfoWithPairingStatus(
+                    pairing_status=DevicePairingStatus.CONFIGURED,
+                    **zha_device.extended_device_info.__dict__,
+                )
+            ),
         )
-        # force async_initialize() to fire so don't explicitly call it
+        # Mark the device as unavailable, `async_initialize` will be called later
         zha_device.available = False
         zha_device.on_network = True
 

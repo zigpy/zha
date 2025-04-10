@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 import asyncio
+from collections.abc import Callable
 from contextlib import suppress
 import dataclasses
 from enum import StrEnum
@@ -60,6 +61,7 @@ class BaseEntityInfo:
     entity_category: str | None
     entity_registry_enabled_default: bool
     enabled: bool = True
+    primary: bool
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -119,6 +121,12 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None
     _attr_state_class: str | None
     _attr_enabled: bool = True
+    _attr_always_supported: bool = False
+    _attr_primary: bool = False
+
+    # When two entities both want to be primary, the one with the higher weight will be
+    # chosen. If there is a tie, both lose.
+    _attr_primary_weight: int = 0
 
     def __init__(self, unique_id: str, previous_unique_id: str | None = None) -> None:
         """Initialize the platform entity."""
@@ -130,6 +138,22 @@ class BaseEntity(LogMixin, EventBase):
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
         self._tracked_handles: list[asyncio.Handle] = []
+        self._on_remove_callbacks: list[Callable[[], None]] = []
+
+    def is_supported(self) -> bool:
+        """Return if the entity is supported for the device."""
+        if self._attr_always_supported:
+            return True
+
+        return self._is_supported()
+
+    def _is_supported(self) -> bool:
+        """Return if the entity is supported for the device, internal."""
+        return True
+
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
+        pass
 
     @property
     def enabled(self) -> bool:
@@ -140,6 +164,21 @@ class BaseEntity(LogMixin, EventBase):
     def enabled(self, value: bool) -> None:
         """Set the entity enabled state."""
         self._attr_enabled = value
+
+    @property
+    def primary(self) -> bool:
+        """Return if the entity is the primary device control."""
+        return self._attr_primary
+
+    @primary.setter
+    def primary(self, value: bool) -> None:
+        """Set the entity as the primary device control."""
+        self._attr_primary = value
+
+    @property
+    def primary_weight(self) -> int:
+        """Return the primary weight of the entity."""
+        return self._attr_primary_weight
 
     @property
     def fallback_name(self) -> str | None:
@@ -222,6 +261,7 @@ class BaseEntity(LogMixin, EventBase):
             entity_category=self.entity_category,
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
+            primary=self.primary,
             # Set by platform entities
             cluster_handlers=[],
             device_ieee=None,
@@ -257,8 +297,17 @@ class BaseEntity(LogMixin, EventBase):
         """Disable the entity."""
         self.enabled = False
 
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        pass
+
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
+        while self._on_remove_callbacks:
+            callback = self._on_remove_callbacks.pop()
+            self.debug("Running remove callback: %s", callback)
+            callback()
+
         for handle in self._tracked_handles:
             self.debug("Cancelling handle: %s", handle)
             handle.cancel()
@@ -321,39 +370,20 @@ class PlatformEntity(BaseEntity):
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
+
         for cluster_handler in cluster_handlers:
             self.cluster_handlers[cluster_handler.name] = cluster_handler
+
         self._device: Device = device
         self._endpoint = endpoint
-
-        if (self.PLATFORM, self.unique_id) in self._device.platform_entities:
-            _LOGGER.warning(
-                "Duplicate entity detected - unique id %r already exists: %r. Replacing with %r",
-                (self.PLATFORM, self.unique_id),
-                self._device.platform_entities[(self.PLATFORM, self.unique_id)],
-                self,
-            )
-        self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
-
-    @classmethod
-    def create_platform_entity(
-        cls: type[PlatformEntity],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> PlatformEntity | None:
-        """Entity Factory.
-
-        Return a platform entity if it is a supported configuration, otherwise return None
-        """
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
         if entity_metadata.initially_disabled:
             self._attr_entity_registry_enabled_default = False
+
+        # v2 quirks entities are assumed to always be supported
+        self._attr_always_supported = True
 
         has_attribute_name = hasattr(entity_metadata, "attribute_name")
         has_command_name = hasattr(entity_metadata, "command_name")
@@ -459,7 +489,6 @@ class GroupEntity(BaseEntity):
             immediate=False,
             function=self.update,
         )
-        self._group.register_group_entity(self)
 
     @cached_property
     def identifiers(self) -> GroupEntityIdentifiers:
@@ -509,9 +538,16 @@ class GroupEntity(BaseEntity):
         assert self._change_listener_debouncer
         self.group.gateway.create_task(self._change_listener_debouncer.async_call())
 
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._group.register_group_entity(self)
+
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
         await super().on_remove()
+        self._group.unregister_group_entity(self)
+
         if self._change_listener_debouncer:
             self._change_listener_debouncer.async_cancel()
 

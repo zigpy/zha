@@ -10,7 +10,7 @@ import functools
 import logging
 import numbers
 import typing
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
@@ -21,7 +21,6 @@ from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -46,6 +45,7 @@ from zha.units import (
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     UnitOfApparentPower,
+    UnitOfConductivity,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
@@ -53,6 +53,7 @@ from zha.units import (
     UnitOfMass,
     UnitOfPower,
     UnitOfPressure,
+    UnitOfSpeed,
     UnitOfTemperature,
     UnitOfTime,
     UnitOfVolume,
@@ -66,6 +67,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_COVER,
     CLUSTER_HANDLER_DEVICE_TEMPERATURE,
     CLUSTER_HANDLER_DIAGNOSTIC,
+    CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY,
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     CLUSTER_HANDLER_FLOW,
     CLUSTER_HANDLER_HUMIDITY,
@@ -78,6 +80,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_SOIL_MOISTURE,
     CLUSTER_HANDLER_TEMPERATURE,
     CLUSTER_HANDLER_THERMOSTAT,
+    CLUSTER_HANDLER_WIND_SPEED,
     SMARTTHINGS_HUMIDITY_CLUSTER,
 )
 
@@ -160,39 +163,6 @@ class Sensor(PlatformEntity):
     _attr_state_class: SensorStateClass | None = None
     _skip_creation_if_no_attr_cache: bool = False
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA not in kwargs and (
-            cls._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
-        ):
-            _LOGGER.debug(
-                "%s is not supported - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
-            )
-            return None
-
-        if (
-            cls._skip_creation_if_no_attr_cache
-            and cluster_handlers[0].cluster.get(cls._attribute_name) is None
-        ):
-            return None
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
         unique_id: str,
@@ -204,10 +174,38 @@ class Sensor(PlatformEntity):
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+        self.recompute_capabilities()
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
+
+    def _is_supported(self) -> bool:
+        if (
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                self._attribute_name,
+                self.__class__.__name__,
+            )
+            return False
+
+        if (
+            self._skip_creation_if_no_attr_cache
+            and self._cluster_handler.cluster.get(self._attribute_name) is None
+        ):
+            return False
+
+        return super()._is_supported()
 
     def _validate_state_class(
         self,
@@ -336,6 +334,10 @@ class PollableSensor(Sensor):
         """Init this sensor."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self._polling_task: Task | None = None
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
         self.maybe_start_polling()
 
     @property
@@ -394,21 +396,6 @@ class DeviceCounterSensor(BaseEntity):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
 
-    @classmethod
-    def create_platform_entity(
-        cls,
-        zha_device: Device,
-        counter_groups: str,
-        counter_group: str,
-        counter: str,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        return cls(zha_device, counter_groups, counter_group, counter, **kwargs)
-
     def __init__(
         self,
         zha_device: Device,
@@ -434,17 +421,22 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
+        self._always_supported: bool = True
 
         # TODO: why do entities get created with " None" as a name suffix instead of
         # falling back to `fallback_name`? We should be able to provide translation keys
         # even if they do not exist.
         # self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
 
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
         self._device.gateway.global_updater.register_update_listener(self.update)
-
-        # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
-            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
+        self._on_remove_callbacks.append(
+            lambda: self._device.gateway.global_updater.remove_update_listener(
+                self.update
+            )
+        )
 
     @functools.cached_property
     def identifiers(self) -> DeviceCounterSensorIdentifiers:
@@ -508,11 +500,6 @@ class DeviceCounterSensor(BaseEntity):
                 self._device.gateway.config.allow_polling,
             )
 
-    async def on_remove(self) -> None:
-        """Cancel tasks this entity owns."""
-        self._device.gateway.global_updater.remove_update_listener(self.update)
-        await super().on_remove()
-
 
 class EnumSensor(Sensor):
     """Sensor with value from enum."""
@@ -575,24 +562,9 @@ class Battery(Sensor):
         "battery_voltage",
     }
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Unlike any other entity, PowerConfiguration cluster may not support
-        battery_percent_remaining attribute, but zha-device-handlers takes care of it
-        so create the entity regardless
-        """
-        if device.is_mains_powered:
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def _is_supported(self) -> bool:
+        # XXX: We intentionally ignore the presence of this attribute
+        return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
 
     @staticmethod
     def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
@@ -872,6 +844,7 @@ class Humidity(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_SOIL_MOISTURE)
@@ -884,6 +857,7 @@ class SoilMoisture(Sensor):
     _attr_translation_key: str = "soil_moisture"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEAF_WETNESS)
@@ -896,6 +870,7 @@ class LeafWetness(Sensor):
     _attr_translation_key: str = "leaf_wetness"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ILLUMINANCE)
@@ -906,6 +881,7 @@ class Illuminance(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ILLUMINANCE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
+    _attr_primary_weight = 1
 
     def formatter(self, value: int) -> int | None:
         """Convert illumination data."""
@@ -943,6 +919,7 @@ class SmartEnergyMetering(PollableSensor):
         "status",
         "zcl_unit_of_measurement",
     }
+    _attr_primary_weight = 1
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(
@@ -1011,7 +988,11 @@ class SmartEnergyMetering(PollableSensor):
     ) -> None:
         """Init."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self.recompute_capabilities()
 
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
+        super().recompute_capabilities()
         entity_description = self._ENTITY_DESCRIPTION_MAP.get(
             self._cluster_handler.unit_of_measurement
         )
@@ -1249,6 +1230,7 @@ class Pressure(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_FLOW)
@@ -1260,6 +1242,7 @@ class Flow(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
+    _attr_primary_weight = 1
 
     def formatter(self, value: int) -> datetime | int | float | str | None:
         """Handle unknown value state."""
@@ -1277,6 +1260,7 @@ class Temperature(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DEVICE_TEMPERATURE)
@@ -1290,6 +1274,7 @@ class DeviceTemperature(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
@@ -1332,6 +1317,7 @@ class CarbonDioxideConcentration(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names="carbon_monoxide_concentration")
@@ -1344,6 +1330,7 @@ class CarbonMonoxideConcentration(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(generic_ids="cluster_handler_0x042e", stop_on_match_group="voc_level")
@@ -1357,6 +1344,7 @@ class VOCLevel(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(
@@ -1375,6 +1363,7 @@ class PPBVOCLevel(Sensor):
     _decimals = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_BILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names="pm25")
@@ -1387,6 +1376,17 @@ class PM25(Sensor):
     _decimals = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    _attr_primary_weight = 1
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY)
+class ElectricalConductivity(Sensor):
+    """Electrical Conductivity sensor."""
+
+    _attribute_name = "measured_value"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.CONDUCTIVITY
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfConductivity.MICROSIEMENS_PER_CM
 
 
 @MULTI_MATCH(cluster_handler_names="formaldehyde_concentration")
@@ -1399,6 +1399,7 @@ class FormaldehydeConcentration(Sensor):
     _decimals = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(
@@ -1411,21 +1412,8 @@ class ThermostatHVACAction(Sensor):
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def _is_supported(self) -> bool:
+        return PlatformEntity._is_supported(self)
 
     @property
     def state(self) -> dict:
@@ -1548,24 +1536,6 @@ class RSSISensor(Sensor):
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        key = f"{CLUSTER_HANDLER_BASIC}_{cls._unique_id_suffix}"
-        if PLATFORM_ENTITIES.prevent_entity_creation(Platform.SENSOR, device.ieee, key):
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
         unique_id: str,
@@ -1576,7 +1546,27 @@ class RSSISensor(Sensor):
     ) -> None:
         """Init."""
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
         self.device.gateway.global_updater.register_update_listener(self.update)
+        self._on_remove_callbacks.append(
+            lambda: self.device.gateway.global_updater.remove_update_listener(
+                self.update
+            )
+        )
+
+    def _is_supported(self) -> bool:
+        cls = type(self)
+        if any(
+            type(entity) is cls
+            for entity in self.device.platform_entities.values()
+            if entity is not self
+        ):
+            return False
+
+        return PlatformEntity._is_supported(self)
 
     @property
     def state(self) -> dict:
@@ -1611,11 +1601,6 @@ class RSSISensor(Sensor):
                 self._device.available,
                 self._device.gateway.config.allow_polling,
             )
-
-    async def on_remove(self) -> None:
-        """Cancel tasks this entity owns."""
-        self._device.gateway.global_updater.remove_update_listener(self.update)
-        await super().on_remove()
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BASIC)
@@ -1976,3 +1961,15 @@ class DanfossMotorStepCounter(Sensor):
     _attribute_name = "motor_step_counter"
     _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_WIND_SPEED)
+class WindSpeed(Sensor):
+    """Wind Speed sensor."""
+
+    _attribute_name = "measured_value"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.WIND_SPEED
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _divisor = 100
+    _attr_native_unit_of_measurement = UnitOfSpeed.METERS_PER_SECOND
+    _attr_primary_weight = 2

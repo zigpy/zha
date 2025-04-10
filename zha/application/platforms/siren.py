@@ -68,6 +68,7 @@ class Siren(PlatformEntity):
 
     PLATFORM = Platform.SIREN
     _attr_fallback_name: str = "Siren"
+    _attr_primary_weight = 10
 
     def __init__(
         self,

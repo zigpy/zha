@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 from zigpy import zcl
 import zigpy.profiles.zha
 import zigpy.profiles.zll
-from zigpy.types.named import EUI64
 
 from zha.application import Platform
 
@@ -282,9 +281,6 @@ class PlatformEntityRegistry:
             lambda: collections.defaultdict(lambda: collections.defaultdict(list))
         )
         self._group_registry: dict[str, type[GroupEntity]] = {}
-        self.single_device_matches: dict[Platform, dict[EUI64, list[str]]] = (
-            collections.defaultdict(lambda: collections.defaultdict(list))
-        )
 
     def get_entity(
         self,
@@ -489,21 +485,6 @@ class PlatformEntityRegistry:
             return zha_ent
 
         return decorator
-
-    def prevent_entity_creation(self, platform: Platform, ieee: EUI64, key: str):
-        """Return True if the entity should not be created."""
-        platform_restrictions = self.single_device_matches[platform]
-        device_restrictions = platform_restrictions[ieee]
-        if key in device_restrictions:
-            return True
-        device_restrictions.append(key)
-        return False
-
-    def clean_up(self) -> None:
-        """Clean up post discovery."""
-        self.single_device_matches = collections.defaultdict(
-            lambda: collections.defaultdict(list)
-        )
 
 
 PLATFORM_ENTITIES = PlatformEntityRegistry()
