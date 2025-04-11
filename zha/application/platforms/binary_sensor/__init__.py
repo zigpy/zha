@@ -13,6 +13,7 @@ from zigpy.quirks.v2 import BinarySensorMetadata
 from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
+from zha.application.const import UniqueIdRoot
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
@@ -161,7 +162,7 @@ class Accelerometer(BinarySensor):
     _attr_translation_key: str = "accelerometer"
 
     _unique_id_suffix = "acceleration"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY)
@@ -173,7 +174,7 @@ class Occupancy(BinarySensor):
     _attr_primary_weight = 2
 
     _unique_id_suffix = "occupancy"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_HUE_OCCUPANCY)
@@ -193,7 +194,7 @@ class Opening(BinarySensor):
     _attr_primary_weight = 1
 
     _unique_id_suffix = "opening"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -204,7 +205,7 @@ class BinaryInput(BinarySensor):
     _attr_translation_key: str = "binary_input"
 
     _unique_id_suffix = "binary_input"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
 
 @STRICT_MATCH(
@@ -225,7 +226,7 @@ class Motion(Opening):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
 
     _unique_id_suffix = "motion"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
@@ -237,7 +238,7 @@ class IASZone(BinarySensor):
 
     # `_unique_id_suffix` calculated below
     # TODO: split this sensor off into individual sensor classes per IASZone type
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
     def __init__(
         self,

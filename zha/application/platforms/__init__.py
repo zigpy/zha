@@ -17,6 +17,10 @@ from zigpy.types.named import EUI64
 
 from zha.application import Platform
 from zha.application.const import UniqueIdRoot
+from zha.application.platforms.helpers import (
+    format_legacy_platform_unique_id,
+    format_platform_unique_id,
+)
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
@@ -349,7 +353,7 @@ class PlatformEntity(BaseEntity):
     # Root for the suffix. By default, the suffix is added to the cluster ID.
     _unique_id_root: UniqueIdRoot = UniqueIdRoot.CLUSTER
 
-    _previous_platform_unique_ids: tuple[str] = ()
+    _previous_platform_unique_ids: tuple[tuple[UniqueIdRoot, str]] | None = None
 
     def __init__(
         self,
@@ -366,36 +370,33 @@ class PlatformEntity(BaseEntity):
         assert self._unique_id_suffix is not None
         cluster = cluster_handlers[0].cluster
 
-        match self._unique_id_root:
-            case UniqueIdRoot.CLUSTER:
-                unique_id = f"{device.ieee}-{endpoint.id}-0x{cluster.cluster_id:04x}-{self._unique_id_suffix}"
-            case UniqueIdRoot.ENDPOINT:
-                unique_id = f"{device.ieee}-{endpoint.id}-{self._unique_id_suffix}"
-            case UniqueIdRoot.DEVICE:
-                unique_id = f"{device.ieee}-{self._unique_id_suffix}"
-            case _:
-                raise ValueError(f"Invalid unique_id_root: {self._unique_id_root}")
+        super().__init__(
+            unique_id=format_platform_unique_id(
+                self._unique_id_root, device, endpoint, cluster, self._unique_id_suffix
+            ),
+            **kwargs,
+        )
 
-        super().__init__(unique_id=unique_id, **kwargs)
-
-        # To avoid boilerplate, automatically generate legacy unique ID migrations
-        for suffix in self._previous_platform_unique_ids:
-            if suffix == "":
-                self._previous_unique_ids.append(f"{device.ieee}-{endpoint.id}")
-            else:
-                self._previous_unique_ids.append(
-                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}-{suffix}"
-                )
-
-        # To avoid requiring unique ID migrations for everything with a suffix,
-        # have a default one for the probably-unchanged suffix
-        if (
-            self._previous_platform_unique_ids
-            is PlatformEntity._previous_platform_unique_ids
-        ):
+        # To avoid boilerplate unique ID migrations for everything with a suffix, have a
+        # default one
+        if self._previous_platform_unique_ids is None:
             self._previous_unique_ids.append(
-                f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}-{self._unique_id_suffix}"
+                format_legacy_platform_unique_id(
+                    self._unique_id_root,
+                    device,
+                    endpoint,
+                    cluster,
+                    self._unique_id_suffix,
+                ),
             )
+        else:
+            # Generate previous unique IDs for this entity
+            for root, suffix in self._previous_platform_unique_ids:
+                self._previous_unique_ids.append(
+                    format_legacy_platform_unique_id(
+                        root, device, endpoint, cluster, suffix
+                    )
+                )
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}

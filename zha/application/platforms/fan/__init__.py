@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
+from zha.application.const import UniqueIdRoot
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -81,7 +82,6 @@ class BaseFan(BaseEntity):
     )
     _attr_translation_key: str = "fan"
     _unique_id_suffix = "fan"
-    _previous_platform_unique_ids = ("",)
     _attr_primary_weight = 10
 
     @functools.cached_property
@@ -203,6 +203,8 @@ class BaseFan(BaseEntity):
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_FAN)
 class Fan(PlatformEntity, BaseFan):
     """Representation of a ZHA fan."""
+
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
     def __init__(
         self,

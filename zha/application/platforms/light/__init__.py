@@ -647,7 +647,7 @@ class Light(PlatformEntity, BaseLight):
     _attr_translation_key: str = "light"
     _unique_id_root = UniqueIdRoot.ENDPOINT  # aggregated from multiple clusters
     _unique_id_suffix = "light"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.ENDPOINT, ""),)
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 

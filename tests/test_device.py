@@ -925,7 +925,7 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
             Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
         )
 
-    assert len(zha_device.platform_entities) == 8
+    assert len(zha_device.platform_entities) == 7
 
 
 async def test_join_binding_reporting(zha_gateway: Gateway) -> None:

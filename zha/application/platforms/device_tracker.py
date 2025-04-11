@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
+from zha.application.const import UniqueIdRoot
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.sensor import Battery
 from zha.application.registries import PLATFORM_ENTITIES
@@ -50,7 +51,7 @@ class DeviceScannerEntity(PlatformEntity):
     __polling_interval: int
 
     _unique_id_suffix = "device_tracker"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
     def __init__(
         self,

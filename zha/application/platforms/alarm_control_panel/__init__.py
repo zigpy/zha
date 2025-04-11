@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
+from zha.application.const import UniqueIdRoot
 from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.application.platforms.alarm_control_panel.const import (
     IAS_ACE_STATE_MAP,
@@ -59,7 +60,7 @@ class AlarmControlPanel(PlatformEntity):
     PLATFORM = Platform.ALARM_CONTROL_PANEL
     _attr_translation_key: str = "alarm_control_panel"
     _unique_id_suffix = "alarm_control_panel"
-    _previous_platform_unique_ids = ("",)
+    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
 
     def __init__(
         self,
