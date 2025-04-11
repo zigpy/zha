@@ -21,6 +21,7 @@ from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
+from zha.application.const import UniqueIdRoot
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -1568,7 +1569,7 @@ class RSSISensor(Sensor):
 
     # This is the only sensor type expected to override the unique ID.
     # TODO: migrate this away from `PlatformEntity`
-    _unique_id_override = "rssi"
+    _unique_id_root = UniqueIdRoot.DEVICE
     _unique_id_suffix = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
@@ -1646,9 +1647,8 @@ class RSSISensor(Sensor):
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
-    # This is the only sensor type expected to override the unique ID.
     # TODO: migrate this away from `PlatformEntity`
-    _unique_id_override = "lqi"
+    _unique_id_root = UniqueIdRoot.DEVICE
     _unique_id_suffix = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None

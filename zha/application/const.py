@@ -216,3 +216,11 @@ class Strobe(t.enum8):
 
     No_Strobe = 0x00
     Strobe = 0x01
+
+
+class UniqueIdRoot(enum.Enum):
+    """Root for unique ID suffix."""
+
+    DEVICE = "device"
+    ENDPOINT = "endpoint"
+    CLUSTER = "cluster"

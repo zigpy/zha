@@ -16,6 +16,7 @@ from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
+from zha.application.const import UniqueIdRoot
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
@@ -344,10 +345,11 @@ class PlatformEntity(BaseEntity):
     # suffix to add to the unique_id of the entity. Used for multi
     # entities using the same cluster handler/cluster id for the entity.
     _unique_id_suffix: str
-    _previous_platform_unique_ids: tuple[str] = ()
 
-    # For the two entities currently using this feature, allow overriding the entire ID
-    _unique_id_override: str | None = None
+    # Root for the suffix. By default, the suffix is added to the cluster ID.
+    _unique_id_root: UniqueIdRoot = UniqueIdRoot.CLUSTER
+
+    _previous_platform_unique_ids: tuple[str] = ()
 
     def __init__(
         self,
@@ -364,11 +366,15 @@ class PlatformEntity(BaseEntity):
         assert self._unique_id_suffix is not None
         cluster = cluster_handlers[0].cluster
 
-        if self._unique_id_override is not None:
-            # This feature is used by only LQI and RSSI and will be removed
-            unique_id = f"{device.ieee}-{self._unique_id_override}"
-        else:
-            unique_id = f"{device.ieee}-{endpoint.id}-0x{cluster.cluster_id:04x}-{self._unique_id_suffix}"
+        match self._unique_id_root:
+            case UniqueIdRoot.CLUSTER:
+                unique_id = f"{device.ieee}-{endpoint.id}-0x{cluster.cluster_id:04x}-{self._unique_id_suffix}"
+            case UniqueIdRoot.ENDPOINT:
+                unique_id = f"{device.ieee}-{endpoint.id}-{self._unique_id_suffix}"
+            case UniqueIdRoot.DEVICE:
+                unique_id = f"{device.ieee}-{self._unique_id_suffix}"
+            case _:
+                raise ValueError(f"Invalid unique_id_root: {self._unique_id_root}")
 
         super().__init__(unique_id=unique_id, **kwargs)
 

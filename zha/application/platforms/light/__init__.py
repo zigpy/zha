@@ -21,6 +21,7 @@ from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
+from zha.application.const import UniqueIdRoot
 from zha.application.platforms import (
     DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
     BaseEntity,
@@ -644,6 +645,7 @@ class Light(PlatformEntity, BaseLight):
     _supported_color_modes: set[ColorMode]
     _external_supported_color_modes: set[ColorMode]
     _attr_translation_key: str = "light"
+    _unique_id_root = UniqueIdRoot.ENDPOINT  # aggregated from multiple clusters
     _unique_id_suffix = "light"
     _previous_platform_unique_ids = ("",)
     _REFRESH_INTERVAL = (2700, 4500)
