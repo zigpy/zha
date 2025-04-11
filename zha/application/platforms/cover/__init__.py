@@ -65,18 +65,19 @@ class Cover(PlatformEntity):
     PLATFORM = Platform.COVER
 
     _attr_translation_key: str = "cover"
+    _unique_id_suffix = "cover"
+    _previous_platform_unique_ids = ("",)
     _attr_primary_weight = 10
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Init this cover."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         cluster_handler = self.cluster_handlers.get(CLUSTER_HANDLER_COVER)
         assert cluster_handler
 
@@ -604,6 +605,8 @@ class Shade(PlatformEntity):
 
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
+    _unique_id_suffix = "shade"
+    _previous_platform_unique_ids = ("",)
     _attr_supported_features: CoverEntityFeature = (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
@@ -614,14 +617,13 @@ class Shade(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the ZHA shade."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ON_OFF
         ]

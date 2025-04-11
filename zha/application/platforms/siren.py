@@ -70,9 +70,11 @@ class Siren(PlatformEntity):
     _attr_fallback_name: str = "Siren"
     _attr_primary_weight = 10
 
+    _unique_id_suffix = "siren"
+    _previous_platform_unique_ids = ("",)
+
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -97,7 +99,7 @@ class Siren(PlatformEntity):
         self._cluster_handler: IasWdClusterHandler = cast(
             IasWdClusterHandler, cluster_handlers[0]
         )
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_is_on: bool = False
         self._off_listener: asyncio.TimerHandle | None = None
 

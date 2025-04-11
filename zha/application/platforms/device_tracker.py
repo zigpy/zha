@@ -49,16 +49,18 @@ class DeviceScannerEntity(PlatformEntity):
     _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
 
+    _unique_id_suffix = "device_tracker"
+    _previous_platform_unique_ids = ("",)
+
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ):
         """Initialize the ZHA device tracker."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._battery_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_POWER_CONFIGURATION
         )

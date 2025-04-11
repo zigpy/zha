@@ -83,6 +83,8 @@ class Thermostat(PlatformEntity):
     _attr_precision = PRECISION_TENTHS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key: str = "thermostat"
+    _unique_id_suffix = "thermostat"
+    _previous_platform_unique_ids = ("",)
     _enable_turn_on_off_backwards_compatibility = False
     _attr_extra_state_attribute_names: set[str] = {
         ATTR_SYS_MODE,
@@ -98,14 +100,13 @@ class Thermostat(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ):
         """Initialize ZHA Thermostat instance."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._preset = Preset.NONE
         self._presets: list[Preset | str] = []
 
@@ -507,14 +508,13 @@ class SinopeTechnologiesThermostat(Thermostat):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ):
         """Initialize ZHA Thermostat instance."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._presets = [Preset.AWAY, Preset.NONE]
         self._manufacturer_ch = self.cluster_handlers["sinope_manufacturer_specific"]
         self._time_update_task: Task | None = None

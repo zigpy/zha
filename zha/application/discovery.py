@@ -397,12 +397,10 @@ class DeviceProbe:
                         )
 
                 yield entity_class(
-                    unique_id=f"{endpoint.unique_id}-{cluster.cluster_id}",
                     cluster_handlers=[cluster_handler],
                     endpoint=endpoint,
                     device=device,
                     entity_metadata=entity_metadata,
-                    previous_unique_id=endpoint.unique_id,
                 )
 
                 _LOGGER.debug(
@@ -507,8 +505,6 @@ class EndpointProbe:
             endpoint.claim_cluster_handlers(claimed)
 
             yield platform_entity_class(
-                unique_id=unique_id,
-                previous_unique_id=endpoint.unique_id,
                 endpoint=endpoint,
                 device=endpoint.device,
                 cluster_handlers=claimed,
@@ -524,7 +520,6 @@ class EndpointProbe:
         if platform is None or platform not in PLATFORMS:
             return
         cluster_handler_list = [cluster_handler]
-        unique_id = f"{endpoint.unique_id}-{cluster_handler.cluster.cluster_id}"
 
         entity_class, claimed = PLATFORM_ENTITIES.get_entity(
             platform,
@@ -539,7 +534,6 @@ class EndpointProbe:
         endpoint.claim_cluster_handlers(claimed)
 
         yield entity_class(
-            unique_id=unique_id,
             endpoint=endpoint,
             device=endpoint.device,
             cluster_handlers=claimed,
@@ -650,23 +644,17 @@ class EndpointProbe:
                     [ch.name for ch in entity_and_handler.claimed_cluster_handlers],
                 )
 
-                first_ch = entity_and_handler.claimed_cluster_handlers[0]
-
                 if platform == cmpt_by_dev_type:
                     # for well known device types,
                     # like thermostats we'll take only 1st class
                     yield entity_and_handler.entity_class(
-                        unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
                         endpoint=endpoint,
                         device=endpoint.device,
                         cluster_handlers=entity_and_handler.claimed_cluster_handlers,
-                        previous_unique_id=endpoint.unique_id,
                     )
                     break
 
-                first_ch = entity_and_handler.claimed_cluster_handlers[0]
                 yield entity_and_handler.entity_class(
-                    unique_id=f"{endpoint.unique_id}-{first_ch.cluster.cluster_id}",
                     endpoint=endpoint,
                     device=endpoint.device,
                     cluster_handlers=entity_and_handler.claimed_cluster_handlers,

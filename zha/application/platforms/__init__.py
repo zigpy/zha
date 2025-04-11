@@ -16,7 +16,6 @@ from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
-from zha.application.const import ENTITY_PREVIOUS_UNIQUE_ID
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
@@ -52,7 +51,7 @@ class BaseEntityInfo:
 
     fallback_name: str
     unique_id: str
-    previous_unique_id: str | None
+    previous_unique_ids: frozenset[str]
     platform: str
     class_name: str
     translation_key: str | None
@@ -128,12 +127,12 @@ class BaseEntity(LogMixin, EventBase):
     # chosen. If there is a tie, both lose.
     _attr_primary_weight: int = 0
 
-    def __init__(self, unique_id: str, previous_unique_id: str | None = None) -> None:
+    def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
         super().__init__()
 
         self._unique_id: str = unique_id
-        self._previous_unique_id: str | None = previous_unique_id
+        self._previous_unique_ids: list[str] = []
 
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
@@ -237,9 +236,9 @@ class BaseEntity(LogMixin, EventBase):
 
     @final
     @property
-    def previous_unique_id(self) -> str | None:
+    def previous_unique_ids(self) -> frozenset[str]:
         """Return the previous unique id, if any."""
-        return self._previous_unique_id
+        return frozenset(self._previous_unique_ids)
 
     @cached_property
     def identifiers(self) -> BaseIdentifiers:
@@ -255,7 +254,7 @@ class BaseEntity(LogMixin, EventBase):
 
         return BaseEntityInfo(
             unique_id=self.unique_id,
-            previous_unique_id=self.previous_unique_id,
+            previous_unique_ids=self.previous_unique_ids,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
             fallback_name=self.fallback_name,
@@ -344,11 +343,11 @@ class PlatformEntity(BaseEntity):
 
     # suffix to add to the unique_id of the entity. Used for multi
     # entities using the same cluster handler/cluster id for the entity.
-    _unique_id_suffix: str | None = None
+    _unique_id_suffix: str
+    _previous_platform_unique_ids: tuple[str] = ()
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -359,18 +358,31 @@ class PlatformEntity(BaseEntity):
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
 
-        if self._unique_id_suffix:
-            unique_id += f"-{self._unique_id_suffix}"
+        assert self._unique_id_suffix is not None
+        super().__init__(unique_id=f"{device.ieee}-{self._unique_id_suffix}", **kwargs)
 
-            if ENTITY_PREVIOUS_UNIQUE_ID in kwargs:
-                previous_unique_id = kwargs[ENTITY_PREVIOUS_UNIQUE_ID]
-                if previous_unique_id is not None:
-                    previous_unique_id += f"-{self._unique_id_suffix}"
-                    kwargs[ENTITY_PREVIOUS_UNIQUE_ID] = previous_unique_id
+        # To avoid boilerplate, automatically generate legacy unique ID migrations
+        cluster = cluster_handlers[0].cluster
 
-        # XXX: The ordering here matters: `_init_from_quirks_metadata` affects how
-        # the `unique_id` is computed!
-        super().__init__(unique_id=unique_id, **kwargs)
+        for suffix in self._previous_platform_unique_ids:
+            if suffix == "":
+                self._previous_unique_ids.append(
+                    f"{device.ieee}-{endpoint.endpoint_id}-{cluster.cluster_id}"
+                )
+            else:
+                self._previous_unique_ids.append(
+                    f"{device.ieee}-{endpoint.endpoint_id}-{cluster.cluster_id}-{suffix}"
+                )
+
+        # To avoid requiring unique ID migrations for everything with a suffix,
+        # have a default one for the probably-unchanged suffix
+        if (
+            self._previous_platform_unique_ids
+            is PlatformEntity._previous_platform_unique_ids
+        ):
+            self._previous_unique_ids.append(
+                f"{device.ieee}-{endpoint.endpoint_id}-{self._unique_id_suffix}"
+            )
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}

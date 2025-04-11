@@ -93,7 +93,7 @@ PRESET_NONE = "none"
 
 ENTITY_METADATA = "entity_metadata"
 
-ENTITY_PREVIOUS_UNIQUE_ID = "previous_unique_id"
+ENTITY_PREVIOUS_UNIQUE_IDS = "previous_unique_ids"
 
 ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
 REPORT_CONFIG = "REPORT_CONFIG"

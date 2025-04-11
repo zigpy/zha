@@ -79,14 +79,13 @@ class Number(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ):
         """Initialize the number."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._analog_output_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
@@ -207,7 +206,6 @@ class NumberConfigurationEntity(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -216,7 +214,7 @@ class NumberConfigurationEntity(PlatformEntity):
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attr_device_class: NumberDeviceClass | None = None
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
@@ -445,14 +443,13 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this ZHA startup color temperature entity."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         if self._cluster_handler:
             self._attr_native_min_value: float = self._cluster_handler.min_mireds
             self._attr_native_max_value: float = self._cluster_handler.max_mireds

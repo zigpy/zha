@@ -65,7 +65,6 @@ class BinarySensor(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -73,7 +72,7 @@ class BinarySensor(PlatformEntity):
     ) -> None:
         """Initialize the ZHA binary sensor."""
         self._cluster_handler = cluster_handlers[0]
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._state: bool = self.is_on
 
     def on_add(self) -> None:
@@ -160,6 +159,9 @@ class Accelerometer(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOVING
     _attr_translation_key: str = "accelerometer"
 
+    _unique_id_suffix = "acceleration"
+    _previous_platform_unique_ids = ("",)
+
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY)
 class Occupancy(BinarySensor):
@@ -168,6 +170,9 @@ class Occupancy(BinarySensor):
     _attribute_name = "occupancy"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
     _attr_primary_weight = 2
+
+    _unique_id_suffix = "occupancy"
+    _previous_platform_unique_ids = ("",)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_HUE_OCCUPANCY)
@@ -186,6 +191,9 @@ class Opening(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_primary_weight = 1
 
+    _unique_id_suffix = "opening"
+    _previous_platform_unique_ids = ("",)
+
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
 class BinaryInput(BinarySensor):
@@ -193,6 +201,9 @@ class BinaryInput(BinarySensor):
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "binary_input"
+
+    _unique_id_suffix = "binary_input"
+    _previous_platform_unique_ids = ("",)
 
 
 @STRICT_MATCH(
@@ -212,6 +223,9 @@ class Motion(Opening):
 
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
 
+    _unique_id_suffix = "motion"
+    _previous_platform_unique_ids = ("",)
+
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
 class IASZone(BinarySensor):
@@ -220,37 +234,41 @@ class IASZone(BinarySensor):
     _attribute_name = "zone_status"
     _attr_primary_weight = 3
 
+    # `_unique_id_suffix` calculated below
+    # TODO: split this sensor off into individual sensor classes per IASZone type
+    _previous_platform_unique_ids = ("",)
+
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+
+        zone_type = self._cluster_handler.cluster.get("zone_type")
+        if zone_type is None:
+            self._attr_unique_id_suffix = "ias_zone"
+            self._attr_translation_key = "ias_zone"
+            self._attr_device_class = None
+        else:
+            self._attr_unique_id_suffix = zone_type.name.lower()
+            self._attr_translation_key = (
+                None if zone_type in IAS_ZONE_CLASS_MAPPING else "ias_zone"
+            )
+            self._attr_device_class = IAS_ZONE_CLASS_MAPPING.get(zone_type)
+
         self._attr_device_class = self.device_class
         self._attr_translation_key = self.translation_key
-
-    @functools.cached_property
-    def translation_key(self) -> str | None:
-        """Return the name of the sensor."""
-        zone_type = self._cluster_handler.cluster.get("zone_type")
-        if zone_type in IAS_ZONE_CLASS_MAPPING:
-            return None
-        return "ias_zone"
-
-    @functools.cached_property
-    def device_class(self) -> BinarySensorDeviceClass | None:
-        """Return device class from platform DEVICE_CLASSES."""
-        zone_type = self._cluster_handler.cluster.get("zone_type")
-        return IAS_ZONE_CLASS_MAPPING.get(zone_type)
+        self._unique_id_suffix = self.unique_id_suffix
 
     @staticmethod
     def parse(value: bool | int) -> bool:
         """Parse the raw attribute into a bool state."""
-        return BinarySensor.parse(value & 3)  # use only bit 0 and 1 for alarm state
+        # use only bit 0 and 1 for alarm state
+        return BinarySensor.parse(value & 0b00000011)
 
     async def async_update(self) -> None:
         """Attempt to retrieve on off state from the IAS Zone sensor."""

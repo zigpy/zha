@@ -66,7 +66,6 @@ class EnumSelectEntity(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -76,7 +75,7 @@ class EnumSelectEntity(PlatformEntity):
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attribute_name = self._enum.__name__
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
 
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:
@@ -174,14 +173,13 @@ class ZCLEnumSelectEntity(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
 

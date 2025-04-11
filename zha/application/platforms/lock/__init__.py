@@ -36,18 +36,19 @@ class DoorLock(PlatformEntity):
 
     PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
+    _unique_id_suffix = "door_lock"
+    _previous_platform_unique_ids = ("",)
     _attr_primary_weight = 10
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the lock."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_DOORLOCK
         )

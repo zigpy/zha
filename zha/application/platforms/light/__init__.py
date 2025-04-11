@@ -644,19 +644,20 @@ class Light(PlatformEntity, BaseLight):
     _supported_color_modes: set[ColorMode]
     _external_supported_color_modes: set[ColorMode]
     _attr_translation_key: str = "light"
+    _unique_id_suffix = "light"
+    _previous_platform_unique_ids = ("",)
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the light."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ON_OFF
         ]

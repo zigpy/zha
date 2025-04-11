@@ -56,19 +56,20 @@ class AlarmControlPanelEntityInfo(BaseEntityInfo):
 class AlarmControlPanel(PlatformEntity):
     """Entity for ZHA alarm control devices."""
 
-    _attr_translation_key: str = "alarm_control_panel"
     PLATFORM = Platform.ALARM_CONTROL_PANEL
+    _attr_translation_key: str = "alarm_control_panel"
+    _unique_id_suffix = "alarm_control_panel"
+    _previous_platform_unique_ids = ("",)
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the ZHA alarm control device."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         alarm_options = device.gateway.config.config.alarm_control_panel_options
         self._cluster_handler: IasAceClusterHandler = cluster_handlers[0]
         self._cluster_handler.panel_code = alarm_options.master_code

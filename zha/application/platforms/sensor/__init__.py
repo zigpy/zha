@@ -165,7 +165,6 @@ class Sensor(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -173,7 +172,7 @@ class Sensor(PlatformEntity):
     ) -> None:
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self.recompute_capabilities()
 
     def on_add(self) -> None:
@@ -325,14 +324,13 @@ class PollableSensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._polling_task: Task | None = None
 
     def on_add(self) -> None:
@@ -402,16 +400,15 @@ class DeviceCounterSensor(BaseEntity):
         counter_groups: str,
         counter_group: str,
         counter: str,
-        **kwargs: Any,
     ) -> None:
         """Init this sensor."""
+
         # XXX: ZHA uses the IEEE address of the device passed through `slugify`!
         slugified_device_id = zha_device.unique_id.replace(":", "-")
-
         super().__init__(
-            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
-            **kwargs,
+            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}"
         )
+
         self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
@@ -509,14 +506,13 @@ class EnumSensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
@@ -591,13 +587,8 @@ class Battery(Sensor):
         return response
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    models={"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"},
-)
-class ElectricalMeasurement(PollableSensor):
-    """Active power measurement."""
+class BaseElectricalMeasurement(PollableSensor):
+    """Base class for electrical measurement."""
 
     _use_custom_polling: bool = False
     _attribute_name = "active_power"
@@ -610,14 +601,13 @@ class ElectricalMeasurement(PollableSensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {
             "measurement_type",
             self._max_attribute_name,
@@ -660,6 +650,18 @@ class ElectricalMeasurement(PollableSensor):
         if value < 100 and divisor > 1:
             return round(value, self._decimals)
         return round(value)
+
+
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
+    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
+    models={"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"},
+)
+class ElectricalMeasurement(BaseElectricalMeasurement):
+    """Active power measurement."""
+
+    _unique_id_suffix = "active_power"
+    _previous_platform_unique_ids = ("",)
 
 
 @MULTI_MATCH(
@@ -840,6 +842,8 @@ class Humidity(Sensor):
     """Humidity sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "humidity"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
@@ -852,6 +856,8 @@ class SoilMoisture(Sensor):
     """Soil Moisture sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "soil_mosture"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "soil_moisture"
@@ -865,6 +871,8 @@ class LeafWetness(Sensor):
     """Leaf Wetness sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "leaf_wetness"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "leaf_wetness"
@@ -878,6 +886,8 @@ class Illuminance(Sensor):
     """Illuminance Sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "illuminance"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ILLUMINANCE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
@@ -912,6 +922,8 @@ class SmartEnergyMetering(PollableSensor):
 
     entity_description: SmartEnergyMeteringEntityDescription
     _use_custom_polling: bool = False
+    _unique_id_suffix = "metering"
+    _previous_platform_unique_ids = ("",)
     _attribute_name = "instantaneous_demand"
     _attr_translation_key: str = "instantaneous_demand"
     _attr_extra_state_attribute_names: set[str] = {
@@ -980,14 +992,13 @@ class SmartEnergyMetering(PollableSensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self.recompute_capabilities()
 
     def recompute_capabilities(self) -> None:
@@ -1226,6 +1237,8 @@ class Pressure(Sensor):
     """Pressure sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "pressure"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PRESSURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1238,6 +1251,8 @@ class Flow(Sensor):
     """Flow Measurement sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "flow"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLUME_FLOW_RATE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 10
@@ -1256,6 +1271,8 @@ class Temperature(Sensor):
     """Temperature Sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "temperature"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
@@ -1268,6 +1285,8 @@ class DeviceTemperature(Sensor):
     """Device Temperature Sensor."""
 
     _attribute_name = "current_temperature"
+    _unique_id_suffix = "device_temperature"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "device_temperature"
@@ -1282,6 +1301,8 @@ class InovelliInternalTemperature(Sensor):
     """Switch Internal Temperature Sensor."""
 
     _attribute_name = "internal_temp_monitor"
+    _unique_id_suffix = "internal_temp_monitor"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "internal_temp_monitor"
@@ -1312,6 +1333,8 @@ class CarbonDioxideConcentration(Sensor):
     """Carbon Dioxide Concentration sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "carbon_dioxide_concentration"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO2
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1325,6 +1348,8 @@ class CarbonMonoxideConcentration(Sensor):
     """Carbon Monoxide Concentration sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "carbon_monoxide_concentration"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1339,6 +1364,8 @@ class VOCLevel(Sensor):
     """VOC Level sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "voc_level"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1356,6 +1383,8 @@ class PPBVOCLevel(Sensor):
     """VOC Level sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "ppb_voc_level"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = (
         SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS
     )
@@ -1371,6 +1400,8 @@ class PM25(Sensor):
     """Particulate Matter 2.5 microns or less sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "pm25"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PM25
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1384,6 +1415,8 @@ class ElectricalConductivity(Sensor):
     """Electrical Conductivity sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "electrical_conductivity"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CONDUCTIVITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfConductivity.MICROSIEMENS_PER_CM
@@ -1394,6 +1427,8 @@ class FormaldehydeConcentration(Sensor):
     """Formaldehyde Concentration sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "formaldehyde"
+    _previous_platform_unique_ids = ("",)
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "formaldehyde"
     _decimals = 0
@@ -1538,14 +1573,13 @@ class RSSISensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -1836,14 +1870,13 @@ class BitMapSensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {
             bit.name for bit in list(self._bitmap)
         }
@@ -1967,6 +2000,8 @@ class WindSpeed(Sensor):
     """Wind Speed sensor."""
 
     _attribute_name = "measured_value"
+    _unique_id_suffix = "wind_speed"
+    _previous_platform_unique_ids = ("",)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.WIND_SPEED
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
