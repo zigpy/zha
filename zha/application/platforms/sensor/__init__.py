@@ -558,6 +558,9 @@ class Battery(Sensor):
         "battery_voltage",
     }
 
+    _unique_id_suffix = "battery_percentage"
+    _previous_platform_unique_ids = ("",)
+
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
         return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
@@ -1563,6 +1566,9 @@ class SinopeHVACAction(ThermostatHVACAction):
 class RSSISensor(Sensor):
     """RSSI sensor for a device."""
 
+    # This is the only sensor type expected to override the unique ID.
+    # TODO: migrate this away from `PlatformEntity`
+    _unique_id_override = "rssi"
     _unique_id_suffix = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
@@ -1605,13 +1611,13 @@ class RSSISensor(Sensor):
     def state(self) -> dict:
         """Return the state of the sensor."""
         response = super().state
-        response["state"] = getattr(self.device.device, self._unique_id_suffix)
+        response["state"] = self.device.device.rssi
         return response
 
     @property
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
-        return getattr(self._device.device, self._unique_id_suffix)
+        return self._device.device.rssi
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -1640,10 +1646,25 @@ class RSSISensor(Sensor):
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
+    # This is the only sensor type expected to override the unique ID.
+    # TODO: migrate this away from `PlatformEntity`
+    _unique_id_override = "lqi"
     _unique_id_suffix = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
+
+    @property
+    def state(self) -> dict:
+        """Return the state of the sensor."""
+        response = super().state
+        response["state"] = self.device.device.lqi
+        return response
+
+    @property
+    def native_value(self) -> str | int | float | None:
+        """Return the state of the entity."""
+        return self._device.device.lqi
 
 
 @MULTI_MATCH(

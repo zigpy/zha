@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 import functools
 import logging
-import typing
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import BinarySensorMetadata
+from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
@@ -60,7 +61,7 @@ class BinarySensor(PlatformEntity):
 
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
-    _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
+    _attribute_converter: Callable[[Any], Any] | None = None
     PLATFORM: Platform = Platform.BINARY_SENSOR
 
     def __init__(
@@ -246,23 +247,22 @@ class IASZone(BinarySensor):
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        cluster_handler = cluster_handlers[0]
+        zone_type = cluster_handler.cluster.get("zone_type")
 
-        zone_type = self._cluster_handler.cluster.get("zone_type")
         if zone_type is None:
-            self._attr_unique_id_suffix = "ias_zone"
+            self._unique_id_suffix = "ias_zone"
             self._attr_translation_key = "ias_zone"
             self._attr_device_class = None
         else:
-            self._attr_unique_id_suffix = zone_type.name.lower()
+            zone_type = IasZone.ZoneType(zone_type)
+            self._unique_id_suffix = zone_type.name.lower()
             self._attr_translation_key = (
                 None if zone_type in IAS_ZONE_CLASS_MAPPING else "ias_zone"
             )
             self._attr_device_class = IAS_ZONE_CLASS_MAPPING.get(zone_type)
 
-        self._attr_device_class = self.device_class
-        self._attr_translation_key = self.translation_key
-        self._unique_id_suffix = self.unique_id_suffix
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
 
     @staticmethod
     def parse(value: bool | int) -> bool:

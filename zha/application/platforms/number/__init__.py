@@ -77,6 +77,9 @@ class Number(PlatformEntity):
     _attr_translation_key: str = "number"
     _attr_mode: NumberMode = NumberMode.AUTO
 
+    _unique_id_suffix = "analog_output"
+    _previous_platform_unique_ids = ("",)
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],

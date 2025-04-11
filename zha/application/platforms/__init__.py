@@ -346,6 +346,9 @@ class PlatformEntity(BaseEntity):
     _unique_id_suffix: str
     _previous_platform_unique_ids: tuple[str] = ()
 
+    # For the two entities currently using this feature, allow overriding the entire ID
+    _unique_id_override: str | None = None
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -359,19 +362,23 @@ class PlatformEntity(BaseEntity):
             self._init_from_quirks_metadata(entity_metadata)
 
         assert self._unique_id_suffix is not None
-        super().__init__(unique_id=f"{device.ieee}-{self._unique_id_suffix}", **kwargs)
-
-        # To avoid boilerplate, automatically generate legacy unique ID migrations
         cluster = cluster_handlers[0].cluster
 
+        if self._unique_id_override is not None:
+            # This feature is used by only LQI and RSSI and will be removed
+            unique_id = f"{device.ieee}-{self._unique_id_override}"
+        else:
+            unique_id = f"{device.ieee}-{endpoint.id}-0x{cluster.cluster_id:04x}-{self._unique_id_suffix}"
+
+        super().__init__(unique_id=unique_id, **kwargs)
+
+        # To avoid boilerplate, automatically generate legacy unique ID migrations
         for suffix in self._previous_platform_unique_ids:
             if suffix == "":
-                self._previous_unique_ids.append(
-                    f"{device.ieee}-{endpoint.endpoint_id}-{cluster.cluster_id}"
-                )
+                self._previous_unique_ids.append(f"{device.ieee}-{endpoint.id}")
             else:
                 self._previous_unique_ids.append(
-                    f"{device.ieee}-{endpoint.endpoint_id}-{cluster.cluster_id}-{suffix}"
+                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}-{suffix}"
                 )
 
         # To avoid requiring unique ID migrations for everything with a suffix,
@@ -381,7 +388,7 @@ class PlatformEntity(BaseEntity):
             is PlatformEntity._previous_platform_unique_ids
         ):
             self._previous_unique_ids.append(
-                f"{device.ieee}-{endpoint.endpoint_id}-{self._unique_id_suffix}"
+                f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}-{self._unique_id_suffix}"
             )
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers

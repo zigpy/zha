@@ -741,48 +741,24 @@ async def test_device_properties(
     assert zha_device.sw_version is None
 
     assert len(zha_device.platform_entities) == 3
-    assert (
-        Platform.SENSOR,
-        "00:0d:6f:00:0a:90:69:e7-3-0-lqi",
-    ) in zha_device.platform_entities
-    assert (
-        Platform.SENSOR,
-        "00:0d:6f:00:0a:90:69:e7-3-0-rssi",
-    ) in zha_device.platform_entities
-    assert (
-        Platform.SWITCH,
-        "00:0d:6f:00:0a:90:69:e7-3-6",
-    ) in zha_device.platform_entities
 
-    assert isinstance(
-        zha_device.platform_entities[
-            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi")
-        ],
-        LQISensor,
-    )
-    assert isinstance(
-        zha_device.platform_entities[
-            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-rssi")
-        ],
-        RSSISensor,
-    )
-    assert isinstance(
-        zha_device.platform_entities[(Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-6")],
-        Switch,
-    )
+    lqi_entity = zha_device.platform_entities[
+        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-lqi"
+    ]
+    assert "00:0d:6f:00:0a:90:69:e7-3-0-lqi" in lqi_entity.previous_unique_ids
+    assert type(lqi_entity) is LQISensor
 
-    assert (
-        zha_device.get_platform_entity(
-            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
-        )
-        is not None
-    )
-    assert isinstance(
-        zha_device.get_platform_entity(
-            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
-        ),
-        LQISensor,
-    )
+    rssi_entity = zha_device.platform_entities[
+        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-rssi"
+    ]
+    assert "00:0d:6f:00:0a:90:69:e7-3-0-rssi" in rssi_entity.previous_unique_ids
+    assert type(rssi_entity) is RSSISensor
+
+    switch_entity = zha_device.platform_entities[
+        (Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-0x0006-switch")
+    ]
+    assert "00:0d:6f:00:0a:90:69:e7-3-6" in switch_entity.previous_unique_ids
+    assert isinstance(switch_entity, Switch)
 
     with pytest.raises(KeyError, match="Entity foo not found"):
         zha_device.get_platform_entity("bar", "foo")
