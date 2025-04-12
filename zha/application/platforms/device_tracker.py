@@ -51,7 +51,7 @@ class DeviceScannerEntity(PlatformEntity):
     __polling_interval: int
 
     _unique_id_suffix = "device_tracker"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_ENDPOINT, ""),)
 
     def __init__(
         self,

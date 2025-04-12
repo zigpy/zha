@@ -38,7 +38,7 @@ class DoorLock(PlatformEntity):
     PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
     _unique_id_suffix = "door_lock"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
     _attr_primary_weight = 10
 
     def __init__(

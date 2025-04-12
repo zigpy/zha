@@ -72,7 +72,7 @@ class Siren(PlatformEntity):
     _attr_primary_weight = 10
 
     _unique_id_suffix = "siren"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
     def __init__(
         self,

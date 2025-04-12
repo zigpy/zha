@@ -67,7 +67,10 @@ class Cover(PlatformEntity):
 
     _attr_translation_key: str = "cover"
     _unique_id_suffix = "cover"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_ENDPOINT, ""),
+        (UniqueIdMigration.LEGACY_CLUSTER, ""),
+    )
     _attr_primary_weight = 10
 
     def __init__(
@@ -607,7 +610,10 @@ class Shade(PlatformEntity):
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
     _unique_id_suffix = "shade"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_CLUSTER, ""),
+        (UniqueIdMigration.LEGACY_ENDPOINT, ""),
+    )
     _attr_supported_features: CoverEntityFeature = (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE

@@ -60,7 +60,10 @@ class AlarmControlPanel(PlatformEntity):
     PLATFORM = Platform.ALARM_CONTROL_PANEL
     _attr_translation_key: str = "alarm_control_panel"
     _unique_id_suffix = "alarm_control_panel"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_ENDPOINT, ""),
+        (UniqueIdMigration.LEGACY_CLUSTER, ""),
+    )
 
     def __init__(
         self,

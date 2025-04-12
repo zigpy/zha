@@ -387,7 +387,6 @@ class PlatformEntity(BaseEntity):
                         endpoint,
                         cluster,
                         suffix,
-                        legacy_discovery_unique_id=legacy_discovery_unique_id,
                     )
                 )
         elif legacy_discovery_unique_id is not None:

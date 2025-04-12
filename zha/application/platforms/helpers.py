@@ -113,8 +113,6 @@ def format_legacy_platform_unique_id(
     endpoint: Endpoint,
     cluster: Cluster,
     suffix: str,
-    *,
-    legacy_discovery_unique_id: str | None,
 ) -> str:
     """Create a unique ID based on the provided information."""
     if suffix != "":
@@ -128,9 +126,6 @@ def format_legacy_platform_unique_id(
         case UniqueIdMigration.LEGACY_ENDPOINT:
             assert endpoint is not None
             return f"{device.ieee}-{endpoint.id}{suffix}"
-        case UniqueIdMigration.LEGACY_DISCOVERY:
-            assert legacy_discovery_unique_id is not None
-            return f"{legacy_discovery_unique_id}{suffix}"
         case _:
             raise ValueError(f"Invalid migration type: {migration_type}")
 

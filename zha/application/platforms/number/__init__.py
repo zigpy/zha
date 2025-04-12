@@ -79,7 +79,7 @@ class Number(PlatformEntity):
     _attr_mode: NumberMode = NumberMode.AUTO
 
     _unique_id_suffix = "analog_output"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
     def __init__(
         self,

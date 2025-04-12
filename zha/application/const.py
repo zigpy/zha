@@ -229,7 +229,6 @@ class UniqueIdMigration(enum.Enum):
 
     LEGACY_CLUSTER = "legacy_cluster"
     LEGACY_ENDPOINT = "legacy_endpoint"
-    LEGACY_DISCOVERY = "legacy_discovery"
 
     DEVICE = "device"
     CLUSTER = "cluster"

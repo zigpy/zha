@@ -162,7 +162,7 @@ class Accelerometer(BinarySensor):
     _attr_translation_key: str = "accelerometer"
 
     _unique_id_suffix = "acceleration"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY)
@@ -174,7 +174,7 @@ class Occupancy(BinarySensor):
     _attr_primary_weight = 2
 
     _unique_id_suffix = "occupancy"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_HUE_OCCUPANCY)
@@ -194,7 +194,7 @@ class Opening(BinarySensor):
     _attr_primary_weight = 1
 
     _unique_id_suffix = "opening"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -205,7 +205,7 @@ class BinaryInput(BinarySensor):
     _attr_translation_key: str = "binary_input"
 
     _unique_id_suffix = "binary_input"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
 
 @STRICT_MATCH(
@@ -226,7 +226,7 @@ class Motion(Opening):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
 
     _unique_id_suffix = "motion"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
@@ -238,7 +238,7 @@ class IASZone(BinarySensor):
 
     # `_unique_id_suffix` calculated below
     # TODO: split this sensor off into individual sensor classes per IASZone type
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
     def __init__(
         self,

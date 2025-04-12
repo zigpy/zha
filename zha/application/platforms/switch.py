@@ -108,7 +108,7 @@ class Switch(PlatformEntity, BaseSwitch):
 
     _attr_translation_key = "switch"
     _unique_id_suffix = "switch"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_ENDPOINT, ""),)
     _attr_primary_weight = 10
 
     def __init__(

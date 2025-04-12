@@ -204,7 +204,7 @@ class BaseFan(BaseEntity):
 class Fan(PlatformEntity, BaseFan):
     """Representation of a ZHA fan."""
 
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
     def __init__(
         self,

@@ -122,7 +122,7 @@ class IdentifyButton(Button):
     _args = [DEFAULT_DURATION]
 
     _unique_id_suffix = "identify"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
