@@ -93,8 +93,6 @@ PRESET_NONE = "none"
 
 ENTITY_METADATA = "entity_metadata"
 
-ENTITY_PREVIOUS_UNIQUE_IDS = "previous_unique_ids"
-
 ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
 REPORT_CONFIG = "REPORT_CONFIG"
 
@@ -224,3 +222,15 @@ class UniqueIdRoot(enum.Enum):
     DEVICE = "device"
     ENDPOINT = "endpoint"
     CLUSTER = "cluster"
+
+
+class UniqueIdMigration(enum.Enum):
+    """Migrateion root for unique ID."""
+
+    LEGACY_CLUSTER = "legacy_cluster"
+    LEGACY_ENDPOINT = "legacy_endpoint"
+    LEGACY_DISCOVERY = "legacy_discovery"
+
+    DEVICE = "device"
+    CLUSTER = "cluster"
+    ENDPOINT = "endpoint"

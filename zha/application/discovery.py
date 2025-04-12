@@ -401,6 +401,7 @@ class DeviceProbe:
                     endpoint=endpoint,
                     device=device,
                     entity_metadata=entity_metadata,
+                    legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
                 )
 
                 _LOGGER.debug(
@@ -478,11 +479,12 @@ class EndpointProbe:
     ) -> Iterator[PlatformEntity]:
         """Process an endpoint on a zigpy device."""
 
-        unique_id = endpoint.unique_id
+        device = endpoint.device
+        legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
 
         platform: str | None = None
-        if unique_id in device_overrides:
-            platform = device_overrides.get(unique_id).type
+        if legacy_discovery_unique_id in device_overrides:
+            platform = device_overrides.get(legacy_discovery_unique_id).type
         if platform is None:
             ep_profile_id = endpoint.zigpy_endpoint.profile_id
             ep_device_type = endpoint.zigpy_endpoint.device_type
@@ -492,22 +494,23 @@ class EndpointProbe:
             platform = cast(Platform, platform)
 
             cluster_handlers = endpoint.unclaimed_cluster_handlers()
-            platform_entity_class, claimed = PLATFORM_ENTITIES.get_entity(
+            entity_class, claimed = PLATFORM_ENTITIES.get_entity(
                 platform,
                 endpoint.device.manufacturer,
                 endpoint.device.model,
                 cluster_handlers,
                 endpoint.device.quirk_id,
             )
-            if platform_entity_class is None:
+            if entity_class is None:
                 return
 
             endpoint.claim_cluster_handlers(claimed)
 
-            yield platform_entity_class(
+            yield entity_class(
                 endpoint=endpoint,
                 device=endpoint.device,
                 cluster_handlers=claimed,
+                legacy_discovery_unique_id=legacy_discovery_unique_id,
             )
 
     def probe_single_cluster(
@@ -519,24 +522,25 @@ class EndpointProbe:
         """Probe specified cluster for specific platform."""
         if platform is None or platform not in PLATFORMS:
             return
-        cluster_handler_list = [cluster_handler]
 
         entity_class, claimed = PLATFORM_ENTITIES.get_entity(
             platform,
             endpoint.device.manufacturer,
             endpoint.device.model,
-            cluster_handler_list,
+            [cluster_handler],
             endpoint.device.quirk_id,
         )
         if entity_class is None:
             return
 
         endpoint.claim_cluster_handlers(claimed)
+        device = endpoint.device
 
         yield entity_class(
             endpoint=endpoint,
             device=endpoint.device,
             cluster_handlers=claimed,
+            legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}-{cluster_handler.cluster.cluster_id}",
         )
 
     def discover_by_cluster_id(self, endpoint: Endpoint) -> Iterator[PlatformEntity]:
@@ -609,6 +613,7 @@ class EndpointProbe:
     ) -> Iterator[PlatformEntity]:
         """Process an endpoint on and discover multiple entities."""
 
+        device = endpoint.device
         ep_profile_id = endpoint.zigpy_endpoint.profile_id
         ep_device_type = endpoint.zigpy_endpoint.device_type
         cmpt_by_dev_type = DEVICE_CLASS[ep_profile_id].get(ep_device_type)
@@ -621,17 +626,17 @@ class EndpointProbe:
                     endpoint.client_cluster_handlers[ota_handler_id]
                 )
             matches, claimed = PLATFORM_ENTITIES.get_config_diagnostic_entity(
-                endpoint.device.manufacturer,
-                endpoint.device.model,
+                device.manufacturer,
+                device.model,
                 cluster_handlers,
-                endpoint.device.quirk_id,
+                device.quirk_id,
             )
         else:
             matches, claimed = PLATFORM_ENTITIES.get_multi_entity(
-                endpoint.device.manufacturer,
-                endpoint.device.model,
+                device.manufacturer,
+                device.model,
                 endpoint.unclaimed_cluster_handlers(),
-                endpoint.device.quirk_id,
+                device.quirk_id,
             )
 
         endpoint.claim_cluster_handlers(claimed)
@@ -649,15 +654,19 @@ class EndpointProbe:
                     # like thermostats we'll take only 1st class
                     yield entity_and_handler.entity_class(
                         endpoint=endpoint,
-                        device=endpoint.device,
+                        device=device,
                         cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                        legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
                     )
                     break
 
+                first_ch = entity_and_handler.claimed_cluster_handlers[0]
+
                 yield entity_and_handler.entity_class(
                     endpoint=endpoint,
-                    device=endpoint.device,
+                    device=device,
                     cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                    legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}",
                 )
 
 

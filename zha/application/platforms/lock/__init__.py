@@ -9,7 +9,7 @@ from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.const import UniqueIdRoot
+from zha.application.const import UniqueIdMigration
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.lock.const import (
     STATE_LOCKED,
@@ -38,7 +38,7 @@ class DoorLock(PlatformEntity):
     PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
     _unique_id_suffix = "door_lock"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_primary_weight = 10
 
     def __init__(

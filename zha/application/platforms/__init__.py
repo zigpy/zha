@@ -16,7 +16,7 @@ from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
-from zha.application.const import UniqueIdRoot
+from zha.application.const import UniqueIdMigration, UniqueIdRoot
 from zha.application.platforms.helpers import (
     format_legacy_platform_unique_id,
     format_platform_unique_id,
@@ -56,7 +56,7 @@ class BaseEntityInfo:
 
     fallback_name: str
     unique_id: str
-    previous_unique_ids: frozenset[str]
+    migrate_unique_ids: frozenset[str]
     platform: str
     class_name: str
     translation_key: str | None
@@ -137,7 +137,7 @@ class BaseEntity(LogMixin, EventBase):
         super().__init__()
 
         self._unique_id: str = unique_id
-        self._previous_unique_ids: list[str] = []
+        self._migrate_unique_ids: list[str] = []
 
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
@@ -241,9 +241,9 @@ class BaseEntity(LogMixin, EventBase):
 
     @final
     @property
-    def previous_unique_ids(self) -> frozenset[str]:
-        """Return the previous unique id, if any."""
-        return frozenset(self._previous_unique_ids)
+    def migrate_unique_ids(self) -> frozenset[str]:
+        """Return the previous unique ids to migrate from, if any."""
+        return frozenset(self._migrate_unique_ids)
 
     @cached_property
     def identifiers(self) -> BaseIdentifiers:
@@ -259,7 +259,7 @@ class BaseEntity(LogMixin, EventBase):
 
         return BaseEntityInfo(
             unique_id=self.unique_id,
-            previous_unique_ids=self.previous_unique_ids,
+            migrate_unique_ids=self.migrate_unique_ids,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
             fallback_name=self.fallback_name,
@@ -353,7 +353,7 @@ class PlatformEntity(BaseEntity):
     # Root for the suffix. By default, the suffix is added to the cluster ID.
     _unique_id_root: UniqueIdRoot = UniqueIdRoot.CLUSTER
 
-    _previous_platform_unique_ids: tuple[tuple[UniqueIdRoot, str]] | None = None
+    _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
     def __init__(
         self,
@@ -361,6 +361,7 @@ class PlatformEntity(BaseEntity):
         endpoint: Endpoint,
         device: Device,
         entity_metadata: EntityMetadata | None = None,
+        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
@@ -377,26 +378,22 @@ class PlatformEntity(BaseEntity):
             **kwargs,
         )
 
-        # To avoid boilerplate unique ID migrations for everything with a suffix, have a
-        # default one
-        if self._previous_platform_unique_ids is None:
-            self._previous_unique_ids.append(
-                format_legacy_platform_unique_id(
-                    self._unique_id_root,
-                    device,
-                    endpoint,
-                    cluster,
-                    self._unique_id_suffix,
-                ),
-            )
-        else:
-            # Generate previous unique IDs for this entity
-            for root, suffix in self._previous_platform_unique_ids:
-                self._previous_unique_ids.append(
+        if self._migrate_platform_unique_ids is not None:
+            for migration_type, suffix in self._migrate_platform_unique_ids:
+                self._migrate_unique_ids.append(
                     format_legacy_platform_unique_id(
-                        root, device, endpoint, cluster, suffix
+                        migration_type,
+                        device,
+                        endpoint,
+                        cluster,
+                        suffix,
+                        legacy_discovery_unique_id=legacy_discovery_unique_id,
                     )
                 )
+        elif legacy_discovery_unique_id is not None:
+            self._migrate_unique_ids.append(
+                f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
+            )
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 from zigpy.zcl import Cluster
 
-from zha.application.const import UniqueIdRoot
+from zha.application.const import UniqueIdMigration, UniqueIdRoot
 
 if TYPE_CHECKING:
     from zha.application.platforms.binary_sensor.const import BinarySensorDeviceClass
@@ -108,28 +108,31 @@ def validate_device_class(
 
 
 def format_legacy_platform_unique_id(
-    root: UniqueIdRoot,
+    migration_type: UniqueIdMigration,
     device: Device,
     endpoint: Endpoint,
     cluster: Cluster,
     suffix: str,
+    *,
+    legacy_discovery_unique_id: str | None,
 ) -> str:
     """Create a unique ID based on the provided information."""
     if suffix != "":
         suffix = "-" + suffix
 
-    match root:
-        case UniqueIdRoot.CLUSTER:
+    match migration_type:
+        case UniqueIdMigration.LEGACY_CLUSTER:
             assert endpoint is not None
             assert cluster is not None
             return f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}{suffix}"
-        case UniqueIdRoot.ENDPOINT:
+        case UniqueIdMigration.LEGACY_ENDPOINT:
             assert endpoint is not None
             return f"{device.ieee}-{endpoint.id}{suffix}"
-        case UniqueIdRoot.DEVICE:
-            return f"{device.ieee}{suffix}"
+        case UniqueIdMigration.LEGACY_DISCOVERY:
+            assert legacy_discovery_unique_id is not None
+            return f"{legacy_discovery_unique_id}{suffix}"
         case _:
-            raise ValueError(f"Invalid unique_id_root: {root}")
+            raise ValueError(f"Invalid migration type: {migration_type}")
 
 
 def format_platform_unique_id(

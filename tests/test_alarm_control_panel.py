@@ -78,7 +78,7 @@ async def test_alarm_control_panel(
         )
     )
     assert alarm_entity is not None
-    assert "00:0d:6f:00:0a:90:69:e7-1" in alarm_entity.previous_unique_ids
+    assert "00:0d:6f:00:0a:90:69:e7-1" in alarm_entity.migrate_unique_ids
     assert isinstance(alarm_entity, AlarmControlPanel)
 
     # test that the state is STATE_ALARM_DISARMED

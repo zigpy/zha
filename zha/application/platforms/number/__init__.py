@@ -12,7 +12,7 @@ from zigpy.quirks.v2 import NumberMetadata
 from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
-from zha.application.const import UniqueIdRoot
+from zha.application.const import UniqueIdMigration
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import (
@@ -79,7 +79,7 @@ class Number(PlatformEntity):
     _attr_mode: NumberMode = NumberMode.AUTO
 
     _unique_id_suffix = "analog_output"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
 
     def __init__(
         self,

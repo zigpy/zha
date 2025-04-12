@@ -24,7 +24,7 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_HIGH,
     WARNING_DEVICE_STROBE_NO,
     Strobe,
-    UniqueIdRoot,
+    UniqueIdMigration,
 )
 from zha.application.platforms import BaseEntityInfo, PlatformEntity
 from zha.application.registries import PLATFORM_ENTITIES
@@ -72,7 +72,7 @@ class Siren(PlatformEntity):
     _attr_primary_weight = 10
 
     _unique_id_suffix = "siren"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
 
     def __init__(
         self,

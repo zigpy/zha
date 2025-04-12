@@ -785,16 +785,17 @@ async def test_devices_from_files(
                     f"Duplicate unique_id {unique_id} found in entities: {entities}"
                 )
 
-        unique_id_migrations: dict[str, PlatformEntity] = {}
+        unique_id_migrations: dict[tuple[Platform, str], PlatformEntity] = {}
         for entity in zha_device.platform_entities.values():
-            for old_unique_id in entity.previous_unique_ids:
-                if old_unique_id in unique_id_migrations:
+            for old_unique_id in entity.migrate_unique_ids:
+                key = (entity.PLATFORM, old_unique_id)
+                if key in unique_id_migrations:
                     raise ValueError(
-                        f"Duplicate unique_id {old_unique_id} found in migration: "
-                        f"{unique_id_migrations[old_unique_id]} and {entity}"
+                        f"Duplicate unique_id {key} found in migration: "
+                        f"{unique_id_migrations[key]} and {entity}"
                     )
 
-                unique_id_migrations[old_unique_id] = entity
+                unique_id_migrations[key] = entity
 
         assert zha_device is not None
 
@@ -808,17 +809,17 @@ async def test_devices_from_files(
         entity_count = 0
         # Iterate over the platform_entities in device.platform_entities
         for platform_name, entities_info in zha_lib_entities.items():
+            platform = Platform(platform_name)
+
             for info in entities_info:
                 entity_count += 1
                 unique_id = info["info_object"]["unique_id"]
 
                 # Migrate the unique ID if necessary
-                if unique_id in unique_id_migrations:
-                    unique_id = unique_id_migrations[unique_id].unique_id
+                if (platform, unique_id) in unique_id_migrations:
+                    unique_id = unique_id_migrations[platform, unique_id].unique_id
 
-                platform_entity = zha_device.platform_entities[
-                    Platform(platform_name), unique_id
-                ]
+                platform_entity = zha_device.platform_entities[platform, unique_id]
 
                 # Assert that the entity properties match those in the json data
                 assert (

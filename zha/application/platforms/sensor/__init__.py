@@ -21,7 +21,7 @@ from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 
 from zha.application import Platform
-from zha.application.const import UniqueIdRoot
+from zha.application.const import UniqueIdMigration, UniqueIdRoot
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -560,7 +560,7 @@ class Battery(Sensor):
     }
 
     _unique_id_suffix = "battery_percentage"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
 
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
@@ -665,7 +665,7 @@ class ElectricalMeasurement(BaseElectricalMeasurement):
     """Active power measurement."""
 
     _unique_id_suffix = "active_power"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
 
 
 @MULTI_MATCH(
@@ -684,6 +684,9 @@ class ElectricalMeasurementRMSActivePowerPhB(PolledElectricalMeasurement):
 
     _attribute_name = "active_power_ph_b"
     _unique_id_suffix = "active_power_ph_b"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "active_power_ph_b"),
+    )
     _attr_translation_key: str = "active_power_ph_b"
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _skip_creation_if_no_attr_cache = True
@@ -696,6 +699,9 @@ class ElectricalMeasurementRMSActivePowerPhC(PolledElectricalMeasurement):
 
     _attribute_name = "active_power_ph_c"
     _unique_id_suffix = "active_power_ph_c"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "active_power_ph_c"),
+    )
     _attr_translation_key: str = "active_power_ph_c"
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _skip_creation_if_no_attr_cache = True
@@ -708,6 +714,9 @@ class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
 
     _attribute_name = "apparent_power"
     _unique_id_suffix = "apparent_power"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "apparent_power"),
+    )
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
@@ -721,6 +730,9 @@ class ElectricalMeasurementRMSCurrent(PolledElectricalMeasurement):
 
     _attribute_name = "rms_current"
     _unique_id_suffix = "rms_current"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "rms_current"),
+    )
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
@@ -734,6 +746,9 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
 
     _attribute_name = "rms_current_ph_b"
     _unique_id_suffix = "rms_current_ph_b"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "rms_current_ph_b"),
+    )
     _attr_translation_key: str = "rms_current_ph_b"
     _skip_creation_if_no_attr_cache = True
     _attr_max_attribute_name: str = "rms_current_max_ph_b"
@@ -745,6 +760,9 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
 
     _attribute_name: str = "rms_current_ph_c"
     _unique_id_suffix: str = "rms_current_ph_c"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "rms_current_ph_c"),
+    )
     _attr_translation_key: str = "rms_current_ph_c"
     _skip_creation_if_no_attr_cache = True
     _attr_max_attribute_name: str = "rms_current_max_ph_c"
@@ -756,6 +774,9 @@ class ElectricalMeasurementRMSVoltage(PolledElectricalMeasurement):
 
     _attribute_name = "rms_voltage"
     _unique_id_suffix = "rms_voltage"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "rms_voltage"),
+    )
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
@@ -769,6 +790,9 @@ class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
 
     _attribute_name = "rms_voltage_ph_b"
     _unique_id_suffix = "rms_voltage_ph_b"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "rms_voltage_ph_b"),
+    )
     _attr_translation_key: str = "rms_voltage_ph_b"
     _skip_creation_if_no_attr_cache = True
     _attr_max_attribute_name = "rms_voltage_max_ph_b"
@@ -780,6 +804,9 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
 
     _attribute_name = "rms_voltage_ph_c"
     _unique_id_suffix = "rms_voltage_ph_c"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "rms_voltage_ph_c"),
+    )
     _attr_translation_key: str = "rms_voltage_ph_c"
     _skip_creation_if_no_attr_cache = True
     _attr_max_attribute_name = "rms_voltage_max_ph_c"
@@ -791,6 +818,9 @@ class ElectricalMeasurementFrequency(PolledElectricalMeasurement):
 
     _attribute_name = "ac_frequency"
     _unique_id_suffix = "ac_frequency"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "ac_frequency"),
+    )
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_translation_key: str = "ac_frequency"
@@ -805,6 +835,9 @@ class ElectricalMeasurementPowerFactor(PolledElectricalMeasurement):
 
     _attribute_name = "power_factor"
     _unique_id_suffix = "power_factor"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "power_factor"),
+    )
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
@@ -818,6 +851,9 @@ class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
 
     _attribute_name = "power_factor_ph_b"
     _unique_id_suffix = "power_factor_ph_b"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "power_factor_ph_b"),
+    )
     _attr_translation_key: str = "power_factor_ph_b"
     _skip_creation_if_no_attr_cache = True
     _attr_max_attribute_name = "power_factor_max_ph_b"
@@ -829,6 +865,9 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
 
     _attribute_name = "power_factor_ph_c"
     _unique_id_suffix = "power_factor_ph_c"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "power_factor_ph_c"),
+    )
     _attr_translation_key: str = "power_factor_ph_c"
     _skip_creation_if_no_attr_cache = True
     _attr_max_attribute_name = "power_factor_max_ph_c"
@@ -847,7 +886,7 @@ class Humidity(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "humidity"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
@@ -861,7 +900,7 @@ class SoilMoisture(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "soil_mosture"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "soil_moisture"
@@ -876,7 +915,7 @@ class LeafWetness(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "leaf_wetness"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "leaf_wetness"
@@ -891,7 +930,7 @@ class Illuminance(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "illuminance"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ILLUMINANCE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
@@ -927,7 +966,7 @@ class SmartEnergyMetering(PollableSensor):
     entity_description: SmartEnergyMeteringEntityDescription
     _use_custom_polling: bool = False
     _unique_id_suffix = "metering"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attribute_name = "instantaneous_demand"
     _attr_translation_key: str = "instantaneous_demand"
     _attr_extra_state_attribute_names: set[str] = {
@@ -1056,6 +1095,9 @@ class SmartEnergySummation(SmartEnergyMetering):
     _attribute_name = "current_summ_delivered"
     _unique_id_suffix = "summation_delivered"
     _attr_translation_key: str = "summation_delivered"
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_DISCOVERY, "summation_delivered"),
+    )
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergySummationEntityDescription(
@@ -1242,7 +1284,7 @@ class Pressure(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "pressure"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PRESSURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1256,7 +1298,7 @@ class Flow(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "flow"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLUME_FLOW_RATE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 10
@@ -1276,7 +1318,7 @@ class Temperature(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "temperature"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
@@ -1290,7 +1332,7 @@ class DeviceTemperature(Sensor):
 
     _attribute_name = "current_temperature"
     _unique_id_suffix = "device_temperature"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "device_temperature"
@@ -1306,7 +1348,7 @@ class InovelliInternalTemperature(Sensor):
 
     _attribute_name = "internal_temp_monitor"
     _unique_id_suffix = "internal_temp_monitor"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.TEMPERATURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "internal_temp_monitor"
@@ -1338,7 +1380,7 @@ class CarbonDioxideConcentration(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "carbon_dioxide_concentration"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO2
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1353,7 +1395,7 @@ class CarbonMonoxideConcentration(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "carbon_monoxide_concentration"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1369,7 +1411,7 @@ class VOCLevel(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "voc_level"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1388,7 +1430,7 @@ class PPBVOCLevel(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "ppb_voc_level"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = (
         SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS
     )
@@ -1405,7 +1447,7 @@ class PM25(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "pm25"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PM25
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _decimals = 0
@@ -1420,7 +1462,7 @@ class ElectricalConductivity(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "electrical_conductivity"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CONDUCTIVITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfConductivity.MICROSIEMENS_PER_CM
@@ -1432,7 +1474,7 @@ class FormaldehydeConcentration(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "formaldehyde"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "formaldehyde"
     _decimals = 0
@@ -1571,7 +1613,8 @@ class RSSISensor(Sensor):
     # TODO: migrate this away from `PlatformEntity`
     _unique_id_root = UniqueIdRoot.DEVICE
     _unique_id_suffix = "rssi"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, "rssi"),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, "rssi"),)
+
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
     _attr_native_unit_of_measurement: str | None = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
@@ -1651,7 +1694,7 @@ class LQISensor(RSSISensor):
     # TODO: migrate this away from `PlatformEntity`
     _unique_id_root = UniqueIdRoot.DEVICE
     _unique_id_suffix = "lqi"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, "lqi"),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, "lqi"),)
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
@@ -2024,7 +2067,7 @@ class WindSpeed(Sensor):
 
     _attribute_name = "measured_value"
     _unique_id_suffix = "wind_speed"
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.WIND_SPEED
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100

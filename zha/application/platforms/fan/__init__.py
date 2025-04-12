@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
-from zha.application.const import UniqueIdRoot
+from zha.application.const import UniqueIdMigration
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -204,7 +204,7 @@ class BaseFan(BaseEntity):
 class Fan(PlatformEntity, BaseFan):
     """Representation of a ZHA fan."""
 
-    _previous_platform_unique_ids = ((UniqueIdRoot.CLUSTER, ""),)
+    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_DISCOVERY, ""),)
 
     def __init__(
         self,
