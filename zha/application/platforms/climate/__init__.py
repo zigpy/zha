@@ -85,7 +85,10 @@ class Thermostat(PlatformEntity):
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key: str = "thermostat"
     _unique_id_suffix = "thermostat"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
+    _migrate_platform_unique_ids = (
+        (UniqueIdMigration.LEGACY_CLUSTER, ""),
+        (UniqueIdMigration.LEGACY_ENDPOINT, ""),
+    )
     _enable_turn_on_off_backwards_compatibility = False
     _attr_extra_state_attribute_names: set[str] = {
         ATTR_SYS_MODE,
