@@ -867,56 +867,6 @@
           "available": true,
           "state": "disarmed"
         }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:0d:6f:00:05:65:83:f2-1-1281",
-          "platform": "alarm_control_panel",
-          "class_name": "AlarmControlPanel",
-          "translation_key": "alarm_control_panel",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "cluster_handlers": [
-            {
-              "class_name": "IasAceClusterHandler",
-              "generic_id": "cluster_handler_0x0501",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1281,
-                "name": "IAS Ancillary Control Equipment",
-                "type": "client"
-              },
-              "id": "1:0x0501",
-              "unique_id": "00:0d:6f:00:05:65:83:f2:1:0x0501",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            242,
-            131,
-            101,
-            5,
-            0,
-            111,
-            13,
-            0
-          ],
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "code_arm_required": false,
-          "code_format": "number",
-          "supported_features": 15
-        },
-        "state": {
-          "class_name": "AlarmControlPanel",
-          "available": true,
-          "state": "disarmed"
-        }
       }
     ],
     "binary_sensor": [
