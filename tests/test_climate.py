@@ -1674,7 +1674,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
     ]
     assert local_temperature_calibration_entity
     assert (
-        "00:0d:6f:00:0a:90:69:e7-1-513-local_temperature_calibration"
+        "00:0d:6f:00:0a:90:69:e7-1-local_temperature_calibration"
         in local_temperature_calibration_entity.migrate_unique_ids
     )
     assert isinstance(local_temperature_calibration_entity, NumberConfigurationEntity)
