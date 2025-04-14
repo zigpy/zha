@@ -128,11 +128,12 @@ def test_discover_by_device_type(device_type, platform, hit) -> None:
 def test_discover_by_device_type_override() -> None:
     """Test entity discovery by device type overriding."""
 
+    device = mock.MagicMock()
+    device.ieee = zigpy.types.EUI64.convert("00:11:22:33:44:55:66:77")
+
     endpoint = mock.MagicMock(spec_set=Endpoint)
-    ep_mock = mock.PropertyMock()
-    ep_mock.return_value.profile_id = 0x0104
-    ep_mock.return_value.device_type = 0x0100
-    type(endpoint).zigpy_endpoint = ep_mock
+    endpoint.id = 1
+    endpoint.device = device
 
     entity_cls = mock.MagicMock()
 
@@ -147,7 +148,7 @@ def test_discover_by_device_type_override() -> None:
             ENDPOINT_PROBE.discover_by_device_type(
                 endpoint,
                 device_overrides={
-                    endpoint.unique_id: DeviceOverridesConfiguration(
+                    "00:11:22:33:44:55:66:77-1": DeviceOverridesConfiguration(
                         type=Platform.SIREN
                     )
                 },
@@ -158,7 +159,7 @@ def test_discover_by_device_type_override() -> None:
         assert entity_cls.mock_calls == [
             call(
                 endpoint=endpoint,
-                device=endpoint.device,
+                device=device,
                 cluster_handlers=mock.sentinel.claimed,
             )
         ]

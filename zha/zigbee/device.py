@@ -825,6 +825,13 @@ class Device(LogMixin, EventBase):
         """Initialize cluster handlers."""
         self.debug("started initialization")
 
+        # Clear out the current entities if we are re-initializing
+        for entity in self._platform_entities.values():
+            await entity.on_remove()
+
+        self._platform_entities.clear()
+
+        # Now, we can discover new ones
         self._discover_new_entities()
 
         await self._zdo_handler.async_initialize(from_cache)
@@ -857,10 +864,12 @@ class Device(LogMixin, EventBase):
 
             if key in entities:
                 _LOGGER.debug("Duplicate entity %s, skipping %s", key, entity)
+                await entity.on_remove()
                 continue
 
             entities[key] = entity
 
+        self._pending_entities.clear()
         self._platform_entities = entities
 
         # At this point we can compute a primary entity
