@@ -361,7 +361,6 @@ class PlatformEntity(BaseEntity):
         endpoint: Endpoint,
         device: Device,
         entity_metadata: EntityMetadata | None = None,
-        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
