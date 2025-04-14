@@ -382,15 +382,26 @@ class PlatformEntity(BaseEntity):
             is PlatformEntity._migrate_platform_unique_ids
         ):
             # Default migration using the current suffix
-            self._migrate_unique_ids.append(
-                format_legacy_platform_unique_id(
-                    UniqueIdMigration.LEGACY_CLUSTER,
-                    device,
-                    endpoint,
-                    cluster,
-                    self._unique_id_suffix,
+            if entity_metadata is not None:
+                self._migrate_unique_ids.append(
+                    format_legacy_platform_unique_id(
+                        UniqueIdMigration.LEGACY_ENDPOINT,
+                        device,
+                        endpoint,
+                        None,
+                        self._unique_id_suffix,
+                    )
                 )
-            )
+            else:
+                self._migrate_unique_ids.append(
+                    format_legacy_platform_unique_id(
+                        UniqueIdMigration.LEGACY_CLUSTER,
+                        device,
+                        endpoint,
+                        cluster,
+                        self._unique_id_suffix,
+                    )
+                )
         else:
             for migration_type, suffix in self._migrate_platform_unique_ids:
                 self._migrate_unique_ids.append(
