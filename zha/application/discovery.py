@@ -543,12 +543,12 @@ class EndpointProbe:
     def discover_by_cluster_id(self, endpoint: Endpoint) -> Iterator[PlatformEntity]:
         """Process an endpoint on a zigpy device."""
 
-        items = SINGLE_INPUT_CLUSTER_DEVICE_CLASS.items()
         single_input_clusters = {
             cluster_class: match
-            for cluster_class, match in items
+            for cluster_class, match in SINGLE_INPUT_CLUSTER_DEVICE_CLASS.items()
             if not isinstance(cluster_class, int)
         }
+
         remaining_cluster_handlers = endpoint.unclaimed_cluster_handlers()
         for cluster_handler in remaining_cluster_handlers:
             if cluster_handler.cluster.cluster_id in CLUSTER_HANDLER_ONLY_CLUSTERS:
