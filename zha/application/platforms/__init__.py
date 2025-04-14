@@ -378,7 +378,21 @@ class PlatformEntity(BaseEntity):
             **kwargs,
         )
 
-        if self._migrate_platform_unique_ids is not None:
+        if (
+            self._migrate_platform_unique_ids
+            is PlatformEntity._migrate_platform_unique_ids
+        ):
+            # Default migration using the current suffix
+            self._migrate_unique_ids.append(
+                format_legacy_platform_unique_id(
+                    UniqueIdMigration.LEGACY_CLUSTER,
+                    device,
+                    endpoint,
+                    cluster,
+                    self._unique_id_suffix,
+                )
+            )
+        else:
             for migration_type, suffix in self._migrate_platform_unique_ids:
                 self._migrate_unique_ids.append(
                     format_legacy_platform_unique_id(
@@ -389,10 +403,6 @@ class PlatformEntity(BaseEntity):
                         suffix,
                     )
                 )
-        elif legacy_discovery_unique_id is not None:
-            self._migrate_unique_ids.append(
-                f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
-            )
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
