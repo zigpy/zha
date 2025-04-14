@@ -825,13 +825,6 @@ class Device(LogMixin, EventBase):
         """Initialize cluster handlers."""
         self.debug("started initialization")
 
-        # Clear out the current entities if we are re-initializing
-        for entity in self._platform_entities.values():
-            await entity.on_remove()
-
-        self._platform_entities.clear()
-
-        # Now, we can discover new ones
         self._discover_new_entities()
 
         await self._zdo_handler.async_initialize(from_cache)
@@ -848,29 +841,30 @@ class Device(LogMixin, EventBase):
                 self.debug("Failed to initialize endpoint", exc_info=True)
 
         # Compute the final entities
-        entities: dict[tuple[Platform, str], PlatformEntity] = {}
+        new_entities: dict[tuple[Platform, str], PlatformEntity] = {}
 
         for entity in self._pending_entities:
             entity.recompute_capabilities()
 
             # Ignore unsupported entities
             if not entity.is_supported() or not entity.is_supported_in_list(
-                entities.values()
+                new_entities.values()
             ):
                 await entity.on_remove()
                 continue
 
             key = (entity.PLATFORM, entity.unique_id)
 
-            if key in entities:
-                _LOGGER.debug("Duplicate entity %s, skipping %s", key, entity)
+            # Ignore entities that already exist
+            if key in new_entities:
                 await entity.on_remove()
                 continue
 
-            entities[key] = entity
+            new_entities[key] = entity
 
-        self._pending_entities.clear()
-        self._platform_entities = entities
+        if new_entities:
+            _LOGGER.debug("Discovered new entities %r", new_entities)
+            self._platform_entities.update(new_entities)
 
         # At this point we can compute a primary entity
         self._compute_primary_entity()
