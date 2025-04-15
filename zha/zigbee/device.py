@@ -83,6 +83,7 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
         {
             "id": f"0x{attr_def.id:04x}",
             "name": attr_def.name,
+            "zcl_type": attr_def.zcl_type.name,
             "value": cluster.get(attr_def.name),
             "unsupported": (attr_def.id in cluster.unsupported_attributes),
         }
@@ -1242,7 +1243,7 @@ class Device(LogMixin, EventBase):
 
         info: dict[str, Any] = {}
         info["ieee"] = str(self.ieee)
-        info["nwk"] = self.nwk
+        info["nwk"] = str(self.nwk)
         info["manufacturer"] = self.manufacturer
         info["model"] = self.model
         info["name"] = self.name
@@ -1276,34 +1277,6 @@ class Device(LogMixin, EventBase):
             "maximum_outgoing_transfer_size": node_desc.maximum_outgoing_transfer_size,
             "descriptor_capability_field": node_desc.descriptor_capability_field,
         }
-
-        topology = self.gateway.application_controller.topology
-        info["neighbors"] = [
-            {
-                "device_type": neighbor.device_type.name,
-                "rx_on_when_idle": neighbor.rx_on_when_idle.name,
-                "relationship": neighbor.relationship.name,
-                "extended_pan_id": str(neighbor.extended_pan_id),
-                "ieee": str(neighbor.ieee),
-                "nwk": str(neighbor.nwk),
-                "permit_joining": neighbor.permit_joining.name,
-                "depth": neighbor.depth,
-                "lqi": neighbor.lqi,
-            }
-            for neighbor in topology.neighbors[self.device.ieee]
-        ]
-
-        info["routes"] = [
-            {
-                "dest_nwk": str(route.DstNWK),
-                "route_status": str(route.RouteStatus.name),
-                "memory_constrained": bool(route.MemoryConstrained),
-                "many_to_one": bool(route.ManyToOne),
-                "route_record_required": bool(route.RouteRecordRequired),
-                "next_hop": str(route.NextHop),
-            }
-            for route in topology.routes[self.device.ieee]
-        ]
 
         info["endpoints"] = {}
 
@@ -1395,5 +1368,33 @@ class Device(LogMixin, EventBase):
                     "state": platform_entity.state,
                 }
             )
+
+        topology = self.gateway.application_controller.topology
+        info["neighbors"] = [
+            {
+                "device_type": neighbor.device_type.name,
+                "rx_on_when_idle": neighbor.rx_on_when_idle.name,
+                "relationship": neighbor.relationship.name,
+                "extended_pan_id": str(neighbor.extended_pan_id),
+                "ieee": str(neighbor.ieee),
+                "nwk": str(neighbor.nwk),
+                "permit_joining": neighbor.permit_joining.name,
+                "depth": neighbor.depth,
+                "lqi": neighbor.lqi,
+            }
+            for neighbor in topology.neighbors[self.device.ieee]
+        ]
+
+        info["routes"] = [
+            {
+                "dest_nwk": str(route.DstNWK),
+                "route_status": str(route.RouteStatus.name),
+                "memory_constrained": bool(route.MemoryConstrained),
+                "many_to_one": bool(route.ManyToOne),
+                "route_record_required": bool(route.RouteRecordRequired),
+                "next_hop": str(route.NextHop),
+            }
+            for route in topology.routes[self.device.ieee]
+        ]
 
         return info

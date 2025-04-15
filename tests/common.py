@@ -327,7 +327,7 @@ def zigpy_device_from_device_data(
     device = zigpy.device.Device(
         application=app,
         ieee=zigpy.types.EUI64.convert(device_data["ieee"]),
-        nwk=device_data["nwk"],
+        nwk=zigpy.types.NWK.convert(device_data["nwk"][2:]),
     )
     device.manufacturer = device_data["manufacturer"]
     device.model = device_data["model"]
