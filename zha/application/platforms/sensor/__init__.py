@@ -298,8 +298,8 @@ class Sensor(PlatformEntity):
         ):
             self.maybe_emit_state_changed_event()
 
-    def _is_non_value(self, value: int) -> bool:
-        # Ignore "non-value" values
+    def _is_non_value(self, value: int | float) -> bool:
+        """Ignore non-value numerical values."""
         try:
             attr_def = self._cluster_handler.cluster.find_attribute(
                 self._attribute_name
