@@ -174,6 +174,13 @@ class Sensor(PlatformEntity):
     ) -> None:
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
+        self._attr_def: foundation.ZCLAttributeDef | None = None
+
+        if self._attribute_name is not None:
+            self._attr_def = self._cluster_handler.cluster.find_attribute(
+                self._attribute_name
+            )
+
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self.recompute_capabilities()
 
@@ -300,14 +307,10 @@ class Sensor(PlatformEntity):
 
     def _is_non_value(self, value: int | float) -> bool:
         """Ignore non-value numerical values."""
-        try:
-            attr_def = self._cluster_handler.cluster.find_attribute(
-                self._attribute_name
-            )
-        except ValueError:
+        if self._attr_def is None:
             return False
 
-        data_type = foundation.DataType.from_type_id(attr_def.zcl_type)
+        data_type = foundation.DataType.from_type_id(self._attr_def.zcl_type)
         return value == data_type.non_value
 
     def formatter(
