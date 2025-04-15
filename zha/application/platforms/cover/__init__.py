@@ -49,11 +49,14 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
+
+# Upper limit for dynamic timeout
 DEFAULT_MOVEMENT_TIMEOUT: float = 5
+
+# Timeout for device transition state following a position attribute update
 LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
 TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
-
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
 
 class BaseCover(PlatformEntity, ABC):
