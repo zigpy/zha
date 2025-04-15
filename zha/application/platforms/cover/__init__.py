@@ -212,12 +212,19 @@ class Cover(BaseCover):
         self,
         *,
         state: CoverState | None,
-        target_lift_position: int | None = None,
-        target_tilt_position: int | None = None,
+        **kwargs: Any,  # pylint: disable=unused-argument
     ):
-        """Restore external state attributes."""
+        """Restore external state attributes.
+
+        If the state is OPENING or CLOSING, a callback is scheduled
+        to determine the final state after the default timeout period.
+        """
         self._state = state
-        # Target positions have been removed
+        if self._state in (CoverState.OPENING, CoverState.CLOSING):
+            self._loop.call_later(
+                DEFAULT_MOVEMENT_TIMEOUT,
+                functools.partial(self._determine_cover_state, refresh=True),
+            )
 
     @property
     def supported_features(self) -> CoverEntityFeature:
