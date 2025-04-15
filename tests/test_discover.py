@@ -839,7 +839,9 @@ async def test_devices_from_files(
             for entity in entities
         }
 
-        assert len(diagnostic_unique_ids) == len(zha_lib_entities)
+        assert len(diagnostic_unique_ids) == sum(
+            len(entities) for entities in zha_lib_entities.values()
+        )
         assert platform_unique_ids == diagnostic_unique_ids
 
         # Assert identify called on join for devices that support it
