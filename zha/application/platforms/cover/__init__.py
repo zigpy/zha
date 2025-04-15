@@ -219,12 +219,18 @@ class Cover(BaseCover):
         If the state is OPENING or CLOSING, a callback is scheduled
         to determine the final state after the default timeout period.
         """
+        if not self._state or state not in (CoverState.OPENING, CoverState.CLOSING):
+            return
+        if state == CoverState.CLOSING and self.is_closed:
+            return
+        if state == CoverState.OPENING and self._is_completely_open:
+            return
+
         self._state = state
-        if self._state in (CoverState.OPENING, CoverState.CLOSING):
-            self._loop.call_later(
-                DEFAULT_MOVEMENT_TIMEOUT,
-                functools.partial(self._determine_cover_state, refresh=True),
-            )
+        self._loop.call_later(
+            DEFAULT_MOVEMENT_TIMEOUT,
+            functools.partial(self._determine_cover_state, refresh=True),
+        )
 
     @property
     def supported_features(self) -> CoverEntityFeature:
@@ -297,6 +303,17 @@ class Cover(BaseCover):
     def _previous_cover_tilt_position(self) -> int | None:
         """Return the previous tilt position of ZHA cover."""
         return self._tilt_position_history[0]
+
+    @property
+    def _is_completely_open(self) -> bool | None:
+        """Return True if the cover is completely open."""
+        if not self._state:
+            return None
+        return (
+            self._state == CoverState.OPEN
+            and self.current_cover_position in (100, None)
+            and self.current_cover_tilt_position in (100, None)
+        )
 
     @staticmethod
     def _determine_state(
