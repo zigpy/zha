@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import asyncio
 from collections import deque
 import functools
@@ -59,11 +60,69 @@ LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
 TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
-class Cover(PlatformEntity):
-    """Representation of a ZHA cover."""
+class BaseCover(PlatformEntity, ABC):
+    """Abstract base class for ZHA covers."""
 
     PLATFORM = Platform.COVER
+
+    _attr_primary_weight = 10
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> CoverEntityFeature:
+        """Return supported features."""
+
+    @property
+    @abstractmethod
+    def is_closed(self) -> bool | None:
+        """Return True if the cover is closed."""
+
+    @property
+    @abstractmethod
+    def is_opening(self) -> bool | None:
+        """Return if the cover is opening or not."""
+
+    @property
+    @abstractmethod
+    def is_closing(self) -> bool | None:
+        """Return if the cover is closing or not."""
+
+    @property
+    @abstractmethod
+    def current_cover_position(self) -> int | None:
+        """Return the current position of ZHA cover.
+
+        In HA, None is unknown, 0 is closed, 100 is fully open.
+        """
+
+    @property
+    @abstractmethod
+    def current_cover_tilt_position(self) -> int | None:
+        """Return the current tilt position of the cover.
+
+        In HA, None is unknown, 0 is closed, 100 is fully open.
+        """
+
+    @abstractmethod
+    async def async_open_cover(self, **kwargs: Any) -> None:
+        """Open the cover."""
+
+    @abstractmethod
+    async def async_close_cover(self, **kwargs: Any) -> None:
+        """Close the cover."""
+
+    @abstractmethod
+    async def async_set_cover_position(self, **kwargs: Any) -> None:
+        """Move the cover to a specific position."""
+
+    @abstractmethod
+    async def async_stop_cover(self, **kwargs: Any) -> None:
+        """Stop the cover."""
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
+class Cover(BaseCover):
+    """Representation of a ZHA cover."""
 
     _attr_translation_key: str = "cover"
     _unique_id_suffix = "cover"
@@ -71,7 +130,6 @@ class Cover(PlatformEntity):
         (UniqueIdMigration.LEGACY_ENDPOINT, ""),
         (UniqueIdMigration.LEGACY_CLUSTER, ""),
     )
-    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -602,10 +660,8 @@ class Cover(PlatformEntity):
         CLUSTER_HANDLER_SHADE,
     }
 )
-class Shade(PlatformEntity):
+class Shade(BaseCover):
     """ZHA Shade."""
-
-    PLATFORM = Platform.COVER
 
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
@@ -620,7 +676,6 @@ class Shade(PlatformEntity):
         | CoverEntityFeature.STOP
         | CoverEntityFeature.SET_POSITION
     )
-    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -687,6 +742,11 @@ class Shade(PlatformEntity):
         None is unknown, 0 is closed, 100 is fully open.
         """
         return self._position
+
+    @property
+    def current_cover_tilt_position(self) -> int | None:
+        """Return the current tilt position of the cover."""
+        return None
 
     @functools.cached_property
     def is_opening(self) -> bool | None:

@@ -795,6 +795,7 @@ async def test_shade(
     # coverage (these are always None for now)
     assert entity.is_opening is None
     assert entity.is_closing is None
+    assert entity.current_cover_tilt_position is None
 
     # test that the state has changed from unavailable to off
     await send_attributes_report(
