@@ -51,10 +51,10 @@ _LOGGER = logging.getLogger(__name__)
 
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
-# Upper limit for dynamic timeout
+# Timeout for device transition state following a position attribute update
 DEFAULT_MOVEMENT_TIMEOUT: float = 5
 
-# Timeout for device transition state following a position attribute update
+# Upper limit for dynamic timeout
 LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
 TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
 
