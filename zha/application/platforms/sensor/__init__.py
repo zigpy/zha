@@ -1878,8 +1878,8 @@ class WindowCoveringTypeSensor(EnumSensor):
 
     _attribute_name: str = WindowCovering.AttributeDefs.window_covering_type.name
     _enum = WindowCovering.WindowCoveringType
-    _unique_id_suffix: str = WindowCovering.AttributeDefs.window_covering_type.name
-    _attr_translation_key: str = WindowCovering.AttributeDefs.window_covering_type.name
+    _unique_id_suffix: str = "window_covering_type"
+    _attr_translation_key: str = "window_covering_type"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
 
@@ -1891,8 +1891,8 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
 
     _attribute_name: str = Basic.AttributeDefs.power_source.name
     _enum = Basic.PowerSource
-    _unique_id_suffix: str = Basic.AttributeDefs.power_source.name
-    _attr_translation_key: str = Basic.AttributeDefs.power_source.name
+    _unique_id_suffix: str = "power_source"
+    _attr_translation_key: str = "power_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
 
