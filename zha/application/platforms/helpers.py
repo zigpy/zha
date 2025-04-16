@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 if TYPE_CHECKING:
     from zha.application.platforms.binary_sensor.const import BinarySensorDeviceClass
+    from zha.application.platforms.event.const import EventDeviceClass
     from zha.application.platforms.number.const import NumberDeviceClass
     from zha.application.platforms.sensor.const import SensorDeviceClass
 
@@ -78,16 +79,32 @@ def validate_device_class(
 ) -> NumberDeviceClass | None: ...
 
 
+@overload
+def validate_device_class(
+    device_class_enum: type[EventDeviceClass],
+    metadata_value: enum.Enum,
+    platform: str,
+    logger: logging.Logger,
+) -> EventDeviceClass | None: ...
+
+
 def validate_device_class(
     device_class_enum: (
         type[BinarySensorDeviceClass]
         | type[SensorDeviceClass]
         | type[NumberDeviceClass]
+        | type[EventDeviceClass]
     ),
     metadata_value: enum.Enum,
     platform: str,
     logger: logging.Logger,
-) -> BinarySensorDeviceClass | SensorDeviceClass | NumberDeviceClass | None:
+) -> (
+    BinarySensorDeviceClass
+    | SensorDeviceClass
+    | NumberDeviceClass
+    | EventDeviceClass
+    | None
+):
     """Validate and return a device class."""
     try:
         return device_class_enum(metadata_value.value)
