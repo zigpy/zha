@@ -1752,7 +1752,7 @@ async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
 
 
 async def test_ignore_non_value(zha_gateway: Gateway) -> None:
-    """Test ZHA quirks v2 sensor with attribute_converter."""
+    """Test sensor updates ignoring ZCL datatype non-values."""
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
