@@ -848,8 +848,22 @@ async def test_devices_from_files(
                     platform_entity.state["class_name"] == info["state"]["class_name"]
                 )
 
-        # Assert that the number of entities in the device matches the number of entities in the json data
-        assert len(zha_device.platform_entities) == entity_count
+        # Ensure unique IDs are the same
+        platform_unique_ids = {
+            f"{platform}.{entity.unique_id}"
+            for (platform, _), entity in zha_device.platform_entities.items()
+        }
+
+        diagnostic_unique_ids = {
+            f"{platform}.{entity['info_object']['unique_id']}"
+            for platform, entities in zha_lib_entities.items()
+            for entity in entities
+        }
+
+        assert len(diagnostic_unique_ids) == sum(
+            len(entities) for entities in zha_lib_entities.values()
+        )
+        assert platform_unique_ids == diagnostic_unique_ids
 
         # Assert identify called on join for devices that support it
         cluster_identify = _get_identify_cluster(zha_device.device)

@@ -34,12 +34,13 @@ from tests.common import (
     get_entity,
     join_zigpy_device,
     send_attributes_report,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.const import ZCL_INIT_ATTRS, ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
-from zha.application.platforms.sensor import DanfossSoftwareErrorCode
+from zha.application.platforms.sensor import DanfossSoftwareErrorCode, Temperature
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
 from zha.units import PERCENTAGE, UnitOfEnergy, UnitOfPressure, UnitOfVolume
 from zha.zigbee.cluster_handlers import AttrReportConfig
@@ -1748,3 +1749,34 @@ async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
 
     await send_attributes_report(zha_gateway, cluster, {"present_value": 0})
     assert entity.state["state"] == 100.0
+
+
+async def test_ignore_non_value(zha_gateway: Gateway) -> None:
+    """Test sensor updates ignoring ZCL datatype non-values."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zha_device.device.endpoints[1].temperature
+    entity = get_entity(zha_device, platform=Platform.SENSOR, entity_type=Temperature)
+
+    assert entity.state["state"] == 22.3
+
+    # Normal attribute report
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: 3000},
+    )
+    assert entity.state["state"] == 30.0
+
+    # Invalid attribute value, ignored
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: -0x8000},
+    )
+    assert entity.state["state"] is None

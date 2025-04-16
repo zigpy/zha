@@ -26,8 +26,14 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.const import ATTR_COMMAND
 from zha.application.gateway import Gateway
+from zha.application.platforms.cover import (
+    DEFAULT_MOVEMENT_TIMEOUT,
+    LIFT_MOVEMENT_TIMEOUT_RANGE,
+    TILT_MOVEMENT_TIMEOUT_RANGE,
+)
 from zha.application.platforms.cover.const import (
     ATTR_CURRENT_POSITION,
+    ATTR_CURRENT_TILT_POSITION,
     CoverEntityFeature,
     CoverState,
 )
@@ -96,16 +102,19 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     cluster = zigpy_cover_device.endpoints[1].window_covering
     cluster.PLUGGED_ATTR_READS = {
         WCAttrs.current_position_lift_percentage.name: 0,
+        WCAttrs.current_position_tilt_percentage.name: 0,  # to validate that this is overridden to None in the state attribute
         WCAttrs.window_covering_type.name: WCT.Drapery,
         WCAttrs.config_status.name: WCCS(~WCCS.Open_up_commands_reversed),
     }
     update_attribute_cache(cluster)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
+
     assert (
         not zha_device.endpoints[1]
         .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
         .inverted
     )
+
     assert cluster.read_attributes.call_count == 3
     assert (
         WCAttrs.current_position_lift_percentage.name
@@ -120,6 +129,13 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     state = entity.state
     assert state["state"] == CoverState.OPEN
     assert state[ATTR_CURRENT_POSITION] == 100
+    assert state[ATTR_CURRENT_TILT_POSITION] is None
+    assert entity.supported_features == (
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.STOP
+        | CoverEntityFeature.SET_POSITION
+    )
 
     # test update
     cluster.PLUGGED_ATTR_READS = {
@@ -136,17 +152,70 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     assert entity.state[ATTR_CURRENT_POSITION] == 0
 
 
+async def test_cover_non_lift_initial_state(  # pylint: disable=unused-argument
+    zha_gateway: Gateway,
+) -> None:
+    """Test ZHA cover platform."""
+
+    # load up cover domain
+    zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
+    cluster = zigpy_cover_device.endpoints[1].window_covering
+    cluster.PLUGGED_ATTR_READS = {
+        WCAttrs.current_position_lift_percentage.name: 0,  # to validate that this is overridden to None in the state attribute
+        WCAttrs.current_position_tilt_percentage.name: 0,
+        WCAttrs.window_covering_type.name: WCT.Tilt_blind_tilt_only,
+        WCAttrs.config_status.name: WCCS(~WCCS.Open_up_commands_reversed),
+    }
+    update_attribute_cache(cluster)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
+
+    assert (
+        not zha_device.endpoints[1]
+        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
+        .inverted
+    )
+
+    assert cluster.read_attributes.call_count == 3
+    assert (
+        WCAttrs.current_position_lift_percentage.name
+        in cluster.read_attributes.call_args[0][0]
+    )
+    assert (
+        WCAttrs.current_position_tilt_percentage.name
+        in cluster.read_attributes.call_args[0][0]
+    )
+
+    entity = get_entity(zha_device, platform=Platform.COVER)
+    state = entity.state
+    assert state["state"] == CoverState.OPEN
+    assert state[ATTR_CURRENT_POSITION] is None
+    assert state[ATTR_CURRENT_TILT_POSITION] == 100
+    assert entity.supported_features == (
+        CoverEntityFeature.OPEN_TILT
+        | CoverEntityFeature.CLOSE_TILT
+        | CoverEntityFeature.STOP_TILT
+        | CoverEntityFeature.SET_TILT_POSITION
+    )
+
+    # test update
+    cluster.PLUGGED_ATTR_READS = {
+        WCAttrs.current_position_tilt_percentage.name: 100,
+        WCAttrs.window_covering_type.name: WCT.Tilt_blind_tilt_only,
+        WCAttrs.config_status.name: WCCS(~WCCS.Open_up_commands_reversed),
+    }
+    update_attribute_cache(cluster)
+    prev_call_count = cluster.read_attributes.call_count
+    await entity.async_update()
+    assert cluster.read_attributes.call_count == prev_call_count + 1
+
+    assert entity.state["state"] == CoverState.CLOSED
+    assert entity.state[ATTR_CURRENT_TILT_POSITION] == 0
+
+
 async def test_cover(
     zha_gateway: Gateway,
 ) -> None:
     """Test zha cover platform."""
-
-    # Timeout for device movement following a position attribute update
-    DEFAULT_MOVEMENT_TIMEOUT: float = 5
-
-    # Upper limit for dynamic timeout
-    LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
-    TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
 
     zigpy_cover_device = create_mock_zigpy_device(zha_gateway, ZIGPY_COVER_DEVICE)
     cluster = zigpy_cover_device.endpoints.get(1).window_covering
@@ -329,7 +398,7 @@ async def test_cover(
 
     # test set position command, starting at 100 % / 0 ZCL (open) from previous lift test
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
-        assert entity.state["current_position"] == 100
+        assert entity.state[ATTR_CURRENT_POSITION] == 100
         await entity.async_set_cover_position(position=47)  # 53 when inverted for ZCL
         await zha_gateway.async_block_till_done()
         assert cluster.request.call_count == 1
@@ -345,14 +414,14 @@ async def test_cover(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 35}
         )
 
-        assert entity.state["current_position"] == 65
+        assert entity.state[ATTR_CURRENT_POSITION] == 65
         assert entity.state["state"] == CoverState.CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 53}
         )
 
-        assert entity.state["current_position"] == 47
+        assert entity.state[ATTR_CURRENT_POSITION] == 47
         assert entity.state["state"] == CoverState.OPEN
 
         # verify that a subsequent go_to command does not change the state to closing/opening
@@ -365,7 +434,7 @@ async def test_cover(
 
     # test set tilt position command, starting at 100 % / 0 ZCL (open) from previous tilt test
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
-        assert entity.state["current_tilt_position"] == 100
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 100
         await entity.async_set_cover_tilt_position(
             tilt_position=47
         )  # 53 when inverted for ZCL
@@ -386,14 +455,14 @@ async def test_cover(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 35}
         )
 
-        assert entity.state["current_tilt_position"] == 65
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 65
         assert entity.state["state"] == CoverState.CLOSING
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 53}
         )
 
-        assert entity.state["current_tilt_position"] == 47
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 47
         assert entity.state["state"] == CoverState.OPEN
 
         # verify that a subsequent go_to command does not change the state to closing/opening
@@ -415,7 +484,7 @@ async def test_cover(
         assert cluster.request.call_args[0][3] == 100
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.state["current_position"] == 47
+        assert entity.state[ATTR_CURRENT_POSITION] == 47
         assert entity.state["state"] == CoverState.CLOSING
 
         # simulate a device position update to set timer to the default duration rather than dynamic
@@ -423,7 +492,7 @@ async def test_cover(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 70}
         )
 
-        assert entity.state["current_position"] == 30
+        assert entity.state[ATTR_CURRENT_POSITION] == 30
         assert entity.state["state"] == CoverState.CLOSING
 
         # wait the timer duration
@@ -443,7 +512,7 @@ async def test_cover(
         assert cluster.request.call_args[0][3] == 100
         assert cluster.request.call_args[1]["expect_reply"] is True
 
-        assert entity.state["current_tilt_position"] == 47
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 47
         assert entity.state["state"] == CoverState.CLOSING
 
         # simulate a device position update to set timer to the default duration rather than dynamic
@@ -451,7 +520,7 @@ async def test_cover(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 70}
         )
 
-        assert entity.state["current_tilt_position"] == 30
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 30
         assert entity.state["state"] == CoverState.CLOSING
 
         # wait the timer duration
@@ -460,14 +529,14 @@ async def test_cover(
 
     # test device instigated movement (e.g. device button press), starting from 30 %
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
-        assert entity.state["current_position"] == 30
+        assert entity.state[ATTR_CURRENT_POSITION] == 30
         assert entity.state["state"] == CoverState.OPEN
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 60}
         )
 
-        assert entity.state["current_position"] == 40
+        assert entity.state[ATTR_CURRENT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the default timer duration
@@ -476,14 +545,14 @@ async def test_cover(
 
     # test device instigated tilt movement (e.g. device button press), starting from 30 %
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
-        assert entity.state["current_tilt_position"] == 30
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 30
         assert entity.state["state"] == CoverState.OPEN
 
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 60}
         )
 
-        assert entity.state["current_tilt_position"] == 40
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPENING
 
         # wait the default timer duration
@@ -492,7 +561,7 @@ async def test_cover(
 
     # test dynamic movement timeout, starting from 40 % and moving to 90 %
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
-        assert entity.state["current_position"] == 40
+        assert entity.state[ATTR_CURRENT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN
 
         await entity.async_set_cover_position(position=90)  # 10 when inverted for ZCL
@@ -514,12 +583,12 @@ async def test_cover(
         await asyncio.sleep(
             (50 * 0.01 * LIFT_MOVEMENT_TIMEOUT_RANGE) - DEFAULT_MOVEMENT_TIMEOUT
         )
-        assert entity.state["current_position"] == 40
+        assert entity.state[ATTR_CURRENT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN
 
     # test dynamic tilt movement timeout, starting from 40 % and moving to 90 %
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
-        assert entity.state["current_tilt_position"] == 40
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN
 
         await entity.async_set_cover_tilt_position(
@@ -543,13 +612,13 @@ async def test_cover(
         await asyncio.sleep(
             (50 * 0.01 * TILT_MOVEMENT_TIMEOUT_RANGE) - DEFAULT_MOVEMENT_TIMEOUT
         )
-        assert entity.state["current_tilt_position"] == 40
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 40
         assert entity.state["state"] == CoverState.OPEN
 
     # test concurrent movement of both axis, lift and tilt starting at 40 %
     with patch("zigpy.zcl.Cluster.request", return_value=[0x5, zcl_f.Status.SUCCESS]):
-        assert entity.state["current_position"] == 40
-        assert entity.state["current_tilt_position"] == 40
+        assert entity.state[ATTR_CURRENT_POSITION] == 40
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 40
 
         await entity.async_set_cover_position(position=90)  # 10 when inverted for ZCL
         await zha_gateway.async_block_till_done()
@@ -581,7 +650,7 @@ async def test_cover(
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 99}
         )
-        assert entity.state["current_tilt_position"] == 1
+        assert entity.state[ATTR_CURRENT_TILT_POSITION] == 1
 
         # state should have reverted to opening because there is still an active lift target transition
         assert entity.state["state"] == CoverState.OPENING
@@ -590,7 +659,7 @@ async def test_cover(
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 10}
         )
-        assert entity.state["current_position"] == 90
+        assert entity.state[ATTR_CURRENT_POSITION] == 90
 
         # the state should now be open (static)
         assert entity.state["state"] == CoverState.OPEN
@@ -890,7 +959,7 @@ async def test_shade(
         assert cluster_level.request.call_args[0][0] is False
         assert cluster_level.request.call_args[0][1] == 0x0004
         assert int(cluster_level.request.call_args[0][3] * 100 / 255) == 47
-        assert entity.state["current_position"] == 0
+        assert entity.state[ATTR_CURRENT_POSITION] == 0
 
     # set position UI success
     with patch(
@@ -902,11 +971,11 @@ async def test_shade(
         assert cluster_level.request.call_args[0][0] is False
         assert cluster_level.request.call_args[0][1] == 0x0004
         assert int(cluster_level.request.call_args[0][3] * 100 / 255) == 47
-        assert entity.state["current_position"] == 47
+        assert entity.state[ATTR_CURRENT_POSITION] == 47
 
     # report position change
     await send_attributes_report(zha_gateway, cluster_level, {8: 0, 0: 100, 1: 1})
-    assert entity.state["current_position"] == int(100 * 100 / 255)
+    assert entity.state[ATTR_CURRENT_POSITION] == int(100 * 100 / 255)
 
     # stop command fails
     with (
@@ -999,7 +1068,7 @@ async def test_keen_vent(
         assert cluster_on_off.request.call_args[0][1] == 0x0001
         assert cluster_level.request.call_count == 1
         assert entity.state["state"] == CoverState.OPEN
-        assert entity.state["current_position"] == 100
+        assert entity.state[ATTR_CURRENT_POSITION] == 100
 
 
 async def test_cover_remote(zha_gateway: Gateway) -> None:
