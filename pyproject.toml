@@ -14,7 +14,7 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.12"
 dependencies = [
-    "zigpy==0.78.0",
+    "zigpy==0.78.1",
     "bellows==0.44.0",
     "zigpy-znp==0.14.0",
     "zigpy-deconz==0.24.1",
