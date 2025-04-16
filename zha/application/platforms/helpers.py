@@ -127,7 +127,9 @@ def format_legacy_platform_unique_id(
             assert endpoint is not None
             return f"{device.ieee}-{endpoint.id}{suffix}"
         case _:
-            raise ValueError(f"Invalid migration type: {migration_type}")
+            raise ValueError(
+                f"Invalid migration type: {migration_type}"
+            )  # pragma: no cover
 
 
 def format_platform_unique_id(
@@ -152,4 +154,4 @@ def format_platform_unique_id(
         case UniqueIdRoot.DEVICE:
             return f"{device.ieee}{suffix}"
         case _:
-            raise ValueError(f"Invalid unique_id_root: {root}")
+            raise ValueError(f"Invalid unique_id_root: {root}")  # pragma: no cover
