@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from asyncio import Task
+import contextlib
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 import enum
@@ -177,9 +178,12 @@ class Sensor(PlatformEntity):
         self._attr_def: foundation.ZCLAttributeDef | None = None
 
         if self._attribute_name is not None:
-            self._attr_def = self._cluster_handler.cluster.find_attribute(
-                self._attribute_name
-            )
+            # If the attribute definition does not exist, this entity will be filtered
+            # out via `is_supported`
+            with contextlib.suppress(KeyError):
+                self._attr_def = self._cluster_handler.cluster.find_attribute(
+                    self._attribute_name
+                )
 
         super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
         self.recompute_capabilities()
