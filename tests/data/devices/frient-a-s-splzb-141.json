@@ -2520,54 +2520,6 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-1-6",
-          "platform": "switch",
-          "class_name": "Switch",
-          "translation_key": "switch",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "00:15:bc:00:2f:02:19:79:1:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
-            }
-          ],
-          "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 1,
-          "available": false,
-          "group_id": null
-        },
-        "state": {
-          "class_name": "Switch",
-          "state": false,
-          "available": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
           "unique_id": "00:15:bc:00:2f:02:19:79-2",
           "platform": "switch",
           "class_name": "Switch",

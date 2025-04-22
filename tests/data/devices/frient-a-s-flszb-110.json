@@ -1162,7 +1162,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:33:00:76:9a-1-3",
+          "unique_id": "00:15:bc:00:33:00:76:9a-35-3",
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -1175,14 +1175,14 @@
             {
               "class_name": "IdentifyClusterHandler",
               "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
+              "endpoint_id": 35,
               "cluster": {
                 "id": 3,
                 "name": "Identify",
                 "type": "server"
               },
-              "id": "1:0x0003",
-              "unique_id": "00:15:bc:00:33:00:76:9a:1:0x0003",
+              "id": "35:0x0003",
+              "unique_id": "00:15:bc:00:33:00:76:9a:35:0x0003",
               "status": "CREATED",
               "value_attribute": null
             }
@@ -1706,56 +1706,6 @@
           "class_name": "Siren",
           "available": false,
           "state": false
-        }
-      }
-    ],
-    "switch": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:33:00:76:9a-1-6",
-          "platform": "switch",
-          "class_name": "Switch",
-          "translation_key": "switch",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "00:15:bc:00:33:00:76:9a:1:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
-            }
-          ],
-          "device_ieee": [
-            154,
-            118,
-            0,
-            51,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 1,
-          "available": false,
-          "group_id": null
-        },
-        "state": {
-          "class_name": "Switch",
-          "state": false,
-          "available": false
         }
       }
     ],
