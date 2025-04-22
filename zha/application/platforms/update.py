@@ -21,6 +21,7 @@ from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_OTA,
+    CLUSTER_HANDLER_OTA_SERVER,
 )
 from zha.zigbee.endpoint import Endpoint
 
@@ -71,9 +72,8 @@ class UpdateEntityInfo(BaseEntityInfo):
     entity_category: EntityCategory
 
 
-@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
-class FirmwareUpdateEntity(PlatformEntity):
-    """Representation of a ZHA firmware update entity."""
+class BaseFirmwareUpdateEntity(PlatformEntity):
+    """Base representation of a ZHA firmware update entity."""
 
     PLATFORM = Platform.UPDATE
 
@@ -92,25 +92,6 @@ class FirmwareUpdateEntity(PlatformEntity):
     _attr_release_summary: str | None = None
     _attr_release_notes: str | None = None
     _attr_release_url: str | None = None
-
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Initialize the ZHA update entity."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-
-        self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_OTA
-        ]
-        self._attr_installed_version: str | None = self._get_cluster_version()
-        self._attr_latest_version = self._attr_installed_version
-        self._compatible_images: OtaImagesResult = OtaImagesResult(
-            upgrades=(), downgrades=()
-        )
 
     @functools.cached_property
     def info_object(self) -> UpdateEntityInfo:
@@ -316,3 +297,52 @@ class FirmwareUpdateEntity(PlatformEntity):
         """Call when entity will be removed."""
         self._attr_in_progress = False
         await super().on_remove()
+
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
+class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
+    """Representation of a ZHA firmware update entity."""
+
+    def __init__(
+        self,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize the ZHA update entity."""
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+
+        self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
+            CLUSTER_HANDLER_OTA
+        ]
+        self._attr_installed_version: str | None = self._get_cluster_version()
+        self._attr_latest_version = self._attr_installed_version
+        self._compatible_images: OtaImagesResult = OtaImagesResult(
+            upgrades=(), downgrades=()
+        )
+
+
+@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA_SERVER)
+class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
+    """Representation of a ZHA firmware update entity."""
+
+    def __init__(
+        self,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize the ZHA update entity."""
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+
+        # Some devices make it a server cluster, not a client cluster...
+        self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
+            CLUSTER_HANDLER_OTA_SERVER
+        ]
+        self._attr_installed_version: str | None = self._get_cluster_version()
+        self._attr_latest_version = self._attr_installed_version
+        self._compatible_images: OtaImagesResult = OtaImagesResult(
+            upgrades=(), downgrades=()
+        )

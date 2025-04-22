@@ -1402,7 +1402,7 @@ async def test_zha_send_event_from_quirk(zha_gateway: Gateway):
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    on_off_ch = zha_device.endpoints[1].client_cluster_handlers["1:0x0006"]
+    on_off_ch = zha_device.endpoints[1].client_cluster_handlers["1:0x0006_client"]
     assert on_off_ch is not None
 
     on_off_ch.emit_zha_event = MagicMock(wraps=on_off_ch.emit_zha_event)

@@ -328,12 +328,15 @@ class DeviceProbe:
                 )
                 continue
 
-            cluster_handler_id = f"{endpoint.id}:0x{cluster.cluster_id:04x}"
-            cluster_handler = (
-                endpoint.all_cluster_handlers.get(cluster_handler_id)
-                if cluster_type is ClusterType.Server
-                else endpoint.client_cluster_handlers.get(cluster_handler_id)
-            )
+            if cluster_type is ClusterType.Server:
+                cluster_handler = endpoint.all_cluster_handlers.get(
+                    f"{endpoint.id}:0x{cluster.cluster_id:04x}"
+                )
+            else:
+                cluster_handler = endpoint.client_cluster_handlers.get(
+                    f"{endpoint.id}:0x{cluster.cluster_id:04x}_client"
+                )
+
             assert cluster_handler
 
             for entity_metadata in entity_metadata_list:
@@ -621,8 +624,9 @@ class EndpointProbe:
 
         if config_diagnostic_entities:
             cluster_handlers = list(endpoint.all_cluster_handlers.values())
-            ota_handler_id = f"{endpoint.id}:0x{Ota.cluster_id:04x}"
+            ota_handler_id = f"{endpoint.id}:0x{Ota.cluster_id:04x}_client"
             if ota_handler_id in endpoint.client_cluster_handlers:
+                # TODO: why is this override here?
                 cluster_handlers.append(
                     endpoint.client_cluster_handlers[ota_handler_id]
                 )

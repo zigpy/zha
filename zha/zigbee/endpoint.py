@@ -184,6 +184,11 @@ class Endpoint:
         ) in CLIENT_CLUSTER_HANDLER_REGISTRY.items():
             cluster = self.zigpy_endpoint.out_clusters.get(cluster_id)
             if cluster is not None:
+                _LOGGER.debug(
+                    "Creating client cluster handler for cluster id: %s class: %s",
+                    cluster_id,
+                    cluster_handler_class,
+                )
                 cluster_handler = cluster_handler_class(cluster, self)
                 self.client_cluster_handlers[cluster_handler.id] = cluster_handler
                 cluster_handler.on_add()
