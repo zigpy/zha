@@ -175,6 +175,7 @@ async def test_on_off_select_attribute_report_v2(
                 ],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zha.DeviceType.OCCUPANCY_SENSOR,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
             }
         },
         manufacturer="Fake_Manufacturer",

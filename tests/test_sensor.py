@@ -1319,6 +1319,7 @@ async def zigpy_device_timestamp_sensor_v2_mock(
                 ],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         manufacturer="Fake_Timestamp_sensor",
@@ -1420,6 +1421,7 @@ async def zigpy_device_aqara_sensor_v2_mock(
                 ],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.OCCUPANCY_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         manufacturer="Fake_Manufacturer_sensor",
@@ -1663,6 +1665,7 @@ async def zigpy_device_danfoss_thermostat_mock(
                 ],
                 SIG_EP_OUTPUT: [general.Basic.cluster_id, general.Ota.cluster_id],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         manufacturer="Danfoss",
@@ -1717,6 +1720,7 @@ async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
                 ],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         manufacturer="manufacturer",
