@@ -1353,7 +1353,9 @@ class Device(LogMixin, EventBase):
 
         info["zha_lib_entities"] = defaultdict(list)
 
-        for (platform, _unique_id), platform_entity in self.platform_entities.items():
+        for (platform, _unique_id), platform_entity in sorted(
+            self.platform_entities.items()
+        ):
             info_object = dataclasses.asdict(platform_entity.info_object)
             info_object["cluster_handlers"].sort(key=lambda i: i["unique_id"])
             info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
