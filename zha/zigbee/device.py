@@ -1245,8 +1245,10 @@ class Device(LogMixin, EventBase):
         info: dict[str, Any] = {}
         info["ieee"] = str(self.ieee)
         info["nwk"] = str(self.nwk)
-        info["manufacturer"] = self.manufacturer
-        info["model"] = self.model
+        info["manufacturer"] = self.device.manufacturer
+        info["model"] = self.device.model
+        info["friendly_manufacturer"] = self.manufacturer
+        info["friendly_model"] = self.model
         info["name"] = self.name
         info["quirk_applied"] = self.quirk_applied
         info["quirk_class"] = self.quirk_class
