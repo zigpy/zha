@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 import asyncio
-from collections import defaultdict, Iterable
+from collections import defaultdict
+from collections.abc import Iterable
 import copy
 import dataclasses
 from dataclasses import dataclass
@@ -1328,10 +1329,10 @@ class Device(LogMixin, EventBase):
             if "endpoints" in original_signature:
                 for ep in original_signature["endpoints"].values():
                     if "profile_id" in ep:
-                        ep["profile_id"] = f"0x{ep["profile_id"]:04x}"
+                        ep["profile_id"] = f"0x{ep['profile_id']:04x}"
 
                     if "device_type" in ep:
-                        ep["device_type"] = f"0x{ep["device_type"]:04x}"
+                        ep["device_type"] = f"0x{ep['device_type']:04x}"
 
                     if "input_clusters" in ep:
                         ep["input_clusters"] = [
@@ -1355,6 +1356,7 @@ class Device(LogMixin, EventBase):
         for (platform, _unique_id), platform_entity in self.platform_entities.items():
             info_object = dataclasses.asdict(platform_entity.info_object)
             info_object["cluster_handlers"].sort(key=lambda i: i["unique_id"])
+            info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
 
             for cluster_handler_info in info_object["cluster_handlers"]:
                 cluster_info = cluster_handler_info["cluster"]
