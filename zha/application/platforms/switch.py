@@ -15,7 +15,6 @@ from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.const import UniqueIdMigration
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -107,11 +106,6 @@ class Switch(PlatformEntity, BaseSwitch):
     """ZHA switch."""
 
     _attr_translation_key = "switch"
-    _unique_id_suffix = "switch"
-    _migrate_platform_unique_ids = (
-        (UniqueIdMigration.LEGACY_ENDPOINT, ""),
-        (UniqueIdMigration.LEGACY_CLUSTER, ""),
-    )
     _attr_primary_weight = 10
 
     def __init__(

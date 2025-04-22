@@ -1618,14 +1618,10 @@ async def test_thermostat_default_local_temperature_calibration_config(
     local_temperature_calibration_entity = zha_device.platform_entities[
         (
             Platform.NUMBER,
-            "00:0d:6f:00:0a:90:69:e7-1-0x0201-local_temperature_calibration",
+            "00:0d:6f:00:0a:90:69:e7-1-513-local_temperature_calibration",
         )
     ]
     assert local_temperature_calibration_entity
-    assert (
-        "00:0d:6f:00:0a:90:69:e7-1-513-local_temperature_calibration"
-        in local_temperature_calibration_entity.migrate_unique_ids
-    )
     assert isinstance(local_temperature_calibration_entity, NumberConfigurationEntity)
     assert local_temperature_calibration_entity.info_object.min_value == -2.5
     assert local_temperature_calibration_entity.info_object.max_value == 2.5
@@ -1667,16 +1663,9 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
     assert zha_device.manufacturer == "unk_manufacturer"
 
     local_temperature_calibration_entity = zha_device.platform_entities[
-        (
-            Platform.NUMBER,
-            "00:0d:6f:00:0a:90:69:e7-1-0x0201-local_temperature_calibration",
-        )
+        (Platform.NUMBER, "00:0d:6f:00:0a:90:69:e7-1-local_temperature_calibration")
     ]
     assert local_temperature_calibration_entity
-    assert (
-        "00:0d:6f:00:0a:90:69:e7-1-local_temperature_calibration"
-        in local_temperature_calibration_entity.migrate_unique_ids
-    )
     assert isinstance(local_temperature_calibration_entity, NumberConfigurationEntity)
     assert local_temperature_calibration_entity.info_object.min_value == -5.0
     assert local_temperature_calibration_entity.info_object.max_value == 5.0

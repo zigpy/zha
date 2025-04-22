@@ -216,14 +216,6 @@ class Strobe(t.enum8):
     Strobe = 0x01
 
 
-class UniqueIdRoot(enum.Enum):
-    """Root for unique ID suffix."""
-
-    DEVICE = "device"
-    ENDPOINT = "endpoint"
-    CLUSTER = "cluster"
-
-
 class UniqueIdMigration(enum.Enum):
     """Migrateion root for unique ID."""
 

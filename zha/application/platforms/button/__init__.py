@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetadata
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA, UniqueIdMigration
+from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -120,9 +120,6 @@ class IdentifyButton(Button):
     _command_name = "identify"
     _kwargs = {}
     _args = [DEFAULT_DURATION]
-
-    _unique_id_suffix = "identify"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""

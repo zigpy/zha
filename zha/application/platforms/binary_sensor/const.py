@@ -102,12 +102,3 @@ IAS_ZONE_CLASS_MAPPING = {
     IasZone.ZoneType.Carbon_Monoxide_Sensor: BinarySensorDeviceClass.GAS,
     IasZone.ZoneType.Vibration_Movement_Sensor: BinarySensorDeviceClass.VIBRATION,
 }
-
-IAS_ZONE_UNIQUE_IDS = {
-    IasZone.ZoneType.Motion_Sensor: "motion",
-    IasZone.ZoneType.Contact_Switch: "contact",
-    IasZone.ZoneType.Fire_Sensor: "fire",
-    IasZone.ZoneType.Water_Sensor: "water",
-    IasZone.ZoneType.Carbon_Monoxide_Sensor: "carbon_monoxide",
-    IasZone.ZoneType.Vibration_Movement_Sensor: "vibration_movement",
-}

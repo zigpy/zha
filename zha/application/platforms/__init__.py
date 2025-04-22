@@ -16,11 +16,7 @@ from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
-from zha.application.const import UniqueIdMigration, UniqueIdRoot
-from zha.application.platforms.helpers import (
-    format_legacy_platform_unique_id,
-    format_platform_unique_id,
-)
+from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
@@ -348,10 +344,7 @@ class PlatformEntity(BaseEntity):
 
     # suffix to add to the unique_id of the entity. Used for multi
     # entities using the same cluster handler/cluster id for the entity.
-    _unique_id_suffix: str
-
-    # Root for the suffix. By default, the suffix is added to the cluster ID.
-    _unique_id_root: UniqueIdRoot = UniqueIdRoot.CLUSTER
+    _unique_id_suffix: str | None = None
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
@@ -361,58 +354,19 @@ class PlatformEntity(BaseEntity):
         endpoint: Endpoint,
         device: Device,
         entity_metadata: EntityMetadata | None = None,
+        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
 
-        assert self._unique_id_suffix is not None
-        cluster = cluster_handlers[0].cluster
-
-        super().__init__(
-            unique_id=format_platform_unique_id(
-                self._unique_id_root, device, endpoint, cluster, self._unique_id_suffix
-            ),
-            **kwargs,
-        )
-
-        if (
-            self._migrate_platform_unique_ids
-            is PlatformEntity._migrate_platform_unique_ids
-        ):
-            # Default migration using the current suffix
-            if entity_metadata is not None:
-                self._migrate_unique_ids.append(
-                    format_legacy_platform_unique_id(
-                        UniqueIdMigration.LEGACY_ENDPOINT,
-                        device,
-                        endpoint,
-                        None,
-                        self._unique_id_suffix,
-                    )
-                )
-            else:
-                self._migrate_unique_ids.append(
-                    format_legacy_platform_unique_id(
-                        UniqueIdMigration.LEGACY_CLUSTER,
-                        device,
-                        endpoint,
-                        cluster,
-                        self._unique_id_suffix,
-                    )
-                )
+        if self._unique_id_suffix is not None:
+            unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
         else:
-            for migration_type, suffix in self._migrate_platform_unique_ids:
-                self._migrate_unique_ids.append(
-                    format_legacy_platform_unique_id(
-                        migration_type,
-                        device,
-                        endpoint,
-                        cluster,
-                        suffix,
-                    )
-                )
+            unique_id = legacy_discovery_unique_id
+
+        super().__init__(unique_id=unique_id, **kwargs)
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}

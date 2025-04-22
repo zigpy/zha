@@ -401,6 +401,7 @@ class DeviceProbe:
                     endpoint=endpoint,
                     device=device,
                     entity_metadata=entity_metadata,
+                    legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
                 )
 
                 _LOGGER.debug(
@@ -510,6 +511,7 @@ class EndpointProbe:
                 endpoint=endpoint,
                 device=endpoint.device,
                 cluster_handlers=claimed,
+                legacy_discovery_unique_id=legacy_discovery_unique_id,
             )
 
     def probe_single_cluster(
@@ -533,11 +535,13 @@ class EndpointProbe:
             return
 
         endpoint.claim_cluster_handlers(claimed)
+        device = endpoint.device
 
         yield entity_class(
             endpoint=endpoint,
             device=endpoint.device,
             cluster_handlers=claimed,
+            legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}-{cluster_handler.cluster.cluster_id}",
         )
 
     def discover_by_cluster_id(self, endpoint: Endpoint) -> Iterator[PlatformEntity]:
@@ -646,16 +650,25 @@ class EndpointProbe:
                     [ch.name for ch in entity_and_handler.claimed_cluster_handlers],
                 )
 
+                if platform == cmpt_by_dev_type:
+                    # for well known device types,
+                    # like thermostats we'll take only 1st class
+                    yield entity_and_handler.entity_class(
+                        endpoint=endpoint,
+                        device=device,
+                        cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                        legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
+                    )
+                    break
+
+                first_ch = entity_and_handler.claimed_cluster_handlers[0]
+
                 yield entity_and_handler.entity_class(
                     endpoint=endpoint,
                     device=device,
                     cluster_handlers=entity_and_handler.claimed_cluster_handlers,
+                    legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}",
                 )
-
-                # for well known device types,
-                # like thermostats we'll take only 1st class
-                if platform == cmpt_by_dev_type:
-                    break
 
 
 class GroupProbe:

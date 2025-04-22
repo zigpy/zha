@@ -13,7 +13,6 @@ from zigpy.quirks.v2 import BinarySensorMetadata
 from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
-from zha.application.const import UniqueIdMigration
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
@@ -161,9 +160,6 @@ class Accelerometer(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOVING
     _attr_translation_key: str = "accelerometer"
 
-    _unique_id_suffix = "acceleration"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
-
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_OCCUPANCY)
 class Occupancy(BinarySensor):
@@ -172,9 +168,6 @@ class Occupancy(BinarySensor):
     _attribute_name = "occupancy"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
     _attr_primary_weight = 2
-
-    _unique_id_suffix = "occupancy"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_HUE_OCCUPANCY)
@@ -193,9 +186,6 @@ class Opening(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_primary_weight = 1
 
-    _unique_id_suffix = "opening"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
-
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
 class BinaryInput(BinarySensor):
@@ -203,9 +193,6 @@ class BinaryInput(BinarySensor):
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "binary_input"
-
-    _unique_id_suffix = "binary_input"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
 
 @STRICT_MATCH(
@@ -225,9 +212,6 @@ class Motion(Opening):
 
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
 
-    _unique_id_suffix = "motion"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
-
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ZONE)
 class IASZone(BinarySensor):
@@ -236,9 +220,7 @@ class IASZone(BinarySensor):
     _attribute_name = "zone_status"
     _attr_primary_weight = 3
 
-    # `_unique_id_suffix` calculated below
     # TODO: split this sensor off into individual sensor classes per IASZone type
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_CLUSTER, ""),)
 
     def __init__(
         self,
@@ -252,12 +234,10 @@ class IASZone(BinarySensor):
         zone_type = cluster_handler.cluster.get("zone_type")
 
         if zone_type is None:
-            self._unique_id_suffix = "ias_zone"
             self._attr_translation_key = "ias_zone"
             self._attr_device_class = None
         else:
             zone_type = IasZone.ZoneType(zone_type)
-            self._unique_id_suffix = zone_type.name.lower()
             self._attr_translation_key = (
                 None if zone_type in IAS_ZONE_CLASS_MAPPING else "ias_zone"
             )

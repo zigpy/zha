@@ -752,7 +752,7 @@ async def test_electrical_measurement_init(
     await asyncio.sleep(entity.__polling_interval + 1)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert (
-        "-1-0x0b04-active_power: skipping polling for updated state, available: False, allow polled requests: True"
+        "-1-2820: skipping polling for updated state, available: False, allow polled requests: True"
         in caplog.text
     )
 
@@ -1626,7 +1626,7 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
 
     # knock it off the network and ensure the polling is skipped
     assert (
-        "00:0d:6f:00:0a:90:69:e7-rssi: skipping polling for updated state, "
+        "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "
         "available: False, allow polled requests: True" not in caplog.text
     )
 
@@ -1637,7 +1637,7 @@ async def test_device_unavailable_or_disabled_skips_entity_polling(
     assert entity.update.call_count == 2
 
     assert (
-        "00:0d:6f:00:0a:90:69:e7-rssi: skipping polling for updated state, "
+        "00:0d:6f:00:0a:90:69:e7-1-0-rssi: skipping polling for updated state, "
         "available: False, allow polled requests: True" in caplog.text
     )
 

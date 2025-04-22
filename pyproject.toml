@@ -202,6 +202,10 @@ ignore = [
     "SIM103", # Return the condition {condition} directly
 ]
 
+# Allow unused import cleaning in `__init__.py` files
+ignore-init-module-imports = false
+extend-safe-fixes = ["F401"]
+
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 

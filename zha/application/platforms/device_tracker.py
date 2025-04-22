@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any
 from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
-from zha.application.const import UniqueIdMigration
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.sensor import Battery
 from zha.application.registries import PLATFORM_ENTITIES
@@ -49,9 +48,6 @@ class DeviceScannerEntity(PlatformEntity):
     _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
-
-    _unique_id_suffix = "device_tracker"
-    _migrate_platform_unique_ids = ((UniqueIdMigration.LEGACY_ENDPOINT, ""),)
 
     def __init__(
         self,

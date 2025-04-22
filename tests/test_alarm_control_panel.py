@@ -72,13 +72,9 @@ async def test_alarm_control_panel(
     zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
     cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
     alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
-        (
-            Platform.ALARM_CONTROL_PANEL,
-            "00:0d:6f:00:0a:90:69:e7-1-0x0501-alarm_control_panel",
-        )
+        (Platform.ALARM_CONTROL_PANEL, "00:0d:6f:00:0a:90:69:e7-1")
     )
     assert alarm_entity is not None
-    assert "00:0d:6f:00:0a:90:69:e7-1" in alarm_entity.migrate_unique_ids
     assert isinstance(alarm_entity, AlarmControlPanel)
 
     # test that the state is STATE_ALARM_DISARMED

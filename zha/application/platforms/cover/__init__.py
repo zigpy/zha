@@ -13,7 +13,6 @@ from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.const import UniqueIdMigration
 from zha.application.platforms import PlatformEntity
 from zha.application.platforms.cover.const import (
     ATTR_CURRENT_POSITION,
@@ -125,11 +124,6 @@ class Cover(BaseCover):
     """Representation of a ZHA cover."""
 
     _attr_translation_key: str = "cover"
-    _unique_id_suffix = "cover"
-    _migrate_platform_unique_ids = (
-        (UniqueIdMigration.LEGACY_ENDPOINT, ""),
-        (UniqueIdMigration.LEGACY_CLUSTER, ""),
-    )
 
     def __init__(
         self,
@@ -677,11 +671,6 @@ class Shade(BaseCover):
 
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
-    _unique_id_suffix = "shade"
-    _migrate_platform_unique_ids = (
-        (UniqueIdMigration.LEGACY_CLUSTER, ""),
-        (UniqueIdMigration.LEGACY_ENDPOINT, ""),
-    )
     _attr_supported_features: CoverEntityFeature = (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE

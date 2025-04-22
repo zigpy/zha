@@ -743,21 +743,18 @@ async def test_device_properties(
     assert len(zha_device.platform_entities) == 3
 
     lqi_entity = zha_device.platform_entities[
-        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-lqi"
+        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
     ]
-    assert "00:0d:6f:00:0a:90:69:e7-3-0-lqi" in lqi_entity.migrate_unique_ids
     assert type(lqi_entity) is LQISensor
 
     rssi_entity = zha_device.platform_entities[
-        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-rssi"
+        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-rssi"
     ]
-    assert "00:0d:6f:00:0a:90:69:e7-3-0-rssi" in rssi_entity.migrate_unique_ids
     assert type(rssi_entity) is RSSISensor
 
     switch_entity = zha_device.platform_entities[
-        (Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-0x0006-switch")
+        Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-6"
     ]
-    assert "00:0d:6f:00:0a:90:69:e7-3-6" in switch_entity.migrate_unique_ids
     assert isinstance(switch_entity, Switch)
 
     with pytest.raises(KeyError, match="Entity foo not found"):
@@ -925,7 +922,7 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
             Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
         )
 
-    assert len(zha_device.platform_entities) == 7
+    assert len(zha_device.platform_entities) == 8
 
 
 async def test_join_binding_reporting(zha_gateway: Gateway) -> None:

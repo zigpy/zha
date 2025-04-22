@@ -7,16 +7,10 @@ import enum
 import logging
 from typing import TYPE_CHECKING, Any, overload
 
-from zigpy.zcl import Cluster
-
-from zha.application.const import UniqueIdMigration, UniqueIdRoot
-
 if TYPE_CHECKING:
     from zha.application.platforms.binary_sensor.const import BinarySensorDeviceClass
     from zha.application.platforms.number.const import NumberDeviceClass
     from zha.application.platforms.sensor.const import SensorDeviceClass
-    from zha.zigbee.device import Device
-    from zha.zigbee.endpoint import Endpoint
 
 
 def find_state_attributes(states: list[dict], key: str) -> Iterator[Any]:
@@ -105,53 +99,3 @@ def validate_device_class(
             ex,
         )
         return None
-
-
-def format_legacy_platform_unique_id(
-    migration_type: UniqueIdMigration,
-    device: Device,
-    endpoint: Endpoint,
-    cluster: Cluster,
-    suffix: str,
-) -> str:
-    """Create a unique ID based on the provided information."""
-    if suffix != "":
-        suffix = "-" + suffix
-
-    match migration_type:
-        case UniqueIdMigration.LEGACY_CLUSTER:
-            assert endpoint is not None
-            assert cluster is not None
-            return f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}{suffix}"
-        case UniqueIdMigration.LEGACY_ENDPOINT:
-            assert endpoint is not None
-            return f"{device.ieee}-{endpoint.id}{suffix}"
-        case _:
-            raise ValueError(
-                f"Invalid migration type: {migration_type}"
-            )  # pragma: no cover
-
-
-def format_platform_unique_id(
-    root: UniqueIdRoot,
-    device: Device,
-    endpoint: Endpoint,
-    cluster: Cluster,
-    suffix: str,
-) -> str:
-    """Create a unique ID based on the provided information."""
-    if suffix != "":
-        suffix = "-" + suffix
-
-    match root:
-        case UniqueIdRoot.CLUSTER:
-            assert endpoint is not None
-            assert cluster is not None
-            return f"{device.ieee}-{endpoint.id}-0x{cluster.cluster_id:04x}{suffix}"
-        case UniqueIdRoot.ENDPOINT:
-            assert endpoint is not None
-            return f"{device.ieee}-{endpoint.id}{suffix}"
-        case UniqueIdRoot.DEVICE:
-            return f"{device.ieee}{suffix}"
-        case _:
-            raise ValueError(f"Invalid unique_id_root: {root}")  # pragma: no cover
