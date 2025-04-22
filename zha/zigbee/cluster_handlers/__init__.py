@@ -720,6 +720,13 @@ class ZDOClusterHandler(LogMixin):
 class ClientClusterHandler(ClusterHandler):
     """ClusterHandler for Zigbee client (output) clusters."""
 
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize ClientClusterHandler."""
+        super().__init__(*args, **kwargs)
+        self._unique_id += "_CLIENT"
+        self._generic_id += "_client"
+        self._id += "_client"
+
     def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
         """Handle an attribute updated on this cluster."""
         super().attribute_updated(attrid, value, timestamp)
