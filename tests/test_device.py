@@ -59,6 +59,7 @@ def zigpy_device(
             SIG_EP_INPUT: in_clusters,
             SIG_EP_OUTPUT: [],
             SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
         }
     }
     return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)

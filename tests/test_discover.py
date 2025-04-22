@@ -320,6 +320,7 @@ async def test_quirks_v2_entity_discovery(
                     zigpy.zcl.clusters.general.Scenes.cluster_id,
                 ],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.NON_COLOR_CONTROLLER,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         ieee="01:2d:6f:00:0a:90:69:e8",
@@ -440,6 +441,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
                     zigpy.zcl.clusters.general.Ota.cluster_id,
                     XiaomiAqaraDriverE1.cluster_id,
                 ],
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         ieee="01:2d:6f:00:0a:90:69:e8",
@@ -522,6 +524,7 @@ def _get_test_device(
                     zigpy.zcl.clusters.general.Scenes.cluster_id,
                 ],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.NON_COLOR_CONTROLLER,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         ieee="01:2d:6f:00:0a:90:69:e8",

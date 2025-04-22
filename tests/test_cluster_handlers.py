@@ -1110,7 +1110,7 @@ async def test_configure_reporting(zha_gateway: Gateway) -> None:
             AttrReportConfig(attr="current_y", config=(1, 60, 4)),
         )
 
-    mock_ep = mock.AsyncMock(spec_set=zigpy.endpoint.Endpoint)
+    mock_ep = mock.AsyncMock()
     mock_ep.profile_id = zigpy.profiles.zha.PROFILE_ID
     mock_ep.device.zdo = AsyncMock()
 
