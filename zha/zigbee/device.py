@@ -569,6 +569,9 @@ class Device(LogMixin, EventBase):
 
     def async_update_firmware_version(self, firmware_version: str) -> None:
         """Update device firmware version."""
+        if firmware_version == self._firmware_version:
+            return
+
         self._firmware_version = firmware_version
         self.emit(DeviceUpdatedEvent.event_type, DeviceUpdatedEvent())
 

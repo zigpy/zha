@@ -811,6 +811,15 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
     )
 
     assert zha_device.firmware_version == "0xabcd1234"
+
+    # Duplicate updates are ignored
+    update_entity._ota_cluster_handler.attribute_updated(
+        attrid=Ota.AttributeDefs.current_file_version.id,
+        value=zigpy.types.uint32_t(0xABCD1234),
+        timestamp=datetime.now(UTC),
+    )
+
+    assert zha_device.firmware_version == "0xabcd1234"
     assert update_callback.mock_calls == [call(DeviceUpdatedEvent())]
 
 
