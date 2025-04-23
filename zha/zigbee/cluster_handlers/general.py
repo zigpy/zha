@@ -585,7 +585,6 @@ class OtaClientClusterHandler(ClientClusterHandler):
             self.cluster.update_attribute(
                 Ota.AttributeDefs.current_file_version.id, current_file_version
             )
-            self._endpoint.device.sw_version = current_file_version
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Partition.cluster_id)
