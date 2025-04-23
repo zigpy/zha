@@ -1,6 +1,7 @@
 """Test ZHA device switch."""
 
 import asyncio
+from datetime import UTC, datetime
 import logging
 import time
 from unittest import mock
@@ -13,6 +14,7 @@ from zigpy.quirks.registry import DeviceRegistry
 from zigpy.quirks.v2 import DeviceAlertLevel, DeviceAlertMetadata, QuirkBuilder
 import zigpy.types
 from zigpy.zcl.clusters import general
+from zigpy.zcl.clusters.general import Ota
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
 import zigpy.zdo.types as zdo_t
 
@@ -42,7 +44,11 @@ from zha.application.platforms.light import Light
 from zha.application.platforms.sensor import LQISensor, RSSISensor
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
-from zha.zigbee.device import ClusterBinding, get_device_automation_triggers
+from zha.zigbee.device import (
+    ClusterBinding,
+    DeviceUpdatedEvent,
+    get_device_automation_triggers,
+)
 from zha.zigbee.group import Group
 
 
@@ -741,7 +747,7 @@ async def test_device_properties(
 
     assert zha_device.power_configuration_ch is None
     assert zha_device.basic_ch is not None
-    assert zha_device.sw_version is None
+    assert zha_device.firmware_version is None
 
     assert len(zha_device.platform_entities) == 3
 
@@ -778,6 +784,34 @@ async def test_device_properties(
     assert zha_device.is_router is None
     assert zha_device.is_end_device is None
     assert zha_device.is_coordinator is None
+
+
+async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
+    """Test device firmware version syncing."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-sml001.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # Register a callback to listen for device updates
+    update_callback = mock.Mock()
+    zha_device.on_event(DeviceUpdatedEvent.event_type, update_callback)
+
+    # The firmware version is restored on device initialization
+    assert zha_device.firmware_version == "0x42006bb7"
+
+    # If we update the entity, the device updates as well
+    update_entity = get_entity(zha_device, platform=Platform.UPDATE)
+    update_entity._ota_cluster_handler.attribute_updated(
+        attrid=Ota.AttributeDefs.current_file_version.id,
+        value=zigpy.types.uint32_t(0xABCD1234),
+        timestamp=datetime.now(UTC),
+    )
+
+    assert zha_device.firmware_version == "0xabcd1234"
+    assert update_callback.mock_calls == [call(DeviceUpdatedEvent())]
 
 
 async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
