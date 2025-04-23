@@ -1161,3 +1161,69 @@ async def test_cover_state_restoration(
         assert entity.state["state"] == interim_state
         await asyncio.sleep(DEFAULT_MOVEMENT_TIMEOUT)
     assert entity.state["state"] == final_state
+
+
+async def test_cover_lift_timer_cancellation_on_remove(zha_gateway: Gateway) -> None:
+    """Test the cover timer handle cancellation upon removal."""
+
+    # create mock cover device
+    zha_device, zigpy_cover_device = await device_cover_mock(
+        zha_gateway,
+        current_position_lift_percentage=0,
+        current_position_tilt_percentage=0,
+        window_covering_type=WCT.Tilt_blind_tilt_and_lift,
+    )
+
+    # start lift close timer
+    entity = get_entity(zha_device, platform=Platform.COVER)
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
+        await entity.async_close_cover()
+        await zha_gateway.async_block_till_done()
+        assert entity.state["state"] == CoverState.CLOSING
+
+    # remove entity
+    await entity.on_remove()
+
+
+async def test_cover_tilt_timer_cancellation_on_remove(zha_gateway: Gateway) -> None:
+    """Test the cover timer handle cancellation upon removal."""
+
+    # create mock cover device
+    zha_device, zigpy_cover_device = await device_cover_mock(
+        zha_gateway,
+        current_position_lift_percentage=0,
+        current_position_tilt_percentage=0,
+        window_covering_type=WCT.Tilt_blind_tilt_and_lift,
+    )
+
+    # start tilt close timer
+    entity = get_entity(zha_device, platform=Platform.COVER)
+    with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
+        await entity.async_close_cover_tilt()
+        await zha_gateway.async_block_till_done()
+        assert entity.state["state"] == CoverState.CLOSING
+
+    # remove entity
+    await entity.on_remove()
+
+
+async def test_cover_state_restore_timer_cancellation_on_remove(
+    zha_gateway: Gateway,
+) -> None:
+    """Test the cover timer handle cancellation upon removal."""
+
+    # create mock cover device
+    zha_device, zigpy_cover_device = await device_cover_mock(
+        zha_gateway,
+        current_position_lift_percentage=0,
+        current_position_tilt_percentage=0,
+        window_covering_type=WCT.Tilt_blind_tilt_and_lift,
+    )
+
+    # start state restore timer
+    entity = get_entity(zha_device, platform=Platform.COVER)
+    entity.restore_external_state_attributes(state=CoverState.CLOSING)
+    assert entity.state["state"] == CoverState.CLOSING
+
+    # remove entity
+    await entity.on_remove()
