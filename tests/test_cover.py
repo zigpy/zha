@@ -289,6 +289,14 @@ async def test_cover(
     )
     assert entity.state["state"] == CoverState.OPEN
 
+    # test entity async_update read of positions from the cluster
+    cluster.PLUGGED_ATTR_READS[WCAttrs.current_position_lift_percentage.name] = 0
+    cluster.PLUGGED_ATTR_READS[WCAttrs.current_position_tilt_percentage.name] = 100
+    update_attribute_cache(cluster)
+    await entity.async_update()
+    await zha_gateway.async_block_till_done()
+    assert entity.state["state"] == CoverState.OPEN
+
     # close from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
         await entity.async_close_cover()
@@ -872,6 +880,7 @@ async def test_shade(
     )
     assert entity.state["state"] == CoverState.OPEN
 
+    # test entity async_update
     await entity.async_update()
     await zha_gateway.async_block_till_done()
     assert entity.state["state"] == CoverState.OPEN
@@ -1030,6 +1039,7 @@ async def test_keen_vent(
     await send_attributes_report(zha_gateway, cluster_on_off, {8: 0, 0: False, 1: 1})
     assert entity.state["state"] == CoverState.CLOSED
 
+    # test entity async_update
     await entity.async_update()
     await zha_gateway.async_block_till_done()
     assert entity.state["state"] == CoverState.CLOSED
