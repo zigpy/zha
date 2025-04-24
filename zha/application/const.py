@@ -94,6 +94,7 @@ PRESET_NONE = "none"
 ENTITY_METADATA = "entity_metadata"
 
 ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
+REPORT_CONFIG = "REPORT_CONFIG"
 
 _ControllerClsType = type[zigpy.application.ControllerApplication]
 
@@ -213,3 +214,14 @@ class Strobe(t.enum8):
 
     No_Strobe = 0x00
     Strobe = 0x01
+
+
+class UniqueIdMigration(enum.Enum):
+    """Migrateion root for unique ID."""
+
+    LEGACY_CLUSTER = "legacy_cluster"
+    LEGACY_ENDPOINT = "legacy_endpoint"
+
+    DEVICE = "device"
+    CLUSTER = "cluster"
+    ENDPOINT = "endpoint"

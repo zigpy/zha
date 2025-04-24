@@ -80,6 +80,7 @@ class BaseFan(BaseEntity):
         | FanEntityFeature.TURN_ON
     )
     _attr_translation_key: str = "fan"
+    _attr_primary_weight = 10
 
     @functools.cached_property
     def preset_modes(self) -> list[str]:
@@ -203,22 +204,27 @@ class Fan(PlatformEntity, BaseFan):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the fan."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_FAN
         )
-        if self._fan_cluster_handler:
+        self.recompute_capabilities()
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
             self._fan_cluster_handler.on_event(
                 CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 self.handle_cluster_handler_attribute_updated,
             )
+        )
 
     @functools.cached_property
     def info_object(self) -> FanEntityInfo:
@@ -390,14 +396,13 @@ class IkeaFan(Fan):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ):
         """Initialize the fan."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             "ikea_airpurifier"
         )

@@ -154,7 +154,7 @@ class WindowCoveringClusterHandler(ClusterHandler):
 
     async def async_update(self):
         """Retrieve latest state."""
-        results = await self.get_attributes(
+        await self.get_attributes(
             [
                 WindowCovering.AttributeDefs.current_position_lift_percentage.name,
                 WindowCovering.AttributeDefs.current_position_tilt_percentage.name,
@@ -162,42 +162,6 @@ class WindowCoveringClusterHandler(ClusterHandler):
             from_cache=False,
             only_cache=False,
         )
-        self.debug(
-            "read current_position_lift_percentage and current_position_tilt_percentage - results: %s",
-            results,
-        )
-        if (
-            results
-            and results.get(
-                WindowCovering.AttributeDefs.current_position_lift_percentage.name
-            )
-            is not None
-        ):
-            # the 100 - value is because we need to invert the value before giving it to the entity
-            self.attribute_updated(
-                WindowCovering.AttributeDefs.current_position_lift_percentage.id,
-                WindowCovering.AttributeDefs.current_position_lift_percentage.name,
-                100
-                - results.get(
-                    WindowCovering.AttributeDefs.current_position_lift_percentage.name
-                ),
-            )
-        if (
-            results
-            and results.get(
-                WindowCovering.AttributeDefs.current_position_tilt_percentage.name
-            )
-            is not None
-        ):
-            # the 100 - value is because we need to invert the value before giving it to the entity
-            self.attribute_updated(
-                WindowCovering.AttributeDefs.current_position_tilt_percentage.id,
-                WindowCovering.AttributeDefs.current_position_tilt_percentage.name,
-                100
-                - results.get(
-                    WindowCovering.AttributeDefs.current_position_tilt_percentage.name
-                ),
-            )
 
     @property
     def inverted(self):

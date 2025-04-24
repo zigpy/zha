@@ -5,14 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import NumberMetadata
 from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import (
@@ -22,7 +21,7 @@ from zha.application.platforms.number.const import (
     NumberMode,
 )
 from zha.application.registries import PLATFORM_ENTITIES
-from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime, validate_unit
+from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ANALOG_OUTPUT,
@@ -80,20 +79,25 @@ class Number(PlatformEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ):
         """Initialize the number."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._analog_output_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
-        self._analog_output_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._analog_output_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
         if (
             hasattr(self._analog_output_cluster_handler, "description")
@@ -208,37 +212,8 @@ class NumberConfigurationEntity(PlatformEntity):
     _attribute_name: str
     _attr_mode: NumberMode = NumberMode.AUTO
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA not in kwargs and (
-            cls._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
-            or cluster_handler.cluster.get(cls._attribute_name) is None
-        ):
-            _LOGGER.debug(
-                "%s is not supported - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
-            )
-            return None
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -247,10 +222,33 @@ class NumberConfigurationEntity(PlatformEntity):
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
         self._attr_device_class: NumberDeviceClass | None = None
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+
+    def _is_supported(self) -> bool:
+        """Return if the entity is supported for the device, internal."""
+        if (
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
+            or self._cluster_handler.cluster.get(self._attribute_name) is None
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                self._attribute_name,
+                self.__class__.__name__,
+            )
+            return False
+
+        return super()._is_supported()
+
+    def on_add(self) -> None:
+        """Initialize entity."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     def _init_from_quirks_metadata(self, entity_metadata: NumberMetadata) -> None:
@@ -274,9 +272,7 @@ class NumberConfigurationEntity(PlatformEntity):
                 _LOGGER,
             )
         if entity_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = validate_unit(
-                entity_metadata.unit
-            ).value
+            self._attr_native_unit_of_measurement = entity_metadata.unit
 
     @functools.cached_property
     def info_object(self) -> NumberConfigurationEntityInfo:
@@ -455,14 +451,13 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this ZHA startup color temperature entity."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         if self._cluster_handler:
             self._attr_native_min_value: float = self._cluster_handler.min_mireds
             self._attr_native_max_value: float = self._cluster_handler.max_mireds

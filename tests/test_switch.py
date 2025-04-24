@@ -381,6 +381,7 @@ async def test_switch_configurable(
                 SIG_EP_INPUT: [general.Basic.cluster_id],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
             }
         },
         manufacturer="_TZE200_b6wax7g0",
@@ -492,6 +493,7 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
                 SIG_EP_INPUT: [general.Basic.cluster_id],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
             }
         },
         manufacturer="manufacturer",
@@ -571,6 +573,7 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
                 SIG_EP_INPUT: [general.Basic.cluster_id],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
             }
         },
         manufacturer="manufacturer2",
@@ -651,6 +654,7 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
                 SIG_EP_INPUT: [general.Basic.cluster_id],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
             }
         },
         manufacturer="manufacturer3",

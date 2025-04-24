@@ -4,8 +4,12 @@ from collections.abc import Awaitable, Callable
 from unittest.mock import MagicMock, call
 
 import pytest
+from zigpy.profiles import zha
 import zigpy.profiles.zha
+from zigpy.quirks import DeviceRegistry
+from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 from zigpy.zcl.clusters import general, measurement, security
+from zigpy.zcl.clusters.general import OnOff
 
 from tests.common import (
     SIG_EP_INPUT,
@@ -22,7 +26,12 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity
-from zha.application.platforms.binary_sensor import Accelerometer, IASZone, Occupancy
+from zha.application.platforms.binary_sensor import (
+    Accelerometer,
+    BinarySensor,
+    IASZone,
+    Occupancy,
+)
 from zha.zigbee.cluster_handlers.const import SMARTTHINGS_ACCELERATION_CLUSTER
 
 DEVICE_IAS = {
@@ -231,3 +240,50 @@ async def test_smarttthings_multi(
             {"attribute_id": 18, "attribute_name": "x_axis", "attribute_value": 120},
         )
     ]
+
+
+async def test_quirks_binary_sensor_attr_converter(zha_gateway: Gateway) -> None:
+    """Test ZHA quirks v2 binary_sensor with attribute_converter."""
+
+    registry = DeviceRegistry()
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [general.Basic.cluster_id, general.OnOff.cluster_id],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zha.PROFILE_ID,
+            }
+        },
+        manufacturer="manufacturer",
+        model="model",
+    )
+
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model, registry=registry)
+        .binary_sensor(
+            OnOff.AttributeDefs.on_off.name,
+            OnOff.cluster_id,
+            translation_key="on_off",
+            fallback_name="On/off",
+            attribute_converter=lambda x: not bool(x),  # invert value with lambda
+        )
+        .add_to_registry()
+    )
+
+    zigpy_device_ = registry.get_device(zigpy_dev)
+
+    assert isinstance(zigpy_device_, CustomDeviceV2)
+    cluster = zigpy_device_.endpoints[1].on_off
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
+    entity = get_entity(zha_device, platform=Platform.BINARY_SENSOR)
+    assert isinstance(entity, BinarySensor)
+
+    # send updated value, check if the value is inverted
+    await send_attributes_report(zha_gateway, cluster, {"on_off": 1})
+    assert entity.is_on is False
+
+    await send_attributes_report(zha_gateway, cluster, {"on_off": 0})
+    assert entity.is_on is True

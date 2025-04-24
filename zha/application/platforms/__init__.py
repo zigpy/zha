@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 import asyncio
+from collections.abc import Callable
 from contextlib import suppress
 import dataclasses
 from enum import StrEnum
@@ -15,6 +16,7 @@ from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
+from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
@@ -50,6 +52,7 @@ class BaseEntityInfo:
 
     fallback_name: str
     unique_id: str
+    migrate_unique_ids: frozenset[str]
     platform: str
     class_name: str
     translation_key: str | None
@@ -58,6 +61,7 @@ class BaseEntityInfo:
     entity_category: str | None
     entity_registry_enabled_default: bool
     enabled: bool = True
+    primary: bool
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -117,16 +121,43 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None
     _attr_state_class: str | None
     _attr_enabled: bool = True
+    _attr_always_supported: bool = False
+    _attr_primary: bool = False
+
+    # When two entities both want to be primary, the one with the higher weight will be
+    # chosen. If there is a tie, both lose.
+    _attr_primary_weight: int = 0
 
     def __init__(self, unique_id: str) -> None:
         """Initialize the platform entity."""
         super().__init__()
 
         self._unique_id: str = unique_id
+        self._migrate_unique_ids: list[str] = []
 
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
         self._tracked_handles: list[asyncio.Handle] = []
+        self._on_remove_callbacks: list[Callable[[], None]] = []
+
+    def is_supported(self) -> bool:
+        """Return if the entity is supported for the device."""
+        if self._attr_always_supported:
+            return True
+
+        return self._is_supported()
+
+    def _is_supported(self) -> bool:
+        """Return if the entity is supported for the device, internal."""
+        return True
+
+    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+        """Return if the entity is supported given all other entities."""
+        return True
+
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
+        pass
 
     @property
     def enabled(self) -> bool:
@@ -137,6 +168,21 @@ class BaseEntity(LogMixin, EventBase):
     def enabled(self, value: bool) -> None:
         """Set the entity enabled state."""
         self._attr_enabled = value
+
+    @property
+    def primary(self) -> bool:
+        """Return if the entity is the primary device control."""
+        return self._attr_primary
+
+    @primary.setter
+    def primary(self, value: bool) -> None:
+        """Set the entity as the primary device control."""
+        self._attr_primary = value
+
+    @property
+    def primary_weight(self) -> int:
+        """Return the primary weight of the entity."""
+        return self._attr_primary_weight
 
     @property
     def fallback_name(self) -> str | None:
@@ -189,6 +235,12 @@ class BaseEntity(LogMixin, EventBase):
         """Return the unique id."""
         return self._unique_id
 
+    @final
+    @property
+    def migrate_unique_ids(self) -> frozenset[str]:
+        """Return the previous unique ids to migrate from, if any."""
+        return frozenset(self._migrate_unique_ids)
+
     @cached_property
     def identifiers(self) -> BaseIdentifiers:
         """Return a dict with the information necessary to identify this entity."""
@@ -203,6 +255,7 @@ class BaseEntity(LogMixin, EventBase):
 
         return BaseEntityInfo(
             unique_id=self.unique_id,
+            migrate_unique_ids=self.migrate_unique_ids,
             platform=self.PLATFORM,
             class_name=self.__class__.__name__,
             fallback_name=self.fallback_name,
@@ -212,6 +265,7 @@ class BaseEntity(LogMixin, EventBase):
             entity_category=self.entity_category,
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
+            primary=self.primary,
             # Set by platform entities
             cluster_handlers=[],
             device_ieee=None,
@@ -247,8 +301,17 @@ class BaseEntity(LogMixin, EventBase):
         """Disable the entity."""
         self.enabled = False
 
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        pass
+
     async def on_remove(self) -> None:
         """Cancel tasks and timers this entity owns."""
+        while self._on_remove_callbacks:
+            callback = self._on_remove_callbacks.pop()
+            self.debug("Running remove callback: %s", callback)
+            callback()
+
         for handle in self._tracked_handles:
             self.debug("Cancelling handle: %s", handle)
             handle.cancel()
@@ -283,62 +346,44 @@ class PlatformEntity(BaseEntity):
     # entities using the same cluster handler/cluster id for the entity.
     _unique_id_suffix: str | None = None
 
+    _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
+
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         entity_metadata: EntityMetadata | None = None,
+        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
 
-        if self._unique_id_suffix:
-            unique_id += f"-{self._unique_id_suffix}"
+        if self._unique_id_suffix is not None:
+            unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
+        else:
+            unique_id = legacy_discovery_unique_id
 
-        # XXX: The ordering here matters: `_init_from_quirks_metadata` affects how
-        # the `unique_id` is computed!
         super().__init__(unique_id=unique_id, **kwargs)
 
         self._cluster_handlers: list[ClusterHandler] = cluster_handlers
         self.cluster_handlers: dict[str, ClusterHandler] = {}
+
         for cluster_handler in cluster_handlers:
             self.cluster_handlers[cluster_handler.name] = cluster_handler
+
         self._device: Device = device
         self._endpoint = endpoint
-        # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
-            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
-        else:
-            _LOGGER.debug(
-                "Not registering entity %r, unique id %r already exists: %r",
-                self,
-                (self.PLATFORM, self.unique_id),
-                self._device.platform_entities[(self.PLATFORM, self.unique_id)],
-            )
-
-    @classmethod
-    def create_platform_entity(
-        cls: type[PlatformEntity],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> PlatformEntity | None:
-        """Entity Factory.
-
-        Return a platform entity if it is a supported configuration, otherwise return None
-        """
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
         if entity_metadata.initially_disabled:
             self._attr_entity_registry_enabled_default = False
+
+        # v2 quirks entities are assumed to always be supported
+        self._attr_always_supported = True
 
         has_attribute_name = hasattr(entity_metadata, "attribute_name")
         has_command_name = hasattr(entity_metadata, "command_name")
@@ -350,7 +395,9 @@ class PlatformEntity(BaseEntity):
         if entity_metadata.translation_key:
             self._attr_translation_key = entity_metadata.translation_key
 
-        if has_attribute_name:
+        if unique_id_suffix := entity_metadata.unique_id_suffix:
+            self._unique_id_suffix = unique_id_suffix
+        elif has_attribute_name:
             self._unique_id_suffix = entity_metadata.attribute_name
         elif has_command_name:
             self._unique_id_suffix = entity_metadata.command_name
@@ -442,7 +489,6 @@ class GroupEntity(BaseEntity):
             immediate=False,
             function=self.update,
         )
-        self._group.register_group_entity(self)
 
     @cached_property
     def identifiers(self) -> GroupEntityIdentifiers:
@@ -492,9 +538,16 @@ class GroupEntity(BaseEntity):
         assert self._change_listener_debouncer
         self.group.gateway.create_task(self._change_listener_debouncer.async_call())
 
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._group.register_group_entity(self)
+
     async def on_remove(self) -> None:
         """Cancel tasks this entity owns."""
         await super().on_remove()
+        self._group.unregister_group_entity(self)
+
         if self._change_listener_debouncer:
             self._change_listener_debouncer.async_cancel()
 

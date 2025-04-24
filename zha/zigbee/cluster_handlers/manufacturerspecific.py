@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -30,6 +31,7 @@ from zha.zigbee.cluster_handlers.const import (
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     INOVELLI_CLUSTER,
+    LEGRAND_CABLE_OUTLET_CLUSTER,
     OSRAM_BUTTON_CLUSTER,
     PHILIPS_CONTACT_CLUSTER,
     PHILLIPS_REMOTE_CLUSTER,
@@ -120,7 +122,7 @@ class TuyaClusterHandler(ClusterHandler):
 class OppleRemoteClusterHandler(ClusterHandler):
     """Opple cluster handler."""
 
-    REPORT_CONFIG = ()
+    REPORT_CONFIG: tuple[AttrReportConfig, ...] = ()
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize Opple cluster handler."""
@@ -231,9 +233,9 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
             "SmartThings",
         )
 
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
+    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
         """Handle attribute updates on this cluster."""
-        super().attribute_updated(attrid, value, _)
+        super().attribute_updated(attrid, value, timestamp)
         try:
             attr_name = self._cluster.attributes[attrid].name
         except KeyError:
@@ -577,3 +579,9 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
         )
 
         return cluster.endpoint.model in switches
+
+
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(LEGRAND_CABLE_OUTLET_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(LEGRAND_CABLE_OUTLET_CLUSTER)
+class LegrandCableOutletClusterHandler(ClusterHandler):
+    """Legrand cable outlet cluster handler."""

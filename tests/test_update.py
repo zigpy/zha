@@ -17,6 +17,7 @@ import zigpy.zdo.types as zdo_t
 from tests.common import (
     SIG_EP_INPUT,
     SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
     SIG_EP_TYPE,
     create_mock_zigpy_device,
     get_entity,
@@ -41,6 +42,7 @@ def zigpy_device_mock(zha_gateway: Gateway):
             SIG_EP_INPUT: [general.Basic.cluster_id, general.OnOff.cluster_id],
             SIG_EP_OUTPUT: [general.Ota.cluster_id],
             SIG_EP_TYPE: zha.DeviceType.ON_OFF_SWITCH,
+            SIG_EP_PROFILE: zha.PROFILE_ID,
         }
     }
     return create_mock_zigpy_device(

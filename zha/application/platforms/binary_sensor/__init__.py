@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import BinarySensorMetadata
+from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
@@ -59,11 +61,11 @@ class BinarySensor(PlatformEntity):
 
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
+    _attribute_converter: Callable[[Any], Any] | None = None
     PLATFORM: Platform = Platform.BINARY_SENSOR
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -71,11 +73,17 @@ class BinarySensor(PlatformEntity):
     ) -> None:
         """Initialize the ZHA binary sensor."""
         self._cluster_handler = cluster_handlers[0]
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._state: bool = self.is_on
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
         if (
             hasattr(self._cluster_handler, "description")
@@ -88,6 +96,8 @@ class BinarySensor(PlatformEntity):
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
         self._attribute_name = entity_metadata.attribute_name
+        if entity_metadata.attribute_converter is not None:
+            self._attribute_converter = entity_metadata.attribute_converter
         if entity_metadata.device_class is not None:
             self._attr_device_class = validate_device_class(
                 BinarySensorDeviceClass,
@@ -119,6 +129,8 @@ class BinarySensor(PlatformEntity):
         )
         if raw_state is None:
             return False
+        if self._attribute_converter:
+            return self._attribute_converter(raw_state)
         return self.parse(raw_state)
 
     def handle_cluster_handler_attribute_updated(
@@ -161,6 +173,7 @@ class Occupancy(BinarySensor):
 
     _attribute_name = "occupancy"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
+    _attr_primary_weight = 2
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_HUE_OCCUPANCY)
@@ -168,6 +181,7 @@ class HueOccupancy(Occupancy):
     """ZHA Hue occupancy."""
 
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
+    _attr_primary_weight = 3
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ON_OFF)
@@ -176,6 +190,7 @@ class Opening(BinarySensor):
 
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
@@ -209,38 +224,38 @@ class IASZone(BinarySensor):
     """ZHA IAS BinarySensor."""
 
     _attribute_name = "zone_status"
+    _attr_primary_weight = 3
+
+    # TODO: split this sensor off into individual sensor classes per IASZone type
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._attr_device_class = self.device_class
-        self._attr_translation_key = self.translation_key
+        cluster_handler = cluster_handlers[0]
+        zone_type = cluster_handler.cluster.get("zone_type")
 
-    @functools.cached_property
-    def translation_key(self) -> str | None:
-        """Return the name of the sensor."""
-        zone_type = self._cluster_handler.cluster.get("zone_type")
-        if zone_type in IAS_ZONE_CLASS_MAPPING:
-            return None
-        return "ias_zone"
+        if zone_type is None:
+            self._attr_translation_key = "ias_zone"
+            self._attr_device_class = None
+        else:
+            zone_type = IasZone.ZoneType(zone_type)
+            self._attr_translation_key = (
+                None if zone_type in IAS_ZONE_CLASS_MAPPING else "ias_zone"
+            )
+            self._attr_device_class = IAS_ZONE_CLASS_MAPPING.get(zone_type)
 
-    @functools.cached_property
-    def device_class(self) -> BinarySensorDeviceClass | None:
-        """Return device class from platform DEVICE_CLASSES."""
-        zone_type = self._cluster_handler.cluster.get("zone_type")
-        return IAS_ZONE_CLASS_MAPPING.get(zone_type)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
 
     @staticmethod
     def parse(value: bool | int) -> bool:
         """Parse the raw attribute into a bool state."""
-        return BinarySensor.parse(value & 3)  # use only bit 0 and 1 for alarm state
+        # use only bit 0 and 1 for alarm state
+        return BinarySensor.parse(value & 0b00000011)
 
     async def async_update(self) -> None:
         """Attempt to retrieve on off state from the IAS Zone sensor."""
@@ -253,6 +268,7 @@ class SinopeLeakStatus(BinarySensor):
 
     _attribute_name = "leak_status"
     _attr_device_class = BinarySensorDeviceClass.MOISTURE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(

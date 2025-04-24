@@ -172,7 +172,7 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
 @pytest.mark.parametrize(
     ("cluster_id", "bind_count", "attrs"),
     [
-        (zigpy.zcl.clusters.general.Basic.cluster_id, 0, {}),
+        (zigpy.zcl.clusters.general.Basic.cluster_id, 0, set()),
         (
             zigpy.zcl.clusters.general.PowerConfiguration.cluster_id,
             1,
@@ -183,13 +183,13 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
             1,
             {"current_temperature"},
         ),
-        (zigpy.zcl.clusters.general.Identify.cluster_id, 0, {}),
-        (zigpy.zcl.clusters.general.Groups.cluster_id, 0, {}),
-        (zigpy.zcl.clusters.general.Scenes.cluster_id, 1, {}),
+        (zigpy.zcl.clusters.general.Identify.cluster_id, 0, set()),
+        (zigpy.zcl.clusters.general.Groups.cluster_id, 0, set()),
+        (zigpy.zcl.clusters.general.Scenes.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.OnOff.cluster_id, 1, {"on_off"}),
-        (zigpy.zcl.clusters.general.OnOffConfiguration.cluster_id, 1, {}),
+        (zigpy.zcl.clusters.general.OnOffConfiguration.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.LevelControl.cluster_id, 1, {"current_level"}),
-        (zigpy.zcl.clusters.general.Alarms.cluster_id, 1, {}),
+        (zigpy.zcl.clusters.general.Alarms.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.AnalogInput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.AnalogOutput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.AnalogValue.cluster_id, 1, {"present_value"}),
@@ -199,13 +199,13 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
         (zigpy.zcl.clusters.general.MultistateInput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.MultistateOutput.cluster_id, 1, {"present_value"}),
         (zigpy.zcl.clusters.general.MultistateValue.cluster_id, 1, {"present_value"}),
-        (zigpy.zcl.clusters.general.Commissioning.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.Partition.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.Ota.cluster_id, 0, {}),
-        (zigpy.zcl.clusters.general.PowerProfile.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.ApplianceControl.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.PollControl.cluster_id, 1, {}),
-        (zigpy.zcl.clusters.general.GreenPowerProxy.cluster_id, 0, {}),
+        (zigpy.zcl.clusters.general.Commissioning.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.Partition.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.Ota.cluster_id, 0, set()),
+        (zigpy.zcl.clusters.general.PowerProfile.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.ApplianceControl.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.PollControl.cluster_id, 1, set()),
+        (zigpy.zcl.clusters.general.GreenPowerProxy.cluster_id, 0, set()),
         (zigpy.zcl.clusters.closures.DoorLock.cluster_id, 1, {"lock_state"}),
         (
             zigpy.zcl.clusters.hvac.Thermostat.cluster_id,
@@ -286,18 +286,25 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
             1,
             {
                 "ac_frequency",
-                "ac_frequency_max",
+                "ac_voltage_divisor",
+                "ac_current_divisor",
+                "ac_power_divisor",
+                "ac_voltage_multiplier",
+                "ac_power_multiplier",
+                "power_divisor",
+                "power_multiplier",
+                "ac_current_multiplier",
+                "ac_frequency",
                 "active_power",
-                "active_power_max",
+                "active_power_ph_b",
+                "active_power_ph_c",
                 "apparent_power",
                 "rms_current",
                 "rms_current_ph_b",
                 "rms_current_ph_c",
-                "rms_current_max",
-                "rms_current_max_b",
-                "rms_current_max_c",
                 "rms_voltage",
-                "rms_voltage_max",
+                "rms_voltage_ph_b",
+                "rms_voltage_ph_c",
             },
         ),
     ],
@@ -334,15 +341,15 @@ async def test_in_cluster_handler_config(
     assert cluster_handler.status == ClusterHandlerStatus.CONFIGURED
 
     assert cluster.bind.call_count == bind_count
+
+    reported_attrs = set()
+
+    for mock_call in cluster.configure_reporting_multiple.mock_calls:
+        reported_attrs.update(mock_call.args[0].keys())
+
+    assert attrs == reported_attrs
     assert cluster.configure_reporting.call_count == 0
     assert cluster.configure_reporting_multiple.call_count == math.ceil(len(attrs) / 3)
-    reported_attrs = {
-        a
-        for a in attrs
-        for attr in cluster.configure_reporting_multiple.call_args_list
-        for attrs in attr[0][0]
-    }
-    assert set(attrs) == reported_attrs
 
 
 async def test_cluster_handler_bind_error(
@@ -574,7 +581,7 @@ def test_cluster_handler_registry() -> None:
         cluster_quirk_id_map[cluster_id] = {None}
 
     # loop over custom clusters in v2 quirks registry
-    for quirks in _DEVICE_REGISTRY._registry_v2.values():
+    for quirks in _DEVICE_REGISTRY.registry_v2.values():
         for quirk_reg_entry in quirks:
             # get standalone adds_metadata and adds_metadata from replaces_metadata
             all_metadata = set(quirk_reg_entry.adds_metadata) | {
@@ -584,7 +591,7 @@ def test_cluster_handler_registry() -> None:
                 cluster_quirk_id_map[metadata.cluster.cluster_id] = {None}
 
     # loop over custom clusters in v1 quirks registry
-    for manufacturer in _DEVICE_REGISTRY.registry.values():
+    for manufacturer in _DEVICE_REGISTRY.registry_v1.values():
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
                 quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
@@ -1070,7 +1077,14 @@ async def test_cluster_no_ep_attribute(
         zha_gateway,
         create_mock_zigpy_device(
             zha_gateway,
-            {1: {SIG_EP_INPUT: [0x042E], SIG_EP_OUTPUT: [], SIG_EP_TYPE: 0x1234}},
+            {
+                1: {
+                    SIG_EP_INPUT: [0x042E],
+                    SIG_EP_OUTPUT: [],
+                    SIG_EP_TYPE: 0x1234,
+                    SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+                }
+            },
         ),
     )
 
@@ -1096,7 +1110,8 @@ async def test_configure_reporting(zha_gateway: Gateway) -> None:
             AttrReportConfig(attr="current_y", config=(1, 60, 4)),
         )
 
-    mock_ep = mock.AsyncMock(spec_set=zigpy.endpoint.Endpoint)
+    mock_ep = mock.AsyncMock()
+    mock_ep.profile_id = zigpy.profiles.zha.PROFILE_ID
     mock_ep.device.zdo = AsyncMock()
 
     cluster = zigpy.zcl.clusters.lighting.Color(mock_ep)
@@ -1143,6 +1158,7 @@ async def test_invalid_cluster_handler(zha_gateway: Gateway, caplog) -> None:  #
 
     mock_device = mock.AsyncMock(spec_set=zigpy.device.Device)
     zigpy_ep = zigpy.endpoint.Endpoint(mock_device, endpoint_id=1)
+    zigpy_ep.profile_id = zigpy.profiles.zha.PROFILE_ID
 
     cluster = zigpy_ep.add_input_cluster(zigpy.zcl.clusters.lighting.Color.cluster_id)
     cluster.configure_reporting_multiple = AsyncMock(
@@ -1187,6 +1203,7 @@ async def test_standard_cluster_handler(
 
     mock_device = mock.AsyncMock(spec_set=zigpy.device.Device)
     zigpy_ep = zigpy.endpoint.Endpoint(mock_device, endpoint_id=1)
+    zigpy_ep.profile_id = zigpy.profiles.zha.PROFILE_ID
 
     cluster = zigpy_ep.add_input_cluster(zigpy.zcl.clusters.lighting.Color.cluster_id)
     cluster.configure_reporting_multiple = AsyncMock(
@@ -1226,6 +1243,7 @@ async def test_quirk_id_cluster_handler(
 
     mock_device = mock.AsyncMock(spec_set=zigpy.device.Device)
     zigpy_ep = zigpy.endpoint.Endpoint(mock_device, endpoint_id=1)
+    zigpy_ep.profile_id = zigpy.profiles.zha.PROFILE_ID
 
     cluster = zigpy_ep.add_input_cluster(zigpy.zcl.clusters.lighting.Color.cluster_id)
     cluster.configure_reporting_multiple = AsyncMock(
@@ -1395,7 +1413,7 @@ async def test_zha_send_event_from_quirk(zha_gateway: Gateway):
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    on_off_ch = zha_device.endpoints[1].client_cluster_handlers["1:0x0006"]
+    on_off_ch = zha_device.endpoints[1].client_cluster_handlers["1:0x0006_client"]
     assert on_off_ch is not None
 
     on_off_ch.emit_zha_event = MagicMock(wraps=on_off_ch.emit_zha_event)

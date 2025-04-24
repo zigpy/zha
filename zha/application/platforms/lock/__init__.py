@@ -36,26 +36,32 @@ class DoorLock(PlatformEntity):
 
     PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
+    _attr_primary_weight = 10
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the lock."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers.get(
             CLUSTER_HANDLER_DOORLOCK
         )
         self._state: str | None = VALUE_TO_STATE.get(
             self._doorlock_cluster_handler.cluster.get("lock_state"), None
         )
-        self._doorlock_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._doorlock_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
 
     @property

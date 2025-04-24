@@ -16,7 +16,7 @@ from zigpy.zcl.clusters.homeautomation import (
 from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    REPORT_CONFIG_DEFAULT,
+    REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_OP,
 )
 
@@ -62,12 +62,48 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
 
     REPORT_CONFIG = (
         AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_voltage_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_current_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_current_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_power_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.ac_power_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.power_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.power_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.active_power.name,
             config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
-            attr=ElectricalMeasurement.AttributeDefs.active_power_max.name,
-            config=REPORT_CONFIG_DEFAULT,
+            attr=ElectricalMeasurement.AttributeDefs.active_power_ph_b.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.active_power_ph_c.name,
+            config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.apparent_power.name,
@@ -86,47 +122,65 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
-            attr=ElectricalMeasurement.AttributeDefs.rms_current_max.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-        AttrReportConfig(
-            attr=ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-        AttrReportConfig(
-            attr=ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-        AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.rms_voltage.name,
             config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
-            attr=ElectricalMeasurement.AttributeDefs.rms_voltage_max.name,
-            config=REPORT_CONFIG_DEFAULT,
+            attr=ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c.name,
+            config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.ac_frequency.name,
             config=REPORT_CONFIG_OP,
         ),
-        AttrReportConfig(
-            attr=ElectricalMeasurement.AttributeDefs.ac_frequency_max.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
     )
+    ZCL_POLLING_ATTRS = [
+        ElectricalMeasurement.AttributeDefs.ac_frequency.name,
+        ElectricalMeasurement.AttributeDefs.ac_frequency_max.name,
+        ElectricalMeasurement.AttributeDefs.active_power.name,
+        ElectricalMeasurement.AttributeDefs.active_power_ph_b.name,
+        ElectricalMeasurement.AttributeDefs.active_power_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.active_power_max.name,
+        ElectricalMeasurement.AttributeDefs.active_power_max_ph_b.name,
+        ElectricalMeasurement.AttributeDefs.active_power_max_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.apparent_power.name,
+        ElectricalMeasurement.AttributeDefs.power_factor.name,
+        ElectricalMeasurement.AttributeDefs.power_factor_ph_b.name,
+        ElectricalMeasurement.AttributeDefs.power_factor_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.rms_current.name,
+        ElectricalMeasurement.AttributeDefs.rms_current_ph_b.name,
+        ElectricalMeasurement.AttributeDefs.rms_current_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.rms_current_max.name,
+        ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b.name,
+        ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.rms_voltage.name,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b.name,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_max.name,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name,
+    ]
     ZCL_INIT_ATTRS = {
-        ElectricalMeasurement.AttributeDefs.ac_current_divisor.name: True,
-        ElectricalMeasurement.AttributeDefs.ac_current_multiplier.name: True,
-        ElectricalMeasurement.AttributeDefs.ac_power_divisor.name: True,
-        ElectricalMeasurement.AttributeDefs.ac_power_multiplier.name: True,
-        ElectricalMeasurement.AttributeDefs.ac_voltage_divisor.name: True,
-        ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier.name: True,
         ElectricalMeasurement.AttributeDefs.ac_frequency_divisor.name: True,
+        ElectricalMeasurement.AttributeDefs.ac_frequency_max.name: True,
         ElectricalMeasurement.AttributeDefs.ac_frequency_multiplier.name: True,
+        ElectricalMeasurement.AttributeDefs.active_power_max.name: True,
+        ElectricalMeasurement.AttributeDefs.active_power_max_ph_b.name: True,
+        ElectricalMeasurement.AttributeDefs.active_power_max_ph_c.name: True,
         ElectricalMeasurement.AttributeDefs.measurement_type.name: True,
-        ElectricalMeasurement.AttributeDefs.power_divisor.name: True,
-        ElectricalMeasurement.AttributeDefs.power_multiplier.name: True,
         ElectricalMeasurement.AttributeDefs.power_factor.name: True,
+        ElectricalMeasurement.AttributeDefs.power_factor_ph_b.name: True,
+        ElectricalMeasurement.AttributeDefs.power_factor_ph_c.name: True,
+        ElectricalMeasurement.AttributeDefs.rms_current_max.name: True,
+        ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b.name: True,
+        ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c.name: True,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_max.name: True,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name: True,
+        ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name: True,
     }
 
     async def async_update(self):
@@ -135,18 +189,11 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
 
         # This is a polling cluster handler. Don't allow cache.
         attrs = [
-            a["attr"]
-            for a in self.REPORT_CONFIG
-            if a["attr"] not in self.cluster.unsupported_attributes
+            attr
+            for attr in self.ZCL_POLLING_ATTRS
+            if attr not in self.cluster.unsupported_attributes
         ]
-        result = await self.get_attributes(attrs, from_cache=False, only_cache=False)
-        if result:
-            for attr, value in result.items():
-                self.attribute_updated(
-                    self.cluster.find_attribute(attr).id,
-                    attr,
-                    value,
-                )
+        await self.get_attributes(attrs, from_cache=False, only_cache=False)
 
     @property
     def ac_current_divisor(self) -> int:

@@ -60,6 +60,12 @@ To bootstrap a development environment for ZHA, follow these steps:
     - `pre-commit install`: This command installs Git pre-commit hooks for the project. Pre-commit hooks are scripts that run before each commit is made in a Git repository, allowing you to enforce certain checks or actions before committing changes.
     </details>
 
+4. If creating new entities or modifying existing ones, unit tests that use device diagnostic files will fail. You can regenerate existing device diagnostic JSON files to incorporate the new entities:
+
+    ```shell
+    python -m tools.regenerate_diagnostics
+    ```
+
 ## License
 
 ZHA is released under the [Apache 2.0 License](https://opensource.org/license/apache-2-0). Please refer to the LICENSE file for more details

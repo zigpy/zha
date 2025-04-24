@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Coroutine, Iterator
 import contextlib
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 import functools
 import logging
@@ -209,8 +210,15 @@ class ClusterHandler(LogMixin, EventBase):
             ]
             self.value_attribute = attr_def.name
         self._status: ClusterHandlerStatus = ClusterHandlerStatus.CREATED
-        self._cluster.add_listener(self)
         self.data_cache: dict[str, Any] = {}
+
+    def on_add(self) -> None:
+        """Call when cluster handler is added."""
+        self._cluster.add_listener(self)
+
+    def on_remove(self) -> None:
+        """Call when cluster handler will be removed."""
+        self._cluster.remove_listener(self)
 
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:  # pylint: disable=unused-argument
@@ -489,7 +497,7 @@ class ClusterHandler(LogMixin, EventBase):
     def cluster_command(self, tsn, command_id, args) -> None:
         """Handle commands received to this cluster."""
 
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
+    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
         """Handle attribute updates on this cluster."""
         attr_name = self._get_attribute_name(attrid)
         self.debug(
@@ -590,6 +598,7 @@ class ClusterHandler(LogMixin, EventBase):
                     only_cache=only_cache,
                     manufacturer=manufacturer,
                 )
+                self.debug("Got attributes: %s", read)
                 result.update(read)
             except (TimeoutError, zigpy.exceptions.ZigbeeException) as ex:
                 self.debug(
@@ -604,7 +613,14 @@ class ClusterHandler(LogMixin, EventBase):
             rest = rest[CLUSTER_READS_PER_REQ:]
         return result
 
-    get_attributes = functools.partialmethod(_get_attributes, False)
+    async def get_attributes(
+        self,
+        attributes: list[str],
+        from_cache: bool = True,
+        only_cache: bool = True,
+    ) -> dict[int | str, Any]:
+        """Get the values for a list of attributes and raise no exceptions."""
+        return await self._get_attributes(False, attributes, from_cache, only_cache)
 
     async def write_attributes_safe(
         self, attributes: dict[str, Any], manufacturer: int | None = None
@@ -656,7 +672,14 @@ class ZDOClusterHandler(LogMixin):
         self._zha_device = device
         self._status = ClusterHandlerStatus.CREATED
         self._unique_id = f"{str(device.ieee)}:{device.name}_ZDO"
+
+    def on_add(self) -> None:
+        """Call when cluster handler is added."""
         self._cluster.add_listener(self)
+
+    def on_remove(self) -> None:
+        """Call when cluster handler will be removed."""
+        self._cluster.remove_listener(self)
 
     @property
     def unique_id(self):
@@ -697,7 +720,14 @@ class ZDOClusterHandler(LogMixin):
 class ClientClusterHandler(ClusterHandler):
     """ClusterHandler for Zigbee client (output) clusters."""
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: Any) -> None:
+    def __init__(self, *args, **kwargs) -> None:
+        """Initialize ClientClusterHandler."""
+        super().__init__(*args, **kwargs)
+        self._unique_id += "_CLIENT"
+        self._generic_id += "_client"
+        self._id += "_client"
+
+    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
         """Handle an attribute updated on this cluster."""
         super().attribute_updated(attrid, value, timestamp)
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from asyncio import Task
+import contextlib
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 import enum
@@ -10,19 +11,20 @@ import functools
 import logging
 import math
 import numbers
-from typing import TYPE_CHECKING, Any, Self
+import typing
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
+from zigpy.zcl import foundation
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
 from zigpy.zcl.clusters.general_const import ApplicationType
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -49,6 +51,7 @@ from zha.units import (
     PERCENTAGE,
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     UnitOfApparentPower,
+    UnitOfConductivity,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
     UnitOfEnergy,
@@ -56,11 +59,11 @@ from zha.units import (
     UnitOfMass,
     UnitOfPower,
     UnitOfPressure,
+    UnitOfSpeed,
     UnitOfTemperature,
     UnitOfTime,
     UnitOfVolume,
     UnitOfVolumeFlowRate,
-    validate_unit,
 )
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -70,6 +73,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_COVER,
     CLUSTER_HANDLER_DEVICE_TEMPERATURE,
     CLUSTER_HANDLER_DIAGNOSTIC,
+    CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY,
     CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     CLUSTER_HANDLER_FLOW,
     CLUSTER_HANDLER_HUMIDITY,
@@ -83,6 +87,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_SOIL_MOISTURE,
     CLUSTER_HANDLER_TEMPERATURE,
     CLUSTER_HANDLER_THERMOSTAT,
+    CLUSTER_HANDLER_WIND_SPEED,
     SMARTTHINGS_HUMIDITY_CLUSTER,
 )
 
@@ -124,7 +129,7 @@ class SensorEntityInfo(BaseEntityInfo):
     """Sensor entity info."""
 
     attribute: str
-    decimals: int
+    suggested_display_precision: int | None = None
     divisor: int
     multiplier: int
     unit: str | None = None
@@ -137,6 +142,7 @@ class DeviceCounterEntityInfo(BaseEntityInfo):
     """Device counter entity info."""
 
     device_ieee: str
+    suggested_display_precision: int
     available: bool
     counter: str
     counter_value: int
@@ -156,50 +162,17 @@ class Sensor(PlatformEntity):
 
     PLATFORM = Platform.SENSOR
     _attribute_name: int | str | None = None
-    _decimals: int = 1
+    _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
     _divisor: int = 1
     _multiplier: int | float = 1
+    _attr_suggested_display_precision: int | None = None
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
     _skip_creation_if_no_attr_cache: bool = False
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        cluster_handler = cluster_handlers[0]
-        if ENTITY_METADATA not in kwargs and (
-            cls._attribute_name in cluster_handler.cluster.unsupported_attributes
-            or cls._attribute_name not in cluster_handler.cluster.attributes_by_name
-        ):
-            _LOGGER.debug(
-                "%s is not supported - skipping %s entity creation",
-                cls._attribute_name,
-                cls.__name__,
-            )
-            return None
-
-        if (
-            cls._skip_creation_if_no_attr_cache
-            and cluster_handlers[0].cluster.get(cls._attribute_name) is None
-        ):
-            return None
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
@@ -207,10 +180,27 @@ class Sensor(PlatformEntity):
     ) -> None:
         """Init this sensor."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
-        self._cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
+        self._attr_def: foundation.ZCLAttributeDef | None = None
+
+        if self._attribute_name is not None:
+            # If the attribute definition does not exist, this entity will be filtered
+            # out via `is_supported`
+            with contextlib.suppress(KeyError):
+                self._attr_def = self._cluster_handler.cluster.find_attribute(
+                    self._attribute_name
+                )
+
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        self.recompute_capabilities()
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
         )
         if (
             hasattr(self._cluster_handler, "description")
@@ -218,6 +208,27 @@ class Sensor(PlatformEntity):
         ):
             self._attr_translation_key = None
             self._attr_fallback_name: str = self._cluster_handler.description
+
+    def _is_supported(self) -> bool:
+        if (
+            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            or self._attribute_name
+            not in self._cluster_handler.cluster.attributes_by_name
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                self._attribute_name,
+                self.__class__.__name__,
+            )
+            return False
+
+        if (
+            self._skip_creation_if_no_attr_cache
+            and self._cluster_handler.cluster.get(self._attribute_name) is None
+        ):
+            return False
+
+        return super()._is_supported()
 
     def _validate_state_class(
         self,
@@ -238,6 +249,8 @@ class Sensor(PlatformEntity):
         """Init this entity from the quirks metadata."""
         super()._init_from_quirks_metadata(entity_metadata)
         self._attribute_name = entity_metadata.attribute_name
+        if entity_metadata.attribute_converter is not None:
+            self._attribute_converter = entity_metadata.attribute_converter
         if entity_metadata.divisor is not None:
             self._divisor = entity_metadata.divisor
         if entity_metadata.multiplier is not None:
@@ -254,9 +267,7 @@ class Sensor(PlatformEntity):
                 entity_metadata.state_class
             )
         if entity_metadata.unit is not None:
-            self._attr_native_unit_of_measurement = validate_unit(
-                entity_metadata.unit
-            ).value
+            self._attr_native_unit_of_measurement = entity_metadata.unit
 
     @functools.cached_property
     def info_object(self) -> SensorEntityInfo:
@@ -264,7 +275,7 @@ class Sensor(PlatformEntity):
         return SensorEntityInfo(
             **super().info_object.__dict__,
             attribute=self._attribute_name,
-            decimals=self._decimals,
+            suggested_display_precision=self._attr_suggested_display_precision,
             divisor=self._divisor,
             multiplier=self._multiplier,
             unit=(
@@ -289,6 +300,8 @@ class Sensor(PlatformEntity):
         raw_state = self._cluster_handler.cluster.get(self._attribute_name)
         if raw_state is None:
             return None
+        if self._attribute_converter:
+            return self._attribute_converter(raw_state)
         return self.formatter(raw_state)
 
     def handle_cluster_handler_attribute_updated(
@@ -307,15 +320,22 @@ class Sensor(PlatformEntity):
         ):
             self.maybe_emit_state_changed_event()
 
+    def _is_non_value(self, value: int | float) -> bool:
+        """Ignore non-value numerical values."""
+        if self._attr_def is None:
+            return False
+
+        data_type = foundation.DataType.from_type_id(self._attr_def.zcl_type)
+        return value == data_type.non_value
+
     def formatter(
         self, value: int | enum.IntEnum
     ) -> datetime | int | float | str | None:
         """Numeric pass-through formatter."""
-        if self._decimals > 0:
-            return round(
-                float(value * self._multiplier) / self._divisor, self._decimals
-            )
-        return round(float(value * self._multiplier) / self._divisor)
+        if self._is_non_value(value):
+            return None
+
+        return float(value * self._multiplier) / self._divisor
 
 
 class TimestampSensor(Sensor):
@@ -335,15 +355,18 @@ class PollableSensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._polling_task: Task | None = None
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
         self.maybe_start_polling()
 
     @property
@@ -401,21 +424,7 @@ class DeviceCounterSensor(BaseEntity):
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
-
-    @classmethod
-    def create_platform_entity(
-        cls,
-        zha_device: Device,
-        counter_groups: str,
-        counter_group: str,
-        counter: str,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        return cls(zha_device, counter_groups, counter_group, counter, **kwargs)
+    _attr_suggested_display_precision = 0
 
     def __init__(
         self,
@@ -423,16 +432,15 @@ class DeviceCounterSensor(BaseEntity):
         counter_groups: str,
         counter_group: str,
         counter: str,
-        **kwargs: Any,
     ) -> None:
         """Init this sensor."""
+
         # XXX: ZHA uses the IEEE address of the device passed through `slugify`!
         slugified_device_id = zha_device.unique_id.replace(":", "-")
-
         super().__init__(
-            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}",
-            **kwargs,
+            unique_id=f"{slugified_device_id}_{counter_groups}_{counter_group}_{counter}"
         )
+
         self._device: Device = zha_device
         state: State = self._device.gateway.application_controller.state
         self._zigpy_counter: Counter = (
@@ -442,17 +450,22 @@ class DeviceCounterSensor(BaseEntity):
         self._zigpy_counter_group: str = counter_group
 
         self._attr_fallback_name: str = self._zigpy_counter.name
+        self._always_supported: bool = True
 
         # TODO: why do entities get created with " None" as a name suffix instead of
         # falling back to `fallback_name`? We should be able to provide translation keys
         # even if they do not exist.
         # self._attr_translation_key = f"counter_{self._zigpy_counter.name.lower()}"
 
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
         self._device.gateway.global_updater.register_update_listener(self.update)
-
-        # we double create these in discovery tests because we reissue the create calls to count and prove them out
-        if (self.PLATFORM, self.unique_id) not in self._device.platform_entities:
-            self._device.platform_entities[(self.PLATFORM, self.unique_id)] = self
+        self._on_remove_callbacks.append(
+            lambda: self._device.gateway.global_updater.remove_update_listener(
+                self.update
+            )
+        )
 
     @functools.cached_property
     def identifiers(self) -> DeviceCounterSensorIdentifiers:
@@ -466,6 +479,7 @@ class DeviceCounterSensor(BaseEntity):
         """Return a representation of the platform entity."""
         return DeviceCounterEntityInfo(
             **super().info_object.__dict__,
+            suggested_display_precision=self._attr_suggested_display_precision,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,
             counter_groups=self._zigpy_counter_groups,
@@ -516,11 +530,6 @@ class DeviceCounterSensor(BaseEntity):
                 self._device.gateway.config.allow_polling,
             )
 
-    async def on_remove(self) -> None:
-        """Cancel tasks this entity owns."""
-        self._device.gateway.global_updater.remove_update_listener(self.update)
-        await super().on_remove()
-
 
 class EnumSensor(Sensor):
     """Sensor with value from enum."""
@@ -530,14 +539,13 @@ class EnumSensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
@@ -568,14 +576,13 @@ class MultiStateInputSensor(EnumSensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         if self._cluster_handler.cluster.get("state_text"):
             self._enum = enum.Enum(  # type: ignore [misc]
                 "state_text", self._cluster_handler.cluster["state_text"]
@@ -584,7 +591,7 @@ class MultiStateInputSensor(EnumSensor):
             self._enum = enum.Enum(  # type: ignore [misc]
                 "state_text",
                 [
-                    (f"state_{i+1}", i + 1)
+                    (f"state_{i + 1}", i + 1)
                     for i in range(self._cluster_handler.cluster["number_of_states"])
                 ],
             )
@@ -602,14 +609,13 @@ class AnalogInputSensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         engineering_units = self._cluster_handler.engineering_units
         self._attr_native_unit_of_measurement = UNITS.get(engineering_units)
         self._attr_state_class = SensorStateClass.MEASUREMENT
@@ -644,39 +650,24 @@ class Battery(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_suggested_display_precision: int = 0
     _attr_extra_state_attribute_names: set[str] = {
         "battery_size",
         "battery_quantity",
         "battery_voltage",
     }
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Unlike any other entity, PowerConfiguration cluster may not support
-        battery_percent_remaining attribute, but zha-device-handlers takes care of it
-        so create the entity regardless
-        """
-        if device.is_mains_powered:
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def _is_supported(self) -> bool:
+        # XXX: We intentionally ignore the presence of this attribute
+        return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
 
     @staticmethod
-    def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
+    def formatter(value: int) -> float | None:  # pylint: disable=arguments-differ
         """Return the state of the entity."""
         # per zcl specs battery percent is reported at 200% ¯\_(ツ)_/¯
         if not isinstance(value, numbers.Number) or value in (-1, 255):
             return None
-        value = round(value / 2)
-        return value
+        return value / 2
 
     @property
     def state(self) -> dict[str, Any]:
@@ -694,32 +685,28 @@ class Battery(Sensor):
         return response
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    models={"VZM31-SN", "SP 234", "outletv4"},
-)
-class ElectricalMeasurement(PollableSensor):
-    """Active power measurement."""
+class BaseElectricalMeasurement(PollableSensor):
+    """Base class for electrical measurement."""
 
     _use_custom_polling: bool = False
     _attribute_name = "active_power"
+    _attr_suggested_display_precision = 1
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _divisor_attribute_name: str | None = "ac_power_divisor"
+    _multiplier_attribute_name: str | None = "ac_power_multiplier"
     _attr_max_attribute_name: str = None
-    _div_mul_prefix: str | None = "ac_power"
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {
             "measurement_type",
             self._max_attribute_name,
@@ -748,18 +735,31 @@ class ElectricalMeasurement(PollableSensor):
 
     def formatter(self, value: int) -> int | float:
         """Return 'normalized' value."""
-        if self._div_mul_prefix:
-            multiplier = getattr(
-                self._cluster_handler, f"{self._div_mul_prefix}_multiplier"
-            )
-            divisor = getattr(self._cluster_handler, f"{self._div_mul_prefix}_divisor")
+        if self._multiplier_attribute_name:
+            multiplier = getattr(self._cluster_handler, self._multiplier_attribute_name)
         else:
             multiplier = self._multiplier
+
+        if self._divisor_attribute_name:
+            divisor = getattr(self._cluster_handler, self._divisor_attribute_name)
+        else:
             divisor = self._divisor
+
         value = float(value * multiplier) / divisor
         if value < 100 and divisor > 1:
-            return round(value, self._decimals)
+            return round(value, self._attr_suggested_display_precision)
         return round(value)
+
+
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
+    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
+    models={"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"},
+)
+class ElectricalMeasurement(BaseElectricalMeasurement):
+    """Active power measurement."""
+
+    pass
 
 
 @MULTI_MATCH(
@@ -773,6 +773,30 @@ class PolledElectricalMeasurement(ElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementRMSActivePowerPhB(PolledElectricalMeasurement):
+    """RMS active power phase B measurement."""
+
+    _attribute_name = "active_power_ph_b"
+    _unique_id_suffix = "active_power_ph_b"
+    _attr_translation_key: str = "active_power_ph_b"
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "active_power_max_ph_b"
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementRMSActivePowerPhC(PolledElectricalMeasurement):
+    """RMS active power phase C measurement."""
+
+    _attribute_name = "active_power_ph_c"
+    _unique_id_suffix = "active_power_ph_c"
+    _attr_translation_key: str = "active_power_ph_c"
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "active_power_max_ph_c"
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
 class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
     """Apparent power measurement."""
 
@@ -781,7 +805,8 @@ class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
-    _div_mul_prefix = "ac_power"
+    _divisor_attribute_name = "ac_power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -793,12 +818,13 @@ class ElectricalMeasurementRMSCurrent(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
-    _div_mul_prefix = "ac_current"
+    _divisor_attribute_name = "ac_current_divisor"
+    _multiplier_attribute_name = "ac_current_multiplier"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
 class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
-    """RMS current measurement."""
+    """RMS current phase B measurement."""
 
     _attribute_name = "rms_current_ph_b"
     _unique_id_suffix = "rms_current_ph_b"
@@ -809,7 +835,7 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
 class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
-    """RMS current measurement."""
+    """RMS current phase C measurement."""
 
     _attribute_name: str = "rms_current_ph_c"
     _unique_id_suffix: str = "rms_current_ph_c"
@@ -827,7 +853,30 @@ class ElectricalMeasurementRMSVoltage(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
-    _div_mul_prefix = "ac_voltage"
+    _divisor_attribute_name = "ac_voltage_divisor"
+    _multiplier_attribute_name = "ac_voltage_multiplier"
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
+    """RMS voltage phase B measurement."""
+
+    _attribute_name = "rms_voltage_ph_b"
+    _unique_id_suffix = "rms_voltage_ph_b"
+    _attr_translation_key: str = "rms_voltage_ph_b"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "rms_voltage_max_ph_b"
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
+    """RMS voltage phase C measurement."""
+
+    _attribute_name = "rms_voltage_ph_c"
+    _unique_id_suffix = "rms_voltage_ph_c"
+    _attr_translation_key: str = "rms_voltage_ph_c"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "rms_voltage_max_ph_c"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -840,7 +889,8 @@ class ElectricalMeasurementFrequency(PolledElectricalMeasurement):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_translation_key: str = "ac_frequency"
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
-    _div_mul_prefix = "ac_frequency"
+    _divisor_attribute_name = "ac_frequency_divisor"
+    _multiplier_attribute_name = "ac_frequency_multiplier"
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
@@ -852,7 +902,30 @@ class ElectricalMeasurementPowerFactor(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
-    _div_mul_prefix = None
+    _divisor_attribute_name = None
+    _multiplier_attribute_name = None
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
+    """Power factor phase B measurement."""
+
+    _attribute_name = "power_factor_ph_b"
+    _unique_id_suffix = "power_factor_ph_b"
+    _attr_translation_key: str = "power_factor_ph_b"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "power_factor_max_ph_b"
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
+    """Power factor phase C measurement."""
+
+    _attribute_name = "power_factor_ph_c"
+    _unique_id_suffix = "power_factor_ph_c"
+    _attr_translation_key: str = "power_factor_ph_c"
+    _skip_creation_if_no_attr_cache = True
+    _attr_max_attribute_name = "power_factor_max_ph_c"
 
 
 @MULTI_MATCH(
@@ -871,6 +944,7 @@ class Humidity(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_SOIL_MOISTURE)
@@ -883,6 +957,7 @@ class SoilMoisture(Sensor):
     _attr_translation_key: str = "soil_moisture"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEAF_WETNESS)
@@ -895,6 +970,7 @@ class LeafWetness(Sensor):
     _attr_translation_key: str = "leaf_wetness"
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ILLUMINANCE)
@@ -905,13 +981,14 @@ class Illuminance(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ILLUMINANCE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
+    _attr_primary_weight = 1
 
     def formatter(self, value: int) -> int | None:
         """Convert illumination data."""
+        if self._is_non_value(value):
+            return None
         if value == 0:
             return 0
-        if value == 0xFFFF:
-            return None
         return round(pow(10, ((value - 1) / 10000)))
 
 
@@ -942,6 +1019,7 @@ class SmartEnergyMetering(PollableSensor):
         "status",
         "zcl_unit_of_measurement",
     }
+    _attr_primary_weight = 1
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(
@@ -1002,15 +1080,18 @@ class SmartEnergyMetering(PollableSensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        self.recompute_capabilities()
 
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities and feature flags."""
+        super().recompute_capabilities()
         entity_description = self._ENTITY_DESCRIPTION_MAP.get(
             self._cluster_handler.unit_of_measurement
         )
@@ -1059,6 +1140,7 @@ class SmartEnergySummation(SmartEnergyMetering):
     _attribute_name = "current_summ_delivered"
     _unique_id_suffix = "summation_delivered"
     _attr_translation_key: str = "summation_delivered"
+    _attr_suggested_display_precision: int = 3
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergySummationEntityDescription(
@@ -1122,11 +1204,10 @@ class SmartEnergySummation(SmartEnergyMetering):
         if self._cluster_handler.unit_of_measurement != 0:
             return self._cluster_handler.summa_formatter(value)
 
-        cooked = (
+        return (
             float(self._cluster_handler.multiplier * value)
             / self._cluster_handler.divisor
         )
-        return round(cooked, 3)
 
 
 @MULTI_MATCH(
@@ -1246,8 +1327,9 @@ class Pressure(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PRESSURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision: int = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_FLOW)
@@ -1259,12 +1341,7 @@ class Flow(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
-
-    def formatter(self, value: int) -> datetime | int | float | str | None:
-        """Handle unknown value state."""
-        if value == 0xFFFF:
-            return None
-        return super().formatter(value)
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_TEMPERATURE)
@@ -1276,6 +1353,7 @@ class Temperature(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DEVICE_TEMPERATURE)
@@ -1289,6 +1367,7 @@ class DeviceTemperature(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_INOVELLI)
@@ -1328,9 +1407,10 @@ class CarbonDioxideConcentration(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO2
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names="carbon_monoxide_concentration")
@@ -1340,9 +1420,10 @@ class CarbonMonoxideConcentration(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(generic_ids="cluster_handler_0x042e", stop_on_match_group="voc_level")
@@ -1353,9 +1434,10 @@ class VOCLevel(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(
@@ -1371,9 +1453,10 @@ class PPBVOCLevel(Sensor):
         SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS
     )
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_BILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(cluster_handler_names="pm25")
@@ -1383,9 +1466,19 @@ class PM25(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PM25
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
+    _attr_primary_weight = 1
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY)
+class ElectricalConductivity(Sensor):
+    """Electrical Conductivity sensor."""
+
+    _attribute_name = "measured_value"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.CONDUCTIVITY
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfConductivity.MICROSIEMENS_PER_CM
 
 
 @MULTI_MATCH(cluster_handler_names="formaldehyde_concentration")
@@ -1395,9 +1488,10 @@ class FormaldehydeConcentration(Sensor):
     _attribute_name = "measured_value"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "formaldehyde"
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
+    _attr_primary_weight = 1
 
 
 @MULTI_MATCH(
@@ -1410,21 +1504,8 @@ class ThermostatHVACAction(Sensor):
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
+    def _is_supported(self) -> bool:
+        return PlatformEntity._is_supported(self)
 
     @property
     def state(self) -> dict:
@@ -1539,7 +1620,8 @@ class SinopeHVACAction(ThermostatHVACAction):
 class RSSISensor(Sensor):
     """RSSI sensor for a device."""
 
-    _unique_id_suffix = "rssi"
+    # TODO: migrate this away from `PlatformEntity`
+    _unique_id_suffix: str = "rssi"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_device_class: SensorDeviceClass | None = SensorDeviceClass.SIGNAL_STRENGTH
     _attr_native_unit_of_measurement: str | None = SIGNAL_STRENGTH_DECIBELS_MILLIWATT
@@ -1547,47 +1629,47 @@ class RSSISensor(Sensor):
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
 
-    @classmethod
-    def create_platform_entity(
-        cls: type[Self],
-        unique_id: str,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> Self | None:
-        """Entity Factory.
-
-        Return entity if it is a supported configuration, otherwise return None
-        """
-        key = f"{CLUSTER_HANDLER_BASIC}_{cls._unique_id_suffix}"
-        if PLATFORM_ENTITIES.prevent_entity_creation(Platform.SENSOR, device.ieee, key):
-            return None
-        return cls(unique_id, cluster_handlers, endpoint, device, **kwargs)
-
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
         self.device.gateway.global_updater.register_update_listener(self.update)
+        self._on_remove_callbacks.append(
+            lambda: self.device.gateway.global_updater.remove_update_listener(
+                self.update
+            )
+        )
+
+    def _is_supported(self) -> bool:
+        # This entity is not actually tied to an endpoint or cluster and will always be
+        # supported
+        return True
+
+    def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
+        """Check if the sensor is supported given the list of entities."""
+        cls = type(self)
+        return not any(type(entity) is cls for entity in entities)
 
     @property
     def state(self) -> dict:
         """Return the state of the sensor."""
         response = super().state
-        response["state"] = getattr(self.device.device, self._unique_id_suffix)
+        response["state"] = self.device.device.rssi
         return response
 
     @property
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
-        return getattr(self._device.device, self._unique_id_suffix)
+        return self._device.device.rssi
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -1611,20 +1693,28 @@ class RSSISensor(Sensor):
                 self._device.gateway.config.allow_polling,
             )
 
-    async def on_remove(self) -> None:
-        """Cancel tasks this entity owns."""
-        self._device.gateway.global_updater.remove_update_listener(self.update)
-        await super().on_remove()
-
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BASIC)
 class LQISensor(RSSISensor):
     """LQI sensor for a device."""
 
-    _unique_id_suffix = "lqi"
+    # TODO: migrate this away from `PlatformEntity`
+    _unique_id_suffix: str = "lqi"
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
+
+    @property
+    def state(self) -> dict:
+        """Return the state of the sensor."""
+        response = super().state
+        response["state"] = self.device.device.lqi
+        return response
+
+    @property
+    def native_value(self) -> str | int | float | None:
+        """Return the state of the entity."""
+        return self._device.device.lqi
 
 
 @MULTI_MATCH(
@@ -1723,7 +1813,7 @@ class AqaraSmokeDensityDbm(Sensor):
     _attr_translation_key: str = "smoke_density"
     _attr_native_unit_of_measurement = "dB/m"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_suggested_display_precision: int = 3
+    _attr_suggested_display_precision = 3
 
 
 class SonoffIlluminationStates(types.enum8):
@@ -1754,7 +1844,7 @@ class PiHeatingDemand(Sensor):
     _attribute_name = "pi_heating_demand"
     _attr_translation_key: str = "pi_heating_demand"
     _attr_native_unit_of_measurement = PERCENTAGE
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
@@ -1801,8 +1891,8 @@ class WindowCoveringTypeSensor(EnumSensor):
 
     _attribute_name: str = WindowCovering.AttributeDefs.window_covering_type.name
     _enum = WindowCovering.WindowCoveringType
-    _unique_id_suffix: str = WindowCovering.AttributeDefs.window_covering_type.name
-    _attr_translation_key: str = WindowCovering.AttributeDefs.window_covering_type.name
+    _unique_id_suffix: str = "window_covering_type"
+    _attr_translation_key: str = "window_covering_type"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
 
@@ -1814,8 +1904,8 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
 
     _attribute_name: str = Basic.AttributeDefs.power_source.name
     _enum = Basic.PowerSource
-    _unique_id_suffix: str = Basic.AttributeDefs.power_source.name
-    _attr_translation_key: str = Basic.AttributeDefs.power_source.name
+    _unique_id_suffix: str = "power_source"
+    _attr_translation_key: str = "power_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
 
@@ -1851,14 +1941,13 @@ class BitMapSensor(Sensor):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {
             bit.name for bit in list(self._bitmap)
         }
@@ -1975,3 +2064,15 @@ class DanfossMotorStepCounter(Sensor):
     _attribute_name = "motor_step_counter"
     _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_WIND_SPEED)
+class WindSpeed(Sensor):
+    """Wind Speed sensor."""
+
+    _attribute_name = "measured_value"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.WIND_SPEED
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _divisor = 100
+    _attr_native_unit_of_measurement = UnitOfSpeed.METERS_PER_SECOND
+    _attr_primary_weight = 2

@@ -19,8 +19,10 @@ import zigpy.zdo.types as zdo_t
 from tests.common import (
     SIG_EP_INPUT,
     SIG_EP_OUTPUT,
+    SIG_EP_PROFILE,
     SIG_EP_TYPE,
     create_mock_zigpy_device,
+    get_entity,
     join_zigpy_device,
     zigpy_device_from_json,
 )
@@ -34,6 +36,9 @@ from zha.application.const import (
     UNKNOWN,
 )
 from zha.application.gateway import Gateway
+from zha.application.platforms import PlatformEntity
+from zha.application.platforms.binary_sensor import IASZone
+from zha.application.platforms.light import Light
 from zha.application.platforms.sensor import LQISensor, RSSISensor
 from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
@@ -54,6 +59,7 @@ def zigpy_device(
             SIG_EP_INPUT: in_clusters,
             SIG_EP_OUTPUT: [],
             SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
         }
     }
     return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)
@@ -70,6 +76,7 @@ def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster_handler: bool = 
             SIG_EP_INPUT: in_clusters,
             SIG_EP_OUTPUT: [],
             SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+            SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
         }
     }
     return create_mock_zigpy_device(
@@ -737,48 +744,21 @@ async def test_device_properties(
     assert zha_device.sw_version is None
 
     assert len(zha_device.platform_entities) == 3
-    assert (
-        Platform.SENSOR,
-        "00:0d:6f:00:0a:90:69:e7-3-0-lqi",
-    ) in zha_device.platform_entities
-    assert (
-        Platform.SENSOR,
-        "00:0d:6f:00:0a:90:69:e7-3-0-rssi",
-    ) in zha_device.platform_entities
-    assert (
-        Platform.SWITCH,
-        "00:0d:6f:00:0a:90:69:e7-3-6",
-    ) in zha_device.platform_entities
 
-    assert isinstance(
-        zha_device.platform_entities[
-            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi")
-        ],
-        LQISensor,
-    )
-    assert isinstance(
-        zha_device.platform_entities[
-            (Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-rssi")
-        ],
-        RSSISensor,
-    )
-    assert isinstance(
-        zha_device.platform_entities[(Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-6")],
-        Switch,
-    )
+    lqi_entity = zha_device.platform_entities[
+        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
+    ]
+    assert type(lqi_entity) is LQISensor
 
-    assert (
-        zha_device.get_platform_entity(
-            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
-        )
-        is not None
-    )
-    assert isinstance(
-        zha_device.get_platform_entity(
-            Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-lqi"
-        ),
-        LQISensor,
-    )
+    rssi_entity = zha_device.platform_entities[
+        Platform.SENSOR, "00:0d:6f:00:0a:90:69:e7-3-0-rssi"
+    ]
+    assert type(rssi_entity) is RSSISensor
+
+    switch_entity = zha_device.platform_entities[
+        Platform.SWITCH, "00:0d:6f:00:0a:90:69:e7-3-6"
+    ]
+    assert isinstance(switch_entity, Switch)
 
     with pytest.raises(KeyError, match="Entity foo not found"):
         zha_device.get_platform_entity("bar", "foo")
@@ -853,3 +833,120 @@ async def test_quirks_v2_device_alerts(zha_gateway: Gateway) -> None:
     assert zha_device.device_alerts == (
         DeviceAlertMetadata(level=DeviceAlertLevel.WARNING, message="Test warning"),
     )
+
+
+@pytest.mark.parametrize(
+    ("json_path", "primary_platform", "primary_entity_type"),
+    [
+        # Light bulb
+        (
+            "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+            Platform.LIGHT,
+            Light,
+        ),
+        # Night light with a bulb and a motion sensor
+        (
+            "tests/data/devices/third-reality-inc-3rsnl02043z.json",
+            Platform.LIGHT,
+            Light,
+        ),
+        # Door sensor
+        (
+            "tests/data/devices/centralite-3320-l.json",
+            Platform.BINARY_SENSOR,
+            IASZone,
+        ),
+        # Smart plug with energy monitoring
+        (
+            "tests/data/devices/innr-sp-234.json",
+            Platform.SWITCH,
+            Switch,
+        ),
+        # Atmosphere sensor with humidity, temperature, and pressure
+        (
+            "tests/data/devices/lumi-lumi-weather.json",
+            None,
+            None,
+        ),
+    ],
+)
+async def test_primary_entity_computation(
+    json_path: str,
+    primary_platform: Platform | None,
+    primary_entity_type: PlatformEntity | None,
+    zha_gateway: Gateway,
+) -> None:
+    """Test primary entity computation."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        json_path,
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # There is a single light entity
+    primary = [e for e in zha_device.platform_entities.values() if e.primary]
+
+    if primary_platform is None:
+        assert not primary
+    else:
+        assert primary == [
+            get_entity(zha_device, primary_platform, entity_type=primary_entity_type)
+        ]
+
+
+async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
+    """Test quirks v2 can prevent creating default entities."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .prevent_default_entity_creation(endpoint_id=123)
+        .prevent_default_entity_creation(cluster_id=0x4567)
+        .prevent_default_entity_creation(unique_id_suffix="_something")
+        .prevent_default_entity_creation(function=lambda entity: None)
+        .prevent_default_entity_creation(
+            function=lambda entity: entity.__class__.__name__ == "IdentifyButton"
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    with pytest.raises(KeyError):
+        zha_device.get_platform_entity(
+            Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
+        )
+
+    assert len(zha_device.platform_entities) == 8
+
+
+async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
+    """Test that new joins go through binding and attribute reporting."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/espressif-zigbeecarbondioxidesensor.json",
+    )
+
+    co2 = zigpy_dev.endpoints[10].carbon_dioxide_concentration
+
+    with (
+        patch.object(co2, "bind", wraps=co2.bind) as mock_bind,
+        patch.object(
+            co2, "configure_reporting_multiple", wraps=co2.configure_reporting_multiple
+        ) as mock_reporting_config,
+    ):
+        await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    assert mock_bind.mock_calls == [call()]
+    assert mock_reporting_config.mock_calls == [
+        call({"measured_value": (30, 900, 1e-6)})
+    ]

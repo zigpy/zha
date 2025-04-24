@@ -1,6 +1,6 @@
 """Units of measure for Zigbee Home Automation."""
 
-from enum import Enum, StrEnum
+from enum import StrEnum
 from typing import Final
 
 
@@ -140,6 +140,27 @@ class UnitOfEnergy(StrEnum):
     WATT_HOUR = "Wh"
 
 
+class UnitOfConductivity(StrEnum):
+    """Conductivity units."""
+
+    SIEMENS_PER_CM = "S/cm"
+    MICROSIEMENS_PER_CM = "µS/cm"
+    MILLISIEMENS_PER_CM = "mS/cm"
+
+
+class UnitOfSpeed(StrEnum):
+    """Speed units."""
+
+    BEAUFORT = "Beaufort"
+    FEET_PER_SECOND = "ft/s"
+    INCHES_PER_SECOND = "in/s"
+    METERS_PER_SECOND = "m/s"
+    KILOMETERS_PER_HOUR = "km/h"
+    KNOTS = "kn"
+    MILES_PER_HOUR = "mph"
+    MILLIMETERS_PER_SECOND = "mm/s"
+
+
 # Concentration units
 CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "µg/m³"
 CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER: Final = "mg/m³"
@@ -157,25 +178,3 @@ LIGHT_LUX: Final = "lx"
 
 # Percentage units
 PERCENTAGE: Final[str] = "%"
-
-
-UNITS_OF_MEASURE = {
-    UnitOfApparentPower.__name__: UnitOfApparentPower,
-    UnitOfPower.__name__: UnitOfPower,
-    UnitOfEnergy.__name__: UnitOfEnergy,
-    UnitOfElectricCurrent.__name__: UnitOfElectricCurrent,
-    UnitOfElectricPotential.__name__: UnitOfElectricPotential,
-    UnitOfTemperature.__name__: UnitOfTemperature,
-    UnitOfTime.__name__: UnitOfTime,
-    UnitOfFrequency.__name__: UnitOfFrequency,
-    UnitOfPressure.__name__: UnitOfPressure,
-    UnitOfVolume.__name__: UnitOfVolume,
-    UnitOfVolumeFlowRate.__name__: UnitOfVolumeFlowRate,
-    UnitOfLength.__name__: UnitOfLength,
-    UnitOfMass.__name__: UnitOfMass,
-}
-
-
-def validate_unit(external_unit: Enum) -> Enum:
-    """Validate and return a unit of measure."""
-    return UNITS_OF_MEASURE[type(external_unit).__name__](external_unit.value)

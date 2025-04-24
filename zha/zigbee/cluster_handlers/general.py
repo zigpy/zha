@@ -695,7 +695,7 @@ class OtaClientClusterHandler(ClientClusterHandler):
         """Return cached value of current_file_version attribute."""
         return self.cluster.get(Ota.AttributeDefs.current_file_version.name)
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: Any) -> None:
+    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
         """Handle an attribute updated on this cluster."""
 
         # We intentionally avoid the `ClientClusterHandler` attribute update handler:

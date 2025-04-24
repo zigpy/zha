@@ -6,20 +6,23 @@ from datetime import UTC, datetime
 from functools import partial
 import math
 from typing import Any, Optional
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zigpy.device import Device as ZigpyDevice
+from zigpy.profiles import zha
 import zigpy.profiles.zha
-from zigpy.quirks import CustomCluster, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
+from zigpy.quirks import CustomCluster, DeviceRegistry, get_device
+from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder, ReportingConfig
+from zigpy.quirks.v2.homeassistant import UnitOfMass
 from zigpy.quirks.v2.homeassistant.sensor import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
+from zigpy.zcl.clusters.general import AnalogInput
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from tests.common import (
@@ -31,14 +34,17 @@ from tests.common import (
     get_entity,
     join_zigpy_device,
     send_attributes_report,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.const import ZHA_CLUSTER_HANDLER_READS_PER_REQ
+from zha.application.const import ZCL_INIT_ATTRS, ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
-from zha.application.platforms.sensor import DanfossSoftwareErrorCode, UnitOfMass
+from zha.application.platforms.sensor import DanfossSoftwareErrorCode, Temperature
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
 from zha.units import PERCENTAGE, UnitOfEnergy, UnitOfPressure, UnitOfVolume
+from zha.zigbee.cluster_handlers import AttrReportConfig
+from zha.zigbee.cluster_handlers.manufacturerspecific import OppleRemoteClusterHandler
 from zha.zigbee.device import Device
 
 EMAttrs = homeautomation.ElectricalMeasurement.AttributeDefs
@@ -74,6 +80,37 @@ def elec_measurement_zigpy_device_mock(
         "measurement_type": 8,
         "power_divisor": 10,
         "power_multiplier": 1,
+    }
+    return zigpy_device
+
+
+def metering_zigpy_device_mock(
+    zha_gateway: Gateway,
+) -> ZigpyDevice:
+    """Metering zigpy device."""
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    smartenergy.Metering.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        model="TS011F",  # polling is enabled for this model
+    )
+    zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
+    zigpy_device.endpoints[1].smartenergy_metering.PLUGGED_ATTR_READS = {
+        "unit_of_measure": 0,  # kWh
+        "multiplier": 1,
+        "divisor": 1000,
+        "summation_formatting": 0b0_0100_011,  # read from plug
+        "metering_device_type": 0,  # electric
     }
     return zigpy_device
 
@@ -846,7 +883,7 @@ async def test_electrical_measurement_init(
     await asyncio.sleep(entity.__polling_interval + 1)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
     assert (
-        "1-2820: skipping polling for updated state, available: False, allow polled requests: True"
+        "-1-2820: skipping polling for updated state, available: False, allow polled requests: True"
         in caplog.text
     )
 
@@ -1048,7 +1085,7 @@ async def test_unsupported_attributes_sensor(
         (
             1,
             1232000,
-            123.2,
+            123.2000,
             UnitOfVolume.CUBIC_METERS,
         ),
         (
@@ -1072,43 +1109,43 @@ async def test_unsupported_attributes_sensor(
         (
             0,
             9366,
-            0.937,
+            0.9366,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             999,
-            0.1,
+            0.0999,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             10091,
-            1.009,
+            1.0091,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             10099,
-            1.01,
+            1.0099,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             100999,
-            10.1,
+            10.0999,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             100023,
-            10.002,
+            10.0023,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             102456,
-            10.246,
+            10.2456,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
@@ -1198,7 +1235,11 @@ async def test_elec_measurement_sensor_type(
 
     zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    entity = get_entity(zha_dev, platform=Platform.SENSOR)
+    entity = get_entity(
+        zha_dev,
+        platform=Platform.SENSOR,
+        entity_type=sensor.ElectricalMeasurementApparentPower,
+    )
     assert entity.state["measurement_type"] == expected_type
 
 
@@ -1224,6 +1265,40 @@ async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
     zigpy_dev.endpoints[1].electrical_measurement.PLUGGED_ATTR_READS["active_power"] = (
         60
     )
+
+    # ensure the state is still 2.0
+    assert entity.state["state"] == 2.0
+
+    # let the polling happen
+    await asyncio.sleep(90)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    # ensure the state has been updated to 6.0
+    assert entity.state["state"] == 6.0
+
+
+async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
+    """Test ZHA metering sensor polling."""
+
+    zigpy_dev = metering_zigpy_device_mock(zha_gateway)
+    zigpy_dev.endpoints[1].smartenergy_metering.PLUGGED_ATTR_READS[
+        "current_summ_delivered"
+    ] = 2000
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # test that the sensor has an initial state of 2.0
+    entity = get_entity(
+        zha_dev,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.PolledSmartEnergySummation,
+    )
+    assert entity.state["state"] == 2.0
+
+    # update the value for the power reading
+    zigpy_dev.endpoints[1].smartenergy_metering.PLUGGED_ATTR_READS[
+        "current_summ_delivered"
+    ] = 6000
 
     # ensure the state is still 2.0
     assert entity.state["state"] == 2.0
@@ -1278,7 +1353,11 @@ async def test_elec_measurement_skip_unsupported_attribute(
 
     all_attrs = {
         "active_power",
+        "active_power_ph_b",
+        "active_power_ph_c",
         "active_power_max",
+        "active_power_max_ph_b",
+        "active_power_max_ph_c",
         "apparent_power",
         "rms_current",
         "rms_current_ph_b",
@@ -1287,10 +1366,24 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "rms_current_max_ph_b",
         "rms_current_max_ph_c",
         "rms_voltage",
+        "rms_voltage_ph_b",
+        "rms_voltage_ph_c",
         "rms_voltage_max",
+        "rms_voltage_max_ph_b",
+        "rms_voltage_max_ph_c",
         "power_factor",
+        "power_factor_ph_b",
+        "power_factor_ph_c",
         "ac_frequency",
         "ac_frequency_max",
+        "ac_voltage_divisor",
+        "ac_current_divisor",
+        "ac_power_divisor",
+        "ac_voltage_multiplier",
+        "ac_power_multiplier",
+        "ac_current_multiplier",
+        "power_divisor",
+        "power_multiplier",
     }
     for attr in all_attrs - supported_attributes:
         cluster.add_unsupported_attribute(attr)
@@ -1357,6 +1450,7 @@ async def zigpy_device_timestamp_sensor_v2_mock(
                 ],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.ON_OFF_SWITCH,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         manufacturer="Fake_Timestamp_sensor",
@@ -1407,6 +1501,9 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         unit=UnitOfMass.GRAMS,
         translation_key="last_feeding_size",
         fallback_name="Last feeding size",
+        reporting_config=ReportingConfig(
+            min_interval=0, max_interval=60, reportable_change=1
+        ),
     )
     .sensor(
         "power",
@@ -1455,6 +1552,7 @@ async def zigpy_device_aqara_sensor_v2_mock(
                 ],
                 SIG_EP_OUTPUT: [],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.OCCUPANCY_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         manufacturer="Fake_Manufacturer_sensor",
@@ -1490,8 +1588,16 @@ async def test_state_class(
 
     zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
     assert isinstance(zha_device.device, CustomDeviceV2)
-    power_entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="power")
-    energy_entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="energy")
+    power_entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        qualifier_func=lambda e: e.info_object.unique_id.endswith("power"),
+    )
+    energy_entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        qualifier_func=lambda e: e.info_object.unique_id.endswith("energy"),
+    )
     energy_delivered_entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="energy_delivered"
     )
@@ -1506,12 +1612,65 @@ async def test_state_class(
     assert "Quirks provided an invalid state class: energy" in caplog.text
 
 
+async def test_cluster_handler_quirks_attributes(zha_gateway: Gateway) -> None:
+    """Test quirks sensor setting up ZCL_INIT_ATTRS and REPORT_CONFIG correctly."""
+
+    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
+    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
+    # We want to test the handler also gets claimed via quirks v2 reporting config.
+    with patch("zha.application.discovery.EndpointProbe.discover_entities"):
+        zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
+    assert isinstance(zha_device.device, CustomDeviceV2)
+
+    # get cluster handler of OppleCluster
+    opple_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfcc0"]
+    assert isinstance(opple_ch, OppleRemoteClusterHandler)
+
+    # make sure the cluster handler was claimed due to reporting config, so ZHA binds it
+    assert opple_ch in zha_device.endpoints[1].claimed_cluster_handlers.values()
+
+    # check ZCL_INIT_ATTRS contains sensor attributes that are not in REPORT_CONFIG
+    assert opple_ch.ZCL_INIT_ATTRS == {
+        "energy": True,
+        "energy_delivered": True,
+        "energy_invalid_state_class": True,
+        "power": True,
+    }
+    # check that ZCL_INIT_ATTRS is an instance variable and not a class variable now
+    assert opple_ch.ZCL_INIT_ATTRS is opple_ch.__dict__[ZCL_INIT_ATTRS]
+    assert opple_ch.ZCL_INIT_ATTRS is not OppleRemoteClusterHandler.ZCL_INIT_ATTRS
+
+    # double check we didn't modify the class variable
+    assert OppleRemoteClusterHandler.ZCL_INIT_ATTRS == {}
+
+    # check if REPORT_CONFIG is set correctly
+    assert (
+        (
+            AttrReportConfig(
+                attr="last_feeding_size",
+                config=(0, 60, 1),
+            ),
+        )
+    ) == opple_ch.REPORT_CONFIG
+
+    # this cannot be wrong, as REPORT_CONFIG is an immutable tuple and not a list/dict,
+    # but let's check it anyway in case the type changes in the future
+    assert opple_ch.REPORT_CONFIG is not OppleRemoteClusterHandler.REPORT_CONFIG
+    assert OppleRemoteClusterHandler.REPORT_CONFIG == ()
+
+
 async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     """Test coordinator counter sensor."""
 
     coordinator = zha_gateway.coordinator_zha_device
     assert coordinator.is_coordinator
-    entity = get_entity(coordinator, platform=Platform.SENSOR)
+    entity = get_entity(
+        coordinator,
+        platform=Platform.SENSOR,
+        qualifier_func=lambda e: e.info_object.unique_id.endswith(
+            "ezsp_counters_counter_1"
+        ),
+    )
 
     assert entity.state["state"] == 1
 
@@ -1637,6 +1796,7 @@ async def zigpy_device_danfoss_thermostat_mock(
                 ],
                 SIG_EP_OUTPUT: [general.Basic.cluster_id, general.Ota.cluster_id],
                 SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.THERMOSTAT,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
             }
         },
         manufacturer="Danfoss",
@@ -1675,3 +1835,83 @@ async def test_danfoss_thermostat_sw_error(zha_gateway: Gateway) -> None:
     assert entity.extra_state_attribute_names
     assert "Top_pcb_sensor_error" in entity.extra_state_attribute_names
     assert entity.state["Top_pcb_sensor_error"]
+
+
+async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:
+    """Test ZHA quirks v2 sensor with attribute_converter."""
+
+    registry = DeviceRegistry()
+    zigpy_dev = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    general.AnalogInput.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zha.DeviceType.SIMPLE_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="manufacturer",
+        model="model",
+    )
+
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model, registry=registry)
+        .sensor(
+            AnalogInput.AttributeDefs.present_value.name,
+            AnalogInput.cluster_id,
+            translation_key="quirks_sensor",
+            fallback_name="Quirks sensor",
+            attribute_converter=lambda x: x + 100,
+        )
+        .add_to_registry()
+    )
+
+    zigpy_device_ = registry.get_device(zigpy_dev)
+
+    assert isinstance(zigpy_device_, CustomDeviceV2)
+    cluster = zigpy_device_.endpoints[1].analog_input
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device_)
+    entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="present_value")
+
+    # send updated value, check if the value is converted
+    await send_attributes_report(zha_gateway, cluster, {"present_value": 100})
+    assert entity.state["state"] == 200.0
+
+    await send_attributes_report(zha_gateway, cluster, {"present_value": 0})
+    assert entity.state["state"] == 100.0
+
+
+async def test_ignore_non_value(zha_gateway: Gateway) -> None:
+    """Test sensor updates ignoring ZCL datatype non-values."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zha_device.device.endpoints[1].temperature
+    entity = get_entity(zha_device, platform=Platform.SENSOR, entity_type=Temperature)
+
+    assert entity.state["state"] == 22.3
+
+    # Normal attribute report
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: 3000},
+    )
+    assert entity.state["state"] == 30.0
+
+    # Invalid attribute value, ignored
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: -0x8000},
+    )
+    assert entity.state["state"] is None

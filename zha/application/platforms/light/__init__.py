@@ -22,6 +22,7 @@ from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
+    DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
     BaseEntity,
     BaseEntityInfo,
     GroupEntity,
@@ -107,6 +108,7 @@ class BaseLight(BaseEntity, ABC):
         "off_with_transition",
         "off_brightness",
     }
+    _attr_primary_weight = 10
 
     def __init__(self, *args, **kwargs):
         """Initialize the light."""
@@ -626,6 +628,11 @@ class BaseLight(BaseEntity, ABC):
                     "zha.light-refresh-debounced-member",
                 )
 
+    async def on_remove(self) -> None:
+        """Clean up when entity is removed."""
+        self._async_unsub_transition_listener()
+        await super().on_remove()
+
 
 @STRICT_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
@@ -642,14 +649,13 @@ class Light(PlatformEntity, BaseLight):
 
     def __init__(
         self,
-        unique_id: str,
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the light."""
-        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ON_OFF
         ]
@@ -664,9 +670,42 @@ class Light(PlatformEntity, BaseLight):
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
-        effect_list = [EFFECT_OFF]
 
-        light_options = device.gateway.config.config.light_options
+        light_options = self.device.gateway.config.config.light_options
+        self._zha_config_transition = light_options.default_light_transition
+        self._zha_config_enhanced_light_transition = (
+            light_options.enable_enhanced_light_transition
+        )
+        self._zha_config_enable_light_transitioning_flag = (
+            light_options.enable_light_transitioning_flag
+        )
+        self._refresh_task: asyncio.Task | None = None
+
+        self.recompute_capabilities()
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._on_remove_callbacks.append(
+            self._on_off_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
+        )
+
+        if self._level_cluster_handler:
+            self._on_remove_callbacks.append(
+                self._level_cluster_handler.on_event(
+                    CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+                )
+            )
+
+        self.start_polling()
+
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+        effect_list = [EFFECT_OFF]
 
         self._supported_color_modes = {ColorMode.ONOFF}
         if self._level_cluster_handler:
@@ -712,29 +751,7 @@ class Light(PlatformEntity, BaseLight):
         if self._identify_cluster_handler:
             self._supported_features |= LightEntityFeature.FLASH
 
-        if effect_list:
-            self._effect_list = effect_list
-
-        self._zha_config_transition = light_options.default_light_transition
-        self._zha_config_enhanced_light_transition = (
-            light_options.enable_enhanced_light_transition
-        )
-        self._zha_config_enable_light_transitioning_flag = (
-            light_options.enable_light_transitioning_flag
-        )
-
-        self._on_off_cluster_handler.on_event(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            self.handle_cluster_handler_attribute_updated,
-        )
-
-        if self._level_cluster_handler:
-            self._level_cluster_handler.on_event(
-                CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
-            )
-
-        self._refresh_task: asyncio.Task | None = None
-        self.start_polling()
+        self._effect_list = effect_list
 
     @functools.cached_property
     def info_object(self) -> LightEntityInfo:
@@ -1018,20 +1035,42 @@ class MinTransitionLight(Light):
 class LightGroup(GroupEntity, BaseLight):
     """Representation of a light group."""
 
+    _attr_always_supported = True
+
     def __init__(self, group: Group):
         """Initialize a light group."""
-        # light groups change the update_group_from_child_delay so we need to do this
-        # before calling super
-        light_options = group.gateway.config.config.light_options
+        super().__init__(group)
+
+        self._on_off_cluster_handler: ClusterHandler = group.zigpy_group.endpoint[
+            OnOff.cluster_id
+        ]
+        self._level_cluster_handler: None | (
+            ClusterHandler
+        ) = group.zigpy_group.endpoint[LevelControl.cluster_id]
+        self._color_cluster_handler: None | (
+            ClusterHandler
+        ) = group.zigpy_group.endpoint[Color.cluster_id]
+        self._identify_cluster_handler: None | (
+            ClusterHandler
+        ) = group.zigpy_group.endpoint[Identify.cluster_id]
+
+        self._debounced_member_refresh: Debouncer | None = Debouncer(
+            self.group.gateway,
+            _LOGGER,
+            cooldown=3,
+            immediate=True,
+            function=self._force_member_updates,
+        )
+
+        self.recompute_capabilities()
+
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+        light_options = self.group.gateway.config.config.light_options
         self._zha_config_group_members_assume_state = (
             light_options.group_members_assume_state
         )
-        kwargs = {}
-        if self._zha_config_group_members_assume_state:
-            kwargs["update_group_from_member_delay"] = (
-                ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
-            )
-        super().__init__(group, **kwargs)
         self._zha_config_transition = light_options.default_light_transition
         self._zha_config_enable_light_transitioning_flag = (
             light_options.enable_light_transitioning_flag
@@ -1039,7 +1078,16 @@ class LightGroup(GroupEntity, BaseLight):
         self._zha_config_enhanced_light_transition = False
         self._GROUP_SUPPORTS_EXECUTE_IF_OFF: bool = True
 
-        for member in group.members:
+        if self.group.gateway.config.config.light_options.group_members_assume_state:
+            self._change_listener_debouncer.cooldown = (
+                ASSUME_UPDATE_GROUP_FROM_CHILD_DELAY
+            )
+        else:
+            self._change_listener_debouncer.cooldown = (
+                DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY
+            )
+
+        for member in self.group.members:
             # Ensure we do not send group commands that violate the minimum transition
             # time of any members.
             if member.device.manufacturer in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
@@ -1059,29 +1107,8 @@ class LightGroup(GroupEntity, BaseLight):
                         self._GROUP_SUPPORTS_EXECUTE_IF_OFF = False
                         break
 
-        self._on_off_cluster_handler: ClusterHandler = group.zigpy_group.endpoint[
-            OnOff.cluster_id
-        ]
-        self._level_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[LevelControl.cluster_id]
-        self._color_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[Color.cluster_id]
-        self._identify_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[Identify.cluster_id]
-
         self._color_mode = ColorMode.UNKNOWN
         self._supported_color_modes = {ColorMode.ONOFF}
-
-        self._debounced_member_refresh: Debouncer | None = Debouncer(
-            self.group.gateway,
-            _LOGGER,
-            cooldown=3,
-            immediate=True,
-            function=self._force_member_updates,
-        )
 
         if hasattr(self, "info_object"):
             delattr(self, "info_object")

@@ -542,7 +542,7 @@ def test_quirk_classes() -> None:
 
     # get all quirk ID from zigpy quirks registry
     all_quirk_ids = []
-    for manufacturer in zigpy_quirks._DEVICE_REGISTRY._registry.values():
+    for manufacturer in zigpy_quirks._DEVICE_REGISTRY.registry_v1.values():
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
                 quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
