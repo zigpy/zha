@@ -793,6 +793,7 @@ async def test_devices_from_files(
         with mock.patch("zigpy.zcl.Cluster._update_attribute"):
             zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
             await zha_gateway.async_block_till_done(wait_background_tasks=True)
+            assert zha_device is not None
 
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
@@ -818,7 +819,7 @@ async def test_devices_from_files(
 
                 unique_id_migrations[key] = entity
 
-        assert zha_device is not None
+        await zha_device.on_remove()
 
         # XXX: We re-serialize the JSON because integer enum types are converted when
         # serializing but will not compare properly otherwise
