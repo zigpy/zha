@@ -1285,7 +1285,9 @@ class Device(LogMixin, EventBase):
 
         info["endpoints"] = {}
 
-        for endpoint in self.device.non_zdo_endpoints:
+        for endpoint in sorted(
+            self.device.non_zdo_endpoints, key=lambda ep: ep.endpoint_id
+        ):
             info["endpoints"][endpoint.endpoint_id] = {
                 "profile_id": endpoint.profile_id,
                 "device_type": {
@@ -1307,7 +1309,7 @@ class Device(LogMixin, EventBase):
                         "endpoint_attribute": cluster.ep_attribute,
                         "attributes": get_cluster_attr_data(cluster),
                     }
-                    for cluster_id, cluster in endpoint.in_clusters.items()
+                    for cluster_id, cluster in sorted(endpoint.in_clusters.items())
                 ],
                 "out_clusters": [
                     {
@@ -1315,7 +1317,7 @@ class Device(LogMixin, EventBase):
                         "endpoint_attribute": cluster.ep_attribute,
                         "attributes": get_cluster_attr_data(cluster),
                     }
-                    for cluster_id, cluster in endpoint.out_clusters.items()
+                    for cluster_id, cluster in sorted(endpoint.out_clusters.items())
                 ],
             }
 
