@@ -207,14 +207,9 @@ class Cover(BaseCover):
                 self.handle_cluster_handler_attribute_updated,
             )
         )
-
-    async def on_remove(self) -> None:
-        """Cancel tasks and timers this entity owns."""
-        await super().on_remove()
-        if self._lift_transition_timer:
-            self._lift_transition_timer.cancel()
-        if self._tilt_transition_timer:
-            self._tilt_transition_timer.cancel()
+        self._on_remove_callbacks.extend(
+            (self._clear_lift_transition, self._clear_tilt_transition)
+        )
 
     def restore_external_state_attributes(
         self,
@@ -233,18 +228,18 @@ class Cover(BaseCover):
             return
         if (
             state == CoverState.OPENING
-            and self._state == CoverState.OPEN
             and self.current_cover_position in (100, None)
             and self.current_cover_tilt_position in (100, None)
         ):
             return
 
         self._state = state
-        restored_state_timer = self._loop.call_later(
-            DEFAULT_MOVEMENT_TIMEOUT,
-            functools.partial(self._determine_cover_state, refresh=True),
+        self._tracked_handles.append(
+            self._loop.call_later(
+                DEFAULT_MOVEMENT_TIMEOUT,
+                functools.partial(self._determine_cover_state, refresh=True),
+            )
         )
-        self._on_remove_callbacks.append(restored_state_timer.cancel)
 
     @property
     def supported_features(self) -> CoverEntityFeature:
