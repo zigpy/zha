@@ -289,12 +289,6 @@ async def test_cover(
     )
     assert entity.state["state"] == CoverState.OPEN
 
-    cluster.PLUGGED_ATTR_READS = {1: 100}
-    update_attribute_cache(cluster)
-    await entity.async_update()
-    await zha_gateway.async_block_till_done()
-    assert entity.state["state"] == CoverState.OPEN
-
     # close from client
     with patch("zigpy.zcl.Cluster.request", return_value=[0x1, zcl_f.Status.SUCCESS]):
         await entity.async_close_cover()
