@@ -76,6 +76,7 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
+DIAGNOSTICS_JSON_VERSION = 1
 
 
 def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
@@ -1243,6 +1244,7 @@ class Device(LogMixin, EventBase):
         """Get ZHA device information."""
 
         info: dict[str, Any] = {}
+        info["version"] = DIAGNOSTICS_JSON_VERSION
         info["ieee"] = str(self.ieee)
         info["nwk"] = str(self.nwk)
         info["manufacturer"] = self.device.manufacturer
