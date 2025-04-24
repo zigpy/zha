@@ -87,6 +87,7 @@ disable = ["C0103", "W0212"]
 asyncio_mode = "auto"
 testpaths = "tests"
 norecursedirs = ".git"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]
 target-version = "py312"
