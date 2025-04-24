@@ -396,9 +396,8 @@ class Cover(BaseCover):
         ):
             return
 
-        # An open or moving tilt state overrides a static lift state
+        # A moving tilt state overrides a static lift state
         if self._tilt_state in (
-            CoverState.OPEN,
             CoverState.OPENING,
             CoverState.CLOSING,
         ) and self._lift_state in (CoverState.CLOSED, CoverState.OPEN):
