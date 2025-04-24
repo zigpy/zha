@@ -954,7 +954,7 @@ async def test_unsupported_attributes_sensor(
         (
             1,
             1232000,
-            123.2,
+            123.2000,
             UnitOfVolume.CUBIC_METERS,
         ),
         (
@@ -978,43 +978,43 @@ async def test_unsupported_attributes_sensor(
         (
             0,
             9366,
-            0.937,
+            0.9366,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             999,
-            0.1,
+            0.0999,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             10091,
-            1.009,
+            1.0091,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             10099,
-            1.01,
+            1.0099,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             100999,
-            10.1,
+            10.0999,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             100023,
-            10.002,
+            10.0023,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (
             0,
             102456,
-            10.246,
+            10.2456,
             UnitOfEnergy.KILO_WATT_HOUR,
         ),
         (

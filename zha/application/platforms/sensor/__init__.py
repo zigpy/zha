@@ -124,7 +124,7 @@ class SensorEntityInfo(BaseEntityInfo):
     """Sensor entity info."""
 
     attribute: str
-    decimals: int
+    suggested_display_precision: int | None = None
     divisor: int
     multiplier: int
     unit: str | None = None
@@ -137,6 +137,7 @@ class DeviceCounterEntityInfo(BaseEntityInfo):
     """Device counter entity info."""
 
     device_ieee: str
+    suggested_display_precision: int
     available: bool
     counter: str
     counter_value: int
@@ -157,9 +158,9 @@ class Sensor(PlatformEntity):
     PLATFORM = Platform.SENSOR
     _attribute_name: int | str | None = None
     _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
-    _decimals: int = 1
     _divisor: int = 1
     _multiplier: int | float = 1
+    _attr_suggested_display_precision: int | None = None
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
@@ -263,7 +264,7 @@ class Sensor(PlatformEntity):
         return SensorEntityInfo(
             **super().info_object.__dict__,
             attribute=self._attribute_name,
-            decimals=self._decimals,
+            suggested_display_precision=self._attr_suggested_display_precision,
             divisor=self._divisor,
             multiplier=self._multiplier,
             unit=(
@@ -323,11 +324,7 @@ class Sensor(PlatformEntity):
         if self._is_non_value(value):
             return None
 
-        if self._decimals > 0:
-            return round(
-                float(value * self._multiplier) / self._divisor, self._decimals
-            )
-        return round(float(value * self._multiplier) / self._divisor)
+        return float(value * self._multiplier) / self._divisor
 
 
 class TimestampSensor(Sensor):
@@ -416,6 +413,7 @@ class DeviceCounterSensor(BaseEntity):
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
+    _attr_suggested_display_precision = 0
 
     def __init__(
         self,
@@ -470,6 +468,7 @@ class DeviceCounterSensor(BaseEntity):
         """Return a representation of the platform entity."""
         return DeviceCounterEntityInfo(
             **super().info_object.__dict__,
+            suggested_display_precision=self._attr_suggested_display_precision,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,
             counter_groups=self._zigpy_counter_groups,
@@ -575,6 +574,7 @@ class Battery(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_suggested_display_precision: int = 0
     _attr_extra_state_attribute_names: set[str] = {
         "battery_size",
         "battery_quantity",
@@ -586,13 +586,12 @@ class Battery(Sensor):
         return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
 
     @staticmethod
-    def formatter(value: int) -> int | None:  # pylint: disable=arguments-differ
+    def formatter(value: int) -> float | None:  # pylint: disable=arguments-differ
         """Return the state of the entity."""
         # per zcl specs battery percent is reported at 200% ¯\_(ツ)_/¯
         if not isinstance(value, numbers.Number) or value in (-1, 255):
             return None
-        value = round(value / 2)
-        return value
+        return value / 2
 
     @property
     def state(self) -> dict[str, Any]:
@@ -615,6 +614,7 @@ class BaseElectricalMeasurement(PollableSensor):
 
     _use_custom_polling: bool = False
     _attribute_name = "active_power"
+    _attr_suggested_display_precision = 1
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
@@ -671,7 +671,7 @@ class BaseElectricalMeasurement(PollableSensor):
 
         value = float(value * multiplier) / divisor
         if value < 100 and divisor > 1:
-            return round(value, self._decimals)
+            return round(value, self._attr_suggested_display_precision)
         return round(value)
 
 
@@ -1064,6 +1064,7 @@ class SmartEnergySummation(SmartEnergyMetering):
     _attribute_name = "current_summ_delivered"
     _unique_id_suffix = "summation_delivered"
     _attr_translation_key: str = "summation_delivered"
+    _attr_suggested_display_precision: int = 3
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergySummationEntityDescription(
@@ -1127,11 +1128,10 @@ class SmartEnergySummation(SmartEnergyMetering):
         if self._cluster_handler.unit_of_measurement != 0:
             return self._cluster_handler.summa_formatter(value)
 
-        cooked = (
+        return (
             float(self._cluster_handler.multiplier * value)
             / self._cluster_handler.divisor
         )
-        return round(cooked, 3)
 
 
 @MULTI_MATCH(
@@ -1251,7 +1251,7 @@ class Pressure(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PRESSURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision: int = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
     _attr_primary_weight = 1
 
@@ -1331,7 +1331,7 @@ class CarbonDioxideConcentration(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO2
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
@@ -1344,7 +1344,7 @@ class CarbonMonoxideConcentration(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CO
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
@@ -1358,7 +1358,7 @@ class VOCLevel(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
@@ -1377,7 +1377,7 @@ class PPBVOCLevel(Sensor):
         SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS_PARTS
     )
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_BILLION
     _attr_primary_weight = 1
@@ -1390,7 +1390,6 @@ class PM25(Sensor):
     _attribute_name = "measured_value"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.PM25
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _decimals = 0
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
@@ -1413,7 +1412,7 @@ class FormaldehydeConcentration(Sensor):
     _attribute_name = "measured_value"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "formaldehyde"
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
@@ -1738,7 +1737,7 @@ class AqaraSmokeDensityDbm(Sensor):
     _attr_translation_key: str = "smoke_density"
     _attr_native_unit_of_measurement = "dB/m"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_suggested_display_precision: int = 3
+    _attr_suggested_display_precision = 3
 
 
 class SonoffIlluminationStates(types.enum8):
@@ -1769,7 +1768,7 @@ class PiHeatingDemand(Sensor):
     _attribute_name = "pi_heating_demand"
     _attr_translation_key: str = "pi_heating_demand"
     _attr_native_unit_of_measurement = PERCENTAGE
-    _decimals = 0
+    _attr_suggested_display_precision = 0
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
