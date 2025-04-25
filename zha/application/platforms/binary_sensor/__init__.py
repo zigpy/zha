@@ -85,12 +85,6 @@ class BinarySensor(PlatformEntity):
                 self.handle_cluster_handler_attribute_updated,
             )
         )
-        if (
-            hasattr(self._cluster_handler, "description")
-            and self._cluster_handler.description is not None
-        ):
-            self._attr_translation_key = None
-            self._attr_fallback_name: str = self._cluster_handler.description
 
     def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -194,11 +188,36 @@ class Opening(BinarySensor):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
+class BinaryInputWithDescription(BinarySensor):
+    """ZHA BinarySensor."""
+
+    _attribute_name = "present_value"
+
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+        self._attr_fallback_name = self._cluster_handler.description
+
+    def _is_supported(self) -> bool:
+        if self._cluster_handler.description is None:
+            return False
+
+        return super()._is_supported()
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_INPUT)
 class BinaryInput(BinarySensor):
     """ZHA BinarySensor."""
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "binary_input"
+
+    def _is_supported(self) -> bool:
+        # Prefer to use the "WithDescription" variant above
+        if self._cluster_handler.description is not None:
+            return False
+
+        return super()._is_supported()
 
 
 @STRICT_MATCH(
