@@ -489,7 +489,7 @@ class MultistateInputClusterHandler(ClusterHandler):
         return self.cluster.get(MultistateInput.AttributeDefs.description.name)
 
     @property
-    def number_of_states(self) -> int:
+    def number_of_states(self) -> int | None:
         """Return cached value of number of states."""
         return self.cluster.get(MultistateInput.AttributeDefs.number_of_states.name)
 

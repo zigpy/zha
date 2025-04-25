@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from asyncio import Task
+from collections.abc import Sequence
 import contextlib
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
@@ -134,6 +135,7 @@ class SensorEntityInfo(BaseEntityInfo):
     divisor: int
     multiplier: int
     unit: str | None = None
+    options: tuple[str] | None = None
     device_class: SensorDeviceClass | None = None
     state_class: SensorStateClass | None = None
 
@@ -168,6 +170,7 @@ class Sensor(PlatformEntity):
     _multiplier: int | float = 1
     _attr_suggested_display_precision: int | None = None
     _attr_native_unit_of_measurement: str | None = None
+    _attr_options: tuple[str] | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
     _skip_creation_if_no_attr_cache: bool = False
@@ -284,6 +287,7 @@ class Sensor(PlatformEntity):
                 if getattr(self, "entity_description", None) is not None
                 else self._attr_native_unit_of_measurement
             ),
+            options=self._attr_options,
         )
 
     @property
@@ -532,10 +536,23 @@ class DeviceCounterSensor(BaseEntity):
             )
 
 
-class EnumSensor(Sensor):
-    """Sensor with value from enum."""
+class OptionsSensor(Sensor):
+    """Sensor with options."""
 
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.ENUM
+    _attr_options: tuple[str]
+
+    def formatter(self, value: int) -> str | None:
+        """Return the state of the entity."""
+        index = value
+        if index >= len(self._attr_options):
+            return None
+        return self._attr_options[index]
+
+
+class EnumSensor(OptionsSensor):
+    """Sensor with value from enum."""
+
     _enum: type[enum.Enum]
 
     def __init__(
@@ -547,7 +564,7 @@ class EnumSensor(Sensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._attr_options = [e.name for e in self._enum]
+        self._attr_options = tuple([e.name for e in self._enum])
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
@@ -566,36 +583,42 @@ class EnumSensor(Sensor):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_MULTISTATE_INPUT)
-class MultiStateInputSensor(EnumSensor):
+class MultiStateInputSensor(OptionsSensor):
     """Sensor that displays enumerated values."""
 
     _attribute_name = "present_value"
-    _unique_id_suffix = "present_value"
-    _attr_entity_registry_enabled_default = False
-    _attr_traslation_key = "multistate_input"
-    _enum = enum.Enum("Empty", names=())  # type: ignore [misc]
+    _unique_id_suffix = "multistate_input"
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        if self._cluster_handler.cluster.get("state_text"):
-            self._enum = enum.Enum(  # type: ignore [misc]
-                "state_text", self._cluster_handler.cluster["state_text"]
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        state_text: Sequence[str] | None = self._cluster_handler.state_text
+        number_of_states: int | None = self._cluster_handler.number_of_states
+
+        self._attr_fallback_name = self._cluster_handler.description
+
+        if state_text is not None:
+            self._attr_options = tuple(state_text)
+        elif number_of_states is not None:
+            self._attr_options = tuple(
+                [f"state_{i}" for i in range(1, number_of_states + 1)]
             )
-        elif self._cluster_handler.cluster.get("number_of_states") is not None:
-            self._enum = enum.Enum(  # type: ignore [misc]
-                "state_text",
-                [
-                    (f"state_{i + 1}", i + 1)
-                    for i in range(self._cluster_handler.cluster["number_of_states"])
-                ],
-            )
+        else:
+            # Capabilities can be recomputed even if the sensor isn't supported
+            self._attr_options = ()
+
+    def _is_supported(self) -> bool:
+        # Description is required
+        if self._cluster_handler.description is None:
+            return False
+
+        # And either the `state_text` array or `number_or_states`
+        if (
+            self._cluster_handler.state_text is None
+            and self._cluster_handler.number_of_states is None
+        ):
+            return False
+
+        return super()._is_supported()
 
 
 @MULTI_MATCH(
