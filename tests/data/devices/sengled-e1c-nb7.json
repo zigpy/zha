@@ -1855,7 +1855,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -1910,7 +1911,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -1965,7 +1967,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W"
+          "unit": "W",
+          "options": null
         },
         "state": {
           "class_name": "SmartEnergyMetering",
@@ -2023,7 +2026,8 @@
           "suggested_display_precision": 3,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "kWh"
+          "unit": "kWh",
+          "options": null
         },
         "state": {
           "class_name": "SmartEnergySummation",

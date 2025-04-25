@@ -2556,7 +2556,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -2611,7 +2612,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -2666,7 +2668,8 @@
           "suggested_display_precision": 3,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "kWh"
+          "unit": "kWh",
+          "options": null
         },
         "state": {
           "class_name": "SmartEnergySummation",
@@ -2724,7 +2727,8 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W"
+          "unit": "W",
+          "options": null
         },
         "state": {
           "class_name": "ElectricalMeasurement",
@@ -2780,7 +2784,8 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "A"
+          "unit": "A",
+          "options": null
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
@@ -2836,7 +2841,8 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "V"
+          "unit": "V",
+          "options": null
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",

@@ -893,7 +893,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -948,7 +949,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -1003,7 +1005,8 @@
           "suggested_display_precision": 0,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "%"
+          "unit": "%",
+          "options": null
         },
         "state": {
           "class_name": "Battery",
@@ -1059,7 +1062,8 @@
           "suggested_display_precision": null,
           "divisor": 100,
           "multiplier": 1,
-          "unit": "\u00b0C"
+          "unit": "\u00b0C",
+          "options": null
         },
         "state": {
           "class_name": "Temperature",
@@ -1114,7 +1118,8 @@
           "suggested_display_precision": null,
           "divisor": 100,
           "multiplier": 1,
-          "unit": "%"
+          "unit": "%",
+          "options": null
         },
         "state": {
           "class_name": "Humidity",

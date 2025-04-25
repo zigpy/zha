@@ -965,12 +965,12 @@
     "binary_sensor": [
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "Jammed",
           "unique_id": "00:13:a2:00:41:67:1f:d7-1-15",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
-          "class_name": "BinaryInput",
-          "translation_key": "binary_input",
+          "class_name": "BinaryInputWithDescription",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -1009,7 +1009,7 @@
           "attribute_name": "present_value"
         },
         "state": {
-          "class_name": "BinaryInput",
+          "class_name": "BinaryInputWithDescription",
           "available": true,
           "state": false
         }
@@ -1222,7 +1222,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -1277,7 +1278,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",

@@ -1100,7 +1100,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -1155,7 +1156,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -1210,7 +1212,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "lx"
+          "unit": "lx",
+          "options": null
         },
         "state": {
           "class_name": "Illuminance",
@@ -1265,7 +1268,8 @@
           "suggested_display_precision": null,
           "divisor": 100,
           "multiplier": 1,
-          "unit": "m"
+          "unit": "m",
+          "options": null
         },
         "state": {
           "class_name": "Sensor",

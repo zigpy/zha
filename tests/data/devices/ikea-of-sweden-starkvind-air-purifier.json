@@ -953,7 +953,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -1008,7 +1009,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -1063,7 +1065,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "\u00b5g/m\u00b3"
+          "unit": "\u00b5g/m\u00b3",
+          "options": null
         },
         "state": {
           "class_name": "PM25",
@@ -1118,7 +1121,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "min"
+          "unit": "min",
+          "options": null
         },
         "state": {
           "class_name": "IkeaDeviceRunTime",
@@ -1173,7 +1177,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "min"
+          "unit": "min",
+          "options": null
         },
         "state": {
           "class_name": "IkeaFilterRunTime",

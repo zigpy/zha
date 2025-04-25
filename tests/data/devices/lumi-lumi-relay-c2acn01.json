@@ -3820,7 +3820,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -3875,7 +3876,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -3930,7 +3932,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W"
+          "unit": "W",
+          "options": null
         },
         "state": {
           "class_name": "SmartEnergyMetering",
@@ -3987,7 +3990,8 @@
           "suggested_display_precision": 3,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "kWh"
+          "unit": "kWh",
+          "options": null
         },
         "state": {
           "class_name": "SmartEnergySummation",
@@ -4044,7 +4048,8 @@
           "suggested_display_precision": null,
           "divisor": 100,
           "multiplier": 1,
-          "unit": "\u00b0C"
+          "unit": "\u00b0C",
+          "options": null
         },
         "state": {
           "class_name": "DeviceTemperature",
@@ -4099,7 +4104,8 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W"
+          "unit": "W",
+          "options": null
         },
         "state": {
           "class_name": "PolledElectricalMeasurement",
@@ -4154,7 +4160,8 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "%"
+          "unit": "%",
+          "options": null
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
