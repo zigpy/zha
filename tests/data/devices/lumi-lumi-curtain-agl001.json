@@ -1525,7 +1525,16 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": [
+            "Unknown",
+            "Mains_single_phase",
+            "Mains_three_phase",
+            "Battery",
+            "DC_Source",
+            "Emergency_Mains_Always_On",
+            "Emergency_Mains_Transfer_Switch"
+          ]
         },
         "state": {
           "class_name": "AqaraCurtainMotorPowerSourceSensor",
@@ -1751,7 +1760,19 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": [
+            "Rollershade",
+            "Rollershade_two_motors",
+            "Rollershade_exterior",
+            "Rollershade_exterior_two_motors",
+            "Drapery",
+            "Awning",
+            "Shutter",
+            "Tilt_blind_tilt_only",
+            "Tilt_blind_tilt_and_lift",
+            "Projector_screen"
+          ]
         },
         "state": {
           "class_name": "WindowCoveringTypeSensor",
@@ -1806,7 +1827,13 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": [
+            "Unlocked",
+            "Locked",
+            "Locking",
+            "Unlocking"
+          ]
         },
         "state": {
           "class_name": "AqaraCurtainHookStateSensor",
