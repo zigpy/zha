@@ -22,7 +22,6 @@ from zigpy.state import Counter, State
 from zigpy.zcl import foundation
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
-from zigpy.zcl.clusters.general_const import ApplicationType
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -37,6 +36,8 @@ from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.const import UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
+    ANALOG_INPUT_APPTYPE_UNIT_CONVERSION,
+    ANALOG_INPUT_APPTYPE_UNITS,
     UNIX_EPOCH_TO_ZCL_EPOCH,
     SensorDeviceClass,
     SensorStateClass,
@@ -597,48 +598,71 @@ class MultiStateInputSensor(EnumSensor):
             )
 
 
+@MULTI_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
+    manufacturers="Digi",
+    stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
+)
+class DigiAnalogInput(Sensor):
+    """Sensor that displays analog input values."""
+
+    _attribute_name = "present_value"
+    _attr_translation_key: str = "analog_input"
+
+
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT)
 class AnalogInputSensor(Sensor):
     """Sensor that displays analog input values."""
 
     _attribute_name = "present_value"
-    _attr_translation_key: str = "analog_input"
-    _unique_id_suffix = "present_value"
-    _attr_entity_registry_enabled_default = False
-    _attr_has_entity_name = True
+    _unique_id_suffix = "analog_input"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        engineering_units = self._cluster_handler.engineering_units
-        self._attr_native_unit_of_measurement = UNITS.get(engineering_units)
-        self._attr_state_class = SensorStateClass.MEASUREMENT
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
 
-    @property
-    def device_class(self) -> str | None:
-        """Return the device class."""
+        self._attr_device_class = ANALOG_INPUT_APPTYPE_DEV_CLASS.get(
+            self._cluster_handler.application_type
+        )
+
         if self._cluster_handler.application_type is not None:
-            app_type = ApplicationType(self._cluster_handler.application_type)
-            return ANALOG_INPUT_APPTYPE_DEV_CLASS[app_type.type]
-        return None
-
-    @property
-    def suggested_display_precision(self) -> int | None:
-        """Return the the display precision."""
-        if self._cluster_handler.resolution is not None:
-            return math.ceil(
-                -math.log10(
-                    abs(self._cluster_handler.resolution)
-                    - abs(math.floor(self._cluster_handler.resolution))
-                )
+            # Application type units take precedence
+            self._attr_native_unit_of_measurement = ANALOG_INPUT_APPTYPE_UNITS.get(
+                self._cluster_handler.application_type
             )
-        return None
+        else:
+            self._attr_native_unit_of_measurement = UNITS.get(
+                self._cluster_handler.engineering_units
+            )
+
+        # Resolution indicates the minimum change in value that can be detected
+        if self._cluster_handler.resolution is not None:
+            exp = math.log10(abs(self._cluster_handler.resolution))
+            self._attr_suggested_display_precision = 0 if exp > 0 else math.ceil(-exp)
+
+    def formatter(self, value: float) -> float:
+        """Return the state of the entity."""
+        if converter := ANALOG_INPUT_APPTYPE_UNIT_CONVERSION.get(
+            self._cluster_handler.application_type
+        ):
+            return converter(value)
+
+        return value
+
+    def _is_supported(self) -> bool:
+        """Return True if this sensor is supported."""
+        if self._cluster_handler.description is None:
+            return False
+
+        # The units are determined by one of these
+        if (
+            self._cluster_handler.application_type is None
+            and self._cluster_handler.engineering_units is None
+        ):
+            return False
+
+        return super()._is_supported()
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)

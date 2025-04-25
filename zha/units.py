@@ -178,3 +178,12 @@ LIGHT_LUX: Final = "lx"
 
 # Percentage units
 PERCENTAGE: Final[str] = "%"
+
+# Rotational speed units
+REVOLUTIONS_PER_MINUTE: Final = "rpm"
+
+# Kinetic energy
+KILOJOULES_PER_KG: Final = "KJ/kg"
+
+# Count
+COUNT = "count"
