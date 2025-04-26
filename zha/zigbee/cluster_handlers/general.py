@@ -42,6 +42,7 @@ from zigpy.zcl.clusters.general import (
     Scenes,
     Time,
 )
+from zigpy.zcl.clusters.general_const import ApplicationType
 from zigpy.zcl.foundation import Status
 
 from zha.exceptions import ZHAException
@@ -151,9 +152,12 @@ class AnalogInputClusterHandler(ClusterHandler):
         return self.cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
 
     @property
-    def application_type(self) -> int | None:
+    def application_type(self) -> ApplicationType | None:
         """Return cached value of application_type."""
-        return self.cluster.get(AnalogInput.AttributeDefs.application_type.name)
+        result = self.cluster.get(AnalogInput.AttributeDefs.application_type.name)
+        if result is None:
+            return None
+        return ApplicationType(result)
 
     async def async_update(self):
         """Update cluster value attribute."""

@@ -659,14 +659,16 @@ class AnalogInputSensor(Sensor):
         super().recompute_capabilities()
 
         self._attr_fallback_name = self._cluster_handler.description
-        self._attr_device_class = ANALOG_INPUT_APPTYPE_DEV_CLASS.get(
-            self._cluster_handler.application_type
-        )
 
         if self._cluster_handler.application_type is not None:
+            # The application type encodes a tiny bit more info but it's mostly
+            # irrelevant, just use the `type` sub-field
+            app_type = self._cluster_handler.application_type.type
+            self._attr_device_class = ANALOG_INPUT_APPTYPE_DEV_CLASS.get(app_type)
+
             # Application type units take precedence
             self._attr_native_unit_of_measurement = ANALOG_INPUT_APPTYPE_UNITS.get(
-                self._cluster_handler.application_type
+                app_type
             )
         else:
             self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
