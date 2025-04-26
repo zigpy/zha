@@ -23,6 +23,7 @@ import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.general import AnalogInput
+from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from tests.common import (
@@ -40,9 +41,19 @@ from zha.application import Platform
 from zha.application.const import ZCL_INIT_ATTRS, ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
-from zha.application.platforms.sensor import DanfossSoftwareErrorCode, Temperature
+from zha.application.platforms.sensor import (
+    AnalogInputSensor,
+    DanfossSoftwareErrorCode,
+    Temperature,
+)
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
-from zha.units import PERCENTAGE, UnitOfEnergy, UnitOfPressure, UnitOfVolume
+from zha.units import (
+    PERCENTAGE,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfPressure,
+    UnitOfVolume,
+)
 from zha.zigbee.cluster_handlers import AttrReportConfig
 from zha.zigbee.cluster_handlers.manufacturerspecific import OppleRemoteClusterHandler
 from zha.zigbee.device import Device
@@ -452,33 +463,6 @@ async def async_test_change_source_timestamp(
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
-async def async_test_general_analog_input(
-    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
-):
-    """Test general analog input."""
-    await entity.async_update()
-
-    assert entity.device_class == SensorDeviceClass.HUMIDITY.value
-
-    if entity._cluster_handler.resolution is not None:
-        assert entity.suggested_display_precision == 1
-    else:
-        assert entity.suggested_display_precision is None
-
-    assert entity._cluster_handler.max_present_value == 100.0
-    assert entity._cluster_handler.min_present_value == 1.0
-    assert entity._cluster_handler.out_of_service == 0
-    assert entity._cluster_handler.reliability == 0
-    assert entity._cluster_handler.status_flags == 0
-    assert entity._cluster_handler.application_type == 0x00070100
-    assert entity._cluster_handler.present_value == 1.0
-
-    await send_attributes_report(
-        zha_gateway, cluster, {general.AnalogInput.AttributeDefs.present_value.id: 1.0}
-    )
-    assert_state(entity, 1.0, "%")
-
-
 async def async_test_general_multistate_input(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
@@ -700,72 +684,6 @@ async def async_test_general_multistate_input(
             None,
             None,
         ),
-        (
-            general.AnalogInput.cluster_id,
-            sensor.AnalogInputSensor,
-            async_test_general_analog_input,
-            {
-                "present_value": 1.0,
-                "description": "Analog Input",
-                "max_present_value": 100.0,
-                "min_present_value": 1.0,
-                "out_of_service": 0,
-                "reliability": 0,
-                "resolution": 1.1,
-                "status_flags": 0,
-                "engineering_units": 98,
-                "application_type": 0x00070100,
-            },
-            None,
-        ),
-        (
-            general.AnalogInput.cluster_id,
-            sensor.AnalogInputSensor,
-            async_test_general_analog_input,
-            {
-                "present_value": 1.0,
-                "description": "Analog Input",
-                "max_present_value": 100.0,
-                "min_present_value": 1.0,
-                "out_of_service": 0,
-                "reliability": 0,
-                "status_flags": 0,
-                "engineering_units": 98,
-                "application_type": 0x00070100,
-            },
-            None,
-        ),
-        (
-            general.MultistateInput.cluster_id,
-            sensor.MultiStateInputSensor,
-            async_test_general_multistate_input,
-            {
-                "state_text": t.LVList(["Night", "Day", "Hold"]),
-                "description": "Multistate Input",
-                "number_of_states": 2,
-                "out_of_service": 0,
-                "present_value": 1,
-                "reliability": 0,
-                "status_flags": 0,
-                "application_type": 0x00000009,
-            },
-            None,
-        ),
-        (
-            general.MultistateInput.cluster_id,
-            sensor.MultiStateInputSensor,
-            async_test_general_multistate_input,
-            {
-                "description": "Multistate Input",
-                "number_of_states": 2,
-                "out_of_service": 0,
-                "present_value": 1,
-                "reliability": 0,
-                "status_flags": 0,
-                "application_type": 0x00000009,
-            },
-            None,
-        ),
     ),
 )
 async def test_sensor(
@@ -815,6 +733,71 @@ async def test_sensor(
         assert entity.fallback_name is None
     # test sensor associated logic
     await test_func(zha_gateway, cluster, entity)
+
+
+async def test_analog_input_simple(zha_gateway: Gateway) -> None:
+    """Test analog input sensors."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    # Pretend this device has a proper description for the attribute
+    # TODO: replace this unit test with one that uses a real device
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+    )
+
+    assert entity.state["available"] is True
+    assert entity.state["state"] == 2.1322579383850098
+    assert entity.info_object.fallback_name == "Some description"
+    assert entity.info_object.translation_key is None
+    assert entity.info_object.unit == UnitOfElectricPotential.VOLT
+    assert entity.info_object.device_class is None
+    assert entity.info_object.suggested_display_precision is None
+
+
+async def test_analog_input_complex(zha_gateway: Gateway) -> None:
+    """Test analog input sensors."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    # Pretend this device has a proper description for the attribute
+    # TODO: replace this unit test with one that uses a real device
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.application_type.id,
+        int(
+            ApplicationType(
+                group=0, type=AnalogInputType.Relative_Humidity_Percent, index=0
+            )
+        ),
+    )
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.resolution.id, 0.01
+    )
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+    )
+
+    assert entity.state["available"] is True
+    assert entity.state["state"] == 2.1322579383850098
+    assert entity.info_object.fallback_name == "Some description"
+    assert entity.info_object.translation_key is None
+    assert entity.info_object.unit is PERCENTAGE  # overridden!
+    assert entity.info_object.device_class is SensorDeviceClass.HUMIDITY  # overridden!
+    assert entity.info_object.suggested_display_precision == 2
 
 
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:

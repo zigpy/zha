@@ -12,7 +12,8 @@ import zigpy.quirks as zigpy_quirks
 
 from zha.application.const import ATTR_QUIRK_ID
 from zha.application.platforms import PlatformEntity
-from zha.application.platforms.binary_sensor import IASZone
+from zha.application.platforms.binary_sensor import BinaryInputWithDescription, IASZone
+from zha.application.platforms.sensor import AnalogInputSensor
 from zha.application.registries import (
     PLATFORM_ENTITIES,
     MatchRule,
@@ -571,7 +572,11 @@ def test_entity_names() -> None:
                     and entity_class._attr_translation_key
                 )
             elif hasattr(entity_class, "_attr_device_class"):
-                assert entity_class._attr_device_class
+                if entity_class is not AnalogInputSensor:
+                    assert entity_class._attr_device_class
             else:
-                # The only exception (for now) is IASZone
-                assert entity_class is IASZone
+                # The only exceptions
+                assert (
+                    entity_class is IASZone
+                    or entity_class is BinaryInputWithDescription
+                )
