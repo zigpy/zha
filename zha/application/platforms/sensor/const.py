@@ -17,7 +17,6 @@ from zha.units import (
     UnitOfPressure,
     UnitOfTemperature,
     UnitOfTime,
-    UnitOfVolumeFlowRate,
 )
 
 
@@ -437,7 +436,7 @@ ANALOG_INPUT_APPTYPE_UNITS = {
     AnalogInputType.Temp_Degrees_C: UnitOfTemperature.CELSIUS,
     AnalogInputType.Relative_Humidity_Percent: PERCENTAGE,
     AnalogInputType.Pressure_Pascal: UnitOfPressure.PA,
-    AnalogInputType.Flow_Liters_Per_Sec: UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
+    AnalogInputType.Flow_Liters_Per_Sec: "L/s",
     AnalogInputType.Percentage: PERCENTAGE,
     AnalogInputType.Parts_Per_Million: CONCENTRATION_PARTS_PER_MILLION,
     AnalogInputType.Rotational_Speed_RPM: REVOLUTIONS_PER_MINUTE,
@@ -449,24 +448,6 @@ ANALOG_INPUT_APPTYPE_UNITS = {
     AnalogInputType.Count: COUNT,
     AnalogInputType.Enthalpy_KJoules_Per_Kg: KILOJOULES_PER_KG,
     AnalogInputType.Time_Seconds: UnitOfTime.SECONDS,
-}
-
-ANALOG_INPUT_APPTYPE_UNIT_CONVERSION = {
-    AnalogInputType.Temp_Degrees_C: None,
-    AnalogInputType.Relative_Humidity_Percent: None,
-    AnalogInputType.Pressure_Pascal: None,
-    AnalogInputType.Flow_Liters_Per_Sec: lambda v: v * 60,  # L/s -> L/m
-    AnalogInputType.Percentage: None,
-    AnalogInputType.Parts_Per_Million: None,
-    AnalogInputType.Rotational_Speed_RPM: None,
-    AnalogInputType.Current_Amps: None,
-    AnalogInputType.Frequency_Hz: None,
-    AnalogInputType.Power_Watts: None,
-    AnalogInputType.Power_Kilo_Watts: None,
-    AnalogInputType.Energy_Kilo_Watt_Hours: None,
-    AnalogInputType.Count: None,
-    AnalogInputType.Enthalpy_KJoules_Per_Kg: None,
-    AnalogInputType.Time_Seconds: None,
 }
 
 UNIX_EPOCH_TO_ZCL_EPOCH = 946684800

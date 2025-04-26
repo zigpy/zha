@@ -37,7 +37,6 @@ from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
-    ANALOG_INPUT_APPTYPE_UNIT_CONVERSION,
     ANALOG_INPUT_APPTYPE_UNITS,
     UNIX_EPOCH_TO_ZCL_EPOCH,
     SensorDeviceClass,
@@ -678,15 +677,6 @@ class AnalogInputSensor(Sensor):
         if self._cluster_handler.resolution is not None:
             exp = math.log10(abs(self._cluster_handler.resolution))
             self._attr_suggested_display_precision = 0 if exp > 0 else math.ceil(-exp)
-
-    def formatter(self, value: float) -> float:
-        """Return the state of the entity."""
-        if converter := ANALOG_INPUT_APPTYPE_UNIT_CONVERSION.get(
-            self._cluster_handler.application_type
-        ):
-            return converter(value)
-
-        return value
 
     def _is_supported(self) -> bool:
         """Return True if this sensor is supported."""
