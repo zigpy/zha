@@ -659,6 +659,7 @@ class AnalogInputSensor(Sensor):
         """Recompute capabilities."""
         super().recompute_capabilities()
 
+        self._attr_fallback_name = self._cluster_handler.description
         self._attr_device_class = ANALOG_INPUT_APPTYPE_DEV_CLASS.get(
             self._cluster_handler.application_type
         )
