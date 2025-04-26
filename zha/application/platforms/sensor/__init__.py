@@ -620,6 +620,20 @@ class MultiStateInputSensor(OptionsSensor):
 
         return super()._is_supported()
 
+    def formatter(self, value: int) -> str | None:
+        """Return the state of the entity."""
+
+        # Arrays in the ZCL are weird. An array of size 3, for example, actually has *4*
+        # elements: the first element being the size (3), then the rest. They are both
+        # zero-indexed and one-indexed.
+        #
+        # The spec says that:
+        #    The PresentValue, interpreted as an integer, serves as an index
+        #    into the array.
+        #
+        # Because of this, we have to subtract 1 from the value to get the "real" index.
+        return super().formatter(value - 1)
+
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
