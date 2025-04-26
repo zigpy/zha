@@ -13,3 +13,4 @@ zigpy>=0.65.2
 ruff
 looptime
 freezegun
+coloredlogs

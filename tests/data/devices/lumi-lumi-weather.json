@@ -1,8 +1,11 @@
 {
+  "version": 1,
   "ieee": "00:15:8d:00:05:4b:9d:1f",
-  "nwk": 65315,
+  "nwk": "0xFF23",
   "manufacturer": "LUMI",
   "model": "lumi.weather",
+  "friendly_manufacturer": "LUMI",
+  "friendly_model": "lumi.weather",
   "name": "LUMI lumi.weather",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.weather.Weather",
@@ -11,187 +14,1032 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-26T13:48:22",
+  "last_seen": "2025-04-24T17:34:08.835738+00:00",
   "available": true,
   "device_type": "EndDevice",
-  "signature": {
-    "node_descriptor": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4151,
-      "maximum_buffer_size": 127,
-      "maximum_incoming_transfer_size": 100,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 100,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x5f01",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0402",
-          "0x0403",
-          "0x0405",
-          "0xffff"
-        ],
-        "output_clusters": [
-          "0x0000",
-          "0x0004",
-          "0xffff"
-        ]
-      }
-    },
-    "manufacturer": "LUMI",
-    "model": "lumi.weather"
-  },
   "active_coordinator": false,
-  "entities": [
-    {
-      "entity_id": "button.lumi_lumi_weather_1f9d4b05_identify",
-      "name": "LUMI lumi.weather"
-    },
-    {
-      "entity_id": "sensor.lumi_lumi_weather_power",
-      "name": "LUMI lumi.weather"
-    },
-    {
-      "entity_id": "sensor.lumi_lumi_weather_pressure",
-      "name": "LUMI lumi.weather"
-    },
-    {
-      "entity_id": "sensor.lumi_lumi_weather_temperature",
-      "name": "LUMI lumi.weather"
-    },
-    {
-      "entity_id": "sensor.lumi_lumi_weather_humidity",
-      "name": "LUMI lumi.weather"
-    }
-  ],
-  "neighbors": [],
-  "routes": [],
-  "endpoint_names": [
-    {
-      "name": "undefined_0x5f01"
-    }
-  ],
-  "user_given_name": "Bathroom Shower",
-  "device_reg_id": "0cc232d9da843fb904547795b18436b1",
-  "area_id": "d0f7ecb50d2647e38a14d7b57efef0f3",
-  "cluster_details": {
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4151,
+    "maximum_buffer_size": 127,
+    "maximum_incoming_transfer_size": 100,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 100,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
     "1": {
+      "profile_id": 260,
       "device_type": {
         "name": "undefined_0x5f01",
         "id": 24321
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0000": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": {
-            "0x0001": {
-              "attribute_name": "app_version",
-              "value": 5
+          "attributes": [
+            {
+              "id": "0x0013",
+              "name": "alarm_mask",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
             },
-            "0x0004": {
-              "attribute_name": "manufacturer",
-              "value": "LUMI"
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 5,
+              "unsupported": false
             },
-            "0x0005": {
-              "attribute_name": "model",
-              "value": "lumi.weather"
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0012",
+              "name": "device_enabled",
+              "zcl_type": "bool_",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0014",
+              "name": "disable_local_config",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0008",
+              "name": "generic_device_class",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0009",
+              "name": "generic_device_type",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0003",
+              "name": "hw_version",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0010",
+              "name": "location_desc",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "LUMI",
+              "unsupported": false
+            },
+            {
+              "id": "0x000c",
+              "name": "manufacturer_version_details",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "lumi.weather",
+              "unsupported": false
+            },
+            {
+              "id": "0x0011",
+              "name": "physical_env",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000a",
+              "name": "product_code",
+              "zcl_type": "octstr",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000e",
+              "name": "product_label",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000b",
+              "name": "product_url",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000d",
+              "name": "serial_number",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "stack_version",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0001": {
+        {
+          "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "attributes": {
-            "0x0021": {
-              "attribute_name": "battery_percentage_remaining",
-              "value": 118
+          "attributes": [
+            {
+              "id": "0x0052",
+              "name": "battery_2_a_hr_rating",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
             },
-            "0x0033": {
-              "attribute_name": "battery_quantity",
-              "value": 1
+            {
+              "id": "0x0055",
+              "name": "battery_2_alarm_mask",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
             },
-            "0x0031": {
-              "attribute_name": "battery_size",
-              "value": 10
+            {
+              "id": "0x005e",
+              "name": "battery_2_alarm_state",
+              "zcl_type": "map32",
+              "value": null,
+              "unsupported": false
             },
-            "0x0020": {
-              "attribute_name": "battery_voltage",
-              "value": 29.9
+            {
+              "id": "0x0050",
+              "name": "battery_2_manufacturer",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x005a",
+              "name": "battery_2_percent_min_thres",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x005b",
+              "name": "battery_2_percent_thres1",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x005c",
+              "name": "battery_2_percent_thres2",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x005d",
+              "name": "battery_2_percent_thres3",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0041",
+              "name": "battery_2_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0053",
+              "name": "battery_2_quantity",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0054",
+              "name": "battery_2_rated_voltage",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0051",
+              "name": "battery_2_size",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0056",
+              "name": "battery_2_volt_min_thres",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0057",
+              "name": "battery_2_volt_thres1",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0058",
+              "name": "battery_2_volt_thres2",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0059",
+              "name": "battery_2_volt_thres3",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0040",
+              "name": "battery_2_voltage",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0072",
+              "name": "battery_3_a_hr_rating",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0075",
+              "name": "battery_3_alarm_mask",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x007e",
+              "name": "battery_3_alarm_state",
+              "zcl_type": "map32",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0070",
+              "name": "battery_3_manufacturer",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x007a",
+              "name": "battery_3_percent_min_thres",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x007b",
+              "name": "battery_3_percent_thres1",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x007c",
+              "name": "battery_3_percent_thres2",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x007d",
+              "name": "battery_3_percent_thres3",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0061",
+              "name": "battery_3_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0073",
+              "name": "battery_3_quantity",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0074",
+              "name": "battery_3_rated_voltage",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0071",
+              "name": "battery_3_size",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0076",
+              "name": "battery_3_volt_min_thres",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0077",
+              "name": "battery_3_volt_thres1",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0078",
+              "name": "battery_3_volt_thres2",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0079",
+              "name": "battery_3_volt_thres3",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0060",
+              "name": "battery_3_voltage",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0032",
+              "name": "battery_a_hr_rating",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0035",
+              "name": "battery_alarm_mask",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x003e",
+              "name": "battery_alarm_state",
+              "zcl_type": "map32",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0030",
+              "name": "battery_manufacturer",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x003a",
+              "name": "battery_percent_min_thres",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x003b",
+              "name": "battery_percent_thres1",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x003c",
+              "name": "battery_percent_thres2",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x003d",
+              "name": "battery_percent_thres3",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 118,
+              "unsupported": false
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 1,
+              "unsupported": false
+            },
+            {
+              "id": "0x0034",
+              "name": "battery_rated_voltage",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 10,
+              "unsupported": false
+            },
+            {
+              "id": "0x0036",
+              "name": "battery_volt_min_thres",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0037",
+              "name": "battery_volt_thres1",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0038",
+              "name": "battery_volt_thres2",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0039",
+              "name": "battery_volt_thres3",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 29.9,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0010",
+              "name": "mains_alarm_mask",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0001",
+              "name": "mains_frequency",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0012",
+              "name": "mains_volt_max_thres",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0011",
+              "name": "mains_volt_min_thres",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "mains_voltage",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0013",
+              "name": "mains_voltage_dwell_trip_point",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0003": {
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "identify_time",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            }
+          ]
         },
-        "0x0402": {
+        {
+          "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "measured_value",
-              "value": 2173
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "max_measured_value",
+              "zcl_type": "int16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 2173,
+              "unsupported": false
+            },
+            {
+              "id": "0x0001",
+              "name": "min_measured_value",
+              "zcl_type": "int16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0003",
+              "name": "tolerance",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0403": {
+        {
+          "cluster_id": "0x0403",
           "endpoint_attribute": "pressure",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "measured_value",
-              "value": 1009
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "max_measured_value",
+              "zcl_type": "int16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0012",
+              "name": "max_scaled_value",
+              "zcl_type": "int16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 1009,
+              "unsupported": false
+            },
+            {
+              "id": "0x0001",
+              "name": "min_measured_value",
+              "zcl_type": "int16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0011",
+              "name": "min_scaled_value",
+              "zcl_type": "int16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0014",
+              "name": "scale",
+              "zcl_type": "int8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0013",
+              "name": "scaled_tolerance",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0010",
+              "name": "scaled_value",
+              "zcl_type": "int16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0003",
+              "name": "tolerance",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0405": {
+        {
+          "cluster_id": "0x0405",
           "endpoint_attribute": "humidity",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "measured_value",
-              "value": 5799
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "max_measured_value",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "uint16",
+              "value": 5799,
+              "unsupported": false
+            },
+            {
+              "id": "0x0001",
+              "name": "min_measured_value",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0003",
+              "name": "tolerance",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0xffff": {
+        {
+          "cluster_id": "0xffff",
           "endpoint_attribute": "manufacturer_specific",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      },
-      "out_clusters": {
-        "0x0000": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": [
+            {
+              "id": "0x0013",
+              "name": "alarm_mask",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0012",
+              "name": "device_enabled",
+              "zcl_type": "bool_",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0014",
+              "name": "disable_local_config",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0008",
+              "name": "generic_device_class",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0009",
+              "name": "generic_device_type",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0003",
+              "name": "hw_version",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0010",
+              "name": "location_desc",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000c",
+              "name": "manufacturer_version_details",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0011",
+              "name": "physical_env",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000a",
+              "name": "product_code",
+              "zcl_type": "octstr",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000e",
+              "name": "product_label",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000b",
+              "name": "product_url",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x000d",
+              "name": "serial_number",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "stack_version",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            }
+          ]
         },
-        "0x0004": {
+        {
+          "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "name_support",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            }
+          ]
         },
-        "0xffff": {
+        {
+          "cluster_id": "0xffff",
           "endpoint_attribute": "manufacturer_specific",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      }
+      ]
     }
   },
   "original_signature": {
@@ -242,6 +1090,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:15:8d:00:05:4b:9d:1f-1-3",
+          "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -249,6 +1098,8 @@
           "state_class": null,
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "IdentifyClusterHandler",
@@ -261,7 +1112,7 @@
               },
               "id": "1:0x0003",
               "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0003",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -294,7 +1145,118 @@
       {
         "info_object": {
           "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "suggested_display_precision": null,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            31,
+            157,
+            75,
+            5,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": null,
+          "suggested_display_precision": null,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
           "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
@@ -302,6 +1264,8 @@
           "state_class": "measurement",
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "PowerConfigurationClusterHandler",
@@ -314,7 +1278,7 @@
               },
               "id": "1:0x0001",
               "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0001",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "battery_voltage"
             }
           ],
@@ -332,7 +1296,7 @@
           "available": true,
           "group_id": null,
           "attribute": "battery_percentage_remaining",
-          "decimals": 1,
+          "suggested_display_precision": 0,
           "divisor": 1,
           "multiplier": 1,
           "unit": "%"
@@ -340,7 +1304,7 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 59,
+          "state": 59.0,
           "battery_size": "CR2032",
           "battery_quantity": 1,
           "battery_voltage": 2.99
@@ -349,59 +1313,8 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1027",
-          "platform": "sensor",
-          "class_name": "Pressure",
-          "translation_key": null,
-          "device_class": "pressure",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "cluster_handlers": [
-            {
-              "class_name": "PressureMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0403",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1027,
-                "name": "Pressure Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0403",
-              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0403",
-              "status": "CREATED",
-              "value_attribute": "measured_value"
-            }
-          ],
-          "device_ieee": [
-            31,
-            157,
-            75,
-            5,
-            0,
-            141,
-            21,
-            0
-          ],
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute": "measured_value",
-          "decimals": 0,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "hPa"
-        },
-        "state": {
-          "class_name": "Pressure",
-          "available": true,
-          "state": 1009
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
           "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1026",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
@@ -409,6 +1322,8 @@
           "state_class": "measurement",
           "entity_category": null,
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "TemperatureMeasurementClusterHandler",
@@ -421,7 +1336,7 @@
               },
               "id": "1:0x0402",
               "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0402",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "measured_value"
             }
           ],
@@ -439,42 +1354,45 @@
           "available": true,
           "group_id": null,
           "attribute": "measured_value",
-          "decimals": 1,
+          "suggested_display_precision": null,
           "divisor": 100,
           "multiplier": 1,
-          "unit": "°C"
+          "unit": "\u00b0C"
         },
         "state": {
           "class_name": "Temperature",
           "available": true,
-          "state": 21.7
+          "state": 21.73
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-rssi",
+          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1027",
+          "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "device_class": "signal_strength",
+          "class_name": "Pressure",
+          "translation_key": null,
+          "device_class": "pressure",
           "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
+              "class_name": "PressureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0403",
               "endpoint_id": 1,
               "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
+                "id": 1027,
+                "name": "Pressure Measurement",
                 "type": "server"
               },
-              "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
+              "id": "1:0x0403",
+              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0403",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
             }
           ],
           "device_ieee": [
@@ -490,74 +1408,23 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
-          "decimals": 1,
+          "attribute": "measured_value",
+          "suggested_display_precision": 0,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "hPa"
         },
         "state": {
-          "class_name": "RSSISensor",
+          "class_name": "Pressure",
           "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:8d:00:05:4b:9d:1f-1-0-lqi",
-          "platform": "sensor",
-          "class_name": "LQISensor",
-          "translation_key": "lqi",
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            31,
-            157,
-            75,
-            5,
-            0,
-            141,
-            21,
-            0
-          ],
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": null
-        },
-        "state": {
-          "class_name": "LQISensor",
-          "available": true,
-          "state": null
+          "state": 1009.0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:15:8d:00:05:4b:9d:1f-1-1029",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Humidity",
           "translation_key": null,
@@ -565,6 +1432,8 @@
           "state_class": "measurement",
           "entity_category": null,
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "RelativeHumidityClusterHandler",
@@ -577,7 +1446,7 @@
               },
               "id": "1:0x0405",
               "unique_id": "00:15:8d:00:05:4b:9d:1f:1:0x0405",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "measured_value"
             }
           ],
@@ -595,7 +1464,7 @@
           "available": true,
           "group_id": null,
           "attribute": "measured_value",
-          "decimals": 1,
+          "suggested_display_precision": null,
           "divisor": 100,
           "multiplier": 1,
           "unit": "%"
@@ -603,9 +1472,11 @@
         "state": {
           "class_name": "Humidity",
           "available": true,
-          "state": 58.0
+          "state": 57.99
         }
       }
     ]
-  }
+  },
+  "neighbors": [],
+  "routes": []
 }

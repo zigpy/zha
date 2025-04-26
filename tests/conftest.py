@@ -92,6 +92,8 @@ class _FakeApp(ControllerApplication):
         expect_reply: bool = True,
         use_ieee: bool = False,
         extended_timeout: bool = False,
+        ask_for_ack: bool | None = None,
+        priority: int = zigpy.types.PacketPriority.NORMAL,
     ):
         pass
 
@@ -200,9 +202,9 @@ def verify_cleanup(
         )
 
 
-@pytest.fixture(name="zigpy_app_controller")
-async def zigpy_app_controller_fixture():
-    """Zigpy ApplicationController fixture."""
+@contextmanager
+def make_zigpy_app_controller():
+    """Mock zigpy ApplicationController."""
     app = _FakeApp(
         {
             zigpy.config.CONF_DATABASE: None,
@@ -244,6 +246,13 @@ async def zigpy_app_controller_fixture():
         yield app
 
 
+@pytest.fixture()
+def zigpy_app_controller():
+    """Zigpy ApplicationController fixture."""
+    with make_zigpy_app_controller() as app:
+        yield app
+
+
 @pytest.fixture(name="caplog")
 def caplog_fixture(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture:
     """Set log level to debug for tests using the caplog fixture."""
@@ -251,10 +260,8 @@ def caplog_fixture(caplog: pytest.LogCaptureFixture) -> pytest.LogCaptureFixture
     return caplog
 
 
-@pytest.fixture(name="zha_data")
-def zha_data_fixture() -> ZHAData:
-    """Fixture representing zha configuration data."""
-
+def make_zha_data() -> ZHAData:
+    """Create ZHA data."""
     return ZHAData(
         config=ZHAConfiguration(
             coordinator_configuration=CoordinatorConfiguration(
@@ -274,21 +281,40 @@ def zha_data_fixture() -> ZHAData:
     )
 
 
+@pytest.fixture(name="zha_data")
+def zha_data_fixture() -> ZHAData:
+    """Fixture representing zha configuration data."""
+    return make_zha_data()
+
+
 class TestGateway:
     """Test ZHA gateway context manager."""
 
-    def __init__(self, data: ZHAData):
+    def __init__(self, data: ZHAData, app: ControllerApplication):
         """Initialize the ZHA gateway."""
         self.zha_data: ZHAData = data
         self.zha_gateway: Gateway
+        self.app = app
 
     async def __aenter__(self) -> Gateway:
         """Start the ZHA gateway."""
-        self.zha_gateway = await Gateway.async_from_config(self.zha_data)
-        await self.zha_gateway.async_initialize()
-        await self.zha_gateway.async_block_till_done()
-        await self.zha_gateway.async_initialize_devices_and_entities()
-        INSTANCES.append(self.zha_gateway)
+
+        with (
+            patch(
+                "bellows.zigbee.application.ControllerApplication.new",
+                return_value=self.app,
+            ),
+            patch(
+                "bellows.zigbee.application.ControllerApplication",
+                return_value=self.app,
+            ),
+        ):
+            self.zha_gateway = await Gateway.async_from_config(self.zha_data)
+            await self.zha_gateway.async_initialize()
+            await self.zha_gateway.async_block_till_done()
+            await self.zha_gateway.async_initialize_devices_and_entities()
+            INSTANCES.append(self.zha_gateway)
+
         return self.zha_gateway
 
     async def __aexit__(
@@ -307,19 +333,8 @@ async def zha_gateway(
     caplog,  # pylint: disable=unused-argument
 ):
     """Set up ZHA component."""
-
-    with (
-        patch(
-            "bellows.zigbee.application.ControllerApplication.new",
-            return_value=zigpy_app_controller,
-        ),
-        patch(
-            "bellows.zigbee.application.ControllerApplication",
-            return_value=zigpy_app_controller,
-        ),
-    ):
-        async with TestGateway(zha_data) as gateway:
-            yield gateway
+    async with TestGateway(zha_data, zigpy_app_controller) as gateway:
+        yield gateway
 
 
 @pytest.fixture(scope="session", autouse=True)
