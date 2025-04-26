@@ -34,7 +34,7 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.climate.const import HVACAction
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.number.const import UNITS
+from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
     ANALOG_INPUT_APPTYPE_UNIT_CONVERSION,
@@ -655,7 +655,7 @@ class AnalogInputSensor(Sensor):
                 self._cluster_handler.application_type
             )
         else:
-            self._attr_native_unit_of_measurement = UNITS.get(
+            self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
                 self._cluster_handler.engineering_units
             )
 

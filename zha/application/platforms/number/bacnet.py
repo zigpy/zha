@@ -1,0 +1,553 @@
+"""BACnet units."""
+
+import zigpy.types as t
+
+from zha.units import (
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
+    CONCENTRATION_PARTS_PER_BILLION,
+    CONCENTRATION_PARTS_PER_MILLION,
+    DEGREE,
+    LIGHT_LUX,
+    PERCENTAGE,
+    REVOLUTIONS_PER_MINUTE,
+    SIGNAL_STRENGTH_DECIBELS,
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    UnitOfApparentPower,
+    UnitOfArea,
+    UnitOfConductivity,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfEnergyDistance,
+    UnitOfFrequency,
+    UnitOfIrradiance,
+    UnitOfLength,
+    UnitOfMass,
+    UnitOfPower,
+    UnitOfPressure,
+    UnitOfReactivePower,
+    UnitOfSoundPressure,
+    UnitOfSpeed,
+    UnitOfTemperature,
+    UnitOfTime,
+    UnitOfVolume,
+    UnitOfVolumeFlowRate,
+)
+
+
+# https://github.com/bacnet-stack/bacnet-stack/blob/980c78dddbd849c7ff8436f317058c7905213f6d/src/bacnet/bacenum.h
+class BacnetUnit(t.enum8):
+    """BACnet units."""
+
+    SQUARE_METERS = 0
+    SQUARE_FEET = 1
+    MILLIAMPERES = 2
+    AMPERES = 3
+    OHMS = 4
+    VOLTS = 5
+    KILOVOLTS = 6
+    MEGAVOLTS = 7
+    VOLT_AMPERES = 8
+    KILOVOLT_AMPERES = 9
+    MEGAVOLT_AMPERES = 10
+    VOLT_AMPERES_REACTIVE = 11
+    KILOVOLT_AMPERES_REACTIVE = 12
+    MEGAVOLT_AMPERES_REACTIVE = 13
+    DEGREES_PHASE = 14
+    POWER_FACTOR = 15
+    JOULES = 16
+    KILOJOULES = 17
+    WATT_HOURS = 18
+    KILOWATT_HOURS = 19
+    BTUS = 20
+    THERMS = 21
+    TON_HOURS = 22
+    JOULES_PER_KILOGRAM_DRY_AIR = 23
+    BTUS_PER_POUND_DRY_AIR = 24
+    CYCLES_PER_HOUR = 25
+    CYCLES_PER_MINUTE = 26
+    HERTZ = 27
+    GRAMS_OF_WATER_PER_KILOGRAM_DRY_AIR = 28
+    PERCENT_RELATIVE_HUMIDITY = 29
+    MILLIMETERS = 30
+    METERS = 31
+    INCHES = 32
+    FEET = 33
+    WATTS_PER_SQUARE_FOOT = 34
+    WATTS_PER_SQUARE_METER = 35
+    LUMENS = 36
+    LUXES = 37
+    FOOT_CANDLES = 38
+    KILOGRAMS = 39
+    POUNDS_MASS = 40
+    TONS = 41
+    KILOGRAMS_PER_SECOND = 42
+    KILOGRAMS_PER_MINUTE = 43
+    KILOGRAMS_PER_HOUR = 44
+    POUNDS_MASS_PER_MINUTE = 45
+    POUNDS_MASS_PER_HOUR = 46
+    WATTS = 47
+    KILOWATTS = 48
+    MEGAWATTS = 49
+    BTUS_PER_HOUR = 50
+    HORSEPOWER = 51
+    TONS_REFRIGERATION = 52
+    PASCALS = 53
+    KILOPASCALS = 54
+    BARS = 55
+    POUNDS_FORCE_PER_SQUARE_INCH = 56
+    CENTIMETERS_OF_WATER = 57
+    INCHES_OF_WATER = 58
+    MILLIMETERS_OF_MERCURY = 59
+    CENTIMETERS_OF_MERCURY = 60
+    INCHES_OF_MERCURY = 61
+    DEGREES_CELSIUS = 62
+    KELVIN = 63
+    DEGREES_FAHRENHEIT = 64
+    DEGREE_DAYS_CELSIUS = 65
+    DEGREE_DAYS_FAHRENHEIT = 66
+    YEARS = 67
+    MONTHS = 68
+    WEEKS = 69
+    DAYS = 70
+    HOURS = 71
+    MINUTES = 72
+    SECONDS = 73
+    METERS_PER_SECOND = 74
+    KILOMETERS_PER_HOUR = 75
+    FEET_PER_SECOND = 76
+    FEET_PER_MINUTE = 77
+    MILES_PER_HOUR = 78
+    CUBIC_FEET = 79
+    CUBIC_METERS = 80
+    IMPERIAL_GALLONS = 81
+    LITERS = 82
+    US_GALLONS = 83
+    CUBIC_FEET_PER_MINUTE = 84
+    CUBIC_METERS_PER_SECOND = 85
+    IMPERIAL_GALLONS_PER_MINUTE = 86
+    LITERS_PER_SECOND = 87
+    LITERS_PER_MINUTE = 88
+    US_GALLONS_PER_MINUTE = 89
+    DEGREES_ANGULAR = 90
+    DEGREES_CELSIUS_PER_HOUR = 91
+    DEGREES_CELSIUS_PER_MINUTE = 92
+    DEGREES_FAHRENHEIT_PER_HOUR = 93
+    DEGREES_FAHRENHEIT_PER_MINUTE = 94
+    NO_UNITS = 95
+    PARTS_PER_MILLION = 96
+    PARTS_PER_BILLION = 97
+    PERCENT = 98
+    PERCENT_PER_SECOND = 99
+    PER_MINUTE = 100
+    PER_SECOND = 101
+    PSI_PER_DEGREE_FAHRENHEIT = 102
+    RADIANS = 103
+    REVOLUTIONS_PER_MINUTE = 104
+    CURRENCY1 = 105
+    CURRENCY2 = 106
+    CURRENCY3 = 107
+    CURRENCY4 = 108
+    CURRENCY5 = 109
+    CURRENCY6 = 110
+    CURRENCY7 = 111
+    CURRENCY8 = 112
+    CURRENCY9 = 113
+    CURRENCY10 = 114
+    SQUARE_INCHES = 115
+    SQUARE_CENTIMETERS = 116
+    BTUS_PER_POUND = 117
+    CENTIMETERS = 118
+    POUNDS_MASS_PER_SECOND = 119
+    DELTA_DEGREES_FAHRENHEIT = 120
+    DELTA_KELVIN = 121
+    KILOHMS = 122
+    MEGOHMS = 123
+    MILLIVOLTS = 124
+    KILOJOULES_PER_KILOGRAM = 125
+    MEGAJOULES = 126
+    JOULES_PER_DEGREE_KELVIN = 127
+    JOULES_PER_KILOGRAM_DEGREE_KELVIN = 128
+    KILOHERTZ = 129
+    MEGAHERTZ = 130
+    PER_HOUR = 131
+    MILLIWATTS = 132
+    HECTOPASCALS = 133
+    MILLIBARS = 134
+    CUBIC_METERS_PER_HOUR = 135
+    LITERS_PER_HOUR = 136
+    KW_HOURS_PER_SQUARE_METER = 137
+    KW_HOURS_PER_SQUARE_FOOT = 138
+    MEGAJOULES_PER_SQUARE_METER = 139
+    MEGAJOULES_PER_SQUARE_FOOT = 140
+    WATTS_PER_SQUARE_METER_DEGREE_KELVIN = 141
+    CUBIC_FEET_PER_SECOND = 142
+    PERCENT_OBSCURATION_PER_FOOT = 143
+    PERCENT_OBSCURATION_PER_METER = 144
+    MILLIOHMS = 145
+    MEGAWATT_HOURS = 146
+    KILO_BTUS = 147
+    MEGA_BTUS = 148
+    KILOJOULES_PER_KILOGRAM_DRY_AIR = 149
+    MEGAJOULES_PER_KILOGRAM_DRY_AIR = 150
+    KILOJOULES_PER_DEGREE_KELVIN = 151
+    MEGAJOULES_PER_DEGREE_KELVIN = 152
+    NEWTON = 153
+    GRAMS_PER_SECOND = 154
+    GRAMS_PER_MINUTE = 155
+    TONS_PER_HOUR = 156
+    KILO_BTUS_PER_HOUR = 157
+    HUNDREDTHS_SECONDS = 158
+    MILLISECONDS = 159
+    NEWTON_METERS = 160
+    MILLIMETERS_PER_SECOND = 161
+    MILLIMETERS_PER_MINUTE = 162
+    METERS_PER_MINUTE = 163
+    METERS_PER_HOUR = 164
+    CUBIC_METERS_PER_MINUTE = 165
+    METERS_PER_SECOND_PER_SECOND = 166
+    AMPERES_PER_METER = 167
+    AMPERES_PER_SQUARE_METER = 168
+    AMPERE_SQUARE_METERS = 169
+    FARADS = 170
+    HENRYS = 171
+    OHM_METERS = 172
+    SIEMENS_PER_METER = 174
+    TESLAS = 175
+    VOLTS_PER_DEGREE_KELVIN = 176
+    VOLTS_PER_METER = 177
+    WEBERS = 178
+    CANDELAS = 179
+    CANDELAS_PER_SQUARE_METER = 180
+    KELVIN_PER_HOUR = 181
+    KELVIN_PER_MINUTE = 182
+    JOULE_SECONDS = 183
+    RADIANS_PER_SECOND = 184
+    SQUARE_METERS_PER_NEWTON = 185
+    KILOGRAMS_PER_CUBIC_METER = 186
+    NEWTON_SECONDS = 187
+    NEWTONS_PER_METER = 188
+    WATTS_PER_METER_PER_DEGREE_KELVIN = 189
+    MICROSIEMENS = 190
+    CUBIC_FEET_PER_HOUR = 191
+    US_GALLONS_PER_HOUR = 192
+    KILOMETERS = 193
+    MICROMETERS = 194
+    GRAMS = 195
+    MILLIGRAMS = 196
+    MILLILITERS = 197
+    MILLILITERS_PER_SECOND = 198
+    DECIBELS = 199
+    DECIBELS_MILLIVOLT = 200
+    DECIBELS_VOLT = 201
+    MILLISIEMENS = 202
+    WATT_REACTIVE_HOURS = 203
+    KILOWATT_REACTIVE_HOURS = 204
+    MEGAWATT_REACTIVE_HOURS = 205
+    MILLIMETERS_OF_WATER = 206
+    PER_MILLE = 207
+    GRAMS_PER_GRAM = 208
+    KILOGRAMS_PER_KILOGRAM = 209
+    GRAMS_PER_KILOGRAM = 210
+    MILLIGRAMS_PER_GRAM = 211
+    MILLIGRAMS_PER_KILOGRAM = 212
+    GRAMS_PER_MILLILITER = 213
+    GRAMS_PER_LITER = 214
+    MILLIGRAMS_PER_LITER = 215
+    MICROGRAMS_PER_LITER = 216
+    GRAMS_PER_CUBIC_METER = 217
+    MILLIGRAMS_PER_CUBIC_METER = 218
+    MICROGRAMS_PER_CUBIC_METER = 219
+    NANOGRAMS_PER_CUBIC_METER = 220
+    GRAMS_PER_CUBIC_CENTIMETER = 221
+    BECQUERELS = 222
+    KILOBECQUERELS = 223
+    MEGABECQUERELS = 224
+    GRAY = 225
+    MILLIGRAY = 226
+    MICROGRAY = 227
+    SIEVERTS = 228
+    MILLISIEVERTS = 229
+    MICROSIEVERTS = 230
+    MICROSIEVERTS_PER_HOUR = 231
+    DECIBELS_A = 232
+    NEPHELOMETRIC_TURBIDITY_UNIT = 233
+    PH = 234
+    GRAMS_PER_SQUARE_METER = 235
+    MINUTES_PER_DEGREE_KELVIN = 236
+    OHM_METER_SQUARED_PER_METER = 237
+    AMPERE_SECONDS = 238
+    VOLT_AMPERE_HOURS = 239
+    KILOVOLT_AMPERE_HOURS = 240
+    MEGAVOLT_AMPERE_HOURS = 241
+    VOLT_AMPERE_REACTIVE_HOURS = 242
+    KILOVOLT_AMPERE_REACTIVE_HOURS = 243
+    MEGAVOLT_AMPERE_REACTIVE_HOURS = 244
+    VOLT_SQUARE_HOURS = 245
+    AMPERE_SQUARE_HOURS = 246
+    JOULE_PER_HOURS = 247
+    CUBIC_FEET_PER_DAY = 248
+    CUBIC_METERS_PER_DAY = 249
+    WATT_HOURS_PER_CUBIC_METER = 250
+    JOULES_PER_CUBIC_METER = 251
+    MOLE_PERCENT = 252
+    PASCAL_SECONDS = 253
+    MILLION_STANDARD_CUBIC_FEET_PER_MINUTE = 254
+
+
+BACNET_UNITS_TO_HA_UNITS = {
+    BacnetUnit.SQUARE_METERS: UnitOfArea.SQUARE_METERS,
+    BacnetUnit.SQUARE_FEET: UnitOfArea.SQUARE_FEET,
+    BacnetUnit.MILLIAMPERES: UnitOfElectricCurrent.MILLIAMPERE,
+    BacnetUnit.AMPERES: UnitOfElectricCurrent.AMPERE,
+    BacnetUnit.OHMS: "Ω",
+    BacnetUnit.VOLTS: UnitOfElectricPotential.VOLT,
+    BacnetUnit.KILOVOLTS: UnitOfElectricPotential.KILOVOLT,
+    BacnetUnit.MEGAVOLTS: UnitOfElectricPotential.MEGAVOLT,
+    BacnetUnit.VOLT_AMPERES: UnitOfApparentPower.VOLT_AMPERE,
+    BacnetUnit.KILOVOLT_AMPERES: "kVA",
+    BacnetUnit.MEGAVOLT_AMPERES: "MVA",
+    BacnetUnit.VOLT_AMPERES_REACTIVE: UnitOfReactivePower.VOLT_AMPERE_REACTIVE,
+    BacnetUnit.KILOVOLT_AMPERES_REACTIVE: UnitOfReactivePower.KILO_VOLT_AMPERE_REACTIVE,
+    BacnetUnit.MEGAVOLT_AMPERES_REACTIVE: "Mvar",
+    BacnetUnit.DEGREES_PHASE: DEGREE,
+    BacnetUnit.POWER_FACTOR: None,
+    BacnetUnit.JOULES: UnitOfEnergy.JOULE,
+    BacnetUnit.KILOJOULES: UnitOfEnergy.KILO_JOULE,
+    BacnetUnit.WATT_HOURS: UnitOfEnergy.WATT_HOUR,
+    BacnetUnit.KILOWATT_HOURS: UnitOfEnergy.KILO_WATT_HOUR,
+    BacnetUnit.BTUS: UnitOfPower.BTU_PER_HOUR,
+    BacnetUnit.THERMS: "therm",
+    BacnetUnit.TON_HOURS: "ton·h",
+    BacnetUnit.JOULES_PER_KILOGRAM_DRY_AIR: "J/kg",
+    BacnetUnit.BTUS_PER_POUND_DRY_AIR: "BTU/lb",
+    BacnetUnit.CYCLES_PER_HOUR: "cycles/h",
+    BacnetUnit.CYCLES_PER_MINUTE: "cycles/m",
+    BacnetUnit.HERTZ: UnitOfFrequency.HERTZ,
+    BacnetUnit.GRAMS_OF_WATER_PER_KILOGRAM_DRY_AIR: "g/kg",
+    BacnetUnit.PERCENT_RELATIVE_HUMIDITY: PERCENTAGE,
+    BacnetUnit.MILLIMETERS: UnitOfLength.MILLIMETERS,
+    BacnetUnit.METERS: UnitOfLength.METERS,
+    BacnetUnit.INCHES: UnitOfLength.INCHES,
+    BacnetUnit.FEET: UnitOfLength.FEET,
+    BacnetUnit.WATTS_PER_SQUARE_FOOT: "W/ft²",
+    BacnetUnit.WATTS_PER_SQUARE_METER: UnitOfIrradiance.WATTS_PER_SQUARE_METER,
+    BacnetUnit.LUMENS: "lm",
+    BacnetUnit.LUXES: LIGHT_LUX,
+    BacnetUnit.FOOT_CANDLES: "fc",
+    BacnetUnit.KILOGRAMS: UnitOfMass.KILOGRAMS,
+    BacnetUnit.POUNDS_MASS: UnitOfMass.POUNDS,
+    BacnetUnit.TONS: UnitOfMass.STONES,
+    BacnetUnit.KILOGRAMS_PER_SECOND: "kg/s",
+    BacnetUnit.KILOGRAMS_PER_MINUTE: "kg/min",
+    BacnetUnit.KILOGRAMS_PER_HOUR: "kg/h",
+    BacnetUnit.POUNDS_MASS_PER_MINUTE: "lb/min",
+    BacnetUnit.POUNDS_MASS_PER_HOUR: "lb/h",
+    BacnetUnit.WATTS: UnitOfPower.WATT,
+    BacnetUnit.KILOWATTS: UnitOfPower.KILO_WATT,
+    BacnetUnit.MEGAWATTS: UnitOfPower.MEGA_WATT,
+    BacnetUnit.BTUS_PER_HOUR: UnitOfPower.BTU_PER_HOUR,
+    BacnetUnit.HORSEPOWER: "hp",
+    BacnetUnit.TONS_REFRIGERATION: "ton",
+    BacnetUnit.PASCALS: UnitOfPressure.PA,
+    BacnetUnit.KILOPASCALS: UnitOfPressure.KPA,
+    BacnetUnit.BARS: UnitOfPressure.BAR,
+    BacnetUnit.POUNDS_FORCE_PER_SQUARE_INCH: UnitOfPressure.PSI,
+    BacnetUnit.CENTIMETERS_OF_WATER: "cm H₂O",
+    BacnetUnit.INCHES_OF_WATER: "in H₂O",
+    BacnetUnit.MILLIMETERS_OF_MERCURY: UnitOfPressure.MMHG,
+    BacnetUnit.CENTIMETERS_OF_MERCURY: "cm Hg",
+    BacnetUnit.INCHES_OF_MERCURY: UnitOfPressure.INHG,
+    BacnetUnit.DEGREES_CELSIUS: UnitOfTemperature.CELSIUS,
+    BacnetUnit.KELVIN: UnitOfTemperature.KELVIN,
+    BacnetUnit.DEGREES_FAHRENHEIT: UnitOfTemperature.FAHRENHEIT,
+    BacnetUnit.DEGREE_DAYS_CELSIUS: "°C·d",
+    BacnetUnit.DEGREE_DAYS_FAHRENHEIT: "°F·d",
+    BacnetUnit.YEARS: UnitOfTime.YEARS,
+    BacnetUnit.MONTHS: UnitOfTime.MONTHS,
+    BacnetUnit.WEEKS: UnitOfTime.WEEKS,
+    BacnetUnit.DAYS: UnitOfTime.DAYS,
+    BacnetUnit.HOURS: UnitOfTime.HOURS,
+    BacnetUnit.MINUTES: UnitOfTime.MINUTES,
+    BacnetUnit.SECONDS: UnitOfTime.SECONDS,
+    BacnetUnit.METERS_PER_SECOND: UnitOfSpeed.METERS_PER_SECOND,
+    BacnetUnit.KILOMETERS_PER_HOUR: UnitOfSpeed.KILOMETERS_PER_HOUR,
+    BacnetUnit.FEET_PER_SECOND: UnitOfSpeed.FEET_PER_SECOND,
+    BacnetUnit.FEET_PER_MINUTE: "ft/min",
+    BacnetUnit.MILES_PER_HOUR: UnitOfSpeed.MILES_PER_HOUR,
+    BacnetUnit.CUBIC_FEET: UnitOfVolume.CUBIC_FEET,
+    BacnetUnit.CUBIC_METERS: UnitOfVolume.CUBIC_METERS,
+    BacnetUnit.IMPERIAL_GALLONS: "imperial gal",
+    BacnetUnit.LITERS: UnitOfVolume.LITERS,
+    BacnetUnit.US_GALLONS: UnitOfVolume.GALLONS,
+    BacnetUnit.CUBIC_FEET_PER_MINUTE: UnitOfVolumeFlowRate.CUBIC_FEET_PER_MINUTE,
+    BacnetUnit.CUBIC_METERS_PER_SECOND: "m³/s",
+    BacnetUnit.IMPERIAL_GALLONS_PER_MINUTE: "imperial gal/min",
+    BacnetUnit.LITERS_PER_SECOND: "L/s",
+    BacnetUnit.LITERS_PER_MINUTE: UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
+    BacnetUnit.US_GALLONS_PER_MINUTE: UnitOfVolumeFlowRate.GALLONS_PER_MINUTE,
+    BacnetUnit.DEGREES_ANGULAR: REVOLUTIONS_PER_MINUTE,
+    BacnetUnit.DEGREES_CELSIUS_PER_HOUR: "°C/h",
+    BacnetUnit.DEGREES_CELSIUS_PER_MINUTE: "°C/min",
+    BacnetUnit.DEGREES_FAHRENHEIT_PER_HOUR: "°F/h",
+    BacnetUnit.DEGREES_FAHRENHEIT_PER_MINUTE: "°F/min",
+    BacnetUnit.NO_UNITS: None,
+    BacnetUnit.PARTS_PER_MILLION: CONCENTRATION_PARTS_PER_MILLION,
+    BacnetUnit.PARTS_PER_BILLION: CONCENTRATION_PARTS_PER_BILLION,
+    BacnetUnit.PERCENT: PERCENTAGE,
+    BacnetUnit.PERCENT_PER_SECOND: "%/s",
+    BacnetUnit.PER_MINUTE: "1/min",
+    BacnetUnit.PER_SECOND: "1/s",
+    BacnetUnit.PSI_PER_DEGREE_FAHRENHEIT: "psi/°F",
+    BacnetUnit.RADIANS: "rad",
+    BacnetUnit.REVOLUTIONS_PER_MINUTE: REVOLUTIONS_PER_MINUTE,
+    BacnetUnit.CURRENCY1: "currency",
+    BacnetUnit.CURRENCY2: "currency",
+    BacnetUnit.CURRENCY3: "currency",
+    BacnetUnit.CURRENCY4: "currency",
+    BacnetUnit.CURRENCY5: "currency",
+    BacnetUnit.CURRENCY6: "currency",
+    BacnetUnit.CURRENCY7: "currency",
+    BacnetUnit.CURRENCY8: "currency",
+    BacnetUnit.CURRENCY9: "currency",
+    BacnetUnit.CURRENCY10: "currency",
+    BacnetUnit.SQUARE_INCHES: UnitOfArea.SQUARE_INCHES,
+    BacnetUnit.SQUARE_CENTIMETERS: UnitOfArea.SQUARE_CENTIMETERS,
+    BacnetUnit.BTUS_PER_POUND: UnitOfEnergy.CALORIE,
+    BacnetUnit.CENTIMETERS: UnitOfLength.CENTIMETERS,
+    BacnetUnit.POUNDS_MASS_PER_SECOND: "lb/s",
+    BacnetUnit.DELTA_DEGREES_FAHRENHEIT: "Δ°F",
+    BacnetUnit.DELTA_KELVIN: "ΔK",
+    BacnetUnit.KILOHMS: "kΩ",
+    BacnetUnit.MEGOHMS: "MΩ",
+    BacnetUnit.MILLIVOLTS: UnitOfElectricPotential.MILLIVOLT,
+    BacnetUnit.KILOJOULES_PER_KILOGRAM: "kJ/kg",
+    BacnetUnit.MEGAJOULES: UnitOfEnergy.MEGA_JOULE,
+    BacnetUnit.JOULES_PER_DEGREE_KELVIN: "J/K",
+    BacnetUnit.JOULES_PER_KILOGRAM_DEGREE_KELVIN: "J/(kg·K)",
+    BacnetUnit.KILOHERTZ: UnitOfFrequency.KILOHERTZ,
+    BacnetUnit.MEGAHERTZ: UnitOfFrequency.MEGAHERTZ,
+    BacnetUnit.PER_HOUR: "1/h",
+    BacnetUnit.MILLIWATTS: UnitOfPower.MILLIWATT,
+    BacnetUnit.HECTOPASCALS: UnitOfPressure.HPA,
+    BacnetUnit.MILLIBARS: UnitOfPressure.MBAR,
+    BacnetUnit.CUBIC_METERS_PER_HOUR: UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+    BacnetUnit.LITERS_PER_HOUR: UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
+    BacnetUnit.KW_HOURS_PER_SQUARE_METER: UnitOfEnergyDistance.KM_PER_KILO_WATT_HOUR,
+    BacnetUnit.KW_HOURS_PER_SQUARE_FOOT: UnitOfEnergyDistance.MILES_PER_KILO_WATT_HOUR,
+    BacnetUnit.MEGAJOULES_PER_SQUARE_METER: f"{UnitOfEnergy.MEGA_JOULE}/m²",
+    BacnetUnit.MEGAJOULES_PER_SQUARE_FOOT: f"{UnitOfEnergy.MEGA_JOULE}/ft²",
+    BacnetUnit.WATTS_PER_SQUARE_METER_DEGREE_KELVIN: "W/(m²·K)",
+    BacnetUnit.CUBIC_FEET_PER_SECOND: "ft³/s",
+    BacnetUnit.PERCENT_OBSCURATION_PER_FOOT: "% obscuration/ft",
+    BacnetUnit.PERCENT_OBSCURATION_PER_METER: "% obscuration/m",
+    BacnetUnit.MILLIOHMS: "mΩ",
+    BacnetUnit.MEGAWATT_HOURS: UnitOfEnergy.MEGA_WATT_HOUR,
+    BacnetUnit.KILO_BTUS: "kBTU",
+    BacnetUnit.MEGA_BTUS: "MBTU",
+    BacnetUnit.KILOJOULES_PER_KILOGRAM_DRY_AIR: "kJ/kg_dry",
+    BacnetUnit.MEGAJOULES_PER_KILOGRAM_DRY_AIR: "MJ/kg_dry",
+    BacnetUnit.KILOJOULES_PER_DEGREE_KELVIN: "kJ/K",
+    BacnetUnit.MEGAJOULES_PER_DEGREE_KELVIN: "MJ/K",
+    BacnetUnit.NEWTON: "N",
+    BacnetUnit.GRAMS_PER_SECOND: "g/s",
+    BacnetUnit.GRAMS_PER_MINUTE: "g/min",
+    BacnetUnit.TONS_PER_HOUR: "tons/h",
+    BacnetUnit.KILO_BTUS_PER_HOUR: "kBTU/h",
+    BacnetUnit.HUNDREDTHS_SECONDS: "1/100 s",
+    BacnetUnit.MILLISECONDS: UnitOfTime.MILLISECONDS,
+    BacnetUnit.NEWTON_METERS: "N·m",
+    BacnetUnit.MILLIMETERS_PER_SECOND: UnitOfLength.MILLIMETERS,
+    BacnetUnit.MILLIMETERS_PER_MINUTE: "mm/min",
+    BacnetUnit.METERS_PER_MINUTE: "m/min",
+    BacnetUnit.METERS_PER_HOUR: "m/h",
+    BacnetUnit.CUBIC_METERS_PER_MINUTE: "m³/min",
+    BacnetUnit.METERS_PER_SECOND_PER_SECOND: "m/s²",
+    BacnetUnit.AMPERES_PER_METER: "A/m",
+    BacnetUnit.AMPERES_PER_SQUARE_METER: "A/m²",
+    BacnetUnit.AMPERE_SQUARE_METERS: "A·m²",
+    BacnetUnit.FARADS: "F",
+    BacnetUnit.HENRYS: "H",
+    BacnetUnit.OHM_METERS: "Ω·m",
+    BacnetUnit.SIEMENS_PER_METER: "S/m",
+    BacnetUnit.TESLAS: "T",
+    BacnetUnit.VOLTS_PER_DEGREE_KELVIN: "V/K",
+    BacnetUnit.VOLTS_PER_METER: "V/m",
+    BacnetUnit.WEBERS: "Wb",
+    BacnetUnit.CANDELAS: "cd",
+    BacnetUnit.CANDELAS_PER_SQUARE_METER: "cd/m²",
+    BacnetUnit.KELVIN_PER_HOUR: "K/h",
+    BacnetUnit.KELVIN_PER_MINUTE: "K/min",
+    BacnetUnit.JOULE_SECONDS: "J·s",
+    BacnetUnit.RADIANS_PER_SECOND: "rad/s",
+    BacnetUnit.SQUARE_METERS_PER_NEWTON: "m²/N",
+    BacnetUnit.KILOGRAMS_PER_CUBIC_METER: "kg/m³",
+    BacnetUnit.NEWTON_SECONDS: "N·s",
+    BacnetUnit.NEWTONS_PER_METER: "N/m",
+    BacnetUnit.WATTS_PER_METER_PER_DEGREE_KELVIN: "W/(m·K)",
+    BacnetUnit.MICROSIEMENS: UnitOfConductivity.MICROSIEMENS_PER_CM,
+    BacnetUnit.CUBIC_FEET_PER_HOUR: "ft³/h",
+    BacnetUnit.US_GALLONS_PER_HOUR: "gal/h",
+    BacnetUnit.KILOMETERS: UnitOfLength.KILOMETERS,
+    BacnetUnit.MICROMETERS: "µm",
+    BacnetUnit.GRAMS: UnitOfMass.GRAMS,
+    BacnetUnit.MILLIGRAMS: UnitOfMass.MILLIGRAMS,
+    BacnetUnit.MILLILITERS: UnitOfVolume.MILLILITERS,
+    BacnetUnit.MILLILITERS_PER_SECOND: UnitOfVolumeFlowRate.MILLILITERS_PER_SECOND,
+    BacnetUnit.DECIBELS: UnitOfSoundPressure.DECIBEL,
+    BacnetUnit.DECIBELS_MILLIVOLT: SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    BacnetUnit.DECIBELS_VOLT: SIGNAL_STRENGTH_DECIBELS,
+    BacnetUnit.MILLISIEMENS: UnitOfConductivity.MILLISIEMENS_PER_CM,
+    BacnetUnit.WATT_REACTIVE_HOURS: "var·h",
+    BacnetUnit.KILOWATT_REACTIVE_HOURS: "kvar·h",
+    BacnetUnit.MEGAWATT_REACTIVE_HOURS: "Mvar·h",
+    BacnetUnit.MILLIMETERS_OF_WATER: "mm H₂O",
+    BacnetUnit.PER_MILLE: "‰",
+    BacnetUnit.GRAMS_PER_GRAM: "g/g",
+    BacnetUnit.KILOGRAMS_PER_KILOGRAM: "kg/kg",
+    BacnetUnit.GRAMS_PER_KILOGRAM: "g/kg",
+    BacnetUnit.MILLIGRAMS_PER_GRAM: "mg/g",
+    BacnetUnit.MILLIGRAMS_PER_KILOGRAM: "mg/kg",
+    BacnetUnit.GRAMS_PER_MILLILITER: "g/mL",
+    BacnetUnit.GRAMS_PER_LITER: "g/L",
+    BacnetUnit.MILLIGRAMS_PER_LITER: "mg/L",
+    BacnetUnit.MICROGRAMS_PER_LITER: "µg/L",
+    BacnetUnit.GRAMS_PER_CUBIC_METER: "g/m³",
+    BacnetUnit.MILLIGRAMS_PER_CUBIC_METER: CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER,
+    BacnetUnit.MICROGRAMS_PER_CUBIC_METER: CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    BacnetUnit.NANOGRAMS_PER_CUBIC_METER: "ng/m³",
+    BacnetUnit.GRAMS_PER_CUBIC_CENTIMETER: "g/cm³",
+    BacnetUnit.BECQUERELS: "Bq",
+    BacnetUnit.KILOBECQUERELS: "kBq",
+    BacnetUnit.MEGABECQUERELS: "MBq",
+    BacnetUnit.GRAY: "Gy",
+    BacnetUnit.MILLIGRAY: "mGy",
+    BacnetUnit.MICROGRAY: "µGy",
+    BacnetUnit.SIEVERTS: "Sv",
+    BacnetUnit.MILLISIEVERTS: "mSv",
+    BacnetUnit.MICROSIEVERTS: "µSv",
+    BacnetUnit.MICROSIEVERTS_PER_HOUR: "µSv/h",
+    BacnetUnit.DECIBELS_A: "dBA",
+    BacnetUnit.NEPHELOMETRIC_TURBIDITY_UNIT: "NTU",
+    BacnetUnit.PH: "pH",
+    BacnetUnit.GRAMS_PER_SQUARE_METER: "g/m²",
+    BacnetUnit.MINUTES_PER_DEGREE_KELVIN: "min/K",
+    BacnetUnit.OHM_METER_SQUARED_PER_METER: "Ω·m²/m",
+    BacnetUnit.AMPERE_SQUARE_HOURS: "A·h",
+    BacnetUnit.VOLT_AMPERE_HOURS: "VA·h",
+    BacnetUnit.KILOVOLT_AMPERE_HOURS: "kVA·h",
+    BacnetUnit.MEGAVOLT_AMPERE_HOURS: "MVA·h",
+    BacnetUnit.VOLT_AMPERE_REACTIVE_HOURS: "var·h",
+    BacnetUnit.KILOVOLT_AMPERE_REACTIVE_HOURS: "kvar·h",
+    BacnetUnit.MEGAVOLT_AMPERE_REACTIVE_HOURS: "Mvar·h",
+    BacnetUnit.VOLT_SQUARE_HOURS: "V²·h",
+    BacnetUnit.JOULE_PER_HOURS: "J/h",
+    BacnetUnit.CUBIC_FEET_PER_DAY: "ft³/d",
+    BacnetUnit.CUBIC_METERS_PER_DAY: "m³/d",
+    BacnetUnit.WATT_HOURS_PER_CUBIC_METER: "Wh/m³",
+    BacnetUnit.JOULES_PER_CUBIC_METER: "J/m³",
+    BacnetUnit.MOLE_PERCENT: "mol%",
+    BacnetUnit.PASCAL_SECONDS: "Pa·s",
+    BacnetUnit.MILLION_STANDARD_CUBIC_FEET_PER_MINUTE: "MMSCFM",
+}

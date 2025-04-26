@@ -14,12 +14,8 @@ from zigpy.zcl.clusters.hvac import Thermostat
 from zha.application import Platform
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.number.const import (
-    ICONS,
-    UNITS,
-    NumberDeviceClass,
-    NumberMode,
-)
+from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
+from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
@@ -173,7 +169,7 @@ class Number(PlatformEntity):
     def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value is expressed in."""
         engineering_units = self._analog_output_cluster_handler.engineering_units
-        return UNITS.get(engineering_units)
+        return BACNET_UNITS_TO_HA_UNITS.get(engineering_units)
 
     @functools.cached_property
     def mode(self) -> NumberMode:
@@ -476,7 +472,7 @@ class TimerDurationMinutes(NumberConfigurationEntity):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0x00
     _attr_native_max_value: float = 0x257
-    _attr_native_unit_of_measurement: str | None = UNITS[72]
+    _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
     _attribute_name = "timer_duration"
     _attr_translation_key: str = "timer_duration"
 
@@ -489,7 +485,7 @@ class FilterLifeTime(NumberConfigurationEntity):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0x00
     _attr_native_max_value: float = 0xFFFFFFFF
-    _attr_native_unit_of_measurement: str | None = UNITS[72]
+    _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
     _attribute_name = "filter_life_time"
     _attr_translation_key: str = "filter_life_time"
 
