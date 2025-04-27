@@ -999,16 +999,12 @@ class SmartEnergyMetering(PollableSensor):
         ),
     }
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self.recompute_capabilities()
+    def _is_supported(self) -> bool:
+        unit = self._cluster_handler.unit_of_measurement
+        if self._is_non_value(unit):
+            return False
+
+        return super()._is_supported()
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
