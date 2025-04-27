@@ -359,6 +359,7 @@ class Cover(BaseCover):
 
     def _determine_cover_state(
         self,
+        *,
         is_lift_update: bool = False,
         is_tilt_update: bool = False,
         refresh: bool = False,
@@ -425,10 +426,9 @@ class Cover(BaseCover):
             CoverState.CLOSING,
         ) and self._lift_state in (CoverState.CLOSED, CoverState.OPEN):
             self._state = self._tilt_state
-            return
-
-        # Pick lift state in preference over tilt
-        self._state = self._lift_state or self._tilt_state
+        else:
+            self._state = self._lift_state or self._tilt_state
+        self.maybe_emit_state_changed_event()
 
     def _set_lift_transition_target(self, target: int) -> None:
         """Set target position for the tilt transition."""
@@ -514,7 +514,6 @@ class Cover(BaseCover):
         if not determine_state:
             return
         self._determine_cover_state(refresh=True)
-        self.maybe_emit_state_changed_event()
 
     def _clear_tilt_transition(self, determine_state: bool = False) -> None:
         """Clear the tilt transition."""
@@ -528,7 +527,6 @@ class Cover(BaseCover):
         if not determine_state:
             return
         self._determine_cover_state(refresh=True)
-        self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -544,7 +542,6 @@ class Cover(BaseCover):
         elif event.attribute_id == WCAttrs.current_position_tilt_percentage.id:
             self._tilt_position_history.append(self.current_cover_tilt_position)
             self._determine_cover_state(is_tilt_update=True)
-        self.maybe_emit_state_changed_event()
 
     def async_update_state(self, state):
         """Handle state update from HA operations below."""
@@ -660,9 +657,7 @@ class Cover(BaseCover):
             raise ZHAException(f"Failed to stop cover: {res[1]}")
         self._clear_lift_transition()
         self._clear_tilt_transition()
-
         self._determine_cover_state(refresh=True)
-        self.maybe_emit_state_changed_event()
 
     async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
         """Stop the cover tilt.
