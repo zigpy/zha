@@ -417,6 +417,7 @@ class Cover(BaseCover):
             or self.is_opening
             and CoverState.OPENING in (self._lift_state, self._tilt_state)
         ):
+            self.maybe_emit_state_changed_event()
             return
 
         # An open or moving tilt state overrides a static lift state
