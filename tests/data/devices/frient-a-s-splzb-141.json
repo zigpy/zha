@@ -1,7 +1,7 @@
 {
   "version": 1,
   "ieee": "00:15:bc:00:2f:02:19:79",
-  "nwk": "0x733A",
+  "nwk": "0x3E8F",
   "manufacturer": "frient A/S",
   "model": "SPLZB-141",
   "friendly_manufacturer": "frient A/S",
@@ -12,9 +12,9 @@
   "quirk_id": null,
   "manufacturer_code": 4117,
   "power_source": "Mains",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-04-24T17:34:08.983868+00:00",
+  "lqi": 255,
+  "rssi": -56,
+  "last_seen": "2025-04-28T20:52:09.253845+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -133,7 +133,7 @@
               "name": "on_off",
               "zcl_type": "bool_",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x4001",
@@ -154,7 +154,7 @@
               "name": "start_up_on_off",
               "zcl_type": "enum8",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             }
           ]
         }
@@ -350,7 +350,7 @@
               "id": "0x0000",
               "name": "current_temperature",
               "zcl_type": "int16",
-              "value": 31,
+              "value": 32,
               "unsupported": false
             },
             {
@@ -393,7 +393,7 @@
               "name": "max_temp_experienced",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0001",
@@ -407,14 +407,14 @@
               "name": "over_temp_total_dwell",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0xfffe",
               "name": "reporting_status",
               "zcl_type": "enum8",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             }
           ]
         },
@@ -862,7 +862,7 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 44,
+              "value": 41,
               "unsupported": false
             },
             {
@@ -1310,7 +1310,7 @@
               "id": "0x0400",
               "name": "instantaneous_demand",
               "zcl_type": "int24",
-              "value": 4,
+              "value": 2,
               "unsupported": false
             },
             {
@@ -1596,7 +1596,7 @@
               "id": "0x0300",
               "name": "ac_frequency",
               "zcl_type": "uint16",
-              "value": 59970,
+              "value": 59986,
               "unsupported": false
             },
             {
@@ -1687,7 +1687,7 @@
               "id": "0x050b",
               "name": "active_power",
               "zcl_type": "int16",
-              "value": 598,
+              "value": 2,
               "unsupported": false
             },
             {
@@ -1702,14 +1702,14 @@
               "name": "active_power_max_ph_b",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0a0d",
               "name": "active_power_max_ph_c",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x050c",
@@ -1737,14 +1737,14 @@
               "name": "active_power_ph_b",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0a0b",
               "name": "active_power_ph_c",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x050f",
@@ -2157,14 +2157,14 @@
               "name": "power_factor_ph_b",
               "zcl_type": "int8",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0a10",
               "name": "power_factor_ph_c",
               "zcl_type": "int8",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0402",
@@ -2219,14 +2219,14 @@
               "id": "0x0508",
               "name": "rms_current",
               "zcl_type": "uint16",
-              "value": 4902,
+              "value": 37,
               "unsupported": false
             },
             {
               "id": "0x050a",
               "name": "rms_current_max",
               "zcl_type": "uint16",
-              "value": 4981,
+              "value": 270,
               "unsupported": false
             },
             {
@@ -2234,14 +2234,14 @@
               "name": "rms_current_max_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0a0a",
               "name": "rms_current_max_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0509",
@@ -2269,14 +2269,14 @@
               "name": "rms_current_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0a08",
               "name": "rms_current_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0807",
@@ -2338,14 +2338,14 @@
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "value": 12075,
+              "value": 12308,
               "unsupported": false
             },
             {
               "id": "0x0507",
               "name": "rms_voltage_max",
               "zcl_type": "uint16",
-              "value": 12333,
+              "value": 12501,
               "unsupported": false
             },
             {
@@ -2353,14 +2353,14 @@
               "name": "rms_voltage_max_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0a07",
               "name": "rms_voltage_max_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0506",
@@ -2388,14 +2388,14 @@
               "name": "rms_voltage_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0a05",
               "name": "rms_voltage_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0809",
@@ -3175,7 +3175,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 255
         }
       },
       {
@@ -3230,7 +3230,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -56
         }
       },
       {
@@ -3285,7 +3285,7 @@
         "state": {
           "class_name": "SmartEnergyMetering",
           "available": true,
-          "state": 4.0,
+          "state": 2.0,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -3343,7 +3343,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 0.044,
+          "state": 0.041,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -3401,7 +3401,7 @@
         "state": {
           "class_name": "DeviceTemperature",
           "available": true,
-          "state": 0.31
+          "state": 0.32
         }
       },
       {
@@ -3456,7 +3456,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 598.0,
+          "state": 2.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -3512,7 +3512,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.97,
+          "state": 59.986,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -3568,9 +3568,9 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 4.902,
+          "state": 0.037,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_current_max": 4.981
+          "rms_current_max": 0.27
         }
       },
       {
@@ -3625,9 +3625,9 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 120.75,
+          "state": 123.08,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_voltage_max": 123.33
+          "rms_voltage_max": 125.01
         }
       }
     ],

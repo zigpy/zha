@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "ieee": "00:15:bc:00:36:00:1f:ee",
-  "nwk": "0xCA04",
+  "ieee": "00:15:bc:00:35:00:26:aa",
+  "nwk": "0x89A7",
   "manufacturer": "frient A/S",
-  "model": "AQSZB-110",
+  "model": "HMSZB-120",
   "friendly_manufacturer": "frient A/S",
-  "friendly_model": "AQSZB-110",
-  "name": "frient A/S AQSZB-110",
+  "friendly_model": "HMSZB-120",
+  "name": "frient A/S HMSZB-120",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
   "quirk_id": null,
@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": 255,
   "rssi": -55,
-  "last_seen": "2025-04-28T20:52:13.626456+00:00",
+  "last_seen": "2025-04-28T20:50:02.453212+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -287,7 +287,7 @@
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "AQSZB-110",
+              "value": "HMSZB-120",
               "unsupported": false
             },
             {
@@ -664,7 +664,7 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 150,
+              "value": 200,
               "unsupported": false
             },
             {
@@ -720,7 +720,7 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 29,
+              "value": 30,
               "unsupported": false
             },
             {
@@ -947,7 +947,7 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 4180,
+              "value": 4150,
               "unsupported": false
             },
             {
@@ -972,16 +972,6 @@
               "unsupported": false
             }
           ]
-        },
-        {
-          "cluster_id": "0x042e",
-          "endpoint_attribute": null,
-          "attributes": []
-        },
-        {
-          "cluster_id": "0xfc03",
-          "endpoint_attribute": "manufacturer_specific",
-          "attributes": []
         }
       ],
       "out_clusters": [
@@ -1221,7 +1211,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:36:00:1f:ee-38-3",
+          "unique_id": "00:15:bc:00:35:00:26:aa-38-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -1243,16 +1233,16 @@
                 "type": "server"
               },
               "id": "38:0x0003",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0003",
+              "unique_id": "00:15:bc:00:35:00:26:aa:38:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            238,
-            31,
+            170,
+            38,
             0,
-            54,
+            53,
             0,
             188,
             21,
@@ -1277,7 +1267,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:36:00:1f:ee-38-0-lqi",
+          "unique_id": "00:15:bc:00:35:00:26:aa-38-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -1299,16 +1289,16 @@
                 "type": "server"
               },
               "id": "38:0x0000",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0000",
+              "unique_id": "00:15:bc:00:35:00:26:aa:38:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            238,
-            31,
+            170,
+            38,
             0,
-            54,
+            53,
             0,
             188,
             21,
@@ -1332,7 +1322,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:36:00:1f:ee-38-0-rssi",
+          "unique_id": "00:15:bc:00:35:00:26:aa-38-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -1354,16 +1344,16 @@
                 "type": "server"
               },
               "id": "38:0x0000",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0000",
+              "unique_id": "00:15:bc:00:35:00:26:aa:38:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            238,
-            31,
+            170,
+            38,
             0,
-            54,
+            53,
             0,
             188,
             21,
@@ -1387,7 +1377,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:36:00:1f:ee-38-1",
+          "unique_id": "00:15:bc:00:35:00:26:aa-38-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -1409,16 +1399,16 @@
                 "type": "server"
               },
               "id": "38:0x0001",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0001",
+              "unique_id": "00:15:bc:00:35:00:26:aa:38:0x0001",
               "status": "INITIALIZED",
               "value_attribute": "battery_voltage"
             }
           ],
           "device_ieee": [
-            238,
-            31,
+            170,
+            38,
             0,
-            54,
+            53,
             0,
             188,
             21,
@@ -1436,16 +1426,16 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 75.0,
+          "state": 100.0,
           "battery_size": "AA",
           "battery_quantity": 2,
-          "battery_voltage": 2.9
+          "battery_voltage": 3.0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:36:00:1f:ee-38-1026",
+          "unique_id": "00:15:bc:00:35:00:26:aa-38-1026",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Temperature",
@@ -1467,16 +1457,16 @@
                 "type": "server"
               },
               "id": "38:0x0402",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0402",
+              "unique_id": "00:15:bc:00:35:00:26:aa:38:0x0402",
               "status": "INITIALIZED",
               "value_attribute": "measured_value"
             }
           ],
           "device_ieee": [
-            238,
-            31,
+            170,
+            38,
             0,
-            54,
+            53,
             0,
             188,
             21,
@@ -1500,7 +1490,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:36:00:1f:ee-38-1029",
+          "unique_id": "00:15:bc:00:35:00:26:aa-38-1029",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Humidity",
@@ -1522,16 +1512,16 @@
                 "type": "server"
               },
               "id": "38:0x0405",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0405",
+              "unique_id": "00:15:bc:00:35:00:26:aa:38:0x0405",
               "status": "INITIALIZED",
               "value_attribute": "measured_value"
             }
           ],
           "device_ieee": [
-            238,
-            31,
+            170,
+            38,
             0,
-            54,
+            53,
             0,
             188,
             21,
@@ -1549,7 +1539,7 @@
         "state": {
           "class_name": "Humidity",
           "available": true,
-          "state": 41.8
+          "state": 41.5
         }
       }
     ],
@@ -1557,7 +1547,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:36:00:1f:ee-38-25-firmware_update",
+          "unique_id": "00:15:bc:00:35:00:26:aa-38-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -1579,16 +1569,16 @@
                 "type": "client"
               },
               "id": "38:0x0019_client",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0019_CLIENT",
+              "unique_id": "00:15:bc:00:35:00:26:aa:38:0x0019_CLIENT",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            238,
-            31,
+            170,
+            38,
             0,
-            54,
+            53,
             0,
             188,
             21,
