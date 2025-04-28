@@ -346,14 +346,14 @@ async def async_test_em_rms_current(
     """Test electrical measurement RMS Current sensor."""
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1234})
-    assert_state(entity, 1.2, "A")
+    assert_state(entity, 1.234, "A")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_current_divisor": 10})
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 236})
     assert_state(entity, 23.6, "A")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1236})
-    assert_state(entity, 124, "A")
+    assert_state(entity, 123.6, "A")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_max_attrid: 88})
     assert entity.state[current_max_attr_name] == 8.8
@@ -365,17 +365,17 @@ async def async_test_em_rms_voltage(
     """Test electrical measurement RMS Voltage sensor."""
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 1234})
-    assert_state(entity, 123, "V")
+    assert_state(entity, 123.4, "V")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 234})
     assert_state(entity, 23.4, "V")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_voltage_divisor": 100})
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 2236})
-    assert_state(entity, 22.4, "V")
+    assert_state(entity, 22.36, "V")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0507: 888})
-    assert entity.state["rms_voltage_max"] == 8.9
+    assert entity.state["rms_voltage_max"] == 8.88
 
 
 async def async_test_powerconfiguration(
