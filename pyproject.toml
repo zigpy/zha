@@ -17,7 +17,7 @@ dependencies = [
     "zigpy==0.78.1",
     "bellows==0.44.1",
     "zigpy-znp==0.14.0",
-    "zigpy-deconz==0.24.1",
+    "zigpy-deconz==0.24.2",
     "zigpy-xbee==0.21.0",
     "zigpy-zigate==0.13.2",
     "zha-quirks==0.0.136",
