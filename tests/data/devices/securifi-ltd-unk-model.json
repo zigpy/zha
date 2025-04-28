@@ -4281,7 +4281,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 0,
+          "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
       },
@@ -4337,7 +4337,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 0,
+          "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
       },
@@ -4449,7 +4449,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 123,
+          "state": 122.98466468299382,
           "measurement_type": "PHASE_A_MEASUREMENT"
         }
       }

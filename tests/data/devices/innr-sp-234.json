@@ -3123,7 +3123,7 @@
         "state": {
           "class_name": "ElectricalMeasurement",
           "available": true,
-          "state": 0,
+          "state": 0.0,
           "measurement_type": "ACTIVE_MEASUREMENT"
         }
       },
@@ -3179,7 +3179,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 0.0,
+          "state": 0.007,
           "measurement_type": "ACTIVE_MEASUREMENT"
         }
       },
@@ -3235,7 +3235,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 123,
+          "state": 123.0,
           "measurement_type": "ACTIVE_MEASUREMENT"
         }
       }

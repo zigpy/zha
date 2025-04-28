@@ -3456,7 +3456,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 598,
+          "state": 598.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -3512,7 +3512,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.0,
+          "state": 59.97,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -3568,9 +3568,9 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 4.9,
+          "state": 4.902,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_current_max": 5.0
+          "rms_current_max": 4.981
         }
       },
       {
@@ -3625,9 +3625,9 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 121,
+          "state": 120.75,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_voltage_max": 123
+          "rms_voltage_max": 123.33
         }
       }
     ],

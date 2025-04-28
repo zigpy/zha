@@ -23701,7 +23701,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 16.1,
+          "state": 16.11,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -23757,7 +23757,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.0,
+          "state": 60.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -23813,7 +23813,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 25.0,
+          "state": 25.01,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -23869,7 +23869,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 55,
+          "state": 55.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -23925,7 +23925,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 11.0,
+          "state": 11.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -23981,7 +23981,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 118,
+          "state": 118.42,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24037,7 +24037,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 61.2,
+          "state": 61.25,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24093,7 +24093,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.6,
+          "state": 60.57,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24149,7 +24149,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 83.2,
+          "state": 83.22,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24205,7 +24205,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 30,
+          "state": 30.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24317,7 +24317,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 122,
+          "state": 121.93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24373,7 +24373,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 0.4,
+          "state": 0.37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24429,7 +24429,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.0,
+          "state": 60.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24485,7 +24485,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 29.0,
+          "state": 29.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24541,7 +24541,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 56,
+          "state": 56.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24597,7 +24597,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 4.3,
+          "state": 4.35,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24653,7 +24653,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 123,
+          "state": 123.32,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24709,7 +24709,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 73.9,
+          "state": 73.87,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24765,7 +24765,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.6,
+          "state": 60.65,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24821,7 +24821,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 71.6,
+          "state": 71.56,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24877,7 +24877,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 63,
+          "state": 63.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24933,7 +24933,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 4.4,
+          "state": 4.36,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24989,7 +24989,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 117,
+          "state": 117.29,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25045,7 +25045,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 80.7,
+          "state": 80.66,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25101,7 +25101,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.9,
+          "state": 60.94,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25157,7 +25157,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 58.6,
+          "state": 58.59,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25213,7 +25213,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 18,
+          "state": 18.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25269,7 +25269,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 8.3,
+          "state": 8.26,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25325,7 +25325,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 117,
+          "state": 117.36,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25381,7 +25381,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 5.3,
+          "state": 5.34,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25437,7 +25437,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.7,
+          "state": 60.74,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25493,7 +25493,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 77.1,
+          "state": 77.12,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25549,7 +25549,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 99,
+          "state": 99.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25605,7 +25605,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 12.2,
+          "state": 12.19,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25661,7 +25661,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 121,
+          "state": 120.67,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25717,7 +25717,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 82.1,
+          "state": 82.07,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25773,7 +25773,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.3,
+          "state": 60.32,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25829,7 +25829,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 9.0,
+          "state": 8.98,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25885,7 +25885,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 44,
+          "state": 44.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25941,7 +25941,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 11.9,
+          "state": 11.93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25997,7 +25997,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 117,
+          "state": 116.78,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26053,7 +26053,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 53.9,
+          "state": 53.88,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26109,7 +26109,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.9,
+          "state": 60.88,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26165,7 +26165,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 65.5,
+          "state": 65.55,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26221,7 +26221,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 95,
+          "state": 95.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26277,7 +26277,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 10.1,
+          "state": 10.07,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26333,7 +26333,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 121,
+          "state": 120.71,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26389,7 +26389,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 15.3,
+          "state": 15.29,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26445,7 +26445,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.9,
+          "state": 60.85,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26501,7 +26501,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 55.3,
+          "state": 55.31,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26557,7 +26557,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 24,
+          "state": 24.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26613,7 +26613,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 14.5,
+          "state": 14.46,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26669,7 +26669,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 116,
+          "state": 116.15,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26725,7 +26725,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 2.9,
+          "state": 2.92,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26781,7 +26781,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.9,
+          "state": 59.93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26837,7 +26837,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 50.8,
+          "state": 50.75,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26893,7 +26893,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 34,
+          "state": 34.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26949,7 +26949,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 5.2,
+          "state": 5.23,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27005,7 +27005,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 121,
+          "state": 121.3,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27061,7 +27061,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 10.6,
+          "state": 10.61,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27117,7 +27117,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.2,
+          "state": 60.17,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27173,7 +27173,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 53.6,
+          "state": 53.61,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27229,7 +27229,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 85,
+          "state": 85.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27285,7 +27285,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 6.3,
+          "state": 6.28,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27341,7 +27341,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 119,
+          "state": 118.51,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27397,7 +27397,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 59.5,
+          "state": 59.51,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27453,7 +27453,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.2,
+          "state": 60.21,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27509,7 +27509,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 92.7,
+          "state": 92.69,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27565,7 +27565,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 91,
+          "state": 91.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27677,7 +27677,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 120,
+          "state": 119.91,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27733,7 +27733,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 4.2,
+          "state": 4.17,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27789,7 +27789,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.2,
+          "state": 59.17,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27901,7 +27901,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 51,
+          "state": 51.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27957,7 +27957,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 3.9,
+          "state": 3.94,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28013,7 +28013,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 117,
+          "state": 116.88,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28069,7 +28069,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 61.3,
+          "state": 61.28,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28125,7 +28125,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.3,
+          "state": 59.33,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28181,7 +28181,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 5.1,
+          "state": 5.13,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28237,7 +28237,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 97,
+          "state": 97.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28293,7 +28293,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 5.6,
+          "state": 5.64,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28349,7 +28349,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 123,
+          "state": 122.72,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28461,7 +28461,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.3,
+          "state": 59.34,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28517,7 +28517,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 39.2,
+          "state": 39.19,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28573,7 +28573,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 21,
+          "state": 21.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28629,7 +28629,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 3.9,
+          "state": 3.91,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28685,7 +28685,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 117,
+          "state": 116.66,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28741,7 +28741,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 4.1,
+          "state": 4.11,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28797,7 +28797,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.0,
+          "state": 59.99,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28853,7 +28853,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 94.3,
+          "state": 94.32,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28909,7 +28909,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 55,
+          "state": 55.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28965,7 +28965,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 1.8,
+          "state": 1.84,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29021,7 +29021,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 121,
+          "state": 121.41,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29077,7 +29077,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 13.5,
+          "state": 13.49,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29133,7 +29133,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.5,
+          "state": 59.46,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29189,7 +29189,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 28.1,
+          "state": 28.08,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29245,7 +29245,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 0,
+          "state": 0.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29301,7 +29301,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 1.7,
+          "state": 1.68,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29357,7 +29357,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 118,
+          "state": 118.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29413,7 +29413,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 84.1,
+          "state": 84.08,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29469,7 +29469,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.6,
+          "state": 59.58,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29525,7 +29525,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 9.2,
+          "state": 9.18,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29581,7 +29581,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 41,
+          "state": 41.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29637,7 +29637,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 3.5,
+          "state": 3.52,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29693,7 +29693,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 124,
+          "state": 124.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29749,7 +29749,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 39.3,
+          "state": 39.33,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29805,7 +29805,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.4,
+          "state": 59.36,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29917,7 +29917,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 27,
+          "state": 27.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29973,7 +29973,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 5.3,
+          "state": 5.29,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30029,7 +30029,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 115,
+          "state": 115.19,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30085,7 +30085,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 63.8,
+          "state": 63.77,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30141,7 +30141,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.0,
+          "state": 59.99,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30197,7 +30197,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 61.4,
+          "state": 61.39,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30253,7 +30253,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 93,
+          "state": 93.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30309,7 +30309,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 8.3,
+          "state": 8.33,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30365,7 +30365,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 117,
+          "state": 117.45,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30421,7 +30421,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 4.4,
+          "state": 4.37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30477,7 +30477,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.6,
+          "state": 60.57,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30533,7 +30533,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 22.2,
+          "state": 22.23,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30589,7 +30589,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 93,
+          "state": 93.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30645,7 +30645,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 14.6,
+          "state": 14.64,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30701,7 +30701,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 124,
+          "state": 124.16,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30757,7 +30757,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 31.5,
+          "state": 31.48,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30869,7 +30869,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 81.5,
+          "state": 81.49,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30925,7 +30925,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 23,
+          "state": 23.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30981,7 +30981,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 10.2,
+          "state": 10.24,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31037,7 +31037,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 123,
+          "state": 123.42,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31149,7 +31149,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.9,
+          "state": 60.92,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31205,7 +31205,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 36.6,
+          "state": 36.56,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31261,7 +31261,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 52,
+          "state": 52.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31317,7 +31317,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 3.4,
+          "state": 3.39,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31373,7 +31373,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 119,
+          "state": 118.6,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31429,7 +31429,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 2.5,
+          "state": 2.47,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31485,7 +31485,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.0,
+          "state": 60.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31541,7 +31541,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 43.4,
+          "state": 43.42,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31597,7 +31597,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 77,
+          "state": 77.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31653,7 +31653,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 4.1,
+          "state": 4.09,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31709,7 +31709,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 124,
+          "state": 124.38,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31821,7 +31821,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60.7,
+          "state": 60.71,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31877,7 +31877,7 @@
         "state": {
           "class_name": "ElectricalMeasurementApparentPower",
           "available": true,
-          "state": 25.7,
+          "state": 25.72,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31933,7 +31933,7 @@
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 37,
+          "state": 37.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31989,7 +31989,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 3.5,
+          "state": 3.48,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -32045,7 +32045,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 125,
+          "state": 124.69,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       }

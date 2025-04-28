@@ -4501,7 +4501,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 0
+          "state": 0.0
         }
       }
     ],

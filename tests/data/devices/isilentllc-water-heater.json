@@ -1804,9 +1804,9 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 0,
+          "state": 0.0,
           "measurement_type": "PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT, DC_MEASUREMENT",
-          "ac_frequency_max": 0
+          "ac_frequency_max": 0.0
         }
       },
       {
@@ -1861,7 +1861,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 0,
+          "state": 0.0,
           "measurement_type": "PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT, DC_MEASUREMENT"
         }
       },
@@ -1917,9 +1917,9 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 0,
+          "state": 0.0,
           "measurement_type": "PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT, DC_MEASUREMENT",
-          "rms_voltage_max": 0
+          "rms_voltage_max": 0.0
         }
       },
       {

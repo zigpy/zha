@@ -2785,7 +2785,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 0.0,
+          "state": 0.007,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
