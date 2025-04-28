@@ -669,10 +669,7 @@ class BaseElectricalMeasurement(PollableSensor):
         else:
             divisor = self._divisor
 
-        value = float(value * multiplier) / divisor
-        if value < 100 and divisor > 1:
-            return round(value, self._attr_suggested_display_precision)
-        return round(value)
+        return float(value * multiplier) / divisor
 
 
 @MULTI_MATCH(
@@ -690,7 +687,7 @@ class ElectricalMeasurement(BaseElectricalMeasurement):
     cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
     stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
 )
-class PolledElectricalMeasurement(ElectricalMeasurement):
+class PolledElectricalMeasurement(BaseElectricalMeasurement):
     """Polled active power measurement."""
 
     _use_custom_polling: bool = True
