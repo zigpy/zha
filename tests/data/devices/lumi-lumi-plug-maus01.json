@@ -1004,13 +1004,6 @@
               "unsupported": false
             },
             {
-              "id": "0x0075",
-              "name": "engineering_units",
-              "zcl_type": "enum16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x002e",
               "name": "inactive_text",
               "zcl_type": "string",
@@ -1070,13 +1063,6 @@
               "id": "0xfffe",
               "name": "reporting_status",
               "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x006a",
-              "name": "resolution",
-              "zcl_type": "single",
               "value": null,
               "unsupported": false
             },

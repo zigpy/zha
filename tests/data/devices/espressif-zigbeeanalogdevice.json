@@ -486,12 +486,12 @@
     "number": [
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "Fan Speed (RPM)",
           "unique_id": "ab:cd:ef:12:39:a2:73:55-1-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -588,7 +588,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -643,12 +644,69 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
           "available": true,
           "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Power Consumption (Watts)",
+          "unique_id": "ab:cd:ef:12:39:a2:73:55-1-12-analog_input",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "AnalogInputSensor",
+          "translation_key": null,
+          "device_class": "power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogInputClusterHandler",
+              "generic_id": "cluster_handler_0x000c",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 12,
+                "name": "AnalogInput",
+                "type": "server"
+              },
+              "id": "1:0x000c",
+              "unique_id": "ab:cd:ef:12:39:a2:73:55:1:0x000c",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": [
+            85,
+            115,
+            162,
+            57,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute": "present_value",
+          "suggested_display_precision": null,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": "W",
+          "options": null
+        },
+        "state": {
+          "class_name": "AnalogInputSensor",
+          "available": true,
+          "state": 280.0
         }
       }
     ]

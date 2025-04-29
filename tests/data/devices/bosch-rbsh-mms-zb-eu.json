@@ -3577,7 +3577,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -3632,7 +3633,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -3687,7 +3689,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W"
+          "unit": "W",
+          "options": null
         },
         "state": {
           "class_name": "SmartEnergyMetering",
@@ -3745,7 +3748,8 @@
           "suggested_display_precision": 3,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "kWh"
+          "unit": "kWh",
+          "options": null
         },
         "state": {
           "class_name": "SmartEnergySummation",
@@ -3803,7 +3807,19 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": [
+            "Rollershade",
+            "Rollershade_two_motors",
+            "Rollershade_exterior",
+            "Rollershade_exterior_two_motors",
+            "Drapery",
+            "Awning",
+            "Shutter",
+            "Tilt_blind_tilt_only",
+            "Tilt_blind_tilt_and_lift",
+            "Projector_screen"
+          ]
         },
         "state": {
           "class_name": "WindowCoveringTypeSensor",
@@ -3858,7 +3874,8 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W"
+          "unit": "W",
+          "options": null
         },
         "state": {
           "class_name": "PolledElectricalMeasurement",

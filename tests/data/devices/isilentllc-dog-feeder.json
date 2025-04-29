@@ -575,7 +575,7 @@
             {
               "id": "0x0055",
               "name": "present_value",
-              "zcl_type": "single",
+              "zcl_type": "uint16",
               "value": 0.0,
               "unsupported": false
             },
@@ -744,7 +744,7 @@
             {
               "id": "0x0055",
               "name": "present_value",
-              "zcl_type": "single",
+              "zcl_type": "uint16",
               "value": 0.0,
               "unsupported": false
             },
@@ -830,7 +830,7 @@
             {
               "id": "0x0055",
               "name": "present_value",
-              "zcl_type": "single",
+              "zcl_type": "uint16",
               "value": null,
               "unsupported": false
             },

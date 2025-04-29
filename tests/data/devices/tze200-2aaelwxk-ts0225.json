@@ -1324,7 +1324,7 @@
             {
               "id": "0x0055",
               "name": "present_value",
-              "zcl_type": "single",
+              "zcl_type": "uint16",
               "value": null,
               "unsupported": false
             },
@@ -1874,12 +1874,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "fading_time",
           "unique_id": "ab:cd:ef:12:94:85:f7:5f-2-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -1929,12 +1929,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "large_sensitivity",
           "unique_id": "ab:cd:ef:12:94:85:f7:5f-3-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -1984,12 +1984,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "large_distance",
           "unique_id": "ab:cd:ef:12:94:85:f7:5f-4-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -2039,12 +2039,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "small_sensitivity",
           "unique_id": "ab:cd:ef:12:94:85:f7:5f-5-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -2094,12 +2094,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "small_distance",
           "unique_id": "ab:cd:ef:12:94:85:f7:5f-6-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -2149,12 +2149,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "static_sensitivity",
           "unique_id": "ab:cd:ef:12:94:85:f7:5f-7-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -2204,12 +2204,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "static_distance",
           "unique_id": "ab:cd:ef:12:94:85:f7:5f-8-13",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "Number",
-          "translation_key": "number",
+          "translation_key": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -2367,7 +2367,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null
+          "unit": null,
+          "options": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -2422,7 +2423,8 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm"
+          "unit": "dBm",
+          "options": null
         },
         "state": {
           "class_name": "RSSISensor",
@@ -2477,12 +2479,74 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "lx"
+          "unit": "lx",
+          "options": null
         },
         "state": {
           "class_name": "Illuminance",
           "available": true,
           "state": 1
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "motion_state",
+          "unique_id": "ab:cd:ef:12:94:85:f7:5f-9-18-multistate_input",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "MultiStateInputSensor",
+          "translation_key": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "MultistateInputClusterHandler",
+              "generic_id": "cluster_handler_0x0012",
+              "endpoint_id": 9,
+              "cluster": {
+                "id": 18,
+                "name": "MultistateInput",
+                "type": "server"
+              },
+              "id": "9:0x0012",
+              "unique_id": "ab:cd:ef:12:94:85:f7:5f:9:0x0012",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": [
+            95,
+            247,
+            133,
+            148,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 9,
+          "available": true,
+          "group_id": null,
+          "attribute": "present_value",
+          "suggested_display_precision": null,
+          "divisor": 1,
+          "multiplier": 1,
+          "unit": null,
+          "options": [
+            "None",
+            "Large",
+            "Small",
+            "Static"
+          ]
+        },
+        "state": {
+          "class_name": "MultiStateInputSensor",
+          "available": true,
+          "state": null
         }
       }
     ],
