@@ -1,20 +1,20 @@
 {
   "version": 1,
-  "ieee": "00:15:bc:00:2f:02:19:79",
-  "nwk": "0x3E8F",
-  "manufacturer": "frient A/S",
-  "model": "SPLZB-141",
-  "friendly_manufacturer": "frient A/S",
-  "friendly_model": "SPLZB-141",
-  "name": "frient A/S SPLZB-141",
+  "ieee": "ab:cd:ef:12:75:e4:96:a5",
+  "nwk": "0x0CE8",
+  "manufacturer": "Bosch",
+  "model": "RBSH-MMS-ZB-EU",
+  "friendly_manufacturer": "Bosch",
+  "friendly_model": "RBSH-MMS-ZB-EU",
+  "name": "Bosch RBSH-MMS-ZB-EU",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
   "quirk_id": null,
-  "manufacturer_code": 4117,
+  "manufacturer_code": 4617,
   "power_source": "Mains",
-  "lqi": 255,
-  "rssi": -56,
-  "last_seen": "2025-04-28T20:52:09.253845+00:00",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-04-29T19:02:49.395140+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -26,146 +26,19 @@
     "aps_flags": 0,
     "frequency_band": 8,
     "mac_capability_flags": 142,
-    "manufacturer_code": 4117,
+    "manufacturer_code": 4617,
     "maximum_buffer_size": 82,
-    "maximum_incoming_transfer_size": 1500,
+    "maximum_incoming_transfer_size": 82,
     "server_mask": 11264,
-    "maximum_outgoing_transfer_size": 1500,
+    "maximum_outgoing_transfer_size": 82,
     "descriptor_capability_field": 0
   },
   "endpoints": {
     "1": {
-      "profile_id": 49353,
-      "device_type": {
-        "name": "unknown",
-        "id": 1
-      },
-      "in_clusters": [
-        {
-          "cluster_id": "0x0005",
-          "endpoint_attribute": "scenes",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "count",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "current_group",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "current_scene",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "last_configured_by",
-              "zcl_type": "EUI64",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "name_support",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "scene_valid",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0006",
-          "endpoint_attribute": "on_off",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "global_scene_control",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4002",
-              "name": "off_wait_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4001",
-              "name": "on_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4003",
-              "name": "start_up_on_off",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        }
-      ],
-      "out_clusters": []
-    },
-    "2": {
       "profile_id": 260,
       "device_type": {
-        "name": "SMART_PLUG",
-        "id": 81
+        "name": "WINDOW_COVERING_DEVICE",
+        "id": 514
       },
       "in_clusters": [
         {
@@ -246,7 +119,7 @@
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "frient A/S",
+              "value": "Bosch",
               "unsupported": false
             },
             {
@@ -260,7 +133,7 @@
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "SPLZB-141",
+              "value": "RBSH-MMS-ZB-EU",
               "unsupported": false
             },
             {
@@ -330,89 +203,6 @@
               "id": "0x0000",
               "name": "zcl_version",
               "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0002",
-          "endpoint_attribute": "device_temperature",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "current_temperature",
-              "zcl_type": "int16",
-              "value": 32,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "dev_temp_alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0014",
-              "name": "high_temp_dwell_trip_point",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "high_temp_thres",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0013",
-              "name": "low_temp_dwell_trip_point",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "low_temp_thres",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "max_temp_experienced",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "min_temp_experienced",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "over_temp_total_dwell",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
               "value": null,
               "unsupported": false
             }
@@ -535,83 +325,147 @@
           ]
         },
         {
-          "cluster_id": "0x0006",
-          "endpoint_attribute": "on_off",
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
+              "id": "0x0015",
+              "name": "acceleration_time_lift",
               "zcl_type": "uint16",
               "value": null,
               "unsupported": false
             },
             {
-              "id": "0x4000",
-              "name": "global_scene_control",
-              "zcl_type": "bool_",
-              "value": null,
+              "id": "0x0007",
+              "name": "config_status",
+              "zcl_type": "map8",
+              "value": 3,
               "unsupported": false
             },
             {
-              "id": "0x4002",
-              "name": "off_wait_time",
+              "id": "0x0003",
+              "name": "current_position_lift",
               "zcl_type": "uint16",
               "value": null,
               "unsupported": false
             },
             {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool_",
+              "id": "0x0008",
+              "name": "current_position_lift_percentage",
+              "zcl_type": "uint8",
               "value": 0,
               "unsupported": false
             },
             {
-              "id": "0x4001",
-              "name": "on_time",
+              "id": "0x0004",
+              "name": "current_position_tilt",
               "zcl_type": "uint16",
               "value": null,
               "unsupported": false
             },
             {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
+              "id": "0x0009",
+              "name": "current_position_tilt_percentage",
+              "zcl_type": "uint8",
+              "value": 0,
+              "unsupported": false
+            },
+            {
+              "id": "0x0016",
+              "name": "deceleration_time_lift",
+              "zcl_type": "uint16",
               "value": null,
               "unsupported": false
             },
             {
-              "id": "0x4003",
-              "name": "start_up_on_off",
-              "zcl_type": "enum8",
+              "id": "0x0011",
+              "name": "installed_closed_limit_lift",
+              "zcl_type": "uint16",
               "value": null,
               "unsupported": true
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0009",
-          "endpoint_attribute": "alarms",
-          "attributes": [
+            },
+            {
+              "id": "0x0013",
+              "name": "installed_closed_limit_tilt",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": true
+            },
+            {
+              "id": "0x0010",
+              "name": "installed_open_limit_lift",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "installed_open_limit_tilt",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": true
+            },
+            {
+              "id": "0x0018",
+              "name": "intermediate_setpoints_lift",
+              "zcl_type": "octstr",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0019",
+              "name": "intermediate_setpoints_tilt",
+              "zcl_type": "octstr",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0005",
+              "name": "number_of_actuations_lift",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0006",
+              "name": "number_of_actuations_tilt",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0001",
+              "name": "physical_closed_limit_lift",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "physical_closed_limit_tilt",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0014",
+              "name": "velocity_lift",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0017",
+              "name": "window_covering_mode",
+              "zcl_type": "map8",
+              "value": 0,
+              "unsupported": false
+            },
             {
               "id": "0x0000",
-              "name": "alarm_count",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
+              "name": "window_covering_type",
               "zcl_type": "enum8",
-              "value": null,
+              "value": 6,
               "unsupported": false
             }
           ]
@@ -862,7 +716,7 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 41,
+              "value": 221,
               "unsupported": false
             },
             {
@@ -1142,8 +996,8 @@
               "id": "0x0304",
               "name": "demand_formatting",
               "zcl_type": "map8",
-              "value": 248,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0602",
@@ -1184,7 +1038,7 @@
               "id": "0x0302",
               "name": "divisor",
               "zcl_type": "uint24",
-              "value": 1000,
+              "value": 100,
               "unsupported": false
             },
             {
@@ -1310,7 +1164,7 @@
               "id": "0x0400",
               "name": "instantaneous_demand",
               "zcl_type": "int24",
-              "value": 2,
+              "value": 0,
               "unsupported": false
             },
             {
@@ -1506,7 +1360,7 @@
               "id": "0x0303",
               "name": "summation_formatting",
               "zcl_type": "map8",
-              "value": 248,
+              "value": 42,
               "unsupported": false
             },
             {
@@ -1575,15 +1429,15 @@
               "id": "0x0603",
               "name": "ac_current_divisor",
               "zcl_type": "uint16",
-              "value": 1000,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0602",
               "name": "ac_current_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0802",
@@ -1596,15 +1450,15 @@
               "id": "0x0300",
               "name": "ac_frequency",
               "zcl_type": "uint16",
-              "value": 59986,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0401",
               "name": "ac_frequency_divisor",
               "zcl_type": "uint16",
-              "value": 1000,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0302",
@@ -1624,8 +1478,8 @@
               "id": "0x0400",
               "name": "ac_frequency_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0605",
@@ -1652,15 +1506,15 @@
               "id": "0x0601",
               "name": "ac_voltage_divisor",
               "zcl_type": "uint16",
-              "value": 100,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0600",
               "name": "ac_voltage_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0801",
@@ -1687,7 +1541,7 @@
               "id": "0x050b",
               "name": "active_power",
               "zcl_type": "int16",
-              "value": 2,
+              "value": 0,
               "unsupported": false
             },
             {
@@ -2121,7 +1975,7 @@
               "id": "0x0000",
               "name": "measurement_type",
               "zcl_type": "map32",
-              "value": 11,
+              "value": 1,
               "unsupported": false
             },
             {
@@ -2219,15 +2073,15 @@
               "id": "0x0508",
               "name": "rms_current",
               "zcl_type": "uint16",
-              "value": 37,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x050a",
               "name": "rms_current_max",
               "zcl_type": "uint16",
-              "value": 270,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x090a",
@@ -2338,15 +2192,15 @@
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "value": 12308,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0507",
               "name": "rms_voltage_max",
               "zcl_type": "uint16",
-              "value": 12501,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0907",
@@ -2719,36 +2573,14 @@
               "unsupported": false
             }
           ]
+        },
+        {
+          "cluster_id": "0xfca0",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
         }
       ],
       "out_clusters": [
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
@@ -2854,7 +2686,7 @@
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": 131081,
+              "value": 286484320,
               "unsupported": false
             },
             {
@@ -2949,10 +2781,19 @@
               "unsupported": false
             }
           ]
-        },
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_LIGHT",
+        "id": 256
+      },
+      "in_clusters": [
         {
-          "cluster_id": "0x0406",
-          "endpoint_attribute": "occupancy",
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
           "attributes": [
             {
               "id": "0xfffd",
@@ -2963,57 +2804,90 @@
             },
             {
               "id": "0x0000",
-              "name": "occupancy",
+              "name": "identify_time",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "name_support",
               "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "count",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "current_group",
+              "zcl_type": "uint16",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0001",
-              "name": "occupancy_sensor_type_bitmap",
+              "name": "current_scene",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0005",
+              "name": "last_configured_by",
+              "zcl_type": "EUI64",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0004",
+              "name": "name_support",
               "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0030",
-              "name": "physical_contact_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0031",
-              "name": "physical_contact_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0032",
-              "name": "physical_contact_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "pir_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "pir_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "pir_u_to_o_threshold",
-              "zcl_type": "uint8",
               "value": null,
               "unsupported": false
             },
@@ -3025,44 +2899,262 @@
               "unsupported": false
             },
             {
-              "id": "0x0020",
-              "name": "ultrasonic_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0021",
-              "name": "ultrasonic_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0022",
-              "name": "ultrasonic_u_to_o_threshold",
-              "zcl_type": "uint8",
+              "id": "0x0003",
+              "name": "scene_valid",
+              "zcl_type": "bool_",
               "value": null,
               "unsupported": false
             }
           ]
-        }
-      ]
-    },
-    "242": {
-      "profile_id": 41440,
-      "device_type": {
-        "name": "PROXY_BASIC",
-        "id": 97
-      },
-      "in_clusters": [],
-      "out_clusters": [
+        },
         {
-          "cluster_id": "0x0021",
-          "endpoint_attribute": "green_power",
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4000",
+              "name": "global_scene_control",
+              "zcl_type": "bool_",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4002",
+              "name": "off_wait_time",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool_",
+              "value": 0,
+              "unsupported": false
+            },
+            {
+              "id": "0x4001",
+              "name": "on_time",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "value": 0,
+              "unsupported": false
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfca0",
+          "endpoint_attribute": "manufacturer_specific",
           "attributes": []
         }
-      ]
+      ],
+      "out_clusters": []
+    },
+    "3": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_LIGHT",
+        "id": 256
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "identify_time",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "name_support",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "count",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0002",
+              "name": "current_group",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0001",
+              "name": "current_scene",
+              "zcl_type": "uint8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0005",
+              "name": "last_configured_by",
+              "zcl_type": "EUI64",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0004",
+              "name": "name_support",
+              "zcl_type": "map8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0003",
+              "name": "scene_valid",
+              "zcl_type": "bool_",
+              "value": null,
+              "unsupported": false
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0xfffd",
+              "name": "cluster_revision",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4000",
+              "name": "global_scene_control",
+              "zcl_type": "bool_",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4002",
+              "name": "off_wait_time",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool_",
+              "value": 0,
+              "unsupported": false
+            },
+            {
+              "id": "0x4001",
+              "name": "on_time",
+              "zcl_type": "uint16",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "value": 0,
+              "unsupported": false
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfca0",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
     }
   },
   "zha_lib_entities": {
@@ -3070,7 +3162,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-3",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -3085,29 +3177,29 @@
             {
               "class_name": "IdentifyClusterHandler",
               "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 3,
                 "name": "Identify",
                 "type": "server"
               },
-              "id": "2:0x0003",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0003",
+              "id": "1:0x0003",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "command": "identify",
@@ -3122,11 +3214,326 @@
         }
       }
     ],
+    "cover": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-258",
+          "migrate_unique_ids": [],
+          "platform": "cover",
+          "class_name": "Cover",
+          "translation_key": "cover",
+          "device_class": "shutter",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "1:0x0102",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": [
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Cover",
+          "available": true,
+          "current_position": null,
+          "current_tilt_position": 100,
+          "state": "open",
+          "is_opening": false,
+          "is_closing": false,
+          "is_closed": false
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-2",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "2:0x0006",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:2:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 8,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 8,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-3",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 3,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "3:0x0006",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:3:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 8,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 8,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-2-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "2:0x0006",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:2:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "Off"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-3-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 3,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "3:0x0006",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:3:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "Off"
+        }
+      }
+    ],
     "sensor": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-0-lqi",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -3141,48 +3548,47 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 0,
                 "name": "Basic",
                 "type": "server"
               },
-              "id": "2:0x0000",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0000",
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": null,
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": null
+          "unit": null
         },
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 255
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-0-rssi",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -3197,48 +3603,47 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 0,
                 "name": "Basic",
                 "type": "server"
               },
-              "id": "2:0x0000",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0000",
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": null,
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm",
-          "options": null
+          "unit": "dBm"
         },
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": -56
+          "state": null
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-1794",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-1794",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "SmartEnergyMetering",
@@ -3253,42 +3658,41 @@
             {
               "class_name": "MeteringClusterHandler",
               "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 1794,
                 "name": "Metering",
                 "type": "server"
               },
-              "id": "2:0x0702",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0702",
+              "id": "1:0x0702",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0702",
               "status": "INITIALIZED",
               "value_attribute": "instantaneous_demand"
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": "instantaneous_demand",
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W",
-          "options": null
+          "unit": "W"
         },
         "state": {
           "class_name": "SmartEnergyMetering",
           "available": true,
-          "state": 2.0,
+          "state": 0.0,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -3297,7 +3701,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-1794-summation_delivered",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-1794-summation_delivered",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
@@ -3312,42 +3716,41 @@
             {
               "class_name": "MeteringClusterHandler",
               "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 1794,
                 "name": "Metering",
                 "type": "server"
               },
-              "id": "2:0x0702",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0702",
+              "id": "1:0x0702",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0702",
               "status": "INITIALIZED",
               "value_attribute": "instantaneous_demand"
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": "current_summ_delivered",
           "suggested_display_precision": 3,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "kWh",
-          "options": null
+          "unit": "kWh"
         },
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 0.041,
+          "state": 2.21,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -3356,63 +3759,62 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-2",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-258-window_covering_type",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "DeviceTemperature",
-          "translation_key": "device_temperature",
-          "device_class": "temperature",
-          "state_class": "measurement",
+          "class_name": "WindowCoveringTypeSensor",
+          "translation_key": "window_covering_type",
+          "device_class": "enum",
+          "state_class": null,
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "DeviceTemperatureClusterHandler",
-              "generic_id": "cluster_handler_0x0002",
-              "endpoint_id": 2,
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 1,
               "cluster": {
-                "id": 2,
-                "name": "Device Temperature",
+                "id": 258,
+                "name": "Window Covering",
                 "type": "server"
               },
-              "id": "2:0x0002",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0002",
+              "id": "1:0x0102",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0102",
               "status": "INITIALIZED",
-              "value_attribute": "current_temperature"
+              "value_attribute": "current_position_lift_percentage"
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "current_temperature",
+          "attribute": "window_covering_type",
           "suggested_display_precision": null,
-          "divisor": 100,
+          "divisor": 1,
           "multiplier": 1,
-          "unit": "\u00b0C",
-          "options": null
+          "unit": null
         },
         "state": {
-          "class_name": "DeviceTemperature",
+          "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": 0.32
+          "state": "Shutter"
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
@@ -3427,216 +3829,42 @@
             {
               "class_name": "ElectricalMeasurementClusterHandler",
               "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 2820,
                 "name": "Electrical Measurement",
                 "type": "server"
               },
-              "id": "2:0x0b04",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": "active_power",
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W",
-          "options": null
+          "unit": "W"
         },
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 2.0,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820-ac_frequency",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "ElectricalMeasurementFrequency",
-          "translation_key": "ac_frequency",
-          "device_class": "frequency",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "2:0x0b04",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
-          "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": "ac_frequency",
-          "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "Hz",
-          "options": null
-        },
-        "state": {
-          "class_name": "ElectricalMeasurementFrequency",
-          "available": true,
-          "state": 59.986,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820-rms_current",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "ElectricalMeasurementRMSCurrent",
-          "translation_key": null,
-          "device_class": "current",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "2:0x0b04",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
-          "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": "rms_current",
-          "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "A",
-          "options": null
-        },
-        "state": {
-          "class_name": "ElectricalMeasurementRMSCurrent",
-          "available": true,
-          "state": 0.037,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_current_max": 0.27
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820-rms_voltage",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "ElectricalMeasurementRMSVoltage",
-          "translation_key": null,
-          "device_class": "voltage",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "2:0x0b04",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
-          "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": "rms_voltage",
-          "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "V",
-          "options": null
-        },
-        "state": {
-          "class_name": "ElectricalMeasurementRMSVoltage",
-          "available": true,
-          "state": 123.08,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_voltage_max": 125.01
+          "state": 0.0,
+          "measurement_type": "ACTIVE_MEASUREMENT"
         }
       }
     ],
@@ -3644,51 +3872,57 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-258-inverted",
           "migrate_unique_ids": [],
           "platform": "switch",
-          "class_name": "Switch",
-          "translation_key": "switch",
+          "class_name": "WindowCoveringInversionSwitch",
+          "translation_key": "inverted",
           "device_class": null,
           "state_class": null,
-          "entity_category": null,
+          "entity_category": "config",
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": true,
+          "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 2,
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 1,
               "cluster": {
-                "id": 6,
-                "name": "On/Off",
+                "id": 258,
+                "name": "Window Covering",
                 "type": "server"
               },
-              "id": "2:0x0006",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0006",
+              "id": "1:0x0102",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0102",
               "status": "INITIALIZED",
-              "value_attribute": "on_off"
+              "value_attribute": "current_position_lift_percentage"
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
-          "group_id": null
+          "group_id": null,
+          "attribute_name": "config_status",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
         },
         "state": {
-          "class_name": "Switch",
-          "state": 0,
-          "available": true
+          "class_name": "WindowCoveringInversionSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],
@@ -3696,7 +3930,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:2f:02:19:79-2-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -3711,29 +3945,29 @@
             {
               "class_name": "OtaClientClusterHandler",
               "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 25,
                 "name": "Ota",
                 "type": "client"
               },
-              "id": "2:0x0019_client",
-              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0019_CLIENT",
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0x0019_CLIENT",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            121,
-            25,
-            2,
-            47,
-            0,
-            188,
-            21,
-            0
+            165,
+            150,
+            228,
+            117,
+            18,
+            239,
+            205,
+            171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "supported_features": 7
@@ -3741,10 +3975,10 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x00020009",
+          "installed_version": "0x11136760",
           "in_progress": false,
           "update_percentage": null,
-          "latest_version": "0x00020009",
+          "latest_version": "0x11136760",
           "release_summary": null,
           "release_notes": null,
           "release_url": null

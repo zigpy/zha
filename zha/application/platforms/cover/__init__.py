@@ -163,7 +163,7 @@ class Cover(BaseCover):
         self._lift_transition_timer: asyncio.TimerHandle | None = None
         self._tilt_transition_timer: asyncio.TimerHandle | None = None
 
-        self._state: CoverState | None = CoverState.OPEN
+        self._state: CoverState | None = None
         self._determine_cover_state(refresh=True)
 
     def recompute_capabilities(self) -> None:
@@ -207,17 +207,39 @@ class Cover(BaseCover):
                 self.handle_cluster_handler_attribute_updated,
             )
         )
+        self._on_remove_callbacks.extend(
+            (self._clear_lift_transition, self._clear_tilt_transition)
+        )
 
     def restore_external_state_attributes(
         self,
         *,
         state: CoverState | None,
-        target_lift_position: int | None = None,
-        target_tilt_position: int | None = None,
+        **kwargs: Any,  # pylint: disable=unused-argument
     ):
-        """Restore external state attributes."""
+        """Restore external state attributes.
+
+        If the state is OPENING or CLOSING, a callback is scheduled
+        to determine the final state after the default timeout period.
+        """
+        if not self._state or state not in (CoverState.OPENING, CoverState.CLOSING):
+            return
+        if state == CoverState.CLOSING and self.is_closed:
+            return
+        if (
+            state == CoverState.OPENING
+            and self.current_cover_position in (100, None)
+            and self.current_cover_tilt_position in (100, None)
+        ):
+            return
+
         self._state = state
-        # Target positions have been removed
+        self._tracked_handles.append(
+            self._loop.call_later(
+                DEFAULT_MOVEMENT_TIMEOUT,
+                functools.partial(self._determine_cover_state, refresh=True),
+            )
+        )
 
     @property
     def supported_features(self) -> CoverEntityFeature:
@@ -337,6 +359,7 @@ class Cover(BaseCover):
 
     def _determine_cover_state(
         self,
+        *,
         is_lift_update: bool = False,
         is_tilt_update: bool = False,
         refresh: bool = False,
@@ -394,6 +417,7 @@ class Cover(BaseCover):
             or self.is_opening
             and CoverState.OPENING in (self._lift_state, self._tilt_state)
         ):
+            self.maybe_emit_state_changed_event()
             return
 
         # An open or moving tilt state overrides a static lift state
@@ -403,10 +427,9 @@ class Cover(BaseCover):
             CoverState.CLOSING,
         ) and self._lift_state in (CoverState.CLOSED, CoverState.OPEN):
             self._state = self._tilt_state
-            return
-
-        # Pick lift state in preference over tilt
-        self._state = self._lift_state or self._tilt_state
+        else:
+            self._state = self._lift_state or self._tilt_state
+        self.maybe_emit_state_changed_event()
 
     def _set_lift_transition_target(self, target: int) -> None:
         """Set target position for the tilt transition."""
@@ -492,7 +515,6 @@ class Cover(BaseCover):
         if not determine_state:
             return
         self._determine_cover_state(refresh=True)
-        self.maybe_emit_state_changed_event()
 
     def _clear_tilt_transition(self, determine_state: bool = False) -> None:
         """Clear the tilt transition."""
@@ -506,7 +528,6 @@ class Cover(BaseCover):
         if not determine_state:
             return
         self._determine_cover_state(refresh=True)
-        self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_attribute_updated(
         self, event: ClusterAttributeUpdatedEvent
@@ -522,7 +543,6 @@ class Cover(BaseCover):
         elif event.attribute_id == WCAttrs.current_position_tilt_percentage.id:
             self._tilt_position_history.append(self.current_cover_tilt_position)
             self._determine_cover_state(is_tilt_update=True)
-        self.maybe_emit_state_changed_event()
 
     def async_update_state(self, state):
         """Handle state update from HA operations below."""
@@ -638,9 +658,7 @@ class Cover(BaseCover):
             raise ZHAException(f"Failed to stop cover: {res[1]}")
         self._clear_lift_transition()
         self._clear_tilt_transition()
-
         self._determine_cover_state(refresh=True)
-        self.maybe_emit_state_changed_event()
 
     async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
         """Stop the cover tilt.

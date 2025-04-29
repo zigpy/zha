@@ -1841,7 +1841,7 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 60
+          "state": 60.0
         }
       },
       {
@@ -1953,7 +1953,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 124
+          "state": 124.5
         }
       }
     ],

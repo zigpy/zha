@@ -2637,7 +2637,7 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 1
+          "state": 1.0
         }
       },
       {
@@ -2693,7 +2693,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 8
+          "state": 8.0
         }
       },
       {
@@ -2749,7 +2749,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 123
+          "state": 123.0
         }
       }
     ],
