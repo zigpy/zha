@@ -32,6 +32,7 @@ exclude = ["tests", "tests.*"]
 testing = [
     "pytest",
     "coloredlogs",
+    "python-slugify"
 ]
 
 [tool.setuptools-git-versioning]
