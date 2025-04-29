@@ -9,6 +9,7 @@ import pathlib
 import re
 from unittest import mock
 from unittest.mock import AsyncMock, call
+import warnings
 
 import pytest
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
@@ -800,12 +801,22 @@ async def test_devices_from_files(
             unique_id_collisions[entity.unique_id].append(entity)
 
         for unique_id, entities in unique_id_collisions.items():
-            if len(entities) > 1:  # noqa: SIM102
-                # Keep track of known exceptions
-                if unique_id not in {"28:2c:02:bf:ff:ea:05:68-1-6"}:
-                    raise ValueError(
-                        f"Duplicate unique_id {unique_id} found in entities: {entities}"
-                    )
+            if len(entities) == 1:
+                continue
+
+            prefixed_unique_ids = [
+                f"{entity.PLATFORM.name.lower()}.{entity.unique_id}"
+                for entity in entities
+            ]
+
+            if len(set(prefixed_unique_ids)) != len(entities):
+                raise ValueError(
+                    f"Duplicate unique_id {unique_id} found in entities: {entities}"
+                )
+            else:
+                warnings.warn(
+                    f"Unique IDs are unique only with platform prefix: {dict(zip(prefixed_unique_ids, entities))}"
+                )
 
         unique_id_migrations: dict[tuple[Platform, str], PlatformEntity] = {}
         for entity in zha_device.platform_entities.values():
