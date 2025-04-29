@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "ieee": "ab:cd:ef:12:0f:c8:06:9a",
-  "nwk": "0x3E8F",
+  "ieee": "00:15:bc:00:2f:02:19:79",
+  "nwk": "0x733A",
   "manufacturer": "frient A/S",
   "model": "SPLZB-141",
   "friendly_manufacturer": "frient A/S",
@@ -14,7 +14,7 @@
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T18:45:35.753197+00:00",
+  "last_seen": "2025-04-24T17:34:08.983868+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -133,7 +133,7 @@
               "name": "on_off",
               "zcl_type": "bool_",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x4001",
@@ -154,7 +154,7 @@
               "name": "start_up_on_off",
               "zcl_type": "enum8",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             }
           ]
         }
@@ -350,7 +350,7 @@
               "id": "0x0000",
               "name": "current_temperature",
               "zcl_type": "int16",
-              "value": 35,
+              "value": 31,
               "unsupported": false
             },
             {
@@ -393,7 +393,7 @@
               "name": "max_temp_experienced",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0001",
@@ -407,14 +407,14 @@
               "name": "over_temp_total_dwell",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0xfffe",
               "name": "reporting_status",
               "zcl_type": "enum8",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             }
           ]
         },
@@ -563,7 +563,7 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool_",
-              "value": 1,
+              "value": 0,
               "unsupported": false
             },
             {
@@ -862,7 +862,7 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 5,
+              "value": 44,
               "unsupported": false
             },
             {
@@ -1310,7 +1310,7 @@
               "id": "0x0400",
               "name": "instantaneous_demand",
               "zcl_type": "int24",
-              "value": 1,
+              "value": 4,
               "unsupported": false
             },
             {
@@ -1596,7 +1596,7 @@
               "id": "0x0300",
               "name": "ac_frequency",
               "zcl_type": "uint16",
-              "value": 59986,
+              "value": 59970,
               "unsupported": false
             },
             {
@@ -1687,7 +1687,7 @@
               "id": "0x050b",
               "name": "active_power",
               "zcl_type": "int16",
-              "value": 1,
+              "value": 598,
               "unsupported": false
             },
             {
@@ -1702,14 +1702,14 @@
               "name": "active_power_max_ph_b",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a0d",
               "name": "active_power_max_ph_c",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x050c",
@@ -1737,14 +1737,14 @@
               "name": "active_power_ph_b",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a0b",
               "name": "active_power_ph_c",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x050f",
@@ -2157,14 +2157,14 @@
               "name": "power_factor_ph_b",
               "zcl_type": "int8",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a10",
               "name": "power_factor_ph_c",
               "zcl_type": "int8",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0402",
@@ -2219,14 +2219,14 @@
               "id": "0x0508",
               "name": "rms_current",
               "zcl_type": "uint16",
-              "value": 24,
+              "value": 4902,
               "unsupported": false
             },
             {
               "id": "0x050a",
               "name": "rms_current_max",
               "zcl_type": "uint16",
-              "value": 2383,
+              "value": 4981,
               "unsupported": false
             },
             {
@@ -2234,14 +2234,14 @@
               "name": "rms_current_max_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a0a",
               "name": "rms_current_max_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0509",
@@ -2269,14 +2269,14 @@
               "name": "rms_current_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a08",
               "name": "rms_current_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0807",
@@ -2338,14 +2338,14 @@
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "value": 12452,
+              "value": 12075,
               "unsupported": false
             },
             {
               "id": "0x0507",
               "name": "rms_voltage_max",
               "zcl_type": "uint16",
-              "value": 12460,
+              "value": 12333,
               "unsupported": false
             },
             {
@@ -2353,14 +2353,14 @@
               "name": "rms_voltage_max_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a07",
               "name": "rms_voltage_max_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0506",
@@ -2388,14 +2388,14 @@
               "name": "rms_voltage_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a05",
               "name": "rms_voltage_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0809",
@@ -3070,7 +3070,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-3",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -3092,20 +3092,20 @@
                 "type": "server"
               },
               "id": "2:0x0003",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0003",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3126,7 +3126,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-0-lqi",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -3148,20 +3148,20 @@
                 "type": "server"
               },
               "id": "2:0x0000",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0000",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3181,7 +3181,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-0-rssi",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -3203,20 +3203,20 @@
                 "type": "server"
               },
               "id": "2:0x0000",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0000",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3236,7 +3236,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-1794",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-1794",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "SmartEnergyMetering",
@@ -3258,20 +3258,20 @@
                 "type": "server"
               },
               "id": "2:0x0702",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0702",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0702",
               "status": "INITIALIZED",
               "value_attribute": "instantaneous_demand"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3285,7 +3285,7 @@
         "state": {
           "class_name": "SmartEnergyMetering",
           "available": true,
-          "state": 1.0,
+          "state": 4.0,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -3294,7 +3294,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-1794-summation_delivered",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-1794-summation_delivered",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
@@ -3316,20 +3316,20 @@
                 "type": "server"
               },
               "id": "2:0x0702",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0702",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0702",
               "status": "INITIALIZED",
               "value_attribute": "instantaneous_demand"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3343,7 +3343,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 0.005,
+          "state": 0.044,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
@@ -3352,7 +3352,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-2",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "DeviceTemperature",
@@ -3374,20 +3374,20 @@
                 "type": "server"
               },
               "id": "2:0x0002",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0002",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0002",
               "status": "INITIALIZED",
               "value_attribute": "current_temperature"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3401,13 +3401,13 @@
         "state": {
           "class_name": "DeviceTemperature",
           "available": true,
-          "state": 0.35
+          "state": 0.31
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
@@ -3429,20 +3429,20 @@
                 "type": "server"
               },
               "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3456,14 +3456,14 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 1.0,
+          "state": 598.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820-ac_frequency",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820-ac_frequency",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
@@ -3485,20 +3485,20 @@
                 "type": "server"
               },
               "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3512,14 +3512,14 @@
         "state": {
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
-          "state": 59.986,
+          "state": 59.97,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820-rms_current",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820-rms_current",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
@@ -3541,20 +3541,20 @@
                 "type": "server"
               },
               "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3568,15 +3568,15 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 0.024,
+          "state": 4.902,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_current_max": 2.383
+          "rms_current_max": 4.981
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820-rms_voltage",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-2820-rms_voltage",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
@@ -3598,20 +3598,20 @@
                 "type": "server"
               },
               "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3625,9 +3625,9 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 124.52,
+          "state": 120.75,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_voltage_max": 124.6
+          "rms_voltage_max": 123.33
         }
       }
     ],
@@ -3635,7 +3635,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2",
           "migrate_unique_ids": [],
           "platform": "switch",
           "class_name": "Switch",
@@ -3657,20 +3657,20 @@
                 "type": "server"
               },
               "id": "2:0x0006",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0006",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0006",
               "status": "INITIALIZED",
               "value_attribute": "on_off"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,
@@ -3678,7 +3678,7 @@
         },
         "state": {
           "class_name": "Switch",
-          "state": 1,
+          "state": 0,
           "available": true
         }
       }
@@ -3687,7 +3687,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-25-firmware_update",
+          "unique_id": "00:15:bc:00:2f:02:19:79-2-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -3709,20 +3709,20 @@
                 "type": "client"
               },
               "id": "2:0x0019_client",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0019_CLIENT",
+              "unique_id": "00:15:bc:00:2f:02:19:79:2:0x0019_CLIENT",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
+            121,
+            25,
+            2,
+            47,
+            0,
+            188,
+            21,
+            0
           ],
           "endpoint_id": 2,
           "available": true,

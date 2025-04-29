@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "ieee": "ab:cd:ef:12:c0:8a:5b:d4",
+  "ieee": "00:0d:6f:00:03:57:f1:be",
   "nwk": "0x0E0D",
   "manufacturer": "CentraLite Systems",
   "model": "3156105",
@@ -14,7 +14,7 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T18:45:35.622794+00:00",
+  "last_seen": "2025-04-24T17:34:07.323884+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -105,7 +105,7 @@
               "id": "0x0003",
               "name": "hw_version",
               "zcl_type": "uint8",
-              "value": 2,
+              "value": null,
               "unsupported": false
             },
             {
@@ -821,7 +821,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "value": 2172,
+              "value": 2005,
               "unsupported": false
             },
             {
@@ -856,7 +856,7 @@
               "id": "0x0015",
               "name": "min_heat_setpoint_limit",
               "zcl_type": "int16",
-              "value": 2400,
+              "value": 700,
               "unsupported": false
             },
             {
@@ -891,14 +891,14 @@
               "id": "0x0011",
               "name": "occupied_cooling_setpoint",
               "zcl_type": "int16",
-              "value": 1833,
+              "value": 2333,
               "unsupported": false
             },
             {
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 1555,
+              "value": 2055,
               "unsupported": false
             },
             {
@@ -1003,7 +1003,7 @@
               "id": "0x001c",
               "name": "system_mode",
               "zcl_type": "enum8",
-              "value": 0,
+              "value": 4,
               "unsupported": false
             },
             {
@@ -1322,7 +1322,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-3",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -1344,20 +1344,20 @@
                 "type": "server"
               },
               "id": "1:0x0003",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0003",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1378,7 +1378,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1",
           "migrate_unique_ids": [],
           "platform": "climate",
           "class_name": "Thermostat",
@@ -1400,7 +1400,7 @@
                 "type": "server"
               },
               "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0201",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0201",
               "status": "INITIALIZED",
               "value_attribute": "local_temperature"
             },
@@ -1414,20 +1414,20 @@
                 "type": "server"
               },
               "id": "1:0x0202",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0202",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0202",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1449,19 +1449,19 @@
         "state": {
           "class_name": "Thermostat",
           "available": true,
-          "current_temperature": 21.72,
+          "current_temperature": 20.05,
           "outdoor_temperature": 0.0,
-          "target_temperature": null,
+          "target_temperature": 20.6,
           "target_temperature_high": null,
           "target_temperature_low": null,
-          "hvac_action": "off",
-          "hvac_mode": "off",
+          "hvac_action": "idle",
+          "hvac_mode": "heat",
           "preset_mode": "none",
           "fan_mode": "auto",
-          "system_mode": "[0]/off",
+          "system_mode": "[4]/heat",
           "occupancy": 0,
-          "occupied_cooling_setpoint": 1833,
-          "occupied_heating_setpoint": 1555,
+          "occupied_cooling_setpoint": 2333,
+          "occupied_heating_setpoint": 2055,
           "pi_heating_demand": null,
           "pi_cooling_demand": null,
           "unoccupied_cooling_setpoint": 2600,
@@ -1473,7 +1473,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-513-local_temperature_calibration",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-513-local_temperature_calibration",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "ThermostatLocalTempCalibration",
@@ -1495,20 +1495,20 @@
                 "type": "server"
               },
               "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0201",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0201",
               "status": "INITIALIZED",
               "value_attribute": "local_temperature"
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1527,7 +1527,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-513-max_heat_setpoint_limit",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-513-max_heat_setpoint_limit",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "MaxHeatSetpointLimit",
@@ -1549,20 +1549,20 @@
                 "type": "server"
               },
               "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0201",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0201",
               "status": "INITIALIZED",
               "value_attribute": "local_temperature"
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1581,7 +1581,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-513-min_heat_setpoint_limit",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-513-min_heat_setpoint_limit",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "MinHeatSetpointLimit",
@@ -1603,20 +1603,20 @@
                 "type": "server"
               },
               "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0201",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0201",
               "status": "INITIALIZED",
               "value_attribute": "local_temperature"
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1629,7 +1629,7 @@
         "state": {
           "class_name": "MinHeatSetpointLimit",
           "available": true,
-          "state": 24.0
+          "state": 7.0
         }
       }
     ],
@@ -1637,7 +1637,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-516-keypad_lockout",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-516-keypad_lockout",
           "migrate_unique_ids": [],
           "platform": "select",
           "class_name": "KeypadLockout",
@@ -1659,20 +1659,20 @@
                 "type": "server"
               },
               "id": "1:0x0204",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0204",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0204",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1697,7 +1697,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-0-lqi",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -1719,20 +1719,20 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0000",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1752,7 +1752,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-0-rssi",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -1774,20 +1774,20 @@
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0000",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1807,7 +1807,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-1",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -1829,20 +1829,20 @@
                 "type": "server"
               },
               "id": "1:0x0001",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0001",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0001",
               "status": "INITIALIZED",
               "value_attribute": "battery_voltage"
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1863,7 +1863,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-513-hvac_action",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-513-hvac_action",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "ThermostatHVACAction",
@@ -1885,20 +1885,20 @@
                 "type": "server"
               },
               "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0201",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0201",
               "status": "INITIALIZED",
               "value_attribute": "local_temperature"
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1912,13 +1912,13 @@
         "state": {
           "class_name": "ThermostatHVACAction",
           "available": true,
-          "state": "off"
+          "state": "idle"
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-513-setpoint_change_source_timestamp",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-513-setpoint_change_source_timestamp",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "SetpointChangeSourceTimestamp",
@@ -1940,20 +1940,20 @@
                 "type": "server"
               },
               "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0201",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0201",
               "status": "INITIALIZED",
               "value_attribute": "local_temperature"
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
@@ -1975,7 +1975,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:c0:8a:5b:d4-1-25-firmware_update",
+          "unique_id": "00:0d:6f:00:03:57:f1:be-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -1997,20 +1997,20 @@
                 "type": "client"
               },
               "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:c0:8a:5b:d4:1:0x0019_CLIENT",
+              "unique_id": "00:0d:6f:00:03:57:f1:be:1:0x0019_CLIENT",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            212,
-            91,
-            138,
-            192,
-            18,
-            239,
-            205,
-            171
+            190,
+            241,
+            87,
+            3,
+            0,
+            111,
+            13,
+            0
           ],
           "endpoint_id": 1,
           "available": true,
