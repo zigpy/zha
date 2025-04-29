@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "ieee": "ab:cd:ef:12:a3:6a:90:8e",
-  "nwk": "0x347D",
-  "manufacturer": "Signify Netherlands B.V.",
-  "model": "LCA007",
-  "friendly_manufacturer": "Signify Netherlands B.V.",
-  "friendly_model": "LCA007",
-  "name": "Signify Netherlands B.V. LCA007",
+  "ieee": "ab:cd:ef:12:ad:8a:89:91",
+  "nwk": "0xC492",
+  "manufacturer": "Philips",
+  "model": "LST002",
+  "friendly_manufacturer": "Philips",
+  "friendly_model": "LST002",
+  "name": "Philips LST002",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
   "quirk_id": null,
@@ -14,7 +14,7 @@
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T18:45:35.866396+00:00",
+  "last_seen": "2025-04-29T18:45:35.902940+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -27,18 +27,18 @@
     "frequency_band": 8,
     "mac_capability_flags": 142,
     "manufacturer_code": 4107,
-    "maximum_buffer_size": 82,
-    "maximum_incoming_transfer_size": 128,
-    "server_mask": 11264,
-    "maximum_outgoing_transfer_size": 128,
+    "maximum_buffer_size": 71,
+    "maximum_incoming_transfer_size": 45,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 45,
     "descriptor_capability_field": 0
   },
   "endpoints": {
     "11": {
-      "profile_id": 260,
+      "profile_id": 49246,
       "device_type": {
         "name": "EXTENDED_COLOR_LIGHT",
-        "id": 269
+        "id": 528
       },
       "in_clusters": [
         {
@@ -50,13 +50,13 @@
               "name": "alarm_mask",
               "zcl_type": "map8",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0001",
               "name": "app_version",
               "zcl_type": "uint8",
-              "value": null,
+              "value": 2,
               "unsupported": false
             },
             {
@@ -119,7 +119,7 @@
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "Signify Netherlands B.V.",
+              "value": "Philips",
               "unsupported": false
             },
             {
@@ -133,7 +133,7 @@
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "LCA007",
+              "value": "LST002",
               "unsupported": false
             },
             {
@@ -147,7 +147,7 @@
               "id": "0x0007",
               "name": "power_source",
               "zcl_type": "enum8",
-              "value": null,
+              "value": 1,
               "unsupported": false
             },
             {
@@ -271,7 +271,7 @@
               "name": "cluster_revision",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0000",
@@ -374,8 +374,8 @@
               "id": "0x4003",
               "name": "start_up_on_off",
               "zcl_type": "enum8",
-              "value": 255,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             }
           ]
         },
@@ -401,7 +401,7 @@
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 76,
+              "value": 1,
               "unsupported": false
             },
             {
@@ -492,8 +492,8 @@
               "id": "0x4000",
               "name": "start_up_current_level",
               "zcl_type": "uint8",
-              "value": 254,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             }
           ]
         },
@@ -701,7 +701,7 @@
               "id": "0x4000",
               "name": "enhanced_current_hue",
               "zcl_type": "uint16",
-              "value": 7169,
+              "value": 7170,
               "unsupported": false
             },
             {
@@ -715,8 +715,8 @@
               "id": "0x000f",
               "name": "options",
               "zcl_type": "map8",
-              "value": 0,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0013",
@@ -862,8 +862,8 @@
               "id": "0x4010",
               "name": "start_up_color_temperature",
               "zcl_type": "uint16",
-              "value": 366,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0030",
@@ -885,16 +885,6 @@
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
           "attributes": []
-        },
-        {
-          "cluster_id": "0xfc01",
-          "endpoint_attribute": "manufacturer_specific",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0xfc03",
-          "endpoint_attribute": "manufacturer_specific",
-          "attributes": []
         }
       ],
       "out_clusters": [
@@ -907,13 +897,13 @@
               "name": "cluster_revision",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": 16785162,
+              "value": 16783104,
               "unsupported": false
             },
             {
@@ -1017,7 +1007,13 @@
         "name": "PROXY_BASIC",
         "id": 97
       },
-      "in_clusters": [],
+      "in_clusters": [
+        {
+          "cluster_id": "0x0021",
+          "endpoint_attribute": "green_power",
+          "attributes": []
+        }
+      ],
       "out_clusters": [
         {
           "cluster_id": "0x0021",
@@ -1032,7 +1028,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11-3",
+          "unique_id": "ab:cd:ef:12:ad:8a:89:91-11-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -1054,16 +1050,16 @@
                 "type": "server"
               },
               "id": "11:0x0003",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0003",
+              "unique_id": "ab:cd:ef:12:ad:8a:89:91:11:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            142,
-            144,
-            106,
-            163,
+            145,
+            137,
+            138,
+            173,
             18,
             239,
             205,
@@ -1088,7 +1084,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11",
+          "unique_id": "ab:cd:ef:12:ad:8a:89:91-11",
           "migrate_unique_ids": [],
           "platform": "light",
           "class_name": "HueLight",
@@ -1110,7 +1106,7 @@
                 "type": "server"
               },
               "id": "11:0x0006",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0006",
+              "unique_id": "ab:cd:ef:12:ad:8a:89:91:11:0x0006",
               "status": "INITIALIZED",
               "value_attribute": "on_off"
             },
@@ -1124,7 +1120,7 @@
                 "type": "server"
               },
               "id": "11:0x0008",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0008",
+              "unique_id": "ab:cd:ef:12:ad:8a:89:91:11:0x0008",
               "status": "INITIALIZED",
               "value_attribute": "current_level"
             },
@@ -1138,16 +1134,16 @@
                 "type": "server"
               },
               "id": "11:0x0300",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0300",
+              "unique_id": "ab:cd:ef:12:ad:8a:89:91:11:0x0300",
               "status": "INITIALIZED",
               "value_attribute": "current_x"
             }
           ],
           "device_ieee": [
-            142,
-            144,
-            106,
-            163,
+            145,
+            137,
+            138,
+            173,
             18,
             239,
             205,
@@ -1167,7 +1163,7 @@
         "state": {
           "class_name": "HueLight",
           "on": false,
-          "brightness": 76,
+          "brightness": 1,
           "xy_color": [
             0.5266803997863737,
             0.41330586709391925
@@ -1192,180 +1188,11 @@
         }
       }
     ],
-    "number": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11-768-start_up_color_temperature",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "translation_key": "start_up_color_temperature",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 11,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "11:0x0300",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
-            }
-          ],
-          "device_ieee": [
-            142,
-            144,
-            106,
-            163,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 11,
-          "available": true,
-          "group_id": null,
-          "min_value": 153,
-          "max_value": 500,
-          "step": 1.0,
-          "multiplier": 1
-        },
-        "state": {
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "available": true,
-          "state": 366
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11-8-start_up_current_level",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "StartUpCurrentLevelConfigurationEntity",
-          "translation_key": "start_up_current_level",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 11,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "11:0x0008",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
-          "device_ieee": [
-            142,
-            144,
-            106,
-            163,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 11,
-          "available": true,
-          "group_id": null,
-          "min_value": 0,
-          "max_value": 255,
-          "step": 1.0,
-          "multiplier": 1
-        },
-        "state": {
-          "class_name": "StartUpCurrentLevelConfigurationEntity",
-          "available": true,
-          "state": 254
-        }
-      }
-    ],
-    "select": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11-6-StartUpOnOff",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "StartupOnOffSelectEntity",
-          "translation_key": "start_up_on_off",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 11,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "11:0x0006",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
-          "device_ieee": [
-            142,
-            144,
-            106,
-            163,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 11,
-          "available": true,
-          "group_id": null,
-          "enum": "StartUpOnOff",
-          "options": [
-            "Off",
-            "On",
-            "Toggle",
-            "PreviousValue"
-          ]
-        },
-        "state": {
-          "class_name": "StartupOnOffSelectEntity",
-          "available": true,
-          "state": "PreviousValue"
-        }
-      }
-    ],
     "sensor": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11-0-lqi",
+          "unique_id": "ab:cd:ef:12:ad:8a:89:91-11-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -1387,16 +1214,16 @@
                 "type": "server"
               },
               "id": "11:0x0000",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0000",
+              "unique_id": "ab:cd:ef:12:ad:8a:89:91:11:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            142,
-            144,
-            106,
-            163,
+            145,
+            137,
+            138,
+            173,
             18,
             239,
             205,
@@ -1420,7 +1247,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11-0-rssi",
+          "unique_id": "ab:cd:ef:12:ad:8a:89:91-11-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -1442,16 +1269,16 @@
                 "type": "server"
               },
               "id": "11:0x0000",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0000",
+              "unique_id": "ab:cd:ef:12:ad:8a:89:91:11:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            142,
-            144,
-            106,
-            163,
+            145,
+            137,
+            138,
+            173,
             18,
             239,
             205,
@@ -1477,7 +1304,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:a3:6a:90:8e-11-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:ad:8a:89:91-11-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -1499,16 +1326,16 @@
                 "type": "client"
               },
               "id": "11:0x0019_client",
-              "unique_id": "ab:cd:ef:12:a3:6a:90:8e:11:0x0019_CLIENT",
+              "unique_id": "ab:cd:ef:12:ad:8a:89:91:11:0x0019_CLIENT",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            142,
-            144,
-            106,
-            163,
+            145,
+            137,
+            138,
+            173,
             18,
             239,
             205,
@@ -1522,10 +1349,10 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x01001f0a",
+          "installed_version": "0x01001700",
           "in_progress": false,
           "update_percentage": null,
-          "latest_version": "0x01001f0a",
+          "latest_version": "0x01001700",
           "release_summary": null,
           "release_notes": null,
           "release_url": null

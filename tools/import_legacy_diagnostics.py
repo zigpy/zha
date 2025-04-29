@@ -20,7 +20,12 @@ from zigpy.quirks import get_device as quirks_get_device
 import zigpy.zcl
 import zigpy.zdo.types as zdo_t
 
-from tests.common import ZhaJsonEncoder, join_zigpy_device, patch_cluster_for_testing
+from tests.common import (
+    ZhaJsonEncoder,
+    join_zigpy_device,
+    patch_cluster_for_testing,
+    zigpy_device_from_device_data,
+)
 from tests.conftest import TestGateway, make_zha_data, make_zigpy_app_controller
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,9 +39,6 @@ def zigpy_device_from_legacy_diagnostics(
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
     device_data = data["data"]
-
-    if device_data["quirk_class"] != "zigpy.device.Device":
-        raise ValueError("Only devices without quirks can be imported")
 
     nwk = device_data["nwk"]
     manufacturer = device_data["manufacturer"]
@@ -190,20 +192,44 @@ async def main(paths: list[str]):
                     + ".json"
                 )
             )
-            _LOGGER.info("Importing %s as %s", path, output_path.name)
+
+            if output_path.is_file():
+                continue
 
             with patch("zigpy.zcl.Cluster._update_attribute"):
                 zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
                 await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
-            new_json = json.dumps(
-                zha_device.get_diagnostics_json(), indent=2, cls=ZhaJsonEncoder
-            )
-            output_path.write_text(new_json)
+            # First, try to join the device
+            initial_json = zha_device.get_diagnostics_json()
 
             await zha_gateway.async_remove_device(zha_device)
             await zha_device.on_remove()
             del zha_gateway.devices[zha_device.ieee]
+
+            # Next, try to re-join the device and see if its quirk still matches
+            rejoined_zigpy_device = zigpy_device_from_device_data(
+                app=zha_gateway.application_controller,
+                device_data=initial_json,
+            )
+
+            with patch("zigpy.zcl.Cluster._update_attribute"):
+                rejoined_zha_device = await join_zigpy_device(
+                    zha_gateway, rejoined_zigpy_device
+                )
+                await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+            rejoined_json = rejoined_zha_device.get_diagnostics_json()
+            if initial_json != rejoined_json:
+                _LOGGER.warning(
+                    "Rejoined device %s does not match original diagnostics JSON, quirk has modified the device signature",
+                    path,
+                )
+                continue
+
+            _LOGGER.info("Importing %s as %s", path, output_path.name)
+            new_json = json.dumps(initial_json, indent=2, cls=ZhaJsonEncoder)
+            output_path.write_text(new_json)
 
 
 if __name__ == "__main__":

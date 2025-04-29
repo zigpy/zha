@@ -1,20 +1,20 @@
 {
   "version": 1,
-  "ieee": "ab:cd:ef:12:0f:c8:06:9a",
-  "nwk": "0x3E8F",
-  "manufacturer": "frient A/S",
-  "model": "SPLZB-141",
-  "friendly_manufacturer": "frient A/S",
-  "friendly_model": "SPLZB-141",
-  "name": "frient A/S SPLZB-141",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "ieee": "ab:cd:ef:12:02:1f:a7:43",
+  "nwk": "0x9F4A",
+  "manufacturer": "_TZ3000_tgddllx4",
+  "model": "TS0001",
+  "friendly_manufacturer": "_TZ3000_tgddllx4",
+  "friendly_model": "TS0001",
+  "name": "_TZ3000_tgddllx4 TS0001",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
-  "manufacturer_code": 4117,
+  "manufacturer_code": 4660,
   "power_source": "Mains",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-04-29T18:45:35.753197+00:00",
+  "last_seen": "2025-04-29T18:45:35.846579+00:00",
   "available": true,
   "device_type": "Router",
   "active_coordinator": false,
@@ -26,146 +26,19 @@
     "aps_flags": 0,
     "frequency_band": 8,
     "mac_capability_flags": 142,
-    "manufacturer_code": 4117,
-    "maximum_buffer_size": 82,
-    "maximum_incoming_transfer_size": 1500,
+    "manufacturer_code": 4660,
+    "maximum_buffer_size": 108,
+    "maximum_incoming_transfer_size": 0,
     "server_mask": 11264,
-    "maximum_outgoing_transfer_size": 1500,
+    "maximum_outgoing_transfer_size": 0,
     "descriptor_capability_field": 0
   },
   "endpoints": {
     "1": {
-      "profile_id": 49353,
-      "device_type": {
-        "name": "unknown",
-        "id": 1
-      },
-      "in_clusters": [
-        {
-          "cluster_id": "0x0005",
-          "endpoint_attribute": "scenes",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "count",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "current_group",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "current_scene",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "last_configured_by",
-              "zcl_type": "EUI64",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "name_support",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "scene_valid",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0006",
-          "endpoint_attribute": "on_off",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "global_scene_control",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4002",
-              "name": "off_wait_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4001",
-              "name": "on_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4003",
-              "name": "start_up_on_off",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        }
-      ],
-      "out_clusters": []
-    },
-    "2": {
       "profile_id": 260,
       "device_type": {
-        "name": "SMART_PLUG",
-        "id": 81
+        "name": "ON_OFF_LIGHT",
+        "id": 256
       },
       "in_clusters": [
         {
@@ -246,7 +119,7 @@
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "frient A/S",
+              "value": "_TZ3000_tgddllx4",
               "unsupported": false
             },
             {
@@ -260,7 +133,7 @@
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "SPLZB-141",
+              "value": "TS0001",
               "unsupported": false
             },
             {
@@ -330,89 +203,6 @@
               "id": "0x0000",
               "name": "zcl_version",
               "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0002",
-          "endpoint_attribute": "device_temperature",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "current_temperature",
-              "zcl_type": "int16",
-              "value": 35,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "dev_temp_alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0014",
-              "name": "high_temp_dwell_trip_point",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "high_temp_thres",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0013",
-              "name": "low_temp_dwell_trip_point",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "low_temp_thres",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "max_temp_experienced",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "min_temp_experienced",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "over_temp_total_dwell",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
               "value": null,
               "unsupported": false
             }
@@ -539,6 +329,20 @@
           "endpoint_attribute": "on_off",
           "attributes": [
             {
+              "id": "0x8001",
+              "name": "backlight_mode",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
+              "id": "0x8000",
+              "name": "child_lock",
+              "zcl_type": "bool_",
+              "value": null,
+              "unsupported": false
+            },
+            {
               "id": "0xfffd",
               "name": "cluster_revision",
               "zcl_type": "uint16",
@@ -574,6 +378,13 @@
               "unsupported": false
             },
             {
+              "id": "0x8002",
+              "name": "power_on_state",
+              "zcl_type": "enum8",
+              "value": null,
+              "unsupported": false
+            },
+            {
               "id": "0xfffe",
               "name": "reporting_status",
               "zcl_type": "enum8",
@@ -586,30 +397,10 @@
               "zcl_type": "enum8",
               "value": null,
               "unsupported": true
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0009",
-          "endpoint_attribute": "alarms",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "alarm_count",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
             },
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
+              "id": "0x8004",
+              "name": "switch_mode",
               "zcl_type": "enum8",
               "value": null,
               "unsupported": false
@@ -862,7 +653,7 @@
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 5,
+              "value": 0,
               "unsupported": false
             },
             {
@@ -1142,8 +933,8 @@
               "id": "0x0304",
               "name": "demand_formatting",
               "zcl_type": "map8",
-              "value": 248,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0602",
@@ -1184,8 +975,8 @@
               "id": "0x0302",
               "name": "divisor",
               "zcl_type": "uint24",
-              "value": 1000,
-              "unsupported": false
+              "value": 100,
+              "unsupported": true
             },
             {
               "id": "0x0801",
@@ -1310,8 +1101,8 @@
               "id": "0x0400",
               "name": "instantaneous_demand",
               "zcl_type": "int24",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0022",
@@ -1346,7 +1137,7 @@
               "name": "metering_device_type",
               "zcl_type": "map8",
               "value": 0,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x030e",
@@ -1360,7 +1151,7 @@
               "name": "multiplier",
               "zcl_type": "uint24",
               "value": 1,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0603",
@@ -1499,15 +1290,15 @@
               "id": "0x0200",
               "name": "status",
               "zcl_type": "map8",
-              "value": 0,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0303",
               "name": "summation_formatting",
               "zcl_type": "map8",
-              "value": 248,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0014",
@@ -1535,7 +1326,7 @@
               "name": "unit_of_measure",
               "zcl_type": "enum8",
               "value": 0,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0012",
@@ -1576,14 +1367,14 @@
               "name": "ac_current_divisor",
               "zcl_type": "uint16",
               "value": 1000,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0602",
               "name": "ac_current_multiplier",
               "zcl_type": "uint16",
               "value": 1,
-              "unsupported": false
+              "unsupported": true
             },
             {
               "id": "0x0802",
@@ -1596,15 +1387,15 @@
               "id": "0x0300",
               "name": "ac_frequency",
               "zcl_type": "uint16",
-              "value": 59986,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0401",
               "name": "ac_frequency_divisor",
               "zcl_type": "uint16",
-              "value": 1000,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0302",
@@ -1624,22 +1415,22 @@
               "id": "0x0400",
               "name": "ac_frequency_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0605",
               "name": "ac_power_divisor",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0604",
               "name": "ac_power_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0804",
@@ -1652,15 +1443,15 @@
               "id": "0x0601",
               "name": "ac_voltage_divisor",
               "zcl_type": "uint16",
-              "value": 100,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0600",
               "name": "ac_voltage_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0801",
@@ -1687,7 +1478,7 @@
               "id": "0x050b",
               "name": "active_power",
               "zcl_type": "int16",
-              "value": 1,
+              "value": 0,
               "unsupported": false
             },
             {
@@ -1702,14 +1493,14 @@
               "name": "active_power_max_ph_b",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a0d",
               "name": "active_power_max_ph_c",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x050c",
@@ -1737,14 +1528,14 @@
               "name": "active_power_ph_b",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a0b",
               "name": "active_power_ph_c",
               "zcl_type": "int16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x050f",
@@ -2121,8 +1912,8 @@
               "id": "0x0000",
               "name": "measurement_type",
               "zcl_type": "map32",
-              "value": 11,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0303",
@@ -2157,14 +1948,14 @@
               "name": "power_factor_ph_b",
               "zcl_type": "int8",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a10",
               "name": "power_factor_ph_c",
               "zcl_type": "int8",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0402",
@@ -2219,29 +2010,29 @@
               "id": "0x0508",
               "name": "rms_current",
               "zcl_type": "uint16",
-              "value": 24,
+              "value": 0,
               "unsupported": false
             },
             {
               "id": "0x050a",
               "name": "rms_current_max",
               "zcl_type": "uint16",
-              "value": 2383,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x090a",
               "name": "rms_current_max_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a0a",
               "name": "rms_current_max_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0509",
@@ -2269,14 +2060,14 @@
               "name": "rms_current_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a08",
               "name": "rms_current_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0807",
@@ -2338,29 +2129,29 @@
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "value": 12452,
+              "value": 237,
               "unsupported": false
             },
             {
               "id": "0x0507",
               "name": "rms_voltage_max",
               "zcl_type": "uint16",
-              "value": 12460,
-              "unsupported": false
+              "value": null,
+              "unsupported": true
             },
             {
               "id": "0x0907",
               "name": "rms_voltage_max_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a07",
               "name": "rms_voltage_max_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0506",
@@ -2388,14 +2179,14 @@
               "name": "rms_voltage_ph_b",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0a05",
               "name": "rms_voltage_ph_c",
               "zcl_type": "uint16",
               "value": null,
-              "unsupported": true
+              "unsupported": false
             },
             {
               "id": "0x0809",
@@ -2477,600 +2268,21 @@
           ]
         },
         {
-          "cluster_id": "0x0b05",
-          "endpoint_attribute": "diagnostic",
-          "attributes": [
-            {
-              "id": "0x0116",
-              "name": "aps_decrypt_failures",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0113",
-              "name": "aps_fc_failure",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0106",
-              "name": "aps_rx_bcast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0108",
-              "name": "aps_rx_ucast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0107",
-              "name": "aps_tx_bcast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010b",
-              "name": "aps_tx_ucast_fail",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010a",
-              "name": "aps_tx_ucast_retry",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0109",
-              "name": "aps_tx_ucast_success",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0114",
-              "name": "aps_unauthorized_key",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011b",
-              "name": "average_mac_retry_per_aps_message_sent",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0111",
-              "name": "child_moved",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0110",
-              "name": "join_indication",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011c",
-              "name": "last_message_lqi",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011d",
-              "name": "last_message_rssi",
-              "zcl_type": "int8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0100",
-              "name": "mac_rx_bcast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0102",
-              "name": "mac_rx_ucast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0101",
-              "name": "mac_tx_bcast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0103",
-              "name": "mac_tx_ucast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0105",
-              "name": "mac_tx_ucast_fail",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0104",
-              "name": "mac_tx_ucast_retry",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010d",
-              "name": "neighbor_added",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010e",
-              "name": "neighbor_removed",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010f",
-              "name": "neighbor_stale",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "number_of_resets",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0115",
-              "name": "nwk_decrypt_failures",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0112",
-              "name": "nwk_fc_failure",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0117",
-              "name": "packet_buffer_allocate_failures",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011a",
-              "name": "packet_validate_drop_count",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "persistent_memory_writes",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0119",
-              "name": "phy_to_mac_queue_limit_reached",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0118",
-              "name": "relayed_ucast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010c",
-              "name": "route_disc_initiated",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        }
-      ],
-      "out_clusters": [
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x000a",
-          "endpoint_attribute": "time",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "dst_end",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "dst_shift",
-              "zcl_type": "int32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "dst_start",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "last_set_time",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "local_time",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "standard_time",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "time",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "time_status",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "time_zone",
-              "zcl_type": "int32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "valid_until_time",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0019",
-          "endpoint_attribute": "ota",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "current_file_version",
-              "zcl_type": "uint32",
-              "value": 131081,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "current_zigbee_stack_version",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "downloaded_file_version",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "downloaded_zigbee_stack_version",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "file_offset",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "image_stamp",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "image_type_id",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "image_upgrade_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "manufacturer_id",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "minimum_block_req_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "upgrade_activation_policy",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "upgrade_server_id",
-              "zcl_type": "EUI64",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "upgrade_timeout_policy",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0406",
-          "endpoint_attribute": "occupancy",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "occupancy",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "occupancy_sensor_type_bitmap",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0030",
-              "name": "physical_contact_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0031",
-              "name": "physical_contact_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0032",
-              "name": "physical_contact_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "pir_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "pir_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "pir_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0020",
-              "name": "ultrasonic_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0021",
-              "name": "ultrasonic_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0022",
-              "name": "ultrasonic_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
-        }
-      ]
-    },
-    "242": {
-      "profile_id": 41440,
-      "device_type": {
-        "name": "PROXY_BASIC",
-        "id": 97
-      },
-      "in_clusters": [],
-      "out_clusters": [
-        {
-          "cluster_id": "0x0021",
-          "endpoint_attribute": "green_power",
+          "cluster_id": "0xe001",
+          "endpoint_attribute": null,
           "attributes": []
         }
-      ]
+      ],
+      "out_clusters": []
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-3",
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -3085,29 +2297,29 @@
             {
               "class_name": "IdentifyClusterHandler",
               "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 3,
                 "name": "Identify",
                 "type": "server"
               },
-              "id": "2:0x0003",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0003",
+              "id": "1:0x0003",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
+            67,
+            167,
+            31,
+            2,
             18,
             239,
             205,
             171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "command": "identify",
@@ -3122,11 +2334,83 @@
         }
       }
     ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            67,
+            167,
+            31,
+            2,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 8,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": true,
+          "brightness": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 8,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        }
+      }
+    ],
     "sensor": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-0-lqi",
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -3141,29 +2425,29 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 0,
                 "name": "Basic",
                 "type": "server"
               },
-              "id": "2:0x0000",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0000",
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
+            67,
+            167,
+            31,
+            2,
             18,
             239,
             205,
             171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": null,
@@ -3181,7 +2465,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-0-rssi",
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -3196,29 +2480,29 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 0,
                 "name": "Basic",
                 "type": "server"
               },
-              "id": "2:0x0000",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0000",
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
+            67,
+            167,
+            31,
+            2,
             18,
             239,
             205,
             171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": null,
@@ -3236,65 +2520,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-1794",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "SmartEnergyMetering",
-          "translation_key": "instantaneous_demand",
-          "device_class": "power",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "MeteringClusterHandler",
-              "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 1794,
-                "name": "Metering",
-                "type": "server"
-              },
-              "id": "2:0x0702",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0702",
-              "status": "INITIALIZED",
-              "value_attribute": "instantaneous_demand"
-            }
-          ],
-          "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": "instantaneous_demand",
-          "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "W"
-        },
-        "state": {
-          "class_name": "SmartEnergyMetering",
-          "available": true,
-          "state": 1.0,
-          "device_type": "Electric Metering",
-          "status": "NO_ALARMS",
-          "zcl_unit_of_measurement": 0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-1794-summation_delivered",
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1-1794-summation_delivered",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
@@ -3309,29 +2535,29 @@
             {
               "class_name": "MeteringClusterHandler",
               "generic_id": "cluster_handler_0x0702",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 1794,
-                "name": "Metering",
+                "name": "CustomMetering",
                 "type": "server"
               },
-              "id": "2:0x0702",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0702",
+              "id": "1:0x0702",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0702",
               "status": "INITIALIZED",
               "value_attribute": "instantaneous_demand"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
+            67,
+            167,
+            31,
+            2,
             18,
             239,
             205,
             171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": "current_summ_delivered",
@@ -3343,71 +2569,15 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 0.005,
+          "state": 0.0,
           "device_type": "Electric Metering",
-          "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "DeviceTemperature",
-          "translation_key": "device_temperature",
-          "device_class": "temperature",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "DeviceTemperatureClusterHandler",
-              "generic_id": "cluster_handler_0x0002",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 2,
-                "name": "Device Temperature",
-                "type": "server"
-              },
-              "id": "2:0x0002",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0002",
-              "status": "INITIALIZED",
-              "value_attribute": "current_temperature"
-            }
-          ],
-          "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": "current_temperature",
-          "suggested_display_precision": null,
-          "divisor": 100,
-          "multiplier": 1,
-          "unit": "\u00b0C"
-        },
-        "state": {
-          "class_name": "DeviceTemperature",
-          "available": true,
-          "state": 0.35
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820",
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
@@ -3422,29 +2592,29 @@
             {
               "class_name": "ElectricalMeasurementClusterHandler",
               "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 2820,
                 "name": "Electrical Measurement",
                 "type": "server"
               },
-              "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
+            67,
+            167,
+            31,
+            2,
             18,
             239,
             205,
             171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": "active_power",
@@ -3456,70 +2626,13 @@
         "state": {
           "class_name": "PolledElectricalMeasurement",
           "available": true,
-          "state": 1.0,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
+          "state": 0.0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820-ac_frequency",
-          "migrate_unique_ids": [],
-          "platform": "sensor",
-          "class_name": "ElectricalMeasurementFrequency",
-          "translation_key": "ac_frequency",
-          "device_class": "frequency",
-          "state_class": "measurement",
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ElectricalMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 2820,
-                "name": "Electrical Measurement",
-                "type": "server"
-              },
-              "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
-              "status": "INITIALIZED",
-              "value_attribute": "ac_voltage_multiplier"
-            }
-          ],
-          "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": "ac_frequency",
-          "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "Hz"
-        },
-        "state": {
-          "class_name": "ElectricalMeasurementFrequency",
-          "available": true,
-          "state": 59.986,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820-rms_current",
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1-2820-rms_current",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
@@ -3534,29 +2647,29 @@
             {
               "class_name": "ElectricalMeasurementClusterHandler",
               "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 2820,
                 "name": "Electrical Measurement",
                 "type": "server"
               },
-              "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
+            67,
+            167,
+            31,
+            2,
             18,
             239,
             205,
             171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": "rms_current",
@@ -3568,15 +2681,13 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 0.024,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_current_max": 2.383
+          "state": 0.0
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-2820-rms_voltage",
+          "unique_id": "ab:cd:ef:12:02:1f:a7:43-1-2820-rms_voltage",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
@@ -3591,29 +2702,29 @@
             {
               "class_name": "ElectricalMeasurementClusterHandler",
               "generic_id": "cluster_handler_0x0b04",
-              "endpoint_id": 2,
+              "endpoint_id": 1,
               "cluster": {
                 "id": 2820,
                 "name": "Electrical Measurement",
                 "type": "server"
               },
-              "id": "2:0x0b04",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0b04",
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:02:1f:a7:43:1:0x0b04",
               "status": "INITIALIZED",
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
           "device_ieee": [
-            154,
-            6,
-            200,
-            15,
+            67,
+            167,
+            31,
+            2,
             18,
             239,
             205,
             171
           ],
-          "endpoint_id": 2,
+          "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "attribute": "rms_voltage",
@@ -3625,120 +2736,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
-          "state": 124.52,
-          "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
-          "rms_voltage_max": 124.6
-        }
-      }
-    ],
-    "switch": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "Switch",
-          "translation_key": "switch",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "2:0x0006",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
-          "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null
-        },
-        "state": {
-          "class_name": "Switch",
-          "state": 1,
-          "available": true
-        }
-      }
-    ],
-    "update": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:0f:c8:06:9a-2-25-firmware_update",
-          "migrate_unique_ids": [],
-          "platform": "update",
-          "class_name": "FirmwareUpdateEntity",
-          "translation_key": null,
-          "device_class": "firmware",
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "2:0x0019_client",
-              "unique_id": "ab:cd:ef:12:0f:c8:06:9a:2:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            154,
-            6,
-            200,
-            15,
-            18,
-            239,
-            205,
-            171
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "supported_features": 7
-        },
-        "state": {
-          "class_name": "FirmwareUpdateEntity",
-          "available": true,
-          "installed_version": "0x00020009",
-          "in_progress": false,
-          "update_percentage": null,
-          "latest_version": "0x00020009",
-          "release_summary": null,
-          "release_notes": null,
-          "release_url": null
+          "state": 237.0
         }
       }
     ]
