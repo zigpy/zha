@@ -23,6 +23,7 @@ from zigpy.state import Counter, State
 from zigpy.zcl import foundation
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
+from zigpy.zcl.clusters.smartenergy import Metering
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -324,12 +325,17 @@ class Sensor(PlatformEntity):
         ):
             self.maybe_emit_state_changed_event()
 
-    def _is_non_value(self, value: int | float) -> bool:
+    def _is_non_value(
+        self, value: int | float, *, attr_def: foundation.ZCLAttributeDef | None = None
+    ) -> bool:
         """Ignore non-value numerical values."""
-        if self._attr_def is None:
+        if attr_def is None:
+            attr_def = self._attr_def
+
+        if attr_def is None:
             return False
 
-        data_type = foundation.DataType.from_type_id(self._attr_def.zcl_type)
+        data_type = foundation.DataType.from_type_id(attr_def.zcl_type)
         return value == data_type.non_value
 
     def formatter(
@@ -1129,16 +1135,12 @@ class SmartEnergyMetering(PollableSensor):
         ),
     }
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self.recompute_capabilities()
+    def _is_supported(self) -> bool:
+        unit = self._cluster_handler.unit_of_measurement
+        if self._is_non_value(unit, attr_def=Metering.AttributeDefs.unit_of_measure):
+            return False
+
+        return super()._is_supported()
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
