@@ -114,12 +114,13 @@ class BaseEntity(LogMixin, EventBase):
 
     PLATFORM: Platform = Platform.UNKNOWN
 
-    _attr_fallback_name: str | None
-    _attr_translation_key: str | None
-    _attr_entity_category: EntityCategory | None
+    _attr_fallback_name: str | None = None
+    _attr_icon: str | None = None
+    _attr_translation_key: str | None = None
+    _attr_entity_category: EntityCategory | None = None
     _attr_entity_registry_enabled_default: bool = True
-    _attr_device_class: str | None
-    _attr_state_class: str | None
+    _attr_device_class: str | None = None
+    _attr_state_class: str | None = None
     _attr_enabled: bool = True
     _attr_always_supported: bool = False
     _attr_primary: bool = False
@@ -187,14 +188,12 @@ class BaseEntity(LogMixin, EventBase):
     @property
     def fallback_name(self) -> str | None:
         """Return the entity fallback name for when a translation key is unavailable."""
-        if hasattr(self, "_attr_fallback_name"):
-            return self._attr_fallback_name
-        return None
+        return self._attr_fallback_name
 
     @property
     def icon(self) -> str | None:
         """Return the entity icon."""
-        return None
+        return self._attr_icon
 
     @property
     def translation_key(self) -> str | None:
@@ -218,16 +217,12 @@ class BaseEntity(LogMixin, EventBase):
     @property
     def device_class(self) -> str | None:
         """Return the device class."""
-        if hasattr(self, "_attr_device_class"):
-            return self._attr_device_class
-        return None
+        return self._attr_device_class
 
     @property
     def state_class(self) -> str | None:
         """Return the state class."""
-        if hasattr(self, "_attr_state_class"):
-            return self._attr_state_class
-        return None
+        return self._attr_state_class
 
     @final
     @property
