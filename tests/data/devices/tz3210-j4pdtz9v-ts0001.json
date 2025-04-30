@@ -972,7 +972,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1026,7 +1026,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1080,7 +1080,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1136,7 +1136,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1192,7 +1192,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1468,7 +1468,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
