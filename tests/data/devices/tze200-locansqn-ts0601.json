@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE200_locansqn TS0601",
   "quirk_applied": true,
-  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
