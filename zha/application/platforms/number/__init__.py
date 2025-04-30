@@ -51,7 +51,6 @@ class NumberEntityInfo(BaseEntityInfo):
     native_max_value: float
     native_min_value: float
     native_step: float | None
-    native_value: float | None
     native_unit_of_measurement: str | None
 
 
@@ -83,7 +82,6 @@ class BaseNumber(PlatformEntity):
             native_max_value=self.native_max_value,
             native_min_value=self.native_min_value,
             native_step=self.native_step,
-            native_value=self.native_value,
             native_unit_of_measurement=self.native_unit_of_measurement,
         )
 
@@ -154,7 +152,11 @@ class Number(BaseNumber):
         self._attr_native_unit_of_measurement = UNITS.get(
             analog_output.engineering_units
         )
-        self._attr_icon = ICONS.get(analog_output.application_type >> 16)
+
+        if analog_output.application_type is not None:
+            self._attr_icon = ICONS.get(analog_output.application_type >> 16)
+        else:
+            self._attr_icon = None
 
         if analog_output.description is not None:
             self._attr_fallback_name = analog_output.description

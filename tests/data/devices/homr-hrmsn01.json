@@ -2332,10 +2332,11 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "min_value": 153,
-          "max_value": 500,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 500,
+          "native_min_value": 153,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "StartUpColorTemperatureConfigurationEntity",

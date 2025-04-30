@@ -8,7 +8,7 @@
   "friendly_model": "TS0601",
   "name": "_TZE200_locansqn TS0601",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
@@ -1154,10 +1154,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 100,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1208,10 +1209,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 100,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1262,10 +1264,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": -20,
-          "max_value": 60,
-          "step": 1,
-          "multiplier": 0.1
+          "mode": "auto",
+          "native_max_value": 60,
+          "native_min_value": -20,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1316,10 +1319,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": -20,
-          "max_value": 60,
-          "step": 1,
-          "multiplier": 0.1
+          "mode": "auto",
+          "native_max_value": 60,
+          "native_min_value": -20,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1370,10 +1374,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 5,
-          "max_value": 120,
-          "step": 5,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 120,
+          "native_min_value": 5,
+          "native_step": 5,
+          "native_unit_of_measurement": "min"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1424,10 +1429,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 1,
-          "max_value": 100,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 1,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1478,10 +1484,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 5,
-          "max_value": 120,
-          "step": 5,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 120,
+          "native_min_value": 5,
+          "native_step": 5,
+          "native_unit_of_measurement": "min"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1532,10 +1539,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0.1,
-          "max_value": 50,
-          "step": 0.1,
-          "multiplier": 0.1
+          "mode": "auto",
+          "native_max_value": 50,
+          "native_min_value": 0.1,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",

@@ -566,10 +566,11 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "min_value": -20,
-          "max_value": 20,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 20,
+          "native_min_value": -20,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "TiRouterTransmitPower",

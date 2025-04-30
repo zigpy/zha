@@ -1205,10 +1205,11 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "min_value": 158,
-          "max_value": 500,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 500,
+          "native_min_value": 158,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "StartUpColorTemperatureConfigurationEntity",
@@ -1259,10 +1260,11 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 255,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "StartUpCurrentLevelConfigurationEntity",

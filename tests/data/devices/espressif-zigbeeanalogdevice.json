@@ -527,11 +527,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "engineering_units": null,
-          "application_type": 17235967,
-          "min_value": 0,
-          "max_value": 1023,
-          "step": null
+          "mode": "auto",
+          "native_max_value": 1023,
+          "native_min_value": 0,
+          "native_step": null,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "Number",

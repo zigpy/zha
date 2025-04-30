@@ -910,10 +910,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 5,
-          "max_value": 3600,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 3600,
+          "native_min_value": 5,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",

@@ -1537,10 +1537,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1,
-          "multiplier": 0.01
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "m"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1591,10 +1592,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1645,10 +1647,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 6,
-          "step": 0.01,
-          "multiplier": 0.01
+          "mode": "auto",
+          "native_max_value": 6,
+          "native_min_value": 0,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "m"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1699,10 +1702,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1753,10 +1757,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 28800,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 28800,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1807,10 +1812,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 6,
-          "step": 0.01,
-          "multiplier": 0.01
+          "mode": "auto",
+          "native_max_value": 6,
+          "native_min_value": 0,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "m"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1861,10 +1867,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1915,11 +1922,11 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "engineering_units": 73,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 600,
-          "step": 1
+          "mode": "auto",
+          "native_max_value": 600,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "Seconds"
         },
         "state": {
           "class_name": "Number",
@@ -1970,11 +1977,11 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "engineering_units": null,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "Number",
@@ -2025,11 +2032,11 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "engineering_units": 118,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 1000,
-          "step": 10
+          "mode": "auto",
+          "native_max_value": 1000,
+          "native_min_value": 0,
+          "native_step": 10,
+          "native_unit_of_measurement": "Centimeters"
         },
         "state": {
           "class_name": "Number",
@@ -2080,11 +2087,11 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "engineering_units": null,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "Number",
@@ -2135,11 +2142,11 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "engineering_units": 118,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 600,
-          "step": 10
+          "mode": "auto",
+          "native_max_value": 600,
+          "native_min_value": 0,
+          "native_step": 10,
+          "native_unit_of_measurement": "Centimeters"
         },
         "state": {
           "class_name": "Number",
@@ -2190,11 +2197,11 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "engineering_units": null,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "Number",
@@ -2245,11 +2252,11 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "engineering_units": 118,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 600,
-          "step": 10
+          "mode": "auto",
+          "native_max_value": 600,
+          "native_min_value": 0,
+          "native_step": 10,
+          "native_unit_of_measurement": "Centimeters"
         },
         "state": {
           "class_name": "Number",

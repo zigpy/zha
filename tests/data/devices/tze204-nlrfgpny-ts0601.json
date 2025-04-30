@@ -1211,10 +1211,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 1,
-          "max_value": 60,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 60,
+          "native_min_value": 1,
+          "native_step": 1,
+          "native_unit_of_measurement": "min"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",

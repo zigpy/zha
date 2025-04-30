@@ -972,7 +972,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "INITIALIZED",
+              "status": "CONFIGURED",
               "value_attribute": null
             }
           ],
@@ -989,10 +989,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 50,
-          "max_value": 100,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 50,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1026,7 +1027,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "INITIALIZED",
+              "status": "CONFIGURED",
               "value_attribute": null
             }
           ],
@@ -1043,10 +1044,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1080,7 +1082,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "INITIALIZED",
+              "status": "CONFIGURED",
               "value_attribute": null
             }
           ],
@@ -1097,10 +1099,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 50,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 50,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1136,7 +1139,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "INITIALIZED",
+              "status": "CONFIGURED",
               "value_attribute": null
             }
           ],
@@ -1192,7 +1195,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "INITIALIZED",
+              "status": "CONFIGURED",
               "value_attribute": null
             }
           ],
@@ -1468,7 +1471,7 @@
               },
               "id": "1:0xef00",
               "unique_id": "ab:cd:ef:12:c8:12:1d:0b:1:0xef00",
-              "status": "INITIALIZED",
+              "status": "CONFIGURED",
               "value_attribute": null
             }
           ],

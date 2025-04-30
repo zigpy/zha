@@ -824,10 +824,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 1,
-          "max_value": 10,
-          "step": 0.1,
-          "multiplier": 0.1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 1,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "s"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -878,10 +879,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0.75,
-          "max_value": 9.0,
-          "step": 0.75,
-          "multiplier": 0.01
+          "mode": "auto",
+          "native_max_value": 9.0,
+          "native_min_value": 0.75,
+          "native_step": 0.75,
+          "native_unit_of_measurement": "m"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -932,10 +934,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 8.25,
-          "step": 0.75,
-          "multiplier": 0.01
+          "mode": "auto",
+          "native_max_value": 8.25,
+          "native_min_value": 0,
+          "native_step": 0.75,
+          "native_unit_of_measurement": "m"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -986,10 +989,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 1,
-          "max_value": 1500,
-          "step": 0.1,
-          "multiplier": 0.1
+          "mode": "auto",
+          "native_max_value": 1500,
+          "native_min_value": 1,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "s"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
@@ -1040,10 +1044,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 10,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "NumberConfigurationEntity",

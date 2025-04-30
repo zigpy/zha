@@ -1689,11 +1689,11 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "engineering_units": 5,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 1023,
-          "step": 0.009999999776482582
+          "mode": "auto",
+          "native_max_value": 1023,
+          "native_min_value": 0,
+          "native_step": 0.009999999776482582,
+          "native_unit_of_measurement": "Volts"
         },
         "state": {
           "class_name": "Number",
@@ -1744,11 +1744,11 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "engineering_units": 5,
-          "application_type": null,
-          "min_value": 0,
-          "max_value": 1023,
-          "step": 0.009999999776482582
+          "mode": "auto",
+          "native_max_value": 1023,
+          "native_min_value": 0,
+          "native_step": 0.009999999776482582,
+          "native_unit_of_measurement": "Volts"
         },
         "state": {
           "class_name": "Number",

@@ -968,10 +968,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 255,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "OnLevelConfigurationEntity",
@@ -1022,10 +1023,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 65535,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "OnOffTransitionTimeConfigurationEntity",
@@ -1076,10 +1078,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 255,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "StartUpCurrentLevelConfigurationEntity",

@@ -1513,10 +1513,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": -2.5,
-          "max_value": 2.5,
-          "step": 0.1,
-          "multiplier": 0.1
+          "mode": "box",
+          "native_max_value": 2.5,
+          "native_min_value": -2.5,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
           "class_name": "ThermostatLocalTempCalibration",
@@ -1567,10 +1568,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0.0,
-          "max_value": 100.0,
-          "step": 0.5,
-          "multiplier": 0.01
+          "mode": "box",
+          "native_max_value": 30.0,
+          "native_min_value": 7.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
           "class_name": "MaxHeatSetpointLimit",
@@ -1621,10 +1623,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0.0,
-          "max_value": 100.0,
-          "step": 0.5,
-          "multiplier": 0.01
+          "mode": "box",
+          "native_max_value": 30.0,
+          "native_min_value": 7.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
           "class_name": "MinHeatSetpointLimit",

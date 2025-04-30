@@ -2049,10 +2049,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 10,
-          "max_value": 65534,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 65534,
+          "native_min_value": 10,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",

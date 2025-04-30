@@ -1109,10 +1109,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": -6,
-          "max_value": 6,
-          "step": 1,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 6,
+          "native_min_value": -6,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
           "class_name": "NumberConfigurationEntity",
