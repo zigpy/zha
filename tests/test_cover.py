@@ -258,14 +258,13 @@ async def test_cover(
         | CoverEntityFeature.SET_TILT_POSITION
     )
 
-    # set lift to 100% (closed) and test that the state has changed from unavailable to open
-    # the starting open tilt position overrides the closed lift state
+    # set lift to 100% (closed) and test that the state has changed from unavailable to closed
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_lift_percentage.id: 100}
     )
-    assert entity.state["state"] == CoverState.OPEN
+    assert entity.state["state"] == CoverState.CLOSED
 
-    # test that the state closes after tilting to 100% (closed)
+    # test that the state remains after tilting to 100% (closed)
     await send_attributes_report(
         zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 100}
     )
@@ -325,7 +324,7 @@ async def test_cover(
         await send_attributes_report(
             zha_gateway, cluster, {WCAttrs.current_position_tilt_percentage.id: 0}
         )
-        assert entity.state["state"] == CoverState.OPEN
+        assert entity.state["state"] == CoverState.CLOSED
 
         await entity.async_close_cover_tilt()
         await zha_gateway.async_block_till_done()

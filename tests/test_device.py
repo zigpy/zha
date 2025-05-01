@@ -950,3 +950,16 @@ async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
     assert mock_reporting_config.mock_calls == [
         call({"measured_value": (30, 900, 1e-6)})
     ]
+
+
+async def test_endpoint_none_profile(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test endpoint with None profile id being skipped."""
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev.endpoints[3].profile_id = None
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    assert zha_device.async_get_std_clusters() == {}
+    assert "Skipping endpoint, profile is None" in caplog.text
