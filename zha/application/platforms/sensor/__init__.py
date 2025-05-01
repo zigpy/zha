@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from asyncio import Task
-from collections.abc import Sequence
 import contextlib
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
@@ -82,7 +81,6 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ILLUMINANCE,
     CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_LEAF_WETNESS,
-    CLUSTER_HANDLER_MULTISTATE_INPUT,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
     CLUSTER_HANDLER_PRESSURE,
     CLUSTER_HANDLER_SMARTENERGY_METERING,
@@ -585,59 +583,6 @@ class EnumSensor(OptionsSensor):
         """Use name of enum."""
         assert self._enum is not None
         return self._enum(value).name
-
-
-@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_MULTISTATE_INPUT)
-class MultiStateInputSensor(OptionsSensor):
-    """Sensor that displays enumerated values."""
-
-    _attribute_name = "present_value"
-    _unique_id_suffix = "multistate_input"
-
-    def recompute_capabilities(self) -> None:
-        """Recompute capabilities."""
-        state_text: Sequence[str] | None = self._cluster_handler.state_text
-        number_of_states: int | None = self._cluster_handler.number_of_states
-
-        self._attr_fallback_name = self._cluster_handler.description
-
-        if state_text is not None:
-            self._attr_options = tuple(state_text)
-        elif number_of_states is not None:
-            self._attr_options = tuple(
-                [f"state_{i}" for i in range(1, number_of_states + 1)]
-            )
-        else:
-            # Capabilities can be recomputed even if the sensor isn't supported
-            self._attr_options = ()
-
-    def _is_supported(self) -> bool:
-        # Description is required
-        if self._cluster_handler.description is None:
-            return False
-
-        # And either the `state_text` array or `number_or_states`
-        if (
-            self._cluster_handler.state_text is None
-            and self._cluster_handler.number_of_states is None
-        ):
-            return False
-
-        return super()._is_supported()
-
-    def formatter(self, value: int) -> str | None:
-        """Return the state of the entity."""
-
-        # Arrays in the ZCL are weird. An array of size 3, for example, actually has *4*
-        # elements: the first element being the size (3), then the rest. They are both
-        # zero-indexed and one-indexed.
-        #
-        # The spec says that:
-        #    The PresentValue, interpreted as an integer, serves as an index
-        #    into the array.
-        #
-        # Because of this, we have to subtract 1 from the value to get the "real" index.
-        return super().formatter(value - 1)
 
 
 @MULTI_MATCH(

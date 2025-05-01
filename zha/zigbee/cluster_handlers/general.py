@@ -522,12 +522,6 @@ class MultistateInputClusterHandler(ClusterHandler):
         """Return cached value of application type."""
         return self.cluster.get(MultistateInput.AttributeDefs.application_type.name)
 
-    async def async_update(self):
-        """Update cluster value attribute."""
-        await self.get_attribute_value(
-            MultistateInput.AttributeDefs.present_value.name, from_cache=False
-        )
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
 class MultistateOutputClusterHandler(ClusterHandler):
