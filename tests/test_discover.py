@@ -614,6 +614,15 @@ async def test_quirks_v2_entity_discovery_errors(
     zigpy_device = _get_test_device(
         zha_gateway, "Ikea of Sweden3", "TRADFRI remote control3"
     )
+
+    # Inject unknown quirks v2 entity metadata
+    class UnknownEntityMetadata:
+        entity_platform = Platform.UPDATE
+
+    zigpy_device._exposes_metadata[
+        (1, zigpy.zcl.clusters.general.OnOff.cluster_id, ClusterType.Server)
+    ].append(UnknownEntityMetadata())
+
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert (
@@ -732,9 +741,7 @@ async def test_quirks_v2_metadata_bad_device_classes(
     zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
 
 
-async def test_quirks_v2_fallback_name(
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
-) -> None:
+async def test_quirks_v2_fallback_name(zha_gateway: Gateway) -> None:
     """Test quirks v2 fallback name."""
 
     zigpy_device = _get_test_device(
@@ -742,7 +749,7 @@ async def test_quirks_v2_fallback_name(
         "Ikea of Sweden6",
         "TRADFRI remote control6",
         augment_method=lambda builder: builder.sensor(
-            attribute_name=zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
+            attribute_name=zigpy.zcl.clusters.general.OnOff.AttributeDefs.global_scene_control.name,
             cluster_id=zigpy.zcl.clusters.general.OnOff.cluster_id,
             translation_key="some_sensor",
             fallback_name="Fallback name",
