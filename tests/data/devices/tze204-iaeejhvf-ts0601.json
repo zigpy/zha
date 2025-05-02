@@ -1465,7 +1465,7 @@
           "unique_id": "ab:cd:ef:12:52:88:1c:b0-1-13",
           "migrate_unique_ids": [],
           "platform": "number",
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "translation_key": null,
           "device_class": null,
           "state_class": null,
@@ -1509,7 +1509,7 @@
           "native_unit_of_measurement": null
         },
         "state": {
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "available": true,
           "state": 5
         }
@@ -2015,7 +2015,7 @@
           "unique_id": "ab:cd:ef:12:52:88:1c:b0-2-13",
           "migrate_unique_ids": [],
           "platform": "number",
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "translation_key": null,
           "device_class": null,
           "state_class": null,
@@ -2056,10 +2056,10 @@
           "native_max_value": 950,
           "native_min_value": 0,
           "native_step": 10,
-          "native_unit_of_measurement": "Centimeters"
+          "native_unit_of_measurement": "cm"
         },
         "state": {
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "available": true,
           "state": 40.0
         }
@@ -2070,7 +2070,7 @@
           "unique_id": "ab:cd:ef:12:52:88:1c:b0-3-13",
           "migrate_unique_ids": [],
           "platform": "number",
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "translation_key": null,
           "device_class": null,
           "state_class": null,
@@ -2111,10 +2111,10 @@
           "native_max_value": 950,
           "native_min_value": 10,
           "native_step": 10,
-          "native_unit_of_measurement": "Centimeters"
+          "native_unit_of_measurement": "cm"
         },
         "state": {
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "available": true,
           "state": 140.0
         }
@@ -2125,7 +2125,7 @@
           "unique_id": "ab:cd:ef:12:52:88:1c:b0-4-13",
           "migrate_unique_ids": [],
           "platform": "number",
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "translation_key": null,
           "device_class": null,
           "state_class": null,
@@ -2166,10 +2166,10 @@
           "native_max_value": 20000,
           "native_min_value": 0,
           "native_step": 100,
-          "native_unit_of_measurement": "Milliseconds"
+          "native_unit_of_measurement": "ms"
         },
         "state": {
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "available": true,
           "state": 500.0
         }
@@ -2180,7 +2180,7 @@
           "unique_id": "ab:cd:ef:12:52:88:1c:b0-5-13",
           "migrate_unique_ids": [],
           "platform": "number",
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "translation_key": null,
           "device_class": null,
           "state_class": null,
@@ -2221,10 +2221,10 @@
           "native_max_value": 200000,
           "native_min_value": 2000,
           "native_step": 1000,
-          "native_unit_of_measurement": "Milliseconds"
+          "native_unit_of_measurement": "ms"
         },
         "state": {
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "available": true,
           "state": 2000.0
         }

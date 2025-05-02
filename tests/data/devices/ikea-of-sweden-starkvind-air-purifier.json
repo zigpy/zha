@@ -897,7 +897,7 @@
           "native_max_value": 4294967295,
           "native_min_value": 0,
           "native_step": 1.0,
-          "native_unit_of_measurement": "Minutes"
+          "native_unit_of_measurement": "min"
         },
         "state": {
           "class_name": "FilterLifeTime",

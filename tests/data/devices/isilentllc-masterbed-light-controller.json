@@ -1652,7 +1652,7 @@
           "unique_id": "00:13:a2:00:40:b1:90:06-2-13",
           "migrate_unique_ids": [],
           "platform": "number",
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "translation_key": "number",
           "device_class": null,
           "state_class": null,
@@ -1693,10 +1693,10 @@
           "native_max_value": 1023,
           "native_min_value": 0,
           "native_step": 0.009999999776482582,
-          "native_unit_of_measurement": "Volts"
+          "native_unit_of_measurement": "V"
         },
         "state": {
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "available": true,
           "state": 1.5
         }
@@ -1707,7 +1707,7 @@
           "unique_id": "00:13:a2:00:40:b1:90:06-3-13",
           "migrate_unique_ids": [],
           "platform": "number",
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "translation_key": "number",
           "device_class": null,
           "state_class": null,
@@ -1748,10 +1748,10 @@
           "native_max_value": 1023,
           "native_min_value": 0,
           "native_step": 0.009999999776482582,
-          "native_unit_of_measurement": "Volts"
+          "native_unit_of_measurement": "V"
         },
         "state": {
-          "class_name": "Number",
+          "class_name": "AnalogOutputNumber",
           "available": true,
           "state": 1.5
         }
