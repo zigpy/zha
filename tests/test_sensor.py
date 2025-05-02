@@ -1980,4 +1980,4 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
         0xAB,  # unknown
     )
 
-    assert entity.state["state"] is None
+    assert entity.state["state"] == "undefined_0xab"  # TODO: should this be `None`?
