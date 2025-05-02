@@ -47,6 +47,7 @@ from zha.application.platforms.sensor import (
     Temperature,
 )
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
+from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
 from zha.units import (
     PERCENTAGE,
     UnitOfElectricPotential,
@@ -1898,3 +1899,45 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
         {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: -0x8000},
     )
     assert entity.state["state"] is None
+
+
+@pytest.mark.parametrize(
+    ("resolution", "precision"),
+    [
+        (0.0009999999310821295, 3),
+        (0.001, 3),
+        (0.001000001, 3),
+        (0.01, 2),
+        (0.05, 2),
+        (0.1, 1),
+        (1.0, 0),
+        (2.0, 0),
+        (0.9, 1),
+        (0.7, 1),
+        (0.2, 1),
+        (0.25, 2),
+        (0.33, 2),
+        (0.44, 2),
+        (0.55, 2),
+        (0.66, 2),
+        (0.77, 2),
+        (0.88, 2),
+        (1 / 3, 7),
+        (0.125, 3),
+        (0.5, 1),
+        (1.5, 1),
+        (10.5, 1),
+        (0.000000000000001, 15),
+        (0.0000000001, 10),
+        (0.000000001, 9),
+        (0.00000001, 8),
+        (0.0000001, 7),
+        (0.000001, 6),
+    ],
+)
+def test_sensor_precision(resolution: float, precision: int) -> None:
+    """Test converting ZCL `resolution` into precision."""
+
+    # Force the values to be float32, not float64
+    resolution, _ = t.Single.deserialize(t.Single(resolution).serialize())
+    assert resolution_to_decimal_precision(resolution) == precision

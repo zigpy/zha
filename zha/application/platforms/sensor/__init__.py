@@ -9,7 +9,6 @@ from datetime import UTC, date, datetime
 import enum
 import functools
 import logging
-import math
 import numbers
 import typing
 from typing import TYPE_CHECKING, Any
@@ -42,6 +41,7 @@ from zha.application.platforms.sensor.const import (
     SensorDeviceClass,
     SensorStateClass,
 )
+from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import (
@@ -628,8 +628,9 @@ class AnalogInputSensor(Sensor):
 
         # Resolution indicates the minimum change in value that can be detected
         if self._cluster_handler.resolution is not None:
-            exp = math.log10(abs(self._cluster_handler.resolution))
-            self._attr_suggested_display_precision = 0 if exp > 0 else math.ceil(-exp)
+            self._attr_suggested_display_precision = resolution_to_decimal_precision(
+                self._cluster_handler.resolution
+            )
 
     def _is_supported(self) -> bool:
         """Return True if this sensor is supported."""
