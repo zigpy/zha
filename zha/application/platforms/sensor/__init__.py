@@ -579,11 +579,6 @@ class EnumSensor(OptionsSensor):
 
         PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
 
-    def formatter(self, value: int) -> str | None:
-        """Use name of enum."""
-        assert self._enum is not None
-        return self._enum(value).name
-
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
