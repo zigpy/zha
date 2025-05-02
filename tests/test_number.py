@@ -203,7 +203,6 @@ async def test_number_missing_description_attr(
     entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
     assert isinstance(entity, PlatformEntity)
 
-    assert entity.description is None
     assert entity.fallback_name is None
     assert entity.translation_key == "number"
 

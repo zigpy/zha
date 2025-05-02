@@ -149,7 +149,7 @@ class AnalogOutputNumber(BaseNumber):
         self._attr_native_min_value = analog_output.min_present_value or 0
         self._attr_native_max_value = analog_output.max_present_value or 1023
         self._attr_native_step = analog_output.resolution
-        self._attr_native_unit_of_measurement = UNITS.get(
+        self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
             analog_output.engineering_units
         )
 

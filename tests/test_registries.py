@@ -574,7 +574,8 @@ def test_entity_names() -> None:
                 pass
             else:
                 # The only exceptions
-                assert (
-                    entity_class is IASZone
-                    or entity_class is BinaryInputWithDescription
+                assert entity_class in (
+                    IASZone,
+                    BinaryInputWithDescription,
+                    AnalogInputSensor,
                 )
