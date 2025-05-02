@@ -123,7 +123,7 @@ class BaseNumber(PlatformEntity):
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_OUTPUT)
-class Number(BaseNumber):
+class AnalogOutputNumber(BaseNumber):
     """Representation of a ZHA Number entity."""
 
     _attr_translation_key: str = "number"

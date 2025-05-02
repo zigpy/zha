@@ -197,12 +197,12 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
         Platform.NUMBER,
         NumberMetadata,
         EntityType.DIAGNOSTIC,
-    ): number.Number,
+    ): number.AnalogOutputNumber,
     (
         Platform.NUMBER,
         NumberMetadata,
         EntityType.STANDARD,
-    ): number.Number,
+    ): number.AnalogOutputNumber,
     (
         Platform.SWITCH,
         SwitchMetadata,
