@@ -15,14 +15,14 @@ from zigpy.profiles import zha
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, DeviceRegistry, get_device
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder, ReportingConfig
-from zigpy.quirks.v2.homeassistant import UnitOfMass
+from zigpy.quirks.v2.homeassistant import EntityPlatform, EntityType, UnitOfMass
 from zigpy.quirks.v2.homeassistant.sensor import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
-from zigpy.zcl.clusters.general import AnalogInput
+from zigpy.zcl.clusters.general import AnalogInput, PowerConfiguration
 from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
@@ -464,38 +464,6 @@ async def async_test_change_source_timestamp(
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
-async def async_test_general_multistate_input(
-    zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
-):
-    """Test general multistate input."""
-    await entity.async_update()
-
-    assert entity._cluster_handler.number_of_states == 2
-    assert entity._cluster_handler.out_of_service == 0
-    assert entity._cluster_handler.present_value == 1
-    assert entity._cluster_handler.reliability == 0
-    assert entity._cluster_handler.status_flags == 0
-    assert entity._cluster_handler.application_type == 0x00000009
-
-    if entity._cluster_handler.state_text is None:
-        assert_state(entity, "state_1", None)
-        await send_attributes_report(
-            zha_gateway,
-            cluster,
-            {general.MultistateInput.AttributeDefs.present_value.id: 2},
-        )
-        assert_state(entity, "state_2", None)
-    else:
-        assert entity._cluster_handler.state_text == ["Night", "Day", "Hold"]
-        assert_state(entity, "Night", None)
-        await send_attributes_report(
-            zha_gateway,
-            cluster,
-            {general.MultistateInput.AttributeDefs.present_value.id: 2},
-        )
-        assert_state(entity, "Day", None)
-
-
 @pytest.mark.parametrize(
     "cluster_id, entity_type, test_func, read_plug, unsupported_attrs",
     (
@@ -727,13 +695,9 @@ async def test_sensor(
 
     await zha_gateway.async_block_till_done()
 
-    if read_plug and read_plug.get("description", None):
-        assert entity.fallback_name == read_plug.get("description", None)
-        assert entity.translation_key is None
-    else:
-        assert entity.fallback_name is None
     # test sensor associated logic
     await test_func(zha_gateway, cluster, entity)
+    assert entity.fallback_name is None
 
 
 async def test_analog_input_simple(zha_gateway: Gateway) -> None:
@@ -761,6 +725,39 @@ async def test_analog_input_simple(zha_gateway: Gateway) -> None:
     assert entity.info_object.unit == UnitOfElectricPotential.VOLT
     assert entity.info_object.device_class is None
     assert entity.info_object.suggested_display_precision is None
+
+
+async def test_analog_input_ignored(zha_gateway: Gateway) -> None:
+    """Test analog input sensors."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    # Pretend this device has a proper description for the attribute
+    # TODO: replace this unit test with one that uses a real device
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+
+    # No units or application type are defined, however
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.engineering_units.id, 5
+    )
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.engineering_units.id, None
+    )
+    zigpy_dev.endpoints[2].analog_input.add_unsupported_attribute(
+        AnalogInput.AttributeDefs.engineering_units.id
+    )
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # The entity is not created
+    with pytest.raises(KeyError):
+        get_entity(
+            zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+        )
 
 
 async def test_analog_input_complex(zha_gateway: Gateway) -> None:
@@ -1941,3 +1938,46 @@ def test_sensor_precision(resolution: float, precision: int) -> None:
     # Force the values to be float32, not float64
     resolution, _ = t.Single.deserialize(t.Single(resolution).serialize())
     assert resolution_to_decimal_precision(resolution) == precision
+
+
+async def test_enum_sensor(zha_gateway: Gateway) -> None:
+    """Test enum sensor creation and handling of missing values."""
+    registry = DeviceRegistry()
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+    )
+
+    zigpy_dev.endpoints[1].power.update_attribute(
+        PowerConfiguration.AttributeDefs.battery_size.id,
+        PowerConfiguration.BatterySize.AAA,
+    )
+
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model, registry=registry)
+        .enum(
+            entity_platform=EntityPlatform.SENSOR,
+            entity_type=EntityType.DIAGNOSTIC,
+            attribute_name=PowerConfiguration.AttributeDefs.battery_size.name,
+            enum_class=PowerConfiguration.BatterySize,
+            cluster_id=PowerConfiguration.cluster_id,
+            endpoint_id=1,
+            translation_key="battery_size",
+            fallback_name="Battery size",
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(zigpy_dev)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="battery_size")
+
+    assert entity.state["state"] == "AAA"
+
+    zigpy_dev.endpoints[1].power.update_attribute(
+        PowerConfiguration.AttributeDefs.battery_size.id,
+        0xAB,  # unknown
+    )
+
+    assert entity.state["state"] is None
