@@ -392,8 +392,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": null
+          "unit": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -448,8 +447,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm",
-          "options": null
+          "unit": "dBm"
         },
         "state": {
           "class_name": "RSSISensor",
@@ -504,8 +502,7 @@
           "suggested_display_precision": 0,
           "divisor": 1,
           "multiplier": 1000000.0,
-          "unit": "ppm",
-          "options": null
+          "unit": "ppm"
         },
         "state": {
           "class_name": "CarbonDioxideConcentration",

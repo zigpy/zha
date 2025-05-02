@@ -133,7 +133,6 @@ class SensorEntityInfo(BaseEntityInfo):
     divisor: int
     multiplier: int
     unit: str | None = None
-    options: tuple[str] | None = None
     device_class: SensorDeviceClass | None = None
     state_class: SensorStateClass | None = None
 
@@ -168,7 +167,6 @@ class Sensor(PlatformEntity):
     _multiplier: int | float = 1
     _attr_suggested_display_precision: int | None = None
     _attr_native_unit_of_measurement: str | None = None
-    _attr_options: tuple[str] | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
     _skip_creation_if_no_attr_cache: bool = False
@@ -285,7 +283,6 @@ class Sensor(PlatformEntity):
                 if getattr(self, "entity_description", None) is not None
                 else self._attr_native_unit_of_measurement
             ),
-            options=self._attr_options,
         )
 
     @property
@@ -539,23 +536,10 @@ class DeviceCounterSensor(BaseEntity):
             )
 
 
-class OptionsSensor(Sensor):
-    """Sensor with options."""
-
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.ENUM
-    _attr_options: tuple[str]
-
-    def formatter(self, value: int) -> str | None:
-        """Return the state of the entity."""
-        index = value
-        if index >= len(self._attr_options):
-            return None
-        return self._attr_options[index]
-
-
-class EnumSensor(OptionsSensor):
+class EnumSensor(Sensor):
     """Sensor with value from enum."""
 
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.ENUM
     _enum: type[enum.Enum]
 
     def __init__(
@@ -567,7 +551,7 @@ class EnumSensor(OptionsSensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._attr_options = tuple([e.name for e in self._enum])
+        self._attr_options = [e.name for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
         # depends on the value of `_attribute_name`
@@ -578,6 +562,11 @@ class EnumSensor(OptionsSensor):
         self._enum = entity_metadata.enum
 
         PlatformEntity._init_from_quirks_metadata(self, entity_metadata)  # pylint: disable=protected-access
+
+    def formatter(self, value: int) -> str | None:
+        """Use name of enum."""
+        assert self._enum is not None
+        return self._enum(value).name
 
 
 @MULTI_MATCH(

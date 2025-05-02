@@ -4626,8 +4626,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": null
+          "unit": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -4682,8 +4681,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm",
-          "options": null
+          "unit": "dBm"
         },
         "state": {
           "class_name": "RSSISensor",
@@ -4738,8 +4736,7 @@
           "suggested_display_precision": 3,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "kWh",
-          "options": null
+          "unit": "kWh"
         },
         "state": {
           "class_name": "PolledSmartEnergySummation",
@@ -4797,8 +4794,7 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W",
-          "options": null
+          "unit": "W"
         },
         "state": {
           "class_name": "PolledElectricalMeasurement",
@@ -4853,8 +4849,7 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "A",
-          "options": null
+          "unit": "A"
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
@@ -4909,8 +4904,7 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "V",
-          "options": null
+          "unit": "V"
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",
@@ -4965,8 +4959,7 @@
           "suggested_display_precision": 3,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "kWh",
-          "options": null
+          "unit": "kWh"
         },
         "state": {
           "class_name": "PolledSmartEnergySummation",
@@ -5024,8 +5017,7 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "W",
-          "options": null
+          "unit": "W"
         },
         "state": {
           "class_name": "PolledElectricalMeasurement",
@@ -5080,8 +5072,7 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "A",
-          "options": null
+          "unit": "A"
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
@@ -5136,8 +5127,7 @@
           "suggested_display_precision": 1,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "V",
-          "options": null
+          "unit": "V"
         },
         "state": {
           "class_name": "ElectricalMeasurementRMSVoltage",

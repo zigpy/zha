@@ -1469,8 +1469,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": null
+          "unit": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -1525,16 +1524,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": [
-            "Unknown",
-            "Mains_single_phase",
-            "Mains_three_phase",
-            "Battery",
-            "DC_Source",
-            "Emergency_Mains_Always_On",
-            "Emergency_Mains_Transfer_Switch"
-          ]
+          "unit": null
         },
         "state": {
           "class_name": "AqaraCurtainMotorPowerSourceSensor",
@@ -1589,8 +1579,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm",
-          "options": null
+          "unit": "dBm"
         },
         "state": {
           "class_name": "RSSISensor",
@@ -1645,8 +1634,7 @@
           "suggested_display_precision": 0,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "%",
-          "options": null
+          "unit": "%"
         },
         "state": {
           "class_name": "Battery",
@@ -1704,8 +1692,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "lx",
-          "options": null
+          "unit": "lx"
         },
         "state": {
           "class_name": "Illuminance",
@@ -1760,19 +1747,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": [
-            "Rollershade",
-            "Rollershade_two_motors",
-            "Rollershade_exterior",
-            "Rollershade_exterior_two_motors",
-            "Drapery",
-            "Awning",
-            "Shutter",
-            "Tilt_blind_tilt_only",
-            "Tilt_blind_tilt_and_lift",
-            "Projector_screen"
-          ]
+          "unit": null
         },
         "state": {
           "class_name": "WindowCoveringTypeSensor",
@@ -1827,13 +1802,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": [
-            "Unlocked",
-            "Locked",
-            "Locking",
-            "Unlocking"
-          ]
+          "unit": null
         },
         "state": {
           "class_name": "AqaraCurtainHookStateSensor",

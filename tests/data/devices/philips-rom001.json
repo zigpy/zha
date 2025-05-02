@@ -1392,8 +1392,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": null,
-          "options": null
+          "unit": null
         },
         "state": {
           "class_name": "LQISensor",
@@ -1448,8 +1447,7 @@
           "suggested_display_precision": null,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "dBm",
-          "options": null
+          "unit": "dBm"
         },
         "state": {
           "class_name": "RSSISensor",
@@ -1504,8 +1502,7 @@
           "suggested_display_precision": 0,
           "divisor": 1,
           "multiplier": 1,
-          "unit": "%",
-          "options": null
+          "unit": "%"
         },
         "state": {
           "class_name": "Battery",
