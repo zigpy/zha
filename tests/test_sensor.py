@@ -271,7 +271,7 @@ async def async_test_smart_energy_summation(
     await send_attributes_report(
         zha_gateway, cluster, {1025: 1, "current_summ_delivered": 12321, 1026: 100}
     )
-    assert_state(entity, 12.32, "m³")
+    assert_state(entity, 12.0, "m³")
     assert entity.state["status"] == "NO_ALARMS"
     assert entity.state["device_type"] == "Electric Metering"
 
@@ -1060,31 +1060,31 @@ async def test_unsupported_attributes_sensor(
         (
             1,
             12320,
-            1.23,
+            1.0,
             UnitOfVolume.CUBIC_METERS,
         ),
         (
             1,
             1232000,
-            123.2000,
+            123.0,
             UnitOfVolume.CUBIC_METERS,
         ),
         (
             3,
             2340,
-            0.23,
+            0.0,
             UnitOfVolume.CUBIC_FEET,
         ),
         (
             3,
             2360,
-            0.24,
+            0.0,
             UnitOfVolume.CUBIC_FEET,
         ),
         (
             8,
             23660,
-            2.37,
+            2.0,
             UnitOfPressure.KPA,
         ),
         (
@@ -1132,13 +1132,13 @@ async def test_unsupported_attributes_sensor(
         (
             5,
             102456,
-            10.25,
+            10.0,
             "IMP gal",
         ),
         (
             7,
             50124,
-            5.01,
+            5.0,
             UnitOfVolume.LITERS,
         ),
     ),
