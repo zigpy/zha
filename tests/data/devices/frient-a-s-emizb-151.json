@@ -975,14 +975,14 @@
             },
             {
               "id": "0x000c",
-              "name": "current_block_period_consump_delivered",
+              "name": "current_block_period_consumption_delivered",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x001d",
-              "name": "current_block_period_consump_received",
+              "name": "current_block_period_consumption_received",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
@@ -1325,14 +1325,14 @@
             },
             {
               "id": "0x0401",
-              "name": "currentday_consump_delivered",
+              "name": "currentday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0402",
-              "name": "currentday_consump_received",
+              "name": "currentday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -1353,7 +1353,7 @@
             },
             {
               "id": "0x000d",
-              "name": "daily_consump_target",
+              "name": "daily_consumption_target",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -1437,14 +1437,14 @@
             },
             {
               "id": "0x030a",
-              "name": "energy_carrier_summ_formatting",
+              "name": "energy_carrier_summation_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0309",
-              "name": "energy_carrier_unit_of_meas",
+              "name": "energy_carrier_unit_of_measure",
               "zcl_type": "enum8",
               "value": null,
               "unsupported": false
@@ -1507,7 +1507,7 @@
             },
             {
               "id": "0x0305",
-              "name": "historical_consump_formatting",
+              "name": "historical_consumption_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
@@ -1661,14 +1661,14 @@
             },
             {
               "id": "0x0403",
-              "name": "previousday_consump_delivered",
+              "name": "previousday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0404",
-              "name": "previousday_consump_received",
+              "name": "previousday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -3621,14 +3621,14 @@
             },
             {
               "id": "0x000c",
-              "name": "current_block_period_consump_delivered",
+              "name": "current_block_period_consumption_delivered",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x001d",
-              "name": "current_block_period_consump_received",
+              "name": "current_block_period_consumption_received",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
@@ -3971,14 +3971,14 @@
             },
             {
               "id": "0x0401",
-              "name": "currentday_consump_delivered",
+              "name": "currentday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0402",
-              "name": "currentday_consump_received",
+              "name": "currentday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -3999,7 +3999,7 @@
             },
             {
               "id": "0x000d",
-              "name": "daily_consump_target",
+              "name": "daily_consumption_target",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -4083,14 +4083,14 @@
             },
             {
               "id": "0x030a",
-              "name": "energy_carrier_summ_formatting",
+              "name": "energy_carrier_summation_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0309",
-              "name": "energy_carrier_unit_of_meas",
+              "name": "energy_carrier_unit_of_measure",
               "zcl_type": "enum8",
               "value": null,
               "unsupported": false
@@ -4153,7 +4153,7 @@
             },
             {
               "id": "0x0305",
-              "name": "historical_consump_formatting",
+              "name": "historical_consumption_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
@@ -4307,14 +4307,14 @@
             },
             {
               "id": "0x0403",
-              "name": "previousday_consump_delivered",
+              "name": "previousday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0404",
-              "name": "previousday_consump_received",
+              "name": "previousday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -4894,14 +4894,14 @@
             },
             {
               "id": "0x000c",
-              "name": "current_block_period_consump_delivered",
+              "name": "current_block_period_consumption_delivered",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x001d",
-              "name": "current_block_period_consump_received",
+              "name": "current_block_period_consumption_received",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
@@ -5244,14 +5244,14 @@
             },
             {
               "id": "0x0401",
-              "name": "currentday_consump_delivered",
+              "name": "currentday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0402",
-              "name": "currentday_consump_received",
+              "name": "currentday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -5272,7 +5272,7 @@
             },
             {
               "id": "0x000d",
-              "name": "daily_consump_target",
+              "name": "daily_consumption_target",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -5356,14 +5356,14 @@
             },
             {
               "id": "0x030a",
-              "name": "energy_carrier_summ_formatting",
+              "name": "energy_carrier_summation_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0309",
-              "name": "energy_carrier_unit_of_meas",
+              "name": "energy_carrier_unit_of_measure",
               "zcl_type": "enum8",
               "value": null,
               "unsupported": false
@@ -5426,7 +5426,7 @@
             },
             {
               "id": "0x0305",
-              "name": "historical_consump_formatting",
+              "name": "historical_consumption_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
@@ -5580,14 +5580,14 @@
             },
             {
               "id": "0x0403",
-              "name": "previousday_consump_delivered",
+              "name": "previousday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0404",
-              "name": "previousday_consump_received",
+              "name": "previousday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -6167,14 +6167,14 @@
             },
             {
               "id": "0x000c",
-              "name": "current_block_period_consump_delivered",
+              "name": "current_block_period_consumption_delivered",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x001d",
-              "name": "current_block_period_consump_received",
+              "name": "current_block_period_consumption_received",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
@@ -6517,14 +6517,14 @@
             },
             {
               "id": "0x0401",
-              "name": "currentday_consump_delivered",
+              "name": "currentday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0402",
-              "name": "currentday_consump_received",
+              "name": "currentday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -6545,7 +6545,7 @@
             },
             {
               "id": "0x000d",
-              "name": "daily_consump_target",
+              "name": "daily_consumption_target",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -6629,14 +6629,14 @@
             },
             {
               "id": "0x030a",
-              "name": "energy_carrier_summ_formatting",
+              "name": "energy_carrier_summation_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0309",
-              "name": "energy_carrier_unit_of_meas",
+              "name": "energy_carrier_unit_of_measure",
               "zcl_type": "enum8",
               "value": null,
               "unsupported": false
@@ -6699,7 +6699,7 @@
             },
             {
               "id": "0x0305",
-              "name": "historical_consump_formatting",
+              "name": "historical_consumption_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
@@ -6853,14 +6853,14 @@
             },
             {
               "id": "0x0403",
-              "name": "previousday_consump_delivered",
+              "name": "previousday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0404",
-              "name": "previousday_consump_received",
+              "name": "previousday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -7440,14 +7440,14 @@
             },
             {
               "id": "0x000c",
-              "name": "current_block_period_consump_delivered",
+              "name": "current_block_period_consumption_delivered",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x001d",
-              "name": "current_block_period_consump_received",
+              "name": "current_block_period_consumption_received",
               "zcl_type": "uint48",
               "value": null,
               "unsupported": false
@@ -7790,14 +7790,14 @@
             },
             {
               "id": "0x0401",
-              "name": "currentday_consump_delivered",
+              "name": "currentday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0402",
-              "name": "currentday_consump_received",
+              "name": "currentday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -7818,7 +7818,7 @@
             },
             {
               "id": "0x000d",
-              "name": "daily_consump_target",
+              "name": "daily_consumption_target",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
@@ -7902,14 +7902,14 @@
             },
             {
               "id": "0x030a",
-              "name": "energy_carrier_summ_formatting",
+              "name": "energy_carrier_summation_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0309",
-              "name": "energy_carrier_unit_of_meas",
+              "name": "energy_carrier_unit_of_measure",
               "zcl_type": "enum8",
               "value": null,
               "unsupported": false
@@ -7972,7 +7972,7 @@
             },
             {
               "id": "0x0305",
-              "name": "historical_consump_formatting",
+              "name": "historical_consumption_formatting",
               "zcl_type": "map8",
               "value": null,
               "unsupported": false
@@ -8126,14 +8126,14 @@
             },
             {
               "id": "0x0403",
-              "name": "previousday_consump_delivered",
+              "name": "previousday_consumption_delivered",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
             },
             {
               "id": "0x0404",
-              "name": "previousday_consump_received",
+              "name": "previousday_consumption_received",
               "zcl_type": "uint24",
               "value": null,
               "unsupported": false
