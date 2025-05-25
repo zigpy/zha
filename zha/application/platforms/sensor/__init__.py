@@ -242,9 +242,9 @@ class Sensor(PlatformEntity):
         self._attribute_name = entity_metadata.attribute_name
         if entity_metadata.attribute_converter is not None:
             self._attribute_converter = entity_metadata.attribute_converter
-        if entity_metadata.divisor is not None:
+        if entity_metadata.divisor is not None and entity_metadata.divisor != 1:
             self._divisor = entity_metadata.divisor
-        if entity_metadata.multiplier is not None:
+        if entity_metadata.multiplier is not None and entity_metadata.multiplier != 1:
             self._multiplier = entity_metadata.multiplier
         if entity_metadata.device_class is not None:
             self._attr_device_class = validate_device_class(
