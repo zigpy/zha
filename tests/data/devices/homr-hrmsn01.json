@@ -2620,10 +2620,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": null
         },
         "state": {
@@ -2675,10 +2672,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "dBm"
         },
         "state": {
@@ -2730,10 +2724,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "lx"
         },
         "state": {
@@ -2785,10 +2776,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
           "suggested_display_precision": null,
-          "divisor": 100,
-          "multiplier": 1,
           "unit": "\u00b0C"
         },
         "state": {
@@ -2840,16 +2828,13 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
           "suggested_display_precision": 0,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "hPa"
         },
         "state": {
           "class_name": "Pressure",
           "available": true,
-          "state": 997.0
+          "state": 997
         }
       },
       {
@@ -2895,10 +2880,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
           "suggested_display_precision": null,
-          "divisor": 100,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {

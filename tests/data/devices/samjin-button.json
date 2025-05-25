@@ -1394,10 +1394,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": null
         },
         "state": {
@@ -1449,10 +1446,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "dBm"
         },
         "state": {
@@ -1504,10 +1498,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "battery_percentage_remaining",
           "suggested_display_precision": 0,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
@@ -1560,10 +1551,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
           "suggested_display_precision": null,
-          "divisor": 100,
-          "multiplier": 1,
           "unit": "\u00b0C"
         },
         "state": {

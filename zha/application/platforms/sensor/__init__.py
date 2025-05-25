@@ -5,7 +5,7 @@ from __future__ import annotations
 from asyncio import Task
 import contextlib
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import date, datetime, timedelta
 import enum
 import functools
 import logging
@@ -37,7 +37,7 @@ from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
     ANALOG_INPUT_APPTYPE_UNITS,
-    UNIX_EPOCH_TO_ZCL_EPOCH,
+    ZCL_EPOCH,
     SensorDeviceClass,
     SensorStateClass,
 )
@@ -128,10 +128,7 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 class SensorEntityInfo(BaseEntityInfo):
     """Sensor entity info."""
 
-    attribute: str
     suggested_display_precision: int | None = None
-    divisor: int
-    multiplier: int
     unit: str | None = None
     device_class: SensorDeviceClass | None = None
     state_class: SensorStateClass | None = None
@@ -163,8 +160,8 @@ class Sensor(PlatformEntity):
     PLATFORM = Platform.SENSOR
     _attribute_name: int | str | None = None
     _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
-    _divisor: int = 1
-    _multiplier: int | float = 1
+    _divisor: int | float | None = None
+    _multiplier: int | float | None = None
     _attr_suggested_display_precision: int | None = None
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
@@ -268,10 +265,7 @@ class Sensor(PlatformEntity):
         """Return a representation of the sensor."""
         return SensorEntityInfo(
             **super().info_object.__dict__,
-            attribute=self._attribute_name,
             suggested_display_precision=self._attr_suggested_display_precision,
-            divisor=self._divisor,
-            multiplier=self._multiplier,
             unit=(
                 getattr(self, "entity_description").native_unit_of_measurement
                 if getattr(self, "entity_description", None) is not None
@@ -293,6 +287,8 @@ class Sensor(PlatformEntity):
         assert self._attribute_name is not None
         raw_state = self._cluster_handler.cluster.get(self._attribute_name)
         if raw_state is None:
+            return None
+        if self._is_non_value(raw_state):
             return None
         if self._attribute_converter:
             return self._attribute_converter(raw_state)
@@ -327,22 +323,19 @@ class Sensor(PlatformEntity):
         data_type = foundation.DataType.from_type_id(attr_def.zcl_type)
         return value == data_type.non_value
 
-    def formatter(
-        self, value: int | enum.IntEnum
-    ) -> datetime | int | float | str | None:
+    def formatter(self, value: Any) -> date | datetime | int | float | str | None:
         """Numeric pass-through formatter."""
-        if self._is_non_value(value):
-            return None
+        if self._multiplier is not None:
+            value *= self._multiplier
 
-        return float(value * self._multiplier) / self._divisor
+        if self._divisor is not None:
+            value /= self._divisor
+
+        return value
 
 
 class TimestampSensor(Sensor):
     """Timestamp ZHA sensor."""
-
-    def formatter(self, value: int | enum.IntEnum) -> datetime | None:
-        """Pass-through formatter."""
-        return datetime.fromtimestamp(value - UNIX_EPOCH_TO_ZCL_EPOCH, tz=UTC)
 
 
 class PollableSensor(Sensor):
@@ -717,19 +710,27 @@ class BaseElectricalMeasurement(PollableSensor):
 
         return response
 
-    def formatter(self, value: int) -> int | float:
-        """Return 'normalized' value."""
-        if self._multiplier_attribute_name:
-            multiplier = getattr(self._cluster_handler, self._multiplier_attribute_name)
-        else:
-            multiplier = self._multiplier
+    @property
+    def _multiplier(self) -> int | float | None:
+        if not self._multiplier_attribute_name:
+            return super()._multiplier
 
-        if self._divisor_attribute_name:
-            divisor = getattr(self._cluster_handler, self._divisor_attribute_name)
-        else:
-            divisor = self._divisor
+        return getattr(self._cluster_handler, self._multiplier_attribute_name)
 
-        return float(value * multiplier) / divisor
+    @_multiplier.setter
+    def _multiplier(self, value: int | None) -> None:
+        raise AttributeError("Cannot set multiplier directly")
+
+    @property
+    def _divisor(self) -> int | float | None:
+        if not self._divisor_attribute_name:
+            return super()._divisor
+
+        return getattr(self._cluster_handler, self._divisor_attribute_name)
+
+    @_divisor.setter
+    def _divisor(self, value: int | None) -> None:
+        raise AttributeError("Cannot set divisor directly")
 
 
 @MULTI_MATCH(
@@ -1860,6 +1861,10 @@ class SetpointChangeSourceTimestamp(TimestampSensor):
     _attr_translation_key: str = "setpoint_change_source_timestamp"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def formatter(self, value: types.UTCTime) -> datetime:
+        """Pass-through formatter."""
+        return ZCL_EPOCH + timedelta(seconds=value)
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)

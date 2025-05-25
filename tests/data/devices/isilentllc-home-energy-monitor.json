@@ -23582,10 +23582,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": null
         },
         "state": {
@@ -23637,10 +23634,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "dBm"
         },
         "state": {
@@ -23692,10 +23686,7 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -23748,10 +23739,7 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -23804,10 +23792,7 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -23860,16 +23845,13 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 55.0,
+          "state": 55,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -23916,10 +23898,7 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -23972,10 +23951,7 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -24028,10 +24004,7 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -24084,10 +24057,7 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -24140,10 +24110,7 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -24196,16 +24163,13 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 30.0,
+          "state": 30,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24252,10 +24216,7 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -24308,10 +24269,7 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -24364,10 +24322,7 @@
           "endpoint_id": 12,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -24420,10 +24375,7 @@
           "endpoint_id": 12,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -24476,10 +24428,7 @@
           "endpoint_id": 12,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -24532,16 +24481,13 @@
           "endpoint_id": 12,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 56.0,
+          "state": 56,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24588,10 +24534,7 @@
           "endpoint_id": 12,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -24644,10 +24587,7 @@
           "endpoint_id": 12,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -24700,10 +24640,7 @@
           "endpoint_id": 13,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -24756,10 +24693,7 @@
           "endpoint_id": 13,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -24812,10 +24746,7 @@
           "endpoint_id": 13,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -24868,16 +24799,13 @@
           "endpoint_id": 13,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 63.0,
+          "state": 63,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -24924,10 +24852,7 @@
           "endpoint_id": 13,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -24980,10 +24905,7 @@
           "endpoint_id": 13,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -25036,10 +24958,7 @@
           "endpoint_id": 14,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -25092,10 +25011,7 @@
           "endpoint_id": 14,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -25148,10 +25064,7 @@
           "endpoint_id": 14,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -25204,16 +25117,13 @@
           "endpoint_id": 14,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 18.0,
+          "state": 18,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25260,10 +25170,7 @@
           "endpoint_id": 14,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -25316,10 +25223,7 @@
           "endpoint_id": 14,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -25372,10 +25276,7 @@
           "endpoint_id": 15,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -25428,10 +25329,7 @@
           "endpoint_id": 15,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -25484,10 +25382,7 @@
           "endpoint_id": 15,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -25540,16 +25435,13 @@
           "endpoint_id": 15,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 99.0,
+          "state": 99,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25596,10 +25488,7 @@
           "endpoint_id": 15,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -25652,10 +25541,7 @@
           "endpoint_id": 15,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -25708,10 +25594,7 @@
           "endpoint_id": 16,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -25764,10 +25647,7 @@
           "endpoint_id": 16,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -25820,10 +25700,7 @@
           "endpoint_id": 16,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -25876,16 +25753,13 @@
           "endpoint_id": 16,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 44.0,
+          "state": 44,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -25932,10 +25806,7 @@
           "endpoint_id": 16,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -25988,10 +25859,7 @@
           "endpoint_id": 16,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -26044,10 +25912,7 @@
           "endpoint_id": 17,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -26100,10 +25965,7 @@
           "endpoint_id": 17,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -26156,10 +26018,7 @@
           "endpoint_id": 17,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -26212,16 +26071,13 @@
           "endpoint_id": 17,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 95.0,
+          "state": 95,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26268,10 +26124,7 @@
           "endpoint_id": 17,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -26324,10 +26177,7 @@
           "endpoint_id": 17,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -26380,10 +26230,7 @@
           "endpoint_id": 18,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -26436,10 +26283,7 @@
           "endpoint_id": 18,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -26492,10 +26336,7 @@
           "endpoint_id": 18,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -26548,16 +26389,13 @@
           "endpoint_id": 18,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 24.0,
+          "state": 24,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26604,10 +26442,7 @@
           "endpoint_id": 18,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -26660,10 +26495,7 @@
           "endpoint_id": 18,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -26716,10 +26548,7 @@
           "endpoint_id": 19,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -26772,10 +26601,7 @@
           "endpoint_id": 19,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -26828,10 +26654,7 @@
           "endpoint_id": 19,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -26884,16 +26707,13 @@
           "endpoint_id": 19,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 34.0,
+          "state": 34,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -26940,10 +26760,7 @@
           "endpoint_id": 19,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -26996,10 +26813,7 @@
           "endpoint_id": 19,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -27052,10 +26866,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -27108,10 +26919,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -27164,10 +26972,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -27220,16 +27025,13 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 85.0,
+          "state": 85,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27276,10 +27078,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -27332,10 +27131,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -27388,10 +27184,7 @@
           "endpoint_id": 20,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -27444,10 +27237,7 @@
           "endpoint_id": 20,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -27500,10 +27290,7 @@
           "endpoint_id": 20,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -27556,16 +27343,13 @@
           "endpoint_id": 20,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 91.0,
+          "state": 91,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27612,10 +27396,7 @@
           "endpoint_id": 20,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -27668,10 +27449,7 @@
           "endpoint_id": 20,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -27724,10 +27502,7 @@
           "endpoint_id": 21,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -27780,10 +27555,7 @@
           "endpoint_id": 21,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -27836,10 +27608,7 @@
           "endpoint_id": 21,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -27892,16 +27661,13 @@
           "endpoint_id": 21,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 51.0,
+          "state": 51,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -27948,10 +27714,7 @@
           "endpoint_id": 21,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -28004,10 +27767,7 @@
           "endpoint_id": 21,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -28060,10 +27820,7 @@
           "endpoint_id": 22,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -28116,10 +27873,7 @@
           "endpoint_id": 22,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -28172,10 +27926,7 @@
           "endpoint_id": 22,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -28228,16 +27979,13 @@
           "endpoint_id": 22,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 97.0,
+          "state": 97,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28284,10 +28032,7 @@
           "endpoint_id": 22,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -28340,10 +28085,7 @@
           "endpoint_id": 22,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -28396,10 +28138,7 @@
           "endpoint_id": 23,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -28452,10 +28191,7 @@
           "endpoint_id": 23,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -28508,10 +28244,7 @@
           "endpoint_id": 23,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -28564,16 +28297,13 @@
           "endpoint_id": 23,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 21.0,
+          "state": 21,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28620,10 +28350,7 @@
           "endpoint_id": 23,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -28676,10 +28403,7 @@
           "endpoint_id": 23,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -28732,10 +28456,7 @@
           "endpoint_id": 24,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -28788,10 +28509,7 @@
           "endpoint_id": 24,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -28844,10 +28562,7 @@
           "endpoint_id": 24,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -28900,16 +28615,13 @@
           "endpoint_id": 24,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 55.0,
+          "state": 55,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -28956,10 +28668,7 @@
           "endpoint_id": 24,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -29012,10 +28721,7 @@
           "endpoint_id": 24,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -29068,10 +28774,7 @@
           "endpoint_id": 25,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -29124,10 +28827,7 @@
           "endpoint_id": 25,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -29180,10 +28880,7 @@
           "endpoint_id": 25,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -29236,16 +28933,13 @@
           "endpoint_id": 25,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 0.0,
+          "state": 0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29292,10 +28986,7 @@
           "endpoint_id": 25,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -29348,10 +29039,7 @@
           "endpoint_id": 25,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -29404,10 +29092,7 @@
           "endpoint_id": 26,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -29460,10 +29145,7 @@
           "endpoint_id": 26,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -29516,10 +29198,7 @@
           "endpoint_id": 26,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -29572,16 +29251,13 @@
           "endpoint_id": 26,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 41.0,
+          "state": 41,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29628,10 +29304,7 @@
           "endpoint_id": 26,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -29684,10 +29357,7 @@
           "endpoint_id": 26,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -29740,10 +29410,7 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -29796,10 +29463,7 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -29852,10 +29516,7 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -29908,16 +29569,13 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 27.0,
+          "state": 27,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -29964,10 +29622,7 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -30020,10 +29675,7 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -30076,10 +29728,7 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -30132,10 +29781,7 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -30188,10 +29834,7 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -30244,16 +29887,13 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 93.0,
+          "state": 93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30300,10 +29940,7 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -30356,10 +29993,7 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -30412,10 +30046,7 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -30468,10 +30099,7 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -30524,10 +30152,7 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -30580,16 +30205,13 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 93.0,
+          "state": 93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30636,10 +30258,7 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -30692,10 +30311,7 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -30748,10 +30364,7 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -30804,10 +30417,7 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -30860,10 +30470,7 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -30916,16 +30523,13 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 23.0,
+          "state": 23,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -30972,10 +30576,7 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -31028,10 +30629,7 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -31084,10 +30682,7 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -31140,10 +30735,7 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -31196,10 +30788,7 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -31252,16 +30841,13 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 52.0,
+          "state": 52,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31308,10 +30894,7 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -31364,10 +30947,7 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -31420,10 +31000,7 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -31476,10 +31053,7 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -31532,10 +31106,7 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -31588,16 +31159,13 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 77.0,
+          "state": 77,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31644,10 +31212,7 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -31700,10 +31265,7 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -31756,10 +31318,7 @@
           "endpoint_id": 9,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -31812,10 +31371,7 @@
           "endpoint_id": 9,
           "available": true,
           "group_id": null,
-          "attribute": "ac_frequency",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "Hz"
         },
         "state": {
@@ -31868,10 +31424,7 @@
           "endpoint_id": 9,
           "available": true,
           "group_id": null,
-          "attribute": "apparent_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "VA"
         },
         "state": {
@@ -31924,16 +31477,13 @@
           "endpoint_id": 9,
           "available": true,
           "group_id": null,
-          "attribute": "power_factor",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
-          "state": 37.0,
+          "state": 37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         }
       },
@@ -31980,10 +31530,7 @@
           "endpoint_id": 9,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -32036,10 +31583,7 @@
           "endpoint_id": 9,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {

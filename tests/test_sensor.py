@@ -459,7 +459,7 @@ async def async_test_change_source_timestamp(
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 2674725315},
+        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 781355715},
     )
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
@@ -1409,6 +1409,7 @@ class TimestampCluster(CustomCluster, ManufacturerSpecificCluster):
         "start_time",
         TimestampCluster.cluster_id,
         device_class=SensorDeviceClassV2.TIMESTAMP,  # Use the zigpy enum
+        attribute_converter=lambda x: datetime.fromtimestamp(x + 946684800, tz=UTC),
         translation_key="start_time",
         fallback_name="Start Time",
     )
@@ -1451,7 +1452,7 @@ async def test_timestamp_sensor_v2(zha_gateway: Gateway) -> None:
     assert isinstance(zha_device.device, CustomDeviceV2)
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="start_time")
 
-    await send_attributes_report(zha_gateway, cluster, {0xEF65: 2674725315})
+    await send_attributes_report(zha_gateway, cluster, {0xEF65: 781355715})
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 

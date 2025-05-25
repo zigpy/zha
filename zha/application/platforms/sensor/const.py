@@ -1,5 +1,6 @@
 """Constants for the sensor platform."""
 
+from datetime import UTC, datetime
 import enum
 
 from zigpy.zcl.clusters.general_const import AnalogInputType
@@ -450,4 +451,4 @@ ANALOG_INPUT_APPTYPE_UNITS = {
     AnalogInputType.Time_Seconds: UnitOfTime.SECONDS,
 }
 
-UNIX_EPOCH_TO_ZCL_EPOCH = 946684800
+ZCL_EPOCH = datetime(2000, 1, 1, tzinfo=UTC)

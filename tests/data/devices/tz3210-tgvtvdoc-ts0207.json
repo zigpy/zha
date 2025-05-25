@@ -1232,10 +1232,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": null
         },
         "state": {
@@ -1287,10 +1284,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "dBm"
         },
         "state": {
@@ -1342,10 +1336,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "battery_percentage_remaining",
           "suggested_display_precision": 0,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
@@ -1400,10 +1391,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "lx"
         },
         "state": {
@@ -1455,10 +1443,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "average_light_intensity_20mins",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "lx"
         },
         "state": {
@@ -1510,10 +1495,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "rain_intensity",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "mV"
         },
         "state": {
@@ -1565,10 +1547,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "todays_max_light_intensity",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "lx"
         },
         "state": {

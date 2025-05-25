@@ -8489,10 +8489,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": null
         },
         "state": {
@@ -8544,10 +8541,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "dBm"
         },
         "state": {
@@ -8599,10 +8593,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "battery_percentage_remaining",
           "suggested_display_precision": 0,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "%"
         },
         "state": {
@@ -8654,10 +8645,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "instantaneous_demand",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -8712,10 +8700,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "current_summ_delivered",
           "suggested_display_precision": 3,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "kWh"
         },
         "state": {
@@ -8770,10 +8755,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "current_summ_received",
           "suggested_display_precision": 3,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "kWh"
         },
         "state": {
@@ -8828,10 +8810,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "active_power",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -8884,10 +8863,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "active_power_ph_b",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -8940,10 +8916,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "active_power_ph_c",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "W"
         },
         "state": {
@@ -8996,10 +8969,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -9052,10 +9022,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current_ph_b",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -9108,10 +9075,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_current_ph_c",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "A"
         },
         "state": {
@@ -9164,10 +9128,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -9220,10 +9181,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage_ph_b",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -9276,10 +9234,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "rms_voltage_ph_c",
           "suggested_display_precision": 1,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "V"
         },
         "state": {
@@ -9332,10 +9287,7 @@
           "endpoint_id": 64,
           "available": true,
           "group_id": null,
-          "attribute": "current_summ_delivered",
           "suggested_display_precision": 3,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "m\u00b3"
         },
         "state": {

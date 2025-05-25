@@ -950,10 +950,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": null
         },
         "state": {
@@ -1005,10 +1002,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "dBm"
         },
         "state": {
@@ -1060,16 +1054,13 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "\u00b5g/m\u00b3"
         },
         "state": {
           "class_name": "PM25",
           "available": true,
-          "state": 16.0
+          "state": 16
         }
       },
       {
@@ -1115,16 +1106,13 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "device_run_time",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "min"
         },
         "state": {
           "class_name": "IkeaDeviceRunTime",
           "available": true,
-          "state": 118729.0
+          "state": 118729
         }
       },
       {
@@ -1170,16 +1158,13 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "filter_run_time",
           "suggested_display_precision": null,
-          "divisor": 1,
-          "multiplier": 1,
           "unit": "min"
         },
         "state": {
           "class_name": "IkeaFilterRunTime",
           "available": true,
-          "state": 118729.0
+          "state": 118729
         }
       }
     ],
