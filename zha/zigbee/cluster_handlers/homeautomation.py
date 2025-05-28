@@ -106,6 +106,10 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_OP,
         ),
         AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.total_active_power.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
             attr=ElectricalMeasurement.AttributeDefs.apparent_power.name,
             config=REPORT_CONFIG_OP,
         ),
@@ -147,6 +151,7 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         ElectricalMeasurement.AttributeDefs.active_power_max.name,
         ElectricalMeasurement.AttributeDefs.active_power_max_ph_b.name,
         ElectricalMeasurement.AttributeDefs.active_power_max_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.total_active_power.name,
         ElectricalMeasurement.AttributeDefs.apparent_power.name,
         ElectricalMeasurement.AttributeDefs.power_factor.name,
         ElectricalMeasurement.AttributeDefs.power_factor_ph_b.name,

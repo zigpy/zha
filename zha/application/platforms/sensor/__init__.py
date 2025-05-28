@@ -779,6 +779,17 @@ class ElectricalMeasurementRMSActivePowerPhC(PolledElectricalMeasurement):
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementTotalActivePower(PolledElectricalMeasurement):
+    """Total active power measurement."""
+
+    _attribute_name = "total_active_power"
+    _unique_id_suffix = "total_active_power"
+    _attr_translation_key: str = "total_active_power"
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _skip_creation_if_no_attr_cache = True
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
 class ElectricalMeasurementApparentPower(PolledElectricalMeasurement):
     """Apparent power measurement."""
 
