@@ -1486,7 +1486,7 @@
           "installed_version": "0x0000005b",
           "in_progress": false,
           "update_percentage": null,
-          "latest_version": "0x0000005b",
+          "latest_version": null,
           "release_summary": null,
           "release_notes": null,
           "release_url": null

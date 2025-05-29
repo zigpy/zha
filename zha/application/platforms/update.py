@@ -317,7 +317,6 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
             CLUSTER_HANDLER_OTA
         ]
         self._attr_installed_version: str | None = self._get_cluster_version()
-        self._attr_latest_version = self._attr_installed_version
         self._compatible_images: OtaImagesResult = OtaImagesResult(
             upgrades=(), downgrades=()
         )
@@ -342,7 +341,6 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
             CLUSTER_HANDLER_OTA_SERVER
         ]
         self._attr_installed_version: str | None = self._get_cluster_version()
-        self._attr_latest_version = self._attr_installed_version
         self._compatible_images: OtaImagesResult = OtaImagesResult(
             upgrades=(), downgrades=()
         )

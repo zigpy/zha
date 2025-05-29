@@ -2385,7 +2385,7 @@
           "installed_version": "0x01000064",
           "in_progress": false,
           "update_percentage": null,
-          "latest_version": "0x01000064",
+          "latest_version": null,
           "release_summary": null,
           "release_notes": null,
           "release_url": null

@@ -1280,7 +1280,7 @@
           "installed_version": "0x00000c08",
           "in_progress": false,
           "update_percentage": null,
-          "latest_version": "0x00000c08",
+          "latest_version": null,
           "release_summary": null,
           "release_notes": null,
           "release_url": null
