@@ -205,7 +205,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         if self.radio_type in external_radio_libraries:
             return external_radio_libraries[self.radio_type].description
 
-        if self.radio_type in RadioType:
+        if self.radio_type in RadioType.__members__:
             return RadioType[self.radio_type].description
 
         raise ValueError(f"Unknown radio type: {self.radio_type!r}")
@@ -220,7 +220,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             )
             return module.ControllerApplication
 
-        if self.radio_type in RadioType:
+        if self.radio_type in RadioType.__members__:
             return RadioType[self.radio_type].controller
 
         raise ValueError(f"Unknown radio type: {self.radio_type!r}")
