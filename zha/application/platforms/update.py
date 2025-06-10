@@ -298,11 +298,6 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
         self._attr_in_progress = False
         await super().on_remove()
 
-    def restore_external_state_attributes(self, *, latest_version: str | None) -> None:
-        """Restore extra state attributes that are stored outside of the ZCL cache."""
-        if latest_version is not None:
-            self._attr_latest_version = latest_version
-
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA)
 class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
