@@ -384,6 +384,14 @@ class DeviceOverridesConfiguration:
 
 
 @dataclass(kw_only=True, slots=True)
+class ExternalRadioLibrary:
+    """ZHA external radio library configuration."""
+
+    module: str
+    description: str
+
+
+@dataclass(kw_only=True, slots=True)
 class ZHAConfiguration:
     """ZHA configuration."""
 
@@ -400,6 +408,9 @@ class ZHAConfiguration:
     device_options: DeviceOptions = dataclasses.field(default_factory=DeviceOptions)
     alarm_control_panel_options: AlarmControlPanelOptions = dataclasses.field(
         default_factory=AlarmControlPanelOptions
+    )
+    external_radio_libraries: dict[str, ExternalRadioLibrary] = dataclasses.field(
+        default_factory=dict
     )
 
 

@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
+import importlib
 import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
@@ -192,9 +193,37 @@ class Gateway(AsyncUtilMixin, EventBase):
         self.config.gateway = self
 
     @property
-    def radio_type(self) -> RadioType:
+    def radio_type(self) -> str:
         """Get the current radio type."""
-        return RadioType[self.config.config.coordinator_configuration.radio_type]
+        return self.config.config.coordinator_configuration.radio_type
+
+    def get_controller_description(self) -> str:
+        """Get the controller description for the current radio type."""
+        external_radio_libraries = self.config.config.external_radio_libraries
+
+        # Prefer external radio libraries
+        if self.radio_type in external_radio_libraries:
+            return external_radio_libraries[self.radio_type].description
+
+        if self.radio_type in RadioType:
+            return RadioType[self.radio_type].description
+
+        raise ValueError(f"Unknown radio type: {self.radio_type!r}")
+
+    def get_controller_cls(self) -> type[ControllerApplication]:
+        """Get the controller class for the current radio type."""
+        external_radio_libraries = self.config.config.external_radio_libraries
+
+        if self.radio_type in external_radio_libraries:
+            module = importlib.import_module(
+                external_radio_libraries[self.radio_type].module
+            )
+            return module.ControllerApplication
+
+        if self.radio_type in RadioType:
+            return RadioType[self.radio_type].controller
+
+        raise ValueError(f"Unknown radio type: {self.radio_type!r}")
 
     def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
@@ -215,7 +244,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
             app_config[CONF_NWK_VALIDATE_SETTINGS] = True
 
-        return self.radio_type.controller, app_config
+        return self.get_controller_cls(), app_config
 
     @classmethod
     async def async_from_config(cls, config: ZHAData) -> Self:
@@ -246,7 +275,11 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Initialize controller and connect radio."""
         self.shutting_down = False
 
-        app_controller_cls, app_config = self.get_application_controller_data()
+        # `get_application_controller_data` can import packages and the blocking IO must
+        # be done in a separate thread
+        app_controller_cls, app_config = await self.async_add_executor_job(
+            self.get_application_controller_data
+        )
         self.application_controller = await app_controller_cls.new(
             config=app_config,
             auto_form=False,
