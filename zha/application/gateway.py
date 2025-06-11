@@ -5,9 +5,11 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager, suppress
+import dataclasses
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
+from functools import cached_property
 import importlib
 import logging
 import time
@@ -47,9 +49,14 @@ from zha.application.const import (
     ZHA_GW_MSG_GROUP_MEMBER_REMOVED,
     ZHA_GW_MSG_GROUP_REMOVED,
     ZHA_GW_MSG_RAW_INIT,
-    RadioType,
 )
-from zha.application.helpers import DeviceAvailabilityChecker, GlobalUpdater, ZHAData
+from zha.application.helpers import (
+    RADIO_LIBRARIES,
+    DeviceAvailabilityChecker,
+    GlobalUpdater,
+    RadioLibrary,
+    ZHAData,
+)
 from zha.async_ import (
     AsyncUtilMixin,
     create_eager_task,
@@ -197,35 +204,34 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Get the current radio type."""
         return self.config.config.coordinator_configuration.radio_type
 
-    def get_controller_description(self) -> str:
-        """Get the controller description for the current radio type."""
-        external_radio_libraries = self.config.config.external_radio_libraries
+    @property
+    def radio_library(self) -> RadioLibrary:
+        """Get the current radio library."""
+        radio_type = self.radio_type
+        radio_libraries = self.radio_libraries
 
-        # Prefer external radio libraries
-        if self.radio_type in external_radio_libraries:
-            return external_radio_libraries[self.radio_type].description
+        if radio_type not in radio_libraries:
+            raise ValueError(f"Unknown radio type: {radio_type!r}")
 
-        if self.radio_type in RadioType.__members__:
-            return RadioType[self.radio_type].description
+        return radio_libraries[radio_type]
 
-        raise ValueError(f"Unknown radio type: {self.radio_type!r}")
+    @cached_property
+    def radio_libraries(self) -> dict[str, RadioLibrary]:
+        """Get all available radio libraries."""
+        radio_libraries = {}
 
-    def get_controller_cls(self) -> type[ControllerApplication]:
-        """Get the controller class for the current radio type."""
-        external_radio_libraries = self.config.config.external_radio_libraries
+        for library in RADIO_LIBRARIES + self.config.config.external_radio_libraries:
+            import_path, cls_name = library.module_path.split(":", 1)
+            module = importlib.import_module(import_path)
+            radio_cls = getattr(module, cls_name)
 
-        if self.radio_type in external_radio_libraries:
-            module = importlib.import_module(
-                external_radio_libraries[self.radio_type].module
+            radio_libraries[library.radio_type] = dataclasses.replace(
+                library, controller=radio_cls
             )
-            return module.ControllerApplication
 
-        if self.radio_type in RadioType.__members__:
-            return RadioType[self.radio_type].controller
+        return radio_libraries
 
-        raise ValueError(f"Unknown radio type: {self.radio_type!r}")
-
-    def get_application_controller_data(self) -> tuple[ControllerApplication, dict]:
+    def get_application_controller_config(self) -> dict:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
         app_config = self.config.zigpy_config
         app_config[CONF_DEVICE] = {
@@ -244,7 +250,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
             app_config[CONF_NWK_VALIDATE_SETTINGS] = True
 
-        return self.get_controller_cls(), app_config
+        return app_config
 
     @classmethod
     async def async_from_config(cls, config: ZHAData) -> Self:
@@ -275,11 +281,12 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Initialize controller and connect radio."""
         self.shutting_down = False
 
-        # `get_application_controller_data` can import packages and the blocking IO must
-        # be done in a separate thread
-        app_controller_cls, app_config = await self.async_add_executor_job(
-            self.get_application_controller_data
+        # `radio_library` imports packages and should be used in a separate thread
+        app_config = self.get_application_controller_config()
+        app_controller_cls = await self.async_add_executor_job(
+            lambda: self.radio_library.controller
         )
+
         self.application_controller = await app_controller_cls.new(
             config=app_config,
             auto_form=False,

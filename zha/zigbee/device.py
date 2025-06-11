@@ -540,7 +540,7 @@ class Device(LogMixin, EventBase):
         if self.is_active_coordinator:
             model = self.gateway.application_controller.state.node_info.model
             if model is None:
-                return f"Generic Zigbee Coordinator ({self.gateway.get_controller_description()})"
+                return f"Generic Zigbee Coordinator ({self.gateway.radio_library.description})"
             return model
 
         if (

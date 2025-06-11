@@ -26,7 +26,7 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
+from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST
 from zha.application.gateway import (
     ConnectionLostEvent,
     DeviceJoinedDeviceInfo,
@@ -191,10 +191,6 @@ async def test_gateway_starts_entity_exception(
             return_value=zigpy_app_controller,
         ),
         patch(
-            "bellows.zigbee.application.ControllerApplication",
-            return_value=zigpy_app_controller,
-        ),
-        patch(
             "zha.application.platforms.sensor.DeviceCounterSensor.__init__",
             side_effect=Exception,
         ),
@@ -218,15 +214,9 @@ async def test_mains_devices_startup_polling_config(
 ) -> None:
     """Test mains powered device startup polling config is respected."""
 
-    with (
-        patch(
-            "bellows.zigbee.application.ControllerApplication.new",
-            return_value=zigpy_app_controller,
-        ),
-        patch(
-            "bellows.zigbee.application.ControllerApplication",
-            return_value=zigpy_app_controller,
-        ),
+    with patch(
+        "bellows.zigbee.application.ControllerApplication.new",
+        return_value=zigpy_app_controller,
     ):
         zha_data.config.device_options.enable_mains_startup_polling = enabled
         zha_gateway = await Gateway.async_from_config(zha_data)
@@ -826,32 +816,6 @@ async def test_gateway_handle_message(
     assert zha_dev_basic.on_network is True
 
 
-def test_radio_type():
-    """Test radio type."""
-
-    assert RadioType.list() == [
-        "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis",
-        "ZNP = Texas Instruments Z-Stack ZNP protocol: CC253x, CC26x2, CC13x2",
-        "deCONZ = dresden elektronik deCONZ protocol: ConBee I/II, RaspBee I/II",
-        "ZiGate = ZiGate Zigbee radios: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
-        "XBee = Digi XBee Zigbee radios: Digi XBee Series 2, 2C, 3",
-    ]
-
-    assert (
-        RadioType.get_by_description(
-            "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis"
-        )
-        == RadioType.ezsp
-    )
-
-    assert RadioType.ezsp.description == (
-        "EZSP = Silicon Labs EmberZNet protocol: Elelabs, HUSBZB-1, Telegesis"
-    )
-
-    with pytest.raises(ValueError):
-        RadioType.get_by_description("Invalid description")
-
-
 @pytest.mark.parametrize(
     ("country_code", "yaml_config", "expected_country_code"),
     [
@@ -873,7 +837,7 @@ async def test_country_code_passthrough(
     zha_data.zigpy_config = yaml_config
 
     gateway = Gateway(zha_data)
-    _, app_config = gateway.get_application_controller_data()
+    app_config = gateway.get_application_controller_config()
 
     assert (
         app_config.get(CONF_NWK, {}).get(CONF_NWK_COUNTRY_CODE) == expected_country_code

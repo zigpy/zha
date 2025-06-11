@@ -41,6 +41,8 @@ from zha.decorators import periodic
 from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
+    from zigpy.application import ControllerApplication
+
     from zha.application.gateway import Gateway
     from zha.zigbee.device import Device
 
@@ -61,6 +63,56 @@ BINDABLE_CLUSTERS: frozenset[int] = frozenset(
         Color.cluster_id,
     }
 )
+
+
+@dataclass(kw_only=True, slots=True)
+class RadioLibrary:
+    """ZHA external radio library configuration."""
+
+    radio_type: str
+    display_name: str
+    description: str
+    module_path: str
+    deprecated: bool = False
+
+    # This module w
+    controller: type[ControllerApplication] = None  # type: ignore[assignment]
+
+
+RADIO_LIBRARIES = [
+    RadioLibrary(
+        radio_type="ezsp",
+        display_name="EZSP",
+        description="Silicon Labs EmberZNet",
+        module_path="bellows.zigbee.application:ControllerApplication",
+    ),
+    RadioLibrary(
+        radio_type="znp",
+        display_name="ZNP",
+        description="Texas Instruments Z-Stack",
+        module_path="zigpy_znp.zigbee.application:ControllerApplication",
+    ),
+    RadioLibrary(
+        radio_type="deconz",
+        display_name="deCONZ",
+        description="dresden elektronik deCONZ",
+        module_path="zigpy_deconz.zigbee.application:ControllerApplication",
+    ),
+    RadioLibrary(
+        radio_type="zigate",
+        display_name="ZiGate",
+        description="ZiGate",
+        module_path="zigpy_zigate.zigbee.application:ControllerApplication",
+        deprecated=True,
+    ),
+    RadioLibrary(
+        radio_type="xbee",
+        display_name="XBee",
+        description="Digi XBee",
+        module_path="zigpy_xbee.zigbee.application:ControllerApplication",
+        deprecated=True,
+    ),
+]
 
 
 @dataclass
@@ -384,14 +436,6 @@ class DeviceOverridesConfiguration:
 
 
 @dataclass(kw_only=True, slots=True)
-class ExternalRadioLibrary:
-    """ZHA external radio library configuration."""
-
-    module: str
-    description: str
-
-
-@dataclass(kw_only=True, slots=True)
 class ZHAConfiguration:
     """ZHA configuration."""
 
@@ -409,8 +453,8 @@ class ZHAConfiguration:
     alarm_control_panel_options: AlarmControlPanelOptions = dataclasses.field(
         default_factory=AlarmControlPanelOptions
     )
-    external_radio_libraries: dict[str, ExternalRadioLibrary] = dataclasses.field(
-        default_factory=dict
+    external_radio_libraries: list[RadioLibrary] = dataclasses.field(
+        default_factory=list
     )
 
 
