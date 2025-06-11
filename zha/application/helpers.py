@@ -75,44 +75,44 @@ class RadioLibrary:
     module_path: str
     deprecated: bool = False
 
-    # This module w
+    # The actual controller class will be imported dynamically
     controller: type[ControllerApplication] = None  # type: ignore[assignment]
 
 
-RADIO_LIBRARIES = [
-    RadioLibrary(
+RADIO_LIBRARIES = {
+    "ezsp": RadioLibrary(
         radio_type="ezsp",
         display_name="EZSP",
-        description="Silicon Labs EmberZNet",
+        description="Silicon Labs EmberZNet: Elelabs, HUSBZB-1, Telegesis",
         module_path="bellows.zigbee.application:ControllerApplication",
     ),
-    RadioLibrary(
+    "znp": RadioLibrary(
         radio_type="znp",
         display_name="ZNP",
-        description="Texas Instruments Z-Stack",
+        description="Texas Instruments Z-Stack ZNP: CC253x, CC26x2, CC13x2",
         module_path="zigpy_znp.zigbee.application:ControllerApplication",
     ),
-    RadioLibrary(
+    "deconz": RadioLibrary(
         radio_type="deconz",
         display_name="deCONZ",
-        description="dresden elektronik deCONZ",
+        description="dresden elektronik deCONZ: ConBee, RaspBee",
         module_path="zigpy_deconz.zigbee.application:ControllerApplication",
     ),
-    RadioLibrary(
+    "zigate": RadioLibrary(
         radio_type="zigate",
         display_name="ZiGate",
-        description="ZiGate",
+        description="ZiGate: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
         module_path="zigpy_zigate.zigbee.application:ControllerApplication",
         deprecated=True,
     ),
-    RadioLibrary(
+    "xbee": RadioLibrary(
         radio_type="xbee",
         display_name="XBee",
-        description="Digi XBee",
+        description="Digi XBee: Series 2, 2C, 3",
         module_path="zigpy_xbee.zigbee.application:ControllerApplication",
         deprecated=True,
     ),
-]
+}
 
 
 @dataclass

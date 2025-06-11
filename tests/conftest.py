@@ -8,7 +8,7 @@ import os
 import reprlib
 import threading
 from types import TracebackType
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 import looptime
 import pytest

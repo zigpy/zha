@@ -11,6 +11,7 @@ from datetime import timedelta
 from enum import Enum
 from functools import cached_property
 import importlib
+from itertools import chain
 import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
@@ -220,7 +221,9 @@ class Gateway(AsyncUtilMixin, EventBase):
         """Get all available radio libraries."""
         radio_libraries = {}
 
-        for library in RADIO_LIBRARIES + self.config.config.external_radio_libraries:
+        for library in chain(
+            RADIO_LIBRARIES.values(), self.config.config.external_radio_libraries
+        ):
             import_path, cls_name = library.module_path.split(":", 1)
             module = importlib.import_module(import_path)
             radio_cls = getattr(module, cls_name)
