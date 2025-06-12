@@ -152,11 +152,11 @@ def expected_lingering_timers() -> bool:
 
 @pytest.fixture(autouse=True)
 def verify_cleanup(
+    event_loop: asyncio.AbstractEventLoop,
     expected_lingering_tasks: bool,  # pylint: disable=redefined-outer-name
     expected_lingering_timers: bool,  # pylint: disable=redefined-outer-name
 ) -> Generator[None, None, None]:
     """Verify that the test has cleaned up resources correctly."""
-    event_loop = asyncio.get_event_loop()
     threads_before = frozenset(threading.enumerate())
     tasks_before = asyncio.all_tasks(event_loop)
     yield
