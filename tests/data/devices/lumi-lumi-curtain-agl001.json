@@ -1956,7 +1956,7 @@
           "installed_version": "0x00000018",
           "in_progress": false,
           "update_percentage": null,
-          "latest_version": "0x00000018",
+          "latest_version": null,
           "release_summary": null,
           "release_notes": null,
           "release_url": null

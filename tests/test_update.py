@@ -166,11 +166,8 @@ async def test_firmware_update_notification_from_zigpy(zha_gateway: Gateway) -> 
     )
 
     entity = get_entity(zha_device, platform=Platform.UPDATE)
-    assert (
-        entity.state["latest_version"]
-        == entity.state["installed_version"]
-        == f"0x{installed_fw_version:08x}"
-    )
+    assert entity.state["installed_version"] == f"0x{installed_fw_version:08x}"
+    assert entity.state["latest_version"] is None
 
     # simulate an image available notification
     await ota_cluster._handle_query_next_image(

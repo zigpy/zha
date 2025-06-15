@@ -3708,7 +3708,7 @@
           "installed_version": "0x00020009",
           "in_progress": false,
           "update_percentage": null,
-          "latest_version": "0x00020009",
+          "latest_version": null,
           "release_summary": null,
           "release_notes": null,
           "release_url": null
