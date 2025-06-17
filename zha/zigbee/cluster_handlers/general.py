@@ -325,6 +325,32 @@ class BinaryOutputClusterHandler(ClusterHandler):
         ),
     )
 
+    ZCL_INIT_ATTRS = {
+        BinaryOutput.AttributeDefs.description.name: True,
+    }
+
+    @property
+    def description(self) -> str | None:
+        """Return cached value of description."""
+        return self.cluster.get(BinaryOutput.AttributeDefs.description.name)
+
+    @property
+    def present_value(self) -> bool | None:
+        """Return cached value of present_value."""
+        return self.cluster.get(BinaryOutput.AttributeDefs.present_value.name)
+
+    async def async_set_present_value(self, value: bool) -> None:
+        """Update present_value."""
+        await self.write_attributes_safe(
+            {BinaryOutput.AttributeDefs.present_value.name: value}
+        )
+
+    async def async_update(self):
+        """Update cluster value attribute."""
+        await self.get_attribute_value(
+            BinaryOutput.AttributeDefs.present_value.name, from_cache=False
+        )
+
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(BinaryValue.cluster_id)
 class BinaryValueClusterHandler(ClusterHandler):
