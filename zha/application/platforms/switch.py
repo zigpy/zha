@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy.quirks.v2 import SwitchMetadata
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
-from zigpy.zcl.clusters.general import OnOff, BinaryOutput
+from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -37,7 +37,7 @@ from zha.zigbee.cluster_handlers.general import OnOffClusterHandler
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler, BinaryOutputClusterHandler
+    from zha.zigbee.cluster_handlers import BinaryOutputClusterHandler, ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -157,9 +157,9 @@ class BinaryOutputSwitch(PlatformEntity):
     ) -> None:
         """Initialize the switch."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._binary_output_cluster_handler: BinaryOutputClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_BINARY_OUTPUT
-        ]
+        self._binary_output_cluster_handler: BinaryOutputClusterHandler = (
+            self.cluster_handlers[CLUSTER_HANDLER_BINARY_OUTPUT]
+        )
 
     def _is_supported(self) -> bool:
         if self._cluster_handler.description is None:
