@@ -1207,11 +1207,35 @@ class Device(LogMixin, EventBase):
     def _compute_primary_entity(self) -> None:
         """Compute the primary entity for this device."""
 
-        # Only consider non-counter entities
+        # First, check if any entity is explicitly primary
+        explicitly_primary = [
+            entity for entity in self._platform_entities.values() if entity.primary
+        ]
+
+        if len(explicitly_primary) == 1:
+            self.debug(
+                "Device has a single explicitly primary entity,"
+                " not performing weight matching"
+            )
+            return
+        elif len(explicitly_primary) > 1:
+            self.warning(
+                "Device has multiple explicitly primary entities, this is a bug"
+            )
+
+            # If there is a collision, nobody wins
+            for entity in explicitly_primary:
+                entity.primary = False
+                del entity.info_object
+
+            return
+
+        # For weight matching, only consider non-counter entities and entities which are
+        # not explicitly marked as not primary
         candidates = [
             e
             for e in self._platform_entities.values()
-            if e.enabled and hasattr(e, "info_object")
+            if e.enabled and hasattr(e, "info_object") and e._attr_primary is not False
         ]
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
 
