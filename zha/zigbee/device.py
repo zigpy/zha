@@ -1218,17 +1218,9 @@ class Device(LogMixin, EventBase):
                 " not performing weight matching"
             )
             return
-        elif len(explicitly_primary) > 1:
-            self.warning(
-                "Device has multiple explicitly primary entities, this is a bug"
-            )
 
-            # If there is a collision, nobody wins
-            for entity in explicitly_primary:
-                entity.primary = False
-                del entity.info_object
-
-            return
+        # It should not be possible for there to be more than one
+        assert not explicitly_primary
 
         # For weight matching, only consider non-counter entities and entities which are
         # not explicitly marked as not primary
