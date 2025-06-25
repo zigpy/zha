@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy.quirks.v2 import SwitchMetadata
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
-from zigpy.zcl.clusters.general import OnOff
+from zigpy.zcl.clusters.general import BinaryOutput, OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -181,7 +181,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
 
     @property
     def is_on(self) -> bool:
-        """Return if the switch is on based on the statemachine."""
+        """Return if the switch is on."""
         if self._binary_output_cluster_handler.present_value is None:
             return False
         return self._binary_output_cluster_handler.present_value
@@ -201,7 +201,8 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle state update from cluster handler."""
-        self.maybe_emit_state_changed_event()
+        if event.attribute_name == BinaryOutput.AttributeDefs.present_value.name:
+            self.maybe_emit_state_changed_event()
 
 
 @GROUP_MATCH()
