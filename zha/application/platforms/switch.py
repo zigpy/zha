@@ -145,6 +145,8 @@ class Switch(PlatformEntity, BaseSwitch):
 class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
     """BinaryOutputCluster switch."""
 
+    _attr_translation_key = "switch"
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
