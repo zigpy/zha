@@ -862,19 +862,14 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
         zha_gateway.application_controller,
         "tests/data/devices/espressif-zigbeebinaryoutputdevice.json",
     )
+    cluster = zigpy_device.endpoints[1].binary_output
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     switch_entity = get_entity(zha_device, platform=Platform.SWITCH)
-    cluster = zigpy_device.endpoints[1].binary_output
+
+    # Clear out the attribute first
+    cluster.update_attribute(BinaryOutput.AttributeDefs.present_value.id, None)
 
     assert switch_entity.info_object.fallback_name == "Entity Description"
-    assert switch_entity.state["state"] is True
-
-    # Turn it off
-    cluster.write_attributes.reset_mock()
-    await switch_entity.async_turn_off()
-    assert cluster.write_attributes.mock_calls == [
-        call({"present_value": False}, manufacturer=None)
-    ]
     assert switch_entity.state["state"] is False
 
     # Turn it on
@@ -884,6 +879,14 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
         call({"present_value": True}, manufacturer=None)
     ]
     assert switch_entity.state["state"] is True
+
+    # Turn it off
+    cluster.write_attributes.reset_mock()
+    await switch_entity.async_turn_off()
+    assert cluster.write_attributes.mock_calls == [
+        call({"present_value": False}, manufacturer=None)
+    ]
+    assert switch_entity.state["state"] is False
 
     # Report an attribute change
     await send_attributes_report(
