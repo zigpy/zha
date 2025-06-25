@@ -866,7 +866,7 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     switch_entity = get_entity(zha_device, platform=Platform.SWITCH)
 
-    # Clear out the attribute first
+    # Clear out the attribute first, to test handling of the missing state
     cluster.update_attribute(BinaryOutput.AttributeDefs.present_value.id, None)
 
     assert switch_entity.info_object.fallback_name == "Entity Description"
@@ -895,3 +895,19 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
         {BinaryOutput.AttributeDefs.present_value.id: t.Bool(False)},
     )
     assert switch_entity.state["state"] is False
+
+    # Force an update
+    cluster.read_attributes.reset_mock()
+    cluster.PLUGGED_ATTR_READS = {BinaryOutput.AttributeDefs.present_value.name: True}
+
+    await switch_entity.async_update()
+    assert switch_entity.state["state"] is True
+
+    assert cluster.read_attributes.mock_calls == [
+        call(
+            [BinaryOutput.AttributeDefs.present_value.name],
+            allow_cache=False,
+            only_cache=False,
+            manufacturer=None,
+        )
+    ]
