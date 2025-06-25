@@ -142,11 +142,8 @@ class Switch(PlatformEntity, BaseSwitch):
 
 
 @STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_BINARY_OUTPUT)
-class BinaryOutputSwitch(PlatformEntity):
+class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
     """BinaryOutputCluster switch."""
-
-    PLATFORM = Platform.SWITCH
-    _attr_primary_weight = 10
 
     def __init__(
         self,
@@ -181,13 +178,6 @@ class BinaryOutputSwitch(PlatformEntity):
                 self.handle_cluster_handler_attribute_updated,
             )
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the switch."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
 
     @property
     def is_on(self) -> bool:
