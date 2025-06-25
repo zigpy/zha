@@ -184,7 +184,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
         """Return if the switch is on."""
         if self._binary_output_cluster_handler.present_value is None:
             return False
-        return self._binary_output_cluster_handler.present_value
+        return bool(self._binary_output_cluster_handler.present_value)
 
     async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Turn the entity on."""
