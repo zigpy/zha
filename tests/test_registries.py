@@ -15,6 +15,7 @@ from zha.application.platforms import PlatformEntity
 from zha.application.platforms.binary_sensor import BinaryInputWithDescription, IASZone
 from zha.application.platforms.number import AnalogOutputNumber
 from zha.application.platforms.sensor import AnalogInputSensor
+from zha.application.platforms.switch import BinaryOutputSwitch
 from zha.application.registries import (
     PLATFORM_ENTITIES,
     MatchRule,
@@ -578,6 +579,7 @@ def test_entity_names() -> None:
                 assert entity_class in (
                     IASZone,
                     BinaryInputWithDescription,
+                    BinaryOutputSwitch,
                     AnalogInputSensor,
                     AnalogOutputNumber,
                 )
