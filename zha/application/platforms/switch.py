@@ -162,7 +162,7 @@ class BinaryOutputSwitch(PlatformEntity):
         )
 
     def _is_supported(self) -> bool:
-        if self._cluster_handler.description is None:
+        if self._binary_output_cluster_handler.description is None:
             return False
 
         return super()._is_supported()
