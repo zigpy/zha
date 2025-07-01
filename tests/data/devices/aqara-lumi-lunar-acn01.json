@@ -46,194 +46,29 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0001",
               "name": "app_version",
               "zcl_type": "uint8",
-              "value": 21,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "date_code",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "device_enabled",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0014",
-              "name": "disable_local_config",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "generic_device_class",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "generic_device_type",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "hw_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "location_desc",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
+              "value": 21
             },
             {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "aqara",
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "manufacturer_version_details",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
+              "value": "aqara"
             },
             {
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "lumi.lunar.acn01",
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "physical_env",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "power_source",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "product_code",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000e",
-              "name": "product_label",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "product_url",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000d",
-              "name": "serial_number",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "stack_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "sw_build_id",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "zcl_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": "lumi.lunar.acn01"
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0xfcc0",
@@ -245,140 +80,12 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "current_file_version",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "current_zigbee_stack_version",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "downloaded_file_version",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "downloaded_zigbee_stack_version",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "file_offset",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "image_stamp",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "image_type_id",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "image_upgrade_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "manufacturer_id",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "minimum_block_req_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "upgrade_activation_policy",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "upgrade_server_id",
-              "zcl_type": "EUI64",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "upgrade_timeout_policy",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         }
       ]
     }

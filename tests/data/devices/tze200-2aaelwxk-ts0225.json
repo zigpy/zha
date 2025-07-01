@@ -46,246 +46,38 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "date_code",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "device_enabled",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0014",
-              "name": "disable_local_config",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "generic_device_class",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "generic_device_type",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "hw_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "location_desc",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "_TZE200_2aaelwxk",
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "manufacturer_version_details",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
+              "value": "_TZE200_2aaelwxk"
             },
             {
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "TS0225",
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "physical_env",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "power_source",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "product_code",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000e",
-              "name": "product_label",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "product_url",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000d",
-              "name": "serial_number",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "stack_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "sw_build_id",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "zcl_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": "TS0225"
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "global_scene_control",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4002",
-              "name": "off_wait_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0000",
               "name": "on_off",
-              "zcl_type": "bool_",
-              "value": null,
+              "zcl_type": "bool",
               "unsupported": true
-            },
-            {
-              "id": "0x4001",
-              "name": "on_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x4003",
               "name": "start_up_on_off",
               "zcl_type": "enum8",
-              "value": null,
               "unsupported": true
             }
           ]
@@ -295,53 +87,16 @@
           "endpoint_attribute": "illuminance",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0004",
               "name": "light_sensor_type",
               "zcl_type": "enum8",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "max_measured_value",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "min_measured_value",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "tolerance",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
+              "value": 1
             }
           ]
         },
@@ -350,95 +105,10 @@
           "endpoint_attribute": "occupancy",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0000",
               "name": "occupancy",
               "zcl_type": "map8",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0001",
-              "name": "occupancy_sensor_type_bitmap",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0030",
-              "name": "physical_contact_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0031",
-              "name": "physical_contact_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0032",
-              "name": "physical_contact_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "pir_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "pir_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "pir_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0020",
-              "name": "ultrasonic_o_to_u_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0021",
-              "name": "ultrasonic_u_to_o_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0022",
-              "name": "ultrasonic_u_to_o_threshold",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
             }
           ]
         },
@@ -450,78 +120,7 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
-          "attributes": [
-            {
-              "id": "0xef6b",
-              "name": "find_switch",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef04",
-              "name": "large_motion_detection_distance",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef02",
-              "name": "large_motion_detection_sensitivity",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef00",
-              "name": "mcu_version",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef68",
-              "name": "medium_motion_detection_distance",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef69",
-              "name": "medium_motion_detection_sensitivity",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef65",
-              "name": "motion_state",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef66",
-              "name": "presence_timeout",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef6c",
-              "name": "small_motion_detection_distance",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xef6d",
-              "name": "small_motion_detection_sensitivity",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": []
@@ -538,95 +137,34 @@
           "endpoint_attribute": "analog_output",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "fading_time",
-              "unsupported": false
+              "value": "fading_time"
             },
             {
               "id": "0x0075",
               "name": "engineering_units",
               "zcl_type": "enum16",
-              "value": 73,
-              "unsupported": false
+              "value": 73
             },
             {
               "id": "0x0041",
               "name": "max_present_value",
               "zcl_type": "single",
-              "value": 600,
-              "unsupported": false
+              "value": 600
             },
             {
               "id": "0x0045",
               "name": "min_present_value",
               "zcl_type": "single",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x006a",
               "name": "resolution",
               "zcl_type": "single",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 1
             }
           ]
         }
@@ -645,95 +183,28 @@
           "endpoint_attribute": "analog_output",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "large_sensitivity",
-              "unsupported": false
-            },
-            {
-              "id": "0x0075",
-              "name": "engineering_units",
-              "zcl_type": "enum16",
-              "value": null,
-              "unsupported": false
+              "value": "large_sensitivity"
             },
             {
               "id": "0x0041",
               "name": "max_present_value",
               "zcl_type": "single",
-              "value": 10,
-              "unsupported": false
+              "value": 10
             },
             {
               "id": "0x0045",
               "name": "min_present_value",
               "zcl_type": "single",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x006a",
               "name": "resolution",
               "zcl_type": "single",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 1
             }
           ]
         }
@@ -752,95 +223,34 @@
           "endpoint_attribute": "analog_output",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "large_distance",
-              "unsupported": false
+              "value": "large_distance"
             },
             {
               "id": "0x0075",
               "name": "engineering_units",
               "zcl_type": "enum16",
-              "value": 118,
-              "unsupported": false
+              "value": 118
             },
             {
               "id": "0x0041",
               "name": "max_present_value",
               "zcl_type": "single",
-              "value": 1000,
-              "unsupported": false
+              "value": 1000
             },
             {
               "id": "0x0045",
               "name": "min_present_value",
               "zcl_type": "single",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x006a",
               "name": "resolution",
               "zcl_type": "single",
-              "value": 10,
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 10
             }
           ]
         }
@@ -859,95 +269,28 @@
           "endpoint_attribute": "analog_output",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "small_sensitivity",
-              "unsupported": false
-            },
-            {
-              "id": "0x0075",
-              "name": "engineering_units",
-              "zcl_type": "enum16",
-              "value": null,
-              "unsupported": false
+              "value": "small_sensitivity"
             },
             {
               "id": "0x0041",
               "name": "max_present_value",
               "zcl_type": "single",
-              "value": 10,
-              "unsupported": false
+              "value": 10
             },
             {
               "id": "0x0045",
               "name": "min_present_value",
               "zcl_type": "single",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x006a",
               "name": "resolution",
               "zcl_type": "single",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 1
             }
           ]
         }
@@ -966,95 +309,34 @@
           "endpoint_attribute": "analog_output",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "small_distance",
-              "unsupported": false
+              "value": "small_distance"
             },
             {
               "id": "0x0075",
               "name": "engineering_units",
               "zcl_type": "enum16",
-              "value": 118,
-              "unsupported": false
+              "value": 118
             },
             {
               "id": "0x0041",
               "name": "max_present_value",
               "zcl_type": "single",
-              "value": 600,
-              "unsupported": false
+              "value": 600
             },
             {
               "id": "0x0045",
               "name": "min_present_value",
               "zcl_type": "single",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x006a",
               "name": "resolution",
               "zcl_type": "single",
-              "value": 10,
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 10
             }
           ]
         }
@@ -1073,95 +355,28 @@
           "endpoint_attribute": "analog_output",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "static_sensitivity",
-              "unsupported": false
-            },
-            {
-              "id": "0x0075",
-              "name": "engineering_units",
-              "zcl_type": "enum16",
-              "value": null,
-              "unsupported": false
+              "value": "static_sensitivity"
             },
             {
               "id": "0x0041",
               "name": "max_present_value",
               "zcl_type": "single",
-              "value": 10,
-              "unsupported": false
+              "value": 10
             },
             {
               "id": "0x0045",
               "name": "min_present_value",
               "zcl_type": "single",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x006a",
               "name": "resolution",
               "zcl_type": "single",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 1
             }
           ]
         }
@@ -1180,95 +395,34 @@
           "endpoint_attribute": "analog_output",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "static_distance",
-              "unsupported": false
+              "value": "static_distance"
             },
             {
               "id": "0x0075",
               "name": "engineering_units",
               "zcl_type": "enum16",
-              "value": 118,
-              "unsupported": false
+              "value": 118
             },
             {
               "id": "0x0041",
               "name": "max_present_value",
               "zcl_type": "single",
-              "value": 600,
-              "unsupported": false
+              "value": 600
             },
             {
               "id": "0x0045",
               "name": "min_present_value",
               "zcl_type": "single",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x006a",
               "name": "resolution",
               "zcl_type": "single",
-              "value": 10,
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 10
             }
           ]
         }
@@ -1287,60 +441,16 @@
           "endpoint_attribute": "multistate_input",
           "attributes": [
             {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x001c",
               "name": "description",
               "zcl_type": "string",
-              "value": "motion_state",
-              "unsupported": false
+              "value": "motion_state"
             },
             {
               "id": "0x004a",
               "name": "number_of_states",
               "zcl_type": "uint16",
-              "value": 4,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0067",
-              "name": "reliability",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 4
             },
             {
               "id": "0x000e",
@@ -1351,15 +461,7 @@
                 "Large",
                 "Small",
                 "Static"
-              ],
-              "unsupported": false
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              ]
             }
           ]
         }
