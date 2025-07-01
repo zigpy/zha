@@ -81,16 +81,32 @@ DIAGNOSTICS_JSON_VERSION = 1
 
 def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
     """Return cluster attribute data."""
-    return [
-        {
+    attributes_info = []
+
+    for attr_def in cluster.attributes.values():
+        info = {
             "id": f"0x{attr_def.id:04x}",
             "name": attr_def.name,
-            "zcl_type": attr_def.zcl_type.name,
+            "zcl_type": (
+                attr_def.zcl_type.name if attr_def.zcl_type.name != "bool_" else "bool"
+            ),
             "value": cluster.get(attr_def.name),
             "unsupported": (attr_def.id in cluster.unsupported_attributes),
         }
-        for attr_def in cluster.attributes.values()
-    ]
+
+        # Don't unnecessarily list out attributes that are just unread
+        if info["value"] is None and not info["unsupported"]:
+            continue
+
+        # Delete unused keys
+        if info["value"] is not None:
+            del info["unsupported"]
+        else:
+            del info["value"]
+
+        attributes_info.append(info)
+
+    return attributes_info
 
 
 def get_device_automation_triggers(
