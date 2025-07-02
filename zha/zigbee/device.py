@@ -154,11 +154,14 @@ class ZHAEvent:
 
 
 @dataclass(kw_only=True, frozen=True)
-class DeviceUpdatedEvent:
-    """Event generated when the device information has changed."""
+class DeviceFirmwareInfoUpdatedEvent:
+    """Event generated when the device firmware information has changed."""
 
     event_type: Final[str] = ZHA_DEVICE_UPDATED_EVENT
     event: Final[str] = ZHA_DEVICE_UPDATED_EVENT
+
+    old_firmware_version: str | None
+    new_firmware_version: str | None
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -606,8 +609,16 @@ class Device(LogMixin, EventBase):
         if firmware_version == self._firmware_version:
             return
 
+        old_firmware_version = self._firmware_version
         self._firmware_version = firmware_version
-        self.emit(DeviceUpdatedEvent.event_type, DeviceUpdatedEvent())
+
+        self.emit(
+            DeviceFirmwareInfoUpdatedEvent.event_type,
+            DeviceFirmwareInfoUpdatedEvent(
+                old_firmware_version=old_firmware_version,
+                new_firmware_version=firmware_version,
+            ),
+        )
 
     async def _check_available(self, *_: Any) -> None:
         # don't flip the availability state of the coordinator

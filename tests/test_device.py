@@ -46,7 +46,7 @@ from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
 from zha.zigbee.device import (
     ClusterBinding,
-    DeviceUpdatedEvent,
+    DeviceFirmwareInfoUpdatedEvent,
     get_device_automation_triggers,
 )
 from zha.zigbee.group import Group
@@ -797,7 +797,7 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
 
     # Register a callback to listen for device updates
     update_callback = mock.Mock()
-    zha_device.on_event(DeviceUpdatedEvent.event_type, update_callback)
+    zha_device.on_event(DeviceFirmwareInfoUpdatedEvent.event_type, update_callback)
 
     # The firmware version is restored on device initialization
     assert zha_device.firmware_version == "0x42006bb7"
@@ -820,7 +820,14 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
     )
 
     assert zha_device.firmware_version == "0xabcd1234"
-    assert update_callback.mock_calls == [call(DeviceUpdatedEvent())]
+    assert update_callback.mock_calls == [
+        call(
+            DeviceFirmwareInfoUpdatedEvent(
+                old_firmware_version="0x42006bb7",
+                new_firmware_version="0xabcd1234",
+            )
+        )
+    ]
 
 
 async def test_quirks_v2_device_renaming(zha_gateway: Gateway) -> None:
