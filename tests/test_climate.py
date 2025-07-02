@@ -1623,10 +1623,10 @@ async def test_thermostat_default_local_temperature_calibration_config(
     ]
     assert local_temperature_calibration_entity
     assert isinstance(local_temperature_calibration_entity, NumberConfigurationEntity)
-    assert local_temperature_calibration_entity.info_object.min_value == -2.5
-    assert local_temperature_calibration_entity.info_object.max_value == 2.5
-    assert local_temperature_calibration_entity.info_object.step == 0.1
-    assert local_temperature_calibration_entity.info_object.multiplier == 0.1
+    assert local_temperature_calibration_entity.info_object.native_min_value == -2.5
+    assert local_temperature_calibration_entity.info_object.native_max_value == 2.5
+    assert local_temperature_calibration_entity.info_object.native_step == 0.1
+    assert local_temperature_calibration_entity._multiplier == 0.1
 
 
 async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite(
@@ -1667,7 +1667,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
     ]
     assert local_temperature_calibration_entity
     assert isinstance(local_temperature_calibration_entity, NumberConfigurationEntity)
-    assert local_temperature_calibration_entity.info_object.min_value == -5.0
-    assert local_temperature_calibration_entity.info_object.max_value == 5.0
-    assert local_temperature_calibration_entity.info_object.step == 0.1
-    assert local_temperature_calibration_entity.info_object.multiplier == 0.1
+    assert local_temperature_calibration_entity.info_object.native_min_value == -5.0
+    assert local_temperature_calibration_entity.info_object.native_max_value == 5.0
+    assert local_temperature_calibration_entity.info_object.native_step == 0.1
+    assert local_temperature_calibration_entity._multiplier == 0.1

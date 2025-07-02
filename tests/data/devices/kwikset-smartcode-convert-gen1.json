@@ -1,239 +1,216 @@
 {
+  "version": 1,
   "ieee": "00:24:46:ff:fd:03:83:d9",
-  "nwk": 32937,
+  "nwk": "0x80A9",
   "manufacturer": "Kwikset",
   "model": "SMARTCODE_CONVERT_GEN1",
+  "friendly_manufacturer": "Kwikset",
+  "friendly_model": "SMARTCODE_CONVERT_GEN1",
   "name": "Kwikset SMARTCODE_CONVERT_GEN1",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
   "quirk_id": null,
   "manufacturer_code": 4242,
   "power_source": "Battery or Unknown",
-  "lqi": 80,
-  "rssi": -80,
-  "last_seen": "2024-08-26T17:04:26",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-04-24T17:34:08.999092+00:00",
   "available": true,
   "device_type": "EndDevice",
-  "signature": {
-    "node_descriptor": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4242,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 128,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 128,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x000a",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0009",
-          "0x0020",
-          "0x0101",
-          "0x0402",
-          "0x0b05",
-          "0xfdbd"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      }
-    },
-    "manufacturer": "Kwikset",
-    "model": "SMARTCODE_CONVERT_GEN1"
-  },
   "active_coordinator": false,
-  "entities": [
-    {
-      "entity_id": "button.kwikset_smartcode_convert_gen1_d98303fd_identify",
-      "name": "Kwikset SMARTCODE_CONVERT_GEN1"
-    },
-    {
-      "entity_id": "lock.front_door",
-      "name": "Kwikset SMARTCODE_CONVERT_GEN1"
-    },
-    {
-      "entity_id": "sensor.front_door_lock_power",
-      "name": "Kwikset SMARTCODE_CONVERT_GEN1"
-    },
-    {
-      "entity_id": "sensor.front_door_lock_temperature",
-      "name": "Kwikset SMARTCODE_CONVERT_GEN1"
-    },
-    {
-      "entity_id": "update.kwikset_front_door_lock_firmware",
-      "name": "Kwikset SMARTCODE_CONVERT_GEN1"
-    }
-  ],
-  "neighbors": [],
-  "routes": [],
-  "endpoint_names": [
-    {
-      "name": "DOOR_LOCK"
-    }
-  ],
-  "user_given_name": "Kwikset Front Door Lock",
-  "device_reg_id": "2af3faf6b055dd4f8bae1bdeb9e474d5",
-  "area_id": "4040462c2bce4405a9a57816783425ca",
-  "cluster_details": {
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4242,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 128,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 128,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
     "2": {
+      "profile_id": 260,
       "device_type": {
         "name": "DOOR_LOCK",
         "id": 10
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0000": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": {
-            "0x0004": {
-              "attribute_name": "manufacturer",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
               "value": "Kwikset"
             },
-            "0x0005": {
-              "attribute_name": "model",
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
               "value": "SMARTCODE_CONVERT_GEN1"
             },
-            "0x0000": {
-              "attribute_name": "zcl_version",
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
               "value": 1
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0001": {
+        {
+          "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "attributes": {
-            "0x0021": {
-              "attribute_name": "battery_percentage_remaining",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
               "value": 200
             },
-            "0x0033": {
-              "attribute_name": "battery_quantity",
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
               "value": 4
             },
-            "0x0031": {
-              "attribute_name": "battery_size",
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
               "value": 3
             },
-            "0x0020": {
-              "attribute_name": "battery_voltage",
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
               "value": 62
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0003": {
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0004": {
+        {
+          "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0005": {
+        {
+          "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0009": {
+        {
+          "cluster_id": "0x0009",
           "endpoint_attribute": "alarms",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0020": {
+        {
+          "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "checkin_interval",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "checkin_interval",
+              "zcl_type": "uint32",
               "value": 13200
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0101": {
+        {
+          "cluster_id": "0x0101",
           "endpoint_attribute": "door_lock",
-          "attributes": {
-            "0x0041": {
-              "attribute_name": "keypad_operation_event_mask",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "door_open_events",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0003",
+              "name": "door_state",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0041",
+              "name": "keypad_operation_event_mask",
+              "zcl_type": "map16",
               "value": 65535
             },
-            "0x0045": {
-              "attribute_name": "keypad_programming_event_mask",
+            {
+              "id": "0x0045",
+              "name": "keypad_programming_event_mask",
+              "zcl_type": "map16",
               "value": 65535
             },
-            "0x0000": {
-              "attribute_name": "lock_state",
+            {
+              "id": "0x0000",
+              "name": "lock_state",
+              "zcl_type": "enum8",
               "value": 1
             },
-            "0x0001": {
-              "attribute_name": "lock_type",
+            {
+              "id": "0x0001",
+              "name": "lock_type",
+              "zcl_type": "enum8",
               "value": 2
             }
-          },
-          "unsupported_attributes": {
-            "0x0003": {
-              "attribute_name": "door_state"
-            },
-            "0x0004": {
-              "attribute_name": "door_open_events"
-            }
-          }
+          ]
         },
-        "0x0402": {
+        {
+          "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "measured_value",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
               "value": 2500
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0b05": {
+        {
+          "cluster_id": "0x0b05",
           "endpoint_attribute": "diagnostic",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0xfdbd": {
+        {
+          "cluster_id": "0xfdbd",
           "endpoint_attribute": "manufacturer_specific",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      },
-      "out_clusters": {
-        "0x000a": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0019": {
+        {
+          "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "attributes": {
-            "0x0002": {
-              "attribute_name": "current_file_version",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
               "value": 815823366
             }
-          },
-          "unsupported_attributes": {}
+          ]
         }
-      }
+      ]
     }
   },
   "zha_lib_entities": {
@@ -242,6 +219,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:24:46:ff:fd:03:83:d9-2-3",
+          "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -249,6 +227,8 @@
           "state_class": null,
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "IdentifyClusterHandler",
@@ -261,7 +241,7 @@
               },
               "id": "2:0x0003",
               "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0003",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -295,6 +275,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:24:46:ff:fd:03:83:d9-2-257",
+          "migrate_unique_ids": [],
           "platform": "lock",
           "class_name": "DoorLock",
           "translation_key": "door_lock",
@@ -302,6 +283,8 @@
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
           "cluster_handlers": [
             {
               "class_name": "DoorLockClusterHandler",
@@ -314,7 +297,7 @@
               },
               "id": "2:0x0101",
               "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0101",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -343,7 +326,112 @@
       {
         "info_object": {
           "fallback_name": null,
+          "unique_id": "00:24:46:ff:fd:03:83:d9-2-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "2:0x0000",
+              "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            217,
+            131,
+            3,
+            253,
+            255,
+            70,
+            36,
+            0
+          ],
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:24:46:ff:fd:03:83:d9-2-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "2:0x0000",
+              "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            217,
+            131,
+            3,
+            253,
+            255,
+            70,
+            36,
+            0
+          ],
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
           "unique_id": "00:24:46:ff:fd:03:83:d9-2-1",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
@@ -351,6 +439,8 @@
           "state_class": "measurement",
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "PowerConfigurationClusterHandler",
@@ -363,7 +453,7 @@
               },
               "id": "2:0x0001",
               "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0001",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "battery_voltage"
             }
           ],
@@ -380,16 +470,13 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "battery_percentage_remaining",
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
+          "suggested_display_precision": 0,
           "unit": "%"
         },
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 100,
+          "state": 100.0,
           "battery_size": "AA",
           "battery_quantity": 4,
           "battery_voltage": 6.2
@@ -399,6 +486,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:24:46:ff:fd:03:83:d9-2-1026",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
@@ -406,6 +494,8 @@
           "state_class": "measurement",
           "entity_category": null,
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "TemperatureMeasurementClusterHandler",
@@ -418,7 +508,7 @@
               },
               "id": "2:0x0402",
               "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0402",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "measured_value"
             }
           ],
@@ -435,120 +525,13 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "attribute": "measured_value",
-          "decimals": 1,
-          "divisor": 100,
-          "multiplier": 1,
-          "unit": "°C"
+          "suggested_display_precision": null,
+          "unit": "\u00b0C"
         },
         "state": {
           "class_name": "Temperature",
           "available": true,
           "state": 25.0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:24:46:ff:fd:03:83:d9-2-0-rssi",
-          "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "device_class": "signal_strength",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "2:0x0000",
-              "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            217,
-            131,
-            3,
-            253,
-            255,
-            70,
-            36,
-            0
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "dBm"
-        },
-        "state": {
-          "class_name": "RSSISensor",
-          "available": true,
-          "state": -80
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:24:46:ff:fd:03:83:d9-2-0-lqi",
-          "platform": "sensor",
-          "class_name": "LQISensor",
-          "translation_key": "lqi",
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "2:0x0000",
-              "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            217,
-            131,
-            3,
-            253,
-            255,
-            70,
-            36,
-            0
-          ],
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": null
-        },
-        "state": {
-          "class_name": "LQISensor",
-          "available": true,
-          "state": 80
         }
       }
     ],
@@ -557,6 +540,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:24:46:ff:fd:03:83:d9-2-25-firmware_update",
+          "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
@@ -564,19 +548,21 @@
           "state_class": null,
           "entity_category": "config",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019",
+              "generic_id": "cluster_handler_0x0019_client",
               "endpoint_id": 2,
               "cluster": {
                 "id": 25,
                 "name": "Ota",
                 "type": "client"
               },
-              "id": "2:0x0019",
-              "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0019",
-              "status": "CREATED",
+              "id": "2:0x0019_client",
+              "unique_id": "00:24:46:ff:fd:03:83:d9:2:0x0019_CLIENT",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -600,12 +586,15 @@
           "available": true,
           "installed_version": "0x30a07a06",
           "in_progress": false,
-          "progress": 0,
-          "latest_version": "0x30a07a06",
+          "update_percentage": null,
+          "latest_version": null,
           "release_summary": null,
+          "release_notes": null,
           "release_url": null
         }
       }
     ]
-  }
+  },
+  "neighbors": [],
+  "routes": []
 }

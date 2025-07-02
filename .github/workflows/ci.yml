@@ -12,7 +12,7 @@ jobs:
     with:
       CODE_FOLDER: zha
       CACHE_VERSION: 2
-      PYTHON_VERSION_DEFAULT: 3.12
+      PYTHON_VERSION_DEFAULT: "3.12.10"
       PRE_COMMIT_CACHE_PATH: ~/.cache/pre-commit
       MINIMUM_COVERAGE_PERCENTAGE: 95
       PYTHON_MATRIX: '"3.12.10", "3.13.3"'

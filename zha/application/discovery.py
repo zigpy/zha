@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
     CustomDeviceV2,
-    EntityType,
     NumberMetadata,
     SwitchMetadata,
     WriteAttributeButtonMetadata,
@@ -45,7 +44,6 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
 )
-from zha.application.platforms.sensor.const import SensorDeviceClass
 from zha.application.registries import (
     DEVICE_CLASS,
     PLATFORM_ENTITIES,
@@ -108,115 +106,14 @@ GROUP_PLATFORMS = (
 )
 
 QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
-    (
-        Platform.BUTTON,
-        WriteAttributeButtonMetadata,
-        EntityType.CONFIG,
-    ): button.WriteAttributeButton,
-    (
-        Platform.BUTTON,
-        WriteAttributeButtonMetadata,
-        EntityType.STANDARD,
-    ): button.WriteAttributeButton,
-    (
-        Platform.BUTTON,
-        WriteAttributeButtonMetadata,
-        EntityType.DIAGNOSTIC,
-    ): button.WriteAttributeButton,
-    (
-        Platform.BUTTON,
-        ZCLCommandButtonMetadata,
-        EntityType.CONFIG,
-    ): button.Button,
-    (
-        Platform.BUTTON,
-        ZCLCommandButtonMetadata,
-        EntityType.DIAGNOSTIC,
-    ): button.Button,
-    (
-        Platform.BUTTON,
-        ZCLCommandButtonMetadata,
-        EntityType.STANDARD,
-    ): button.Button,
-    (
-        Platform.BINARY_SENSOR,
-        BinarySensorMetadata,
-        EntityType.CONFIG,
-    ): binary_sensor.BinarySensor,
-    (
-        Platform.BINARY_SENSOR,
-        BinarySensorMetadata,
-        EntityType.DIAGNOSTIC,
-    ): binary_sensor.BinarySensor,
-    (
-        Platform.BINARY_SENSOR,
-        BinarySensorMetadata,
-        EntityType.STANDARD,
-    ): binary_sensor.BinarySensor,
-    (
-        Platform.SENSOR,
-        ZCLEnumMetadata,
-        EntityType.DIAGNOSTIC,
-    ): sensor.EnumSensor,
-    (
-        Platform.SENSOR,
-        ZCLEnumMetadata,
-        EntityType.STANDARD,
-    ): sensor.EnumSensor,
-    (
-        Platform.SENSOR,
-        ZCLSensorMetadata,
-        EntityType.DIAGNOSTIC,
-    ): sensor.Sensor,
-    (
-        Platform.SENSOR,
-        ZCLSensorMetadata,
-        EntityType.STANDARD,
-    ): sensor.Sensor,
-    (
-        Platform.SELECT,
-        ZCLEnumMetadata,
-        EntityType.CONFIG,
-    ): select.ZCLEnumSelectEntity,
-    (
-        Platform.SELECT,
-        ZCLEnumMetadata,
-        EntityType.STANDARD,
-    ): select.ZCLEnumSelectEntity,
-    (
-        Platform.SELECT,
-        ZCLEnumMetadata,
-        EntityType.DIAGNOSTIC,
-    ): select.ZCLEnumSelectEntity,
-    (
-        Platform.NUMBER,
-        NumberMetadata,
-        EntityType.CONFIG,
-    ): number.NumberConfigurationEntity,
-    (
-        Platform.NUMBER,
-        NumberMetadata,
-        EntityType.DIAGNOSTIC,
-    ): number.Number,
-    (
-        Platform.NUMBER,
-        NumberMetadata,
-        EntityType.STANDARD,
-    ): number.Number,
-    (
-        Platform.SWITCH,
-        SwitchMetadata,
-        EntityType.CONFIG,
-    ): switch.ConfigurableAttributeSwitch,
-    (
-        Platform.SWITCH,
-        SwitchMetadata,
-        EntityType.STANDARD,
-    ): switch.ConfigurableAttributeSwitch,
-}
-
-QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS = {
-    SensorDeviceClass.TIMESTAMP: sensor.TimestampSensor
+    (Platform.BUTTON, WriteAttributeButtonMetadata): button.WriteAttributeButton,
+    (Platform.BUTTON, ZCLCommandButtonMetadata): button.Button,
+    (Platform.BINARY_SENSOR, BinarySensorMetadata): binary_sensor.BinarySensor,
+    (Platform.SENSOR, ZCLEnumMetadata): sensor.EnumSensor,
+    (Platform.SENSOR, ZCLSensorMetadata): sensor.Sensor,
+    (Platform.SELECT, ZCLEnumMetadata): select.ZCLEnumSelectEntity,
+    (Platform.NUMBER, NumberMetadata): number.NumberConfigurationEntity,
+    (Platform.SWITCH, SwitchMetadata): switch.ConfigurableAttributeSwitch,
 }
 
 
@@ -343,7 +240,7 @@ class DeviceProbe:
                 platform = Platform(entity_metadata.entity_platform.value)
                 metadata_type = type(entity_metadata)
                 entity_class = QUIRKS_ENTITY_META_TO_ENTITY_CLASS.get(
-                    (platform, metadata_type, entity_metadata.entity_type)
+                    (platform, metadata_type)
                 )
 
                 if entity_class is None:
@@ -358,14 +255,6 @@ class DeviceProbe:
                         },
                     )
                     continue
-
-                if (
-                    entity_class is sensor.Sensor
-                    and entity_metadata.device_class is not None
-                ):
-                    entity_class = QUIRKS_SENSOR_DEV_CLASS_TO_ENTITY_CLASS.get(
-                        entity_metadata.device_class.value, entity_class
-                    )
 
                 # process the entity metadata for ZCL_INIT_ATTRS and REPORT_CONFIG
                 if attr_name := getattr(entity_metadata, "attribute_name", None):

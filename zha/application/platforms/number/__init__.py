@@ -14,12 +14,8 @@ from zigpy.zcl.clusters.hvac import Thermostat
 from zha.application import Platform
 from zha.application.platforms import BaseEntityInfo, EntityCategory, PlatformEntity
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.number.const import (
-    ICONS,
-    UNITS,
-    NumberDeviceClass,
-    NumberMode,
-)
+from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
+from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
@@ -51,31 +47,84 @@ CONFIG_DIAGNOSTIC_MATCH = functools.partial(
 class NumberEntityInfo(BaseEntityInfo):
     """Number entity info."""
 
-    engineering_units: int
-    application_type: int
-    min_value: float | None
-    max_value: float | None
-    step: float | None
+    mode: NumberMode
+    native_max_value: float
+    native_min_value: float
+    native_step: float | None
+    native_unit_of_measurement: str | None
 
 
-@dataclass(frozen=True, kw_only=True)
-class NumberConfigurationEntityInfo(BaseEntityInfo):
-    """Number configuration entity info."""
-
-    min_value: float | None
-    max_value: float | None
-    step: float | None
-    multiplier: float | None
-    device_class: str | None
-
-
-@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_OUTPUT)
-class Number(PlatformEntity):
+class BaseNumber(PlatformEntity):
     """Representation of a ZHA Number entity."""
 
     PLATFORM = Platform.NUMBER
-    _attr_translation_key: str = "number"
+
+    _attr_device_class: NumberDeviceClass | None = None
+
     _attr_mode: NumberMode = NumberMode.AUTO
+    _attr_native_max_value: float
+    _attr_native_min_value: float
+    _attr_native_step: float | None = None
+    _attr_native_value: float | None
+    _attr_native_unit_of_measurement: str | None = None
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the current value."""
+        raise NotImplementedError
+
+    @functools.cached_property
+    def info_object(self) -> NumberEntityInfo:
+        """Return a representation of the number entity."""
+        return NumberEntityInfo(
+            **super().info_object.__dict__,
+            mode=self.mode,
+            native_max_value=self.native_max_value,
+            native_min_value=self.native_min_value,
+            native_step=self.native_step,
+            native_unit_of_measurement=self.native_unit_of_measurement,
+        )
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the entity."""
+        response = super().state
+        response["state"] = self.native_value
+        return response
+
+    @property
+    def native_min_value(self) -> float:
+        """Return the minimum value."""
+        return self._attr_native_min_value
+
+    @property
+    def native_max_value(self) -> float:
+        """Return the maximum value."""
+        return self._attr_native_max_value
+
+    @property
+    def native_step(self) -> float | None:
+        """Return the value step."""
+        return self._attr_native_step
+
+    @functools.cached_property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit the value is expressed in."""
+        return self._attr_native_unit_of_measurement
+
+    @functools.cached_property
+    def mode(self) -> NumberMode:
+        """Return the mode of the entity."""
+        return self._attr_mode
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Update the current value from HA."""
+        raise NotImplementedError
+
+
+@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_OUTPUT)
+class AnalogOutputNumber(BaseNumber):
+    """Representation of a ZHA Number entity."""
 
     def __init__(
         self,
@@ -90,6 +139,25 @@ class Number(PlatformEntity):
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
 
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+
+        analog_output = self._analog_output_cluster_handler
+        self._attr_native_min_value = analog_output.min_present_value or 0
+        self._attr_native_max_value = analog_output.max_present_value or 1023
+        self._attr_native_step = analog_output.resolution
+        self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
+            analog_output.engineering_units
+        )
+
+        if analog_output.application_type is not None:
+            self._attr_icon = ICONS.get(analog_output.application_type >> 16)
+        else:
+            self._attr_icon = None
+
+        self._attr_fallback_name = analog_output.description
+
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
@@ -100,77 +168,10 @@ class Number(PlatformEntity):
             )
         )
 
-    @functools.cached_property
-    def info_object(self) -> NumberEntityInfo:
-        """Return a representation of the number entity."""
-        return NumberEntityInfo(
-            **super().info_object.__dict__,
-            engineering_units=self._analog_output_cluster_handler.engineering_units,
-            application_type=self._analog_output_cluster_handler.application_type,
-            min_value=self.native_min_value,
-            max_value=self.native_max_value,
-            step=self.native_step,
-        )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the entity."""
-        response = super().state
-        response["state"] = self.native_value
-        return response
-
     @property
     def native_value(self) -> float | None:
         """Return the current value."""
         return self._analog_output_cluster_handler.present_value
-
-    @property
-    def native_min_value(self) -> float:
-        """Return the minimum value."""
-        min_present_value = self._analog_output_cluster_handler.min_present_value
-        if min_present_value is not None:
-            return min_present_value
-        return 0
-
-    @property
-    def native_max_value(self) -> float:
-        """Return the maximum value."""
-        max_present_value = self._analog_output_cluster_handler.max_present_value
-        if max_present_value is not None:
-            return max_present_value
-        return 1023
-
-    @property
-    def native_step(self) -> float | None:
-        """Return the value step."""
-        return self._analog_output_cluster_handler.resolution
-
-    @functools.cached_property
-    def description(self) -> str | None:
-        """Return the description of the number entity."""
-        description = self._analog_output_cluster_handler.description
-        if not description:
-            return None
-        return description
-
-    @functools.cached_property
-    def icon(self) -> str | None:
-        """Return the icon to be used for this entity."""
-        application_type = self._analog_output_cluster_handler.application_type
-        if application_type is not None:
-            return ICONS.get(application_type >> 16, None)
-        return None
-
-    @functools.cached_property
-    def native_unit_of_measurement(self) -> str | None:
-        """Return the unit the value is expressed in."""
-        engineering_units = self._analog_output_cluster_handler.engineering_units
-        return UNITS.get(engineering_units)
-
-    @functools.cached_property
-    def mode(self) -> NumberMode:
-        """Return the mode of the entity."""
-        return self._attr_mode
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
@@ -184,25 +185,16 @@ class Number(PlatformEntity):
         """Handle value update from cluster handler."""
         self.maybe_emit_state_changed_event()
 
-    async def async_set_value(self, value: Any, **kwargs: Any) -> None:  # pylint: disable=unused-argument
-        """Update the current value from service."""
-        num_value = float(value)
-        if await self._analog_output_cluster_handler.async_set_present_value(num_value):
-            self.maybe_emit_state_changed_event()
 
-
-class NumberConfigurationEntity(PlatformEntity):
+class NumberConfigurationEntity(BaseNumber):
     """Representation of a ZHA number configuration entity."""
 
-    PLATFORM = Platform.NUMBER
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_unit_of_measurement: str | None
     _attr_native_min_value: float = 0.0
     _attr_native_max_value: float = 100.0
     _attr_native_step: float = 1.0
-    _attr_multiplier: float = 1
+    _multiplier: float = 1
     _attribute_name: str
-    _attr_mode: NumberMode = NumberMode.AUTO
 
     def __init__(
         self,
@@ -213,15 +205,16 @@ class NumberConfigurationEntity(PlatformEntity):
     ) -> None:
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        self._attr_device_class: NumberDeviceClass | None = None
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
         if (
             self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
-            or self._attribute_name
-            not in self._cluster_handler.cluster.attributes_by_name
+            or (
+                self._attribute_name
+                not in self._cluster_handler.cluster.attributes_by_name
+            )
             or self._cluster_handler.cluster.get(self._attribute_name) is None
         ):
             _LOGGER.debug(
@@ -255,7 +248,7 @@ class NumberConfigurationEntity(PlatformEntity):
         if entity_metadata.step is not None:
             self._attr_native_step = entity_metadata.step
         if entity_metadata.multiplier is not None:
-            self._attr_multiplier = entity_metadata.multiplier
+            self._multiplier = entity_metadata.multiplier
         if entity_metadata.device_class is not None:
             self._attr_device_class = validate_device_class(
                 NumberDeviceClass,
@@ -265,17 +258,6 @@ class NumberConfigurationEntity(PlatformEntity):
             )
         if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = entity_metadata.unit
-
-    @functools.cached_property
-    def info_object(self) -> NumberConfigurationEntityInfo:
-        """Return a representation of the number entity."""
-        return NumberConfigurationEntityInfo(
-            **super().info_object.__dict__,
-            min_value=self._attr_native_min_value,
-            max_value=self._attr_native_max_value,
-            step=self._attr_native_step,
-            multiplier=self._attr_multiplier,
-        )
 
     @property
     def state(self) -> dict[str, Any]:
@@ -290,45 +272,12 @@ class NumberConfigurationEntity(PlatformEntity):
         value = self._cluster_handler.cluster.get(self._attribute_name)
         if value is None:
             return None
-        return value * self._attr_multiplier
-
-    @property
-    def native_min_value(self) -> float:
-        """Return the minimum value."""
-        return self._attr_native_min_value
-
-    @property
-    def native_max_value(self) -> float:
-        """Return the maximum value."""
-        return self._attr_native_max_value
-
-    @property
-    def native_step(self) -> float | None:
-        """Return the value step."""
-        return self._attr_native_step
-
-    @functools.cached_property
-    def description(self) -> str | None:
-        """Return the description of the number entity."""
-        # To maintain parity with `Number`
-        return None
-
-    @functools.cached_property
-    def native_unit_of_measurement(self) -> str | None:
-        """Return the unit the value is expressed in."""
-        if hasattr(self, "_attr_native_unit_of_measurement"):
-            return self._attr_native_unit_of_measurement
-        return None
-
-    @functools.cached_property
-    def mode(self) -> NumberMode:
-        """Return the mode of the entity."""
-        return self._attr_mode
+        return value * self._multiplier
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
         await self._cluster_handler.write_attributes_safe(
-            {self._attribute_name: int(value / self._attr_multiplier)}
+            {self._attribute_name: int(value / self._multiplier)}
         )
         self.maybe_emit_state_changed_event()
 
@@ -341,6 +290,7 @@ class NumberConfigurationEntity(PlatformEntity):
                 self._attribute_name, from_cache=False
             )
             _LOGGER.debug("read value=%s", value)
+            # The attribute update handler below takes care of the rest
 
     def handle_cluster_handler_attribute_updated(
         self,
@@ -441,18 +391,11 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "start_up_color_temperature"
     _attr_translation_key: str = "start_up_color_temperature"
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init this ZHA startup color temperature entity."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        if self._cluster_handler:
-            self._attr_native_min_value: float = self._cluster_handler.min_mireds
-            self._attr_native_max_value: float = self._cluster_handler.max_mireds
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+        self._attr_native_min_value = self._cluster_handler.min_mireds
+        self._attr_native_max_value = self._cluster_handler.max_mireds
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -468,7 +411,7 @@ class TimerDurationMinutes(NumberConfigurationEntity):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0x00
     _attr_native_max_value: float = 0x257
-    _attr_native_unit_of_measurement: str | None = UNITS[72]
+    _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
     _attribute_name = "timer_duration"
     _attr_translation_key: str = "timer_duration"
 
@@ -481,7 +424,7 @@ class FilterLifeTime(NumberConfigurationEntity):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0x00
     _attr_native_max_value: float = 0xFFFFFFFF
-    _attr_native_unit_of_measurement: str | None = UNITS[72]
+    _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
     _attribute_name = "filter_life_time"
     _attr_translation_key: str = "filter_life_time"
 
@@ -822,7 +765,7 @@ class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 5
     _attr_native_max_value: float = 30
-    _attr_multiplier: float = 0.01
+    _multiplier: float = 0.01
     _attribute_name = "away_preset_temperature"
     _attr_translation_key: str = "away_preset_temperature"
 
@@ -841,7 +784,7 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     _attr_native_min_value: float = -2.5
     _attr_native_max_value: float = 2.5
     _attr_native_step: float = 0.1
-    _attr_multiplier: float = 0.1
+    _multiplier: float = 0.1
     _attribute_name = "local_temperature_calibration"
     _attr_translation_key: str = "local_temperature_calibration"
 
@@ -902,7 +845,7 @@ class ZCLTemperatureEntity(NumberConfigurationEntity):
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_step: float = 0.01
-    _attr_multiplier: float = 0.01
+    _multiplier: float = 0.01
 
 
 class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
@@ -910,21 +853,21 @@ class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
 
     _attr_native_step: float = 0.5
 
-    _min_source = Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name
-    _max_source = Thermostat.AttributeDefs.abs_max_heat_setpoint_limit.name
-
-    @property
-    def native_min_value(self) -> float:
-        """Return the minimum value."""
-        # The spec says 0x954D, which is a signed integer, therefore the value is in decimals
-        min_present_value = self._cluster_handler.cluster.get(self._min_source, -27315)
-        return min_present_value * self._attr_multiplier
-
-    @property
-    def native_max_value(self) -> float:
-        """Return the maximum value."""
-        max_present_value = self._cluster_handler.cluster.get(self._max_source, 0x7FFF)
-        return max_present_value * self._attr_multiplier
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+        self._attr_native_min_value = (
+            self._cluster_handler.cluster.get(
+                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name, -27315
+            )
+            * self._multiplier
+        )
+        self._attr_native_max_value = (
+            self._cluster_handler.cluster.get(
+                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit.name, 0x7FFF
+            )
+            * self._multiplier
+        )
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
@@ -939,7 +882,15 @@ class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     _attr_translation_key: str = "max_heat_setpoint_limit"
     _attr_entity_category = EntityCategory.CONFIG
 
-    _min_source = Thermostat.AttributeDefs.min_heat_setpoint_limit.name
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+        self._attr_native_min_value = (
+            self._cluster_handler.cluster.get(
+                Thermostat.AttributeDefs.min_heat_setpoint_limit.name, -27315
+            )
+            * self._multiplier
+        )
 
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT)
@@ -954,7 +905,15 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     _attr_translation_key: str = "min_heat_setpoint_limit"
     _attr_entity_category = EntityCategory.CONFIG
 
-    _max_source = Thermostat.AttributeDefs.max_heat_setpoint_limit.name
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        super().recompute_capabilities()
+        self._attr_native_max_value = (
+            self._cluster_handler.cluster.get(
+                Thermostat.AttributeDefs.max_heat_setpoint_limit.name, 0x7FFF
+            )
+            * self._multiplier
+        )
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -1017,7 +976,7 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     _attr_native_min_value: float = -2.5
     _attr_native_max_value: float = 2.5
     _attr_native_step: float = 0.1
-    _attr_multiplier = 1 / 10
+    _multiplier = 1 / 10
 
 
 @CONFIG_DIAGNOSTIC_MATCH(

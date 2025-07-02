@@ -1,458 +1,144 @@
 {
+  "version": 1,
   "ieee": "f0:d1:b8:00:00:05:49:22",
-  "nwk": 60946,
+  "nwk": "0xEE12",
   "manufacturer": "LEDVANCE",
   "model": "PLUG",
+  "friendly_manufacturer": "LEDVANCE",
+  "friendly_model": "PLUG",
   "name": "LEDVANCE PLUG",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
   "quirk_id": null,
   "manufacturer_code": 4489,
   "power_source": "Mains",
-  "lqi": 145,
+  "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-26T14:47:52",
+  "last_seen": "2025-04-24T17:34:07.486196+00:00",
   "available": true,
   "device_type": "Router",
-  "signature": {
-    "node_descriptor": {
-      "logical_type": 1,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 142,
-      "manufacturer_code": 4489,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 82,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 82,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0051",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0b05",
-          "0xfc01",
-          "0xfc08"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0019"
-        ]
-      }
-    },
-    "manufacturer": "LEDVANCE",
-    "model": "PLUG"
-  },
   "active_coordinator": false,
-  "entities": [
-    {
-      "entity_id": "button.bunn_coffee_pot_identifybutton",
-      "name": "LEDVANCE PLUG"
-    },
-    {
-      "entity_id": "switch.bunn_coffee_pot_switch",
-      "name": "LEDVANCE PLUG"
-    },
-    {
-      "entity_id": "update.bunn_coffee_pot_firmware",
-      "name": "LEDVANCE PLUG"
-    }
-  ],
-  "neighbors": [
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:22:a3:00:00:25:db:00",
-      "nwk": "0x0F04",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "255"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "7c:e5:24:00:00:02:30:a7",
-      "nwk": "0x13E7",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:13:a2:00:41:93:fe:df",
-      "nwk": "0x29E5",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:0d:6f:00:10:67:70:a5",
-      "nwk": "0x334B",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "252"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:13:a2:00:40:b1:90:06",
-      "nwk": "0x3E49",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "255"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "cc:cc:cc:ff:fe:d7:8e:af",
-      "nwk": "0x4691",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "246"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:13:a2:00:40:c0:4d:cb",
-      "nwk": "0x6100",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "252"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "f0:d1:b8:00:00:07:83:8e",
-      "nwk": "0x6404",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "248"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:22:a3:00:00:25:2c:24",
-      "nwk": "0x68BB",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "255"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:15:8d:00:04:27:01:b4",
-      "nwk": "0x696C",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:13:a2:00:41:92:cf:47",
-      "nwk": "0x79AB",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:15:8d:00:04:44:ec:08",
-      "nwk": "0x8F9D",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "cc:cc:cc:ff:fe:c4:dc:e1",
-      "nwk": "0xA57B",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "254"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:22:a3:00:00:25:17:33",
-      "nwk": "0xAEFD",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "255"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:22:a3:00:00:26:d3:61",
-      "nwk": "0xB811",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "255"
-    },
-    {
-      "device_type": "Router",
-      "rx_on_when_idle": "On",
-      "relationship": "Sibling",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:13:a2:00:41:67:1f:d7",
-      "nwk": "0xB988",
-      "permit_joining": "Unknown",
-      "depth": "15",
-      "lqi": "255"
-    },
-    {
-      "device_type": "EndDevice",
-      "rx_on_when_idle": "Off",
-      "relationship": "Child",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "00:15:8d:00:02:cb:2e:a9",
-      "nwk": "0x4609",
-      "permit_joining": "NotAccepting",
-      "depth": "2",
-      "lqi": "255"
-    },
-    {
-      "device_type": "EndDevice",
-      "rx_on_when_idle": "Off",
-      "relationship": "Child",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "a4:c1:38:94:4c:af:1a:88",
-      "nwk": "0x5256",
-      "permit_joining": "NotAccepting",
-      "depth": "2",
-      "lqi": "255"
-    },
-    {
-      "device_type": "EndDevice",
-      "rx_on_when_idle": "On",
-      "relationship": "Child",
-      "extended_pan_id": "44:8e:fd:1d:2e:96:ce:9a",
-      "ieee": "74:4d:bd:ff:fe:60:7c:c2",
-      "nwk": "0x00A2",
-      "permit_joining": "NotAccepting",
-      "depth": "2",
-      "lqi": "255"
-    }
-  ],
-  "routes": [
-    {
-      "dest_nwk": "0x0000",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": true,
-      "route_record_required": false,
-      "next_hop": "0xB811"
-    },
-    {
-      "dest_nwk": "0x6114",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x0F04"
-    },
-    {
-      "dest_nwk": "0x62C7",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x0F04"
-    },
-    {
-      "dest_nwk": "0x0F04",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x0F04"
-    },
-    {
-      "dest_nwk": "0xB811",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x0F04"
-    },
-    {
-      "dest_nwk": "0x13E7",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x68BB"
-    },
-    {
-      "dest_nwk": "0x6404",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x6404"
-    },
-    {
-      "dest_nwk": "0x4691",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x4691"
-    },
-    {
-      "dest_nwk": "0x79AB",
-      "route_status": "Active",
-      "memory_constrained": false,
-      "many_to_one": false,
-      "route_record_required": false,
-      "next_hop": "0x79AB"
-    }
-  ],
-  "endpoint_names": [
-    {
-      "name": "SMART_PLUG"
-    }
-  ],
-  "user_given_name": "Bunn Coffee Pot",
-  "device_reg_id": "e59675df90e24957a549ec0eded99e64",
-  "area_id": "d392f14e42674da88134d6ebbf0bfaca",
-  "cluster_details": {
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4489,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
     "1": {
+      "profile_id": 260,
       "device_type": {
         "name": "SMART_PLUG",
         "id": 81
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0000": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": {
-            "0x0001": {
-              "attribute_name": "app_version",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
               "value": 1
             },
-            "0x0004": {
-              "attribute_name": "manufacturer",
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
               "value": "LEDVANCE"
             },
-            "0x0005": {
-              "attribute_name": "model",
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
               "value": "PLUG"
             },
-            "0x0007": {
-              "attribute_name": "power_source",
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
               "value": 1
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0xfc01": {
-          "endpoint_attribute": "manufacturer_specific",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0004": {
+        {
+          "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0005": {
+        {
+          "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0006": {
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
               "value": 1
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
             }
-          },
-          "unsupported_attributes": {
-            "0x4003": {
-              "attribute_name": "start_up_on_off"
-            }
-          }
+          ]
         },
-        "0xfc08": {
-          "endpoint_attribute": "manufacturer_specific",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0b05": {
+        {
+          "cluster_id": "0x0b05",
           "endpoint_attribute": "diagnostic",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc01",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc08",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
         }
-      },
-      "out_clusters": {
-        "0x0019": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "attributes": {
-            "0x0002": {
-              "attribute_name": "current_file_version",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
               "value": 1057025
             }
-          },
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
-          "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          ]
         }
-      }
+      ]
     }
   },
   "zha_lib_entities": {
@@ -461,6 +147,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "f0:d1:b8:00:00:05:49:22-1-3",
+          "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -468,6 +155,8 @@
           "state_class": null,
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "IdentifyClusterHandler",
@@ -480,7 +169,7 @@
               },
               "id": "1:0x0003",
               "unique_id": "f0:d1:b8:00:00:05:49:22:1:0x0003",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -513,59 +202,8 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "f0:d1:b8:00:00:05:49:22-1-0-rssi",
-          "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "device_class": "signal_strength",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "f0:d1:b8:00:00:05:49:22:1:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            34,
-            73,
-            5,
-            0,
-            0,
-            184,
-            209,
-            240
-          ],
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "dBm"
-        },
-        "state": {
-          "class_name": "RSSISensor",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
           "unique_id": "f0:d1:b8:00:00:05:49:22-1-0-lqi",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
@@ -573,6 +211,8 @@
           "state_class": "measurement",
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -585,7 +225,7 @@
               },
               "id": "1:0x0000",
               "unique_id": "f0:d1:b8:00:00:05:49:22:1:0x0000",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -602,16 +242,65 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
+          "suggested_display_precision": null,
           "unit": null
         },
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 145
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "f0:d1:b8:00:00:05:49:22-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "f0:d1:b8:00:00:05:49:22:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            34,
+            73,
+            5,
+            0,
+            0,
+            184,
+            209,
+            240
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
         }
       }
     ],
@@ -620,6 +309,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "f0:d1:b8:00:00:05:49:22-1",
+          "migrate_unique_ids": [],
           "platform": "switch",
           "class_name": "Switch",
           "translation_key": "switch",
@@ -627,6 +317,8 @@
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",
@@ -639,7 +331,7 @@
               },
               "id": "1:0x0006",
               "unique_id": "f0:d1:b8:00:00:05:49:22:1:0x0006",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "on_off"
             }
           ],
@@ -669,6 +361,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "f0:d1:b8:00:00:05:49:22-1-25-firmware_update",
+          "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
@@ -676,19 +369,21 @@
           "state_class": null,
           "entity_category": "config",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019",
+              "generic_id": "cluster_handler_0x0019_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 25,
                 "name": "Ota",
                 "type": "client"
               },
-              "id": "1:0x0019",
-              "unique_id": "f0:d1:b8:00:00:05:49:22:1:0x0019",
-              "status": "CREATED",
+              "id": "1:0x0019_client",
+              "unique_id": "f0:d1:b8:00:00:05:49:22:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -712,12 +407,15 @@
           "available": true,
           "installed_version": "0x00102101",
           "in_progress": false,
-          "progress": 0,
-          "latest_version": "0x00102101",
+          "update_percentage": null,
+          "latest_version": null,
           "release_summary": null,
+          "release_notes": null,
           "release_url": null
         }
       }
     ]
-  }
+  },
+  "neighbors": [],
+  "routes": []
 }

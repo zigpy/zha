@@ -1,8 +1,11 @@
 {
+  "version": 1,
   "ieee": "04:cf:8c:df:3c:75:c1:67",
-  "nwk": 25421,
+  "nwk": "0x634D",
   "manufacturer": "LUMI",
   "model": "lumi.remote.b286opcn01",
+  "friendly_manufacturer": "LUMI",
+  "friendly_model": "lumi.remote.b286opcn01",
   "name": "LUMI lumi.remote.b286opcn01",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.opple_remote.RemoteB286OPCN01V4",
@@ -11,383 +14,287 @@
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-26T14:23:13",
+  "last_seen": "2025-04-24T17:34:07.823821+00:00",
   "available": true,
   "device_type": "EndDevice",
-  "signature": {
-    "node_descriptor": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 128,
-      "manufacturer_code": 4447,
-      "maximum_buffer_size": 127,
-      "maximum_incoming_transfer_size": 100,
-      "server_mask": 11264,
-      "maximum_outgoing_transfer_size": 100,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0105",
-        "input_clusters": [
-          "0x0000",
-          "0x0001",
-          "0x0003",
-          "0x0012",
-          "0xfcc0"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0006",
-          "0x0008",
-          "0x0300"
-        ]
-      },
-      "2": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0003",
-          "0x0012"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0006"
-        ]
-      },
-      "3": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0003",
-          "0x0012"
-        ],
-        "output_clusters": [
-          "0x0006"
-        ]
-      },
-      "4": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0003",
-          "0x0012"
-        ],
-        "output_clusters": [
-          "0x0006"
-        ]
-      },
-      "5": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0003",
-          "0x0012"
-        ],
-        "output_clusters": [
-          "0x0006"
-        ]
-      },
-      "6": {
-        "profile_id": "0x0104",
-        "device_type": "0x0103",
-        "input_clusters": [
-          "0x0003",
-          "0x0012"
-        ],
-        "output_clusters": [
-          "0x0006"
-        ]
-      }
-    },
-    "manufacturer": "LUMI",
-    "model": "lumi.remote.b286opcn01"
-  },
   "active_coordinator": false,
-  "entities": [
-    {
-      "entity_id": "button.lumi_lumi_remote_b286opcn01_identifybutton",
-      "name": "LUMI lumi.remote.b286opcn01"
-    },
-    {
-      "entity_id": "sensor.lumi_lumi_remote_b286opcn01_battery",
-      "name": "LUMI lumi.remote.b286opcn01"
-    }
-  ],
-  "neighbors": [],
-  "routes": [],
-  "endpoint_names": [
-    {
-      "name": "COLOR_DIMMER_SWITCH"
-    },
-    {
-      "name": "ON_OFF_LIGHT_SWITCH"
-    },
-    {
-      "name": "ON_OFF_LIGHT_SWITCH"
-    },
-    {
-      "name": "ON_OFF_LIGHT_SWITCH"
-    },
-    {
-      "name": "ON_OFF_LIGHT_SWITCH"
-    },
-    {
-      "name": "ON_OFF_LIGHT_SWITCH"
-    }
-  ],
-  "user_given_name": "Master Bedroom Switch",
-  "device_reg_id": "dbbe8d29713d44d7961de69d1680e3f6",
-  "area_id": "ac964c45c0b94b4784ee72177efba786",
-  "cluster_details": {
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4447,
+    "maximum_buffer_size": 127,
+    "maximum_incoming_transfer_size": 100,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 100,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
     "1": {
+      "profile_id": 260,
       "device_type": {
         "name": "COLOR_DIMMER_SWITCH",
         "id": 261
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0000": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": {
-            "0x0001": {
-              "attribute_name": "app_version",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
               "value": 17
             },
-            "0x0004": {
-              "attribute_name": "manufacturer",
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
               "value": "LUMI"
             },
-            "0x0005": {
-              "attribute_name": "model",
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
               "value": "lumi.remote.b286opcn01"
             },
-            "0x0007": {
-              "attribute_name": "power_source",
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
               "value": 3
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0003": {
-          "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0001": {
+        {
+          "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "attributes": {
-            "0x0021": {
-              "attribute_name": "battery_percentage_remaining",
-              "value": 200
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "unsupported": true
             },
-            "0x0033": {
-              "attribute_name": "battery_quantity",
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
               "value": 1
             },
-            "0x0031": {
-              "attribute_name": "battery_size",
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
               "value": 7
             },
-            "0x0020": {
-              "attribute_name": "battery_voltage",
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
               "value": 28
             }
-          },
-          "unsupported_attributes": {
-            "0x0021": {
-              "attribute_name": "battery_percentage_remaining"
-            }
-          }
+          ]
         },
-        "0xfcc0": {
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": [
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "uint16",
+              "value": 1.0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfcc0",
           "endpoint_attribute": "opple_cluster",
-          "attributes": {
-            "0x0009": {
-              "attribute_name": "mode",
+          "attributes": [
+            {
+              "id": "0x0009",
+              "name": "mode",
+              "zcl_type": "uint8",
               "value": 1
             }
-          },
-          "unsupported_attributes": {}
-        },
-        "0x0012": {
-          "endpoint_attribute": "multistate_input",
-          "attributes": {
-            "0x0055": {
-              "attribute_name": "present_value",
-              "value": 1.0
-            }
-          },
-          "unsupported_attributes": {}
+          ]
         }
-      },
-      "out_clusters": {
-        "0x0003": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0006": {
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0008": {
+        {
+          "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0300": {
+        {
+          "cluster_id": "0x0300",
           "endpoint_attribute": "light_color",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      }
+      ]
     },
     "2": {
+      "profile_id": 260,
       "device_type": {
         "name": "ON_OFF_LIGHT_SWITCH",
         "id": 259
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0012": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0012",
           "endpoint_attribute": "multistate_input",
-          "attributes": {
-            "0x0055": {
-              "attribute_name": "present_value",
+          "attributes": [
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "uint16",
               "value": 1.0
             }
-          },
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
-          "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          ]
         }
-      },
-      "out_clusters": {
-        "0x0006": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
-          "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      }
+      ]
     },
     "3": {
+      "profile_id": 260,
       "device_type": {
         "name": "ON_OFF_LIGHT_SWITCH",
         "id": 259
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0012": {
-          "endpoint_attribute": "multistate_input",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": []
         }
-      },
-      "out_clusters": {
-        "0x0006": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      }
+      ]
     },
     "4": {
+      "profile_id": 260,
       "device_type": {
         "name": "ON_OFF_LIGHT_SWITCH",
         "id": 259
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0012": {
-          "endpoint_attribute": "multistate_input",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": []
         }
-      },
-      "out_clusters": {
-        "0x0006": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      }
+      ]
     },
     "5": {
+      "profile_id": 260,
       "device_type": {
         "name": "ON_OFF_LIGHT_SWITCH",
         "id": 259
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0012": {
-          "endpoint_attribute": "multistate_input",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": []
         }
-      },
-      "out_clusters": {
-        "0x0006": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      }
+      ]
     },
     "6": {
+      "profile_id": 260,
       "device_type": {
         "name": "ON_OFF_LIGHT_SWITCH",
         "id": 259
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0012": {
-          "endpoint_attribute": "multistate_input",
-          "attributes": {},
-          "unsupported_attributes": {}
-        },
-        "0x0003": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0012",
+          "endpoint_attribute": "multistate_input",
+          "attributes": []
         }
-      },
-      "out_clusters": {
-        "0x0006": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         }
-      }
+      ]
     }
   },
   "original_signature": {
@@ -476,6 +383,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "04:cf:8c:df:3c:75:c1:67-1-3",
+          "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -483,6 +391,8 @@
           "state_class": null,
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "IdentifyClusterHandler",
@@ -495,7 +405,7 @@
               },
               "id": "1:0x0003",
               "unique_id": "04:cf:8c:df:3c:75:c1:67:1:0x0003",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -528,7 +438,112 @@
       {
         "info_object": {
           "fallback_name": null,
+          "unique_id": "04:cf:8c:df:3c:75:c1:67-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "04:cf:8c:df:3c:75:c1:67:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            103,
+            193,
+            117,
+            60,
+            223,
+            140,
+            207,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "04:cf:8c:df:3c:75:c1:67-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "04:cf:8c:df:3c:75:c1:67:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            103,
+            193,
+            117,
+            60,
+            223,
+            140,
+            207,
+            4
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
           "unique_id": "04:cf:8c:df:3c:75:c1:67-1-1",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
@@ -536,6 +551,8 @@
           "state_class": "measurement",
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "PowerConfigurationClusterHandler",
@@ -548,7 +565,7 @@
               },
               "id": "1:0x0001",
               "unique_id": "04:cf:8c:df:3c:75:c1:67:1:0x0001",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "battery_voltage"
             }
           ],
@@ -565,125 +582,20 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": "battery_percentage_remaining",
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
+          "suggested_display_precision": 0,
           "unit": "%"
         },
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 100,
+          "state": null,
           "battery_size": "CR2",
           "battery_quantity": 1,
           "battery_voltage": 2.8
         }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "04:cf:8c:df:3c:75:c1:67-1-0-rssi",
-          "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "device_class": "signal_strength",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "04:cf:8c:df:3c:75:c1:67:1:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            103,
-            193,
-            117,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "dBm"
-        },
-        "state": {
-          "class_name": "RSSISensor",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "04:cf:8c:df:3c:75:c1:67-1-0-lqi",
-          "platform": "sensor",
-          "class_name": "LQISensor",
-          "translation_key": "lqi",
-          "device_class": null,
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "04:cf:8c:df:3c:75:c1:67:1:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            103,
-            193,
-            117,
-            60,
-            223,
-            140,
-            207,
-            4
-          ],
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": null
-        },
-        "state": {
-          "class_name": "LQISensor",
-          "available": true,
-          "state": null
-        }
       }
     ]
-  }
+  },
+  "neighbors": [],
+  "routes": []
 }

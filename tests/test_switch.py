@@ -18,6 +18,7 @@ from zigpy.quirks import _DEVICE_REGISTRY, CustomCluster, CustomDevice
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
 from zigpy.zcl.clusters import closures, general
+from zigpy.zcl.clusters.general import BinaryOutput
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
 
@@ -33,6 +34,7 @@ from tests.common import (
     join_zigpy_device,
     send_attributes_report,
     update_attribute_cache,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
@@ -851,3 +853,61 @@ async def test_cover_inversion_switch_not_created(zha_gateway: Gateway) -> None:
     # entity should not be created when mode or config status aren't present
     with pytest.raises(KeyError):
         get_entity(zha_device, platform=Platform.SWITCH)
+
+
+async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
+    """Test ZHA switch platform with binary output cluster."""
+
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/espressif-zigbeebinaryoutputdevice.json",
+    )
+    cluster = zigpy_device.endpoints[1].binary_output
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    switch_entity = get_entity(zha_device, platform=Platform.SWITCH)
+
+    # Clear out the attribute first, to test handling of the missing state
+    cluster.update_attribute(BinaryOutput.AttributeDefs.present_value.id, None)
+
+    assert switch_entity.info_object.fallback_name == "Entity Description"
+    assert switch_entity.state["state"] is False
+
+    # Turn it on
+    cluster.write_attributes.reset_mock()
+    await switch_entity.async_turn_on()
+    assert cluster.write_attributes.mock_calls == [
+        call({"present_value": True}, manufacturer=None)
+    ]
+    assert switch_entity.state["state"] is True
+
+    # Turn it off
+    cluster.write_attributes.reset_mock()
+    await switch_entity.async_turn_off()
+    assert cluster.write_attributes.mock_calls == [
+        call({"present_value": False}, manufacturer=None)
+    ]
+    assert switch_entity.state["state"] is False
+
+    # Report an attribute change
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {BinaryOutput.AttributeDefs.present_value.id: t.Bool(False)},
+    )
+    assert switch_entity.state["state"] is False
+
+    # Force an update
+    cluster.read_attributes.reset_mock()
+    cluster.PLUGGED_ATTR_READS = {BinaryOutput.AttributeDefs.present_value.name: True}
+
+    await switch_entity.async_update()
+    assert switch_entity.state["state"] is True
+
+    assert cluster.read_attributes.mock_calls == [
+        call(
+            [BinaryOutput.AttributeDefs.present_value.name],
+            allow_cache=False,
+            only_cache=False,
+            manufacturer=None,
+        )
+    ]

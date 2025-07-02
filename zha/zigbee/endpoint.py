@@ -135,10 +135,13 @@ class Endpoint:
     def add_all_cluster_handlers(self) -> None:
         """Create and add cluster handlers for all input clusters."""
         profile_id = self._zigpy_endpoint.profile_id
-        if profile_id not in (ZLL_PROFILE_ID, ZHA_PROFILE_ID):
+        if profile_id is None:
+            _LOGGER.debug("Skipping endpoint, profile is None")
+            return
+        elif profile_id not in (ZLL_PROFILE_ID, ZHA_PROFILE_ID):
             _LOGGER.debug(
                 "Skipping endpoint, profile is not ZLL or ZHA: 0x%04X",
-                self._zigpy_endpoint.profile_id,
+                profile_id,
             )
             return
 

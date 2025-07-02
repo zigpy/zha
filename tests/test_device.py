@@ -14,7 +14,7 @@ from zigpy.quirks.registry import DeviceRegistry
 from zigpy.quirks.v2 import DeviceAlertLevel, DeviceAlertMetadata, QuirkBuilder
 import zigpy.types
 from zigpy.zcl.clusters import general
-from zigpy.zcl.clusters.general import Ota
+from zigpy.zcl.clusters.general import Ota, PowerConfiguration
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
 import zigpy.zdo.types as zdo_t
 
@@ -938,6 +938,35 @@ async def test_primary_entity_computation(
         ]
 
 
+async def test_quirks_v2_primary_entity(zha_gateway: Gateway) -> None:
+    """Test quirks v2 primary entity."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .sensor(
+            attribute_name=PowerConfiguration.AttributeDefs.battery_quantity.id,
+            cluster_id=PowerConfiguration.cluster_id,
+            translation_key="battery_quantity",
+            fallback_name="Battery quantity",
+            primary=True,
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    (primary,) = [e for e in zha_device.platform_entities.values() if e.primary]
+    assert primary.translation_key == "battery_quantity"
+
+
 async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
     """Test quirks v2 can prevent creating default entities."""
     registry = DeviceRegistry()
@@ -993,3 +1022,16 @@ async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
     assert mock_reporting_config.mock_calls == [
         call({"measured_value": (30, 900, 1e-6)})
     ]
+
+
+async def test_endpoint_none_profile(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test endpoint with None profile id being skipped."""
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev.endpoints[3].profile_id = None
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    assert zha_device.async_get_std_clusters() == {}
+    assert "Skipping endpoint, profile is None" in caplog.text

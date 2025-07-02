@@ -12,7 +12,10 @@ import zigpy.quirks as zigpy_quirks
 
 from zha.application.const import ATTR_QUIRK_ID
 from zha.application.platforms import PlatformEntity
-from zha.application.platforms.binary_sensor import IASZone
+from zha.application.platforms.binary_sensor import BinaryInputWithDescription, IASZone
+from zha.application.platforms.number import AnalogOutputNumber
+from zha.application.platforms.sensor import AnalogInputSensor
+from zha.application.platforms.switch import BinaryOutputSwitch
 from zha.application.registries import (
     PLATFORM_ENTITIES,
     MatchRule,
@@ -559,19 +562,24 @@ def test_entity_names() -> None:
 
     for _, entity_classes in iter_all_rules():
         for entity_class in entity_classes:
-            if hasattr(entity_class, "_attr_fallback_name"):
-                # The entity has a name
+            if entity_class._attr_fallback_name is not None:
                 assert (
                     isinstance(entity_class._attr_fallback_name, str)
                     and entity_class._attr_fallback_name
                 )
-            elif hasattr(entity_class, "_attr_translation_key"):
+            elif entity_class._attr_translation_key is not None:
                 assert (
                     isinstance(entity_class._attr_translation_key, str)
                     and entity_class._attr_translation_key
                 )
-            elif hasattr(entity_class, "_attr_device_class"):
-                assert entity_class._attr_device_class
+            elif entity_class._attr_device_class is not None:
+                pass
             else:
-                # The only exception (for now) is IASZone
-                assert entity_class is IASZone
+                # The only exceptions
+                assert entity_class in (
+                    IASZone,
+                    BinaryInputWithDescription,
+                    BinaryOutputSwitch,
+                    AnalogInputSensor,
+                    AnalogOutputNumber,
+                )

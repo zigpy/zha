@@ -15,14 +15,15 @@ from zigpy.profiles import zha
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, DeviceRegistry, get_device
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder, ReportingConfig
-from zigpy.quirks.v2.homeassistant import UnitOfMass
+from zigpy.quirks.v2.homeassistant import EntityPlatform, EntityType, UnitOfMass
 from zigpy.quirks.v2.homeassistant.sensor import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 import zigpy.types as t
 from zigpy.zcl import Cluster
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
-from zigpy.zcl.clusters.general import AnalogInput
+from zigpy.zcl.clusters.general import AnalogInput, PowerConfiguration
+from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 
 from tests.common import (
@@ -40,9 +41,20 @@ from zha.application import Platform
 from zha.application.const import ZCL_INIT_ATTRS, ZHA_CLUSTER_HANDLER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
-from zha.application.platforms.sensor import DanfossSoftwareErrorCode, Temperature
+from zha.application.platforms.sensor import (
+    AnalogInputSensor,
+    DanfossSoftwareErrorCode,
+    Temperature,
+)
 from zha.application.platforms.sensor.const import SensorDeviceClass, SensorStateClass
-from zha.units import PERCENTAGE, UnitOfEnergy, UnitOfPressure, UnitOfVolume
+from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
+from zha.units import (
+    PERCENTAGE,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfPressure,
+    UnitOfVolume,
+)
 from zha.zigbee.cluster_handlers import AttrReportConfig
 from zha.zigbee.cluster_handlers.manufacturerspecific import OppleRemoteClusterHandler
 from zha.zigbee.device import Device
@@ -346,14 +358,14 @@ async def async_test_em_rms_current(
     """Test electrical measurement RMS Current sensor."""
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1234})
-    assert_state(entity, 1.2, "A")
+    assert_state(entity, 1.234, "A")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_current_divisor": 10})
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 236})
     assert_state(entity, 23.6, "A")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_attrid: 1236})
-    assert_state(entity, 124, "A")
+    assert_state(entity, 123.6, "A")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, current_max_attrid: 88})
     assert entity.state[current_max_attr_name] == 8.8
@@ -365,17 +377,17 @@ async def async_test_em_rms_voltage(
     """Test electrical measurement RMS Voltage sensor."""
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 1234})
-    assert_state(entity, 123, "V")
+    assert_state(entity, 123.4, "V")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 234})
     assert_state(entity, 23.4, "V")
 
     await send_attributes_report(zha_gateway, cluster, {"ac_voltage_divisor": 100})
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 2236})
-    assert_state(entity, 22.4, "V")
+    assert_state(entity, 22.36, "V")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0507: 888})
-    assert entity.state["rms_voltage_max"] == 8.9
+    assert entity.state["rms_voltage_max"] == 8.88
 
 
 async def async_test_powerconfiguration(
@@ -447,7 +459,7 @@ async def async_test_change_source_timestamp(
     await send_attributes_report(
         zha_gateway,
         cluster,
-        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 2674725315},
+        {hvac.Thermostat.AttributeDefs.setpoint_change_source_timestamp.id: 781355715},
     )
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
@@ -682,8 +694,108 @@ async def test_sensor(
     )
 
     await zha_gateway.async_block_till_done()
+
     # test sensor associated logic
     await test_func(zha_gateway, cluster, entity)
+    assert entity.fallback_name is None
+
+
+async def test_analog_input_simple(zha_gateway: Gateway) -> None:
+    """Test analog input sensors."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    # Pretend this device has a proper description for the attribute
+    # TODO: replace this unit test with one that uses a real device
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+    )
+
+    assert entity.state["available"] is True
+    assert entity.state["state"] == 2.1322579383850098
+    assert entity.info_object.fallback_name == "Some description"
+    assert entity.info_object.translation_key is None
+    assert entity.info_object.unit == UnitOfElectricPotential.VOLT
+    assert entity.info_object.device_class is None
+    assert entity.info_object.suggested_display_precision is None
+
+
+async def test_analog_input_ignored(zha_gateway: Gateway) -> None:
+    """Test analog input sensors."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    # Pretend this device has a proper description for the attribute
+    # TODO: replace this unit test with one that uses a real device
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+
+    # No units or application type are defined, however
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.engineering_units.id, 5
+    )
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.engineering_units.id, None
+    )
+    zigpy_dev.endpoints[2].analog_input.add_unsupported_attribute(
+        AnalogInput.AttributeDefs.engineering_units.id
+    )
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # The entity is not created
+    with pytest.raises(KeyError):
+        get_entity(
+            zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+        )
+
+
+async def test_analog_input_complex(zha_gateway: Gateway) -> None:
+    """Test analog input sensors."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/isilentllc-masterbed-light-controller.json",
+    )
+
+    # Pretend this device has a proper description for the attribute
+    # TODO: replace this unit test with one that uses a real device
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.description.id, "Some description"
+    )
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.application_type.id,
+        int(
+            ApplicationType(
+                group=0, type=AnalogInputType.Relative_Humidity_Percent, index=0
+            )
+        ),
+    )
+    zigpy_dev.endpoints[2].analog_input.update_attribute(
+        AnalogInput.AttributeDefs.resolution.id, 0.01
+    )
+
+    zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_dev, platform=Platform.SENSOR, exact_entity_type=AnalogInputSensor
+    )
+
+    assert entity.state["available"] is True
+    assert entity.state["state"] == 2.1322579383850098
+    assert entity.info_object.fallback_name == "Some description"
+    assert entity.info_object.translation_key is None
+    assert entity.info_object.unit is PERCENTAGE  # overridden!
+    assert entity.info_object.device_class is SensorDeviceClass.HUMIDITY  # overridden!
+    assert entity.info_object.suggested_display_precision == 2
 
 
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
@@ -1297,6 +1409,7 @@ class TimestampCluster(CustomCluster, ManufacturerSpecificCluster):
         "start_time",
         TimestampCluster.cluster_id,
         device_class=SensorDeviceClassV2.TIMESTAMP,  # Use the zigpy enum
+        attribute_converter=lambda x: datetime.fromtimestamp(x + 946684800, tz=UTC),
         translation_key="start_time",
         fallback_name="Start Time",
     )
@@ -1339,7 +1452,7 @@ async def test_timestamp_sensor_v2(zha_gateway: Gateway) -> None:
     assert isinstance(zha_device.device, CustomDeviceV2)
     entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="start_time")
 
-    await send_attributes_report(zha_gateway, cluster, {0xEF65: 2674725315})
+    await send_attributes_report(zha_gateway, cluster, {0xEF65: 781355715})
     assert entity.state["state"] == datetime(2024, 10, 4, 11, 15, 15, tzinfo=UTC)
 
 
@@ -1784,3 +1897,88 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
         {measurement.TemperatureMeasurement.AttributeDefs.measured_value.id: -0x8000},
     )
     assert entity.state["state"] is None
+
+
+@pytest.mark.parametrize(
+    ("resolution", "precision"),
+    [
+        (0.0009999999310821295, 3),
+        (0.001, 3),
+        (0.001000001, 3),
+        (0.01, 2),
+        (0.05, 2),
+        (0.1, 1),
+        (1.0, 0),
+        (2.0, 0),
+        (0.9, 1),
+        (0.7, 1),
+        (0.2, 1),
+        (0.25, 2),
+        (0.33, 2),
+        (0.44, 2),
+        (0.55, 2),
+        (0.66, 2),
+        (0.77, 2),
+        (0.88, 2),
+        (1 / 3, 7),
+        (0.125, 3),
+        (0.5, 1),
+        (1.5, 1),
+        (10.5, 1),
+        (0.000000000000001, 15),
+        (0.0000000001, 10),
+        (0.000000001, 9),
+        (0.00000001, 8),
+        (0.0000001, 7),
+        (0.000001, 6),
+    ],
+)
+def test_sensor_precision(resolution: float, precision: int) -> None:
+    """Test converting ZCL `resolution` into precision."""
+
+    # Force the values to be float32, not float64
+    resolution, _ = t.Single.deserialize(t.Single(resolution).serialize())
+    assert resolution_to_decimal_precision(resolution) == precision
+
+
+async def test_enum_sensor(zha_gateway: Gateway) -> None:
+    """Test enum sensor creation and handling of missing values."""
+    registry = DeviceRegistry()
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+    )
+
+    zigpy_dev.endpoints[1].power.update_attribute(
+        PowerConfiguration.AttributeDefs.battery_size.id,
+        PowerConfiguration.BatterySize.AAA,
+    )
+
+    (
+        QuirkBuilder(zigpy_dev.manufacturer, zigpy_dev.model, registry=registry)
+        .enum(
+            entity_platform=EntityPlatform.SENSOR,
+            entity_type=EntityType.DIAGNOSTIC,
+            attribute_name=PowerConfiguration.AttributeDefs.battery_size.name,
+            enum_class=PowerConfiguration.BatterySize,
+            cluster_id=PowerConfiguration.cluster_id,
+            endpoint_id=1,
+            translation_key="battery_size",
+            fallback_name="Battery size",
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(zigpy_dev)
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(zha_device, platform=Platform.SENSOR, qualifier="battery_size")
+
+    assert entity.state["state"] == "AAA"
+
+    zigpy_dev.endpoints[1].power.update_attribute(
+        PowerConfiguration.AttributeDefs.battery_size.id,
+        0xAB,  # unknown
+    )
+
+    assert entity.state["state"] == "undefined_0xab"  # TODO: should this be `None`?

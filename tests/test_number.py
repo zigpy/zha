@@ -120,19 +120,19 @@ async def test_number(
 
     assert cluster.read_attributes.call_count == 3
 
-    assert entity.description == "PWM1"
+    assert entity.fallback_name == "PWM1"
 
     # test that the state is 15.0
     assert entity.state["state"] == 15.0
 
     # test attributes
-    assert entity.info_object.min_value == 1.0
-    assert entity.info_object.max_value == 100.0
-    assert entity.info_object.step == 1.1
+    assert entity.info_object.native_min_value == 1.0
+    assert entity.info_object.native_max_value == 100.0
+    assert entity.info_object.native_step == 1.1
+    assert entity.info_object.mode == NumberMode.AUTO
 
     assert entity.icon == "mdi:percent"
     assert entity.native_unit_of_measurement == "%"
-    assert entity.mode == NumberMode.AUTO
     assert entity.native_min_value == 1.0
     assert entity.native_max_value == 100.0
     assert entity.native_step == 1.1
@@ -149,7 +149,7 @@ async def test_number(
     assert entity.state["state"] == 20.0
 
     # change value from client
-    await entity.async_set_value(30.0)
+    await entity.async_set_native_value(30.0)
     await zha_gateway.async_block_till_done()
 
     assert len(cluster.write_attributes.mock_calls) == 1
@@ -177,6 +177,34 @@ async def test_number(
         {"present_value": 30}, manufacturer=None
     )
     assert entity.state["state"] == 30.0
+
+
+async def test_number_missing_description_attr(
+    zha_gateway: Gateway,
+) -> None:
+    """Test zha number platform - missing description attribute."""
+    zigpy_analog_output_device = create_mock_zigpy_device(
+        zha_gateway, ZIGPY_ANALOG_OUTPUT_DEVICE
+    )
+    cluster: general.AnalogOutput = zigpy_analog_output_device.endpoints.get(
+        1
+    ).analog_output
+    cluster.PLUGGED_ATTR_READS = {
+        "max_present_value": 100.0,
+        "min_present_value": 1.0,
+        "relinquish_default": 50.0,
+        "resolution": 1.1,
+        "engineering_units": 98,
+        "application_type": 4 * 0x10000,
+    }
+    update_attribute_cache(cluster)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
+
+    entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
+    assert isinstance(entity, PlatformEntity)
+
+    assert entity.fallback_name is None
+    assert entity.translation_key is None
 
 
 @pytest.mark.parametrize(
@@ -241,7 +269,7 @@ async def test_level_control_number(
     assert entity._attr_entity_category == EntityCategory.CONFIG
 
     assert entity.icon is None
-    assert entity.description is None
+    assert entity.fallback_name is None
     assert entity.native_unit_of_measurement is None
     assert entity.mode == NumberMode.AUTO
     assert entity.native_min_value == 0

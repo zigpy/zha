@@ -17,6 +17,7 @@ from zigpy.zcl.clusters.smartenergy import (
     MduPairing,
     Messaging,
     Metering,
+    NumberFormatting,
     Prepayment,
     Price,
     Tunneling,
@@ -31,6 +32,13 @@ from zha.zigbee.cluster_handlers.const import (
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
+
+
+DEFAULT_FORMATTING = NumberFormatting(
+    num_digits_right_of_decimal=1,
+    num_digits_left_of_decimal=15,
+    suppress_leading_zeros=1,
+)
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Calendar.cluster_id)
@@ -302,13 +310,13 @@ class MeteringClusterHandler(ClusterHandler):
         """Fetch config from device and updates format specifier."""
 
         fmting = self.cluster.get(
-            Metering.AttributeDefs.demand_formatting.name, 0xF9
-        )  # 1 digit to the right, 15 digits to the left
+            Metering.AttributeDefs.demand_formatting.name, DEFAULT_FORMATTING
+        )
         self._format_spec = self.get_formatting(fmting)
 
         fmting = self.cluster.get(
-            Metering.AttributeDefs.summation_formatting.name, 0xF9
-        )  # 1 digit to the right, 15 digits to the left
+            Metering.AttributeDefs.summation_formatting.name, DEFAULT_FORMATTING
+        )
         self._summa_format = self.get_formatting(fmting)
 
     async def async_update(self) -> None:
@@ -324,19 +332,17 @@ class MeteringClusterHandler(ClusterHandler):
 
     @staticmethod
     def get_formatting(formatting: int) -> str:
-        """Return a formatting string, given the formatting value.
+        """Return a formatting string, given the formatting value."""
+        formatting = NumberFormatting(formatting)
+        r_digits = formatting.num_digits_right_of_decimal
+        l_digits = formatting.num_digits_left_of_decimal
 
-        Bits 0 to 2: Number of Digits to the right of the Decimal Point.
-        Bits 3 to 6: Number of Digits to the left of the Decimal Point.
-        Bit 7: If set, suppress leading zeros.
-        """
-        r_digits = int(formatting & 0x07)  # digits to the right of decimal point
-        l_digits = (formatting >> 3) & 0x0F  # digits to the left of decimal point
         if l_digits == 0:
             l_digits = 15
+
         width = r_digits + l_digits + (1 if r_digits > 0 else 0)
 
-        if formatting & 0x80:
+        if formatting.suppress_leading_zeros:
             # suppress leading 0
             return f"{{:{width}.{r_digits}f}}"
 

@@ -9,6 +9,7 @@ import pathlib
 import re
 from unittest import mock
 from unittest.mock import AsyncMock, call
+import warnings
 
 import pytest
 from zhaquirks.ikea import PowerConfig1CRCluster, ScenesCluster
@@ -44,11 +45,12 @@ from tests.common import (
     SIG_EP_OUTPUT,
     SIG_EP_PROFILE,
     SIG_EP_TYPE,
+    ZhaJsonEncoder,
     create_mock_zigpy_device,
     get_entity,
     join_zigpy_device,
     update_attribute_cache,
-    zigpy_device_from_json,
+    zigpy_device_from_device_data,
 )
 from zha.application import Platform
 from zha.application.discovery import ENDPOINT_PROBE, EndpointProbe
@@ -612,6 +614,15 @@ async def test_quirks_v2_entity_discovery_errors(
     zigpy_device = _get_test_device(
         zha_gateway, "Ikea of Sweden3", "TRADFRI remote control3"
     )
+
+    # Inject unknown quirks v2 entity metadata
+    class UnknownEntityMetadata:
+        entity_platform = Platform.UPDATE
+
+    zigpy_device._exposes_metadata[
+        (1, zigpy.zcl.clusters.general.OnOff.cluster_id, ClusterType.Server)
+    ].append(UnknownEntityMetadata())
+
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert (
@@ -730,9 +741,7 @@ async def test_quirks_v2_metadata_bad_device_classes(
     zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
 
 
-async def test_quirks_v2_fallback_name(
-    zha_gateway: Gateway,  # pylint: disable=unused-argument
-) -> None:
+async def test_quirks_v2_fallback_name(zha_gateway: Gateway) -> None:
     """Test quirks v2 fallback name."""
 
     zigpy_device = _get_test_device(
@@ -740,7 +749,7 @@ async def test_quirks_v2_fallback_name(
         "Ikea of Sweden6",
         "TRADFRI remote control6",
         augment_method=lambda builder: builder.sensor(
-            attribute_name=zigpy.zcl.clusters.general.OnOff.AttributeDefs.off_wait_time.name,
+            attribute_name=zigpy.zcl.clusters.general.OnOff.AttributeDefs.global_scene_control.name,
             cluster_id=zigpy.zcl.clusters.general.OnOff.cluster_id,
             translation_key="some_sensor",
             fallback_name="Fallback name",
@@ -770,29 +779,51 @@ def pytest_generate_tests(metafunc):
 
 async def test_devices_from_files(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
-    file_path: str,
+    file_path: pathlib.Path,
 ) -> None:
     """Test all devices."""
     with mock.patch(
         "zigpy.zcl.clusters.general.Identify.request",
         new=AsyncMock(return_value=[mock.sentinel.data, zcl_f.Status.SUCCESS]),
     ):
-        zigpy_device = await zigpy_device_from_json(
-            zha_gateway.application_controller, file_path
+        device_data_text = await asyncio.get_running_loop().run_in_executor(
+            None, file_path.read_text
         )
-        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+        device_data = json.loads(device_data_text)
+
+        zigpy_device = zigpy_device_from_device_data(
+            app=zha_gateway.application_controller, device_data=device_data
+        )
+
+        # XXX: attribute updates during device initialization unfortunately triggers
+        # logic within quirks to "fix" attributes. Since these attributes are *read out*
+        # in this state, this will compound the "fix" repeatedly.
+        with mock.patch("zigpy.zcl.Cluster._update_attribute"):
+            zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+            await zha_gateway.async_block_till_done(wait_background_tasks=True)
+            assert zha_device is not None
 
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
             unique_id_collisions[entity.unique_id].append(entity)
 
         for unique_id, entities in unique_id_collisions.items():
-            if len(entities) > 1:  # noqa: SIM102
-                # Keep track of known exceptions
-                if unique_id not in {"28:2c:02:bf:ff:ea:05:68-1-6"}:
-                    raise ValueError(
-                        f"Duplicate unique_id {unique_id} found in entities: {entities}"
-                    )
+            if len(entities) == 1:
+                continue
+
+            prefixed_unique_ids = [
+                f"{entity.PLATFORM.name.lower()}.{entity.unique_id}"
+                for entity in entities
+            ]
+
+            if len(set(prefixed_unique_ids)) != len(entities):
+                raise ValueError(
+                    f"Duplicate unique_id {unique_id} found in entities: {entities}"
+                )
+            else:
+                warnings.warn(
+                    f"Unique IDs are unique only with platform prefix: {dict(zip(prefixed_unique_ids, entities))}"
+                )
 
         unique_id_migrations: dict[tuple[Platform, str], PlatformEntity] = {}
         for entity in zha_device.platform_entities.values():
@@ -806,74 +837,14 @@ async def test_devices_from_files(
 
                 unique_id_migrations[key] = entity
 
-        assert zha_device is not None
+        await zha_device.on_remove()
 
-        device_data = json.loads(
-            await asyncio.get_running_loop().run_in_executor(None, file_path.read_text)
+        # XXX: We re-serialize the JSON because integer enum types are converted when
+        # serializing but will not compare properly otherwise
+        loaded_device_data = json.loads(
+            json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
         )
-
-        # Get the zha_lib_entities from device_data
-        zha_lib_entities = device_data.get("zha_lib_entities", [])
-
-        diagnostic_unique_ids = set()
-
-        # Iterate over the platform_entities in device.platform_entities
-        for platform_name, entities_info in zha_lib_entities.items():
-            platform = Platform(platform_name)
-
-            for info in entities_info:
-                unique_id = info["info_object"]["unique_id"]
-
-                # Migrate the unique ID if necessary
-                if (platform, unique_id) in unique_id_migrations:
-                    unique_id = unique_id_migrations[platform, unique_id].unique_id
-
-                combined_unique_id = f"{platform}.{unique_id}"
-                if combined_unique_id in diagnostic_unique_ids:
-                    raise ValueError(
-                        f"Diagnostic unique ID {combined_unique_id} duplicated!"
-                    )
-                else:
-                    diagnostic_unique_ids.add(combined_unique_id)
-
-                platform_entity = zha_device.platform_entities[platform, unique_id]
-
-                # Assert that the entity properties match those in the json data
-                assert (
-                    platform_entity.translation_key
-                    == info["info_object"]["translation_key"]
-                )
-                assert (
-                    platform_entity.fallback_name
-                    == info["info_object"]["fallback_name"]
-                )
-                assert (
-                    platform_entity.device_class == info["info_object"]["device_class"]
-                )
-                assert platform_entity.__class__.__name__ == info["state"]["class_name"]
-                assert (
-                    platform_entity.entity_category
-                    == info["info_object"]["entity_category"]
-                )
-                assert platform_entity.state_class == info["info_object"]["state_class"]
-                assert (
-                    platform_entity.entity_registry_enabled_default
-                    == info["info_object"]["entity_registry_enabled_default"]
-                )
-                assert (
-                    platform_entity.state["class_name"] == info["state"]["class_name"]
-                )
-
-        # Ensure unique IDs remain intact
-        computed_unique_ids = {
-            f"{platform}.{entity.unique_id}"
-            for (platform, _), entity in zha_device.platform_entities.items()
-        }
-
-        assert len(diagnostic_unique_ids) == sum(
-            len(entities) for entities in zha_lib_entities.values()
-        )
-        assert computed_unique_ids == diagnostic_unique_ids
+        assert loaded_device_data == device_data
 
         # Assert identify called on join for devices that support it
         cluster_identify = _get_identify_cluster(zha_device.device)

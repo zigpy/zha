@@ -1,207 +1,189 @@
 {
+  "version": 1,
   "ieee": "00:22:a3:00:00:27:48:84",
-  "nwk": 30475,
+  "nwk": "0x770B",
   "manufacturer": "King Of Fans,  Inc.",
   "model": "HDC52EastwindFan",
+  "friendly_manufacturer": "King Of Fans,  Inc.",
+  "friendly_model": "HDC52EastwindFan",
   "name": "King Of Fans,  Inc. HDC52EastwindFan",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.kof.kof_mr101z.CeilingFan",
   "quirk_id": null,
   "manufacturer_code": 4098,
   "power_source": "Mains",
-  "lqi": 171,
+  "lqi": null,
   "rssi": null,
-  "last_seen": "2024-08-26T14:48:13",
+  "last_seen": "2025-04-24T17:34:08.038444+00:00",
   "available": true,
   "device_type": "EndDevice",
-  "signature": {
-    "node_descriptor": {
-      "logical_type": 2,
-      "complex_descriptor_available": 0,
-      "user_descriptor_available": 0,
-      "reserved": 0,
-      "aps_flags": 0,
-      "frequency_band": 8,
-      "mac_capability_flags": 140,
-      "manufacturer_code": 4098,
-      "maximum_buffer_size": 82,
-      "maximum_incoming_transfer_size": 82,
-      "server_mask": 0,
-      "maximum_outgoing_transfer_size": 82,
-      "descriptor_capability_field": 0
-    },
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x0101",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0008",
-          "0x0202"
-        ],
-        "output_clusters": [
-          "0x0003",
-          "0x0019"
-        ]
-      }
-    },
-    "manufacturer": "King Of Fans,  Inc.",
-    "model": "HDC52EastwindFan"
-  },
   "active_coordinator": false,
-  "entities": [
-    {
-      "entity_id": "button.guest_bedroom_ceiling_fan_identifybutton",
-      "name": "King Of Fans,  Inc. HDC52EastwindFan"
-    },
-    {
-      "entity_id": "fan.guest_bedroom_ceiling_fan_fan",
-      "name": "King Of Fans,  Inc. HDC52EastwindFan"
-    },
-    {
-      "entity_id": "light.guest_bedroom_ceiling_fan_light",
-      "name": "King Of Fans,  Inc. HDC52EastwindFan"
-    },
-    {
-      "entity_id": "number.guest_bedroom_ceiling_fan_onlevelconfiguration",
-      "name": "King Of Fans,  Inc. HDC52EastwindFan"
-    },
-    {
-      "entity_id": "update.guest_bedroom_ceiling_fan_firmware",
-      "name": "King Of Fans,  Inc. HDC52EastwindFan"
-    }
-  ],
-  "neighbors": [],
-  "routes": [],
-  "endpoint_names": [
-    {
-      "name": "DIMMABLE_LIGHT"
-    }
-  ],
-  "user_given_name": "Guest Bedroom Ceiling Fan",
-  "device_reg_id": "b943770bf844451888e170a505032fe5",
-  "area_id": "5903623501004cf5a274d4429d4d8c99",
-  "cluster_details": {
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 140,
+    "manufacturer_code": 4098,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
     "1": {
+      "profile_id": 260,
       "device_type": {
         "name": "DIMMABLE_LIGHT",
         "id": 257
       },
-      "profile_id": 260,
-      "in_clusters": {
-        "0x0000": {
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "attributes": {
-            "0x0004": {
-              "attribute_name": "manufacturer",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
               "value": "King Of Fans,  Inc."
             },
-            "0x0005": {
-              "attribute_name": "model",
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
               "value": "HDC52EastwindFan"
             },
-            "0x0007": {
-              "attribute_name": "power_source",
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
               "value": 0
             }
-          },
-          "unsupported_attributes": {}
+          ]
         },
-        "0x0003": {
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0004": {
+        {
+          "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0005": {
+        {
+          "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0006": {
+        {
+          "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
               "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
             }
-          },
-          "unsupported_attributes": {
-            "0x4003": {
-              "attribute_name": "start_up_on_off"
-            }
-          }
+          ]
         },
-        "0x0008": {
+        {
+          "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "current_level",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_level",
+              "zcl_type": "uint8",
               "value": 254
             },
-            "0x0011": {
-              "attribute_name": "on_level",
+            {
+              "id": "0x0014",
+              "name": "default_move_rate",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0013",
+              "name": "off_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "on_level",
+              "zcl_type": "uint8",
               "value": 254
+            },
+            {
+              "id": "0x0010",
+              "name": "on_off_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "on_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x4000",
+              "name": "start_up_current_level",
+              "zcl_type": "uint8",
+              "unsupported": true
             }
-          },
-          "unsupported_attributes": {
-            "0x4000": {
-              "attribute_name": "start_up_current_level"
-            },
-            "0x0010": {
-              "attribute_name": "on_off_transition_time"
-            },
-            "0x0012": {
-              "attribute_name": "on_transition_time"
-            },
-            "0x0013": {
-              "attribute_name": "off_transition_time"
-            },
-            "0x0014": {
-              "attribute_name": "default_move_rate"
-            }
-          }
+          ]
         },
-        "0x0202": {
+        {
+          "cluster_id": "0x0202",
           "endpoint_attribute": "fan",
-          "attributes": {
-            "0x0000": {
-              "attribute_name": "fan_mode",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "fan_mode",
+              "zcl_type": "enum8",
               "value": 0
             },
-            "0x0001": {
-              "attribute_name": "fan_mode_sequence",
+            {
+              "id": "0x0001",
+              "name": "fan_mode_sequence",
+              "zcl_type": "enum8",
               "value": 5
             }
-          },
-          "unsupported_attributes": {}
+          ]
         }
-      },
-      "out_clusters": {
-        "0x0003": {
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": {},
-          "unsupported_attributes": {}
+          "attributes": []
         },
-        "0x0019": {
+        {
+          "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "attributes": {
-            "0x0002": {
-              "attribute_name": "current_file_version",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
               "value": 15
             }
-          },
-          "unsupported_attributes": {}
+          ]
         }
-      }
+      ]
     }
   },
   "original_signature": {
@@ -232,6 +214,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:22:a3:00:00:27:48:84-1-3",
+          "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
@@ -239,6 +222,8 @@
           "state_class": null,
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "IdentifyClusterHandler",
@@ -251,7 +236,7 @@
               },
               "id": "1:0x0003",
               "unique_id": "00:22:a3:00:00:27:48:84:1:0x0003",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -285,6 +270,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:22:a3:00:00:27:48:84-1-514",
+          "migrate_unique_ids": [],
           "platform": "fan",
           "class_name": "KofFan",
           "translation_key": "fan",
@@ -292,6 +278,8 @@
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "FanClusterHandler",
@@ -304,7 +292,7 @@
               },
               "id": "1:0x0202",
               "unique_id": "00:22:a3:00:00:27:48:84:1:0x0202",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -349,6 +337,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:22:a3:00:00:27:48:84-1",
+          "migrate_unique_ids": [],
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
@@ -356,6 +345,8 @@
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",
@@ -368,7 +359,7 @@
               },
               "id": "1:0x0006",
               "unique_id": "00:22:a3:00:00:27:48:84:1:0x0006",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "on_off"
             },
             {
@@ -382,7 +373,7 @@
               },
               "id": "1:0x0008",
               "unique_id": "00:22:a3:00:00:27:48:84:1:0x0008",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "current_level"
             }
           ],
@@ -399,7 +390,9 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "effect_list": null,
+          "effect_list": [
+            "off"
+          ],
           "supported_features": 40,
           "min_mireds": 153,
           "max_mireds": 500
@@ -408,18 +401,20 @@
           "class_name": "Light",
           "on": false,
           "brightness": 254,
-          "hs_color": null,
           "xy_color": null,
           "color_temp": null,
-          "effect": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
           "supported_features": 40,
           "color_mode": "brightness",
           "supported_color_modes": [
-            "onoff",
-            "brightness"
+            "brightness",
+            "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": 254,
+          "off_brightness": null,
           "available": true
         }
       }
@@ -429,6 +424,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:22:a3:00:00:27:48:84-1-8-on_level",
+          "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "OnLevelConfigurationEntity",
           "translation_key": "on_level",
@@ -436,6 +432,8 @@
           "state_class": null,
           "entity_category": "config",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "LevelControlClusterHandler",
@@ -448,7 +446,7 @@
               },
               "id": "1:0x0008",
               "unique_id": "00:22:a3:00:00:27:48:84:1:0x0008",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": "current_level"
             }
           ],
@@ -465,10 +463,11 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "min_value": 0,
-          "max_value": 255,
-          "step": 1.0,
-          "multiplier": 1
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
         },
         "state": {
           "class_name": "OnLevelConfigurationEntity",
@@ -481,59 +480,8 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:22:a3:00:00:27:48:84-1-0-rssi",
-          "platform": "sensor",
-          "class_name": "RSSISensor",
-          "translation_key": "rssi",
-          "device_class": "signal_strength",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "KofBasic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "00:22:a3:00:00:27:48:84:1:0x0000",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            132,
-            72,
-            39,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
-          "unit": "dBm"
-        },
-        "state": {
-          "class_name": "RSSISensor",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
           "unique_id": "00:22:a3:00:00:27:48:84-1-0-lqi",
+          "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
@@ -541,6 +489,8 @@
           "state_class": "measurement",
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -553,7 +503,7 @@
               },
               "id": "1:0x0000",
               "unique_id": "00:22:a3:00:00:27:48:84:1:0x0000",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -570,16 +520,65 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "attribute": null,
-          "decimals": 1,
-          "divisor": 1,
-          "multiplier": 1,
+          "suggested_display_precision": null,
           "unit": null
         },
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": 171
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:22:a3:00:00:27:48:84-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "KofBasic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "00:22:a3:00:00:27:48:84:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            132,
+            72,
+            39,
+            0,
+            0,
+            163,
+            34,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
         }
       }
     ],
@@ -588,6 +587,7 @@
         "info_object": {
           "fallback_name": null,
           "unique_id": "00:22:a3:00:00:27:48:84-1-25-firmware_update",
+          "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
@@ -595,19 +595,21 @@
           "state_class": null,
           "entity_category": "config",
           "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019",
+              "generic_id": "cluster_handler_0x0019_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 25,
                 "name": "Ota",
                 "type": "client"
               },
-              "id": "1:0x0019",
-              "unique_id": "00:22:a3:00:00:27:48:84:1:0x0019",
-              "status": "CREATED",
+              "id": "1:0x0019_client",
+              "unique_id": "00:22:a3:00:00:27:48:84:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -631,12 +633,15 @@
           "available": true,
           "installed_version": "0x0000000f",
           "in_progress": false,
-          "progress": 0,
-          "latest_version": "0x0000000f",
+          "update_percentage": null,
+          "latest_version": null,
           "release_summary": null,
+          "release_notes": null,
           "release_url": null
         }
       }
     ]
-  }
+  },
+  "neighbors": [],
+  "routes": []
 }
