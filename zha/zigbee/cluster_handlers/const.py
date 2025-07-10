@@ -40,6 +40,7 @@ CLUSTER_READS_PER_REQ: Final[int] = 5
 
 CLUSTER_HANDLER_ACCELEROMETER: Final[str] = "accelerometer"
 CLUSTER_HANDLER_BINARY_INPUT: Final[str] = "binary_input"
+CLUSTER_HANDLER_BINARY_OUTPUT: Final[str] = "binary_output"
 CLUSTER_HANDLER_ANALOG_INPUT: Final[str] = "analog_input"
 CLUSTER_HANDLER_ANALOG_OUTPUT: Final[str] = "analog_output"
 CLUSTER_HANDLER_ATTRIBUTE: Final[str] = "attribute"

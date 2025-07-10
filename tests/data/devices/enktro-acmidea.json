@@ -46,194 +46,23 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "date_code",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "device_enabled",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0014",
-              "name": "disable_local_config",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "generic_device_class",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "generic_device_type",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "hw_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "location_desc",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "enktro",
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "manufacturer_version_details",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
+              "value": "enktro"
             },
             {
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "ACmidea",
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "physical_env",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "power_source",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "product_code",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000e",
-              "name": "product_label",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "product_url",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000d",
-              "name": "serial_number",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "stack_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "sw_build_id",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "zcl_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": "ACmidea"
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0201",
@@ -243,351 +72,133 @@
               "id": "0x0006",
               "name": "abs_max_cool_setpoint_limit",
               "zcl_type": "int16",
-              "value": 3000,
-              "unsupported": false
+              "value": 3000
             },
             {
               "id": "0x0004",
               "name": "abs_max_heat_setpoint_limit",
               "zcl_type": "int16",
-              "value": 3000,
-              "unsupported": false
+              "value": 3000
             },
             {
               "id": "0x0005",
               "name": "abs_min_cool_setpoint_limit",
               "zcl_type": "int16",
-              "value": 1700,
-              "unsupported": false
+              "value": 1700
             },
             {
               "id": "0x0003",
               "name": "abs_min_heat_setpoint_limit",
               "zcl_type": "int16",
-              "value": 1700,
-              "unsupported": false
-            },
-            {
-              "id": "0x0041",
-              "name": "ac_capacity",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0047",
-              "name": "ac_capacity_format",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0046",
-              "name": "ac_coil_temperature",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0043",
-              "name": "ac_compressor_type",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0044",
-              "name": "ac_error_code",
-              "zcl_type": "map32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0045",
-              "name": "ac_louver_position",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0042",
-              "name": "ac_refrigerant_type",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0040",
-              "name": "ac_type",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x001d",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
+              "value": 1700
             },
             {
               "id": "0x001b",
               "name": "ctrl_sequence_of_oper",
               "zcl_type": "enum8",
-              "value": 4,
-              "unsupported": false
-            },
-            {
-              "id": "0x003a",
-              "name": "emergency_heat_delta",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": 4
             },
             {
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "value": 2450,
-              "unsupported": false
+              "value": 2450
             },
             {
               "id": "0x0010",
               "name": "local_temperature_calibration",
               "zcl_type": "int8",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0018",
               "name": "max_cool_setpoint_limit",
               "zcl_type": "int16",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0016",
               "name": "max_heat_setpoint_limit",
               "zcl_type": "int16",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0017",
               "name": "min_cool_setpoint_limit",
               "zcl_type": "int16",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0015",
               "name": "min_heat_setpoint_limit",
               "zcl_type": "int16",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0019",
-              "name": "min_setpoint_dead_band",
-              "zcl_type": "int8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0022",
-              "name": "number_of_daily_transitions",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0021",
-              "name": "number_of_weekly_transitions",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0002",
               "name": "occupancy",
               "zcl_type": "map8",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0011",
               "name": "occupied_cooling_setpoint",
               "zcl_type": "int16",
-              "value": 2600,
-              "unsupported": false
+              "value": 2600
             },
             {
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 2000,
-              "unsupported": false
-            },
-            {
-              "id": "0x0034",
-              "name": "occupied_setback",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0036",
-              "name": "occupied_setback_max",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0035",
-              "name": "occupied_setback_min",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "outdoor_temperature",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
+              "value": 2000
             },
             {
               "id": "0x0007",
               "name": "pi_cooling_demand",
               "zcl_type": "uint8",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0008",
               "name": "pi_heating_demand",
               "zcl_type": "uint8",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0025",
-              "name": "programing_oper_mode",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x001a",
-              "name": "remote_sensing",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x001e",
               "name": "running_mode",
               "zcl_type": "enum8",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0029",
               "name": "running_state",
               "zcl_type": "map16",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0031",
-              "name": "setpoint_change_amount",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0030",
               "name": "setpoint_change_source",
               "zcl_type": "enum8",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0032",
-              "name": "setpoint_change_source_timestamp",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0020",
-              "name": "start_of_week",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x001c",
               "name": "system_mode",
               "zcl_type": "enum8",
-              "value": 4,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "system_type_config",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0023",
-              "name": "temp_setpoint_hold",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0024",
-              "name": "temp_setpoint_hold_duration",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
+              "value": 4
             },
             {
               "id": "0x0013",
               "name": "unoccupied_cooling_setpoint",
               "zcl_type": "int16",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0014",
               "name": "unoccupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0037",
-              "name": "unoccupied_setback",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0039",
-              "name": "unoccupied_setback_max",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0038",
-              "name": "unoccupied_setback_min",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
             }
           ]
         },
@@ -599,15 +210,13 @@
               "id": "0x0000",
               "name": "fan_mode",
               "zcl_type": "enum8",
-              "value": 5,
-              "unsupported": false
+              "value": 5
             },
             {
               "id": "0x0001",
               "name": "fan_mode_sequence",
               "zcl_type": "enum8",
-              "value": 2,
-              "unsupported": false
+              "value": 2
             }
           ]
         }
@@ -616,29 +225,7 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         }
       ]
     }

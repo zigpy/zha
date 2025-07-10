@@ -7,7 +7,7 @@ from enum import IntFlag, StrEnum
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING, Any, Final, final
+from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
 from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
@@ -52,7 +52,6 @@ class UpdateEntityFeature(IntFlag):
     RELEASE_NOTES = 16
 
 
-ATTR_BACKUP: Final = "backup"
 ATTR_INSTALLED_VERSION: Final = "installed_version"
 ATTR_IN_PROGRESS: Final = "in_progress"
 ATTR_UPDATE_PERCENTAGE: Final = "update_percentage"
@@ -69,7 +68,6 @@ class UpdateEntityInfo(BaseEntityInfo):
 
     supported_features: UpdateEntityFeature
     device_class: UpdateDeviceClass
-    entity_category: EntityCategory
 
 
 class BaseFirmwareUpdateEntity(PlatformEntity):
@@ -77,7 +75,6 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
 
     PLATFORM = Platform.UPDATE
 
-    _unique_id_suffix = "firmware_update"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_device_class = UpdateDeviceClass.FIRMWARE
     _attr_supported_features = (
@@ -105,7 +102,16 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
     def state(self):
         """Get the state for the entity."""
         response = super().state
-        response.update(self.state_attributes)
+        if (release_summary := self.release_summary) is not None:
+            release_summary = release_summary[:255]
+
+        response[ATTR_INSTALLED_VERSION] = self.installed_version
+        response[ATTR_IN_PROGRESS] = self.in_progress
+        response[ATTR_UPDATE_PERCENTAGE] = self.update_percentage
+        response[ATTR_LATEST_VERSION] = self.latest_version
+        response[ATTR_RELEASE_SUMMARY] = release_summary
+        response[ATTR_RELEASE_NOTES] = self.release_notes
+        response[ATTR_RELEASE_URL] = self.release_url
         return response
 
     @property
@@ -160,23 +166,6 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
     def supported_features(self) -> UpdateEntityFeature:
         """Flag supported features."""
         return self._attr_supported_features
-
-    @final
-    @property
-    def state_attributes(self) -> dict[str, Any] | None:
-        """Return state attributes."""
-        if (release_summary := self.release_summary) is not None:
-            release_summary = release_summary[:255]
-
-        return {
-            ATTR_INSTALLED_VERSION: self.installed_version,
-            ATTR_IN_PROGRESS: self.in_progress,
-            ATTR_UPDATE_PERCENTAGE: self.update_percentage,
-            ATTR_LATEST_VERSION: self.latest_version,
-            ATTR_RELEASE_SUMMARY: release_summary,
-            ATTR_RELEASE_NOTES: self.release_notes,
-            ATTR_RELEASE_URL: self.release_url,
-        }
 
     def _get_cluster_version(self) -> str | None:
         """Synchronize current file version with the cluster."""
@@ -303,6 +292,8 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
 class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
     """Representation of a ZHA firmware update entity."""
 
+    _unique_id_suffix = "firmware_update"
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -325,6 +316,8 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA_SERVER)
 class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
     """Representation of a ZHA firmware update entity."""
+
+    _unique_id_suffix = "firmware_update"
 
     def __init__(
         self,

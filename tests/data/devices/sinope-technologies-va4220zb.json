@@ -46,165 +46,16 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0013",
-              "name": "alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "app_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "date_code",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "device_enabled",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0014",
-              "name": "disable_local_config",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "generic_device_class",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "generic_device_type",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "hw_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "location_desc",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "Sinope Technologies",
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "manufacturer_version_details",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
+              "value": "Sinope Technologies"
             },
             {
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "VA4220ZB",
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "physical_env",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "power_source",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "product_code",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000e",
-              "name": "product_label",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "product_url",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000d",
-              "name": "serial_number",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "stack_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "sw_build_id",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "zcl_version",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": "VA4220ZB"
             }
           ]
         },
@@ -213,587 +64,66 @@
           "endpoint_attribute": "power",
           "attributes": [
             {
-              "id": "0x0052",
-              "name": "battery_2_a_hr_rating",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0055",
-              "name": "battery_2_alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x005e",
-              "name": "battery_2_alarm_state",
-              "zcl_type": "map32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0050",
-              "name": "battery_2_manufacturer",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x005a",
-              "name": "battery_2_percent_min_thres",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x005b",
-              "name": "battery_2_percent_thres1",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x005c",
-              "name": "battery_2_percent_thres2",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x005d",
-              "name": "battery_2_percent_thres3",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0041",
-              "name": "battery_2_percentage_remaining",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0053",
-              "name": "battery_2_quantity",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0054",
-              "name": "battery_2_rated_voltage",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0051",
-              "name": "battery_2_size",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0056",
-              "name": "battery_2_volt_min_thres",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0057",
-              "name": "battery_2_volt_thres1",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0058",
-              "name": "battery_2_volt_thres2",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0059",
-              "name": "battery_2_volt_thres3",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0040",
-              "name": "battery_2_voltage",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0072",
-              "name": "battery_3_a_hr_rating",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0075",
-              "name": "battery_3_alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x007e",
-              "name": "battery_3_alarm_state",
-              "zcl_type": "map32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0070",
-              "name": "battery_3_manufacturer",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x007a",
-              "name": "battery_3_percent_min_thres",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x007b",
-              "name": "battery_3_percent_thres1",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x007c",
-              "name": "battery_3_percent_thres2",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x007d",
-              "name": "battery_3_percent_thres3",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0061",
-              "name": "battery_3_percentage_remaining",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0073",
-              "name": "battery_3_quantity",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0074",
-              "name": "battery_3_rated_voltage",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0071",
-              "name": "battery_3_size",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0076",
-              "name": "battery_3_volt_min_thres",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0077",
-              "name": "battery_3_volt_thres1",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0078",
-              "name": "battery_3_volt_thres2",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0079",
-              "name": "battery_3_volt_thres3",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0060",
-              "name": "battery_3_voltage",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0032",
-              "name": "battery_a_hr_rating",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0035",
-              "name": "battery_alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x003e",
               "name": "battery_alarm_state",
               "zcl_type": "map32",
-              "value": 15,
-              "unsupported": false
-            },
-            {
-              "id": "0x0030",
-              "name": "battery_manufacturer",
-              "zcl_type": "string",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x003a",
-              "name": "battery_percent_min_thres",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x003b",
-              "name": "battery_percent_thres1",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x003c",
-              "name": "battery_percent_thres2",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x003d",
-              "name": "battery_percent_thres3",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": 15
             },
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 0,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
-              "value": 4,
-              "unsupported": false
-            },
-            {
-              "id": "0x0034",
-              "name": "battery_rated_voltage",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": 4
             },
             {
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 4,
-              "unsupported": false
-            },
-            {
-              "id": "0x0036",
-              "name": "battery_volt_min_thres",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0037",
-              "name": "battery_volt_thres1",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0038",
-              "name": "battery_volt_thres2",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0039",
-              "name": "battery_volt_thres3",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
+              "value": 4
             },
             {
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0010",
-              "name": "mains_alarm_mask",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "mains_frequency",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "mains_volt_max_thres",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "mains_volt_min_thres",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "mains_voltage",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0013",
-              "name": "mains_voltage_dwell_trip_point",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 0
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "name_support",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "count",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "current_group",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "current_scene",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "last_configured_by",
-              "zcl_type": "EUI64",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "name_support",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "scene_valid",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "global_scene_control",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4002",
-              "name": "off_wait_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0000",
               "name": "on_off",
-              "zcl_type": "bool_",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x4001",
-              "name": "on_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "zcl_type": "bool",
+              "value": 1
             },
             {
               "id": "0x4003",
               "name": "start_up_on_off",
               "zcl_type": "enum8",
-              "value": null,
               "unsupported": true
             }
           ]
@@ -803,115 +133,45 @@
           "endpoint_attribute": "level",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "current_frequency",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 254,
-              "unsupported": false
+              "value": 254
             },
             {
               "id": "0x0014",
               "name": "default_move_rate",
               "zcl_type": "uint8",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0006",
-              "name": "max_frequency",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "max_level",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "min_frequency",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "min_level",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0013",
               "name": "off_transition_time",
               "zcl_type": "uint16",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0011",
               "name": "on_level",
               "zcl_type": "uint8",
-              "value": 255,
-              "unsupported": false
+              "value": 255
             },
             {
               "id": "0x0010",
               "name": "on_off_transition_time",
               "zcl_type": "uint16",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0012",
               "name": "on_transition_time",
               "zcl_type": "uint16",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x000f",
-              "name": "options",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "remaining_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x4000",
               "name": "start_up_current_level",
               "zcl_type": "uint8",
-              "value": null,
               "unsupported": true
             }
           ]
@@ -924,42 +184,30 @@
               "id": "0xfffd",
               "name": "cluster_revision",
               "zcl_type": "uint16",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "max_measured_value",
-              "zcl_type": "int16",
-              "value": null,
-              "unsupported": false
+              "value": 1
             },
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2910,
-              "unsupported": false
+              "value": 2910
             },
             {
               "id": "0x0001",
               "name": "min_measured_value",
               "zcl_type": "int16",
-              "value": -2000,
-              "unsupported": false
+              "value": -2000
             },
             {
               "id": "0xfffe",
               "name": "reporting_status",
               "zcl_type": "enum8",
-              "value": null,
               "unsupported": true
             },
             {
               "id": "0x0003",
               "name": "tolerance",
               "zcl_type": "uint16",
-              "value": null,
               "unsupported": true
             }
           ]
@@ -967,50 +215,7 @@
         {
           "cluster_id": "0x0404",
           "endpoint_attribute": "flow",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "max_measured_value",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "measured_value",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "min_measured_value",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "tolerance",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0500",
@@ -1020,50 +225,25 @@
               "id": "0x0010",
               "name": "cie_addr",
               "zcl_type": "EUI64",
-              "value": "00:21:2e:ff:ff:05:cc:60",
-              "unsupported": false
-            },
-            {
-              "id": "0x0013",
-              "name": "current_zone_sensitivity_level",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "num_zone_sensitivity_levels_supported",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "zone_id",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
+              "value": "00:21:2e:ff:ff:05:cc:60"
             },
             {
               "id": "0x0000",
               "name": "zone_state",
               "zcl_type": "enum8",
-              "value": 1,
-              "unsupported": false
+              "value": 1
             },
             {
               "id": "0x0002",
               "name": "zone_status",
               "zcl_type": "map16",
-              "value": 56,
-              "unsupported": false
+              "value": 56
             },
             {
               "id": "0x0001",
               "name": "zone_type",
               "zcl_type": "uint16",
-              "value": 32768,
-              "unsupported": false
+              "value": 32768
             }
           ]
         },
@@ -1072,1181 +252,107 @@
           "endpoint_attribute": "smartenergy_metering",
           "attributes": [
             {
-              "id": "0x0020",
-              "name": "active_register_tier_delivered",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0021",
-              "name": "active_register_tier_received",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0314",
-              "name": "alternative_consumption_formatting",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0313",
-              "name": "alternative_demand_formatting",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0312",
-              "name": "alternative_unit_of_measure",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0a00",
-              "name": "bill_to_date",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0a01",
-              "name": "bill_to_date_time_stamp",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0019",
-              "name": "control_temperature",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0413",
-              "name": "cur_month_max_energy_carr_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0414",
-              "name": "cur_month_min_energy_carr_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0405",
-              "name": "cur_part_profile_int_start_time_delivered",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0406",
-              "name": "cur_part_profile_int_start_time_received",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0407",
-              "name": "cur_part_profile_int_value_delivered",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0408",
-              "name": "cur_part_profile_int_value_received",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0415",
-              "name": "cur_year_max_energy_carr_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0416",
-              "name": "cur_year_min_energy_carr_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000e",
-              "name": "current_block",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "current_block_period_consumption_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x001d",
-              "name": "current_block_period_consumption_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x001e",
-              "name": "current_block_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x040d",
-              "name": "current_day_max_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0409",
-              "name": "current_day_max_pressure",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x040a",
-              "name": "current_day_min_pressure",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0600",
-              "name": "current_demand_delivered",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x001a",
-              "name": "current_in_energy_carrier_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0015",
-              "name": "current_in_energy_carrier_summ",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0002",
-              "name": "current_max_demand_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "current_max_demand_delivered_time",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0003",
-              "name": "current_max_demand_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "current_max_demand_received_time",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0206",
-              "name": "current_meter_id",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x040f",
-              "name": "current_month_max_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x001b",
-              "name": "current_out_energy_carrier_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0016",
-              "name": "current_out_energy_carrier_summ",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 1,
-              "unsupported": false
+              "value": 1
             },
             {
               "id": "0x0001",
               "name": "current_summ_received",
               "zcl_type": "uint48",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0112",
-              "name": "current_tier10_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0113",
-              "name": "current_tier10_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0114",
-              "name": "current_tier11_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0115",
-              "name": "current_tier11_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0116",
-              "name": "current_tier12_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0117",
-              "name": "current_tier12_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0118",
-              "name": "current_tier13_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0119",
-              "name": "current_tier13_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011a",
-              "name": "current_tier14_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011b",
-              "name": "current_tier14_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011c",
-              "name": "current_tier15_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011d",
-              "name": "current_tier15_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0100",
               "name": "current_tier1_summ_delivered",
               "zcl_type": "uint48",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0101",
-              "name": "current_tier1_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0102",
               "name": "current_tier2_summ_delivered",
               "zcl_type": "uint48",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0103",
-              "name": "current_tier2_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0104",
               "name": "current_tier3_summ_delivered",
               "zcl_type": "uint48",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0105",
-              "name": "current_tier3_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0106",
               "name": "current_tier4_summ_delivered",
               "zcl_type": "uint48",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0107",
-              "name": "current_tier4_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0108",
               "name": "current_tier5_summ_delivered",
               "zcl_type": "uint48",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0109",
-              "name": "current_tier5_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x010a",
               "name": "current_tier6_summ_delivered",
               "zcl_type": "uint48",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x010b",
-              "name": "current_tier6_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010c",
-              "name": "current_tier7_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010d",
-              "name": "current_tier7_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010e",
-              "name": "current_tier8_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010f",
-              "name": "current_tier8_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0110",
-              "name": "current_tier9_summ_delivered",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0111",
-              "name": "current_tier9_summ_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0410",
-              "name": "current_year_max_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0401",
-              "name": "currentday_consumption_delivered",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0402",
-              "name": "currentday_consumption_received",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0411",
-              "name": "currentday_max_energy_carr_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0311",
-              "name": "customer_id_number",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000d",
-              "name": "daily_consumption_target",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "daily_freeze_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "default_update_period",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
             },
             {
               "id": "0x0304",
               "name": "demand_formatting",
               "zcl_type": "map8",
-              "value": 251,
-              "unsupported": false
-            },
-            {
-              "id": "0x0602",
-              "name": "demand_integration_period",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0601",
-              "name": "demand_limit",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0604",
-              "name": "demand_limit_arm_duration",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "dft_summ",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x001f",
-              "name": "dft_summation_received",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
+              "value": 251
             },
             {
               "id": "0x0302",
               "name": "divisor",
               "zcl_type": "uint24",
-              "value": 1000,
-              "unsupported": false
-            },
-            {
-              "id": "0x0801",
-              "name": "electricity_alarm_mask",
-              "zcl_type": "map32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x030b",
-              "name": "energy_carrier_demand_formatting",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x030a",
-              "name": "energy_carrier_summation_formatting",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0309",
-              "name": "energy_carrier_unit_of_measure",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0806",
-              "name": "extended_generic_alarm_mask",
-              "zcl_type": "map48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0204",
-              "name": "extended_status",
-              "zcl_type": "map64",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "fast_poll_update_period",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0013",
-              "name": "flow_restriction",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0805",
-              "name": "gas_specific_alarm_mask",
-              "zcl_type": "map16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0802",
-              "name": "gen_flow_pressure_alarm_mask",
-              "zcl_type": "map16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0800",
-              "name": "generic_alarm_mask",
-              "zcl_type": "map16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0804",
-              "name": "heat_cool_specific_alarm_mask",
-              "zcl_type": "map16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0305",
-              "name": "historical_consumption_formatting",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0203",
-              "name": "hours_in_fault",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0202",
-              "name": "hours_in_operation",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0207",
-              "name": "iambient_consumption_indicator",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0017",
-              "name": "inlet_temperature",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
+              "value": 1000
             },
             {
               "id": "0x0400",
               "name": "instantaneous_demand",
               "zcl_type": "int24",
-              "value": 0,
-              "unsupported": false
-            },
-            {
-              "id": "0x0022",
-              "name": "last_block_switch_time",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0807",
-              "name": "manufacture_alarm_mask",
-              "zcl_type": "map16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0500",
-              "name": "max_number_of_periods_delivered",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0308",
-              "name": "meter_serial_number",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x0306",
               "name": "metering_device_type",
               "zcl_type": "map8",
-              "value": 2,
-              "unsupported": false
-            },
-            {
-              "id": "0x030e",
-              "name": "module_serial_number",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
+              "value": 2
             },
             {
               "id": "0x0301",
               "name": "multiplier",
               "zcl_type": "uint24",
-              "value": 1,
-              "unsupported": false
-            },
-            {
-              "id": "0x0603",
-              "name": "number_of_demand_subintervals",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x030f",
-              "name": "operating_tariff_label_delivered",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0310",
-              "name": "operating_tariff_label_received",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0018",
-              "name": "outlet_temperature",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "power_factor",
-              "zcl_type": "int8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0011",
-              "name": "preset_reading_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x040e",
-              "name": "previous_day_max_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x040b",
-              "name": "previous_day_max_pressure",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x040c",
-              "name": "previous_day_min_pressure",
-              "zcl_type": "uint48",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0403",
-              "name": "previousday_consumption_delivered",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0404",
-              "name": "previousday_consumption_received",
-              "zcl_type": "uint24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0412",
-              "name": "previousday_max_energy_carr_demand",
-              "zcl_type": "int24",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000f",
-              "name": "profile_interval_period",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0a02",
-              "name": "projected_bill",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0a03",
-              "name": "projected_bill_time_stamp",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "reading_snapshot_time",
-              "zcl_type": "UTC",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0201",
-              "name": "remaining_battery_life",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0205",
-              "name": "remaining_battery_life_days",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0307",
-              "name": "site_id",
-              "zcl_type": "octstr",
-              "value": null,
-              "unsupported": false
+              "value": 1
             },
             {
               "id": "0x0200",
               "name": "status",
               "zcl_type": "map8",
-              "value": 0,
-              "unsupported": false
+              "value": 0
             },
             {
               "id": "0x0303",
               "name": "summation_formatting",
               "zcl_type": "map8",
-              "value": 248,
-              "unsupported": false
-            },
-            {
-              "id": "0x0014",
-              "name": "supply_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x030d",
-              "name": "temperature_formatting",
-              "zcl_type": "map8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x030c",
-              "name": "temperature_unit_of_measure",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
+              "value": 248
             },
             {
               "id": "0x0300",
               "name": "unit_of_measure",
               "zcl_type": "enum8",
-              "value": 7,
-              "unsupported": false
-            },
-            {
-              "id": "0x0012",
-              "name": "volume_per_report",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0803",
-              "name": "water_specific_alarm_mask",
-              "zcl_type": "map16",
-              "value": null,
-              "unsupported": false
+              "value": 7
             }
           ]
         },
         {
           "cluster_id": "0x0b05",
           "endpoint_attribute": "diagnostic",
-          "attributes": [
-            {
-              "id": "0x0116",
-              "name": "aps_decrypt_failures",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0113",
-              "name": "aps_fc_failure",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0106",
-              "name": "aps_rx_bcast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0108",
-              "name": "aps_rx_ucast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0107",
-              "name": "aps_tx_bcast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010b",
-              "name": "aps_tx_ucast_fail",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010a",
-              "name": "aps_tx_ucast_retry",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0109",
-              "name": "aps_tx_ucast_success",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0114",
-              "name": "aps_unauthorized_key",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011b",
-              "name": "average_mac_retry_per_aps_message_sent",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0111",
-              "name": "child_moved",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0110",
-              "name": "join_indication",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011c",
-              "name": "last_message_lqi",
-              "zcl_type": "uint8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011d",
-              "name": "last_message_rssi",
-              "zcl_type": "int8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0100",
-              "name": "mac_rx_bcast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0102",
-              "name": "mac_rx_ucast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0101",
-              "name": "mac_tx_bcast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0103",
-              "name": "mac_tx_ucast",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0105",
-              "name": "mac_tx_ucast_fail",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0104",
-              "name": "mac_tx_ucast_retry",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010d",
-              "name": "neighbor_added",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010e",
-              "name": "neighbor_removed",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010f",
-              "name": "neighbor_stale",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "number_of_resets",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0115",
-              "name": "nwk_decrypt_failures",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0112",
-              "name": "nwk_fc_failure",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0117",
-              "name": "packet_buffer_allocate_failures",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x011a",
-              "name": "packet_validate_drop_count",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "persistent_memory_writes",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0119",
-              "name": "phy_to_mac_queue_limit_reached",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0118",
-              "name": "relayed_ucast",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x010c",
-              "name": "route_disc_initiated",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0xff01",
@@ -2258,82 +364,17 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "identify_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4000",
-              "name": "global_scene_control",
-              "zcl_type": "bool_",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4002",
-              "name": "off_wait_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0000",
               "name": "on_off",
-              "zcl_type": "bool_",
-              "value": null,
+              "zcl_type": "bool",
               "unsupported": true
-            },
-            {
-              "id": "0x4001",
-              "name": "on_time",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x4003",
-              "name": "start_up_on_off",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
             }
           ]
         },
@@ -2342,109 +383,10 @@
           "endpoint_attribute": "ota",
           "attributes": [
             {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": null,
               "unsupported": true
-            },
-            {
-              "id": "0x0003",
-              "name": "current_zigbee_stack_version",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0004",
-              "name": "downloaded_file_version",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0005",
-              "name": "downloaded_zigbee_stack_version",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0001",
-              "name": "file_offset",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000a",
-              "name": "image_stamp",
-              "zcl_type": "uint32",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0008",
-              "name": "image_type_id",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0006",
-              "name": "image_upgrade_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0007",
-              "name": "manufacturer_id",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0009",
-              "name": "minimum_block_req_delay",
-              "zcl_type": "uint16",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0xfffe",
-              "name": "reporting_status",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000b",
-              "name": "upgrade_activation_policy",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x0000",
-              "name": "upgrade_server_id",
-              "zcl_type": "EUI64",
-              "value": null,
-              "unsupported": false
-            },
-            {
-              "id": "0x000c",
-              "name": "upgrade_timeout_policy",
-              "zcl_type": "enum8",
-              "value": null,
-              "unsupported": false
             }
           ]
         }

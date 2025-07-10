@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 import copy
 import dataclasses
 from dataclasses import dataclass
@@ -61,10 +61,16 @@ from zha.application.const import (
     UNKNOWN_MODEL,
     ZHA_CLUSTER_HANDLER_CFG_DONE,
     ZHA_CLUSTER_HANDLER_MSG,
+    ZHA_DEVICE_UPDATED_EVENT,
     ZHA_EVENT,
 )
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    EntityStateChangedEvent,
+    PlatformEntity,
+)
+from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
@@ -81,16 +87,32 @@ DIAGNOSTICS_JSON_VERSION = 1
 
 def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
     """Return cluster attribute data."""
-    return [
-        {
+    attributes_info = []
+
+    for attr_def in cluster.attributes.values():
+        info = {
             "id": f"0x{attr_def.id:04x}",
             "name": attr_def.name,
-            "zcl_type": attr_def.zcl_type.name,
+            "zcl_type": (
+                attr_def.zcl_type.name if attr_def.zcl_type.name != "bool_" else "bool"
+            ),
             "value": cluster.get(attr_def.name),
             "unsupported": (attr_def.id in cluster.unsupported_attributes),
         }
-        for attr_def in cluster.attributes.values()
-    ]
+
+        # Don't unnecessarily list out attributes that are just unread
+        if info["value"] is None and not info["unsupported"]:
+            continue
+
+        # Delete unused keys
+        if info["value"] is not None:
+            del info["unsupported"]
+        else:
+            del info["value"]
+
+        attributes_info.append(info)
+
+    return attributes_info
 
 
 def get_device_automation_triggers(
@@ -129,6 +151,17 @@ class ZHAEvent:
     data: dict[str, Any]
     event_type: Final[str] = ZHA_EVENT
     event: Final[str] = ZHA_EVENT
+
+
+@dataclass(kw_only=True, frozen=True)
+class DeviceFirmwareInfoUpdatedEvent:
+    """Event generated when the device firmware information has changed."""
+
+    event_type: Final[str] = ZHA_DEVICE_UPDATED_EVENT
+    event: Final[str] = ZHA_DEVICE_UPDATED_EVENT
+
+    old_firmware_version: str | None
+    new_firmware_version: str | None
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -236,7 +269,7 @@ class Device(LogMixin, EventBase):
         self._power_config_ch: ClusterHandler | None = None
         self._identify_ch: ClusterHandler | None = None
         self._basic_ch: ClusterHandler | None = None
-        self._sw_build_id: int | None = None
+        self._firmware_version: str | None = None
 
         device_options = _gateway.config.config.device_options
         if self.is_mains_powered:
@@ -256,15 +289,20 @@ class Device(LogMixin, EventBase):
         self._pending_entities: list[PlatformEntity] = []
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
 
+        self._on_remove_callbacks: list[Callable[[], None]] = []
+
         self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
         self._zdo_handler.on_add()
+        self._on_remove_callbacks.append(self._zdo_handler.on_remove)
 
         self.status: DeviceStatus = DeviceStatus.CREATED
 
         self._endpoints: dict[int, Endpoint] = {}
         for ep_id, endpoint in zigpy_device.endpoints.items():
             if ep_id != 0:
-                self._endpoints[ep_id] = Endpoint.new(endpoint, self)
+                ep = Endpoint.new(endpoint, self)
+                self._endpoints[ep_id] = ep
+                self._on_remove_callbacks.append(ep.on_remove)
 
     def __repr__(self) -> str:
         """Return a string representation of the device."""
@@ -541,14 +579,9 @@ class Device(LogMixin, EventBase):
         }
 
     @property
-    def sw_version(self) -> int | None:
+    def firmware_version(self) -> str | None:
         """Return the software version for this device."""
-        return self._sw_build_id
-
-    @sw_version.setter
-    def sw_version(self, sw_build_id: int) -> None:
-        """Set the software version for this device."""
-        self._sw_build_id = sw_build_id
+        return self._firmware_version
 
     @property
     def platform_entities(self) -> dict[tuple[Platform, str], PlatformEntity]:
@@ -571,9 +604,21 @@ class Device(LogMixin, EventBase):
         """Create new device."""
         return cls(zigpy_dev, gateway)
 
-    def async_update_sw_build_id(self, sw_version: int) -> None:
-        """Update device sw version."""
-        self._sw_build_id = sw_version
+    def async_update_firmware_version(self, firmware_version: str) -> None:
+        """Update device firmware version."""
+        if firmware_version == self._firmware_version:
+            return
+
+        old_firmware_version = self._firmware_version
+        self._firmware_version = firmware_version
+
+        self.emit(
+            DeviceFirmwareInfoUpdatedEvent.event_type,
+            DeviceFirmwareInfoUpdatedEvent(
+                old_firmware_version=old_firmware_version,
+                new_firmware_version=firmware_version,
+            ),
+        )
 
     async def _check_available(self, *_: Any) -> None:
         # don't flip the availability state of the coordinator
@@ -887,16 +932,32 @@ class Device(LogMixin, EventBase):
         # At this point we can compute a primary entity
         self._compute_primary_entity()
 
+        # Sync the device's firmware version with the first platform entity
+        for (platform, _unique_id), entity in self.platform_entities.items():
+            if platform != Platform.UPDATE:
+                continue
+
+            self._firmware_version = entity.installed_version
+
+            def entity_update_listener(event: EntityStateChangedEvent) -> None:
+                """Listen to firmware update entity changes."""
+                entity = self.get_platform_entity(event.platform, event.unique_id)
+                self.async_update_firmware_version(entity.installed_version)
+
+            self._on_remove_callbacks.append(
+                entity.on_event(STATE_CHANGED, entity_update_listener)
+            )
+
+            break
+
         self.debug("power source: %s", self.power_source)
         self.status = DeviceStatus.INITIALIZED
         self.debug("completed initialization")
 
     async def on_remove(self) -> None:
         """Cancel tasks this device owns."""
-        self._zdo_handler.on_remove()
-
-        for endpoint in self._endpoints.values():
-            endpoint.on_remove()
+        for callback in self._on_remove_callbacks:
+            callback()
 
         for platform_entity in self._platform_entities.values():
             await platform_entity.on_remove()
@@ -1207,11 +1268,27 @@ class Device(LogMixin, EventBase):
     def _compute_primary_entity(self) -> None:
         """Compute the primary entity for this device."""
 
-        # Only consider non-counter entities
+        # First, check if any entity is explicitly primary
+        explicitly_primary = [
+            entity for entity in self._platform_entities.values() if entity.primary
+        ]
+
+        if len(explicitly_primary) == 1:
+            self.debug(
+                "Device has a single explicitly primary entity,"
+                " not performing weight matching"
+            )
+            return
+
+        # It should not be possible for there to be more than one
+        assert not explicitly_primary
+
+        # For weight matching, only consider non-counter entities and entities which are
+        # not explicitly marked as not primary
         candidates = [
             e
             for e in self._platform_entities.values()
-            if e.enabled and hasattr(e, "info_object")
+            if e.enabled and hasattr(e, "info_object") and e._attr_primary is not False
         ]
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
 

@@ -397,11 +397,11 @@ def zigpy_device_from_device_data(
                 for attr in cluster["attributes"]:
                     attrid = int(attr["id"], 16)
 
-                    if attr["value"] is not None:
+                    if attr.get("value", None) is not None:
                         real_cluster._attr_cache[attrid] = attr["value"]
                         real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
 
-                    if attr["unsupported"]:
+                    if attr.get("unsupported", False):
                         real_cluster.unsupported_attributes.add(attrid)
 
                         if attr["name"] is not None:

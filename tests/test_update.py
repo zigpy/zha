@@ -153,7 +153,6 @@ async def setup_test_data(
     )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
-    zha_device.async_update_sw_build_id(installed_fw_version)
 
     return zha_device, ota_cluster, fw_image, installed_fw_version
 

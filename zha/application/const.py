@@ -192,6 +192,7 @@ ZHA_CLUSTER_HANDLER_MSG_DATA = "zha_channel_msg_data"
 ZHA_CLUSTER_HANDLER_CFG_DONE = "zha_channel_cfg_done"
 ZHA_CLUSTER_HANDLER_READS_PER_REQ = 5
 ZHA_EVENT = "zha_event"
+ZHA_DEVICE_UPDATED_EVENT = "zha_device_updated_event"
 ZHA_GW_MSG = "zha_gateway_message"
 ZHA_GW_MSG_DEVICE_FULL_INIT = "device_fully_initialized"
 ZHA_GW_MSG_DEVICE_INFO = "device_info"
