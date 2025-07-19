@@ -271,7 +271,46 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize Inovelli cluster handler."""
         super().__init__(cluster, endpoint)
-        if self.cluster.endpoint.model == "VZM31-SN":
+        if self.cluster.endpoint.model == "VZM30-SN":
+            self.ZCL_INIT_ATTRS = {
+                "dimming_speed_up_remote": True,
+                "dimming_speed_up_local": True,
+                "ramp_rate_off_to_on_remote": True,
+                "ramp_rate_off_to_on_local": True,
+                "dimming_speed_down_remote": True,
+                "dimming_speed_down_local": True,
+                "ramp_rate_on_to_off_remote": True,
+                "ramp_rate_on_to_off_local": True,
+                "minimum_level": True,
+                "maximum_level": True,
+                "invert_switch": True,
+                "auto_off_timer": True,
+                "default_level_local": True,
+                "default_level_remote": True,
+                "state_after_power_restored": True,
+                "load_level_indicator_timeout": True,
+                "active_power_reports": True,
+                "periodic_power_and_energy_reports": True,
+                "active_energy_reports": True,
+                "power_type": False,
+                "switch_type": False,
+                "internal_temp_monitor": True,
+                "overheated": True,
+                "button_delay": False,
+                "smart_bulb_mode": False,
+                "led_color_when_on": True,
+                "led_color_when_off": True,
+                "led_intensity_when_on": True,
+                "led_intensity_when_off": True,
+                "led_scaling_mode": True,
+                "aux_switch_scenes": True,
+                "binding_off_to_on_sync_level": True,
+                "local_protection": False,
+                "output_mode": False,
+                "firmware_progress_led": True,
+                "disable_clear_notifications_double_tap": True,
+            }
+        elif self.cluster.endpoint.model == "VZM31-SN":
             self.ZCL_INIT_ATTRS = {
                 "dimming_speed_up_remote": True,
                 "dimming_speed_up_local": True,
