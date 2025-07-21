@@ -77,11 +77,13 @@ def wrap_zigpy_exceptions() -> Iterator[None]:
         raise ZHAException(message) from exc
 
 
-def retry_request(func: _FuncType[_P]) -> _ReturnFuncType[_P]:
+def retry_request[**P](
+    func: Callable[P, Awaitable[Any]],
+) -> Callable[P, Coroutine[Any, Any, Any]]:
     """Send a request with retries and wrap expected zigpy exceptions."""
 
     @functools.wraps(func)
-    async def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> Any:
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> Any:
         with wrap_zigpy_exceptions():
             return await RETRYABLE_REQUEST_DECORATOR(func)(*args, **kwargs)
 

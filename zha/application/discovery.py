@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import astuple
 import functools
 import logging
-from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast
+from typing import TYPE_CHECKING, cast
 
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
@@ -117,11 +117,7 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
 }
 
 
-P = ParamSpec("P")
-T = TypeVar("T")
-
-
-def ignore_exceptions_during_iteration(
+def ignore_exceptions_during_iteration[**P, T](
     func: Callable[P, Iterator[T]],
 ) -> Callable[P, Iterator[T]]:
     """Ignore exceptions during iteration for wrapped function."""

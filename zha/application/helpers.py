@@ -91,7 +91,7 @@ async def get_matched_clusters(
     source_zha_device: Device, target_zha_device: Device
 ) -> list[BindingPair]:
     """Get matched input/output cluster pairs for 2 devices."""
-    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel
+    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
         BINDABLE_CLUSTERS,
     )
 
@@ -199,7 +199,7 @@ def convert_to_zcl_values(
 
 def async_is_bindable_target(source_zha_device: Device, target_zha_device: Device):
     """Determine if target is bindable to source."""
-    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel
+    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
         BINDABLE_CLUSTERS,
     )
 

@@ -718,7 +718,7 @@ class BaseElectricalMeasurement(PollableSensor):
         return getattr(self._cluster_handler, self._multiplier_attribute_name)
 
     @_multiplier.setter
-    def _multiplier(self, value: int | None) -> None:
+    def _multiplier(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set multiplier directly")
 
     @property
@@ -729,7 +729,7 @@ class BaseElectricalMeasurement(PollableSensor):
         return getattr(self._cluster_handler, self._divisor_attribute_name)
 
     @_divisor.setter
-    def _divisor(self, value: int | None) -> None:
+    def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
 
 

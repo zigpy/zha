@@ -12,10 +12,11 @@ from zha.async_ import ZHAJob
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
 
+
 _R_co = TypeVar("_R_co", covariant=True)
 
 
-class Debouncer(Generic[_R_co]):
+class Debouncer(Generic[_R_co]):  # noqa: UP046
     """Class to rate limit calls to a specific command."""
 
     def __init__(

@@ -181,7 +181,7 @@ def verify_cleanup(
     if tasks:
         event_loop.run_until_complete(asyncio.wait(tasks))
 
-    for handle in event_loop._scheduled:  # type: ignore[attr-defined]
+    for handle in event_loop._scheduled:
         if not handle.cancelled():
             with long_repr_strings():
                 if expected_lingering_timers:
@@ -357,7 +357,7 @@ def globally_load_quirks():
     run.
     """
 
-    import zhaquirks  # pylint: disable=import-outside-toplevel
+    import zhaquirks  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
 
     zhaquirks.setup()
 
