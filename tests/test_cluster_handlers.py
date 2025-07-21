@@ -41,12 +41,15 @@ from tests.common import (
     SIG_EP_PROFILE,
     SIG_EP_TYPE,
     create_mock_zigpy_device,
+    get_entity,
     join_zigpy_device,
-    make_zcl_header,
     send_attributes_report,
+    zigpy_device_from_json,
 )
+from zha.application import Platform
 from zha.application.const import ATTR_QUIRK_ID
 from zha.application.gateway import Gateway
+from zha.application.platforms.button import IdentifyButton
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
@@ -61,7 +64,6 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_ON_OFF,
 )
-from zha.zigbee.cluster_handlers.general import PollControlClusterHandler
 from zha.zigbee.cluster_handlers.lighting import ColorClusterHandler
 from zha.zigbee.cluster_handlers.lightlink import LightLinkClusterHandler
 from zha.zigbee.cluster_handlers.registries import (
@@ -117,58 +119,6 @@ def endpoint_mock(zigpy_coordinator_device: ZigpyDevice) -> Endpoint:
     return endpoint_mock
 
 
-def poll_control_ch_mock(
-    endpoint: Endpoint,
-    zha_gateway: Gateway,
-) -> PollControlClusterHandler:
-    """Poll control cluster_handler fixture."""
-    cluster_id = zigpy.zcl.clusters.general.PollControl.cluster_id
-    zigpy_dev = create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                SIG_EP_INPUT: [cluster_id],
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: 0x1234,
-                SIG_EP_PROFILE: 0x0104,
-            }
-        },
-        "00:11:22:33:44:55:66:77",
-        "test manufacturer",
-        "test model",
-    )
-
-    cluster = zigpy_dev.endpoints[1].in_clusters[cluster_id]
-    cluster_handler_class: type[PollControlClusterHandler] | None = (
-        CLUSTER_HANDLER_REGISTRY.get(cluster_id).get(None)
-    )
-    assert cluster_handler_class is not None
-
-    return cluster_handler_class(cluster, endpoint)
-
-
-async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
-    """Poll control device fixture."""
-    cluster_id = zigpy.zcl.clusters.general.PollControl.cluster_id
-    zigpy_dev = create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                SIG_EP_INPUT: [cluster_id],
-                SIG_EP_OUTPUT: [],
-                SIG_EP_TYPE: 0x1234,
-                SIG_EP_PROFILE: 0x0104,
-            }
-        },
-        "00:11:22:33:44:55:66:77",
-        "test manufacturer",
-        "test model",
-    )
-
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
-    return zha_device
-
-
 @pytest.mark.parametrize(
     ("cluster_id", "bind_count", "attrs"),
     [
@@ -204,7 +154,6 @@ async def poll_control_device_mock(zha_gateway: Gateway) -> Device:
         (zigpy.zcl.clusters.general.Ota.cluster_id, 0, set()),
         (zigpy.zcl.clusters.general.PowerProfile.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.ApplianceControl.cluster_id, 1, set()),
-        (zigpy.zcl.clusters.general.PollControl.cluster_id, 1, set()),
         (zigpy.zcl.clusters.general.GreenPowerProxy.cluster_id, 0, set()),
         (zigpy.zcl.clusters.closures.DoorLock.cluster_id, 1, {"lock_state"}),
         (
@@ -885,113 +834,6 @@ async def test_ep_cluster_handlers_configure(cluster_handler) -> None:
     assert ch_5.debug.call_count == 2
 
 
-async def test_poll_control_configure(zha_gateway: Gateway) -> None:
-    """Test poll control cluster_handler configuration."""
-    zigpy_coordinator_device: ZigpyDevice = zigpy_coordinator_device_mock(zha_gateway)
-    endpoint: Endpoint = endpoint_mock(zigpy_coordinator_device)
-    poll_control_ch: PollControlClusterHandler = poll_control_ch_mock(
-        endpoint, zha_gateway
-    )
-    await poll_control_ch.async_configure()
-    assert poll_control_ch.cluster.write_attributes.call_count == 1
-    assert poll_control_ch.cluster.write_attributes.call_args[0][0] == {
-        "checkin_interval": poll_control_ch.CHECKIN_INTERVAL
-    }
-
-
-async def test_poll_control_checkin_response(zha_gateway: Gateway) -> None:
-    """Test poll control cluster_handler checkin response."""
-    zigpy_coordinator_device: ZigpyDevice = zigpy_coordinator_device_mock(zha_gateway)
-    endpoint: Endpoint = endpoint_mock(zigpy_coordinator_device)
-    poll_control_ch: PollControlClusterHandler = poll_control_ch_mock(
-        endpoint, zha_gateway
-    )
-    rsp_mock = AsyncMock()
-    set_interval_mock = AsyncMock()
-    fast_poll_mock = AsyncMock()
-    cluster = poll_control_ch.cluster
-    patch_1 = mock.patch.object(cluster, "checkin_response", rsp_mock)
-    patch_2 = mock.patch.object(cluster, "set_long_poll_interval", set_interval_mock)
-    patch_3 = mock.patch.object(cluster, "fast_poll_stop", fast_poll_mock)
-
-    with patch_1, patch_2, patch_3:
-        await poll_control_ch.check_in_response(33)
-
-    assert rsp_mock.call_count == 1
-    assert set_interval_mock.call_count == 1
-    assert fast_poll_mock.call_count == 1
-
-    await poll_control_ch.check_in_response(33)
-    assert cluster.endpoint.request.call_count == 3
-    assert cluster.endpoint.request.await_count == 3
-    assert cluster.endpoint.request.mock_calls[0].kwargs["sequence"] == 33
-    assert cluster.endpoint.request.mock_calls[0].kwargs["cluster"] == 0x0020
-    assert cluster.endpoint.request.mock_calls[1].kwargs["cluster"] == 0x0020
-
-
-async def test_poll_control_cluster_command(zha_gateway: Gateway) -> None:
-    """Test poll control cluster_handler response to cluster command."""
-    poll_control_device = await poll_control_device_mock(zha_gateway)
-    checkin_mock = AsyncMock()
-    poll_control_ch = poll_control_device._endpoints[1].all_cluster_handlers["1:0x0020"]
-    cluster = poll_control_ch.cluster
-    # events = async_capture_events("zha_event")
-
-    poll_control_ch.emit_zha_event = MagicMock(wraps=poll_control_ch.emit_zha_event)
-    with mock.patch.object(poll_control_ch, "check_in_response", checkin_mock):
-        tsn = 22
-        hdr = make_zcl_header(0, global_command=False, tsn=tsn)
-        cluster.handle_message(
-            hdr, [mock.sentinel.args, mock.sentinel.args2, mock.sentinel.args3]
-        )
-        await poll_control_device.gateway.async_block_till_done()
-
-    assert checkin_mock.call_count == 1
-    assert checkin_mock.await_count == 1
-    assert checkin_mock.mock_calls == [call(tsn)]
-
-    assert poll_control_ch.emit_zha_event.call_count == 1
-    assert poll_control_ch.emit_zha_event.call_args_list[0] == mock.call(
-        "checkin", [mock.sentinel.args, mock.sentinel.args2, mock.sentinel.args3]
-    )
-
-
-async def test_poll_control_ignore_list(zha_gateway: Gateway) -> None:
-    """Test poll control cluster_handler ignore list."""
-    poll_control_device = await poll_control_device_mock(zha_gateway)
-    set_long_poll_mock = AsyncMock()
-    poll_control_ch = poll_control_device._endpoints[1].all_cluster_handlers["1:0x0020"]
-    cluster = poll_control_ch.cluster
-
-    with mock.patch.object(cluster, "set_long_poll_interval", set_long_poll_mock):
-        await poll_control_ch.check_in_response(33)
-
-    assert set_long_poll_mock.call_count == 1
-
-    set_long_poll_mock.reset_mock()
-    poll_control_ch.skip_manufacturer_id(4151)
-    with mock.patch.object(cluster, "set_long_poll_interval", set_long_poll_mock):
-        await poll_control_ch.check_in_response(33)
-
-    assert set_long_poll_mock.call_count == 0
-
-
-async def test_poll_control_ikea(zha_gateway: Gateway) -> None:
-    """Test poll control cluster_handler ignore list for ikea."""
-    poll_control_device = await poll_control_device_mock(zha_gateway)
-    set_long_poll_mock = AsyncMock()
-    poll_control_ch = poll_control_device._endpoints[1].all_cluster_handlers["1:0x0020"]
-    cluster = poll_control_ch.cluster
-
-    delattr(poll_control_device, "manufacturer_code")
-    poll_control_device.device.node_desc.manufacturer_code = 4476
-
-    with mock.patch.object(cluster, "set_long_poll_interval", set_long_poll_mock):
-        await poll_control_ch.check_in_response(33)
-
-    assert set_long_poll_mock.call_count == 0
-
-
 def zigpy_zll_device_mock(zha_gateway: Gateway) -> ZigpyDevice:
     """ZLL device fixture."""
 
@@ -1318,24 +1160,34 @@ async def test_cluster_handler_naming() -> None:
             assert cluster_handler.__name__.endswith("ClusterHandler")
 
 
-def test_parse_and_log_command(zha_gateway: Gateway):  # noqa: F811
+async def test_parse_and_log_command(zha_gateway: Gateway) -> None:
     """Test that `parse_and_log_command` correctly parses a known command."""
-    zigpy_coordinator_device: ZigpyDevice = zigpy_coordinator_device_mock(zha_gateway)
-    endpoint: Endpoint = endpoint_mock(zigpy_coordinator_device)
-    poll_control_ch: PollControlClusterHandler = poll_control_ch_mock(
-        endpoint, zha_gateway
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-rodret-dimmer.json",
     )
-    assert parse_and_log_command(poll_control_ch, 0x00, 0x01, []) == "fast_poll_stop"
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    identify_entity = get_entity(
+        zha_device, platform=Platform.BUTTON, entity_type=IdentifyButton
+    )
+    identify_handler = identify_entity._cluster_handler
+
+    assert parse_and_log_command(identify_handler, 0x00, 0x01, []) == "identify_query"
 
 
-def test_parse_and_log_command_unknown(zha_gateway: Gateway):  # noqa: F811
+async def test_parse_and_log_command_unknown(zha_gateway: Gateway):
     """Test that `parse_and_log_command` correctly parses an unknown command."""
-    zigpy_coordinator_device: ZigpyDevice = zigpy_coordinator_device_mock(zha_gateway)
-    endpoint: Endpoint = endpoint_mock(zigpy_coordinator_device)
-    poll_control_ch: PollControlClusterHandler = poll_control_ch_mock(
-        endpoint, zha_gateway
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-rodret-dimmer.json",
     )
-    assert parse_and_log_command(poll_control_ch, 0x00, 0xAB, []) == "0xAB"
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    identify_entity = get_entity(
+        zha_device, platform=Platform.BUTTON, entity_type=IdentifyButton
+    )
+    identify_handler = identify_entity._cluster_handler
+
+    assert parse_and_log_command(identify_handler, 0x00, 0xAB, []) == "0xAB"
 
 
 async def test_zha_send_event_from_quirk(zha_gateway: Gateway):
