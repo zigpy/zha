@@ -4,7 +4,6 @@
 
 import asyncio
 import logging
-from typing import Optional
 from unittest.mock import AsyncMock, call, patch
 
 import pytest
@@ -228,7 +227,7 @@ async def test_fan(
 async def async_turn_on(
     zha_gateway: Gateway,
     entity: PlatformEntity,
-    speed: Optional[str] = None,
+    speed: str | None = None,
 ) -> None:
     """Turn fan on."""
     await entity.async_turn_on(speed=speed)
@@ -244,7 +243,7 @@ async def async_turn_off(zha_gateway: Gateway, entity: PlatformEntity) -> None:
 async def async_set_speed(
     zha_gateway: Gateway,
     entity: PlatformEntity,
-    speed: Optional[str] = None,
+    speed: str | None = None,
 ) -> None:
     """Set speed for specified fan."""
     await entity.async_turn_on(speed=speed)
@@ -262,7 +261,7 @@ async def async_set_percentage(
 async def async_set_preset_mode(
     zha_gateway: Gateway,
     entity: PlatformEntity,
-    preset_mode: Optional[str] = None,
+    preset_mode: str | None = None,
 ) -> None:
     """Set preset_mode for specified fan."""
     assert preset_mode is not None
@@ -446,8 +445,8 @@ async def test_fan_init(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
     plug_read: dict,
     expected_state: bool,
-    expected_speed: Optional[str],
-    expected_percentage: Optional[int],
+    expected_speed: str | None,
+    expected_percentage: int | None,
 ):
     """Test zha fan platform."""
 
@@ -642,7 +641,7 @@ async def test_fan_ikea_init(
     ikea_plug_read: dict,
     ikea_expected_state: bool,
     ikea_expected_percentage: int,
-    ikea_preset_mode: Optional[str],
+    ikea_preset_mode: str | None,
     zha_gateway: Gateway,
 ) -> None:
     """Test ZHA fan platform."""
@@ -798,8 +797,8 @@ async def test_fan_kof_init(
     zha_gateway: Gateway,
     plug_read: dict,
     expected_state: bool,
-    expected_percentage: Optional[int],
-    expected_preset: Optional[str],
+    expected_percentage: int | None,
+    expected_preset: str | None,
 ) -> None:
     """Test ZHA fan platform for King of Fans."""
 

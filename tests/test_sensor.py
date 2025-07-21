@@ -5,7 +5,7 @@ from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from functools import partial
 import math
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -660,8 +660,8 @@ async def test_sensor(
     cluster_id: int,
     entity_type: type[PlatformEntity],
     test_func: Callable[[Cluster, Cluster, PlatformEntity], Awaitable[None]],
-    read_plug: Optional[dict],
-    unsupported_attrs: Optional[set],
+    read_plug: dict | None,
+    unsupported_attrs: set | None,
 ) -> None:
     """Test zha sensor platform."""
 

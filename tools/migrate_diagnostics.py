@@ -11,7 +11,6 @@ from contextlib import suppress
 import json
 import pathlib
 import time
-from typing import Optional
 from unittest.mock import AsyncMock, patch
 
 from zigpy.application import ControllerApplication
@@ -29,7 +28,7 @@ def zigpy_device_from_legacy_device_data(
     app: ControllerApplication,
     device_data: dict,
     patch_cluster: bool = True,
-    quirk: Optional[Callable] = None,
+    quirk: Callable | None = None,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
     ieee = zigpy.types.EUI64.convert(device_data["ieee"])
