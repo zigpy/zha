@@ -57,6 +57,7 @@ from zha.application.discovery import ENDPOINT_PROBE, EndpointProbe
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
+from zha.application.platforms.number import BaseNumber, NumberMode
 from zha.application.registries import SINGLE_INPUT_CLUSTER_DEVICE_CLASS
 from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.endpoint import Endpoint
@@ -344,6 +345,7 @@ async def test_quirks_v2_entity_discovery(
             step=1,
             unit=UnitOfTime.SECONDS,
             multiplier=1,
+            mode="box",
             translation_key="off_wait_time",
             fallback_name="Off wait time",
         )
@@ -363,7 +365,9 @@ async def test_quirks_v2_entity_discovery(
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    get_entity(zha_device, platform=Platform.NUMBER)
+    number_entity = get_entity(zha_device, platform=Platform.NUMBER)
+    assert isinstance(number_entity, BaseNumber)
+    assert number_entity.mode == NumberMode.BOX  # verify v2 quirk set this
 
 
 async def test_quirks_v2_entity_discovery_e1_curtain(
