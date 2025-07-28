@@ -805,3 +805,80 @@ def test_radio_type():
 
     with pytest.raises(ValueError):
         RadioType.get_by_description("Invalid description")
+
+
+async def test_gateway_network_scan(zha_gateway: Gateway) -> None:
+    """Test gateway network_scan method."""
+    channels = zigpy.types.Channels.from_channel_list([11, 15, 20, 25])
+    duration_exp = 3
+
+    # Create mock network beacons
+    mock_beacon1 = zigpy.types.NetworkBeacon(
+        src=0x1234,
+        channel=11,
+        pan_id=0xABCD,
+        extended_pan_id=zigpy.types.ExtendedPanId.convert("00:11:22:33:44:55:66:77"),
+        permit_joining=True,
+        router_capacity=True,
+        device_capacity=False,
+        lqi=150,
+        rssi=-45,
+        nwk_update_id=0,
+        stack_profile=2,
+        protocol_version=2,
+    )
+
+    mock_beacon2 = zigpy.types.NetworkBeacon(
+        src=None,
+        channel=15,
+        pan_id=0xEF01,
+        extended_pan_id=zigpy.types.ExtendedPanId.convert("aa:bb:cc:dd:ee:ff:00:11"),
+        permit_joining=False,
+        router_capacity=False,
+        device_capacity=True,
+        lqi=100,
+        rssi=-60,
+        nwk_update_id=1,
+        stack_profile=2,
+        protocol_version=2,
+    )
+
+    # Mock the application_controller's network_scan method
+    async def mock_network_scan(channels, duration_exp):
+        yield mock_beacon1
+        yield mock_beacon2
+
+    with patch.object(
+        zha_gateway.application_controller,
+        "network_scan",
+        side_effect=mock_network_scan,
+    ) as mock_scan:
+        beacons = []
+        async for beacon in zha_gateway.network_scan(channels, duration_exp):
+            beacons.append(beacon)
+
+        assert beacons == [mock_beacon1, mock_beacon2]
+        assert mock_scan.mock_calls == [
+            call(channels=channels, duration_exp=duration_exp)
+        ]
+
+
+async def test_gateway_energy_scan(zha_gateway: Gateway) -> None:
+    """Test gateway energy_scan method."""
+    channels = zigpy.types.Channels.from_channel_list([11, 15, 20, 25])
+    expected_results = {
+        11: 45.5,
+        15: 78.2,
+        20: 32.1,
+        25: 91.7,
+    }
+
+    with patch.object(
+        zha_gateway.application_controller, "energy_scan", return_value=expected_results
+    ) as mock_scan:
+        results = await zha_gateway.energy_scan(channels, 4, 1)
+
+        assert results == expected_results
+        assert mock_scan.mock_calls == [
+            call(channels=channels, duration_exp=4, count=1)
+        ]
