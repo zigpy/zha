@@ -23,6 +23,7 @@ import zigpy.quirks
 from zigpy.quirks.v2 import CustomDeviceV2, DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
+from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Groups, Identify
 from zigpy.zcl.foundation import (
@@ -868,6 +869,94 @@ class Device(LogMixin, EventBase):
 
         return False
 
+    def _apply_entity_metadata_changes(self, entity: PlatformEntity) -> None:
+        """Apply entity metadata changes from quirks v2."""
+        if self.quirk_metadata is None:
+            _LOGGER.debug("No quirk metadata for device %s", self)
+            return
+
+        _LOGGER.debug(
+            "Processing entity %s for metadata changes. Quirk metadata has %d change entries",
+            entity,
+            len(self.quirk_metadata.changed_entity_metadata),
+        )
+
+        for meta in self.quirk_metadata.changed_entity_metadata:
+            _LOGGER.debug(
+                "Checking if entity %s matches metadata change %s", entity, meta
+            )
+
+            if meta.unique_id_suffix is not None and not entity.unique_id.endswith(
+                meta.unique_id_suffix
+            ):
+                continue
+
+            if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
+                continue
+
+            if meta.cluster_id is not None and not any(
+                cluster_handler.cluster.cluster_id == meta.cluster_id
+                for cluster_handler in entity.cluster_handlers.values()
+            ):
+                continue
+
+            if meta.cluster_type is not None:
+                # Check if the entity's cluster handlers match the specified cluster type
+                matching_cluster_found = False
+                for cluster_handler in entity.cluster_handlers.values():
+                    if cluster_handler.cluster.cluster_id == meta.cluster_id:
+                        # For server clusters, check if it's in the in_clusters
+                        # For client clusters, check if it's in the out_clusters
+                        if meta.cluster_type is ClusterType.Server:
+                            if (
+                                cluster_handler.cluster.cluster_id
+                                in entity.endpoint.zigpy_endpoint.in_clusters
+                            ):
+                                matching_cluster_found = True
+                                break
+                        elif (
+                            cluster_handler.cluster.cluster_id
+                            in entity.endpoint.zigpy_endpoint.out_clusters
+                        ):
+                            matching_cluster_found = True
+                            break
+                if not matching_cluster_found:
+                    continue
+
+            if meta.function is not None and not meta.function(entity):
+                continue
+
+            # Apply metadata changes
+            _LOGGER.debug(
+                "Applying metadata changes from %s to entity %s", meta, entity
+            )
+
+            if meta.new_primary is not None:
+                entity._attr_primary = meta.new_primary
+
+            if meta.new_unique_id is not None:
+                entity._attr_unique_id = meta.new_unique_id
+
+            if meta.new_translation_key is not None:
+                entity._attr_translation_key = meta.new_translation_key
+
+            if meta.new_device_class is not None:
+                entity._attr_device_class = meta.new_device_class
+
+            if meta.new_state_class is not None:
+                entity._attr_state_class = meta.new_state_class
+
+            if meta.new_entity_category is not None:
+                entity._attr_entity_category = meta.new_entity_category
+
+            if meta.new_entity_registry_enabled_default is not None:
+                entity._attr_entity_registry_enabled_default = (
+                    meta.new_entity_registry_enabled_default
+                )
+
+            if meta.new_fallback_name is not None:
+                entity._attr_fallback_name = meta.new_fallback_name
+
     def _discover_new_entities(self) -> None:
         if self.is_active_coordinator:
             new_entities = discovery.DEVICE_PROBE.discover_coordinator_device_entities(
@@ -880,6 +969,9 @@ class Device(LogMixin, EventBase):
         for entity in new_entities:
             if self._is_entity_removed_by_quirk(entity):
                 continue
+
+            # Apply any metadata changes from quirks v2
+            self._apply_entity_metadata_changes(entity)
 
             entity.on_add()
             self._pending_entities.append(entity)

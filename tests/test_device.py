@@ -12,6 +12,8 @@ from zigpy.exceptions import ZigbeeException
 import zigpy.profiles.zha
 from zigpy.quirks.registry import DeviceRegistry
 from zigpy.quirks.v2 import DeviceAlertLevel, DeviceAlertMetadata, QuirkBuilder
+from zigpy.quirks.v2.homeassistant import EntityType
+from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 import zigpy.types
 from zigpy.zcl.clusters import general
 from zigpy.zcl.clusters.general import Ota, PowerConfiguration
@@ -1005,6 +1007,61 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
         )
 
     assert len(zha_device.platform_entities) == 8
+
+
+async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
+    """Test quirks v2 can change entity metadata."""
+    registry = DeviceRegistry()
+
+    def filter_func(entity) -> bool:
+        return entity.__class__.__name__ == "LQISensor"
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .change_entity_metadata(
+            endpoint_id=1,
+            unique_id_suffix="-lqi",
+            new_device_class=SensorDeviceClass.POWER,
+            new_state_class=SensorStateClass.MEASUREMENT,
+            new_entity_category=EntityType.CONFIG,
+            new_entity_registry_enabled_default=False,
+            new_translation_key="custom_lqi_key",
+            new_fallback_name="Custom LQI Name",
+        )
+        .change_entity_metadata(
+            function=filter_func, new_unique_id="custom_lqi_unique_id"
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # Find the LQI sensor entity to verify metadata changes were applied
+    lqi_entity = None
+    for entity in zha_device.platform_entities.values():
+        if isinstance(entity, LQISensor):
+            lqi_entity = entity
+            break
+
+    assert lqi_entity is not None, "LQI sensor entity should exist"
+
+    # Verify metadata changes were applied - first filter matches by endpoint_id=1 and unique_id_suffix="-lqi"
+    assert lqi_entity._attr_device_class == SensorDeviceClass.POWER
+    assert lqi_entity._attr_state_class == SensorStateClass.MEASUREMENT
+    assert lqi_entity._attr_entity_category == EntityType.CONFIG
+    assert lqi_entity._attr_entity_registry_enabled_default is False
+    assert lqi_entity._attr_translation_key == "custom_lqi_key"
+    assert lqi_entity._attr_fallback_name == "Custom LQI Name"
+
+    # Verify metadata changes from second filter - function-based match
+    assert lqi_entity._attr_unique_id == "custom_lqi_unique_id"
 
 
 async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
