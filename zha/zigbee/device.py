@@ -902,25 +902,12 @@ class Device(LogMixin, EventBase):
 
             if meta.cluster_type is not None:
                 # Check if the entity's cluster handlers match the specified cluster type
-                matching_cluster_found = False
-                for cluster_handler in entity.cluster_handlers.values():
-                    if cluster_handler.cluster.cluster_id == meta.cluster_id:
-                        # For server clusters, check if it's in the in_clusters
-                        # For client clusters, check if it's in the out_clusters
-                        if meta.cluster_type is ClusterType.Server:
-                            if (
-                                cluster_handler.cluster.cluster_id
-                                in entity.endpoint.zigpy_endpoint.in_clusters
-                            ):
-                                matching_cluster_found = True
-                                break
-                        elif (
-                            cluster_handler.cluster.cluster_id
-                            in entity.endpoint.zigpy_endpoint.out_clusters
-                        ):
-                            matching_cluster_found = True
-                            break
-                if not matching_cluster_found:
+                cluster_collection = (
+                    entity.endpoint.zigpy_endpoint.in_clusters
+                    if meta.cluster_type == ClusterType.Server
+                    else entity.endpoint.zigpy_endpoint.out_clusters
+                )
+                if meta.cluster_id not in cluster_collection:
                     continue
 
             if meta.function is not None and not meta.function(entity):
