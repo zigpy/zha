@@ -404,12 +404,12 @@
     "binary_sensor": [
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "IN1",
           "unique_id": "00:15:bc:00:42:00:09:1c-112-15",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "BinaryInput",
-          "translation_key": "binary_input",
+          "translation_key": "frient_in_1",
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -455,12 +455,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "IN2",
           "unique_id": "00:15:bc:00:42:00:09:1c-113-15",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "BinaryInput",
-          "translation_key": "binary_input",
+          "translation_key": "frient_in_2",
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -506,12 +506,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "IN3",
           "unique_id": "00:15:bc:00:42:00:09:1c-114-15",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "BinaryInput",
-          "translation_key": "binary_input",
+          "translation_key": "frient_in_3",
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -557,12 +557,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "IN4",
           "unique_id": "00:15:bc:00:42:00:09:1c-115-15",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "BinaryInput",
-          "translation_key": "binary_input",
+          "translation_key": "frient_in_4",
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -772,12 +772,12 @@
     "switch": [
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "COM 1",
           "unique_id": "00:15:bc:00:42:00:09:1c-116-6",
           "migrate_unique_ids": [],
           "platform": "switch",
           "class_name": "Switch",
-          "translation_key": "switch",
+          "translation_key": "frient_com_1",
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -822,12 +822,12 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "COM 2",
           "unique_id": "00:15:bc:00:42:00:09:1c-117-6",
           "migrate_unique_ids": [],
           "platform": "switch",
           "class_name": "Switch",
-          "translation_key": "switch",
+          "translation_key": "frient_com_2",
           "device_class": null,
           "state_class": null,
           "entity_category": null,
