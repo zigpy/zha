@@ -1,0 +1,3297 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:dc:41:3c:40",
+  "nwk": "0x46DF",
+  "manufacturer": "Inovelli",
+  "model": "VZM31-SN",
+  "friendly_manufacturer": "Inovelli",
+  "friendly_model": "VZM31-SN",
+  "name": "Inovelli VZM31-SN",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_id": null,
+  "manufacturer_code": 4655,
+  "power_source": "Mains",
+  "lqi": 112,
+  "rssi": -72,
+  "last_seen": "2025-07-30T15:12:50.962529+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4655,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 512,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 512,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "DIMMABLE_LIGHT",
+        "id": 257
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": "20230331"
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Inovelli"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "VZM31-SN"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "value": 255
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_level",
+              "zcl_type": "uint8",
+              "value": 254
+            },
+            {
+              "id": "0x0014",
+              "name": "default_move_rate",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0013",
+              "name": "off_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "on_level",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0010",
+              "name": "on_off_transition_time",
+              "zcl_type": "uint16",
+              "value": 30
+            },
+            {
+              "id": "0x0012",
+              "name": "on_transition_time",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x4000",
+              "name": "start_up_current_level",
+              "zcl_type": "uint8",
+              "value": 255
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0702",
+          "endpoint_attribute": "smartenergy_metering",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_summ_delivered",
+              "zcl_type": "uint48",
+              "value": 302
+            },
+            {
+              "id": "0x0001",
+              "name": "current_summ_received",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0100",
+              "name": "current_tier1_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0102",
+              "name": "current_tier2_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0104",
+              "name": "current_tier3_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0106",
+              "name": "current_tier4_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0108",
+              "name": "current_tier5_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x010a",
+              "name": "current_tier6_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0304",
+              "name": "demand_formatting",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0302",
+              "name": "divisor",
+              "zcl_type": "uint24",
+              "value": 100
+            },
+            {
+              "id": "0x0400",
+              "name": "instantaneous_demand",
+              "zcl_type": "int24",
+              "unsupported": true
+            },
+            {
+              "id": "0x0306",
+              "name": "metering_device_type",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0301",
+              "name": "multiplier",
+              "zcl_type": "uint24",
+              "value": 1
+            },
+            {
+              "id": "0x0200",
+              "name": "status",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0303",
+              "name": "summation_formatting",
+              "zcl_type": "map8",
+              "value": 66
+            },
+            {
+              "id": "0x0300",
+              "name": "unit_of_measure",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0b04",
+          "endpoint_attribute": "electrical_measurement",
+          "attributes": [
+            {
+              "id": "0x0603",
+              "name": "ac_current_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0602",
+              "name": "ac_current_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0300",
+              "name": "ac_frequency",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0401",
+              "name": "ac_frequency_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0302",
+              "name": "ac_frequency_max",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0400",
+              "name": "ac_frequency_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0605",
+              "name": "ac_power_divisor",
+              "zcl_type": "uint16",
+              "value": 10
+            },
+            {
+              "id": "0x0604",
+              "name": "ac_power_multiplier",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0601",
+              "name": "ac_voltage_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0600",
+              "name": "ac_voltage_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x050b",
+              "name": "active_power",
+              "zcl_type": "int16",
+              "value": 0
+            },
+            {
+              "id": "0x050d",
+              "name": "active_power_max",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x090d",
+              "name": "active_power_max_ph_b",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0d",
+              "name": "active_power_max_ph_c",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x090b",
+              "name": "active_power_ph_b",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0b",
+              "name": "active_power_ph_c",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x050f",
+              "name": "apparent_power",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "measurement_type",
+              "zcl_type": "map32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0403",
+              "name": "power_divisor",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0510",
+              "name": "power_factor",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0910",
+              "name": "power_factor_ph_b",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a10",
+              "name": "power_factor_ph_c",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0402",
+              "name": "power_multiplier",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0508",
+              "name": "rms_current",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x050a",
+              "name": "rms_current_max",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x090a",
+              "name": "rms_current_max_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0a",
+              "name": "rms_current_max_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0908",
+              "name": "rms_current_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a08",
+              "name": "rms_current_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0505",
+              "name": "rms_voltage",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0507",
+              "name": "rms_voltage_max",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0907",
+              "name": "rms_voltage_max_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a07",
+              "name": "rms_voltage_max_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0905",
+              "name": "rms_voltage_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a05",
+              "name": "rms_voltage_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0b05",
+          "endpoint_attribute": "diagnostic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc31",
+          "endpoint_attribute": "inovelli_vzm31sn_cluster",
+          "attributes": [
+            {
+              "id": "0x0014",
+              "name": "active_energy_reports",
+              "zcl_type": "uint16",
+              "value": 10
+            },
+            {
+              "id": "0x0012",
+              "name": "active_power_reports",
+              "zcl_type": "uint8",
+              "value": 10
+            },
+            {
+              "id": "0x000c",
+              "name": "auto_off_timer",
+              "zcl_type": "uint16",
+              "value": 0
+            },
+            {
+              "id": "0x007b",
+              "name": "aux_switch_scenes",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x007d",
+              "name": "binding_off_to_on_sync_level",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0032",
+              "name": "button_delay",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x000d",
+              "name": "default_level_local",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x000e",
+              "name": "default_level_remote",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0006",
+              "name": "dimming_speed_down_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0005",
+              "name": "dimming_speed_down_remote",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0002",
+              "name": "dimming_speed_up_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0001",
+              "name": "dimming_speed_up_remote",
+              "zcl_type": "uint8",
+              "value": 25
+            },
+            {
+              "id": "0x0106",
+              "name": "disable_clear_notifications_double_tap",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0036",
+              "name": "double_tap_down_enabled",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0038",
+              "name": "double_tap_down_level",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0035",
+              "name": "double_tap_up_enabled",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0037",
+              "name": "double_tap_up_level",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0104",
+              "name": "firmware_progress_led",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x0019",
+              "name": "increased_non_neutral_output",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "internal_temp_monitor",
+              "zcl_type": "uint8",
+              "value": 39
+            },
+            {
+              "id": "0x000b",
+              "name": "invert_switch",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x001a",
+              "name": "leading_or_trailing_edge",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0060",
+              "name": "led_color_when_off",
+              "zcl_type": "uint8",
+              "value": 170
+            },
+            {
+              "id": "0x005f",
+              "name": "led_color_when_on",
+              "zcl_type": "uint8",
+              "value": 170
+            },
+            {
+              "id": "0x0062",
+              "name": "led_intensity_when_off",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0061",
+              "name": "led_intensity_when_on",
+              "zcl_type": "uint8",
+              "value": 33
+            },
+            {
+              "id": "0x0064",
+              "name": "led_scaling_mode",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "load_level_indicator_timeout",
+              "zcl_type": "uint8",
+              "value": 11
+            },
+            {
+              "id": "0x0100",
+              "name": "local_protection",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x000a",
+              "name": "maximum_level",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0009",
+              "name": "minimum_level",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0103",
+              "name": "on_off_led_mode",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0102",
+              "name": "output_mode",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x0021",
+              "name": "overheated",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0013",
+              "name": "periodic_power_and_energy_reports",
+              "zcl_type": "uint8",
+              "value": 3600
+            },
+            {
+              "id": "0x0015",
+              "name": "power_type",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0004",
+              "name": "ramp_rate_off_to_on_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0003",
+              "name": "ramp_rate_off_to_on_remote",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0008",
+              "name": "ramp_rate_on_to_off_local",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0007",
+              "name": "ramp_rate_on_to_off_remote",
+              "zcl_type": "uint8",
+              "value": 127
+            },
+            {
+              "id": "0x0105",
+              "name": "relay_click_in_on_off_mode",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0034",
+              "name": "smart_bulb_mode",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x000f",
+              "name": "state_after_power_restored",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0016",
+              "name": "switch_type",
+              "zcl_type": "uint8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfc57",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 16908818
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "DIMMER_SWITCH",
+        "id": 260
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc31",
+          "endpoint_attribute": "inovelli_vzm31sn_cluster",
+          "attributes": []
+        }
+      ]
+    },
+    "242": {
+      "profile_id": 41440,
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "in_clusters": [],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0021",
+          "endpoint_attribute": "green_power",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {},
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-3",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0003",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            },
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0008",
+              "status": "INITIALIZED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 40,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": 254,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 40,
+          "color_mode": "brightness",
+          "supported_color_modes": [
+            "brightness",
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-auto_off_timer",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliAutoShutoffTimer",
+          "translation_key": "auto_off_timer",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 32767,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliAutoShutoffTimer",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-button_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliButtonDelay",
+          "translation_key": "button_delay",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 9,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliButtonDelay",
+          "available": true,
+          "state": 1
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-default_level_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalDefaultLevel",
+          "translation_key": "default_level_local",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalDefaultLevel",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-default_level_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDefaultLevel",
+          "translation_key": "default_level_remote",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDefaultLevel",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-dimming_speed_down_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalDimmingDownSpeed",
+          "translation_key": "dimming_speed_down_local",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalDimmingDownSpeed",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-dimming_speed_down_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingDownSpeed",
+          "translation_key": "dimming_speed_down_remote",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingDownSpeed",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-dimming_speed_up_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalDimmingUpSpeed",
+          "translation_key": "dimming_speed_up_local",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalDimmingUpSpeed",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-dimming_speed_up_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingUpSpeed",
+          "translation_key": "dimming_speed_up_remote",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 126,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingUpSpeed",
+          "available": true,
+          "state": 25
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-led_color_when_off",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliDefaultAllLEDOffColor",
+          "translation_key": "led_color_when_off",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliDefaultAllLEDOffColor",
+          "available": true,
+          "state": 170
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-led_color_when_on",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliDefaultAllLEDOnColor",
+          "translation_key": "led_color_when_on",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliDefaultAllLEDOnColor",
+          "available": true,
+          "state": 170
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-led_intensity_when_off",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliDefaultAllLEDOffIntensity",
+          "translation_key": "led_intensity_when_off",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliDefaultAllLEDOffIntensity",
+          "available": true,
+          "state": 1
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-led_intensity_when_on",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliDefaultAllLEDOnIntensity",
+          "translation_key": "led_intensity_when_on",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliDefaultAllLEDOnIntensity",
+          "available": true,
+          "state": 33
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-load_level_indicator_timeout",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLoadLevelIndicatorTimeout",
+          "translation_key": "load_level_indicator_timeout",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 11,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLoadLevelIndicatorTimeout",
+          "available": true,
+          "state": 11
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-maximum_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliMaximumLoadDimmingLevel",
+          "translation_key": "maximum_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 2,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliMaximumLoadDimmingLevel",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-minimum_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliMinimumLoadDimmingLevel",
+          "translation_key": "minimum_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 254,
+          "native_min_value": 1,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliMinimumLoadDimmingLevel",
+          "available": true,
+          "state": 1
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-ramp_rate_off_to_on_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalRampRateOffToOn",
+          "translation_key": "ramp_rate_off_to_on_local",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalRampRateOffToOn",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-ramp_rate_off_to_on_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingSpeedOffToOn",
+          "translation_key": "ramp_rate_off_to_on_remote",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingSpeedOffToOn",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-ramp_rate_on_to_off_local",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliLocalRampRateOnToOff",
+          "translation_key": "ramp_rate_on_to_off_local",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliLocalRampRateOnToOff",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-ramp_rate_on_to_off_remote",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliRemoteDimmingSpeedOnToOff",
+          "translation_key": "ramp_rate_on_to_off_remote",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 127,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliRemoteDimmingSpeedOnToOff",
+          "available": true,
+          "state": 127
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-state_after_power_restored",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "InovelliStartupDefaultLevel",
+          "translation_key": "state_after_power_restored",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "InovelliStartupDefaultLevel",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-8-on_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OnLevelConfigurationEntity",
+          "translation_key": "on_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0008",
+              "status": "INITIALIZED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OnLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-8-on_off_transition_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "translation_key": "on_off_transition_time",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0008",
+              "status": "INITIALIZED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "OnOffTransitionTimeConfigurationEntity",
+          "available": true,
+          "state": 30
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-8-start_up_current_level",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "translation_key": "start_up_current_level",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "LevelControlClusterHandler",
+              "generic_id": "cluster_handler_0x0008",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 8,
+                "name": "Level control",
+                "type": "server"
+              },
+              "id": "1:0x0008",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0008",
+              "status": "INITIALIZED",
+              "value_attribute": "current_level"
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 255,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "StartUpCurrentLevelConfigurationEntity",
+          "available": true,
+          "state": 255
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-6-StartUpOnOff",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "StartupOnOffSelectEntity",
+          "translation_key": "start_up_on_off",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "StartUpOnOff",
+          "options": [
+            "Off",
+            "On",
+            "Toggle",
+            "PreviousValue"
+          ]
+        },
+        "state": {
+          "class_name": "StartupOnOffSelectEntity",
+          "available": true,
+          "state": "PreviousValue"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-leading_or_trailing_edge",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "InovelliDimmingModeEntity",
+          "translation_key": "leading_or_trailing_edge",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "InovelliDimmingMode",
+          "options": [
+            "LeadingEdge",
+            "TrailingEdge"
+          ]
+        },
+        "state": {
+          "class_name": "InovelliDimmingModeEntity",
+          "available": true,
+          "state": "LeadingEdge"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-output_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "InovelliOutputModeEntity",
+          "translation_key": "output_mode",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "InovelliOutputMode",
+          "options": [
+            "Dimmer",
+            "OnOff"
+          ]
+        },
+        "state": {
+          "class_name": "InovelliOutputModeEntity",
+          "available": true,
+          "state": "OnOff"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-switch_type",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "InovelliSwitchTypeEntity",
+          "translation_key": "switch_type",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "InovelliSwitchType",
+          "options": [
+            "Single Pole",
+            "Three Way Dumb",
+            "Three Way AUX",
+            "Single Pole Full Sine"
+          ]
+        },
+        "state": {
+          "class_name": "InovelliSwitchTypeEntity",
+          "available": true,
+          "state": "Single Pole"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 112
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": -72
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-1794-summation_delivered",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SmartEnergySummation",
+          "translation_key": "summation_delivered",
+          "device_class": "energy",
+          "state_class": "total_increasing",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1794,
+                "name": "Metering",
+                "type": "server"
+              },
+              "id": "1:0x0702",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0702",
+              "status": "INITIALIZED",
+              "value_attribute": "instantaneous_demand"
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 3,
+          "unit": "kWh"
+        },
+        "state": {
+          "class_name": "SmartEnergySummation",
+          "available": true,
+          "state": 3.02,
+          "device_type": "Electric Metering",
+          "status": "NO_ALARMS",
+          "zcl_unit_of_measurement": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-2820",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurement",
+          "translation_key": null,
+          "device_class": "power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0b04",
+              "status": "INITIALIZED",
+              "value_attribute": "ac_voltage_multiplier"
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 1,
+          "unit": "W"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurement",
+          "available": true,
+          "state": 0.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "InovelliInternalTemperature",
+          "translation_key": "internal_temp_monitor",
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "\u00b0C"
+        },
+        "state": {
+          "class_name": "InovelliInternalTemperature",
+          "available": true,
+          "state": 39
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-overheated",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "InovelliOverheated",
+          "translation_key": "overheated",
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "InovelliOverheated",
+          "available": true,
+          "state": "Normal"
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-disable_clear_notifications_double_tap",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliDisableDoubleTapClearNotificationsMode",
+          "translation_key": "disable_clear_notifications_double_tap",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "disable_clear_notifications_double_tap",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliDisableDoubleTapClearNotificationsMode",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-double_tap_up_enabled",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliDoubleTapUpEnabled",
+          "translation_key": "double_tap_up_enabled",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "double_tap_up_enabled",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliDoubleTapUpEnabled",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-firmware_progress_led",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliFirmwareProgressLED",
+          "translation_key": "firmware_progress_led",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "firmware_progress_led",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliFirmwareProgressLED",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-invert_switch",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliInvertSwitch",
+          "translation_key": "invert_switch",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "invert_switch",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliInvertSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-local_protection",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliLocalProtection",
+          "translation_key": "local_protection",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "local_protection",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliLocalProtection",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-on_off_led_mode",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliOnOffLEDMode",
+          "translation_key": "one_led_mode",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "on_off_led_mode",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliOnOffLEDMode",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-relay_click_in_on_off_mode",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliRelayClickInOnOffMode",
+          "translation_key": "relay_click_in_on_off_mode",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "relay_click_in_on_off_mode",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliRelayClickInOnOffMode",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-64561-smart_bulb_mode",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "InovelliSmartBulbMode",
+          "translation_key": "smart_bulb_mode",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "InovelliConfigEntityClusterHandler",
+              "generic_id": "cluster_handler_0xfc31",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64561,
+                "name": "InovelliVZM31SNCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc31",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0xfc31",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "smart_bulb_mode",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "InovelliSmartBulbMode",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:dc:41:3c:40-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:dc:41:3c:40:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            64,
+            60,
+            65,
+            220,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x01020212",
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

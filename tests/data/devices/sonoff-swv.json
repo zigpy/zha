@@ -806,6 +806,62 @@
           "state": 0,
           "available": true
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Water shortage auto-close",
+          "unique_id": "ab:cd:ef:12:8c:25:a4:7c-1-auto_close_water_shortage",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "water_shortage_auto_close",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SonoffPresenceSenorClusterHandler",
+              "generic_id": "cluster_handler_0xfc11",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64529,
+                "name": "CustomSonoffCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc11",
+              "unique_id": "ab:cd:ef:12:8c:25:a4:7c:1:0xfc11",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            124,
+            164,
+            37,
+            140,
+            18,
+            239,
+            205,
+            171
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "auto_close_water_shortage",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 30
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
       }
     ],
     "update": [

@@ -7,8 +7,8 @@
   "friendly_manufacturer": "frient A/S",
   "friendly_model": "MOSZB-153",
   "name": "frient A/S MOSZB-153",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
@@ -414,59 +414,9 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "binary_sensor": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:1a:10:8a:e5-34-1030",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "Occupancy",
-          "translation_key": null,
-          "device_class": "occupancy",
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OccupancySensingClusterHandler",
-              "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 34,
-              "cluster": {
-                "id": 1030,
-                "name": "Occupancy Sensing",
-                "type": "server"
-              },
-              "id": "34:0x0406",
-              "unique_id": "00:15:bc:00:1a:10:8a:e5:34:0x0406",
-              "status": "INITIALIZED",
-              "value_attribute": "occupancy"
-            }
-          ],
-          "device_ieee": [
-            229,
-            138,
-            16,
-            26,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 34,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "occupancy"
-        },
-        "state": {
-          "class_name": "Occupancy",
-          "available": true,
-          "state": false
-        }
-      },
       {
         "info_object": {
           "fallback_name": null,
@@ -517,166 +467,13 @@
           "available": true,
           "state": false
         }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:1a:10:8a:e5-35-15",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "BinaryInput",
-          "translation_key": "binary_input",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BinaryInputClusterHandler",
-              "generic_id": "cluster_handler_0x000f",
-              "endpoint_id": 35,
-              "cluster": {
-                "id": 15,
-                "name": "Binary Input (Basic)",
-                "type": "server"
-              },
-              "id": "35:0x000f",
-              "unique_id": "00:15:bc:00:1a:10:8a:e5:35:0x000f",
-              "status": "INITIALIZED",
-              "value_attribute": "present_value"
-            }
-          ],
-          "device_ieee": [
-            229,
-            138,
-            16,
-            26,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 35,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "present_value"
-        },
-        "state": {
-          "class_name": "BinaryInput",
-          "available": true,
-          "state": true
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:1a:10:8a:e5-40-1030",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "Occupancy",
-          "translation_key": null,
-          "device_class": "occupancy",
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OccupancySensingClusterHandler",
-              "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 40,
-              "cluster": {
-                "id": 1030,
-                "name": "Occupancy Sensing",
-                "type": "server"
-              },
-              "id": "40:0x0406",
-              "unique_id": "00:15:bc:00:1a:10:8a:e5:40:0x0406",
-              "status": "INITIALIZED",
-              "value_attribute": "occupancy"
-            }
-          ],
-          "device_ieee": [
-            229,
-            138,
-            16,
-            26,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 40,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "occupancy"
-        },
-        "state": {
-          "class_name": "Occupancy",
-          "available": true,
-          "state": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:1a:10:8a:e5-41-1030",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "Occupancy",
-          "translation_key": null,
-          "device_class": "occupancy",
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OccupancySensingClusterHandler",
-              "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 41,
-              "cluster": {
-                "id": 1030,
-                "name": "Occupancy Sensing",
-                "type": "server"
-              },
-              "id": "41:0x0406",
-              "unique_id": "00:15:bc:00:1a:10:8a:e5:41:0x0406",
-              "status": "INITIALIZED",
-              "value_attribute": "occupancy"
-            }
-          ],
-          "device_ieee": [
-            229,
-            138,
-            16,
-            26,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 41,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "occupancy"
-        },
-        "state": {
-          "class_name": "Occupancy",
-          "available": true,
-          "state": false
-        }
       }
     ],
     "button": [
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:1a:10:8a:e5-34-3",
+          "unique_id": "00:15:bc:00:1a:10:8a:e5-35-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -691,14 +488,14 @@
             {
               "class_name": "IdentifyClusterHandler",
               "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 34,
+              "endpoint_id": 35,
               "cluster": {
                 "id": 3,
                 "name": "Identify",
                 "type": "server"
               },
-              "id": "34:0x0003",
-              "unique_id": "00:15:bc:00:1a:10:8a:e5:34:0x0003",
+              "id": "35:0x0003",
+              "unique_id": "00:15:bc:00:1a:10:8a:e5:35:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
@@ -713,7 +510,7 @@
             21,
             0
           ],
-          "endpoint_id": 34,
+          "endpoint_id": 35,
           "available": true,
           "group_id": null,
           "command": "identify",
@@ -732,7 +529,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:1a:10:8a:e5-34-0-lqi",
+          "unique_id": "00:15:bc:00:1a:10:8a:e5-35-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -747,14 +544,14 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 34,
+              "endpoint_id": 35,
               "cluster": {
                 "id": 0,
                 "name": "Basic",
                 "type": "server"
               },
-              "id": "34:0x0000",
-              "unique_id": "00:15:bc:00:1a:10:8a:e5:34:0x0000",
+              "id": "35:0x0000",
+              "unique_id": "00:15:bc:00:1a:10:8a:e5:35:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
@@ -769,7 +566,7 @@
             21,
             0
           ],
-          "endpoint_id": 34,
+          "endpoint_id": 35,
           "available": true,
           "group_id": null,
           "suggested_display_precision": null,
@@ -784,7 +581,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:1a:10:8a:e5-34-0-rssi",
+          "unique_id": "00:15:bc:00:1a:10:8a:e5-35-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -799,14 +596,14 @@
             {
               "class_name": "BasicClusterHandler",
               "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 34,
+              "endpoint_id": 35,
               "cluster": {
                 "id": 0,
                 "name": "Basic",
                 "type": "server"
               },
-              "id": "34:0x0000",
-              "unique_id": "00:15:bc:00:1a:10:8a:e5:34:0x0000",
+              "id": "35:0x0000",
+              "unique_id": "00:15:bc:00:1a:10:8a:e5:35:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
@@ -821,7 +618,7 @@
             21,
             0
           ],
-          "endpoint_id": 34,
+          "endpoint_id": 35,
           "available": true,
           "group_id": null,
           "suggested_display_precision": null,

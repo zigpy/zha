@@ -7,8 +7,8 @@
   "friendly_manufacturer": "frient A/S",
   "friendly_model": "SIRZB-111",
   "name": "frient A/S SIRZB-111",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4117,
   "power_source": "Mains",
@@ -208,60 +208,8 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
-    "binary_sensor": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:41:00:6f:8e-43-1280",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "IASZone",
-          "translation_key": "ias_zone",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IASZoneClusterHandler",
-              "generic_id": "cluster_handler_0x0500",
-              "endpoint_id": 43,
-              "cluster": {
-                "id": 1280,
-                "name": "IAS Zone",
-                "type": "server"
-              },
-              "id": "43:0x0500",
-              "unique_id": "00:15:bc:00:41:00:6f:8e:43:0x0500",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": [
-            142,
-            111,
-            0,
-            65,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 43,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "zone_status"
-        },
-        "state": {
-          "class_name": "IASZone",
-          "available": true,
-          "state": false
-        }
-      }
-    ],
     "button": [
       {
         "info_object": {
@@ -652,6 +600,58 @@
           "class_name": "RSSISensor",
           "available": true,
           "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Battery",
+          "unique_id": "00:15:bc:00:41:00:6f:8e-43-battery",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 43,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "43:0x0001",
+              "unique_id": "00:15:bc:00:41:00:6f:8e:43:0x0001",
+              "status": "INITIALIZED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": [
+            142,
+            111,
+            0,
+            65,
+            0,
+            188,
+            21,
+            0
+          ],
+          "endpoint_id": 43,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": 5.0
         }
       }
     ],
