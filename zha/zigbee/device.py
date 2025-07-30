@@ -23,7 +23,6 @@ import zigpy.quirks
 from zigpy.quirks.v2 import CustomDeviceV2, DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
-from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Groups, Identify
 from zigpy.zcl.foundation import (
@@ -889,15 +888,6 @@ class Device(LogMixin, EventBase):
                 for cluster_handler in entity.cluster_handlers.values()
             ):
                 continue
-
-            if meta.cluster_type is not None:
-                cluster = (
-                    entity.endpoint.zigpy_endpoint.in_clusters
-                    if meta.cluster_type == ClusterType.Server
-                    else entity.endpoint.zigpy_endpoint.out_clusters
-                )
-                if meta.cluster_id not in cluster:
-                    continue
 
             if meta.function is not None and not meta.function(entity):
                 continue
