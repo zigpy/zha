@@ -7,8 +7,8 @@
   "friendly_manufacturer": "frient A/S",
   "friendly_model": "KEPZB-110",
   "name": "frient A/S KEPZB-110",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
@@ -199,6 +199,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "alarm_control_panel": [
       {
@@ -258,18 +259,18 @@
     "binary_sensor": [
       {
         "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:43:00:4a:39-44-1280",
+          "fallback_name": "Tamper",
+          "unique_id": "00:15:bc:00:43:00:4a:39-44-tamper",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
-          "class_name": "IASZone",
-          "translation_key": "ias_zone",
-          "device_class": null,
+          "class_name": "BinarySensor",
+          "translation_key": null,
+          "device_class": "tamper",
           "state_class": null,
-          "entity_category": null,
+          "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "IASZoneClusterHandler",
@@ -302,9 +303,9 @@
           "attribute_name": "zone_status"
         },
         "state": {
-          "class_name": "IASZone",
+          "class_name": "BinarySensor",
           "available": true,
-          "state": false
+          "state": true
         }
       }
     ],

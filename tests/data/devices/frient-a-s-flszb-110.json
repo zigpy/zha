@@ -7,8 +7,8 @@
   "friendly_manufacturer": "frient A/S",
   "friendly_model": "FLSZB-110",
   "name": "frient A/S FLSZB-110",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
@@ -233,6 +233,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -284,57 +285,6 @@
           "class_name": "IASZone",
           "available": true,
           "state": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:33:00:76:9a-35-15",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "BinaryInput",
-          "translation_key": "binary_input",
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BinaryInputClusterHandler",
-              "generic_id": "cluster_handler_0x000f",
-              "endpoint_id": 35,
-              "cluster": {
-                "id": 15,
-                "name": "Binary Input (Basic)",
-                "type": "server"
-              },
-              "id": "35:0x000f",
-              "unique_id": "00:15:bc:00:33:00:76:9a:35:0x000f",
-              "status": "INITIALIZED",
-              "value_attribute": "present_value"
-            }
-          ],
-          "device_ieee": [
-            154,
-            118,
-            0,
-            51,
-            0,
-            188,
-            21,
-            0
-          ],
-          "endpoint_id": 35,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "present_value"
-        },
-        "state": {
-          "class_name": "BinaryInput",
-          "available": true,
-          "state": true
         }
       }
     ],

@@ -7,8 +7,8 @@
   "friendly_manufacturer": "frient A/S",
   "friendly_model": "SPLZB-141",
   "name": "frient A/S SPLZB-141",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4117,
   "power_source": "Mains",
@@ -499,6 +499,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {
@@ -773,11 +774,11 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "Device temperature",
           "unique_id": "00:15:bc:00:2f:02:19:79-2-2",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "DeviceTemperature",
+          "class_name": "Sensor",
           "translation_key": "device_temperature",
           "device_class": "temperature",
           "state_class": "measurement",
@@ -818,9 +819,9 @@
           "unit": "\u00b0C"
         },
         "state": {
-          "class_name": "DeviceTemperature",
+          "class_name": "Sensor",
           "available": true,
-          "state": 0.32
+          "state": 32
         }
       },
       {

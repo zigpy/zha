@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Xiaomi",
   "friendly_model": "LYWSD03MMC",
   "name": "Xiaomi LYWSD03MMC",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
@@ -107,6 +107,11 @@
           ]
         },
         {
+          "cluster_id": "0x0204",
+          "endpoint_attribute": "thermostat_ui",
+          "attributes": []
+        },
+        {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
           "attributes": [
@@ -140,6 +145,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {
@@ -194,6 +200,338 @@
         "state": {
           "class_name": "IdentifyButton",
           "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Comfort humidity max",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-comfort_humidity_max",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "comfort_humidity_max",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 99,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Comfort humidity min",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-comfort_humidity_min",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "comfort_humidity_min",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 99,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Comfort temperature max",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-comfort_temperature_max",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "comfort_temperature_max",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 99,
+          "native_min_value": -99,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Comfort temperature min",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-comfort_temperature_min",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "comfort_temperature_min",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 99,
+          "native_min_value": -99,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Humidity offset",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-humidity_calibration",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "humidity_offset",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "RelativeHumidityClusterHandler",
+              "generic_id": "cluster_handler_0x0405",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1029,
+                "name": "Relative Humidity Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0405",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0405",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 99,
+          "native_min_value": -99,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Temperature offset",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-temperature_calibration",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "temperature_offset",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TemperatureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0402",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1026,
+                "name": "Temperature Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0402",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0402",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 99,
+          "native_min_value": -99,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
         }
       }
     ],
@@ -457,6 +795,120 @@
           "class_name": "Humidity",
           "available": true,
           "state": 52.96
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": "Display enabled",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-display",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "display_enabled",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "display",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": false,
+          "on_value": true
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Show smiley",
+          "unique_id": "a4:c1:38:dd:ed:49:77:95-1-smiley",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "show_smiley",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "a4:c1:38:dd:ed:49:77:95:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": [
+            149,
+            119,
+            73,
+            237,
+            221,
+            56,
+            193,
+            164
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "smiley",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": false,
+          "on_value": true
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],
