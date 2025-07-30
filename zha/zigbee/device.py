@@ -872,20 +872,9 @@ class Device(LogMixin, EventBase):
     def _apply_entity_metadata_changes(self, entity: PlatformEntity) -> None:
         """Apply entity metadata changes from quirks v2."""
         if self.quirk_metadata is None:
-            _LOGGER.debug("No quirk metadata for device %s", self)
             return
 
-        _LOGGER.debug(
-            "Processing entity %s for metadata changes. Quirk metadata has %d change entries",
-            entity,
-            len(self.quirk_metadata.changed_entity_metadata),
-        )
-
         for meta in self.quirk_metadata.changed_entity_metadata:
-            _LOGGER.debug(
-                "Checking if entity %s matches metadata change %s", entity, meta
-            )
-
             if meta.unique_id_suffix is not None and not entity.unique_id.endswith(
                 meta.unique_id_suffix
             ):
@@ -901,13 +890,12 @@ class Device(LogMixin, EventBase):
                 continue
 
             if meta.cluster_type is not None:
-                # Check if the entity's cluster handlers match the specified cluster type
-                cluster_collection = (
+                cluster = (
                     entity.endpoint.zigpy_endpoint.in_clusters
                     if meta.cluster_type == ClusterType.Server
                     else entity.endpoint.zigpy_endpoint.out_clusters
                 )
-                if meta.cluster_id not in cluster_collection:
+                if meta.cluster_id not in cluster:
                     continue
 
             if meta.function is not None and not meta.function(entity):
