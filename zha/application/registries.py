@@ -324,7 +324,7 @@ class PlatformEntityRegistry:
                         manufacturer, model, cluster_handlers, quirk_id
                     ):
                         claimed = match.claim_cluster_handlers(cluster_handlers)
-                        for ent_class in stop_match_groups[stop_match_grp][match]:
+                        for ent_class in matches[match]:
                             ent_n_cluster_handlers = EntityClassAndClusterHandlers(
                                 ent_class, claimed
                             )
@@ -360,7 +360,7 @@ class PlatformEntityRegistry:
                         manufacturer, model, cluster_handlers, quirk_id
                     ):
                         claimed = match.claim_cluster_handlers(cluster_handlers)
-                        for ent_class in stop_match_groups[stop_match_grp][match]:
+                        for ent_class in matches[match]:
                             ent_n_cluster_handlers = EntityClassAndClusterHandlers(
                                 ent_class, claimed
                             )

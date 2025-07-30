@@ -8,7 +8,7 @@ import json
 import logging
 import pathlib
 import time
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import AsyncMock, Mock
 
 from zigpy.application import ControllerApplication
@@ -187,7 +187,7 @@ def find_entity(device: Device, platform: Platform) -> PlatformEntity:
 
 
 def mock_coro(
-    return_value: Any = None, exception: Optional[Exception] = None
+    return_value: Any = None, exception: Exception | None = None
 ) -> Awaitable:
     """Return a coro that returns a value or raise an exception."""
     fut: asyncio.Future = asyncio.Future()
@@ -320,7 +320,7 @@ def zigpy_device_from_device_data(
     app: ControllerApplication,
     device_data: dict,
     patch_cluster: bool = True,
-    quirk: Optional[Callable] = None,
+    quirk: Callable | None = None,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
 
@@ -443,7 +443,7 @@ async def zigpy_device_from_json(
     app: ControllerApplication,
     json_file: str,
     patch_cluster: bool = True,
-    quirk: Optional[Callable] = None,
+    quirk: Callable | None = None,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""
     device_data = await asyncio.get_running_loop().run_in_executor(
@@ -481,7 +481,7 @@ def create_mock_zigpy_device(
     node_descriptor: zdo_t.NodeDescriptor | None = None,
     nwk: int = 0xB79C,
     patch_cluster: bool = True,
-    quirk: Optional[Callable] = None,
+    quirk: Callable | None = None,
     attributes: dict[int, dict[str, dict[str, Any]]] = None,
 ) -> zigpy.device.Device:
     """Make a fake device using the specified cluster classes."""

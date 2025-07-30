@@ -10,7 +10,7 @@ import dataclasses
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, Optional, final
+from typing import TYPE_CHECKING, Any, Final, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types.named import EUI64
@@ -104,9 +104,9 @@ class EntityStateChangedEvent:
     event: Final[str] = STATE_CHANGED
     platform: str
     unique_id: str
-    device_ieee: Optional[EUI64] = None
-    endpoint_id: Optional[int] = None
-    group_id: Optional[int] = None
+    device_ieee: EUI64 | None = None
+    endpoint_id: int | None = None
+    group_id: int | None = None
 
 
 class BaseEntity(LogMixin, EventBase):

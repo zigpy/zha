@@ -32,6 +32,12 @@ _LOGGER = logging.getLogger(__name__)
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 
 
+def ieee_from_manufacturer_model(manufacturer: str, model: str) -> zigpy.types.EUI64:
+    """Generate a fake IEEE address based on the manufacturer and model."""
+    ieee_hash = hashlib.sha256(f"{manufacturer} {model}".encode()).hexdigest()
+    return zigpy.types.EUI64.convert("abcdef12" + ieee_hash[:8])
+
+
 def zigpy_device_from_legacy_diagnostics(
     app: ControllerApplication,
     data: dict,
@@ -49,8 +55,7 @@ def zigpy_device_from_legacy_diagnostics(
 
     # Generate a unique IEEE address based on the manufacturer and model, since the
     # real (unique) IEEE is redacted
-    ieee_hash = hashlib.sha256(f"{manufacturer} {model}".encode()).hexdigest()
-    ieee = zigpy.types.EUI64.convert("abcdef12" + ieee_hash[:8])
+    ieee = ieee_from_manufacturer_model(manufacturer, model)
 
     device = zigpy.device.Device(app, ieee, nwk)
     device.manufacturer = manufacturer
@@ -157,6 +162,35 @@ def zigpy_device_from_legacy_diagnostics(
     return device
 
 
+def zigpy_device_from_diagnostics(
+    app: ControllerApplication,
+    data: dict,
+    patch_cluster: bool = True,
+) -> zigpy.device.Device:
+    """Create a zigpy device from diagnostics JSON, both modern and legacy formats."""
+    if "home_assistant" not in data:
+        raise ValueError("Invalid diagnostics JSON, missing 'home_assistant' key")
+
+    zha_data = data["data"]
+
+    if "version" not in zha_data:
+        return zigpy_device_from_legacy_diagnostics(app, data, patch_cluster)
+
+    # Home Assistant diagnostics contain redacted IEEE info, fake an IEEE instead
+    if "REDACTED" in zha_data["ieee"]:
+        zha_data["ieee"] = str(
+            ieee_from_manufacturer_model(
+                manufacturer=zha_data["manufacturer"], model=zha_data["model"]
+            )
+        )
+
+    # Neighbors contain EUI64 addresses and EPIDs
+    zha_data["neighbors"] = []
+
+    # Use our normal testing function to load the data
+    return zigpy_device_from_device_data(app, zha_data, patch_cluster)
+
+
 @contextlib.asynccontextmanager
 async def create_zha_gateway():
     """Turn a pytest fixture into a normal context manager."""
@@ -174,7 +208,7 @@ async def main(paths: list[str]):
     async with create_zha_gateway() as zha_gateway:
         for path in map(pathlib.Path, paths):
             try:
-                zigpy_device = zigpy_device_from_legacy_diagnostics(
+                zigpy_device = zigpy_device_from_diagnostics(
                     zha_gateway.application_controller,
                     json.loads(path.read_text()),
                 )

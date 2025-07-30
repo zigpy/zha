@@ -35,7 +35,6 @@ from zigpy.zcl.clusters.general import (
     OnOffConfiguration,
     Ota,
     Partition,
-    PollControl,
     PowerConfiguration,
     PowerProfile,
     RSSILocation,
@@ -696,50 +695,6 @@ class OtaClientClusterHandler(ClientClusterHandler):
 @registries.CLUSTER_HANDLER_REGISTRY.register(Partition.cluster_id)
 class PartitionClusterHandler(ClusterHandler):
     """Partition cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(PollControl.cluster_id)
-@registries.CLUSTER_HANDLER_REGISTRY.register(PollControl.cluster_id)
-class PollControlClusterHandler(ClusterHandler):
-    """Poll Control cluster handler."""
-
-    CHECKIN_INTERVAL = 55 * 60 * 4  # 55min
-    CHECKIN_FAST_POLL_TIMEOUT = 2 * 4  # 2s
-    LONG_POLL = 6 * 4  # 6s
-    _IGNORED_MANUFACTURER_ID = {
-        4476,
-    }  # IKEA
-
-    async def async_configure_cluster_handler_specific(self) -> None:
-        """Configure cluster handler: set check-in interval."""
-        await self.write_attributes_safe(
-            {PollControl.AttributeDefs.checkin_interval.name: self.CHECKIN_INTERVAL}
-        )
-
-    def cluster_command(
-        self, tsn: int, command_id: int, args: list[Any] | None
-    ) -> None:
-        """Handle commands received to this cluster."""
-        if command_id in self.cluster.client_commands:
-            cmd_name = self.cluster.client_commands[command_id].name
-        else:
-            cmd_name = command_id
-
-        self.debug("Received %s tsn command '%s': %s", tsn, cmd_name, args)
-        self.emit_zha_event(cmd_name, args)
-        if cmd_name == PollControl.ClientCommandDefs.checkin.name:
-            self.cluster.create_catching_task(self.check_in_response(tsn))
-
-    async def check_in_response(self, tsn: int) -> None:
-        """Respond to checkin command."""
-        await self.checkin_response(True, self.CHECKIN_FAST_POLL_TIMEOUT, tsn=tsn)
-        if self._endpoint.device.manufacturer_code not in self._IGNORED_MANUFACTURER_ID:
-            await self.set_long_poll_interval(self.LONG_POLL)
-        await self.fast_poll_stop()
-
-    def skip_manufacturer_id(self, manufacturer_code: int) -> None:
-        """Block a specific manufacturer id from changing default polling."""
-        self._IGNORED_MANUFACTURER_ID.add(manufacturer_code)
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(PowerConfiguration.cluster_id)

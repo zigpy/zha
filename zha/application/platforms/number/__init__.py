@@ -258,6 +258,8 @@ class NumberConfigurationEntity(BaseNumber):
             )
         if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = entity_metadata.unit
+        if entity_metadata.mode in NumberMode:
+            self._attr_mode = NumberMode(entity_metadata.mode)
 
     @property
     def state(self) -> dict[str, Any]:

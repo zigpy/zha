@@ -1008,6 +1008,58 @@
           "available": true,
           "state": 0.0
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "00:15:8d:00:04:44:ec:08-1-2820-total_active_power",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementTotalActivePower",
+          "translation_key": "total_active_power",
+          "device_class": "power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "00:15:8d:00:04:44:ec:08:1:0x0b04",
+              "status": "INITIALIZED",
+              "value_attribute": "ac_voltage_multiplier"
+            }
+          ],
+          "device_ieee": [
+            8,
+            236,
+            68,
+            4,
+            0,
+            141,
+            21,
+            0
+          ],
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 1,
+          "unit": "W"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementTotalActivePower",
+          "available": true,
+          "state": 9.6
+        }
       }
     ],
     "update": [

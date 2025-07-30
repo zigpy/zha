@@ -28,7 +28,7 @@ def ordered_list_item_to_percentage(ordered_list: list[T], item: T) -> int:
     return (list_position * 100) // list_len
 
 
-def percentage_to_ordered_list_item(ordered_list: list[T], percentage: int) -> T:
+def percentage_to_ordered_list_item[T](ordered_list: list[T], percentage: int) -> T:
     """Find the item that most closely matches the percentage in an ordered list.
 
     When using this utility for fan speeds, do not include "off"

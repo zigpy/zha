@@ -35,12 +35,12 @@ BLOCK_LOG_TIMEOUT: Final[int] = 60
 _LOGGER = logging.getLogger(__name__)
 
 
-def create_eager_task(
-    coro: Coroutine[Any, Any, _T],
+def create_eager_task[T](
+    coro: Coroutine[Any, Any, T],
     *,
     name: str | None = None,
     loop: AbstractEventLoop | None = None,
-) -> Task[_T]:
+) -> Task[T]:
     """Create a task from a coroutine and schedule it to run immediately."""
     return Task(
         coro,
@@ -82,7 +82,7 @@ class ZHAJobType(enum.Enum):
     Callback = 2
 
 
-class ZHAJob(Generic[_P, _R_co]):
+class ZHAJob(Generic[_P, _R_co]):  # noqa: UP046
     """Represent a job to be run later.
 
     We check the callable type in advance
@@ -221,7 +221,7 @@ class AsyncUtilMixin:
     def _cancel_cancellable_timers(self) -> None:
         """Cancel timer handles marked as cancellable."""
         # pylint: disable-next=protected-access
-        handles: Iterable[asyncio.TimerHandle] = self.loop._scheduled  # type: ignore[attr-defined]
+        handles: Iterable[asyncio.TimerHandle] = self.loop._scheduled
         for handle in handles:
             if (
                 not handle.cancelled()

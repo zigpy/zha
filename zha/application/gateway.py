@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import AsyncGenerator
 from contextlib import suppress
 from dataclasses import dataclass
 from datetime import timedelta
@@ -25,6 +26,7 @@ import zigpy.endpoint
 import zigpy.group
 from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
+import zigpy.types as t
 from zigpy.types.named import EUI64
 
 from zha.application import discovery
@@ -176,7 +178,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         self._devices: dict[EUI64, Device] = {}
         self._groups: dict[int, Group] = {}
         self.application_controller: ControllerApplication = None
-        self.coordinator_zha_device: Device = None  # type: ignore[assignment]
+        self.coordinator_zha_device: Device = None
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
@@ -757,3 +759,20 @@ class Gateway(AsyncUtilMixin, EventBase):
         if sender.ieee in self.devices and not self.devices[sender.ieee].available:
             self.devices[sender.ieee].on_network = True
             self.async_update_device(sender, available=True)
+
+    async def network_scan(
+        self, channels: t.Channels, duration_exp: int
+    ) -> AsyncGenerator[t.NetworkBeacon, None]:
+        """Scan for 802.15.4 networks, if supported."""
+        async for network in self.application_controller.network_scan(
+            channels=channels, duration_exp=duration_exp
+        ):
+            yield network
+
+    async def energy_scan(
+        self, channels: t.Channels, duration_exp: int, count: int
+    ) -> dict[int, float]:
+        """Run an energy detection scan."""
+        return await self.application_controller.energy_scan(
+            channels=channels, duration_exp=duration_exp, count=count
+        )

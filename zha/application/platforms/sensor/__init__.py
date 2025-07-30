@@ -718,7 +718,7 @@ class BaseElectricalMeasurement(PollableSensor):
         return getattr(self._cluster_handler, self._multiplier_attribute_name)
 
     @_multiplier.setter
-    def _multiplier(self, value: int | None) -> None:
+    def _multiplier(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set multiplier directly")
 
     @property
@@ -729,7 +729,7 @@ class BaseElectricalMeasurement(PollableSensor):
         return getattr(self._cluster_handler, self._divisor_attribute_name)
 
     @_divisor.setter
-    def _divisor(self, value: int | None) -> None:
+    def _divisor(self, value: int | float | None) -> None:
         raise AttributeError("Cannot set divisor directly")
 
 
@@ -776,6 +776,17 @@ class ElectricalMeasurementRMSActivePowerPhC(PolledElectricalMeasurement):
     _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
     _skip_creation_if_no_attr_cache = True
     _attr_max_attribute_name = "active_power_max_ph_c"
+
+
+@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+class ElectricalMeasurementTotalActivePower(PolledElectricalMeasurement):
+    """Total active power measurement."""
+
+    _attribute_name = "total_active_power"
+    _unique_id_suffix = "total_active_power"
+    _attr_translation_key: str = "total_active_power"
+    _use_custom_polling = False  # Poll indirectly by ElectricalMeasurementSensor
+    _skip_creation_if_no_attr_cache = True
 
 
 @MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
