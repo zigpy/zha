@@ -144,7 +144,7 @@
             {
               "id": "0x0001",
               "name": "zone_type",
-              "zcl_type": "uint16",
+              "zcl_type": "enum16",
               "value": 2056
             }
           ]
