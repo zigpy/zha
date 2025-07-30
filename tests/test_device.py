@@ -15,6 +15,7 @@ from zigpy.quirks.v2 import DeviceAlertLevel, DeviceAlertMetadata, QuirkBuilder
 from zigpy.quirks.v2.homeassistant import EntityType
 from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 import zigpy.types
+from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import general
 from zigpy.zcl.clusters.general import Ota, PowerConfiguration
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
@@ -1029,7 +1030,14 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
             new_fallback_name="Custom LQI Name",
         )
         .change_entity_metadata(
-            function=filter_func, new_unique_id="custom_lqi_unique_id"
+            function=filter_func,
+            new_unique_id="custom_lqi_unique_id",
+        )
+        .change_entity_metadata(
+            endpoint_id=1,
+            cluster_id=general.Identify.cluster_id,
+            cluster_type=ClusterType.Server,
+            new_primary=True,
         )
         .add_to_registry()
     )
@@ -1044,11 +1052,9 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     # Find the LQI sensor entity to verify metadata changes were applied
-    lqi_entity = None
-    for entity in zha_device.platform_entities.values():
-        if isinstance(entity, LQISensor):
-            lqi_entity = entity
-            break
+    lqi_entity = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="custom_lqi_unique_id"
+    )
 
     assert lqi_entity is not None, "LQI sensor entity should exist"
 
@@ -1061,7 +1067,10 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     assert lqi_entity._attr_fallback_name == "Custom LQI Name"
 
     # Verify metadata changes from second filter - function-based match
-    assert lqi_entity._attr_unique_id == "custom_lqi_unique_id"
+    assert lqi_entity.unique_id == "custom_lqi_unique_id"
+
+    button_entity = get_entity(zha_device, platform=Platform.BUTTON)
+    assert button_entity._attr_primary is True
 
 
 async def test_join_binding_reporting(zha_gateway: Gateway) -> None:

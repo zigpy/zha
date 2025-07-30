@@ -885,6 +885,7 @@ class Device(LogMixin, EventBase):
 
             if meta.cluster_id is not None and not any(
                 cluster_handler.cluster.cluster_id == meta.cluster_id
+                and cluster_handler.cluster.cluster_type == meta.cluster_type
                 for cluster_handler in entity.cluster_handlers.values()
             ):
                 continue
@@ -910,7 +911,7 @@ class Device(LogMixin, EventBase):
                 entity._attr_primary = meta.new_primary
 
             if meta.new_unique_id is not None:
-                entity._attr_unique_id = meta.new_unique_id
+                entity._unique_id = meta.new_unique_id
 
             if meta.new_translation_key is not None:
                 entity._attr_translation_key = meta.new_translation_key
