@@ -350,10 +350,10 @@ def zigpy_device_from_device_data(
                 endpoint.profile_id = profile_id
                 endpoint.device_type = device_type
 
-            for cluster_id in ep["input_clusters"]:
+            for cluster_id in ep.get("input_clusters", []):
                 endpoint.add_input_cluster(int(cluster_id, 16))
 
-            for cluster_id in ep["output_clusters"]:
+            for cluster_id in ep.get("output_clusters", []):
                 endpoint.add_output_cluster(int(cluster_id, 16))
     else:
         for epid, ep in device_data["endpoints"].items():
