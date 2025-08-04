@@ -69,7 +69,6 @@ disable_error_code = [
     "attr-defined",
     "no-any-return",
     "no-untyped-call",
-    "assignment",
     "arg-type",
     "union-attr",
 ]
@@ -77,6 +76,9 @@ disable_error_code = [
 [[tool.mypy.overrides]]
 module = [
   "tests.*",
+]
+disable_error_code = [
+    "assignment"
 ]
 warn_unreachable = false
 
