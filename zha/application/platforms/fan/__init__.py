@@ -439,6 +439,11 @@ class IkeaFan(BaseFan, PlatformEntity):
         else:
             await super().async_turn_on(speed, percentage, preset_mode)
 
+    async def _async_set_fan_mode(self, fan_mode: int) -> None:
+        """Set the fan mode for the fan."""
+        await self._fan_cluster_handler.async_set_speed(fan_mode)
+        self.maybe_emit_state_changed_event()
+
     async def async_set_percentage(self, percentage: int) -> None:
         """Set the speed percentage of the fan."""
         fan_mode = math.ceil(percentage_to_ranged_value(self.speed_range, percentage))
