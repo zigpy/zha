@@ -66,7 +66,6 @@ non_interactive = true
 
 disable_error_code = [
     "no-untyped-def",
-    "attr-defined",
     "no-any-return",
     "no-untyped-call",
     "arg-type",
@@ -78,7 +77,13 @@ module = [
   "tests.*",
 ]
 disable_error_code = [
-    "assignment"
+    "assignment",
+    "no-untyped-def",
+    "attr-defined",
+    "no-any-return",
+    "no-untyped-call",
+    "arg-type",
+    "union-attr",
 ]
 warn_unreachable = false
 

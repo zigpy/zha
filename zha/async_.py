@@ -221,7 +221,7 @@ class AsyncUtilMixin:
     def _cancel_cancellable_timers(self) -> None:
         """Cancel timer handles marked as cancellable."""
         # pylint: disable-next=protected-access
-        handles: Iterable[asyncio.TimerHandle] = self.loop._scheduled
+        handles: Iterable[asyncio.TimerHandle] = self.loop._scheduled  # type: ignore[attr-defined]
         for handle in handles:
             if (
                 not handle.cancelled()

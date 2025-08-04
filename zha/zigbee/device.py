@@ -71,6 +71,7 @@ from zha.application.platforms import (
     EntityStateChangedEvent,
     PlatformEntity,
 )
+from zha.application.platforms.update import BaseFirmwareUpdateEntity
 from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
@@ -998,11 +999,13 @@ class Device(LogMixin, EventBase):
             if platform != Platform.UPDATE:
                 continue
 
+            assert isinstance(entity, BaseFirmwareUpdateEntity)
             self._firmware_version = entity.installed_version
 
             def entity_update_listener(event: EntityStateChangedEvent) -> None:
                 """Listen to firmware update entity changes."""
                 entity = self.get_platform_entity(event.platform, event.unique_id)
+                assert isinstance(entity, BaseFirmwareUpdateEntity)
                 self.async_update_firmware_version(entity.installed_version)
 
             self._on_remove_callbacks.append(

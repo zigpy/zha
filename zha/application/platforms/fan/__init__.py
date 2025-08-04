@@ -91,6 +91,11 @@ class BaseFan(BaseEntity):
     def preset_mode(self) -> str | None:
         """Return the current preset mode."""
 
+    @property
+    @abstractmethod
+    def percentage(self) -> int | None:
+        """Return the current speed percentage."""
+
     @functools.cached_property
     def preset_modes(self) -> list[str]:
         """Return the available preset modes."""

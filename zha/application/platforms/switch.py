@@ -33,11 +33,14 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_THERMOSTAT,
 )
-from zha.zigbee.cluster_handlers.general import OnOffClusterHandler
+from zha.zigbee.cluster_handlers.general import (
+    BinaryOutputClusterHandler,
+    OnOffClusterHandler,
+)
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import BinaryOutputClusterHandler, ClusterHandler
+    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -154,8 +157,9 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
     ) -> None:
         """Initialize the switch."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._binary_output_cluster_handler: BinaryOutputClusterHandler = (
-            self.cluster_handlers[CLUSTER_HANDLER_BINARY_OUTPUT]
+        self._binary_output_cluster_handler: BinaryOutputClusterHandler = cast(
+            BinaryOutputClusterHandler,
+            self.cluster_handlers[CLUSTER_HANDLER_BINARY_OUTPUT],
         )
 
     def _is_supported(self) -> bool:

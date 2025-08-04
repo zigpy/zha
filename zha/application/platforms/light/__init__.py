@@ -585,6 +585,7 @@ class BaseLight(BaseEntity, ABC):
         self._transitioning_group = False
         if isinstance(self, LightGroup):
             for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+                assert isinstance(platform_entity, Light)
                 platform_entity.transition_on()
         self._async_unsub_transition_listener()
 
@@ -622,6 +623,7 @@ class BaseLight(BaseEntity, ABC):
         self.maybe_emit_state_changed_event()
         if isinstance(self, LightGroup):
             for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+                assert isinstance(platform_entity, Light)
                 platform_entity.transition_off()
 
             if self._debounced_member_refresh is not None:
@@ -1288,6 +1290,7 @@ class LightGroup(GroupEntity, BaseLight):
         update_params[ATTR_EFFECT] = self._effect
 
         for platform_entity in self.group.get_platform_entities(Light.PLATFORM):
+            assert isinstance(platform_entity, Light)
             platform_entity._assume_group_state(update_params)
 
     def restore_external_state_attributes(

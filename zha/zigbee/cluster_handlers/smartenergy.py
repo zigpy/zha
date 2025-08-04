@@ -333,16 +333,16 @@ class MeteringClusterHandler(ClusterHandler):
     @staticmethod
     def get_formatting(formatting: int) -> str:
         """Return a formatting string, given the formatting value."""
-        formatting = NumberFormatting(formatting)
-        r_digits = formatting.num_digits_right_of_decimal
-        l_digits = formatting.num_digits_left_of_decimal
+        formatting_obj = NumberFormatting(formatting)
+        r_digits = formatting_obj.num_digits_right_of_decimal
+        l_digits = formatting_obj.num_digits_left_of_decimal
 
         if l_digits == 0:
             l_digits = 15
 
         width = r_digits + l_digits + (1 if r_digits > 0 else 0)
 
-        if formatting.suppress_leading_zeros:
+        if formatting_obj.suppress_leading_zeros:
             # suppress leading 0
             return f"{{:{width}.{r_digits}f}}"
 

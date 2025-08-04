@@ -167,14 +167,6 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
         """Flag supported features."""
         return self._attr_supported_features
 
-    def _get_cluster_version(self) -> str | None:
-        """Synchronize current file version with the cluster."""
-
-        if self._ota_cluster_handler.current_file_version is not None:
-            return f"0x{self._ota_cluster_handler.current_file_version:08x}"
-
-        return None
-
     def handle_cluster_handler_attribute_updated(
         self,
         event: ClusterAttributeUpdatedEvent,
@@ -267,21 +259,6 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
         self._attr_in_progress = False
         self.maybe_emit_state_changed_event()
 
-    def on_add(self) -> None:
-        """Call when entity is added."""
-        super().on_add()
-
-        self.device.device.add_listener(self)
-        self._on_remove_callbacks.append(
-            self._ota_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
-            )
-        )
-        self._on_remove_callbacks.append(
-            lambda: self.device.device.remove_listener(self)
-        )
-
     async def on_remove(self) -> None:
         """Call when entity will be removed."""
         self._attr_in_progress = False
@@ -312,6 +289,28 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
             upgrades=(), downgrades=()
         )
 
+    def on_add(self) -> None:
+        """Call when entity is added."""
+        super().on_add()
+
+        self.device.device.add_listener(self)
+        self._on_remove_callbacks.append(
+            self._ota_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
+        )
+        self._on_remove_callbacks.append(
+            lambda: self.device.device.remove_listener(self)
+        )
+
+    def _get_cluster_version(self) -> str | None:
+        """Synchronize current file version with the cluster."""
+        if self._ota_cluster_handler.current_file_version is not None:
+            return f"0x{self._ota_cluster_handler.current_file_version:08x}"
+
+        return None
+
 
 @CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_OTA_SERVER)
 class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
@@ -337,3 +336,25 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
         self._compatible_images: OtaImagesResult = OtaImagesResult(
             upgrades=(), downgrades=()
         )
+
+    def on_add(self) -> None:
+        """Call when entity is added."""
+        super().on_add()
+
+        self.device.device.add_listener(self)
+        self._on_remove_callbacks.append(
+            self._ota_cluster_handler.on_event(
+                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+                self.handle_cluster_handler_attribute_updated,
+            )
+        )
+        self._on_remove_callbacks.append(
+            lambda: self.device.device.remove_listener(self)
+        )
+
+    def _get_cluster_version(self) -> str | None:
+        """Synchronize current file version with the cluster."""
+        if self._ota_cluster_handler.current_file_version is not None:
+            return f"0x{self._ota_cluster_handler.current_file_version:08x}"
+
+        return None
