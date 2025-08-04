@@ -218,16 +218,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            83,
-            245,
-            24,
-            62,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:3e:18:f5:53",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -274,16 +265,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            83,
-            245,
-            24,
-            62,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:3e:18:f5:53",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -326,16 +308,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            83,
-            245,
-            24,
-            62,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:3e:18:f5:53",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -380,16 +353,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            83,
-            245,
-            24,
-            62,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:3e:18:f5:53",
           "endpoint_id": 1,
           "available": true,
           "group_id": null
@@ -432,16 +396,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            83,
-            245,
-            24,
-            62,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:3e:18:f5:53",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

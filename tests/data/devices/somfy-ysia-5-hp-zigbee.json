@@ -581,16 +581,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -632,16 +623,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -683,16 +665,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
@@ -734,16 +707,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
@@ -785,16 +749,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
@@ -838,16 +793,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -894,16 +840,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -946,16 +883,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -998,16 +926,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 232,
           "available": true,
           "group_id": null,
@@ -1057,16 +976,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            201,
-            46,
-            38,
-            5,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:05:26:2e:c9",
           "endpoint_id": 232,
           "available": true,
           "group_id": null,

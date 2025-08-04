@@ -151,16 +151,7 @@
               "value_attribute": "occupancy"
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -202,16 +193,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -255,16 +237,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -311,16 +284,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -366,16 +330,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -423,16 +378,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -475,16 +421,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -527,16 +464,7 @@
               "value_attribute": "measured_value"
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -581,16 +509,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -639,16 +558,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            15,
-            196,
-            129,
-            56,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:38:81:c4:0f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

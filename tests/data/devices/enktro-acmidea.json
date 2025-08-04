@@ -262,16 +262,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            129,
-            45,
-            16,
-            249,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -332,16 +323,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            129,
-            45,
-            16,
-            249,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -424,16 +406,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            129,
-            45,
-            16,
-            249,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -476,16 +449,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            129,
-            45,
-            16,
-            249,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -528,16 +492,7 @@
               "value_attribute": "local_temperature"
             }
           ],
-          "device_ieee": [
-            129,
-            45,
-            16,
-            249,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -580,16 +535,7 @@
               "value_attribute": "local_temperature"
             }
           ],
-          "device_ieee": [
-            129,
-            45,
-            16,
-            249,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:f9:10:2d:81",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

@@ -432,16 +432,7 @@
               "value_attribute": "present_value"
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 112,
           "available": true,
           "group_id": null,
@@ -483,16 +474,7 @@
               "value_attribute": "present_value"
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 113,
           "available": true,
           "group_id": null,
@@ -534,16 +516,7 @@
               "value_attribute": "present_value"
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 114,
           "available": true,
           "group_id": null,
@@ -585,16 +558,7 @@
               "value_attribute": "present_value"
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 115,
           "available": true,
           "group_id": null,
@@ -638,16 +602,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 112,
           "available": true,
           "group_id": null,
@@ -694,16 +649,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 112,
           "available": true,
           "group_id": null,
@@ -746,16 +692,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 112,
           "available": true,
           "group_id": null,
@@ -800,16 +737,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 116,
           "available": true,
           "group_id": null
@@ -850,16 +778,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 117,
           "available": true,
           "group_id": null
@@ -902,16 +821,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            28,
-            9,
-            0,
-            66,
-            0,
-            188,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:bc:00:42:00:09:1c",
           "endpoint_id": 112,
           "available": true,
           "group_id": null,

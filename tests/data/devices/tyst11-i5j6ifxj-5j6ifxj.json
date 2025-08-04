@@ -166,16 +166,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            81,
-            46,
-            48,
-            254,
-            255,
-            189,
-            27,
-            236
-          ],
+          "device_ieee": "ec:1b:bd:ff:fe:30:2e:51",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -219,16 +210,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            81,
-            46,
-            48,
-            254,
-            255,
-            189,
-            27,
-            236
-          ],
+          "device_ieee": "ec:1b:bd:ff:fe:30:2e:51",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -275,16 +257,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            81,
-            46,
-            48,
-            254,
-            255,
-            189,
-            27,
-            236
-          ],
+          "device_ieee": "ec:1b:bd:ff:fe:30:2e:51",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -327,16 +300,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            81,
-            46,
-            48,
-            254,
-            255,
-            189,
-            27,
-            236
-          ],
+          "device_ieee": "ec:1b:bd:ff:fe:30:2e:51",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -381,16 +345,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            81,
-            46,
-            48,
-            254,
-            255,
-            189,
-            27,
-            236
-          ],
+          "device_ieee": "ec:1b:bd:ff:fe:30:2e:51",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

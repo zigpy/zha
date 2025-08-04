@@ -302,16 +302,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            97,
-            211,
-            38,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
+          "device_ieee": "00:22:a3:00:00:26:d3:61",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -358,16 +349,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            97,
-            211,
-            38,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
+          "device_ieee": "00:22:a3:00:00:26:d3:61",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -434,16 +416,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            97,
-            211,
-            38,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
+          "device_ieee": "00:22:a3:00:00:26:d3:61",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -486,16 +459,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            97,
-            211,
-            38,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
+          "device_ieee": "00:22:a3:00:00:26:d3:61",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -538,16 +502,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            97,
-            211,
-            38,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
+          "device_ieee": "00:22:a3:00:00:26:d3:61",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -598,16 +553,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            97,
-            211,
-            38,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
+          "device_ieee": "00:22:a3:00:00:26:d3:61",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -660,16 +606,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            97,
-            211,
-            38,
-            0,
-            0,
-            163,
-            34,
-            0
-          ],
+          "device_ieee": "00:22:a3:00:00:26:d3:61",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

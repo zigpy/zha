@@ -692,16 +692,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -748,16 +739,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -800,16 +782,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -852,16 +825,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -912,16 +876,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -968,16 +923,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1024,16 +970,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -1080,16 +1017,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -1140,16 +1068,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -1196,16 +1115,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -1252,16 +1162,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -1310,16 +1211,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null
@@ -1360,16 +1252,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 2,
           "available": true,
           "group_id": null
@@ -1412,16 +1295,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            141,
-            120,
-            239,
-            41,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:29:ef:78:8d",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

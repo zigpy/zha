@@ -215,16 +215,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            82,
-            64,
-            171,
-            1,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:8d:00:01:ab:40:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -268,16 +259,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            82,
-            64,
-            171,
-            1,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:8d:00:01:ab:40:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -324,16 +306,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            82,
-            64,
-            171,
-            1,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:8d:00:01:ab:40:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -376,16 +349,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            82,
-            64,
-            171,
-            1,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:8d:00:01:ab:40:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -428,16 +392,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            82,
-            64,
-            171,
-            1,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:8d:00:01:ab:40:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -488,16 +443,7 @@
               "value_attribute": "current_temperature"
             }
           ],
-          "device_ieee": [
-            82,
-            64,
-            171,
-            1,
-            0,
-            141,
-            21,
-            0
-          ],
+          "device_ieee": "00:15:8d:00:01:ab:40:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

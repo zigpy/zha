@@ -169,16 +169,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            82,
-            243,
-            6,
-            103,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:67:06:f3:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -226,16 +217,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            82,
-            243,
-            6,
-            103,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:67:06:f3:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -278,16 +260,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            82,
-            243,
-            6,
-            103,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:67:06:f3:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -330,16 +303,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            82,
-            243,
-            6,
-            103,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:67:06:f3:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -389,16 +353,7 @@
               "value_attribute": "measured_value"
             }
           ],
-          "device_ieee": [
-            82,
-            243,
-            6,
-            103,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:67:06:f3:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -441,16 +396,7 @@
               "value_attribute": "measured_value"
             }
           ],
-          "device_ieee": [
-            82,
-            243,
-            6,
-            103,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:67:06:f3:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -495,16 +441,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            82,
-            243,
-            6,
-            103,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:67:06:f3:52",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

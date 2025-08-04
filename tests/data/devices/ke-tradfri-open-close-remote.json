@@ -243,16 +243,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            4,
-            72,
-            150,
-            254,
-            255,
-            114,
-            2,
-            92
-          ],
+          "device_ieee": "5c:02:72:ff:fe:96:48:04",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -299,16 +290,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            4,
-            72,
-            150,
-            254,
-            255,
-            114,
-            2,
-            92
-          ],
+          "device_ieee": "5c:02:72:ff:fe:96:48:04",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -351,16 +333,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            4,
-            72,
-            150,
-            254,
-            255,
-            114,
-            2,
-            92
-          ],
+          "device_ieee": "5c:02:72:ff:fe:96:48:04",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -403,16 +376,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            4,
-            72,
-            150,
-            254,
-            255,
-            114,
-            2,
-            92
-          ],
+          "device_ieee": "5c:02:72:ff:fe:96:48:04",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -465,16 +429,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            4,
-            72,
-            150,
-            254,
-            255,
-            114,
-            2,
-            92
-          ],
+          "device_ieee": "5c:02:72:ff:fe:96:48:04",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

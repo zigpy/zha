@@ -287,16 +287,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            177,
-            95,
-            70,
-            28,
-            0,
-            75,
-            18,
-            0
-          ],
+          "device_ieee": "00:12:4b:00:1c:46:5f:b1",
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
@@ -371,16 +362,7 @@
               "value_attribute": "current_x"
             }
           ],
-          "device_ieee": [
-            177,
-            95,
-            70,
-            28,
-            0,
-            75,
-            18,
-            0
-          ],
+          "device_ieee": "00:12:4b:00:1c:46:5f:b1",
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
@@ -455,16 +437,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            177,
-            95,
-            70,
-            28,
-            0,
-            75,
-            18,
-            0
-          ],
+          "device_ieee": "00:12:4b:00:1c:46:5f:b1",
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
@@ -507,16 +480,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            177,
-            95,
-            70,
-            28,
-            0,
-            75,
-            18,
-            0
-          ],
+          "device_ieee": "00:12:4b:00:1c:46:5f:b1",
           "endpoint_id": 11,
           "available": true,
           "group_id": null,

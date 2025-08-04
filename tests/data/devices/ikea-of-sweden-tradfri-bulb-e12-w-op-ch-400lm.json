@@ -245,16 +245,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -315,16 +306,7 @@
               "value_attribute": "current_level"
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -392,16 +374,7 @@
               "value_attribute": "current_level"
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -447,16 +420,7 @@
               "value_attribute": "current_level"
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -502,16 +466,7 @@
               "value_attribute": "current_level"
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -559,16 +514,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -618,16 +564,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -670,16 +607,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -724,16 +652,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            101,
-            55,
-            213,
-            254,
-            255,
-            87,
-            11,
-            0
-          ],
+          "device_ieee": "00:0b:57:ff:fe:d5:37:65",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

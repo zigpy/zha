@@ -178,16 +178,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            7,
-            240,
-            251,
-            231,
-            15,
-            0,
-            255,
-            255
-          ],
+          "device_ieee": "ff:ff:00:0f:e7:fb:f0:07",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -234,16 +225,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            7,
-            240,
-            251,
-            231,
-            15,
-            0,
-            255,
-            255
-          ],
+          "device_ieee": "ff:ff:00:0f:e7:fb:f0:07",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -286,16 +268,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            7,
-            240,
-            251,
-            231,
-            15,
-            0,
-            255,
-            255
-          ],
+          "device_ieee": "ff:ff:00:0f:e7:fb:f0:07",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -338,16 +311,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            7,
-            240,
-            251,
-            231,
-            15,
-            0,
-            255,
-            255
-          ],
+          "device_ieee": "ff:ff:00:0f:e7:fb:f0:07",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -398,16 +362,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            7,
-            240,
-            251,
-            231,
-            15,
-            0,
-            255,
-            255
-          ],
+          "device_ieee": "ff:ff:00:0f:e7:fb:f0:07",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

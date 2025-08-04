@@ -788,16 +788,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            231,
-            212,
-            200,
-            14,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": "00:0d:6f:00:0e:c8:d4:e7",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -840,16 +831,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            231,
-            212,
-            200,
-            14,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": "00:0d:6f:00:0e:c8:d4:e7",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -892,16 +874,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            231,
-            212,
-            200,
-            14,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": "00:0d:6f:00:0e:c8:d4:e7",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -952,16 +925,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            231,
-            212,
-            200,
-            14,
-            0,
-            111,
-            13,
-            0
-          ],
+          "device_ieee": "00:0d:6f:00:0e:c8:d4:e7",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

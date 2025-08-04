@@ -224,16 +224,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            161,
-            216,
-            254,
-            254,
-            255,
-            159,
-            253,
-            144
-          ],
+          "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -280,16 +271,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            161,
-            216,
-            254,
-            254,
-            255,
-            159,
-            253,
-            144
-          ],
+          "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -332,16 +314,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            161,
-            216,
-            254,
-            254,
-            255,
-            159,
-            253,
-            144
-          ],
+          "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -384,16 +357,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            161,
-            216,
-            254,
-            254,
-            255,
-            159,
-            253,
-            144
-          ],
+          "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -446,16 +410,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            161,
-            216,
-            254,
-            254,
-            255,
-            159,
-            253,
-            144
-          ],
+          "device_ieee": "90:fd:9f:ff:fe:fe:d8:a1",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

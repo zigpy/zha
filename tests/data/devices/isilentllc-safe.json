@@ -320,16 +320,7 @@
               "value_attribute": "present_value"
             }
           ],
-          "device_ieee": [
-            166,
-            195,
-            149,
-            65,
-            0,
-            162,
-            19,
-            0
-          ],
+          "device_ieee": "00:13:a2:00:41:95:c3:a6",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -371,16 +362,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            166,
-            195,
-            149,
-            65,
-            0,
-            162,
-            19,
-            0
-          ],
+          "device_ieee": "00:13:a2:00:41:95:c3:a6",
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
@@ -452,16 +434,7 @@
               "value_attribute": "current_x"
             }
           ],
-          "device_ieee": [
-            166,
-            195,
-            149,
-            65,
-            0,
-            162,
-            19,
-            0
-          ],
+          "device_ieee": "00:13:a2:00:41:95:c3:a6",
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
@@ -533,16 +506,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            166,
-            195,
-            149,
-            65,
-            0,
-            162,
-            19,
-            0
-          ],
+          "device_ieee": "00:13:a2:00:41:95:c3:a6",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -585,16 +549,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            166,
-            195,
-            149,
-            65,
-            0,
-            162,
-            19,
-            0
-          ],
+          "device_ieee": "00:13:a2:00:41:95:c3:a6",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -637,16 +592,7 @@
               "value_attribute": "measured_value"
             }
           ],
-          "device_ieee": [
-            166,
-            195,
-            149,
-            65,
-            0,
-            162,
-            19,
-            0
-          ],
+          "device_ieee": "00:13:a2:00:41:95:c3:a6",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
@@ -689,16 +635,7 @@
               "value_attribute": "measured_value"
             }
           ],
-          "device_ieee": [
-            166,
-            195,
-            149,
-            65,
-            0,
-            162,
-            19,
-            0
-          ],
+          "device_ieee": "00:13:a2:00:41:95:c3:a6",
           "endpoint_id": 2,
           "available": true,
           "group_id": null,

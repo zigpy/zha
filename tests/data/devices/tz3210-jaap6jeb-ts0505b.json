@@ -339,16 +339,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            67,
-            232,
-            128,
-            93,
-            66,
-            56,
-            193,
-            164
-          ],
+          "device_ieee": "a4:c1:38:42:5d:80:e8:43",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -423,16 +414,7 @@
               "value_attribute": "current_x"
             }
           ],
-          "device_ieee": [
-            67,
-            232,
-            128,
-            93,
-            66,
-            56,
-            193,
-            164
-          ],
+          "device_ieee": "a4:c1:38:42:5d:80:e8:43",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -505,16 +487,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            67,
-            232,
-            128,
-            93,
-            66,
-            56,
-            193,
-            164
-          ],
+          "device_ieee": "a4:c1:38:42:5d:80:e8:43",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -557,16 +530,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            67,
-            232,
-            128,
-            93,
-            66,
-            56,
-            193,
-            164
-          ],
+          "device_ieee": "a4:c1:38:42:5d:80:e8:43",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -611,16 +575,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            67,
-            232,
-            128,
-            93,
-            66,
-            56,
-            193,
-            164
-          ],
+          "device_ieee": "a4:c1:38:42:5d:80:e8:43",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

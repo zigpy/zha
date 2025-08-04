@@ -220,16 +220,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            85,
-            115,
-            162,
-            57,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:39:a2:73:55",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -276,16 +267,7 @@
               "value_attribute": "present_value"
             }
           ],
-          "device_ieee": [
-            85,
-            115,
-            162,
-            57,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:39:a2:73:55",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -333,16 +315,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            85,
-            115,
-            162,
-            57,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:39:a2:73:55",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -385,16 +358,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            85,
-            115,
-            162,
-            57,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:39:a2:73:55",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -437,16 +401,7 @@
               "value_attribute": "present_value"
             }
           ],
-          "device_ieee": [
-            85,
-            115,
-            162,
-            57,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:39:a2:73:55",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

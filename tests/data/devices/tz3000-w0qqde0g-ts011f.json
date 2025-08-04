@@ -429,16 +429,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -485,16 +476,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -541,16 +523,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -599,16 +572,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -651,16 +615,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -703,16 +658,7 @@
               "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -761,16 +707,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -817,16 +754,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -873,16 +801,7 @@
               "value_attribute": "ac_voltage_multiplier"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -931,16 +850,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null
@@ -981,16 +891,7 @@
               "value_attribute": "on_off"
             }
           ],
-          "device_ieee": [
-            46,
-            246,
-            14,
-            182,
-            18,
-            239,
-            205,
-            171
-          ],
+          "device_ieee": "ab:cd:ef:12:b6:0e:f6:2e",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,

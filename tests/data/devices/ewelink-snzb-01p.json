@@ -171,16 +171,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            254,
-            65,
-            210,
-            254,
-            255,
-            32,
-            186,
-            132
-          ],
+          "device_ieee": "84:ba:20:ff:fe:d2:41:fe",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -227,16 +218,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            254,
-            65,
-            210,
-            254,
-            255,
-            32,
-            186,
-            132
-          ],
+          "device_ieee": "84:ba:20:ff:fe:d2:41:fe",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -279,16 +261,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            254,
-            65,
-            210,
-            254,
-            255,
-            32,
-            186,
-            132
-          ],
+          "device_ieee": "84:ba:20:ff:fe:d2:41:fe",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -331,16 +304,7 @@
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": [
-            254,
-            65,
-            210,
-            254,
-            255,
-            32,
-            186,
-            132
-          ],
+          "device_ieee": "84:ba:20:ff:fe:d2:41:fe",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -391,16 +355,7 @@
               "value_attribute": null
             }
           ],
-          "device_ieee": [
-            254,
-            65,
-            210,
-            254,
-            255,
-            32,
-            186,
-            132
-          ],
+          "device_ieee": "84:ba:20:ff:fe:d2:41:fe",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
