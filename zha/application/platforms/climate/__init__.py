@@ -106,14 +106,14 @@ class Thermostat(PlatformEntity):
     ):
         """Initialize ZHA Thermostat instance."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._preset = Preset.NONE
+        self._preset: Preset | str = Preset.NONE
         self._presets: list[Preset | str] = []
 
         self._thermostat_cluster_handler: ThermostatClusterHandler = cast(
             ThermostatClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_THERMOSTAT]
         )
-        self._fan_cluster_handler: FanClusterHandler = cast(
-            FanClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_FAN]
+        self._fan_cluster_handler: FanClusterHandler | None = cast(
+            FanClusterHandler | None, self.cluster_handlers.get(CLUSTER_HANDLER_FAN)
         )
 
         self._supported_features = ClimateEntityFeature(0)
@@ -441,7 +441,7 @@ class Thermostat(PlatformEntity):
         if preset_mode != Preset.NONE:
             await self.async_preset_handler(preset_mode, enable=True)
 
-        self._preset = Preset(preset_mode)
+        self._preset = preset_mode
         self.maybe_emit_state_changed_event()
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
@@ -916,9 +916,9 @@ class ZONNSMARTThermostat(Thermostat):
             if event.attribute_value == 1:
                 self._preset = Preset.NONE
             if event.attribute_value in (2, 3):
-                self._preset = Preset(self.PRESET_HOLIDAY)
+                self._preset = self.PRESET_HOLIDAY
             if event.attribute_value == 4:
-                self._preset = Preset(self.PRESET_FROST)
+                self._preset = self.PRESET_FROST
         super().handle_cluster_handler_attribute_updated(event)
 
     async def async_preset_handler(self, preset: str, enable: bool = False) -> None:

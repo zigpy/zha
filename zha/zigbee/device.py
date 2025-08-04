@@ -1516,7 +1516,7 @@ class Device(LogMixin, EventBase):
             }
 
             if platform_entity.extra_state_attribute_names is not None:
-                obj["extra_state_attributes"] = list(
+                obj["extra_state_attributes"] = sorted(
                     platform_entity.extra_state_attribute_names
                 )
 

@@ -51,7 +51,6 @@ from zha.zigbee.cluster_handlers.const import (
     UNKNOWN,
 )
 from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
-from zha.zigbee.cluster_handlers.hvac import FanClusterHandler
 
 from .homeautomation import DiagnosticClusterHandler
 from .hvac import ThermostatClusterHandler, UserInterfaceClusterHandler
@@ -435,10 +434,10 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_AIR_PURIFIER_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaAirPurifierClusterHandler(FanClusterHandler):
+class IkeaAirPurifierClusterHandler(ClusterHandler):
     """IKEA Air Purifier cluster handler."""
 
-    REPORT_CONFIG = (  # type: ignore[assignment]
+    REPORT_CONFIG = (
         AttrReportConfig(attr="filter_run_time", config=REPORT_CONFIG_DEFAULT),
         AttrReportConfig(attr="replace_filter", config=REPORT_CONFIG_IMMEDIATE),
         AttrReportConfig(attr="filter_life_time", config=REPORT_CONFIG_DEFAULT),
@@ -451,13 +450,27 @@ class IkeaAirPurifierClusterHandler(FanClusterHandler):
     )
 
     @property
+    def fan_mode(self) -> int | None:
+        """Return current fan mode."""
+        return self.cluster.get("fan_mode")
+
+    @property
     def fan_speed(self) -> int | None:
         """Return current fan speed."""
         return self.cluster.get("fan_speed")
 
+    @property
+    def fan_mode_sequence(self) -> int | None:
+        """Return possible fan mode speeds."""
+        return self.cluster.get("fan_mode_sequence")
+
+    async def async_set_speed(self, value) -> None:
+        """Set the speed of the fan."""
+        await self.write_attributes_safe({"fan_mode": value})
+
     async def async_update(self) -> None:
         """Retrieve latest state."""
-        await super().async_update()
+        await self.get_attribute_value("fan_mode", from_cache=False)
         await self.get_attribute_value("fan_speed", from_cache=False)
 
 
