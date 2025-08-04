@@ -505,7 +505,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -560,7 +565,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       }
     ],
     "switch": [

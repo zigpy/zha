@@ -827,7 +827,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -880,7 +885,11 @@
           "available": true,
           "state": 0.0,
           "measurement_type": ""
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -933,7 +942,11 @@
           "available": true,
           "state": 0.0,
           "measurement_type": ""
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -986,7 +999,11 @@
           "available": true,
           "state": 238.0,
           "measurement_type": ""
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       }
     ],
     "switch": [

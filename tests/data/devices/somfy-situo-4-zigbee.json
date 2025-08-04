@@ -755,7 +755,12 @@
           "class_name": "Battery",
           "available": true,
           "state": 77.0
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       }
     ],
     "update": [

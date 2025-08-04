@@ -731,7 +731,12 @@
           "available": true,
           "state": null,
           "battery_voltage": 3.2
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {

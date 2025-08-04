@@ -750,7 +750,12 @@
           "battery_size": "CR123A",
           "battery_quantity": 1,
           "battery_voltage": 2.9
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {

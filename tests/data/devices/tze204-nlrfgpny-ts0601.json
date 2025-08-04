@@ -622,7 +622,12 @@
           "state": null,
           "battery_size": "Other",
           "battery_quantity": 1
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {

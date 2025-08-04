@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Third Reality, Inc",
   "friendly_model": "3RSM0147Z",
   "name": "Third Reality, Inc 3RSM0147Z",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 5127,
   "power_source": "Battery or Unknown",
@@ -141,6 +141,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "sensor": [
       {
@@ -298,7 +299,12 @@
           "available": true,
           "state": 100.0,
           "battery_voltage": 1.5
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {
@@ -354,18 +360,18 @@
       },
       {
         "info_object": {
-          "fallback_name": null,
+          "fallback_name": "Soil moisture",
           "unique_id": "28:2c:02:bf:ff:ef:2b:82-1-1029",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "Humidity",
-          "translation_key": null,
+          "class_name": "Sensor",
+          "translation_key": "soil_moisture",
           "device_class": "humidity",
           "state_class": "measurement",
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": false,
+          "primary": true,
           "cluster_handlers": [
             {
               "class_name": "RelativeHumidityClusterHandler",
@@ -399,7 +405,7 @@
           "unit": "%"
         },
         "state": {
-          "class_name": "Humidity",
+          "class_name": "Sensor",
           "available": true,
           "state": 31.21
         }

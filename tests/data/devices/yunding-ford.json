@@ -407,7 +407,12 @@
           "state": 100.0,
           "battery_size": "AA",
           "battery_quantity": 4
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       }
     ],
     "update": [

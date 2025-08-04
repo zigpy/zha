@@ -535,7 +535,12 @@
           "available": true,
           "state": 58.0,
           "battery_voltage": 5.3
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {

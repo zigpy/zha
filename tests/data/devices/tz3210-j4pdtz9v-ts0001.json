@@ -604,7 +604,12 @@
           "state": null,
           "battery_size": "CR2",
           "battery_quantity": 1
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       }
     ],
     "switch": [

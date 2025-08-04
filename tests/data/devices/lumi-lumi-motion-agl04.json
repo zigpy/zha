@@ -634,7 +634,12 @@
           "battery_size": "CR1632",
           "battery_quantity": 1,
           "battery_voltage": 3.13
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {

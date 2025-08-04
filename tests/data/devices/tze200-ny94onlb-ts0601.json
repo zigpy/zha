@@ -955,7 +955,12 @@
           "available": true,
           "state": 0.26,
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -1007,7 +1012,11 @@
           "class_name": "PolledElectricalMeasurement",
           "available": true,
           "state": 298.0
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1059,7 +1068,11 @@
           "class_name": "ElectricalMeasurementActivePowerPhB",
           "available": true,
           "state": 266.0
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max_ph_b",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1111,7 +1124,11 @@
           "class_name": "ElectricalMeasurementActivePowerPhC",
           "available": true,
           "state": 70.0
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max_ph_c",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1163,7 +1180,11 @@
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
           "state": 1.38
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -1215,7 +1236,11 @@
           "class_name": "ElectricalMeasurementRMSCurrentPhB",
           "available": true,
           "state": 1.576
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max_ph_b"
+        ]
       },
       {
         "info_object": {
@@ -1267,7 +1292,11 @@
           "class_name": "ElectricalMeasurementRMSCurrentPhC",
           "available": true,
           "state": 0.413
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max_ph_c"
+        ]
       },
       {
         "info_object": {
@@ -1319,7 +1348,11 @@
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
           "state": 223.8
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -1371,7 +1404,11 @@
           "class_name": "ElectricalMeasurementRMSVoltagePhB",
           "available": true,
           "state": 215.9
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max_ph_b"
+        ]
       },
       {
         "info_object": {
@@ -1423,7 +1460,11 @@
           "class_name": "ElectricalMeasurementRMSVoltagePhC",
           "available": true,
           "state": 227.2
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max_ph_c"
+        ]
       },
       {
         "info_object": {
@@ -1475,7 +1516,11 @@
           "class_name": "PolledElectricalMeasurement",
           "available": true,
           "state": 298.0
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1527,7 +1572,11 @@
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
           "state": 1.38
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -1579,7 +1628,11 @@
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
           "state": 223.8
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -1631,7 +1684,11 @@
           "class_name": "PolledElectricalMeasurement",
           "available": true,
           "state": 266.0
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1683,7 +1740,11 @@
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
           "state": 1.576
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -1735,7 +1796,11 @@
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
           "state": 215.9
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -1787,7 +1852,11 @@
           "class_name": "PolledElectricalMeasurement",
           "available": true,
           "state": 70.0
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1839,7 +1908,11 @@
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
           "state": 0.413
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -1891,7 +1964,11 @@
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
           "state": 227.2
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       }
     ],
     "update": [

@@ -443,7 +443,11 @@
           "off_with_transition": false,
           "off_brightness": null,
           "available": true
-        }
+        },
+        "extra_state_attributes": [
+          "off_brightness",
+          "off_with_transition"
+        ]
       }
     ],
     "number": [

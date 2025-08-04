@@ -397,7 +397,12 @@
           "battery_size": "CR2032",
           "battery_quantity": 1,
           "battery_voltage": 3.01
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {

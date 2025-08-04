@@ -376,7 +376,12 @@
           "state": null,
           "battery_size": "Unknown",
           "battery_voltage": 3.0
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {

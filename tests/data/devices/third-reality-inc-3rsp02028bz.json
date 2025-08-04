@@ -673,7 +673,11 @@
           "class_name": "PolledElectricalMeasurement",
           "available": true,
           "state": 0.0
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -725,7 +729,11 @@
           "class_name": "ElectricalMeasurementFrequency",
           "available": true,
           "state": 60.0
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -777,7 +785,11 @@
           "class_name": "ElectricalMeasurementPowerFactor",
           "available": true,
           "state": 0
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -829,7 +841,11 @@
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
           "state": 0.0
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -881,7 +897,11 @@
           "class_name": "ElectricalMeasurementRMSVoltage",
           "available": true,
           "state": 124.5
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       }
     ],
     "switch": [

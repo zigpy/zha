@@ -715,7 +715,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -770,7 +775,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -875,7 +885,11 @@
           "available": true,
           "state": 2.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -928,7 +942,11 @@
           "available": true,
           "state": 59.986,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -982,7 +1000,11 @@
           "state": 0.037,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
           "rms_current_max": 0.27
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -1036,7 +1058,11 @@
           "state": 123.08,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
           "rms_voltage_max": 125.01
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       }
     ],
     "switch": [

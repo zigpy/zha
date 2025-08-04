@@ -409,7 +409,12 @@
           "battery_size": "AAA",
           "battery_quantity": 1,
           "battery_voltage": 1.2
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       }
     ],
     "update": [

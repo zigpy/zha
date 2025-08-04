@@ -425,7 +425,11 @@
           "state": 0.0,
           "measurement_type": "PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT, DC_MEASUREMENT",
           "ac_frequency_max": 0.0
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -478,7 +482,11 @@
           "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT, DC_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -532,7 +540,11 @@
           "state": 0.0,
           "measurement_type": "PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT, DC_MEASUREMENT",
           "rms_voltage_max": 0.0
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {

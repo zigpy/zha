@@ -1280,7 +1280,12 @@
           "class_name": "Battery",
           "available": true,
           "state": null
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       },
       {
         "info_object": {
@@ -1335,7 +1340,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -1390,7 +1400,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -1445,7 +1460,12 @@
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -1498,7 +1518,11 @@
           "available": true,
           "state": 517.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1551,7 +1575,11 @@
           "available": true,
           "state": 1274.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max_ph_b",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1604,7 +1632,11 @@
           "available": true,
           "state": 29.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max_ph_c",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -1657,7 +1689,11 @@
           "available": true,
           "state": 5.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -1710,7 +1746,11 @@
           "available": true,
           "state": 5.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max_ph_b"
+        ]
       },
       {
         "info_object": {
@@ -1763,7 +1803,11 @@
           "available": true,
           "state": 0.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max_ph_c"
+        ]
       },
       {
         "info_object": {
@@ -1816,7 +1860,11 @@
           "available": true,
           "state": 228.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -1869,7 +1917,11 @@
           "available": true,
           "state": 228.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max_ph_b"
+        ]
       },
       {
         "info_object": {
@@ -1922,7 +1974,11 @@
           "available": true,
           "state": 227.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max_ph_c"
+        ]
       },
       {
         "info_object": {
@@ -1975,7 +2031,11 @@
           "available": true,
           "state": 1821.0,
           "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT, PHASE_B_MEASUREMENT, PHASE_C_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       }
     ],
     "update": [

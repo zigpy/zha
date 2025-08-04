@@ -3920,7 +3920,11 @@
           "available": true,
           "state": 16.11,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -3973,7 +3977,11 @@
           "available": true,
           "state": 60.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -4026,7 +4034,11 @@
           "available": true,
           "state": 25.01,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -4079,7 +4091,11 @@
           "available": true,
           "state": 55,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -4132,7 +4148,11 @@
           "available": true,
           "state": 11.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -4185,7 +4205,11 @@
           "available": true,
           "state": 118.42,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -4238,7 +4262,11 @@
           "available": true,
           "state": 61.25,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -4291,7 +4319,11 @@
           "available": true,
           "state": 60.57,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -4344,7 +4376,11 @@
           "available": true,
           "state": 83.22,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -4397,7 +4433,11 @@
           "available": true,
           "state": 30,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -4450,7 +4490,11 @@
           "available": true,
           "state": 10.5,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -4503,7 +4547,11 @@
           "available": true,
           "state": 121.93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -4556,7 +4604,11 @@
           "available": true,
           "state": 0.37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -4609,7 +4661,11 @@
           "available": true,
           "state": 60.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -4662,7 +4718,11 @@
           "available": true,
           "state": 29.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -4715,7 +4775,11 @@
           "available": true,
           "state": 56,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -4768,7 +4832,11 @@
           "available": true,
           "state": 4.35,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -4821,7 +4889,11 @@
           "available": true,
           "state": 123.32,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -4874,7 +4946,11 @@
           "available": true,
           "state": 73.87,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -4927,7 +5003,11 @@
           "available": true,
           "state": 60.65,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -4980,7 +5060,11 @@
           "available": true,
           "state": 71.56,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -5033,7 +5117,11 @@
           "available": true,
           "state": 63,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -5086,7 +5174,11 @@
           "available": true,
           "state": 4.36,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -5139,7 +5231,11 @@
           "available": true,
           "state": 117.29,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -5192,7 +5288,11 @@
           "available": true,
           "state": 80.66,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -5245,7 +5345,11 @@
           "available": true,
           "state": 60.94,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -5298,7 +5402,11 @@
           "available": true,
           "state": 58.59,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -5351,7 +5459,11 @@
           "available": true,
           "state": 18,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -5404,7 +5516,11 @@
           "available": true,
           "state": 8.26,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -5457,7 +5573,11 @@
           "available": true,
           "state": 117.36,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -5510,7 +5630,11 @@
           "available": true,
           "state": 5.34,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -5563,7 +5687,11 @@
           "available": true,
           "state": 60.74,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -5616,7 +5744,11 @@
           "available": true,
           "state": 77.12,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -5669,7 +5801,11 @@
           "available": true,
           "state": 99,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -5722,7 +5858,11 @@
           "available": true,
           "state": 12.19,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -5775,7 +5915,11 @@
           "available": true,
           "state": 120.67,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -5828,7 +5972,11 @@
           "available": true,
           "state": 82.07,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -5881,7 +6029,11 @@
           "available": true,
           "state": 60.32,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -5934,7 +6086,11 @@
           "available": true,
           "state": 8.98,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -5987,7 +6143,11 @@
           "available": true,
           "state": 44,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -6040,7 +6200,11 @@
           "available": true,
           "state": 11.93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -6093,7 +6257,11 @@
           "available": true,
           "state": 116.78,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -6146,7 +6314,11 @@
           "available": true,
           "state": 53.88,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -6199,7 +6371,11 @@
           "available": true,
           "state": 60.88,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -6252,7 +6428,11 @@
           "available": true,
           "state": 65.55,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -6305,7 +6485,11 @@
           "available": true,
           "state": 95,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -6358,7 +6542,11 @@
           "available": true,
           "state": 10.07,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -6411,7 +6599,11 @@
           "available": true,
           "state": 120.71,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -6464,7 +6656,11 @@
           "available": true,
           "state": 15.29,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -6517,7 +6713,11 @@
           "available": true,
           "state": 60.85,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -6570,7 +6770,11 @@
           "available": true,
           "state": 55.31,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -6623,7 +6827,11 @@
           "available": true,
           "state": 24,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -6676,7 +6884,11 @@
           "available": true,
           "state": 14.46,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -6729,7 +6941,11 @@
           "available": true,
           "state": 116.15,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -6782,7 +6998,11 @@
           "available": true,
           "state": 2.92,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -6835,7 +7055,11 @@
           "available": true,
           "state": 59.93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -6888,7 +7112,11 @@
           "available": true,
           "state": 50.75,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -6941,7 +7169,11 @@
           "available": true,
           "state": 34,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -6994,7 +7226,11 @@
           "available": true,
           "state": 5.23,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -7047,7 +7283,11 @@
           "available": true,
           "state": 121.3,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -7100,7 +7340,11 @@
           "available": true,
           "state": 10.61,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -7153,7 +7397,11 @@
           "available": true,
           "state": 60.17,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -7206,7 +7454,11 @@
           "available": true,
           "state": 53.61,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -7259,7 +7511,11 @@
           "available": true,
           "state": 85,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -7312,7 +7568,11 @@
           "available": true,
           "state": 6.28,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -7365,7 +7625,11 @@
           "available": true,
           "state": 118.51,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -7418,7 +7682,11 @@
           "available": true,
           "state": 59.51,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -7471,7 +7739,11 @@
           "available": true,
           "state": 60.21,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -7524,7 +7796,11 @@
           "available": true,
           "state": 92.69,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -7577,7 +7853,11 @@
           "available": true,
           "state": 91,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -7630,7 +7910,11 @@
           "available": true,
           "state": 6.7,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -7683,7 +7967,11 @@
           "available": true,
           "state": 119.91,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -7736,7 +8024,11 @@
           "available": true,
           "state": 4.17,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -7789,7 +8081,11 @@
           "available": true,
           "state": 59.17,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -7842,7 +8138,11 @@
           "available": true,
           "state": 79.9,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -7895,7 +8195,11 @@
           "available": true,
           "state": 51,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -7948,7 +8252,11 @@
           "available": true,
           "state": 3.94,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -8001,7 +8309,11 @@
           "available": true,
           "state": 116.88,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -8054,7 +8366,11 @@
           "available": true,
           "state": 61.28,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -8107,7 +8423,11 @@
           "available": true,
           "state": 59.33,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -8160,7 +8480,11 @@
           "available": true,
           "state": 5.13,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -8213,7 +8537,11 @@
           "available": true,
           "state": 97,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -8266,7 +8594,11 @@
           "available": true,
           "state": 5.64,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -8319,7 +8651,11 @@
           "available": true,
           "state": 122.72,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -8372,7 +8708,11 @@
           "available": true,
           "state": 11.9,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -8425,7 +8765,11 @@
           "available": true,
           "state": 59.34,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -8478,7 +8822,11 @@
           "available": true,
           "state": 39.19,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -8531,7 +8879,11 @@
           "available": true,
           "state": 21,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -8584,7 +8936,11 @@
           "available": true,
           "state": 3.91,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -8637,7 +8993,11 @@
           "available": true,
           "state": 116.66,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -8690,7 +9050,11 @@
           "available": true,
           "state": 4.11,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -8743,7 +9107,11 @@
           "available": true,
           "state": 59.99,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -8796,7 +9164,11 @@
           "available": true,
           "state": 94.32,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -8849,7 +9221,11 @@
           "available": true,
           "state": 55,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -8902,7 +9278,11 @@
           "available": true,
           "state": 1.84,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -8955,7 +9335,11 @@
           "available": true,
           "state": 121.41,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -9008,7 +9392,11 @@
           "available": true,
           "state": 13.49,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -9061,7 +9449,11 @@
           "available": true,
           "state": 59.46,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -9114,7 +9506,11 @@
           "available": true,
           "state": 28.08,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -9167,7 +9563,11 @@
           "available": true,
           "state": 0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -9220,7 +9620,11 @@
           "available": true,
           "state": 1.68,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -9273,7 +9677,11 @@
           "available": true,
           "state": 118.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -9326,7 +9734,11 @@
           "available": true,
           "state": 84.08,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -9379,7 +9791,11 @@
           "available": true,
           "state": 59.58,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -9432,7 +9848,11 @@
           "available": true,
           "state": 9.18,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -9485,7 +9905,11 @@
           "available": true,
           "state": 41,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -9538,7 +9962,11 @@
           "available": true,
           "state": 3.52,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -9591,7 +10019,11 @@
           "available": true,
           "state": 124.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -9644,7 +10076,11 @@
           "available": true,
           "state": 39.33,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -9697,7 +10133,11 @@
           "available": true,
           "state": 59.36,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -9750,7 +10190,11 @@
           "available": true,
           "state": 6.4,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -9803,7 +10247,11 @@
           "available": true,
           "state": 27,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -9856,7 +10304,11 @@
           "available": true,
           "state": 5.29,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -9909,7 +10361,11 @@
           "available": true,
           "state": 115.19,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -9962,7 +10418,11 @@
           "available": true,
           "state": 63.77,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -10015,7 +10475,11 @@
           "available": true,
           "state": 59.99,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -10068,7 +10532,11 @@
           "available": true,
           "state": 61.39,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -10121,7 +10589,11 @@
           "available": true,
           "state": 93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -10174,7 +10646,11 @@
           "available": true,
           "state": 8.33,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -10227,7 +10703,11 @@
           "available": true,
           "state": 117.45,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -10280,7 +10760,11 @@
           "available": true,
           "state": 4.37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -10333,7 +10817,11 @@
           "available": true,
           "state": 60.57,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -10386,7 +10874,11 @@
           "available": true,
           "state": 22.23,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -10439,7 +10931,11 @@
           "available": true,
           "state": 93,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -10492,7 +10988,11 @@
           "available": true,
           "state": 14.64,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -10545,7 +11045,11 @@
           "available": true,
           "state": 124.16,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -10598,7 +11102,11 @@
           "available": true,
           "state": 31.48,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -10651,7 +11159,11 @@
           "available": true,
           "state": 59.0,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -10704,7 +11216,11 @@
           "available": true,
           "state": 81.49,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -10757,7 +11273,11 @@
           "available": true,
           "state": 23,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -10810,7 +11330,11 @@
           "available": true,
           "state": 10.24,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -10863,7 +11387,11 @@
           "available": true,
           "state": 123.42,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -10916,7 +11444,11 @@
           "available": true,
           "state": 7.6,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -10969,7 +11501,11 @@
           "available": true,
           "state": 60.92,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -11022,7 +11558,11 @@
           "available": true,
           "state": 36.56,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -11075,7 +11615,11 @@
           "available": true,
           "state": 52,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -11128,7 +11672,11 @@
           "available": true,
           "state": 3.39,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -11181,7 +11729,11 @@
           "available": true,
           "state": 118.6,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -11234,7 +11786,11 @@
           "available": true,
           "state": 2.47,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -11287,7 +11843,11 @@
           "available": true,
           "state": 60.04,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -11340,7 +11900,11 @@
           "available": true,
           "state": 43.42,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -11393,7 +11957,11 @@
           "available": true,
           "state": 77,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -11446,7 +12014,11 @@
           "available": true,
           "state": 4.09,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -11499,7 +12071,11 @@
           "available": true,
           "state": 124.38,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       },
       {
         "info_object": {
@@ -11552,7 +12128,11 @@
           "available": true,
           "state": 63.6,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -11605,7 +12185,11 @@
           "available": true,
           "state": 60.71,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -11658,7 +12242,11 @@
           "available": true,
           "state": 25.72,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -11711,7 +12299,11 @@
           "available": true,
           "state": 37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -11764,7 +12356,11 @@
           "available": true,
           "state": 3.48,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -11817,7 +12413,11 @@
           "available": true,
           "state": 124.69,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       }
     ]
   },

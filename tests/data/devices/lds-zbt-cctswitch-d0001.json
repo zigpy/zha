@@ -402,7 +402,12 @@
           "battery_size": "Other",
           "battery_quantity": 1,
           "battery_voltage": 3.0
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       }
     ],
     "update": [

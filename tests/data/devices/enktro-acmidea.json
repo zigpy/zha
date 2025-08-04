@@ -380,7 +380,17 @@
           "pi_cooling_demand": null,
           "unoccupied_cooling_setpoint": null,
           "unoccupied_heating_setpoint": null
-        }
+        },
+        "extra_state_attributes": [
+          "occupancy",
+          "occupied_cooling_setpoint",
+          "occupied_heating_setpoint",
+          "pi_cooling_demand",
+          "pi_heating_demand",
+          "system_mode",
+          "unoccupied_cooling_setpoint",
+          "unoccupied_heating_setpoint"
+        ]
       }
     ],
     "sensor": [

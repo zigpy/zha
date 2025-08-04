@@ -873,7 +873,12 @@
           "device_type": "Water Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 7
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       },
       {
         "info_object": {
@@ -928,7 +933,12 @@
           "device_type": "Water Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 7
-        }
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
       }
     ],
     "switch": [

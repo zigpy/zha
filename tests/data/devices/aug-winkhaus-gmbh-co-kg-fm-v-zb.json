@@ -392,7 +392,12 @@
           "class_name": "Battery",
           "available": true,
           "state": null
-        }
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       }
     ],
     "update": [

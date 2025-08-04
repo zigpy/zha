@@ -522,7 +522,11 @@
           "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -575,7 +579,11 @@
           "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
       },
       {
         "info_object": {
@@ -628,7 +636,11 @@
           "available": true,
           "state": 0,
           "measurement_type": "PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          null
+        ]
       },
       {
         "info_object": {
@@ -681,7 +693,11 @@
           "available": true,
           "state": 0.0,
           "measurement_type": "PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_current_max"
+        ]
       },
       {
         "info_object": {
@@ -734,7 +750,11 @@
           "available": true,
           "state": 122.98466468299382,
           "measurement_type": "PHASE_A_MEASUREMENT"
-        }
+        },
+        "extra_state_attributes": [
+          "measurement_type",
+          "rms_voltage_max"
+        ]
       }
     ],
     "switch": [
