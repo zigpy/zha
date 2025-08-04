@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
@@ -17,6 +17,7 @@ from zha.application.platforms.lock.const import (
 )
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
+from zha.zigbee.cluster_handlers.closures import DoorLockClusterHandler
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_DOORLOCK,
@@ -47,9 +48,9 @@ class DoorLock(PlatformEntity):
     ) -> None:
         """Initialize the lock."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_DOORLOCK
-        ]
+        self._doorlock_cluster_handler: DoorLockClusterHandler = cast(
+            DoorLockClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_DOORLOCK]
+        )
         self._state: str | None = VALUE_TO_STATE.get(
             self._doorlock_cluster_handler.cluster.get("lock_state"), None
         )

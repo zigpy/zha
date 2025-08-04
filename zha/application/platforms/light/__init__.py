@@ -13,7 +13,7 @@ from dataclasses import dataclass
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
@@ -73,7 +73,13 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
 )
-from zha.zigbee.cluster_handlers.general import LevelChangeEvent
+from zha.zigbee.cluster_handlers.general import (
+    IdentifyClusterHandler,
+    LevelChangeEvent,
+    LevelControlClusterHandler,
+    OnOffClusterHandler,
+)
+from zha.zigbee.cluster_handlers.lighting import ColorClusterHandler
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -129,10 +135,10 @@ class BaseLight(BaseEntity, ABC):
         self._zha_config_transition: float = self._DEFAULT_MIN_TRANSITION_TIME
         self._zha_config_enhanced_light_transition: bool = False
         self._zha_config_enable_light_transitioning_flag: bool = True
-        self._on_off_cluster_handler: ClusterHandler | None = None
-        self._level_cluster_handler: ClusterHandler | None = None
-        self._color_cluster_handler: ClusterHandler | None = None
-        self._identify_cluster_handler: ClusterHandler | None = None
+        self._on_off_cluster_handler: OnOffClusterHandler | None = None
+        self._level_cluster_handler: LevelControlClusterHandler | None = None
+        self._color_cluster_handler: ColorClusterHandler | None = None
+        self._identify_cluster_handler: IdentifyClusterHandler | None = None
         self._transitioning_individual: bool = False
         self._transitioning_group: bool = False
         self._transition_listener: asyncio.TimerHandle | None = None
@@ -654,17 +660,20 @@ class Light(PlatformEntity, BaseLight):
     ) -> None:
         """Initialize the light."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_ON_OFF
-        ]
+        self._on_off_cluster_handler: OnOffClusterHandler = cast(
+            OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
+        )
         self._state: bool = bool(self._on_off_cluster_handler.on_off)
-        self._level_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_LEVEL
-        ]
-        self._color_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_COLOR
-        ]
-        self._identify_cluster_handler: ClusterHandler | None = device.identify_ch
+        self._level_cluster_handler: LevelControlClusterHandler | None = cast(
+            LevelControlClusterHandler | None,
+            self.cluster_handlers.get(CLUSTER_HANDLER_LEVEL),
+        )
+        self._color_cluster_handler: ColorClusterHandler | None = cast(
+            ColorClusterHandler | None, self.cluster_handlers.get(CLUSTER_HANDLER_COLOR)
+        )
+        self._identify_cluster_handler: IdentifyClusterHandler | None = cast(
+            IdentifyClusterHandler | None, device.identify_ch
+        )
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
@@ -1039,17 +1048,21 @@ class LightGroup(GroupEntity, BaseLight):
         """Initialize a light group."""
         super().__init__(group)
 
-        self._on_off_cluster_handler: ClusterHandler = group.zigpy_group.endpoint[
-            OnOff.cluster_id
-        ]
-        self._level_cluster_handler: ClusterHandler | None = group.zigpy_group.endpoint[
-            LevelControl.cluster_id
-        ]
-        self._color_cluster_handler: ClusterHandler | None = group.zigpy_group.endpoint[
-            Color.cluster_id
-        ]
-        self._identify_cluster_handler: ClusterHandler | None = (
-            group.zigpy_group.endpoint[Identify.cluster_id]
+        # TODO: these type annotations are not correct, these are not cluster handler
+        # objects but are instead cluster proxies!
+        self._on_off_cluster_handler: OnOffClusterHandler = cast(
+            OnOffClusterHandler, group.zigpy_group.endpoint[OnOff.cluster_id]
+        )
+        self._level_cluster_handler: LevelControlClusterHandler | None = cast(
+            LevelControlClusterHandler | None,
+            group.zigpy_group.endpoint[LevelControl.cluster_id],
+        )
+        self._color_cluster_handler: ColorClusterHandler | None = cast(
+            ColorClusterHandler | None, group.zigpy_group.endpoint[Color.cluster_id]
+        )
+        self._identify_cluster_handler: IdentifyClusterHandler | None = cast(
+            IdentifyClusterHandler | None,
+            group.zigpy_group.endpoint[Identify.cluster_id],
         )
 
         self._debounced_member_refresh: Debouncer | None = Debouncer(

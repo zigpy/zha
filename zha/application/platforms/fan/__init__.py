@@ -6,7 +6,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 import functools
 import math
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters import hvac
 
@@ -46,6 +46,10 @@ from zha.zigbee.cluster_handlers import (
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
+)
+from zha.zigbee.cluster_handlers.hvac import FanClusterHandler
+from zha.zigbee.cluster_handlers.manufacturerspecific import (
+    IkeaAirPurifierClusterHandler,
 )
 from zha.zigbee.group import Group
 
@@ -211,9 +215,9 @@ class Fan(PlatformEntity, BaseFan):
     ) -> None:
         """Initialize the fan."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._fan_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_FAN
-        ]
+        self._fan_cluster_handler: FanClusterHandler = cast(
+            FanClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_FAN]
+        )
         self.recompute_capabilities()
 
     def on_add(self) -> None:
@@ -291,7 +295,9 @@ class FanGroup(GroupEntity, BaseFan):
 
     def __init__(self, group: Group):
         """Initialize a fan group."""
-        self._fan_cluster_handler: ClusterHandler = group.endpoint[hvac.Fan.cluster_id]
+        self._fan_cluster_handler: FanClusterHandler = cast(
+            FanClusterHandler, group.endpoint[hvac.Fan.cluster_id]
+        )
         super().__init__(group)
         self._percentage = None
         self._preset_mode = None
@@ -403,9 +409,9 @@ class IkeaFan(Fan):
     ):
         """Initialize the fan."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._fan_cluster_handler: ClusterHandler = self.cluster_handlers[
-            "ikea_airpurifier"
-        ]
+        self._fan_cluster_handler: IkeaAirPurifierClusterHandler = cast(
+            IkeaAirPurifierClusterHandler, self.cluster_handlers["ikea_airpurifier"]
+        )
         self._fan_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,

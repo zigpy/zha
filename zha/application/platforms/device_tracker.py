@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 import functools
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters.general import PowerConfiguration
 
@@ -19,6 +19,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
 )
+from zha.zigbee.cluster_handlers.general import PowerConfigurationClusterHandler
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -58,9 +59,10 @@ class DeviceScannerEntity(PlatformEntity):
     ):
         """Initialize the ZHA device tracker."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._battery_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_POWER_CONFIGURATION
-        ]
+        self._battery_cluster_handler: PowerConfigurationClusterHandler = cast(
+            PowerConfigurationClusterHandler,
+            self.cluster_handlers[CLUSTER_HANDLER_POWER_CONFIGURATION],
+        )
         self._connected: bool = False
         self._keepalive_interval: int = 60
         self._should_poll: bool = True
