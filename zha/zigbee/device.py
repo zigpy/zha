@@ -1507,12 +1507,17 @@ class Device(LogMixin, EventBase):
                 if cluster_info is not None:
                     cluster_info.pop("commands", None)
 
-            info["zha_lib_entities"][platform].append(
-                {
-                    "info_object": info_object,
-                    "state": platform_entity.state,
-                }
-            )
+            obj = {
+                "info_object": info_object,
+                "state": platform_entity.state,
+            }
+
+            if platform_entity.extra_state_attribute_names is not None:
+                obj["extra_state_attributes"] = (
+                    platform_entity.extra_state_attribute_names
+                )
+
+            info["zha_lib_entities"][platform].append(obj)
 
         topology = self.gateway.application_controller.topology
         info["neighbors"] = [
