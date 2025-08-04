@@ -1500,6 +1500,7 @@ class Device(LogMixin, EventBase):
             info_object = dataclasses.asdict(platform_entity.info_object)
             info_object["cluster_handlers"].sort(key=lambda i: i["unique_id"])
             info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
+            info_object["device_ieee"] = str(info_object["device_ieee"])
 
             for cluster_handler_info in info_object["cluster_handlers"]:
                 cluster_info = cluster_handler_info["cluster"]
