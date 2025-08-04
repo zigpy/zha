@@ -69,7 +69,6 @@ disable_error_code = [
     "no-any-return",
     "no-untyped-call",
     "arg-type",
-    "union-attr",
 ]
 
 [[tool.mypy.overrides]]

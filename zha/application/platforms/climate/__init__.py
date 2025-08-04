@@ -403,6 +403,10 @@ class Thermostat(PlatformEntity):
 
     async def async_set_fan_mode(self, fan_mode: str) -> None:
         """Set fan mode."""
+        if self._fan_cluster_handler is None:
+            self.warning("Fan cluster handler is not available")
+            return
+
         if not self.fan_modes or fan_mode not in self.fan_modes:
             self.warning("Unsupported '%s' fan mode", fan_mode)
             return

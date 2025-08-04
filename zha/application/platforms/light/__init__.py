@@ -333,7 +333,7 @@ class BaseLight(BaseEntity, ABC):
 
         t_log = {}
 
-        if new_color_provided_while_off:
+        if new_color_provided_while_off and self._level_cluster_handler is not None:
             # If the light is currently off, we first need to turn it on at a low
             # brightness level with no transition.
             # After that, we set it to the desired color/temperature with no transition.
@@ -375,6 +375,7 @@ class BaseLight(BaseEntity, ABC):
             (brightness is not None or transition is not None)
             and not new_color_provided_while_off
             and brightness_supported(self._supported_color_modes)
+            and self._level_cluster_handler is not None
         ):
             result = await self._level_cluster_handler.move_to_level_with_on_off(
                 level=level,
@@ -396,7 +397,7 @@ class BaseLight(BaseEntity, ABC):
             (brightness is None and transition is None)
             and not new_color_provided_while_off
             or (self._FORCE_ON and brightness != 0)
-        ):
+        ) and self._on_off_cluster_handler is not None:
             # since FORCE_ON lights don't turn on with move_to_level_with_on_off,
             # we should call the on command on the on_off cluster
             # if brightness is not 0.
@@ -426,7 +427,7 @@ class BaseLight(BaseEntity, ABC):
                 self.debug("turned on: %s", t_log)
                 return
 
-        if new_color_provided_while_off:
+        if new_color_provided_while_off and self._level_cluster_handler is not None:
             # The light has the correct color, so we can now transition
             # it to the correct brightness level.
             result = await self._level_cluster_handler.move_to_level(
@@ -445,32 +446,33 @@ class BaseLight(BaseEntity, ABC):
         # attribute reports after the completed transition).
         self.async_transition_start_timer(transition_time)
 
-        if effect == EFFECT_COLORLOOP:
-            result = await self._color_cluster_handler.color_loop_set(
-                update_flags=(
-                    Color.ColorLoopUpdateFlags.Action
-                    | Color.ColorLoopUpdateFlags.Direction
-                    | Color.ColorLoopUpdateFlags.Time
-                ),
-                action=Color.ColorLoopAction.Activate_from_current_hue,
-                direction=Color.ColorLoopDirection.Increment,
-                time=transition if transition else 7,
-                start_hue=0,
-            )
-            t_log["color_loop_set"] = result
-            self._effect = EFFECT_COLORLOOP
-        elif self._effect == EFFECT_COLORLOOP and effect != EFFECT_COLORLOOP:
-            result = await self._color_cluster_handler.color_loop_set(
-                update_flags=Color.ColorLoopUpdateFlags.Action,
-                action=Color.ColorLoopAction.Deactivate,
-                direction=Color.ColorLoopDirection.Decrement,
-                time=0,
-                start_hue=0,
-            )
-            t_log["color_loop_set"] = result
-            self._effect = EFFECT_OFF
+        if self._color_cluster_handler is not None:
+            if effect == EFFECT_COLORLOOP:
+                result = await self._color_cluster_handler.color_loop_set(
+                    update_flags=(
+                        Color.ColorLoopUpdateFlags.Action
+                        | Color.ColorLoopUpdateFlags.Direction
+                        | Color.ColorLoopUpdateFlags.Time
+                    ),
+                    action=Color.ColorLoopAction.Activate_from_current_hue,
+                    direction=Color.ColorLoopDirection.Increment,
+                    time=transition if transition else 7,
+                    start_hue=0,
+                )
+                t_log["color_loop_set"] = result
+                self._effect = EFFECT_COLORLOOP
+            elif self._effect == EFFECT_COLORLOOP and effect != EFFECT_COLORLOOP:
+                result = await self._color_cluster_handler.color_loop_set(
+                    update_flags=Color.ColorLoopUpdateFlags.Action,
+                    action=Color.ColorLoopAction.Deactivate,
+                    direction=Color.ColorLoopDirection.Decrement,
+                    time=0,
+                    start_hue=0,
+                )
+                t_log["color_loop_set"] = result
+                self._effect = EFFECT_OFF
 
-        if flash is not None:
+        if flash is not None and self._identify_cluster_handler is not None:
             result = await self._identify_cluster_handler.trigger_effect(
                 effect_id=FLASH_EFFECTS[flash],
                 effect_variant=Identify.EffectVariant.Default,
@@ -500,6 +502,7 @@ class BaseLight(BaseEntity, ABC):
         # is not none looks odd here, but it will override built in bulb
         # transition times if we pass 0 in here
         if transition is not None and supports_level:
+            assert self._level_cluster_handler is not None
             result = await self._level_cluster_handler.move_to_level_with_on_off(
                 level=0,
                 transition_time=int(
@@ -507,6 +510,7 @@ class BaseLight(BaseEntity, ABC):
                 ),
             )
         else:
+            assert self._on_off_cluster_handler is not None
             result = await self._on_off_cluster_handler.off()
 
         # Pause parsing attribute reports until transition is complete
@@ -539,6 +543,10 @@ class BaseLight(BaseEntity, ABC):
         t_log,
     ):
         """Process ZCL color commands."""
+
+        if self._color_cluster_handler is None:
+            self.debug("no color cluster handler available")
+            return False
 
         transition_time = (
             self._DEFAULT_MIN_TRANSITION_TIME

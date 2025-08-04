@@ -372,7 +372,7 @@ class EndpointProbe:
 
         platform: str | None = None
         if legacy_discovery_unique_id in device_overrides:
-            platform = device_overrides.get(legacy_discovery_unique_id).type
+            platform = device_overrides[legacy_discovery_unique_id].type
 
         if platform is None:
             ep_profile_id = endpoint.zigpy_endpoint.profile_id
