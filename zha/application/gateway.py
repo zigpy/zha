@@ -178,7 +178,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         self._devices: dict[EUI64, Device] = {}
         self._groups: dict[int, Group] = {}
         self.application_controller: ControllerApplication = None
-        self.coordinator_zha_device: Device = None
+        self.coordinator_zha_device: Device | None = None
 
         self.shutting_down: bool = False
         self._reload_task: asyncio.Task | None = None
@@ -436,9 +436,10 @@ class Gateway(AsyncUtilMixin, EventBase):
 
     def device_left(self, device: zigpy.device.Device) -> None:
         """Handle device leaving the network."""
-        zha_device: Device = self._devices.get(device.ieee)
+        zha_device = self._devices.get(device.ieee)
         if zha_device is not None:
             zha_device.on_network = False
+
         self.async_update_device(device, available=False)
         self.emit(
             ZHA_GW_MSG_DEVICE_LEFT, DeviceLeftEvent(ieee=device.ieee, nwk=device.nwk)

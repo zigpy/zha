@@ -211,9 +211,9 @@ class Fan(PlatformEntity, BaseFan):
     ) -> None:
         """Initialize the fan."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
+        self._fan_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_FAN
-        )
+        ]
         self.recompute_capabilities()
 
     def on_add(self) -> None:
@@ -403,9 +403,9 @@ class IkeaFan(Fan):
     ):
         """Initialize the fan."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._fan_cluster_handler: ClusterHandler = self.cluster_handlers.get(
+        self._fan_cluster_handler: ClusterHandler = self.cluster_handlers[
             "ikea_airpurifier"
-        )
+        ]
         self._fan_cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,

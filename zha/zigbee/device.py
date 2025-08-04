@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 import copy
 import dataclasses
 from dataclasses import dataclass
@@ -66,6 +66,7 @@ from zha.application.const import (
 )
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
 from zha.application.platforms import (
+    BaseEntity,
     BaseEntityInfo,
     EntityStateChangedEvent,
     PlatformEntity,
@@ -924,6 +925,8 @@ class Device(LogMixin, EventBase):
                 entity._attr_fallback_name = meta.new_fallback_name
 
     def _discover_new_entities(self) -> None:
+        new_entities: Iterator[BaseEntity]
+
         if self.is_active_coordinator:
             new_entities = discovery.DEVICE_PROBE.discover_coordinator_device_entities(
                 self
@@ -1507,13 +1510,13 @@ class Device(LogMixin, EventBase):
                 if cluster_info is not None:
                     cluster_info.pop("commands", None)
 
-            obj = {
+            obj: dict[str, Any] = {
                 "info_object": info_object,
                 "state": platform_entity.state,
             }
 
             if platform_entity.extra_state_attribute_names is not None:
-                obj["extra_state_attributes"] = (
+                obj["extra_state_attributes"] = list(
                     platform_entity.extra_state_attribute_names
                 )
 

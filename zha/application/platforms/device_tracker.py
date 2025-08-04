@@ -58,9 +58,9 @@ class DeviceScannerEntity(PlatformEntity):
     ):
         """Initialize the ZHA device tracker."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._battery_cluster_handler: ClusterHandler = self.cluster_handlers.get(
+        self._battery_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_POWER_CONFIGURATION
-        )
+        ]
         self._connected: bool = False
         self._keepalive_interval: int = 60
         self._should_poll: bool = True

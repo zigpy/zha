@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import functools
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters.security import IasAce
 
@@ -69,7 +69,9 @@ class AlarmControlPanel(PlatformEntity):
         """Initialize the ZHA alarm control device."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
         alarm_options = device.gateway.config.config.alarm_control_panel_options
-        self._cluster_handler: IasAceClusterHandler = cluster_handlers[0]
+        self._cluster_handler: IasAceClusterHandler = cast(
+            IasAceClusterHandler, cluster_handlers[0]
+        )
         self._cluster_handler.panel_code = alarm_options.master_code
         self._cluster_handler.code_required_arm_actions = (
             alarm_options.arm_requires_code

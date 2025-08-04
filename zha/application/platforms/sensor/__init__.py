@@ -681,9 +681,7 @@ class BaseElectricalMeasurement(PollableSensor):
     ) -> None:
         """Init this sensor."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._attr_extra_state_attribute_names: set[str] = {
-            "measurement_type",
-        }
+        self._attr_extra_state_attribute_names: set[str] = {"measurement_type"}
         if self._attr_max_attribute_name is not None:
             self._attr_extra_state_attribute_names.add(self._attr_max_attribute_name)
 

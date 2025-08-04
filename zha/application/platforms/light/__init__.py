@@ -7,7 +7,6 @@ from __future__ import annotations
 from abc import ABC
 import asyncio
 from collections import Counter
-from collections.abc import Callable
 import contextlib
 import dataclasses
 from dataclasses import dataclass
@@ -112,7 +111,6 @@ class BaseLight(BaseEntity, ABC):
 
     def __init__(self, *args, **kwargs):
         """Initialize the light."""
-        self._device: Device = None
         super().__init__(*args, **kwargs)
         self._min_mireds: int | None = 153
         self._max_mireds: int | None = 500
@@ -128,16 +126,16 @@ class BaseLight(BaseEntity, ABC):
         self._effect: str = EFFECT_OFF
         self._supported_color_modes: set[ColorMode] = set()
         self._external_supported_color_modes: set[ColorMode] = set()
-        self._zha_config_transition: int = self._DEFAULT_MIN_TRANSITION_TIME
+        self._zha_config_transition: float = self._DEFAULT_MIN_TRANSITION_TIME
         self._zha_config_enhanced_light_transition: bool = False
         self._zha_config_enable_light_transitioning_flag: bool = True
-        self._on_off_cluster_handler: ClusterHandler = None
-        self._level_cluster_handler: ClusterHandler = None
-        self._color_cluster_handler: ClusterHandler = None
-        self._identify_cluster_handler: ClusterHandler = None
+        self._on_off_cluster_handler: ClusterHandler | None = None
+        self._level_cluster_handler: ClusterHandler | None = None
+        self._color_cluster_handler: ClusterHandler | None = None
+        self._identify_cluster_handler: ClusterHandler | None = None
         self._transitioning_individual: bool = False
         self._transitioning_group: bool = False
-        self._transition_listener: Callable[[], None] | None = None
+        self._transition_listener: asyncio.TimerHandle | None = None
 
     @property
     def state(self) -> dict[str, Any]:
@@ -660,13 +658,13 @@ class Light(PlatformEntity, BaseLight):
             CLUSTER_HANDLER_ON_OFF
         ]
         self._state: bool = bool(self._on_off_cluster_handler.on_off)
-        self._level_cluster_handler: ClusterHandler = self.cluster_handlers.get(
+        self._level_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_LEVEL
-        )
-        self._color_cluster_handler: ClusterHandler = self.cluster_handlers.get(
+        ]
+        self._color_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_COLOR
-        )
-        self._identify_cluster_handler: ClusterHandler = device.identify_ch
+        ]
+        self._identify_cluster_handler: ClusterHandler | None = device.identify_ch
         if self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
@@ -1044,15 +1042,15 @@ class LightGroup(GroupEntity, BaseLight):
         self._on_off_cluster_handler: ClusterHandler = group.zigpy_group.endpoint[
             OnOff.cluster_id
         ]
-        self._level_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[LevelControl.cluster_id]
-        self._color_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[Color.cluster_id]
-        self._identify_cluster_handler: None | (
-            ClusterHandler
-        ) = group.zigpy_group.endpoint[Identify.cluster_id]
+        self._level_cluster_handler: ClusterHandler | None = group.zigpy_group.endpoint[
+            LevelControl.cluster_id
+        ]
+        self._color_cluster_handler: ClusterHandler | None = group.zigpy_group.endpoint[
+            Color.cluster_id
+        ]
+        self._identify_cluster_handler: ClusterHandler | None = (
+            group.zigpy_group.endpoint[Identify.cluster_id]
+        )
 
         self._debounced_member_refresh: Debouncer | None = Debouncer(
             self.group.gateway,

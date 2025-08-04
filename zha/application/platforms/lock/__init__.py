@@ -47,9 +47,9 @@ class DoorLock(PlatformEntity):
     ) -> None:
         """Initialize the lock."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers.get(
+        self._doorlock_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_DOORLOCK
-        )
+        ]
         self._state: str | None = VALUE_TO_STATE.get(
             self._doorlock_cluster_handler.cluster.get("lock_state"), None
         )

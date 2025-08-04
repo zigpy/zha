@@ -403,7 +403,7 @@ class GlobalUpdater:
 
     def __init__(self, gateway: Gateway):
         """Initialize the GlobalUpdater."""
-        self._updater_task_handle: asyncio.Task = None
+        self._updater_task_handle: asyncio.Task | None = None
         self._update_listeners: list[Callable] = []
         self._gateway: Gateway = gateway
 
@@ -470,7 +470,7 @@ class DeviceAvailabilityChecker:
     def __init__(self, gateway: Gateway):
         """Initialize the DeviceAvailabilityChecker."""
         self._gateway: Gateway = gateway
-        self._device_availability_task_handle: asyncio.Task = None
+        self._device_availability_task_handle: asyncio.Task | None = None
 
     def start(self):
         """Start the device availability checker."""

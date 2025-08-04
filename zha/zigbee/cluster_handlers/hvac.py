@@ -229,12 +229,12 @@ class ThermostatClusterHandler(ClusterHandler):
         return self.cluster.get(Thermostat.AttributeDefs.occupied_heating_setpoint.name)
 
     @property
-    def pi_cooling_demand(self) -> int:
+    def pi_cooling_demand(self) -> int | None:
         """Cooling demand."""
         return self.cluster.get(Thermostat.AttributeDefs.pi_cooling_demand.name)
 
     @property
-    def pi_heating_demand(self) -> int:
+    def pi_heating_demand(self) -> int | None:
         """Heating demand."""
         return self.cluster.get(Thermostat.AttributeDefs.pi_heating_demand.name)
 

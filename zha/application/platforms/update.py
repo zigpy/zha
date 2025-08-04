@@ -232,13 +232,13 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
 
             firmware = self._compatible_images.upgrades[0]
         else:
-            version = int(version, 16)
+            version_int = int(version, 16)
 
             for firmware in itertools.chain(
                 self._compatible_images.upgrades,
                 self._compatible_images.downgrades,
             ):
-                if firmware.version == version:
+                if firmware.version == version_int:
                     break
             else:
                 raise ZHAException(f"Version {version!r} is not available")

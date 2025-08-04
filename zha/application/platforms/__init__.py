@@ -351,8 +351,9 @@ class PlatformEntity(BaseEntity):
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
+        *,
         entity_metadata: EntityMetadata | None = None,
-        legacy_discovery_unique_id: str | None = None,
+        legacy_discovery_unique_id: str,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
