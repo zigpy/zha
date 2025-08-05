@@ -545,7 +545,7 @@ class BaseLight(BaseEntity, ABC):
         """Process ZCL color commands."""
 
         if self._color_cluster_handler is None:
-            self.debug("no color cluster handler available")
+            self.warning("no color cluster handler available")
             return False
 
         transition_time = (
