@@ -371,7 +371,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         async def fetch_updated_state() -> None:
             """Fetch updated state for mains powered devices."""
             if self.config.config.device_options.enable_mains_startup_polling:
-                await self.async_fetch_updated_state_mains()
+                async with self.application_controller.request_priority(
+                    t.PacketPriority.LOW
+                ):
+                    await self.async_fetch_updated_state_mains()
             else:
                 _LOGGER.debug("Polling of mains powered devices at startup is disabled")
             _LOGGER.debug("Allowing polled requests")
@@ -615,8 +618,13 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_device.available = True
         zha_device.on_network = True
 
-        await zha_device.async_configure()
-        await zha_device.async_initialize()
+        async with self.application_controller.request_priority(
+            t.PacketPriority.CRITICAL
+        ):
+            await zha_device.async_configure()
+
+        async with self.application_controller.request_priority(t.PacketPriority.LOW):
+            await zha_device.async_initialize()
 
         self.emit(
             ZHA_GW_MSG_DEVICE_FULL_INIT,
