@@ -624,10 +624,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_device.available = True
         zha_device.on_network = True
 
-        async with self.request_priority(t.PacketPriority.CRITICAL):
+        async with self.request_priority(t.PacketPriority.HIGH):
             await zha_device.async_configure()
-
-        async with self.request_priority(t.PacketPriority.LOW):
             await zha_device.async_initialize()
 
         self.emit(
