@@ -560,8 +560,6 @@ class BaseLight(BaseEntity, ABC):
         t_log,
     ):
         """Process ZCL color commands."""
-        assert self._color_cluster_handler is not None
-
         transition_time = (
             self._DEFAULT_MIN_TRANSITION_TIME
             if new_color_provided_while_off
@@ -569,6 +567,8 @@ class BaseLight(BaseEntity, ABC):
         )
 
         if temperature is not None:
+            assert self._color_cluster_handler is not None
+
             result = await self._color_cluster_handler.move_to_color_temp(
                 color_temp_mireds=temperature,
                 transition_time=int(10 * transition_time),
@@ -581,6 +581,8 @@ class BaseLight(BaseEntity, ABC):
             self._xy_color = None
 
         if xy_color is not None:
+            assert self._color_cluster_handler is not None
+
             result = await self._color_cluster_handler.move_to_color(
                 color_x=int(xy_color[0] * 65535),
                 color_y=int(xy_color[1] * 65535),
