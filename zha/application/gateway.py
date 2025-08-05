@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncGenerator
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
@@ -275,6 +275,14 @@ class Gateway(AsyncUtilMixin, EventBase):
             await self.shutdown()
             raise
 
+    @asynccontextmanager
+    async def request_priority(
+        self, priority: t.PacketPriority | None
+    ) -> AsyncGenerator[None, None]:
+        """Context manager to request a priority for radio access."""
+        async with self.application_controller.request_priority(priority):
+            yield
+
     def connection_lost(self, exc: Exception) -> None:
         """Handle connection lost event."""
         _LOGGER.debug("Connection to the radio was lost: %r", exc)
@@ -371,9 +379,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         async def fetch_updated_state() -> None:
             """Fetch updated state for mains powered devices."""
             if self.config.config.device_options.enable_mains_startup_polling:
-                async with self.application_controller.request_priority(
-                    t.PacketPriority.LOW
-                ):
+                async with self.request_priority(t.PacketPriority.LOW):
                     await self.async_fetch_updated_state_mains()
             else:
                 _LOGGER.debug("Polling of mains powered devices at startup is disabled")
@@ -618,12 +624,10 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_device.available = True
         zha_device.on_network = True
 
-        async with self.application_controller.request_priority(
-            t.PacketPriority.CRITICAL
-        ):
+        async with self.request_priority(t.PacketPriority.CRITICAL):
             await zha_device.async_configure()
 
-        async with self.application_controller.request_priority(t.PacketPriority.LOW):
+        async with self.request_priority(t.PacketPriority.LOW):
             await zha_device.async_initialize()
 
         self.emit(
