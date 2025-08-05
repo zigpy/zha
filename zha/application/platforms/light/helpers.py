@@ -21,7 +21,7 @@ def filter_supported_color_modes(color_modes: Iterable[ColorMode]) -> set[ColorM
     return color_modes
 
 
-def brightness_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
+def is_brightness_supported(color_modes: Iterable[ColorMode | str] | None) -> bool:
     """Test if brightness is supported."""
     if not color_modes:
         return False
