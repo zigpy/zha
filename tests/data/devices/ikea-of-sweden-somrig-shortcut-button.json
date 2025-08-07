@@ -1,0 +1,515 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:6d:e6:02:47",
+  "nwk": "0xDF5B",
+  "manufacturer": "IKEA of Sweden",
+  "model": "SOMRIG shortcut button",
+  "friendly_manufacturer": "IKEA of Sweden",
+  "friendly_model": "SOMRIG shortcut button",
+  "name": "IKEA of Sweden SOMRIG shortcut button",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.ikea.somrigsmartbtn.IkeaSomrigSmartButton",
+  "quirk_id": null,
+  "manufacturer_code": 4476,
+  "power_source": "Battery or Unknown",
+  "lqi": 180,
+  "rssi": -66,
+  "last_seen": "2025-08-07T14:50:27.483479+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4476,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "REMOTE_CONTROL",
+        "id": 6
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 168
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0034",
+              "name": "battery_rated_voltage",
+              "zcl_type": "uint8",
+              "value": 15
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 4
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 13
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0020",
+          "endpoint_attribute": "poll_control",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "checkin_interval",
+              "zcl_type": "uint32",
+              "value": 13200
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x1000",
+          "endpoint_attribute": "lightlink",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc7c",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc80",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 16777249
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x1000",
+          "endpoint_attribute": "lightlink",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc80",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "REMOTE_CONTROL",
+        "id": 6
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc80",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfc80",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "IKEA of Sweden",
+        "SOMRIG shortcut button"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0006",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0004",
+          "0x0020",
+          "0x1000",
+          "0xfc7c",
+          "0xfc80"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0006",
+          "0x0008",
+          "0x0019",
+          "0x1000",
+          "0xfc80"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0006",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0xfc80"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0006",
+          "0x0008",
+          "0xfc80"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:6d:e6:02:47-1-3",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0x0003",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:6d:e6:02:47",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:6d:e6:02:47-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:6d:e6:02:47",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 180
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:6d:e6:02:47-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:6d:e6:02:47",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": -66
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:6d:e6:02:47-1-1",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0x0001",
+              "status": "INITIALIZED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:6d:e6:02:47",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 84.0,
+          "battery_size": "AAA",
+          "battery_quantity": 1,
+          "battery_voltage": 1.3
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:6d:e6:02:47-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:6d:e6:02:47",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x01000021",
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}
