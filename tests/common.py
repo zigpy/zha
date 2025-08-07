@@ -9,7 +9,7 @@ import logging
 import pathlib
 import time
 from typing import Any
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock
 
 from zigpy.application import ControllerApplication
 from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
@@ -62,7 +62,6 @@ def patch_cluster_for_testing(cluster: zigpy.zcl.Cluster) -> None:
     cluster.configure_reporting_multiple = AsyncMock(
         return_value=zcl_f.ConfigureReportingResponse.deserialize(b"\x00")[0]
     )
-    cluster.handle_cluster_request = Mock()
     cluster.read_attributes = AsyncMock(wraps=cluster.read_attributes)
     cluster.read_attributes_raw = AsyncMock(side_effect=_read_attribute_raw)
     cluster.unbind = AsyncMock(return_value=[0])
