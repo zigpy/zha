@@ -475,8 +475,8 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)
-@registries.CLUSTER_HANDLER_REGISTRY.register(IKEA_REMOTE_CLUSTER)
-class IkeaRemoteClusterHandler(ClusterHandler):
+@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(IKEA_REMOTE_CLUSTER)
+class IkeaRemoteClientClusterHandler(ClusterHandler):
     """Ikea Matter remote cluster handler."""
 
     REPORT_CONFIG = ()
