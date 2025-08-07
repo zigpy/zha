@@ -481,6 +481,12 @@ class IkeaRemoteClientClusterHandler(ClientClusterHandler):
 
     REPORT_CONFIG = ()
 
+    def cluster_command(self, tsn, command_id, args):
+        """Handle a cluster command received on this cluster."""
+        # Do not emit ZHA events when receiving a client command, this duplicates the
+        # existing event sent by the quirk.
+        pass
+
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(
     DoorLock.cluster_id, XIAOMI_AQARA_VIBRATION_AQ1
