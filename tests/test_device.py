@@ -50,6 +50,7 @@ from zha.exceptions import ZHAException
 from zha.zigbee.device import (
     ClusterBinding,
     DeviceFirmwareInfoUpdatedEvent,
+    ZHAEvent,
     get_device_automation_triggers,
 )
 from zha.zigbee.group import Group
@@ -1108,3 +1109,48 @@ async def test_endpoint_none_profile(
 
     assert zha_device.async_get_std_clusters() == {}
     assert "Skipping endpoint, profile is None" in caplog.text
+
+
+async def test_somrig_events(zha_gateway: Gateway) -> None:
+    """Test that Somrig events are handled correctly."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-somrig-shortcut-button.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    listener = mock.Mock()
+    zha_device.on_all_events(listener)
+
+    # ShortcutV2Cluster:initial_press(new_position=0)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=0,
+            profile_id=260,
+            cluster_id=64640,
+            data=zigpy.types.SerializableBytes(b"\x15|\x11\x0f\x01\x00"),
+        )
+    )
+
+    assert listener.mock_calls == [
+        call(
+            ZHAEvent(
+                device_ieee=zigpy.types.EUI64.convert("ab:cd:ef:12:6d:e6:02:47"),
+                unique_id="ab:cd:ef:12:6d:e6:02:47",
+                data={
+                    "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0xfc80",
+                    "endpoint_id": 1,
+                    "cluster_id": 64640,
+                    "command": "initial_press",
+                    "args": [0],
+                    "params": {"new_position": 0},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        )
+    ]
