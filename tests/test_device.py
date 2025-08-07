@@ -1142,7 +1142,7 @@ async def test_somrig_events(zha_gateway: Gateway) -> None:
                 device_ieee=zigpy.types.EUI64.convert("ab:cd:ef:12:6d:e6:02:47"),
                 unique_id="ab:cd:ef:12:6d:e6:02:47",
                 data={
-                    "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0xfc80",
+                    "unique_id": "ab:cd:ef:12:6d:e6:02:47:1:0xfc80_CLIENT",
                     "endpoint_id": 1,
                     "cluster_id": 64640,
                     "command": "initial_press",
