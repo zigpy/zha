@@ -1189,7 +1189,7 @@ async def test_symfonisk_events(
                 device_ieee=zigpy.types.EUI64.convert("ab:cd:ef:12:52:61:2b:43"),
                 unique_id="ab:cd:ef:12:52:61:2b:43",
                 data={
-                    "unique_id": "ab:cd:ef:12:52:61:2b:43:1:0xfc7f",
+                    "unique_id": "ab:cd:ef:12:52:61:2b:43:1:0xfc7f_CLIENT",
                     "endpoint_id": 1,
                     "cluster_id": 64639,
                     "command": "shortcut_v1_events",
