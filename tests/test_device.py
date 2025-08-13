@@ -1171,7 +1171,7 @@ async def test_symfonisk_events(
     listener = mock.Mock()
     zha_device.on_all_events(listener)
 
-    # ShortcutV1Cluster:shortcut_v1(shortcut_button=1, shortcut_event=1)
+    # ShortcutV1Cluster:shortcut_v1_events(shortcut_button=1, shortcut_event=1)
     zigpy_dev.packet_received(
         zigpy.types.ZigbeePacket(
             src_ep=1,
