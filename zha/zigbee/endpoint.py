@@ -13,7 +13,7 @@ from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 
 from zha.application import const
 from zha.async_ import gather_with_limited_concurrency
-from zha.zigbee.cluster_handlers import ClientClusterHandler, ClusterHandler
+from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_BASIC,
     CLUSTER_HANDLER_IDENTIFY,
@@ -27,6 +27,7 @@ from zha.zigbee.cluster_handlers.registries import (
 if TYPE_CHECKING:
     from zigpy import Endpoint as ZigpyEndpoint
 
+    from zha.zigbee.cluster_handlers import ClientClusterHandler
     from zha.zigbee.device import Device
 
 ATTR_DEVICE_TYPE: Final[str] = "device_type"
@@ -191,46 +192,20 @@ class Endpoint:
 
     def add_client_cluster_handlers(self) -> None:
         """Create client cluster handlers for all output clusters if in the registry."""
-        profile_id = self._zigpy_endpoint.profile_id
-        if profile_id is None:
-            _LOGGER.debug("Skipping endpoint, profile is None")
-            return
-        elif profile_id not in (ZLL_PROFILE_ID, ZHA_PROFILE_ID):
-            _LOGGER.debug(
-                "Skipping endpoint, profile is not ZLL or ZHA: 0x%04X",
-                profile_id,
-            )
-            return
-
-        for cluster_id, cluster in self.zigpy_endpoint.out_clusters.items():
-            cluster_handler_class = CLIENT_CLUSTER_HANDLER_REGISTRY.get(
-                cluster_id, ClientClusterHandler
-            )
-
-            # Allow cluster handler to filter out bad matches
-            if not cluster_handler_class.matches(cluster, self):
-                cluster_handler_class = ClientClusterHandler
-
-            _LOGGER.debug(
-                "Creating client cluster handler for cluster id: %s class: %s",
-                cluster_id,
-                cluster_handler_class,
-            )
-
-            try:
-                cluster_handler = cluster_handler_class(cluster, self)
-            except KeyError as err:
-                _LOGGER.warning(
-                    "Cluster handler %s for client cluster %s on endpoint %s is invalid: %s",
+        for (
+            cluster_id,
+            cluster_handler_class,
+        ) in CLIENT_CLUSTER_HANDLER_REGISTRY.items():
+            cluster = self.zigpy_endpoint.out_clusters.get(cluster_id)
+            if cluster is not None:
+                _LOGGER.debug(
+                    "Creating client cluster handler for cluster id: %s class: %s",
+                    cluster_id,
                     cluster_handler_class,
-                    cluster,
-                    self,
-                    err,
                 )
-                continue
-
-            self.client_cluster_handlers[cluster_handler.id] = cluster_handler
-            cluster_handler.on_add()
+                cluster_handler = cluster_handler_class(cluster, self)
+                self.client_cluster_handlers[cluster_handler.id] = cluster_handler
+                cluster_handler.on_add()
 
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize claimed cluster handlers."""
