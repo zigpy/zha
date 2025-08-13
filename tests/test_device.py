@@ -1154,3 +1154,50 @@ async def test_somrig_events(zha_gateway: Gateway) -> None:
             )
         )
     ]
+
+
+async def test_symfonisk_events(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that Symfonisk events are handled correctly."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-symfonisk-sound-remote-gen2.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    listener = mock.Mock()
+    zha_device.on_all_events(listener)
+
+    # ShortcutV1Cluster:shortcut_v1(shortcut_button=1, shortcut_event=1)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=0,
+            profile_id=260,
+            cluster_id=64639,
+            data=zigpy.types.SerializableBytes(b"\x15|\x11\x1f\x01\x01\x01"),
+        )
+    )
+
+    assert listener.mock_calls == [
+        call(
+            ZHAEvent(
+                device_ieee=zigpy.types.EUI64.convert("ab:cd:ef:12:52:61:2b:43"),
+                unique_id="ab:cd:ef:12:52:61:2b:43",
+                data={
+                    "unique_id": "ab:cd:ef:12:52:61:2b:43:1:0xfc7f",
+                    "endpoint_id": 1,
+                    "cluster_id": 64639,
+                    "command": "shortcut_v1_events",
+                    "args": [1, 1],
+                    "params": {"shortcut_button": 1, "shortcut_event": 1},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        )
+    ]
