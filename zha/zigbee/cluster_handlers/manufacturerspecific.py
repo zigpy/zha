@@ -30,7 +30,7 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_VALUE,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
-    IKEA_SHORTCUT_CLUSTER_V1_CLUSTER,
+    IKEA_SHORTCUT_V1_CLUSTER,
     INOVELLI_CLUSTER,
     LEGRAND_CABLE_OUTLET_CLUSTER,
     OSRAM_BUTTON_CLUSTER,
@@ -489,8 +489,8 @@ class IkeaRemoteClientClusterHandler(ClientClusterHandler):
         pass
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_SHORTCUT_CLUSTER_V1_CLUSTER)
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(IKEA_SHORTCUT_CLUSTER_V1_CLUSTER)
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_SHORTCUT_V1_CLUSTER)
+@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(IKEA_SHORTCUT_V1_CLUSTER)
 class IkeaSymfoniskRemoteClientClusterHandler(ClientClusterHandler):
     """Ikea Symfonisk remote cluster handler."""
 
