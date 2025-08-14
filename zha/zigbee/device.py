@@ -1038,26 +1038,8 @@ class Device(LogMixin, EventBase):
                 ),
             )
 
-    async def async_initialize(self, from_cache: bool = False) -> None:
-        """Initialize cluster handlers."""
-        self.debug("started initialization")
-
-        self._discover_new_entities()
-
-        await self._zdo_handler.async_initialize(from_cache)
-        self._zdo_handler.debug("'async_initialize' stage succeeded")
-
-        # We intentionally do not use `gather` here! This is so that if, for example,
-        # three `device.async_initialize()`s are spawned, only three concurrent requests
-        # will ever be in flight at once. Startup concurrency is managed at the device
-        # level.
-        for endpoint in self._endpoints.values():
-            try:
-                await endpoint.async_initialize(from_cache)
-            except Exception:  # pylint: disable=broad-exception-caught
-                self.debug("Failed to initialize endpoint", exc_info=True)
-
-        # Compute the final entities
+    async def _add_pending_entities(self) -> None:
+        """Add pending entities to the device."""
         new_entities: dict[tuple[Platform, str], PlatformEntity] = {}
 
         for entity in self._pending_entities:
@@ -1084,6 +1066,29 @@ class Device(LogMixin, EventBase):
 
         # At this point we can compute a primary entity
         self._compute_primary_entity()
+
+    async def async_initialize(self, from_cache: bool = False) -> None:
+        """Initialize cluster handlers."""
+        self.debug("started initialization")
+
+        # We discover prospective entities before initialization
+        self._discover_new_entities()
+
+        await self._zdo_handler.async_initialize(from_cache)
+        self._zdo_handler.debug("'async_initialize' stage succeeded")
+
+        # We intentionally do not use `gather` here! This is so that if, for example,
+        # three `device.async_initialize()`s are spawned, only three concurrent requests
+        # will ever be in flight at once. Startup concurrency is managed at the device
+        # level.
+        for endpoint in self._endpoints.values():
+            try:
+                await endpoint.async_initialize(from_cache)
+            except Exception:  # pylint: disable=broad-exception-caught
+                self.debug("Failed to initialize endpoint", exc_info=True)
+
+        # And add them after
+        await self._add_pending_entities()
 
         # Sync the device's firmware version with the first platform entity
         for (platform, _unique_id), entity in self.platform_entities.items():
