@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Sequence
 import copy
 import dataclasses
 from dataclasses import dataclass
@@ -1040,6 +1040,7 @@ class Device(LogMixin, EventBase):
 
     async def _add_pending_entities(self) -> None:
         """Add pending entities to the device."""
+        all_entities = dict(self._platform_entities)
         new_entities: dict[tuple[Platform, str], PlatformEntity] = {}
 
         for entity in self._pending_entities:
@@ -1047,7 +1048,7 @@ class Device(LogMixin, EventBase):
 
             # Ignore unsupported entities
             if not entity.is_supported() or not entity.is_supported_in_list(
-                new_entities.values()
+                all_entities.values()
             ):
                 await entity.on_remove()
                 continue
@@ -1055,17 +1056,19 @@ class Device(LogMixin, EventBase):
             key = (entity.PLATFORM, entity.unique_id)
 
             # Ignore entities that already exist
-            if key in new_entities or key in self._platform_entities:
+            if key in all_entities:
                 await entity.on_remove()
                 continue
 
+            all_entities[key] = entity
             new_entities[key] = entity
 
+        # Compute a new primary entity
+        self._compute_primary_entity(all_entities.values())
+
+        # Finally, add the new entities
         for entity in new_entities.values():
             self._add_entity(entity)
-
-        # At this point we can compute a primary entity
-        self._compute_primary_entity()
 
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize cluster handlers."""
@@ -1449,13 +1452,11 @@ class Device(LogMixin, EventBase):
         args = (self.nwk, self.model) + args
         _LOGGER.log(level, msg, *args, **kwargs)
 
-    def _compute_primary_entity(self) -> None:
-        """Compute the primary entity for this device."""
+    def _compute_primary_entity(self, entities: Sequence[PlatformEntity]) -> None:
+        """Compute the primary entity from a given set of entities."""
 
         # First, check if any entity is explicitly primary
-        explicitly_primary = [
-            entity for entity in self._platform_entities.values() if entity.primary
-        ]
+        explicitly_primary = [entity for entity in entities if entity.primary]
 
         if len(explicitly_primary) == 1:
             self.debug(
@@ -1471,7 +1472,7 @@ class Device(LogMixin, EventBase):
         # not explicitly marked as not primary
         candidates = [
             e
-            for e in self._platform_entities.values()
+            for e in entities
             if e.enabled and hasattr(e, "info_object") and e._attr_primary is not False
         ]
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
