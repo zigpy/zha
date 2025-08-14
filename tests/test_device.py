@@ -23,6 +23,7 @@ from zigpy.typing import UNDEFINED
 from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import general
 from zigpy.zcl.clusters.general import Ota, PowerConfiguration
+from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.clusters.measurement import CarbonDioxideConcentration
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
 from zigpy.zcl.helpers import ReportingConfig
@@ -56,6 +57,8 @@ from zha.application.platforms.switch import Switch
 from zha.exceptions import ZHAException
 from zha.zigbee.device import (
     ClusterBinding,
+    DeviceEntityAddedEvent,
+    DeviceEntityRemovedEvent,
     DeviceFirmwareInfoUpdatedEvent,
     ZHAEvent,
     get_device_automation_triggers,
@@ -1376,3 +1379,61 @@ async def test_initialize_endpoint_failure(zha_gateway: Gateway) -> None:
         await zha_device.async_initialize(from_cache=True)
 
     assert mock_async_initialize.call_count == 1
+
+
+async def test_entity_recomputation(zha_gateway: Gateway) -> None:
+    """Test entity recomputation."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    event_listener = mock.Mock()
+    zha_device.on_all_events(event_listener)
+
+    entities1 = set(zha_device.platform_entities.values())
+
+    # We lose track of the color temperature
+    zha_device._zigpy_device.endpoints[1].light_color.add_unsupported_attribute(
+        Color.AttributeDefs.start_up_color_temperature.id
+    )
+    await zha_device.recompute_entities()
+
+    entities2 = set(zha_device.platform_entities.values())
+    assert entities2 - entities1 == set()
+    assert len(entities1 - entities2) == 1
+    assert (
+        list(entities1 - entities2)[0].unique_id
+        == "68:0a:e2:ff:fe:8f:fa:33-1-768-start_up_color_temperature"
+    )
+    assert event_listener.mock_calls == [
+        call(
+            DeviceEntityRemovedEvent(
+                unique_id="68:0a:e2:ff:fe:8f:fa:33-1-768-start_up_color_temperature"
+            )
+        )
+    ]
+
+    event_listener.reset_mock()
+
+    # We add it back
+    zha_device._zigpy_device.endpoints[1].light_color.remove_unsupported_attribute(
+        Color.AttributeDefs.start_up_color_temperature.id
+    )
+    await zha_device.recompute_entities()
+
+    entities3 = set(zha_device.platform_entities.values())
+    assert (
+        list(entities3 - entities2)[0].unique_id
+        == "68:0a:e2:ff:fe:8f:fa:33-1-768-start_up_color_temperature"
+    )
+    assert {e.unique_id for e in entities1} == {e.unique_id for e in entities3}
+
+    assert event_listener.mock_calls == [
+        call(
+            DeviceEntityAddedEvent(
+                unique_id="68:0a:e2:ff:fe:8f:fa:33-1-768-start_up_color_temperature"
+            )
+        )
+    ]
