@@ -1070,6 +1070,25 @@ class Device(LogMixin, EventBase):
         for entity in new_entities.values():
             self._add_entity(entity)
 
+    async def recompute_entities(self) -> None:
+        """Recompute all entities for this device."""
+        self.debug("Recomputing entities")
+
+        entities = list(self._platform_entities.values())
+
+        # Remove all entities that are no longer supported
+        for entity in entities[:]:
+            entity.recompute_capabilities()
+
+            if not entity.is_supported() or not entity.is_supported_in_list(entities):
+                self.debug("Removing unsupported entity %s", entity)
+                await self._remove_entity(entity)
+                entities.remove(entity)
+
+        # Discover new entities
+        self._discover_new_entities()
+        await self._add_pending_entities()
+
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize cluster handlers."""
         self.debug("started initialization")

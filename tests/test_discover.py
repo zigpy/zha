@@ -714,6 +714,9 @@ async def test_devices_from_files(
             await zha_gateway.async_block_till_done(wait_background_tasks=True)
             assert zha_device is not None
 
+        # Ensure entity recomputation is idempotent
+        await zha_device.recompute_entities()
+
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
             unique_id_collisions[entity.unique_id].append(entity)
