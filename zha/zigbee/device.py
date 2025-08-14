@@ -1009,8 +1009,9 @@ class Device(LogMixin, EventBase):
             )
 
         _LOGGER.debug("Discovered new entity %s", entity)
+
+        # `entity.on_add()` is assumed to have been called already
         self._platform_entities[key] = entity
-        # entity.on_add()
         self.emit(
             DeviceEntityAddedEvent.event_type,
             DeviceEntityAddedEvent(
@@ -1062,6 +1063,8 @@ class Device(LogMixin, EventBase):
 
             all_entities[key] = entity
             new_entities[key] = entity
+
+        self._pending_entities.clear()
 
         # Compute a new primary entity
         self._compute_primary_entity(all_entities.values())
