@@ -68,6 +68,8 @@ from zha.application.const import (
     UNKNOWN_MODEL,
     ZHA_CLUSTER_HANDLER_CFG_DONE,
     ZHA_CLUSTER_HANDLER_MSG,
+    ZHA_DEVICE_ENTITY_ADDED_EVENT,
+    ZHA_DEVICE_ENTITY_REMOVED_EVENT,
     ZHA_DEVICE_UPDATED_EVENT,
     ZHA_EVENT,
 )
@@ -171,6 +173,27 @@ class DeviceFirmwareInfoUpdatedEvent:
 
     old_firmware_version: str | None
     new_firmware_version: str | None
+
+
+@dataclass(kw_only=True, frozen=True)
+class DeviceEntityAddedEvent:
+    """Event generated when a new entity is added to a device."""
+
+    event_type: Final[str] = ZHA_DEVICE_ENTITY_ADDED_EVENT
+    event: Final[str] = ZHA_DEVICE_ENTITY_ADDED_EVENT
+
+    # TODO: allow all entity information to be serialized and include it here
+    unique_id: str
+
+
+@dataclass(kw_only=True, frozen=True)
+class DeviceEntityRemovedEvent:
+    """Event generated when a new entity is added to a device."""
+
+    event_type: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
+    event: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
+
+    unique_id: str
 
 
 @dataclass(kw_only=True, frozen=True)
