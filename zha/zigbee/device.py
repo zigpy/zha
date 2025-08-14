@@ -999,6 +999,45 @@ class Device(LogMixin, EventBase):
             entity.on_add()
             self._pending_entities.append(entity)
 
+    def _add_entity(self, entity: PlatformEntity) -> None:
+        """Add an entity to the device."""
+        key = (entity.PLATFORM, entity.unique_id)
+
+        if key in self._platform_entities:
+            raise ValueError(
+                f"Cannot add entity {entity!r}, unique ID already taken by {self._platform_entities[key]!r}"
+            )
+
+        _LOGGER.debug("Discovered new entity %s", entity)
+        self._platform_entities[key] = entity
+        # entity.on_add()
+        self.emit(
+            DeviceEntityAddedEvent.event_type,
+            DeviceEntityAddedEvent(
+                unique_id=entity.unique_id,
+            ),
+        )
+
+    async def _remove_entity(
+        self, entity: BaseEntity, *, emit_event: bool = True
+    ) -> None:
+        """Remove an entity from the device."""
+        key = (entity.PLATFORM, entity.unique_id)
+
+        if key not in self._platform_entities:
+            raise ValueError(f"Cannot remove entity {entity!r}, unique ID not found")
+
+        await entity.on_remove()
+        del self._platform_entities[key]
+
+        if emit_event:
+            self.emit(
+                DeviceEntityRemovedEvent.event_type,
+                DeviceEntityRemovedEvent(
+                    unique_id=entity.unique_id,
+                ),
+            )
+
     async def async_initialize(self, from_cache: bool = False) -> None:
         """Initialize cluster handlers."""
         self.debug("started initialization")
@@ -1034,15 +1073,14 @@ class Device(LogMixin, EventBase):
             key = (entity.PLATFORM, entity.unique_id)
 
             # Ignore entities that already exist
-            if key in new_entities:
+            if key in new_entities or key in self._platform_entities:
                 await entity.on_remove()
                 continue
 
             new_entities[key] = entity
 
-        if new_entities:
-            _LOGGER.debug("Discovered new entities %r", new_entities)
-            self._platform_entities.update(new_entities)
+        for entity in new_entities.values():
+            self._add_entity(entity)
 
         # At this point we can compute a primary entity
         self._compute_primary_entity()
