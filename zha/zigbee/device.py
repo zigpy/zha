@@ -1149,9 +1149,11 @@ class Device(LogMixin, EventBase):
                     exc_info=True,
                 )
 
-        for platform_entity in self._platform_entities.values():
+        for platform_entity in list(self._platform_entities.values()):
             try:
-                await platform_entity.on_remove()
+                # TODO: To avoid unnecessary traffic during shutdown, we don't
+                # need to emit an event for every entity, just the device
+                await self._remove_entity(platform_entity, emit_event=False)
             except Exception:
                 _LOGGER.warning(
                     "Failed to remove platform entity %s for device %s",

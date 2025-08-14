@@ -751,8 +751,6 @@ async def test_devices_from_files(
 
                 unique_id_migrations[key] = entity
 
-        await zha_device.on_remove()
-
         # XXX: We re-serialize the JSON because integer enum types are converted when
         # serializing but will not compare properly otherwise
         loaded_device_data = json.loads(
@@ -780,6 +778,8 @@ async def test_devices_from_files(
                     manufacturer=None,
                 )
             ]
+
+        await zha_device.on_remove()
 
 
 async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None:
@@ -814,3 +814,4 @@ async def test_cluster_handler_only_clusters_are_bound(zha_gateway: Gateway) -> 
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert len(philips_cluster.bind.mock_calls) == 1
+
