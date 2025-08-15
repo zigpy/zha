@@ -446,12 +446,6 @@ class ClusterHandler(LogMixin, EventBase):
             if self.cluster.is_server:
                 self.debug("Configuring cluster attribute reporting")
                 await self.configure_reporting()
-            ch_specific_cfg = getattr(
-                self, "async_configure_cluster_handler_specific", None
-            )
-            if ch_specific_cfg:
-                self.debug("Performing cluster handler specific configuration")
-                await ch_specific_cfg()
             self.debug("finished cluster handler configuration")
         else:
             self.debug("skipping cluster handler configuration")
