@@ -439,16 +439,18 @@ class ClusterHandler(LogMixin, EventBase):
 
     async def async_configure(self) -> None:
         """Set cluster binding and attribute reporting."""
-        if not self._endpoint.device.skip_configuration:
-            if self.BIND:
-                self.debug("Performing cluster binding")
-                await self.bind()
-            if self.cluster.is_server:
-                self.debug("Configuring cluster attribute reporting")
-                await self.configure_reporting()
-            self.debug("finished cluster handler configuration")
-        else:
+        if self._endpoint.device.skip_configuration:
             self.debug("skipping cluster handler configuration")
+            self._status = ClusterHandlerStatus.CONFIGURED
+            return
+
+        if self.BIND:
+            self.debug("Performing cluster binding")
+            await self.bind()
+        if self.cluster.is_server:
+            self.debug("Configuring cluster attribute reporting")
+            await self.configure_reporting()
+        self.debug("finished cluster handler configuration")
         self._status = ClusterHandlerStatus.CONFIGURED
 
     async def async_initialize(self, from_cache: bool) -> None:
