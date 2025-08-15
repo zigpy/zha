@@ -287,7 +287,7 @@ class ClusterHandler(LogMixin, EventBase):
         devices are unreachable.
         """
         try:
-            res = await self.cluster.bind()
+            res = await RETRYABLE_REQUEST_DECORATOR(self.cluster.bind)()
             self.debug("bound '%s' cluster: %s", self.cluster.ep_attribute, res[0])
             self._endpoint.device.emit(
                 ZHA_CLUSTER_HANDLER_MSG_BIND,
@@ -354,7 +354,9 @@ class ClusterHandler(LogMixin, EventBase):
         while chunk:
             reports = {rec["attr"]: rec["config"] for rec in chunk}
             try:
-                res = await self.cluster.configure_reporting_multiple(reports, **kwargs)
+                res = await RETRYABLE_REQUEST_DECORATOR(
+                    self.cluster.configure_reporting_multiple
+                )(reports, **kwargs)
                 self._configure_reporting_status(reports, res[0], event_data)
             except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
                 self.debug(
@@ -447,9 +449,11 @@ class ClusterHandler(LogMixin, EventBase):
         if self.BIND:
             self.debug("Performing cluster binding")
             await self.bind()
+
         if self.cluster.is_server:
             self.debug("Configuring cluster attribute reporting")
             await self.configure_reporting()
+
         self.debug("finished cluster handler configuration")
         self._status = ClusterHandlerStatus.CONFIGURED
 
@@ -590,7 +594,9 @@ class ClusterHandler(LogMixin, EventBase):
         while chunk:
             try:
                 self.debug("Reading attributes in chunks: %s", chunk)
-                read, _ = await self.cluster.read_attributes(
+                read, _ = await RETRYABLE_REQUEST_DECORATOR(
+                    self.cluster.read_attributes
+                )(
                     chunk,
                     allow_cache=from_cache,
                     only_cache=only_cache,
