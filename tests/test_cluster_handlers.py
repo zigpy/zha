@@ -328,7 +328,7 @@ async def test_cluster_handler_bind_error(
 
     await cluster_handler.async_configure()
 
-    assert cluster.bind.await_count == 1
+    assert cluster.bind.await_count == 3
     assert cluster.configure_reporting.await_count == 0
     assert f"Failed to bind '{cluster.ep_attribute}' cluster:" in caplog.text
 
@@ -360,7 +360,7 @@ async def test_cluster_handler_configure_reporting_error(
     await cluster_handler.async_configure()
 
     assert cluster.bind.await_count == 1
-    assert cluster.configure_reporting_multiple.await_count == 1
+    assert cluster.configure_reporting_multiple.await_count == 3
     assert f"failed to set reporting on '{cluster.ep_attribute}' cluster" in caplog.text
 
 
