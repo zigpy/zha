@@ -295,6 +295,48 @@
           "available": true,
           "state": true
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Tamper",
+          "unique_id": "00:15:bc:00:44:01:11:f9-35-tamper",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": null,
+          "device_class": "tamper",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IASZoneClusterHandler",
+              "generic_id": "cluster_handler_0x0500",
+              "endpoint_id": 35,
+              "cluster": {
+                "id": 1280,
+                "name": "IAS Zone",
+                "type": "server"
+              },
+              "id": "35:0x0500",
+              "unique_id": "00:15:bc:00:44:01:11:f9:35:0x0500",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "00:15:bc:00:44:01:11:f9",
+          "endpoint_id": 35,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "zone_status"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
       }
     ],
     "button": [

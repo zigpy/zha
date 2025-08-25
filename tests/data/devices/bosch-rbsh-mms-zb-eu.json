@@ -5,10 +5,10 @@
   "manufacturer": "Bosch",
   "model": "RBSH-MMS-ZB-EU",
   "friendly_manufacturer": "Bosch",
-  "friendly_model": "RBSH-MMS-ZB-EU",
-  "name": "Bosch RBSH-MMS-ZB-EU",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "friendly_model": "BMCT-SLZ",
+  "name": "Bosch BMCT-SLZ",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4617,
   "power_source": "Mains",
@@ -130,7 +130,7 @@
               "id": "0x0000",
               "name": "window_covering_type",
               "zcl_type": "enum8",
-              "value": 6
+              "value": 8
             }
           ]
         },
@@ -459,7 +459,7 @@
         },
         {
           "cluster_id": "0xfca0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": null,
           "attributes": []
         }
       ],
@@ -525,7 +525,7 @@
         },
         {
           "cluster_id": "0xfca0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": null,
           "attributes": []
         }
       ],
@@ -573,13 +573,14 @@
         },
         {
           "cluster_id": "0xfca0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": null,
           "attributes": []
         }
       ],
       "out_clusters": []
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {
@@ -637,7 +638,7 @@
           "platform": "cover",
           "class_name": "Cover",
           "translation_key": "cover",
-          "device_class": "shutter",
+          "device_class": "blind",
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,
@@ -667,7 +668,7 @@
         "state": {
           "class_name": "Cover",
           "available": true,
-          "current_position": null,
+          "current_position": 100,
           "current_tilt_position": 100,
           "state": "open",
           "is_opening": false,
@@ -808,7 +809,288 @@
         ]
       }
     ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Long press duration",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-calibration_button_hold_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "long_press_duration",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 2,
+          "native_min_value": 0.1,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Closing duration",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-calibration_closing_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "closing_duration",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 90,
+          "native_min_value": 1,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Motor start delay",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-calibration_motor_start_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "motor_start_delay",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 20,
+          "native_min_value": 0,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Opening duration",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-calibration_opening_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "opening_duration",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 90,
+          "native_min_value": 1,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
     "select": [
+      {
+        "info_object": {
+          "fallback_name": "Device mode",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-device_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "device_mode",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "BoschDeviceMode",
+          "options": [
+            "Disabled",
+            "Cover",
+            "Light"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Switch type",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-switch_type",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "switch_type",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "BoschSwitchType",
+          "options": [
+            "Button",
+            "Button key change",
+            "Rocker switch",
+            "Rocker switch key change"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
       {
         "info_object": {
           "fallback_name": null,
@@ -1135,7 +1417,7 @@
         "state": {
           "class_name": "WindowCoveringTypeSensor",
           "available": true,
-          "state": "Shutter"
+          "state": "Tilt_blind_tilt_and_lift"
         }
       },
       {
@@ -1185,6 +1467,49 @@
           "active_power_max",
           "measurement_type"
         ]
+      },
+      {
+        "info_object": {
+          "fallback_name": "Motor state",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-motor_state",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "motor_state",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
       }
     ],
     "switch": [
@@ -1230,6 +1555,147 @@
         },
         "state": {
           "class_name": "WindowCoveringInversionSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Child lock",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-1-child_lock",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "child_lock",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "1:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "child_lock",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Child lock",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-2-child_lock",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "child_lock",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "2:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:2:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "child_lock",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Child lock",
+          "unique_id": "ab:cd:ef:12:75:e4:96:a5-3-child_lock",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "child_lock",
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfca0",
+              "endpoint_id": 3,
+              "cluster": {
+                "id": 64672,
+                "name": "BoschLightShutterControlII",
+                "type": "server"
+              },
+              "id": "3:0xfca0",
+              "unique_id": "ab:cd:ef:12:75:e4:96:a5:3:0xfca0",
+              "status": "CREATED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:75:e4:96:a5",
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "child_lock",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
           "available": true,
           "state": false,
           "inverted": false
