@@ -565,6 +565,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",
@@ -607,6 +608,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",
@@ -649,6 +651,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 3,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",
@@ -691,6 +694,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 4,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",
@@ -733,6 +737,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 5,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",
@@ -777,6 +782,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IdentifyClusterHandler",
@@ -824,6 +830,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -867,6 +874,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -910,6 +918,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "PowerConfigurationClusterHandler",
@@ -960,6 +969,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "OtaClientClusterHandler",

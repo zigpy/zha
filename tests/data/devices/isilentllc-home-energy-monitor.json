@@ -3779,6 +3779,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -3822,6 +3823,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -3865,6 +3867,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 9,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -3913,6 +3916,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 9,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -3961,6 +3965,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 9,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4008,6 +4013,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 9,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4055,6 +4061,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 9,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4103,6 +4110,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 9,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4151,6 +4159,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 10,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4199,6 +4208,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 10,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4247,6 +4257,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 10,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4294,6 +4305,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 10,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4341,6 +4353,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 10,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4389,6 +4402,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 10,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4437,6 +4451,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 11,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4485,6 +4500,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 11,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4533,6 +4549,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 11,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4580,6 +4597,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 11,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4627,6 +4645,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 11,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4675,6 +4694,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 11,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4723,6 +4743,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 12,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4771,6 +4792,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 12,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4819,6 +4841,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 12,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4866,6 +4889,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 12,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4913,6 +4937,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 12,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -4961,6 +4986,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 12,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5009,6 +5035,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 13,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5057,6 +5084,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 13,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5105,6 +5133,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 13,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5152,6 +5181,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 13,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5199,6 +5229,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 13,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5247,6 +5278,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 13,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5295,6 +5327,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 14,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5343,6 +5376,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 14,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5391,6 +5425,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 14,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5438,6 +5473,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 14,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5485,6 +5521,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 14,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5533,6 +5570,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 14,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5581,6 +5619,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 15,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5629,6 +5668,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 15,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5677,6 +5717,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 15,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5724,6 +5765,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 15,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5771,6 +5813,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 15,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5819,6 +5862,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 15,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5867,6 +5911,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 16,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5915,6 +5960,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 16,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -5963,6 +6009,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 16,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6010,6 +6057,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 16,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6057,6 +6105,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 16,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6105,6 +6154,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 16,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6153,6 +6203,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 17,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6201,6 +6252,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 17,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6249,6 +6301,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 17,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6296,6 +6349,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 17,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6343,6 +6397,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 17,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6391,6 +6446,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 17,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6439,6 +6495,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 18,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6487,6 +6544,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 18,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6535,6 +6593,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 18,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6582,6 +6641,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 18,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6629,6 +6689,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 18,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6677,6 +6738,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 18,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6725,6 +6787,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6773,6 +6836,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6821,6 +6885,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6868,6 +6933,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6915,6 +6981,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -6963,6 +7030,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7011,6 +7079,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 19,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7059,6 +7128,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 19,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7107,6 +7177,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 19,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7154,6 +7225,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 19,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7201,6 +7273,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 19,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7249,6 +7322,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 19,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7297,6 +7371,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 20,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7345,6 +7420,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 20,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7393,6 +7469,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 20,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7440,6 +7517,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 20,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7487,6 +7565,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 20,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7535,6 +7614,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 20,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7583,6 +7663,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 21,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7631,6 +7712,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 21,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7679,6 +7761,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 21,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7726,6 +7809,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 21,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7773,6 +7857,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 21,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7821,6 +7906,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 21,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7869,6 +7955,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 22,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7917,6 +8004,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 22,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -7965,6 +8053,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 22,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8012,6 +8101,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 22,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8059,6 +8149,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 22,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8107,6 +8198,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 22,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8155,6 +8247,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 23,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8203,6 +8296,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 23,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8251,6 +8345,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 23,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8298,6 +8393,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 23,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8345,6 +8441,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 23,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8393,6 +8490,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 23,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8441,6 +8539,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 24,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8489,6 +8588,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 24,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8537,6 +8637,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 24,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8584,6 +8685,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 24,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8631,6 +8733,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 24,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8679,6 +8782,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 24,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8727,6 +8831,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 25,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8775,6 +8880,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 25,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8823,6 +8929,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 25,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8870,6 +8977,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 25,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8917,6 +9025,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 25,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -8965,6 +9074,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 25,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9013,6 +9123,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9061,6 +9172,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9109,6 +9221,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9156,6 +9269,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9203,6 +9317,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9251,6 +9366,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9299,6 +9415,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 3,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9347,6 +9464,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 3,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9395,6 +9513,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 3,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9442,6 +9561,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 3,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9489,6 +9609,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 3,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9537,6 +9658,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 3,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9585,6 +9707,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 4,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9633,6 +9756,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 4,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9681,6 +9805,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 4,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9728,6 +9853,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 4,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9775,6 +9901,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 4,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9823,6 +9950,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 4,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9871,6 +9999,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 5,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9919,6 +10048,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 5,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -9967,6 +10097,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 5,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10014,6 +10145,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 5,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10061,6 +10193,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 5,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10109,6 +10242,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 5,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10157,6 +10291,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 6,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10205,6 +10340,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 6,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10253,6 +10389,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 6,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10300,6 +10437,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 6,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10347,6 +10485,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 6,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10395,6 +10534,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 6,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10443,6 +10583,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 7,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10491,6 +10632,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 7,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10539,6 +10681,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 7,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10586,6 +10729,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 7,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10633,6 +10777,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 7,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10681,6 +10826,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 7,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10729,6 +10875,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 8,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10777,6 +10924,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 8,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10825,6 +10973,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 8,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10872,6 +11021,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 8,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10919,6 +11069,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 8,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",
@@ -10967,6 +11118,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": 8,
           "cluster_handlers": [
             {
               "class_name": "ElectricalMeasurementClusterHandler",

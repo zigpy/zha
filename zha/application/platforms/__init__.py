@@ -62,6 +62,7 @@ class BaseEntityInfo:
     entity_registry_enabled_default: bool
     enabled: bool = True
     primary: bool
+    postfix: int | None
 
     # For platform entities
     cluster_handlers: list[ClusterHandlerInfo]
@@ -135,6 +136,7 @@ class BaseEntity(LogMixin, EventBase):
 
         self._unique_id: str = unique_id
         self._migrate_unique_ids: list[str] = []
+        self._postfix: int | None = None
 
         self.__previous_state: Any = None
         self._tracked_tasks: list[asyncio.Task] = []
@@ -169,6 +171,11 @@ class BaseEntity(LogMixin, EventBase):
     def enabled(self, value: bool) -> None:
         """Set the entity enabled state."""
         self._attr_enabled = value
+
+    @property
+    def postfix(self) -> int | None:
+        """Return the postfix number of the entity."""
+        return self._postfix
 
     @property
     def primary(self) -> bool:
@@ -264,6 +271,7 @@ class BaseEntity(LogMixin, EventBase):
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
             primary=self.primary,
+            postfix=self.postfix,
             # Set by platform entities
             cluster_handlers=[],
             device_ieee=None,

@@ -244,6 +244,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IkeaAirPurifierClusterHandler",
@@ -288,6 +289,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IdentifyClusterHandler",
@@ -335,6 +337,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IkeaAirPurifierClusterHandler",
@@ -393,6 +396,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IkeaAirPurifierClusterHandler",
@@ -441,6 +445,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -484,6 +489,7 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "BasicClusterHandler",
@@ -527,6 +533,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "PM25ClusterHandler",
@@ -570,6 +577,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IkeaAirPurifierClusterHandler",
@@ -613,6 +621,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IkeaAirPurifierClusterHandler",
@@ -658,6 +667,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IkeaAirPurifierClusterHandler",
@@ -705,6 +715,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "IkeaAirPurifierClusterHandler",
@@ -754,6 +765,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
+          "postfix": null,
           "cluster_handlers": [
             {
               "class_name": "OtaClientClusterHandler",
