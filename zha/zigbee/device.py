@@ -911,6 +911,11 @@ class Device(LogMixin, EventBase):
             if meta.new_translation_key is not None:
                 entity._attr_translation_key = meta.new_translation_key
 
+            if meta.new_translation_placeholders is not None:
+                entity._attr_translation_placeholders = (
+                    meta.new_translation_placeholders
+                )
+
             if meta.new_device_class is not None:
                 entity._attr_device_class = meta.new_device_class
 
