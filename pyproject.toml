@@ -15,7 +15,7 @@ license = {text = "Apache-2.0"}
 requires-python = ">=3.12"
 dependencies = [
     "zigpy==0.83.0",
-    "bellows==0.46.0",
+    "bellows==0.46.1",
     "zigpy-znp==0.14.1",
     "zigpy-deconz==0.25.2",
     "zigpy-xbee==0.21.0",
