@@ -210,9 +210,7 @@ class BaseEntity(LogMixin, EventBase):
     @property
     def translation_placeholders(self) -> dict[str, str] | None:
         """Return the translation placeholders."""
-        if hasattr(self, "_attr_translation_placeholders"):
-            return self._attr_translation_placeholders
-        return None
+        return self._attr_translation_placeholders
 
     @property
     def entity_category(self) -> EntityCategory | None:
