@@ -21,6 +21,7 @@ from tests.common import (
     get_entity,
     get_group_entity,
     join_zigpy_device,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.const import (
@@ -882,3 +883,86 @@ async def test_gateway_energy_scan(zha_gateway: Gateway) -> None:
         assert mock_scan.mock_calls == [
             call(channels=channels, duration_exp=4, count=1)
         ]
+
+
+async def test_gateway_shutdown_device_on_remove_failure(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that gateway shutdown continues when device.on_remove fails."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/centralite-3320-l.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    with patch.object(
+        zha_device, "on_remove", side_effect=Exception("Device removal failed")
+    ):
+        await zha_gateway.shutdown()
+        await zha_gateway.async_block_till_done()
+
+    assert "Failed to remove device" in caplog.text
+    assert "Device removal failed" in caplog.text
+
+
+async def test_gateway_shutdown_group_on_remove_failure(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that gateway shutdown continues when group.on_remove fails."""
+    zigpy_dev_1 = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
+
+    zha_group = await zha_gateway.async_create_zigpy_group(
+        "Test Group",
+        [GroupMemberReference(ieee=zha_device_1.ieee, endpoint_id=1)],
+    )
+    await zha_gateway.async_block_till_done()
+
+    with patch.object(
+        zha_group, "on_remove", side_effect=Exception("Group removal failed")
+    ):
+        await zha_gateway.shutdown()
+        await zha_gateway.async_block_till_done()
+
+    assert "Failed to remove group" in caplog.text
+    assert "Group removal failed" in caplog.text
+
+
+async def test_group_on_remove_entity_failure(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that group.on_remove continues when group entity removal fails."""
+    zigpy_dev_1 = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zigpy_dev_2 = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-e26-opal-1000lm.json",
+    )
+    zha_device_1 = await join_zigpy_device(zha_gateway, zigpy_dev_1)
+    zha_device_2 = await join_zigpy_device(zha_gateway, zigpy_dev_2)
+
+    members = [
+        GroupMemberReference(ieee=zha_device_1.ieee, endpoint_id=1),
+        GroupMemberReference(ieee=zha_device_2.ieee, endpoint_id=1),
+    ]
+
+    zha_group = await zha_gateway.async_create_zigpy_group("Test Group", members)
+    await zha_gateway.async_block_till_done()
+
+    group_entity = get_group_entity(zha_group, platform=Platform.LIGHT)
+
+    with patch.object(
+        group_entity, "on_remove", side_effect=Exception("Group entity removal failed")
+    ):
+        await zha_group.on_remove()
+
+    assert "Failed to remove group entity" in caplog.text
+    assert "Group entity removal failed" in caplog.text

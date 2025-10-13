@@ -1201,3 +1201,70 @@ async def test_symfonisk_events(
             )
         )
     ]
+
+
+async def test_device_on_remove_callback_failure(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that device.on_remove continues when callback fails."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-sml001.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    failing_callback = mock.Mock(side_effect=Exception("Callback failed"))
+    zha_device._on_remove_callbacks.append(failing_callback)
+
+    await zha_device.on_remove()
+
+    assert failing_callback.call_count == 1
+    assert "Failed to execute on_remove callback" in caplog.text
+    assert "Callback failed" in caplog.text
+
+
+async def test_device_on_remove_platform_entity_failure(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that device.on_remove continues when platform entity removal fails."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-sml001.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    switch_entity = get_entity(zha_device, platform=Platform.SWITCH)
+    with patch.object(
+        switch_entity, "on_remove", side_effect=Exception("Entity removal failed")
+    ):
+        await zha_device.on_remove()
+
+    assert "Failed to remove platform entity" in caplog.text
+    assert "Entity removal failed" in caplog.text
+
+
+async def test_device_on_remove_pending_entity_failure(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that device.on_remove continues when pending entity removal fails."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-sml001.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    update_entity = get_entity(zha_device, platform=Platform.UPDATE)
+    zha_device._pending_entities.append(update_entity)
+
+    with patch.object(
+        update_entity,
+        "on_remove",
+        side_effect=Exception("Pending entity removal failed"),
+    ):
+        await zha_device.on_remove()
+
+    assert "Failed to remove pending entity" in caplog.text
+    assert "Pending entity removal failed" in caplog.text
