@@ -1021,13 +1021,37 @@ class Device(LogMixin, EventBase):
     async def on_remove(self) -> None:
         """Cancel tasks this device owns."""
         for callback in self._on_remove_callbacks:
-            callback()
+            try:
+                callback()
+            except Exception:
+                _LOGGER.warning(
+                    "Failed to execute on_remove callback %s for device %s",
+                    callback,
+                    self,
+                    exc_info=True,
+                )
 
         for platform_entity in self._platform_entities.values():
-            await platform_entity.on_remove()
+            try:
+                await platform_entity.on_remove()
+            except Exception:
+                _LOGGER.warning(
+                    "Failed to remove platform entity %s for device %s",
+                    platform_entity,
+                    self,
+                    exc_info=True,
+                )
 
         for entity in self._pending_entities:
-            await entity.on_remove()
+            try:
+                await entity.on_remove()
+            except Exception:
+                _LOGGER.warning(
+                    "Failed to remove pending entity %s for device %s",
+                    entity,
+                    self,
+                    exc_info=True,
+                )
 
     def async_get_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get all clusters for this device."""

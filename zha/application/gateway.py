@@ -741,10 +741,24 @@ class Gateway(AsyncUtilMixin, EventBase):
         self._device_availability_checker.stop()
 
         for device in self._devices.values():
-            await device.on_remove()
+            try:
+                await device.on_remove()
+            except Exception:
+                _LOGGER.warning(
+                    "Failed to remove device %s during shutdown",
+                    device,
+                    exc_info=True,
+                )
 
         for group in self._groups.values():
-            await group.on_remove()
+            try:
+                await group.on_remove()
+            except Exception:
+                _LOGGER.warning(
+                    "Failed to remove group %s during shutdown",
+                    group,
+                    exc_info=True,
+                )
 
         _LOGGER.debug("Shutting down ZHA ControllerApplication")
         if self.application_controller is not None:
