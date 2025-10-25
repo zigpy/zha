@@ -840,9 +840,13 @@ class Device(LogMixin, EventBase):
             and self.identify_ch is not None
             and not self.skip_configuration
         ):
-            await self.identify_ch.trigger_effect(
-                effect_id=Identify.EffectIdentifier.Okay,
-                effect_variant=Identify.EffectVariant.Default,
+            self._gateway.async_create_task(
+                self.identify_ch.trigger_effect(
+                    effect_id=Identify.EffectIdentifier.Okay,
+                    effect_variant=Identify.EffectVariant.Default,
+                ),
+                name=f"({self.nwk},{self.model}) trigger_effect identify",
+                eager_start=True,
             )
 
     def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:
