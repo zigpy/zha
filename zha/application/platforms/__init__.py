@@ -402,6 +402,11 @@ class PlatformEntity(BaseEntity):
         if entity_metadata.translation_key:
             self._attr_translation_key = entity_metadata.translation_key
 
+        if entity_metadata.translation_placeholders:
+            self._attr_translation_placeholders = (
+                entity_metadata.translation_placeholders
+            )
+
         if unique_id_suffix := entity_metadata.unique_id_suffix:
             self._unique_id_suffix = unique_id_suffix
         elif has_attribute_name:

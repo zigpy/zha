@@ -1039,6 +1039,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
             new_entity_category=EntityType.CONFIG,
             new_entity_registry_enabled_default=False,
             new_translation_key="custom_lqi_key",
+            new_translation_placeholders={"placeholder": "123"},
             new_fallback_name="Custom LQI Name",
         )
         .change_entity_metadata(
@@ -1076,6 +1077,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     assert lqi_entity._attr_entity_category == EntityType.CONFIG
     assert lqi_entity._attr_entity_registry_enabled_default is False
     assert lqi_entity._attr_translation_key == "custom_lqi_key"
+    assert lqi_entity._attr_translation_placeholders == {"placeholder": "123"}
     assert lqi_entity._attr_fallback_name == "Custom LQI Name"
 
     # Verify metadata changes from second filter - function-based match
@@ -1083,6 +1085,42 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
 
     button_entity = get_entity(zha_device, platform=Platform.BUTTON)
     assert button_entity._attr_primary is True
+
+
+async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
+    """Test quirks v2 translation_placeholders on entities."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .sensor(
+            PowerConfiguration.AttributeDefs.battery_voltage.name,
+            PowerConfiguration.cluster_id,
+            translation_key="some_battery_sensor",
+            translation_placeholders={"sensor_index": "1"},
+            fallback_name="Some battery sensor {sensor_index}",
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="battery_voltage"
+    )
+    assert entity is not None
+
+    assert (
+        entity.translation_placeholders
+        == entity.info_object.translation_placeholders
+        == {"sensor_index": "1"}
+    )
 
 
 async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
