@@ -1,0 +1,1221 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:8c:9e:5f:db",
+  "nwk": "0xAFEE",
+  "manufacturer": "_TZE204_qyr2m29i",
+  "model": "TS0601",
+  "friendly_manufacturer": "_TZE204_qyr2m29i",
+  "friendly_model": "TS0601",
+  "name": "_TZE204_qyr2m29i TS0601",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "quirk_id": null,
+  "manufacturer_code": 4417,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-10-28T18:05:40.168832+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4417,
+    "maximum_buffer_size": 66,
+    "maximum_incoming_transfer_size": 66,
+    "server_mask": 10752,
+    "maximum_outgoing_transfer_size": 66,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "SMART_PLUG",
+        "id": 81
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 74
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "_TZE204_qyr2m29i"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "TS0601"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "value": 2
+            },
+            {
+              "id": "0x0034",
+              "name": "battery_rated_voltage",
+              "zcl_type": "uint8",
+              "value": 15
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0201",
+          "endpoint_attribute": "thermostat",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "abs_max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 3000
+            },
+            {
+              "id": "0x0003",
+              "name": "abs_min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 500
+            },
+            {
+              "id": "0x001b",
+              "name": "ctrl_sequence_of_oper",
+              "zcl_type": "enum8",
+              "value": 2
+            },
+            {
+              "id": "0x0010",
+              "name": "local_temperature_calibration",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0016",
+              "name": "max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0015",
+              "name": "min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0008",
+              "name": "pi_heating_demand",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0030",
+              "name": "setpoint_change_source",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0032",
+              "name": "setpoint_change_source_timestamp",
+              "zcl_type": "UTC",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xef00",
+          "endpoint_attribute": "tuya_manufacturer",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 74
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {},
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": "Window open",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-window_open",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "window",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "window_open"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
+    "climate": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-513",
+          "migrate_unique_ids": [],
+          "platform": "climate",
+          "class_name": "Thermostat",
+          "translation_key": "thermostat",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "TuyaThermostatV2",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "max_temp": 30.0,
+          "min_temp": 5.0,
+          "supported_features": 385,
+          "fan_modes": null,
+          "preset_modes": [],
+          "hvac_modes": [
+            "off",
+            "heat"
+          ]
+        },
+        "state": {
+          "class_name": "Thermostat",
+          "available": true,
+          "current_temperature": null,
+          "outdoor_temperature": null,
+          "target_temperature": null,
+          "target_temperature_high": null,
+          "target_temperature_low": null,
+          "hvac_action": null,
+          "hvac_mode": null,
+          "preset_mode": "none",
+          "fan_mode": "auto",
+          "system_mode": null,
+          "occupancy": null,
+          "occupied_cooling_setpoint": null,
+          "occupied_heating_setpoint": null,
+          "pi_heating_demand": null,
+          "pi_cooling_demand": null,
+          "unoccupied_cooling_setpoint": null,
+          "unoccupied_heating_setpoint": null
+        },
+        "extra_state_attributes": [
+          "occupancy",
+          "occupied_cooling_setpoint",
+          "occupied_heating_setpoint",
+          "pi_cooling_demand",
+          "pi_heating_demand",
+          "system_mode",
+          "unoccupied_cooling_setpoint",
+          "unoccupied_heating_setpoint"
+        ]
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Comfort temperature",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-comfort_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "comfort_temperature",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 30,
+          "native_min_value": 5,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Eco temperature",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-eco_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "eco_temperature",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 30,
+          "native_min_value": 5,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Holiday temperature",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-holiday_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "holiday_temperature",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 30,
+          "native_min_value": 5,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Local temperature calibration",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-local_temperature_calibration",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "local_temperature_calibration",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 6,
+          "native_min_value": -6,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Max temperature",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-max_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "max_temperature",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 35,
+          "native_min_value": 15,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Min temperature",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-min_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "min_temperature",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 15,
+          "native_min_value": 1,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": "Display brightness",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-display_brightness",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "display_brightness",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaDisplayBrightness",
+          "options": [
+            "High",
+            "Medium",
+            "Low"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Display orientation",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-display_orientation",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "display_orientation",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaDisplayOrientation",
+          "options": [
+            "Up",
+            "Down"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Hysteresis mode",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-hysteresis_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "hysteresis_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaHysteresis",
+          "options": [
+            "Comfort",
+            "Eco"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Motor thrust",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-motor_thrust",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "motor_thrust",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaMotorThrust",
+          "options": [
+            "Strong",
+            "Middle",
+            "Weak"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Preset mode",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-preset_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "preset_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaPresetMode",
+          "options": [
+            "Eco",
+            "Auto",
+            "Off",
+            "Heat"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-1",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0x0001",
+              "status": "INITIALIZED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": null,
+          "battery_size": "AA",
+          "battery_quantity": 2
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-513-hvac_action",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ThermostatHVACAction",
+          "translation_key": "hvac_action",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "TuyaThermostatV2",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "ThermostatHVACAction",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Valve position",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-valve_position",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "valve_position",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": "Child lock",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-child_lock",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "child_lock",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "child_lock",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Open window detection",
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-window_detection",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "window_detection",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "window_detection",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8c:9e:5f:db-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:8c:9e:5f:db:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8c:9e:5f:db",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x0000004a",
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

@@ -1,0 +1,986 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:ab:88:33:32",
+  "nwk": "0x37E6",
+  "manufacturer": "_TZE200_bkkmqmyo",
+  "model": "TS0601",
+  "friendly_manufacturer": "_TZE200_bkkmqmyo",
+  "friendly_model": "TS0601",
+  "name": "_TZE200_bkkmqmyo TS0601",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.ts0601_din_power.HikingPowerMeter",
+  "quirk_id": null,
+  "manufacturer_code": 4098,
+  "power_source": "Mains",
+  "lqi": 160,
+  "rssi": -60,
+  "last_seen": "2025-08-11T23:22:01.680726+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4098,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "SMART_PLUG",
+        "id": 81
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 65
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "_TZE200_bkkmqmyo"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "TS0601"
+            },
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0xfffe",
+              "name": "reporting_status",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0702",
+          "endpoint_attribute": "smartenergy_metering",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "current_summ_delivered",
+              "zcl_type": "uint48",
+              "value": 1396.8
+            },
+            {
+              "id": "0x0001",
+              "name": "current_summ_received",
+              "zcl_type": "uint48",
+              "value": 1253.2
+            },
+            {
+              "id": "0x0100",
+              "name": "current_tier1_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0102",
+              "name": "current_tier2_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0104",
+              "name": "current_tier3_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0106",
+              "name": "current_tier4_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0108",
+              "name": "current_tier5_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x010a",
+              "name": "current_tier6_summ_delivered",
+              "zcl_type": "uint48",
+              "unsupported": true
+            },
+            {
+              "id": "0x0304",
+              "name": "demand_formatting",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0302",
+              "name": "divisor",
+              "zcl_type": "uint24",
+              "unsupported": true
+            },
+            {
+              "id": "0x0400",
+              "name": "instantaneous_demand",
+              "zcl_type": "int24",
+              "unsupported": true
+            },
+            {
+              "id": "0x0306",
+              "name": "metering_device_type",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0301",
+              "name": "multiplier",
+              "zcl_type": "uint24",
+              "unsupported": true
+            },
+            {
+              "id": "0x0200",
+              "name": "status",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0303",
+              "name": "summation_formatting",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0300",
+              "name": "unit_of_measure",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0b04",
+          "endpoint_attribute": "electrical_measurement",
+          "attributes": [
+            {
+              "id": "0x0603",
+              "name": "ac_current_divisor",
+              "zcl_type": "uint16",
+              "value": 1000
+            },
+            {
+              "id": "0x0602",
+              "name": "ac_current_multiplier",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0300",
+              "name": "ac_frequency",
+              "zcl_type": "uint16",
+              "value": 5000
+            },
+            {
+              "id": "0x0401",
+              "name": "ac_frequency_divisor",
+              "zcl_type": "uint16",
+              "value": 100
+            },
+            {
+              "id": "0x0302",
+              "name": "ac_frequency_max",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0400",
+              "name": "ac_frequency_multiplier",
+              "zcl_type": "uint16",
+              "value": 1
+            },
+            {
+              "id": "0x0605",
+              "name": "ac_power_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0604",
+              "name": "ac_power_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0601",
+              "name": "ac_voltage_divisor",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0600",
+              "name": "ac_voltage_multiplier",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x050b",
+              "name": "active_power",
+              "zcl_type": "int16",
+              "value": 8
+            },
+            {
+              "id": "0x050d",
+              "name": "active_power_max",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x090d",
+              "name": "active_power_max_ph_b",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0d",
+              "name": "active_power_max_ph_c",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x090b",
+              "name": "active_power_ph_b",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0b",
+              "name": "active_power_ph_c",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x050f",
+              "name": "apparent_power",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "measurement_type",
+              "zcl_type": "map32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0403",
+              "name": "power_divisor",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0510",
+              "name": "power_factor",
+              "zcl_type": "int8",
+              "value": 7
+            },
+            {
+              "id": "0x0910",
+              "name": "power_factor_ph_b",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a10",
+              "name": "power_factor_ph_c",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0402",
+              "name": "power_multiplier",
+              "zcl_type": "uint32",
+              "unsupported": true
+            },
+            {
+              "id": "0x050e",
+              "name": "reactive_power",
+              "zcl_type": "int16",
+              "value": 102
+            },
+            {
+              "id": "0x0508",
+              "name": "rms_current",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x050a",
+              "name": "rms_current_max",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x090a",
+              "name": "rms_current_max_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a0a",
+              "name": "rms_current_max_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0908",
+              "name": "rms_current_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a08",
+              "name": "rms_current_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0505",
+              "name": "rms_voltage",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0507",
+              "name": "rms_voltage_max",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0907",
+              "name": "rms_voltage_max_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a07",
+              "name": "rms_voltage_max_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0905",
+              "name": "rms_voltage_ph_b",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0a05",
+              "name": "rms_voltage_ph_c",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0304",
+              "name": "total_active_power",
+              "zcl_type": "int32",
+              "unsupported": true
+            },
+            {
+              "id": "0x0305",
+              "name": "total_reactive_power",
+              "zcl_type": "int32",
+              "value": 50147
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xef00",
+          "endpoint_attribute": "tuya_manufacturer",
+          "attributes": [
+            {
+              "id": "0x0201",
+              "name": "energy_delivered",
+              "zcl_type": "uint32",
+              "value": 139680
+            },
+            {
+              "id": "0x0266",
+              "name": "energy_received",
+              "zcl_type": "uint32",
+              "value": 125320
+            },
+            {
+              "id": "0x0269",
+              "name": "frequency",
+              "zcl_type": "uint16",
+              "value": 5000
+            },
+            {
+              "id": "0x0267",
+              "name": "power",
+              "zcl_type": "int32",
+              "value": 8
+            },
+            {
+              "id": "0x026f",
+              "name": "power_factor",
+              "zcl_type": "uint16",
+              "value": 77
+            },
+            {
+              "id": "0x026e",
+              "name": "reactive_power",
+              "zcl_type": "int16",
+              "value": 102
+            },
+            {
+              "id": "0x0110",
+              "name": "switch",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x026d",
+              "name": "total_reactive_energy",
+              "zcl_type": "int32",
+              "value": 50147
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 65
+            }
+          ]
+        }
+      ]
+    },
+    "16": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "SMART_PLUG",
+        "id": 81
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "_TZE200_bkkmqmyo",
+        "TS0601"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
+        "input_clusters": [
+          "0x0000",
+          "0x0004",
+          "0x0005",
+          "0xef00"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 160
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": -60
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-1794-summation_delivered",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SmartEnergySummation",
+          "translation_key": "summation_delivered",
+          "translation_placeholders": null,
+          "device_class": "energy",
+          "state_class": "total_increasing",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1794,
+                "name": "TuyaElectricalMeasurement",
+                "type": "server"
+              },
+              "id": "1:0x0702",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0702",
+              "status": "INITIALIZED",
+              "value_attribute": "instantaneous_demand"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 3,
+          "unit": "kWh"
+        },
+        "state": {
+          "class_name": "SmartEnergySummation",
+          "available": true,
+          "state": 1396.8,
+          "zcl_unit_of_measurement": 0
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-1794-summation_received",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SmartEnergySummationReceived",
+          "translation_key": "summation_received",
+          "translation_placeholders": null,
+          "device_class": "energy",
+          "state_class": "total_increasing",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1794,
+                "name": "TuyaElectricalMeasurement",
+                "type": "server"
+              },
+              "id": "1:0x0702",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0702",
+              "status": "INITIALIZED",
+              "value_attribute": "instantaneous_demand"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 3,
+          "unit": "kWh"
+        },
+        "state": {
+          "class_name": "SmartEnergySummationReceived",
+          "available": true,
+          "state": 1253.2,
+          "zcl_unit_of_measurement": 0
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-2820",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "PolledElectricalMeasurement",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0b04",
+              "status": "INITIALIZED",
+              "value_attribute": "ac_voltage_multiplier"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 1,
+          "unit": "W"
+        },
+        "state": {
+          "class_name": "PolledElectricalMeasurement",
+          "available": true,
+          "state": 8.0
+        },
+        "extra_state_attributes": [
+          "active_power_max",
+          "measurement_type"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-2820-ac_frequency",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementFrequency",
+          "translation_key": "ac_frequency",
+          "translation_placeholders": null,
+          "device_class": "frequency",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0b04",
+              "status": "INITIALIZED",
+              "value_attribute": "ac_voltage_multiplier"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 1,
+          "unit": "Hz"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementFrequency",
+          "available": true,
+          "state": 50.0
+        },
+        "extra_state_attributes": [
+          "ac_frequency_max",
+          "measurement_type"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-2820-power_factor",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementPowerFactor",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "power_factor",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0b04",
+              "status": "INITIALIZED",
+              "value_attribute": "ac_voltage_multiplier"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 1,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementPowerFactor",
+          "available": true,
+          "state": 7
+        },
+        "extra_state_attributes": [
+          "measurement_type"
+        ]
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-16",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 16,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "16:0x0006",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:16:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 16,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 1,
+          "available": true
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ab:88:33:32-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:ab:88:33:32:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ab:88:33:32",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x00000041",
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

@@ -1,0 +1,743 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:d5:c9:be:9b",
+  "nwk": "0x0868",
+  "manufacturer": "Signify Netherlands B.V.",
+  "model": "SML003",
+  "friendly_manufacturer": "Signify Netherlands B.V.",
+  "friendly_model": "SML003",
+  "name": "Signify Netherlands B.V. SML003",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.philips.motion.SignifyMotion",
+  "quirk_id": null,
+  "manufacturer_code": 4107,
+  "power_source": "Battery or Unknown",
+  "lqi": 61,
+  "rssi": null,
+  "last_seen": "2025-10-16T11:42:09.835709+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4107,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 128,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 128,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "OCCUPANCY_SENSOR",
+        "id": 263
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Signify Netherlands B.V."
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "SML003"
+            },
+            {
+              "id": "0x0033",
+              "name": "trigger_indicator",
+              "zcl_type": "bool",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 139
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 28
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0400",
+          "endpoint_attribute": "illuminance",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "uint16",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0402",
+          "endpoint_attribute": "temperature",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 2081
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0406",
+          "endpoint_attribute": "philips_occupancy",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x0030",
+              "name": "sensitivity",
+              "zcl_type": "uint8",
+              "value": 3
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 33568006
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "Signify Netherlands B.V.",
+        "SML003"
+      ],
+      [
+        "Signify Netherlands B.V.",
+        "SML004"
+      ]
+    ],
+    "endpoints": {
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0107",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0400",
+          "0x0402",
+          "0x0406"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0006",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-1030",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "HueOccupancy",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "occupancy",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1030,
+                "name": "PhilipsOccupancySensing",
+                "type": "server"
+              },
+              "id": "2:0x0406",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0406",
+              "status": "INITIALIZED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "occupancy"
+        },
+        "state": {
+          "class_name": "HueOccupancy",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-6",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "Opening",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "opening",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "client"
+              },
+              "id": "2:0x0006",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0006",
+              "status": "CONFIGURED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "on_off"
+        },
+        "state": {
+          "class_name": "Opening",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-3",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "2:0x0003",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0003",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-1030-motion_sensitivity",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "HueV2MotionSensitivity",
+          "translation_key": "motion_sensitivity",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1030,
+                "name": "PhilipsOccupancySensing",
+                "type": "server"
+              },
+              "id": "2:0x0406",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0406",
+              "status": "INITIALIZED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "enum": "HueV2MotionSensitivities",
+          "options": [
+            "Lowest",
+            "Low",
+            "Medium",
+            "High",
+            "Highest"
+          ]
+        },
+        "state": {
+          "class_name": "HueV2MotionSensitivity",
+          "available": true,
+          "state": "High"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "2:0x0000",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": 61
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "2:0x0000",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-1",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "2:0x0001",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0001",
+              "status": "INITIALIZED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 69.5,
+          "battery_voltage": 2.8
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-1024",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Illuminance",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "illuminance",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IlluminanceMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0400",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1024,
+                "name": "Illuminance Measurement",
+                "type": "server"
+              },
+              "id": "2:0x0400",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0400",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "lx"
+        },
+        "state": {
+          "class_name": "Illuminance",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-1026",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Temperature",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TemperatureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0402",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1026,
+                "name": "Temperature Measurement",
+                "type": "server"
+              },
+              "id": "2:0x0402",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0402",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "\u00b0C"
+        },
+        "state": {
+          "class_name": "Temperature",
+          "available": true,
+          "state": 20.81
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-0-trigger_indicator",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "HueMotionTriggerIndicatorSwitch",
+          "translation_key": "trigger_indicator",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 0,
+                "name": "BasicCluster",
+                "type": "server"
+              },
+              "id": "2:0x0000",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "trigger_indicator",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "HueMotionTriggerIndicatorSwitch",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "2:0x0019_client",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x02003506",
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

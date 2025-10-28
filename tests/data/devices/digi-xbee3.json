@@ -1,0 +1,1421 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:e9:3f:91:6d",
+  "nwk": "0x6ADB",
+  "manufacturer": "Digi",
+  "model": "XBee3",
+  "friendly_manufacturer": "Digi",
+  "friendly_model": "XBee3",
+  "name": "Digi XBee3",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xbee.xbee3_io.XBee3Sensor",
+  "quirk_id": null,
+  "manufacturer_code": 4126,
+  "power_source": "Mains",
+  "lqi": 255,
+  "rssi": -63,
+  "last_seen": "2025-08-15T21:07:49.512697+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4126,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 255,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 255,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "208": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000c",
+          "endpoint_attribute": "analog_input",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "209": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x000c",
+          "endpoint_attribute": "analog_input",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "210": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x000c",
+          "endpoint_attribute": "analog_input",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "211": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x000c",
+          "endpoint_attribute": "analog_input",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "212": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "213": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "214": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "215": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000c",
+          "endpoint_attribute": "analog_input",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "216": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "217": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "218": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 1023.0
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 0.0
+            },
+            {
+              "id": "0x0051",
+              "name": "out_of_service",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1.0
+            },
+            {
+              "id": "0x006f",
+              "name": "status_flags",
+              "zcl_type": "map8",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "219": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 1023.0
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 0.0
+            },
+            {
+              "id": "0x0051",
+              "name": "out_of_service",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1.0
+            },
+            {
+              "id": "0x006f",
+              "name": "status_flags",
+              "zcl_type": "map8",
+              "value": 0
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "220": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "221": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "222": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "LEVEL_CONTROL_SWITCH",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    },
+    "230": {
+      "profile_id": 49413,
+      "device_type": {
+        "name": "unknown",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x00a1",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0021",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ]
+    },
+    "232": {
+      "profile_id": 49413,
+      "device_type": {
+        "name": "unknown",
+        "id": 1
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0007",
+              "name": "power_source",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0011",
+          "endpoint_attribute": "xbee_serial_data",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0092",
+          "endpoint_attribute": "binary_input",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0008",
+          "endpoint_attribute": "level",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0011",
+          "endpoint_attribute": "xbee_serial_data",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "endpoints": {
+      "232": {
+        "profile_id": "0xc105",
+        "device_type": "0x0001",
+        "input_clusters": [],
+        "output_clusters": []
+      },
+      "230": {
+        "profile_id": "0xc105",
+        "device_type": "0x0001",
+        "input_clusters": [],
+        "output_clusters": []
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-218-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 218,
+              "cluster": {
+                "id": 13,
+                "name": "XBeePWM",
+                "type": "server"
+              },
+              "id": "218:0x000d",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:218:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 218,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 1023.0,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-219-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 219,
+              "cluster": {
+                "id": 13,
+                "name": "XBeePWM",
+                "type": "server"
+              },
+              "id": "219:0x000d",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:219:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 219,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 1023.0,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-208-12",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DigiAnalogInput",
+          "translation_key": "analog_input",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogInputClusterHandler",
+              "generic_id": "cluster_handler_0x000c",
+              "endpoint_id": 208,
+              "cluster": {
+                "id": 12,
+                "name": "XBeeAnalogInput",
+                "type": "server"
+              },
+              "id": "208:0x000c",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:208:0x000c",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 208,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DigiAnalogInput",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-209-12",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DigiAnalogInput",
+          "translation_key": "analog_input",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogInputClusterHandler",
+              "generic_id": "cluster_handler_0x000c",
+              "endpoint_id": 209,
+              "cluster": {
+                "id": 12,
+                "name": "XBeeAnalogInput",
+                "type": "server"
+              },
+              "id": "209:0x000c",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:209:0x000c",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 209,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DigiAnalogInput",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-210-12",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DigiAnalogInput",
+          "translation_key": "analog_input",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogInputClusterHandler",
+              "generic_id": "cluster_handler_0x000c",
+              "endpoint_id": 210,
+              "cluster": {
+                "id": 12,
+                "name": "XBeeAnalogInput",
+                "type": "server"
+              },
+              "id": "210:0x000c",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:210:0x000c",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 210,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DigiAnalogInput",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-211-12",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DigiAnalogInput",
+          "translation_key": "analog_input",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogInputClusterHandler",
+              "generic_id": "cluster_handler_0x000c",
+              "endpoint_id": 211,
+              "cluster": {
+                "id": 12,
+                "name": "XBeeAnalogInput",
+                "type": "server"
+              },
+              "id": "211:0x000c",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:211:0x000c",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 211,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DigiAnalogInput",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-215-12",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DigiAnalogInput",
+          "translation_key": "analog_input",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogInputClusterHandler",
+              "generic_id": "cluster_handler_0x000c",
+              "endpoint_id": 215,
+              "cluster": {
+                "id": 12,
+                "name": "XBeeAnalogInput",
+                "type": "server"
+              },
+              "id": "215:0x000c",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:215:0x000c",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 215,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DigiAnalogInput",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-208-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 208,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "208:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:208:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 208,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-209-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 209,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "209:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:209:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 209,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 1,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-210-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 210,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "210:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:210:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 210,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 0,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-211-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 211,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "211:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:211:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 211,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": 1,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-212-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 212,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "212:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:212:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 212,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-213-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 213,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "213:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:213:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 213,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-214-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 214,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "214:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:214:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 214,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-215-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 215,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "215:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:215:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 215,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-216-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 216,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "216:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:216:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 216,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-217-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 217,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "217:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:217:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 217,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-218-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 218,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "218:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:218:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 218,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-219-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 219,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "219:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:219:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 219,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-220-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 220,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "220:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:220:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 220,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-221-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 221,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "221:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:221:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 221,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e9:3f:91:6d-222-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 222,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "222:0x0006",
+              "unique_id": "ab:cd:ef:12:e9:3f:91:6d:222:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e9:3f:91:6d",
+          "endpoint_id": 222,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

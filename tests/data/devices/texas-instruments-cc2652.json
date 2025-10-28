@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:6a:30:e1:65",
+  "nwk": "0xFF51",
+  "manufacturer": "Texas Instruments",
+  "model": "CC2652",
+  "friendly_manufacturer": "Texas Instruments",
+  "friendly_model": "CC2652",
+  "name": "Texas Instruments CC2652",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "quirk_id": null,
+  "manufacturer_code": 0,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-10-28T18:05:43.379814+00:00",
+  "available": true,
+  "device_type": "Coordinator",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Coordinator",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 143,
+    "manufacturer_code": 0,
+    "maximum_buffer_size": 80,
+    "maximum_incoming_transfer_size": 160,
+    "server_mask": 11265,
+    "maximum_outgoing_transfer_size": 160,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "IAS_CONTROL",
+        "id": 1024
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Texas Instruments"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "Coordinator"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0501",
+          "endpoint_attribute": "ias_ace",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0020",
+          "endpoint_attribute": "poll_control",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0500",
+          "endpoint_attribute": "ias_zone",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0502",
+          "endpoint_attribute": "ias_wd",
+          "attributes": []
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 49246,
+      "device_type": {
+        "name": "CONTROLLER",
+        "id": 2080
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        }
+      ],
+      "out_clusters": []
+    }
+  },
+  "zha_lib_entities": {},
+  "neighbors": [],
+  "routes": []
+}

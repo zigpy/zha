@@ -1,0 +1,2372 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+  "nwk": "0x423A",
+  "manufacturer": "Danfoss",
+  "model": "eTRV0103",
+  "friendly_manufacturer": "Danfoss",
+  "friendly_model": "eTRV0103",
+  "name": "Danfoss eTRV0103",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.danfoss.thermostat.DanfossThermostat",
+  "quirk_id": "danfoss.ally_thermostat",
+  "manufacturer_code": 4678,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-10-28T18:05:40.322980+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4678,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "THERMOSTAT",
+        "id": 769
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Danfoss"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "eTRV0103"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 70
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 27
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "time",
+              "zcl_type": "UTC",
+              "value": 779375341
+            },
+            {
+              "id": "0x0001",
+              "name": "time_status",
+              "zcl_type": "map8",
+              "value": 2
+            },
+            {
+              "id": "0x0002",
+              "name": "time_zone",
+              "zcl_type": "int32",
+              "value": -3600
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0020",
+          "endpoint_attribute": "poll_control",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "checkin_interval",
+              "zcl_type": "uint32",
+              "value": 13200
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0201",
+          "endpoint_attribute": "thermostat",
+          "attributes": [
+            {
+              "id": "0x0006",
+              "name": "abs_max_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0004",
+              "name": "abs_max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 3500
+            },
+            {
+              "id": "0x0005",
+              "name": "abs_min_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0003",
+              "name": "abs_min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 500
+            },
+            {
+              "id": "0x404c",
+              "name": "adaptation_run_control",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x404e",
+              "name": "adaptation_run_settings",
+              "zcl_type": "map8",
+              "value": 1
+            },
+            {
+              "id": "0x404d",
+              "name": "adaptation_run_status",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x4020",
+              "name": "control_algorithm_scale_factor",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x001b",
+              "name": "ctrl_sequence_of_oper",
+              "zcl_type": "enum8",
+              "value": 2
+            },
+            {
+              "id": "0x4010",
+              "name": "exercise_day_of_week",
+              "zcl_type": "enum8",
+              "value": 4
+            },
+            {
+              "id": "0x4011",
+              "name": "exercise_trigger_time",
+              "zcl_type": "uint16",
+              "value": 660
+            },
+            {
+              "id": "0x4015",
+              "name": "external_measured_room_sensor",
+              "zcl_type": "int16",
+              "value": 2080
+            },
+            {
+              "id": "0x4003",
+              "name": "external_open_window_detected",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4030",
+              "name": "heat_available",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x4031",
+              "name": "heat_required",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4032",
+              "name": "load_balancing_enable",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x404a",
+              "name": "load_estimate",
+              "zcl_type": "int16",
+              "value": 437
+            },
+            {
+              "id": "0x4040",
+              "name": "load_room_mean",
+              "zcl_type": "int16",
+              "value": -8000
+            },
+            {
+              "id": "0x0000",
+              "name": "local_temperature",
+              "zcl_type": "int16",
+              "value": 2014
+            },
+            {
+              "id": "0x0010",
+              "name": "local_temperature_calibration",
+              "zcl_type": "int8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0018",
+              "name": "max_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0016",
+              "name": "max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 3500
+            },
+            {
+              "id": "0x0017",
+              "name": "min_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0015",
+              "name": "min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "value": 500
+            },
+            {
+              "id": "0x4012",
+              "name": "mounting_mode_active",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4013",
+              "name": "mounting_mode_control",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x0002",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "occupied_cooling_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "occupied_heating_setpoint",
+              "zcl_type": "int16",
+              "value": 500
+            },
+            {
+              "id": "0x4000",
+              "name": "open_window_detection",
+              "zcl_type": "enum8",
+              "value": 1
+            },
+            {
+              "id": "0x4014",
+              "name": "orientation",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0007",
+              "name": "pi_cooling_demand",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0008",
+              "name": "pi_heating_demand",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x404f",
+              "name": "preheat_status",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x4050",
+              "name": "preheat_time",
+              "zcl_type": "uint32",
+              "value": 0
+            },
+            {
+              "id": "0x4016",
+              "name": "radiator_covered",
+              "zcl_type": "bool",
+              "value": 1
+            },
+            {
+              "id": "0x404b",
+              "name": "regulation_setpoint_offset",
+              "zcl_type": "int8",
+              "value": 0
+            },
+            {
+              "id": "0x001e",
+              "name": "running_mode",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0029",
+              "name": "running_state",
+              "zcl_type": "map16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0030",
+              "name": "setpoint_change_source",
+              "zcl_type": "enum8",
+              "value": 2
+            },
+            {
+              "id": "0x001c",
+              "name": "system_mode",
+              "zcl_type": "enum8",
+              "value": 4
+            },
+            {
+              "id": "0x0013",
+              "name": "unoccupied_cooling_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0014",
+              "name": "unoccupied_heating_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x4051",
+              "name": "window_open_feature",
+              "zcl_type": "bool",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0204",
+          "endpoint_attribute": "thermostat_ui",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "keypad_lockout",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x4000",
+              "name": "viewing_direction",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0b05",
+          "endpoint_attribute": "diagnostic",
+          "attributes": [
+            {
+              "id": "0x4021",
+              "name": "control_diagnostics",
+              "zcl_type": "octstr",
+              "value": {
+                "__type": "<class 'bytes'>",
+                "repr": "b''"
+              }
+            },
+            {
+              "id": "0x4010",
+              "name": "motor_step_counter",
+              "zcl_type": "uint32",
+              "value": 63774
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_error_code",
+              "zcl_type": "map16",
+              "value": 512
+            }
+          ]
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "value": 20
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "Danfoss",
+        "eTRV0100"
+      ],
+      [
+        "Danfoss",
+        "eTRV0101"
+      ],
+      [
+        "Danfoss",
+        "eTRV0103"
+      ],
+      [
+        "D5X84YU",
+        "eT093WRO"
+      ],
+      [
+        "D5X84YU",
+        "eT093WRG"
+      ],
+      [
+        "Danfoss",
+        "TRV001"
+      ],
+      [
+        "Danfoss",
+        "TRV003"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0301",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x000a",
+          "0x0020",
+          "0x0201",
+          "0x0204",
+          "0x0b05"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-heat_required",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "DanfossHeatRequired",
+          "translation_key": "heat_required",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "heat_required"
+        },
+        "state": {
+          "class_name": "DanfossHeatRequired",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-mounting_mode_active",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "DanfossMountingModeActive",
+          "translation_key": "mounting_mode_active",
+          "translation_placeholders": null,
+          "device_class": "opening",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "mounting_mode_active"
+        },
+        "state": {
+          "class_name": "DanfossMountingModeActive",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-preheat_status",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "DanfossPreheatStatus",
+          "translation_key": "preheat_status",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "preheat_status"
+        },
+        "state": {
+          "class_name": "DanfossPreheatStatus",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-3",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0003",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "climate": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1",
+          "migrate_unique_ids": [],
+          "platform": "climate",
+          "class_name": "Thermostat",
+          "translation_key": "thermostat",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "max_temp": 35.0,
+          "min_temp": 5.0,
+          "supported_features": 385,
+          "fan_modes": null,
+          "preset_modes": [],
+          "hvac_modes": [
+            "off",
+            "heat"
+          ]
+        },
+        "state": {
+          "class_name": "Thermostat",
+          "available": true,
+          "current_temperature": 20.14,
+          "outdoor_temperature": null,
+          "target_temperature": 5.0,
+          "target_temperature_high": null,
+          "target_temperature_low": null,
+          "hvac_action": "idle",
+          "hvac_mode": "heat",
+          "preset_mode": "none",
+          "fan_mode": "auto",
+          "system_mode": "[4]/heat",
+          "occupancy": null,
+          "occupied_cooling_setpoint": null,
+          "occupied_heating_setpoint": 500,
+          "pi_heating_demand": 0,
+          "pi_cooling_demand": null,
+          "unoccupied_cooling_setpoint": null,
+          "unoccupied_heating_setpoint": null
+        },
+        "extra_state_attributes": [
+          "occupancy",
+          "occupied_cooling_setpoint",
+          "occupied_heating_setpoint",
+          "pi_cooling_demand",
+          "pi_heating_demand",
+          "system_mode",
+          "unoccupied_cooling_setpoint",
+          "unoccupied_heating_setpoint"
+        ]
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-exercise_trigger_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "DanfossExerciseTriggerTime",
+          "translation_key": "exercise_trigger_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 1439,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "min"
+        },
+        "state": {
+          "class_name": "DanfossExerciseTriggerTime",
+          "available": true,
+          "state": 660
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-external_measured_room_sensor",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "DanfossExternalMeasuredRoomSensor",
+          "translation_key": "external_temperature_sensor",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 35,
+          "native_min_value": -80,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "DanfossExternalMeasuredRoomSensor",
+          "available": true,
+          "state": 20.8
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-load_room_mean",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "DanfossLoadRoomMean",
+          "translation_key": "load_room_mean",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 2000,
+          "native_min_value": -8000,
+          "native_step": 1.0,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "DanfossLoadRoomMean",
+          "available": true,
+          "state": -8000
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-max_heat_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "MaxHeatSetpointLimit",
+          "translation_key": "max_heat_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 35.0,
+          "native_min_value": 5.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "MaxHeatSetpointLimit",
+          "available": true,
+          "state": 35.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-min_heat_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "MinHeatSetpointLimit",
+          "translation_key": "min_heat_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 35.0,
+          "native_min_value": 5.0,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "MinHeatSetpointLimit",
+          "available": true,
+          "state": 5.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-regulation_setpoint_offset",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "DanfossRegulationSetpointOffset",
+          "translation_key": "regulation_setpoint_offset",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 2.5,
+          "native_min_value": -2.5,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "DanfossRegulationSetpointOffset",
+          "available": true,
+          "state": 0.0
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-adaptation_run_control",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "DanfossAdaptationRunControl",
+          "translation_key": "adaptation_run_command",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "DanfossAdaptationRunControlEnum",
+          "options": [
+            "Nothing",
+            "Initiate",
+            "Cancel"
+          ]
+        },
+        "state": {
+          "class_name": "DanfossAdaptationRunControl",
+          "available": true,
+          "state": "Nothing"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-control_algorithm_scale_factor",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "DanfossControlAlgorithmScaleFactor",
+          "translation_key": "setpoint_response_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "DanfossControlAlgorithmScaleFactorEnum",
+          "options": [
+            "quick 5min",
+            "quick 10min",
+            "quick 15min",
+            "quick 25min",
+            "moderate 30min",
+            "moderate 40min",
+            "moderate 50min",
+            "moderate 60min",
+            "moderate 70min",
+            "slow 80min",
+            "quick open disabled"
+          ]
+        },
+        "state": {
+          "class_name": "DanfossControlAlgorithmScaleFactor",
+          "available": true,
+          "state": "quick 5min"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-exercise_day_of_week",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "DanfossExerciseDayOfTheWeek",
+          "translation_key": "exercise_day_of_week",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "DanfossExerciseDayOfTheWeekEnum",
+          "options": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Undefined"
+          ]
+        },
+        "state": {
+          "class_name": "DanfossExerciseDayOfTheWeek",
+          "available": true,
+          "state": "Thursday"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-orientation",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "DanfossOrientation",
+          "translation_key": "valve_orientation",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "DanfossOrientationEnum",
+          "options": [
+            "Horizontal",
+            "Vertical"
+          ]
+        },
+        "state": {
+          "class_name": "DanfossOrientation",
+          "available": true,
+          "state": "Horizontal"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-516-keypad_lockout",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "KeypadLockout",
+          "translation_key": "keypad_lockout",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossUserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "KeypadLockoutEnum",
+          "options": [
+            "Unlock",
+            "Lock1",
+            "Lock2",
+            "Lock3",
+            "Lock4"
+          ]
+        },
+        "state": {
+          "class_name": "KeypadLockout",
+          "available": true,
+          "state": "Unlock"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-516-viewing_direction",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "DanfossViewingDirection",
+          "translation_key": "viewing_direction",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossUserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "DanfossViewingDirectionEnum",
+          "options": [
+            "Default",
+            "Inverted"
+          ]
+        },
+        "state": {
+          "class_name": "DanfossViewingDirection",
+          "available": true,
+          "state": "Default"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-1",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0001",
+              "status": "INITIALIZED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 35.0,
+          "battery_voltage": 2.7
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-2821-motor_step_counter",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DanfossMotorStepCounter",
+          "translation_key": "motor_stepcount",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossDiagnosticClusterHandler",
+              "generic_id": "cluster_handler_0x0b05",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2821,
+                "name": "DanfossDiagnosticCluster",
+                "type": "server"
+              },
+              "id": "1:0x0b05",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0b05",
+              "status": "INITIALIZED",
+              "value_attribute": "sw_error_code"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DanfossMotorStepCounter",
+          "available": true,
+          "state": 63774
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-2821-sw_error_code",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DanfossSoftwareErrorCode",
+          "translation_key": "software_error",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossDiagnosticClusterHandler",
+              "generic_id": "cluster_handler_0x0b05",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2821,
+                "name": "DanfossDiagnosticCluster",
+                "type": "server"
+              },
+              "id": "1:0x0b05",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0b05",
+              "status": "INITIALIZED",
+              "value_attribute": "sw_error_code"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DanfossSoftwareErrorCode",
+          "available": true,
+          "state": "something",
+          "Top_pcb_sensor_error": false,
+          "Side_pcb_sensor_error": false,
+          "Non_volatile_memory_error": false,
+          "Unknown_hw_error": false,
+          "Motor_error": false,
+          "Invalid_internal_communication": false,
+          "Invalid_clock_information": true,
+          "Radio_communication_error": false,
+          "Encoder_jammed": false,
+          "Low_battery": false,
+          "Critical_low_battery": false
+        },
+        "extra_state_attributes": [
+          "Critical_low_battery",
+          "Encoder_jammed",
+          "Invalid_clock_information",
+          "Invalid_internal_communication",
+          "Low_battery",
+          "Motor_error",
+          "Non_volatile_memory_error",
+          "Radio_communication_error",
+          "Side_pcb_sensor_error",
+          "Top_pcb_sensor_error",
+          "Unknown_hw_error"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-adaptation_run_status",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DanfossAdaptationRunStatus",
+          "translation_key": "adaptation_run_status",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DanfossAdaptationRunStatus",
+          "available": true,
+          "state": "nothing",
+          "In_progress": false,
+          "Valve_characteristic_found": false,
+          "Valve_characteristic_lost": false
+        },
+        "extra_state_attributes": [
+          "In_progress",
+          "Valve_characteristic_found",
+          "Valve_characteristic_lost"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-hvac_action",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ThermostatHVACAction",
+          "translation_key": "hvac_action",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "ThermostatHVACAction",
+          "available": true,
+          "state": "idle"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-load_estimate",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DanfossLoadEstimate",
+          "translation_key": "load_estimate",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DanfossLoadEstimate",
+          "available": true,
+          "state": 437
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-open_window_detection",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DanfossOpenWindowDetection",
+          "translation_key": "open_window_detected",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DanfossOpenWindowDetection",
+          "available": true,
+          "state": "Closed"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-pi_heating_demand",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "PiHeatingDemand",
+          "translation_key": "pi_heating_demand",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "PiHeatingDemand",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-preheat_time",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "DanfossPreheatTime",
+          "translation_key": "preheat_time",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "DanfossPreheatTime",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-setpoint_change_source",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SetpointChangeSource",
+          "translation_key": "setpoint_change_source",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "SetpointChangeSource",
+          "available": true,
+          "state": "External"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-setpoint_change_source_timestamp",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SetpointChangeSourceTimestamp",
+          "translation_key": "setpoint_change_source_timestamp",
+          "translation_placeholders": null,
+          "device_class": "timestamp",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "SetpointChangeSourceTimestamp",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-adaptation_run_settings",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "DanfossAdaptationRunSettings",
+          "translation_key": "adaptation_run_enabled",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "adaptation_run_settings",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "DanfossAdaptationRunSettings",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-external_open_window_detected",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "DanfossExternalOpenWindowDetected",
+          "translation_key": "external_window_sensor",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "external_open_window_detected",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "DanfossExternalOpenWindowDetected",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-heat_available",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "DanfossHeatAvailable",
+          "translation_key": "heat_available",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "heat_available",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "DanfossHeatAvailable",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-load_balancing_enable",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "DanfossLoadBalancingEnable",
+          "translation_key": "use_load_balancing",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "load_balancing_enable",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "DanfossLoadBalancingEnable",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-mounting_mode_control",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "DanfossMountingModeControl",
+          "translation_key": "mounting_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "mounting_mode_control",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "DanfossMountingModeControl",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-radiator_covered",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "DanfossRadiatorCovered",
+          "translation_key": "prioritize_external_temperature_sensor",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "radiator_covered",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "DanfossRadiatorCovered",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-513-window_open_feature",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "DanfossWindowOpenFeature",
+          "translation_key": "use_internal_window_detection",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "DanfossThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "DanfossThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "window_open_feature",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "DanfossWindowOpenFeature",
+          "available": true,
+          "state": true,
+          "inverted": false
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:5c:a0:3f:1c-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:5c:a0:3f:1c:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:5c:a0:3f:1c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": "0x00000014",
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}
