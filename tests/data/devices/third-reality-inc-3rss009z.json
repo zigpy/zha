@@ -150,12 +150,12 @@
     "number": [
       {
         "info_object": {
-          "fallback_name": "Off to on delay",
+          "fallback_name": "Turn on delay",
           "unique_id": "28:2c:02:bf:ff:e9:77:95-1-off_to_on_delay",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
-          "translation_key": "off_to_on_delay",
+          "translation_key": "turn_on_delay",
           "translation_placeholders": null,
           "device_class": "duration",
           "state_class": null,
@@ -170,7 +170,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 65282,
-                "name": "THIRD_REALITY_Switch_CLUSTER",
+                "name": "ThirdRealitySwitchCluster",
                 "type": "server"
               },
               "id": "1:0xff02",
@@ -183,10 +183,10 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "mode": "auto",
+          "mode": "box",
           "native_max_value": 65535,
           "native_min_value": 0,
-          "native_step": 1,
+          "native_step": 1.0,
           "native_unit_of_measurement": "s"
         },
         "state": {
@@ -197,12 +197,12 @@
       },
       {
         "info_object": {
-          "fallback_name": "On to off delay",
+          "fallback_name": "Turn off delay",
           "unique_id": "28:2c:02:bf:ff:e9:77:95-1-on_to_off_delay",
           "migrate_unique_ids": [],
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
-          "translation_key": "on_to_off_delay",
+          "translation_key": "turn_off_delay",
           "translation_placeholders": null,
           "device_class": "duration",
           "state_class": null,
@@ -217,7 +217,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 65282,
-                "name": "THIRD_REALITY_Switch_CLUSTER",
+                "name": "ThirdRealitySwitchCluster",
                 "type": "server"
               },
               "id": "1:0xff02",
@@ -230,10 +230,10 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "mode": "auto",
+          "mode": "box",
           "native_max_value": 65535,
           "native_min_value": 0,
-          "native_step": 1,
+          "native_step": 1.0,
           "native_unit_of_measurement": "s"
         },
         "state": {
