@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Third Reality, Inc",
   "friendly_model": "3RDS17BZ",
   "name": "Third Reality, Inc 3RDS17BZ",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
@@ -118,6 +118,11 @@
               "value": 21
             }
           ]
+        },
+        {
+          "cluster_id": "0xff01",
+          "endpoint_attribute": null,
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -129,6 +134,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -172,6 +178,55 @@
           "class_name": "IASZone",
           "available": true,
           "state": false
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Open delay time",
+          "unique_id": "28:2c:02:bf:ff:e7:b2:eb-1-open_delay_time",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "open_delay_time",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff01",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65281,
+                "name": "ThirdRealityDoorCluster",
+                "type": "server"
+              },
+              "id": "1:0xff01",
+              "unique_id": "28:2c:02:bf:ff:e7:b2:eb:1:0xff01",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:e7:b2:eb",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 3600,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
         }
       }
     ],

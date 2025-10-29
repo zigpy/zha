@@ -443,6 +443,102 @@
         }
       }
     ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Turn on delay",
+          "unique_id": "28:2c:02:bf:ff:eb:4f:2f-1-off_to_on_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "turn_on_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff03",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65283,
+                "name": "ThirdRealityPlugCluster",
+                "type": "server"
+              },
+              "id": "1:0xff03",
+              "unique_id": "28:2c:02:bf:ff:eb:4f:2f:1:0xff03",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:eb:4f:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Turn off delay",
+          "unique_id": "28:2c:02:bf:ff:eb:4f:2f-1-on_to_off_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "turn_off_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff03",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65283,
+                "name": "ThirdRealityPlugCluster",
+                "type": "server"
+              },
+              "id": "1:0xff03",
+              "unique_id": "28:2c:02:bf:ff:eb:4f:2f:1:0xff03",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:eb:4f:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
     "select": [
       {
         "info_object": {

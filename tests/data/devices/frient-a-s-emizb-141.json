@@ -7,8 +7,8 @@
   "friendly_manufacturer": "frient A/S",
   "friendly_model": "EMIZB-141",
   "name": "frient A/S EMIZB-141",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.develco.ManufacturerDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
@@ -243,6 +243,11 @@
           "cluster_id": "0x0b05",
           "endpoint_attribute": "diagnostic",
           "attributes": []
+        },
+        {
+          "cluster_id": "0xfd10",
+          "endpoint_attribute": null,
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -271,6 +276,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {
@@ -317,6 +323,55 @@
         "state": {
           "class_name": "IdentifyButton",
           "available": true
+        }
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Pulse configuration",
+          "unique_id": "00:15:bc:00:1b:10:01:5c-2-pulse_configuration",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "pulse_configuration",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfd10",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 64784,
+                "name": "ManufacturerMetering",
+                "type": "server"
+              },
+              "id": "2:0xfd10",
+              "unique_id": "00:15:bc:00:1b:10:01:5c:2:0xfd10",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "00:15:bc:00:1b:10:01:5c",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 10000,
+          "native_min_value": 50,
+          "native_step": 1,
+          "native_unit_of_measurement": "pulses/kWh"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
         }
       }
     ],

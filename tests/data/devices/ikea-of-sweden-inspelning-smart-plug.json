@@ -422,7 +422,7 @@
         },
         {
           "cluster_id": "0xfc85",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": null,
           "attributes": []
         }
       ],
@@ -894,6 +894,102 @@
           "class_name": "Switch",
           "state": 0,
           "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Child lock",
+          "unique_id": "d4:48:67:ff:fe:13:d6:f8-1-child_lock",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "child_lock",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc85",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64645,
+                "name": "IkeaSmartPlugCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc85",
+              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0xfc85",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "child_lock",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Disable LED",
+          "unique_id": "d4:48:67:ff:fe:13:d6:f8-1-enable_led",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "disable_led",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc85",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64645,
+                "name": "IkeaSmartPlugCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc85",
+              "unique_id": "d4:48:67:ff:fe:13:d6:f8:1:0xfc85",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "d4:48:67:ff:fe:13:d6:f8",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "enable_led",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 1,
+          "on_value": 0
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],

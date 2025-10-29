@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Third Reality, Inc",
   "friendly_model": "3RTHS24BZ",
   "name": "Third Reality, Inc 3RTHS24BZ",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
@@ -118,6 +118,11 @@
               "value": 5600
             }
           ]
+        },
+        {
+          "cluster_id": "0xff01",
+          "endpoint_attribute": null,
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -136,7 +141,104 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Humidity offset",
+          "unique_id": "a4:c1:38:cb:f6:22:83:f0-1-humidity_offset",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "humidity_offset",
+          "translation_placeholders": null,
+          "device_class": "humidity",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff01",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65281,
+                "name": "ThirdRealityCluster",
+                "type": "server"
+              },
+              "id": "1:0xff01",
+              "unique_id": "a4:c1:38:cb:f6:22:83:f0:1:0xff01",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "a4:c1:38:cb:f6:22:83:f0",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 10000,
+          "native_min_value": -10000,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Temperature offset",
+          "unique_id": "a4:c1:38:cb:f6:22:83:f0-1-temperature_offset_celsius",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "temperature_offset",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff01",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65281,
+                "name": "ThirdRealityCluster",
+                "type": "server"
+              },
+              "id": "1:0xff01",
+              "unique_id": "a4:c1:38:cb:f6:22:83:f0:1:0xff01",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "a4:c1:38:cb:f6:22:83:f0",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 10000,
+          "native_min_value": -10000,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
     "sensor": [
       {
         "info_object": {

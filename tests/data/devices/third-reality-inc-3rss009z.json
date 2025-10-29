@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Third Reality, Inc",
   "friendly_model": "3RSS009Z",
   "name": "Third Reality, Inc 3RSS009Z",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
@@ -120,7 +120,7 @@
         },
         {
           "cluster_id": "0xff02",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": null,
           "attributes": []
         }
       ],
@@ -145,7 +145,104 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Off to on delay",
+          "unique_id": "28:2c:02:bf:ff:e9:77:95-1-off_to_on_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "off_to_on_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff02",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65282,
+                "name": "THIRD_REALITY_Switch_CLUSTER",
+                "type": "server"
+              },
+              "id": "1:0xff02",
+              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0xff02",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:e9:77:95",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "On to off delay",
+          "unique_id": "28:2c:02:bf:ff:e9:77:95-1-on_to_off_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "on_to_off_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff02",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65282,
+                "name": "THIRD_REALITY_Switch_CLUSTER",
+                "type": "server"
+              },
+              "id": "1:0xff02",
+              "unique_id": "28:2c:02:bf:ff:e9:77:95:1:0xff02",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:e9:77:95",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
     "sensor": [
       {
         "info_object": {
