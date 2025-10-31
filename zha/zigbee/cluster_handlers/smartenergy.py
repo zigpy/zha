@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import enum
-from functools import partialmethod
 from typing import TYPE_CHECKING
 
 import zigpy.zcl
@@ -17,7 +16,6 @@ from zigpy.zcl.clusters.smartenergy import (
     MduPairing,
     Messaging,
     Metering,
-    NumberFormatting,
     Prepayment,
     Price,
     Tunneling,
@@ -32,13 +30,6 @@ from zha.zigbee.cluster_handlers.const import (
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
-
-
-DEFAULT_FORMATTING = NumberFormatting(
-    num_digits_right_of_decimal=1,
-    num_digits_left_of_decimal=15,
-    suppress_leading_zeros=1,
-)
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Calendar.cluster_id)
@@ -306,18 +297,15 @@ class MeteringClusterHandler(ClusterHandler):
         """Return unit of measurement."""
         return self.cluster.get(Metering.AttributeDefs.unit_of_measure.name)
 
-    async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:  # pylint: disable=unused-argument
-        """Fetch config from device and updates format specifier."""
+    @property
+    def demand_formatting(self) -> int | None:
+        """Return demand formatting."""
+        return self.cluster.get(Metering.AttributeDefs.demand_formatting.name)
 
-        fmting = self.cluster.get(
-            Metering.AttributeDefs.demand_formatting.name, DEFAULT_FORMATTING
-        )
-        self._format_spec = self.get_formatting(fmting)
-
-        fmting = self.cluster.get(
-            Metering.AttributeDefs.summation_formatting.name, DEFAULT_FORMATTING
-        )
-        self._summa_format = self.get_formatting(fmting)
+    @property
+    def summation_formatting(self) -> int | None:
+        """Return summation formatting."""
+        return self.cluster.get(Metering.AttributeDefs.summation_formatting.name)
 
     async def async_update(self) -> None:
         """Retrieve latest state."""
@@ -329,44 +317,6 @@ class MeteringClusterHandler(ClusterHandler):
             if a["attr"] not in self.cluster.unsupported_attributes
         ]
         await self.get_attributes(attrs, from_cache=False, only_cache=False)
-
-    @staticmethod
-    def get_formatting(formatting: int) -> str:
-        """Return a formatting string, given the formatting value."""
-        formatting_obj = NumberFormatting(formatting)
-        r_digits = formatting_obj.num_digits_right_of_decimal
-        l_digits = formatting_obj.num_digits_left_of_decimal
-
-        if l_digits == 0:
-            l_digits = 15
-
-        width = r_digits + l_digits + (1 if r_digits > 0 else 0)
-
-        if formatting_obj.suppress_leading_zeros:
-            # suppress leading 0
-            return f"{{:{width}.{r_digits}f}}"
-
-        return f"{{:0{width}.{r_digits}f}}"
-
-    def _formatter_function(
-        self, selector: FormatSelector, value: int
-    ) -> int | float | str:
-        """Return formatted value for display."""
-        value_float = value * self.multiplier / self.divisor
-        if self.unit_of_measurement == 0:
-            # Zigbee spec power unit is kW, but we show the value in W
-            value_watt = value_float * 1000
-            if value_watt < 100:
-                return round(value_watt, 1)
-            return round(value_watt)
-        if selector == self.FormatSelector.SUMMATION:
-            assert self._summa_format
-            return float(self._summa_format.format(value_float).lstrip())
-        assert self._format_spec
-        return float(self._format_spec.format(value_float).lstrip())
-
-    demand_formatter = partialmethod(_formatter_function, FormatSelector.DEMAND)
-    summa_formatter = partialmethod(_formatter_function, FormatSelector.SUMMATION)
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Prepayment.cluster_id)

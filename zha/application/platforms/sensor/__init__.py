@@ -11,7 +11,7 @@ import functools
 import logging
 import numbers
 import typing
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
@@ -21,7 +21,11 @@ from zigpy.state import Counter, State
 from zigpy.zcl import foundation
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import Basic
-from zigpy.zcl.clusters.smartenergy import Metering
+from zigpy.zcl.clusters.smartenergy import (
+    Metering,
+    MeteringUnitofMeasure,
+    NumberFormatting,
+)
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -41,7 +45,10 @@ from zha.application.platforms.sensor.const import (
     SensorDeviceClass,
     SensorStateClass,
 )
-from zha.application.platforms.sensor.helpers import resolution_to_decimal_precision
+from zha.application.platforms.sensor.helpers import (
+    create_number_formatter,
+    resolution_to_decimal_precision,
+)
 from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import (
@@ -95,6 +102,12 @@ if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
+
+DEFAULT_FORMATTING = NumberFormatting(
+    num_digits_right_of_decimal=1,
+    num_digits_left_of_decimal=15,
+    suppress_leading_zeros=1,
+)
 
 BATTERY_SIZES = {
     0: "No battery",
@@ -1100,9 +1113,43 @@ class SmartEnergyMetering(PollableSensor):
         response["zcl_unit_of_measurement"] = self._cluster_handler.unit_of_measurement
         return response
 
+    @property
+    def _multiplier(self) -> int | float | None:
+        return self._cluster_handler.multiplier
+
+    @_multiplier.setter
+    def _multiplier(self, value: int | float | None) -> None:
+        raise AttributeError("Cannot set multiplier directly")
+
+    @property
+    def _divisor(self) -> int | float | None:
+        return self._cluster_handler.divisor
+
+    @_divisor.setter
+    def _divisor(self, value: int | float | None) -> None:
+        raise AttributeError("Cannot set divisor directly")
+
     def formatter(self, value: int) -> int | float:
-        """Pass through cluster handler formatter."""
-        return self._cluster_handler.demand_formatter(value)
+        """Metering formatter."""
+        # TODO: improve typing for base class
+        scaled_value = cast(float, super().formatter(value))
+
+        if (
+            self._cluster_handler.unit_of_measurement
+            == MeteringUnitofMeasure.Kwh_and_Kwh_binary
+        ):
+            # Zigbee spec power unit is kW, but we show the value in W
+            value_watt = scaled_value * 1000
+            if value_watt < 100:
+                return round(value_watt, 1)
+            return round(value_watt)
+
+        demand_formater = create_number_formatter(
+            self._cluster_handler.demand_formatting
+            if self._cluster_handler.demand_formatting is not None
+            else DEFAULT_FORMATTING
+        )
+        return float(demand_formater.format(scaled_value))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1184,14 +1231,22 @@ class SmartEnergySummation(SmartEnergyMetering):
     }
 
     def formatter(self, value: int) -> int | float:
-        """Numeric pass-through formatter."""
-        if self._cluster_handler.unit_of_measurement != 0:
-            return self._cluster_handler.summa_formatter(value)
+        """Metering summation formatter."""
+        # TODO: improve typing for base class
+        scaled_value = cast(float, Sensor.formatter(self, value))
 
-        return (
-            float(self._cluster_handler.multiplier * value)
-            / self._cluster_handler.divisor
+        if (
+            self._cluster_handler.unit_of_measurement
+            == MeteringUnitofMeasure.Kwh_and_Kwh_binary
+        ):
+            return scaled_value
+
+        summation_formater = create_number_formatter(
+            self._cluster_handler.summation_formatting
+            if self._cluster_handler.summation_formatting is not None
+            else DEFAULT_FORMATTING
         )
+        return float(summation_formater.format(scaled_value))
 
 
 @MULTI_MATCH(

@@ -1,6 +1,9 @@
 """Helpers for sensor platform."""
 
+import functools
 from math import ceil, log10
+
+from zigpy.zcl.clusters.smartenergy import NumberFormatting
 
 
 def resolution_to_decimal_precision(
@@ -27,3 +30,22 @@ def resolution_to_decimal_precision(
 
     # If nothing was found, fall back to the number of decimal places in epsilon
     return ceil(-log10(epsilon))
+
+
+@functools.lru_cache(maxsize=32)
+def create_number_formatter(formatting: int) -> str:
+    """Return a formatting string, given the formatting value."""
+    formatting_obj = NumberFormatting(formatting)
+    r_digits = formatting_obj.num_digits_right_of_decimal
+    l_digits = formatting_obj.num_digits_left_of_decimal
+
+    if l_digits == 0:
+        l_digits = 15
+
+    width = r_digits + l_digits + (1 if r_digits > 0 else 0)
+
+    if formatting_obj.suppress_leading_zeros:
+        # suppress leading 0
+        return f"{{:{width}.{r_digits}f}}"
+
+    return f"{{:0{width}.{r_digits}f}}"
