@@ -7,8 +7,8 @@
   "friendly_manufacturer": "_TZE204_58of2pfn",
   "friendly_model": "TS0601",
   "name": "_TZE204_58of2pfn TS0601",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.ts0601_switch.TuyaQuadrupleSwitchGP",
   "quirk_id": null,
   "manufacturer_code": 4417,
   "power_source": "Mains",
@@ -37,8 +37,8 @@
     "1": {
       "profile_id": 260,
       "device_type": {
-        "name": "SMART_PLUG",
-        "id": 81
+        "name": "ON_OFF_LIGHT",
+        "id": 256
       },
       "in_clusters": [
         {
@@ -76,8 +76,26 @@
           "attributes": []
         },
         {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
           "cluster_id": "0xef00",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer",
           "attributes": []
         }
       ],
@@ -101,6 +119,90 @@
         }
       ]
     },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_LIGHT",
+        "id": 256
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "3": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_LIGHT",
+        "id": 256
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "4": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_LIGHT",
+        "id": 256
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
     "242": {
       "profile_id": 41440,
       "device_type": {
@@ -117,7 +219,313 @@
       ]
     }
   },
+  "original_signature": {
+    "models_info": [
+      [
+        "_TZE200_1n2kyphz",
+        "TS0601"
+      ],
+      [
+        "_TZE200_mexisfik",
+        "TS0601"
+      ],
+      [
+        "_TZE204_58of2pfn",
+        "TS0601"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
+        "input_clusters": [
+          "0x0000",
+          "0x0004",
+          "0x0005",
+          "0xef00"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
+    "light": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:1c:a6:1f:fb-1",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "ab:cd:ef:12:1c:a6:1f:fb:1:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:1c:a6:1f:fb",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 0,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 0,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        },
+        "extra_state_attributes": [
+          "off_brightness",
+          "off_with_transition"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:1c:a6:1f:fb-2",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "2:0x0006",
+              "unique_id": "ab:cd:ef:12:1c:a6:1f:fb:2:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:1c:a6:1f:fb",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 0,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 0,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        },
+        "extra_state_attributes": [
+          "off_brightness",
+          "off_with_transition"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:1c:a6:1f:fb-3",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 3,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "3:0x0006",
+              "unique_id": "ab:cd:ef:12:1c:a6:1f:fb:3:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:1c:a6:1f:fb",
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 0,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 0,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        },
+        "extra_state_attributes": [
+          "off_brightness",
+          "off_with_transition"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:1c:a6:1f:fb-4",
+          "migrate_unique_ids": [],
+          "platform": "light",
+          "class_name": "Light",
+          "translation_key": "light",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 4,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "4:0x0006",
+              "unique_id": "ab:cd:ef:12:1c:a6:1f:fb:4:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:1c:a6:1f:fb",
+          "endpoint_id": 4,
+          "available": true,
+          "group_id": null,
+          "effect_list": [
+            "off"
+          ],
+          "supported_features": 0,
+          "min_mireds": 153,
+          "max_mireds": 500
+        },
+        "state": {
+          "class_name": "Light",
+          "on": false,
+          "brightness": null,
+          "xy_color": null,
+          "color_temp": null,
+          "effect_list": [
+            "off"
+          ],
+          "effect": "off",
+          "supported_features": 0,
+          "color_mode": "onoff",
+          "supported_color_modes": [
+            "onoff"
+          ],
+          "off_with_transition": false,
+          "off_brightness": null,
+          "available": true
+        },
+        "extra_state_attributes": [
+          "off_brightness",
+          "off_with_transition"
+        ]
+      }
+    ],
     "sensor": [
       {
         "info_object": {

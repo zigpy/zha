@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Candeo",
   "friendly_model": "C-ZB-LC20-RGB",
   "name": "Candeo C-ZB-LC20-RGB",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "quirk_id": null,
   "manufacturer_code": 4687,
   "power_source": "Mains",
@@ -175,12 +175,6 @@
               "value": 158
             },
             {
-              "id": "0x0007",
-              "name": "color_temperature",
-              "zcl_type": "uint16",
-              "value": 181
-            },
-            {
               "id": "0x0003",
               "name": "current_x",
               "zcl_type": "uint16",
@@ -197,12 +191,6 @@
               "name": "options",
               "zcl_type": "map8",
               "value": 0
-            },
-            {
-              "id": "0x4010",
-              "name": "start_up_color_temperature",
-              "zcl_type": "uint16",
-              "value": 65535
             }
           ]
         },
@@ -228,6 +216,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {
@@ -356,7 +345,7 @@
             0.07499809262226291,
             0.8
           ],
-          "color_temp": 181,
+          "color_temp": null,
           "effect_list": [
             "off"
           ],
@@ -365,7 +354,6 @@
           "color_mode": "xy",
           "supported_color_modes": [
             "brightness",
-            "color_temp",
             "onoff",
             "xy"
           ],
@@ -380,53 +368,6 @@
       }
     ],
     "number": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:ca:6d:9d:be-11-768-start_up_color_temperature",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "translation_key": "start_up_color_temperature",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 11,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "11:0x0300",
-              "unique_id": "ab:cd:ef:12:ca:6d:9d:be:11:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:ca:6d:9d:be",
-          "endpoint_id": 11,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 500,
-          "native_min_value": 158,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "available": true,
-          "state": 65535
-        }
-      },
       {
         "info_object": {
           "fallback_name": null,
