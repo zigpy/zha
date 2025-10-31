@@ -16,7 +16,7 @@ requires-python = ">=3.12"
 dependencies = [
     "zigpy==0.86.0",
     "bellows==0.47.0",
-    "zigpy-znp==0.14.1",
+    "zigpy-znp==0.14.2",
     "zigpy-deconz==0.25.3",
     "zigpy-xbee==0.21.0",
     "zigpy-zigate==0.13.3",
