@@ -385,10 +385,21 @@ def zigpy_device_from_device_data(
         endpoint.request = AsyncMock(return_value=[0])
 
         for cluster_type in ("in_clusters", "out_clusters"):
+            clusters = getattr(endpoint, cluster_type)
+
             for cluster in ep[cluster_type]:
-                real_cluster = getattr(endpoint, cluster_type)[
-                    int(cluster["cluster_id"], 16)
-                ]
+                cluster_id = int(cluster["cluster_id"], 16)
+
+                try:
+                    real_cluster = clusters[cluster_id]
+                except KeyError:
+                    _LOGGER.warning(
+                        "Cluster %0#04x not found on endpoint %r of device %s",
+                        cluster_id,
+                        endpoint,
+                        device,
+                    )
+                    continue
 
                 if patch_cluster:
                     patch_cluster_for_testing(real_cluster)
