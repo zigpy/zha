@@ -765,9 +765,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         if self.application_controller is not None:
             await self.application_controller.shutdown()
             self.application_controller = None
-            await asyncio.sleep(
-                SHUT_DOWN_DELAY_S
-            )  # give bellows thread callback a chance to run
+            # give bellows thread callback a chance to run
+            await asyncio.sleep(SHUT_DOWN_DELAY_S)
 
         await super().shutdown()
 
