@@ -58,7 +58,7 @@ from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceIn
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
-SHUT_DOWN_DELAY_S: Final[int] = 0.1
+SHUT_DOWN_DELAY_S: Final[float] = 0.1
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
