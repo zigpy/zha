@@ -381,7 +381,16 @@ def zigpy_device_from_device_data(
         device = quirks_get_device(device)
 
     for epid, ep in device_data["endpoints"].items():
-        endpoint = device.endpoints[int(epid)]
+        try:
+            endpoint = device.endpoints[int(epid)]
+        except KeyError:
+            _LOGGER.warning(
+                "Endpoint %d not found on device %s",
+                int(epid),
+                device,
+            )
+            continue
+
         endpoint.request = AsyncMock(return_value=[0])
 
         for cluster_type in ("in_clusters", "out_clusters"):
