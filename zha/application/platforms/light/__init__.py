@@ -290,6 +290,14 @@ class BaseClusterHandlerLight(BaseLight):
         """Return the gateway."""
         raise NotImplementedError
 
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the light."""
+        response = super().state
+        # XXX: for backwards compatibility
+        response["supported_color_modes"] = self._internal_supported_color_modes
+        return response
+
     def recompute_capabilities(self) -> None:
         """Recompute supported features and color modes."""
         super().recompute_capabilities()
