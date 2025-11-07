@@ -213,7 +213,7 @@
               "id": "0x0302",
               "name": "divisor",
               "zcl_type": "uint24",
-              "value": 1000
+              "value": 1000000
             },
             {
               "id": "0x0400",
@@ -1180,7 +1180,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 1794,
-                "name": "MeteringCluster",
+                "name": "T2MeteringCluster",
                 "type": "server"
               },
               "id": "1:0x0702",

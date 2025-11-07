@@ -7,9 +7,9 @@
   "friendly_manufacturer": "_TZ3000_o1jzcxou",
   "friendly_model": "TS011F",
   "name": "_TZ3000_o1jzcxou TS011F",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.ts011f_plug.Plug_v7",
+  "quirk_id": "tuya.plug_on_off_attributes",
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": 204,
@@ -130,12 +130,12 @@
         },
         {
           "cluster_id": "0xe000",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer_specific_57344",
           "attributes": []
         },
         {
           "cluster_id": "0xe001",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_external_switch_type",
           "attributes": []
         }
       ],
@@ -158,21 +158,36 @@
           ]
         }
       ]
-    },
-    "242": {
-      "profile_id": 41440,
-      "device_type": {
-        "name": "PROXY_BASIC",
-        "id": 97
+    }
+  },
+  "original_signature": {
+    "model": "TS011F",
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x010a",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0xe000",
+          "0xe001"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
       },
-      "in_clusters": [],
-      "out_clusters": [
-        {
-          "cluster_id": "0x0021",
-          "endpoint_attribute": "green_power",
-          "attributes": []
-        }
-      ]
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
     }
   },
   "zha_lib_entities": {
