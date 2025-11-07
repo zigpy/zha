@@ -58,6 +58,7 @@ from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceIn
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
+SHUT_DOWN_DELAY_S: Final[float] = 0.1
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
@@ -764,7 +765,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         if self.application_controller is not None:
             await self.application_controller.shutdown()
             self.application_controller = None
-            await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
+            # give bellows thread callback a chance to run
+            await asyncio.sleep(SHUT_DOWN_DELAY_S)
 
         await super().shutdown()
 
