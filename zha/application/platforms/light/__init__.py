@@ -783,7 +783,7 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self.recompute_capabilities()
 
     @property
-    def _gateway(self):
+    def _gateway(self) -> Gateway:
         return self._device.gateway
 
     def on_add(self) -> None:
@@ -1095,7 +1095,7 @@ class LightGroup(BaseClusterHandlerLight, GroupEntity):
         self.recompute_capabilities()
 
     @property
-    def _gateway(self):
+    def _gateway(self) -> Gateway:
         return self.group.gateway
 
     def recompute_capabilities(self) -> None:
