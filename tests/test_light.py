@@ -31,12 +31,7 @@ from tests.common import (
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import GroupEntity, PlatformEntity
-from zha.application.platforms.light.const import (
-    FLASH_EFFECTS,
-    FLASH_LONG,
-    FLASH_SHORT,
-    ColorMode,
-)
+from zha.application.platforms.light.const import FLASH_EFFECTS, ColorMode, FlashMode
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -408,7 +403,7 @@ async def test_light(
     # test short flashing the lights from the client
     if cluster_identify:
         await async_test_flash_from_client(
-            zha_gateway, cluster_identify, entity, FLASH_SHORT
+            zha_gateway, cluster_identify, entity, FlashMode.SHORT
         )
         await _async_shift_time(zha_gateway)
 
@@ -431,11 +426,11 @@ async def test_light(
     # test long flashing the lights from the client
     if cluster_identify:
         await async_test_flash_from_client(
-            zha_gateway, cluster_identify, entity, FLASH_LONG
+            zha_gateway, cluster_identify, entity, FlashMode.LONG
         )
         await _async_shift_time(zha_gateway)
         await async_test_flash_from_client(
-            zha_gateway, cluster_identify, entity, FLASH_SHORT
+            zha_gateway, cluster_identify, entity, FlashMode.SHORT
         )
         await _async_shift_time(zha_gateway)
 
@@ -846,12 +841,12 @@ async def test_zha_group_light_entity(
 
     # test short flashing the lights from the client
     await async_test_flash_from_client(
-        zha_gateway, group_cluster_identify, entity, FLASH_SHORT
+        zha_gateway, group_cluster_identify, entity, FlashMode.SHORT
     )
     await _async_shift_time(zha_gateway)
     # test long flashing the lights from the client
     await async_test_flash_from_client(
-        zha_gateway, group_cluster_identify, entity, FLASH_LONG
+        zha_gateway, group_cluster_identify, entity, FlashMode.LONG
     )
     await _async_shift_time(zha_gateway)
 
@@ -1814,7 +1809,7 @@ async def test_on_with_off_color(zha_gateway: Gateway) -> None:
     assert entity.state["color_temp"] == 235
     assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
     assert entity.supported_color_modes == {ColorMode.COLOR_TEMP, ColorMode.XY}
-    assert entity._supported_color_modes == {
+    assert entity._internal_supported_color_modes == {
         ColorMode.COLOR_TEMP,
         ColorMode.XY,
         ColorMode.ONOFF,

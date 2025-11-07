@@ -52,8 +52,14 @@ ATTR_SUPPORTED_COLOR_MODES = "supported_color_modes"
 
 # If the light should flash, can be FLASH_SHORT or FLASH_LONG.
 ATTR_FLASH: Final[str] = "flash"
-FLASH_SHORT: Final[str] = "short"
-FLASH_LONG: Final[str] = "long"
+
+
+class FlashMode(StrEnum):
+    """Flash modes."""
+
+    SHORT = "short"
+    LONG = "long"
+
 
 # List of possible effects
 ATTR_EFFECT_LIST: Final[str] = "effect_list"
@@ -71,8 +77,8 @@ EFFECT_OKAY: Final[int] = 0x02
 EFFECT_DEFAULT_VARIANT: Final[int] = 0x00
 
 FLASH_EFFECTS: Final[dict[str, int]] = {
-    FLASH_SHORT: Identify.EffectIdentifier.Blink,
-    FLASH_LONG: Identify.EffectIdentifier.Breathe,
+    FlashMode.SHORT: Identify.EffectIdentifier.Blink,
+    FlashMode.LONG: Identify.EffectIdentifier.Breathe,
 }
 
 VALID_COLOR_MODES = {
