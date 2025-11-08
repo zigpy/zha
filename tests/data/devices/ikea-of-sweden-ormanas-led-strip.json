@@ -504,6 +504,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": true,
           "brightness": 56,
           "xy_color": [
@@ -525,8 +526,7 @@
             "xy"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
