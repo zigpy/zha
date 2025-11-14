@@ -498,7 +498,7 @@
           "class_name": "Sensor",
           "translation_key": null,
           "translation_placeholders": null,
-          "device_class": "volatile_organic_compounds",
+          "device_class": "volatile_organic_compounds_parts",
           "state_class": "measurement",
           "entity_category": null,
           "entity_registry_enabled_default": true,
