@@ -9,7 +9,7 @@
   "name": "SOMFY Ysia 5 HP Zigbee",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4640,
   "power_source": "Battery or Unknown",
   "lqi": null,

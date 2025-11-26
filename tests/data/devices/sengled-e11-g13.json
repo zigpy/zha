@@ -9,7 +9,7 @@
   "name": "sengled E11-G13",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4448,
   "power_source": "Mains",
   "lqi": null,

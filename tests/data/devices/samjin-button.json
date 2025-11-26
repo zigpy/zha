@@ -9,7 +9,7 @@
   "name": "Samjin button",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.samjin.button.SamjinButton",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4673,
   "power_source": "Battery or Unknown",
   "lqi": null,

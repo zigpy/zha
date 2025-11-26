@@ -9,7 +9,9 @@
   "name": "_TZ3000_typdpbpg TS011F",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts011f_plug.Plug_v3",
-  "quirk_id": "tuya.plug_on_off_attributes",
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4107,
   "power_source": "Mains",
   "lqi": 132,

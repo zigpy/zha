@@ -9,7 +9,9 @@
   "name": "Danfoss eTRV0103",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.danfoss.thermostat.DanfossThermostat",
-  "quirk_id": "danfoss.ally_thermostat",
+  "exposes_features": [
+    "danfoss.ally_thermostat"
+  ],
   "manufacturer_code": 4678,
   "power_source": "Battery or Unknown",
   "lqi": null,

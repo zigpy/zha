@@ -9,7 +9,7 @@
   "name": "EZVIZ CS-T55-R100-G",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4451,
   "power_source": "Battery or Unknown",
   "lqi": null,

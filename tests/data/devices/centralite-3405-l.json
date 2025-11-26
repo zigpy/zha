@@ -9,7 +9,7 @@
   "name": "CentraLite 3405-L",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4174,
   "power_source": "Battery or Unknown",
   "lqi": null,

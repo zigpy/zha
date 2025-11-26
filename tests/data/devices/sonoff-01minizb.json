@@ -9,7 +9,7 @@
   "name": "SONOFF 01MINIZB",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Mains",
   "lqi": null,

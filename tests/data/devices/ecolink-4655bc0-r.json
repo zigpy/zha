@@ -9,7 +9,7 @@
   "name": "Ecolink 4655BC0-R",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.ecolink.contact.Ecolink4655BC0R",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4335,
   "power_source": "Battery or Unknown",
   "lqi": null,

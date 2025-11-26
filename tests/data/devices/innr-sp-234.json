@@ -9,7 +9,7 @@
   "name": "innr SP 234",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.innr.innr_sp234_plug.SP234",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Mains",
   "lqi": null,

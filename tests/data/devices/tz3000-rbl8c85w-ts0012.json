@@ -9,7 +9,7 @@
   "name": "_TZ3000_rbl8c85w TS0012",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts001x.Tuya_Double_Var06",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
   "lqi": 47,

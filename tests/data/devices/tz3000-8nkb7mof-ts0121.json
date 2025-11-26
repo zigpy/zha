@@ -9,7 +9,9 @@
   "name": "_TZ3000_8nkb7mof TS0121",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts0121_plug.TS0121B",
-  "quirk_id": "tuya.plug_on_off_attributes",
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4098,
   "power_source": "Mains",
   "lqi": null,

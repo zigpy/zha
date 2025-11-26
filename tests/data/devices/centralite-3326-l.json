@@ -9,7 +9,7 @@
   "name": "CentraLite 3326-L",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.centralite.motion.CentraLiteMotionSensor",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 49887,
   "power_source": "Battery or Unknown",
   "lqi": null,

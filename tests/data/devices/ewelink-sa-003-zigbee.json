@@ -9,7 +9,7 @@
   "name": "eWeLink SA-003-Zigbee",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",
   "lqi": null,

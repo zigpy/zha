@@ -9,7 +9,7 @@
   "name": "_TZE200_qrztc3ev TS0601",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
   "lqi": null,

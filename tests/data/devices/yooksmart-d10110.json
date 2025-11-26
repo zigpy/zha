@@ -9,7 +9,7 @@
   "name": "yooksmart D10110",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4169,
   "power_source": "Battery or Unknown",
   "lqi": null,

@@ -9,7 +9,7 @@
   "name": "_TZE200_bkkmqmyo TS0601",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts0601_din_power.HikingPowerMeter",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
   "lqi": 160,

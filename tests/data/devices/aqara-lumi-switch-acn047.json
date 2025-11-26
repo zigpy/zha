@@ -9,7 +9,7 @@
   "name": "Aqara lumi.switch.acn047",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.switch_acn047.AqaraT2Relay",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",
   "lqi": 108,

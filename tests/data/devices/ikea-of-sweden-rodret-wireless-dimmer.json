@@ -9,7 +9,7 @@
   "name": "IKEA of Sweden RODRET wireless dimmer",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.ikea.twobtnremote.IkeaRodretRemote2BtnNew",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",
   "lqi": 39,

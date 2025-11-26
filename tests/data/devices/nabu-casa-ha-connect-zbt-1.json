@@ -9,7 +9,7 @@
   "name": "HA Connect ZBT-1",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 43981,
   "power_source": "Mains",
   "lqi": null,

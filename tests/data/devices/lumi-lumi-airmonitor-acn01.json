@@ -9,7 +9,7 @@
   "name": "LUMI lumi.airmonitor.acn01",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.tvoc.TVOCMonitor",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
   "lqi": null,

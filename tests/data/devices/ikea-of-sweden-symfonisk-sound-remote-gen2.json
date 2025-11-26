@@ -9,7 +9,7 @@
   "name": "IKEA of Sweden SYMFONISK sound remote gen2",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.ikea.symfonisk2.IkeaSymfoniskGen2v1",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Battery or Unknown",
   "lqi": 255,

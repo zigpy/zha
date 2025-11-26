@@ -9,7 +9,7 @@
   "name": "LUMI lumi.motion.ac02",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.motion_ac02.LumiMotionAC02",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
   "lqi": null,

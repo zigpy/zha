@@ -9,7 +9,7 @@
   "name": "MLI tint-ExtendedColor",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.mli.tintE14rgbcct.TintRGBCCTLight",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4635,
   "power_source": "Mains",
   "lqi": null,

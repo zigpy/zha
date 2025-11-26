@@ -9,7 +9,7 @@
   "name": "_TZ3002_vaq2bfcu TS0726",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": null,

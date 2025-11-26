@@ -9,7 +9,7 @@
   "name": "Signify Netherlands B.V. RDM002",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.philips.rdm002.PhilipsRDM002",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
   "lqi": null,

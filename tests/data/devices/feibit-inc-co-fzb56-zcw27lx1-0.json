@@ -9,7 +9,7 @@
   "name": "Feibit Inc co.   FZB56-ZCW27LX1.0",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",
   "lqi": null,

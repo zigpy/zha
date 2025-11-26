@@ -9,7 +9,7 @@
   "name": "Bosch RBSH-RTH0-BAT-ZB-EU",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4617,
   "power_source": "Battery or Unknown",
   "lqi": 255,

@@ -9,7 +9,7 @@
   "name": "LUMI lumi.relay.c2acn01",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.relay_c2acn01.Relay",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Mains",
   "lqi": null,

@@ -9,7 +9,7 @@
   "name": "frient A/S WISZB-131",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
   "lqi": 255,

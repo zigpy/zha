@@ -9,7 +9,7 @@
   "name": "_TZ3000_gwkzibhs TS004F",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts004f.TuyaSmartRemote004FROK",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
   "lqi": 182,

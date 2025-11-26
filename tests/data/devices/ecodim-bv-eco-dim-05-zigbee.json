@@ -9,7 +9,7 @@
   "name": "EcoDim BV Eco-Dim.05 Zigbee",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
   "lqi": 179,

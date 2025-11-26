@@ -9,7 +9,7 @@
   "name": "_TZ3000_1dd0d5yi TS130F",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts130f.TuyaTS130FTI2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
   "lqi": 255,

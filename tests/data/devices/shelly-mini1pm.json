@@ -9,7 +9,7 @@
   "name": "Shelly Mini1PM",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 5264,
   "power_source": "Mains",
   "lqi": 153,

@@ -9,7 +9,7 @@
   "name": "OSRAM Switch 4x-LIGHTIFY",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.osram.lightifyx4.LightifyX4",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4364,
   "power_source": "Battery or Unknown",
   "lqi": null,

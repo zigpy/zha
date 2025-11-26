@@ -9,7 +9,7 @@
   "name": "_TZ3290_7v1k4vufotpowp9z TS1201",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts1201.ZosungIRBlaster_ZS06",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
   "lqi": null,

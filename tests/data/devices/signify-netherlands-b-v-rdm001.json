@@ -9,7 +9,7 @@
   "name": "Signify Netherlands B.V. RDM001",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.philips.wall_switch.PhilipsWallSwitch",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
   "lqi": null,

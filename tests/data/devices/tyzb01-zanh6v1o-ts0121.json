@@ -9,7 +9,7 @@
   "name": "_TYZB01_zanh6v1o TS0121",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",
   "lqi": null,

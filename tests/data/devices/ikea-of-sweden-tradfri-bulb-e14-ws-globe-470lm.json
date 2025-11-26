@@ -9,7 +9,7 @@
   "name": "IKEA of Sweden TRADFRI bulb E14 WS globe 470lm",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Mains",
   "lqi": 160,
