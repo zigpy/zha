@@ -19,6 +19,8 @@ from zigpy.config import (
     CONF_DEVICE_BAUDRATE,
     CONF_DEVICE_FLOW_CONTROL,
     CONF_DEVICE_PATH,
+    CONF_NWK,
+    CONF_NWK_COUNTRY_CODE,
     CONF_NWK_VALIDATE_SETTINGS,
 )
 import zigpy.device
@@ -203,6 +205,14 @@ class Gateway(AsyncUtilMixin, EventBase):
             CONF_DEVICE_BAUDRATE: self.config.config.coordinator_configuration.baudrate,
             CONF_DEVICE_FLOW_CONTROL: self.config.config.coordinator_configuration.flow_control,
         }
+
+        if (
+            self.config.country_code is not None
+            and CONF_NWK_COUNTRY_CODE not in app_config.get(CONF_NWK, {})
+        ):
+            app_config.setdefault(CONF_NWK, {})[CONF_NWK_COUNTRY_CODE] = (
+                self.config.country_code
+            )
 
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
             app_config[CONF_NWK_VALIDATE_SETTINGS] = True
