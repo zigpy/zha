@@ -144,7 +144,7 @@
               "id": "0x001b",
               "name": "ctrl_sequence_of_oper",
               "zcl_type": "enum8",
-              "value": 2
+              "value": 6
             },
             {
               "id": "0x0000",
@@ -303,6 +303,51 @@
   },
   "original_signature": {},
   "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": "Valve state",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-valve_state",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": "valve_state",
+          "translation_placeholders": null,
+          "device_class": "running",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "valve_state"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
     "button": [
       {
         "info_object": {
@@ -393,8 +438,9 @@
           "fan_modes": null,
           "preset_modes": [],
           "hvac_modes": [
-            "off",
-            "heat"
+            "cool",
+            "heat",
+            "off"
           ]
         },
         "state": {
@@ -665,6 +711,147 @@
           "available": true,
           "state": null
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Max cool setpoint limit",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-max_cool_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "max_cool_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 3000,
+          "native_min_value": -500,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": 30.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Min cool setpoint limit",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-min_cool_setpoint_limit",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "min_cool_setpoint_limit",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 3000,
+          "native_min_value": -500,
+          "native_step": 0.5,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": 5.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Outdoor temperature",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-outdoor_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "outdoor_temperature",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 32767,
+          "native_min_value": -32768,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
       }
     ],
     "select": [
@@ -720,12 +907,12 @@
       },
       {
         "info_object": {
-          "fallback_name": "Control sequence",
-          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-ctrl_sequence_of_oper",
+          "fallback_name": "Actuator type",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-actuator_type",
           "migrate_unique_ids": [],
           "platform": "select",
           "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "ctrl_sequence_of_oper",
+          "translation_key": "actuator_type",
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
@@ -753,16 +940,256 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "enum": "BoschControlSequenceOfOperation",
+          "enum": "BoschActuatorType",
           "options": [
-            "Cooling",
-            "Heating"
+            "NormallyClosed",
+            "NormallyOpen"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "Heating"
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Heater type",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-heater_type",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "heater_type",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "BoschHeaterType",
+          "options": [
+            "UnderfloorHeating",
+            "Boiler",
+            "Radiator",
+            "CentralHeating"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Operating mode",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-operating_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "operating_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "BoschOperatingMode",
+          "options": [
+            "Schedule",
+            "Manual",
+            "Pause"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Sensor connection",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-sensor_connection",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "sensor_connection",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "BoschSensorConnection",
+          "options": [
+            "NotUsed",
+            "WithoutRegulation",
+            "WithRegulation"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Temperature display mode",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-temperature_display_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "temperature_display_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TemperatureDisplayMode",
+          "options": [
+            "Metric",
+            "Imperial"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Valve status LED",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-valve_status_led",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "valve_status_led",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "BoschValveStatusLed",
+          "options": [
+            "Off",
+            "Normal",
+            "On"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
         }
       }
     ],
@@ -1083,14 +1510,14 @@
       },
       {
         "info_object": {
-          "fallback_name": "Operating mode",
-          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-operating_mode",
+          "fallback_name": "Error code",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-error_code",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "EnumSensor",
-          "translation_key": "operating_mode",
+          "class_name": "Sensor",
+          "translation_key": "error_code",
           "translation_placeholders": null,
-          "device_class": "enum",
+          "device_class": null,
           "state_class": null,
           "entity_category": "diagnostic",
           "entity_registry_enabled_default": true,
@@ -1120,9 +1547,141 @@
           "unit": null
         },
         "state": {
-          "class_name": "EnumSensor",
+          "class_name": "Sensor",
           "available": true,
           "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "External temperature",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-external_temperature",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "external_temperature",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "\u00b0C"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Heating demand",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-heating_demand",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "heating_demand",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Local temperature",
+          "unique_id": "ab:cd:ef:12:e1:24:c2:fc-1-local_temperature",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "local_temperature",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "BoschThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e1:24:c2:fc:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e1:24:c2:fc",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "\u00b0C"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": 21.8
         }
       }
     ],

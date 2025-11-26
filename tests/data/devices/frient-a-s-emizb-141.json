@@ -324,6 +324,49 @@
           "class_name": "IdentifyButton",
           "available": true
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Reset summation delivered",
+          "unique_id": "00:15:bc:00:1b:10:01:5c-2-current_summation",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "reset_summation_delivered",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfd10",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 64784,
+                "name": "ManufacturerMetering",
+                "type": "server"
+              },
+              "id": "2:0xfd10",
+              "unique_id": "00:15:bc:00:1b:10:01:5c:2:0xfd10",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "00:15:bc:00:1b:10:01:5c",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "current_summation",
+          "attribute_value": 0
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
+        }
       }
     ],
     "number": [
