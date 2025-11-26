@@ -268,7 +268,7 @@ class Device(LogMixin, EventBase):
             f"{self._zigpy_device.__class__.__name__}"
         )
 
-        # add v1 quirk exposed features (and legacy quirk id)
+        # add v1 quirk exposed features (legacy quirk id)
         qid: set[str] | str = getattr(self._zigpy_device, ATTR_QUIRK_ID, set())
         self.exposes_features: set[str] = {qid} if isinstance(qid, str) else set(qid)
 
