@@ -272,6 +272,11 @@ class Device(LogMixin, EventBase):
         qid: set[str] | str = getattr(self._zigpy_device, ATTR_QUIRK_ID, set())
         self.exposes_features: set[str] = {qid} if isinstance(qid, str) else set(qid)
 
+        # add v2 quirk exposed features
+        if self.quirk_metadata is not None:
+            for feature in self.quirk_metadata.exposes_features:
+                self.exposes_features.add(feature.feature)
+
         self._power_config_ch: ClusterHandler | None = None
         self._identify_ch: ClusterHandler | None = None
         self._basic_ch: ClusterHandler | None = None
