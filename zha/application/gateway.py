@@ -210,9 +210,8 @@ class Gateway(AsyncUtilMixin, EventBase):
             self.config.country_code is not None
             and CONF_NWK_COUNTRY_CODE not in app_config.get(CONF_NWK, {})
         ):
-            app_config.setdefault(CONF_NWK, {})[CONF_NWK_COUNTRY_CODE] = (
-                self.config.country_code
-            )
+            app_config.setdefault(CONF_NWK, {})
+            app_config[CONF_NWK][CONF_NWK_COUNTRY_CODE] = self.config.country_code
 
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
             app_config[CONF_NWK_VALIDATE_SETTINGS] = True
