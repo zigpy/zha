@@ -274,8 +274,9 @@ class Device(LogMixin, EventBase):
 
         # add v2 quirk exposed features
         if self.quirk_metadata is not None:
-            for feature in self.quirk_metadata.exposes_features:
-                self.exposes_features.add(feature.feature)
+            self.exposes_features.update(
+                f.feature for f in self.quirk_metadata.exposes_features
+            )
 
         self._power_config_ch: ClusterHandler | None = None
         self._identify_ch: ClusterHandler | None = None
