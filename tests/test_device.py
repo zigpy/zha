@@ -1151,7 +1151,7 @@ async def test_quirks_v2_exposed_features(zha_gateway: Gateway) -> None:
     # can access the set of exposed features, similar to v1 quirks
     assert zha_device.exposes_features == {"some_feature", "another_feature"}
 
-    # can access the quirk metadata for config features for now
+    # can access the quirk metadata for config features
     assert zha_device.quirk_metadata.exposes_features == (
         ExposesFeatureMetadata(feature="some_feature"),
         ExposesFeatureMetadata(feature="another_feature", config={"option": True}),
