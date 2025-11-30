@@ -111,6 +111,7 @@ class Switch(PlatformEntity, BaseSwitch):
 
     _attr_translation_key = "switch"
     _attr_primary_weight = 10
+    _attribute_name = OnOff.AttributeDefs.on_off.name
 
     def __init__(
         self,
@@ -135,12 +136,26 @@ class Switch(PlatformEntity, BaseSwitch):
             )
         )
 
+    def _is_supported(self) -> bool:
+        if (
+            self._attribute_name
+            in self._on_off_cluster_handler.cluster.unsupported_attributes
+        ):
+            _LOGGER.debug(
+                "%s is not supported - skipping %s entity creation",
+                self._attribute_name,
+                self.__class__.__name__,
+            )
+            return False
+
+        return super()._is_supported()
+
     def handle_cluster_handler_attribute_updated(
         self,
         event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
     ) -> None:
         """Handle state update from cluster handler."""
-        if event.attribute_name == OnOff.AttributeDefs.on_off.name:
+        if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
 
 
