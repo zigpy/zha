@@ -124,18 +124,6 @@
           "attributes": []
         },
         {
-          "cluster_id": "0x0006",
-          "endpoint_attribute": "on_off",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool",
-              "unsupported": true
-            }
-          ]
-        },
-        {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
           "attributes": []
