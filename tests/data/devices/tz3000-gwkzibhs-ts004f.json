@@ -9,7 +9,9 @@
   "name": "_TZ3000_gwkzibhs TS004F",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts004f.TuyaSmartRemote004FROK",
-  "exposes_features": [],
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
   "lqi": 182,
@@ -124,6 +126,24 @@
           "attributes": []
         },
         {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x8004",
+              "name": "switch_mode",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
           "attributes": []
@@ -148,14 +168,7 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "TS004X_cluster",
-          "attributes": [
-            {
-              "id": "0x8004",
-              "name": "switch_mode",
-              "zcl_type": "enum8",
-              "value": 0
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0008",
@@ -294,6 +307,55 @@
         "state": {
           "class_name": "IdentifyButton",
           "available": true
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e5:79:a6:00-1-6-switch_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "TuyaSwitchModeSelectEntity",
+          "translation_key": "switch_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "ab:cd:ef:12:e5:79:a6:00:1:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e5:79:a6:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "SwitchMode",
+          "options": [
+            "Command",
+            "Event"
+          ]
+        },
+        "state": {
+          "class_name": "TuyaSwitchModeSelectEntity",
+          "available": true,
+          "state": "Command"
         }
       }
     ],

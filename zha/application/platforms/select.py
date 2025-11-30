@@ -8,6 +8,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
+from zhaquirks import tuya
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import (
     DANFOSS_ALLY_THERMOSTAT,
@@ -315,6 +316,18 @@ class TuyaBacklightModeSelectEntity(ZCLEnumSelectEntity):
     _attribute_name = "backlight_mode"
     _enum = TuyaBacklightMode
     _attr_translation_key: str = "backlight_mode"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_ON_OFF, exposed_features=TUYA_PLUG_ONOFF
+)
+class TuyaSwitchModeSelectEntity(ZCLEnumSelectEntity):
+    """Representation of a ZHA backlight mode select entity."""
+
+    _unique_id_suffix = "switch_mode"
+    _attribute_name = "switch_mode"
+    _enum = tuya.SwitchMode
+    _attr_translation_key: str = "switch_mode"
 
 
 class MoesBacklightMode(types.enum8):

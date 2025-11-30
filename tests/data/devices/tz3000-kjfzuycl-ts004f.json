@@ -9,7 +9,9 @@
   "name": "_TZ3000_kjfzuycl TS004F",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts004f.TuyaSmartRemote004FSK",
-  "exposes_features": [],
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -97,6 +99,11 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
           "attributes": []
         },
         {
@@ -384,6 +391,50 @@
           "battery_size",
           "battery_voltage"
         ]
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "38:5b:44:ff:fe:36:af:0f-1-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "38:5b:44:ff:fe:36:af:0f:1:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "38:5b:44:ff:fe:36:af:0f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
       }
     ],
     "update": [

@@ -550,6 +550,7 @@ class OnOffClusterHandler(ClusterHandler):
             self.ZCL_INIT_ATTRS["backlight_mode"] = True
             self.ZCL_INIT_ATTRS["power_on_state"] = True
             self.ZCL_INIT_ATTRS["child_lock"] = True
+            self.ZCL_INIT_ATTRS["switch_mode"] = True
 
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:
