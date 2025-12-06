@@ -629,9 +629,36 @@ class InovelliMmwaveRoomSizePreset(types.enum8):
     """Inovelli mmwave room size preset."""
 
     Custom = 0x00  # User-defined
-    Small = 0x01  # X: -100 to 100, Y: 0 to 200, Z: -100 to 100
-    Medium = 0x02  # X: -160 to 160, Y: 0 to 280, Z: -100 to 100
-    Large = 0x03  # X: -210 to 210, Y: 0 to 360, Z: -100 to 100
+    X_Small = 0x01  # X: -100 to 100, Y: 0 to 200, Z: -100 to 100
+    Small = 0x02  # X: -160 to 160, Y: 0 to 280, Z: -100 to 100
+    Medium = 0x03  # X: -210 to 210, Y: 0 to 360, Z: -100 to 100
+    Large = 0x04  # X: -260 to 260, Y: 0 to 400, Z: -100 to 100
+    X_Large = 0x05  # X: -310 to 310, Y: 0 to 460, Z: -100 to 100
+
+
+class InovelliLightOnPresenceBehavior(types.enum8):
+    """Inovelli light on presence behavior."""
+
+    Disabled = 0x00
+    On_When_Occupied_Off_When_Unoccupied = 0x01  # Auto On/Off when occupied (default)
+    Off_When_Vacant = 0x02  # Auto Off when vacant
+    On_When_Occupied = 0x03  # Auto On when occupied
+    On_When_Vacant_Off_When_Occupied = 0x04  # Auto On/Off when Vacant
+    On_When_Vacant = 0x05  # Auto On when Vacant
+    Off_When_Occupied = 0x06  # Auto Off when Occupied
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM32-SN"}
+)
+class InovelliLightOnPresenceBehaviorEntity(ZCLEnumSelectEntity):
+    """Inovelli light on presence behavior control."""
+
+    _unique_id_suffix = "light_on_presence_behavior"
+    _attribute_name = "light_on_presence_behavior"
+    _enum = InovelliLightOnPresenceBehavior
+    _attr_translation_key: str = "light_on_presence_behavior"
+    _attr_fallback_name = "Light On Presence Behavior"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(

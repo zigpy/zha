@@ -725,19 +725,6 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     _attr_translation_key: str = "double_tap_down_level"
 
 
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM32-SN"}
-)
-class InovelliLightOnPresenceBehavior(NumberConfigurationEntity):
-    """Inovelli light on presence behavior configuration entity."""
-
-    _unique_id_suffix = "light_on_presence_behavior"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
-    _attribute_name = "light_on_presence_behavior"
-    _attr_translation_key: str = "light_on_presence_behavior"
-    _attr_fallback_name = "Light On Presence Behavior"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
