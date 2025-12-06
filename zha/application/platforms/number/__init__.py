@@ -25,6 +25,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_BASIC,
     CLUSTER_HANDLER_COLOR,
     CLUSTER_HANDLER_INOVELLI,
+    CLUSTER_HANDLER_INOVELLI_MMWAVE,
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_THERMOSTAT,
@@ -722,6 +723,174 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     _attr_native_max_value: float = 254
     _attribute_name = "double_tap_down_level"
     _attr_translation_key: str = "double_tap_down_level"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM32-SN"}
+)
+class InovelliLightOnPresenceBehavior(NumberConfigurationEntity):
+    """Inovelli light on presence behavior configuration entity."""
+
+    _unique_id_suffix = "light_on_presence_behavior"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "light_on_presence_behavior"
+    _attr_translation_key: str = "light_on_presence_behavior"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveZMin(NumberConfigurationEntity):
+    """Inovelli mmwave Z minimum configuration entity."""
+
+    _unique_id_suffix = "mmwave_z_min"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_z_min"
+    _attr_translation_key: str = "mmwave_z_min"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveZMax(NumberConfigurationEntity):
+    """Inovelli mmwave Z maximum configuration entity."""
+
+    _unique_id_suffix = "mmwave_z_max"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_z_max"
+    _attr_translation_key: str = "mmwave_z_max"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveXMin(NumberConfigurationEntity):
+    """Inovelli mmwave X minimum configuration entity."""
+
+    _unique_id_suffix = "mmwave_x_min"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_x_min"
+    _attr_translation_key: str = "mmwave_x_min"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveXMax(NumberConfigurationEntity):
+    """Inovelli mmwave X maximum configuration entity."""
+
+    _unique_id_suffix = "mmwave_x_max"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_x_max"
+    _attr_translation_key: str = "mmwave_x_max"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveYMin(NumberConfigurationEntity):
+    """Inovelli mmwave Y minimum configuration entity."""
+
+    _unique_id_suffix = "mmwave_y_min"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_y_min"
+    _attr_translation_key: str = "mmwave_y_min"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveYMax(NumberConfigurationEntity):
+    """Inovelli mmwave Y maximum configuration entity."""
+
+    _unique_id_suffix = "mmwave_y_max"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_y_max"
+    _attr_translation_key: str = "mmwave_y_max"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveTargetInfoReport(NumberConfigurationEntity):
+    """Inovelli mmwave target info report configuration entity."""
+
+    _unique_id_suffix = "mmwave_target_info_report"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_target_info_report"
+    _attr_translation_key: str = "mmwave_target_info_report"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveStayLife(NumberConfigurationEntity):
+    """Inovelli mmwave stay life configuration entity."""
+
+    _unique_id_suffix = "mmwave_stay_life"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_stay_life"
+    _attr_translation_key: str = "mmwave_stay_life"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveDetectSensitivity(NumberConfigurationEntity):
+    """Inovelli mmwave detect sensitivity configuration entity."""
+
+    _unique_id_suffix = "mmwave_detect_sensitivity"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_detect_sensitivity"
+    _attr_translation_key: str = "mmwave_detect_sensitivity"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveDetectTrigger(NumberConfigurationEntity):
+    """Inovelli mmwave detect trigger configuration entity."""
+
+    _unique_id_suffix = "mmwave_detect_trigger"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_detect_trigger"
+    _attr_translation_key: str = "mmwave_detect_trigger"
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveHoldTime(NumberConfigurationEntity):
+    """Inovelli mmwave hold time configuration entity."""
+
+    _unique_id_suffix = "mmwave_hold_time"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value: float = 0
+    _attr_native_max_value: float = 255
+    _attribute_name = "mmwave_hold_time"
+    _attr_translation_key: str = "mmwave_hold_time"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(

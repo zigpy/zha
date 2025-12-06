@@ -32,6 +32,7 @@ from zha.zigbee.cluster_handlers.const import (
     IKEA_REMOTE_CLUSTER,
     IKEA_SHORTCUT_V1_CLUSTER,
     INOVELLI_CLUSTER,
+    INOVELLI_MMWAVE_CLUSTER,
     LEGRAND_CABLE_OUTLET_CLUSTER,
     OSRAM_BUTTON_CLUSTER,
     PHILIPS_CONTACT_CLUSTER,
@@ -358,6 +359,53 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
                 "relay_click_in_on_off_mode": True,
                 "disable_clear_notifications_double_tap": True,
             }
+        elif self.cluster.endpoint.model == "VZM32-SN":
+            self.ZCL_INIT_ATTRS = {
+                "dimming_speed_up_remote": True,
+                "dimming_speed_up_local": True,
+                "ramp_rate_off_to_on_remote": True,
+                "ramp_rate_off_to_on_local": True,
+                "dimming_speed_down_remote": True,
+                "dimming_speed_down_local": True,
+                "ramp_rate_on_to_off_remote": True,
+                "ramp_rate_on_to_off_local": True,
+                "minimum_level": True,
+                "maximum_level": True,
+                "invert_switch": True,
+                "auto_off_timer": True,
+                "default_level_local": True,
+                "default_level_remote": True,
+                "state_after_power_restored": True,
+                "load_level_indicator_timeout": True,
+                "active_power_reports": True,
+                "periodic_power_and_energy_reports": True,
+                "active_energy_reports": True,
+                "power_type": False,
+                "switch_type": False,
+                "increased_non_neutral_output": True,
+                "leading_or_trailing_edge": True,
+                "internal_temp_monitor": True,
+                "overheated": True,
+                "button_delay": False,
+                "smart_bulb_mode": False,
+                "double_tap_up_enabled": True,
+                "double_tap_down_enabled": True,
+                "double_tap_up_level": True,
+                "double_tap_down_level": True,
+                "led_color_when_on": True,
+                "led_color_when_off": True,
+                "led_intensity_when_on": True,
+                "led_intensity_when_off": True,
+                "led_scaling_mode": True,
+                "aux_switch_scenes": True,
+                "binding_off_to_on_sync_level": True,
+                "local_protection": False,
+                "output_mode": False,
+                "on_off_led_mode": True,
+                "firmware_progress_led": True,
+                "disable_clear_notifications_double_tap": True,
+                "light_on_presence_behavior": True,
+            }
         elif self.cluster.endpoint.model == "VZM35-SN":
             self.ZCL_INIT_ATTRS = {
                 "dimming_speed_up_remote": True,
@@ -431,6 +479,32 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
         await self.individual_led_effect(
             led_number, effect_type, color, level, duration, expect_reply=False
         )
+
+
+@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(INOVELLI_MMWAVE_CLUSTER)
+@registries.CLUSTER_HANDLER_REGISTRY.register(INOVELLI_MMWAVE_CLUSTER)
+class InovelliMmwaveClusterHandler(ClusterHandler):
+    """Inovelli mmwave cluster handler."""
+
+    REPORT_CONFIG = ()
+
+    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
+        """Initialize Inovelli mmwave cluster handler."""
+        super().__init__(cluster, endpoint)
+        if self.cluster.endpoint.model == "VZM32-SN":
+            self.ZCL_INIT_ATTRS = {
+                "mmwave_z_min": True,
+                "mmwave_z_max": True,
+                "mmwave_x_min": True,
+                "mmwave_x_max": True,
+                "mmwave_y_min": True,
+                "mmwave_y_max": True,
+                "mmwave_target_info_report": True,
+                "mmwave_stay_life": True,
+                "mmwave_detect_sensitivity": True,
+                "mmwave_detect_trigger": True,
+                "mmwave_hold_time": True,
+            }
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_AIR_PURIFIER_CLUSTER)
