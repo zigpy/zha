@@ -747,11 +747,12 @@ class InovelliMmwaveZMin(NumberConfigurationEntity):
 
     _unique_id_suffix = "mmwave_z_min"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_min_value: float = -600
+    _attr_native_max_value: float = 600
     _attribute_name = "mmwave_z_min"
     _attr_translation_key: str = "mmwave_z_min"
     _attr_fallback_name = "mmWave Height Minimum (Floor)"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -762,11 +763,12 @@ class InovelliMmwaveZMax(NumberConfigurationEntity):
 
     _unique_id_suffix = "mmwave_z_max"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_min_value: float = -600
+    _attr_native_max_value: float = 600
     _attribute_name = "mmwave_z_max"
     _attr_translation_key: str = "mmwave_z_max"
     _attr_fallback_name = "mmWave Height Maximum (Ceiling)"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -777,11 +779,12 @@ class InovelliMmwaveXMin(NumberConfigurationEntity):
 
     _unique_id_suffix = "mmwave_x_min"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_min_value: float = -600
+    _attr_native_max_value: float = 600
     _attribute_name = "mmwave_x_min"
     _attr_translation_key: str = "mmwave_x_min"
     _attr_fallback_name = "mmWave Width Minimum (Left)"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -792,11 +795,12 @@ class InovelliMmwaveXMax(NumberConfigurationEntity):
 
     _unique_id_suffix = "mmwave_x_max"
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_min_value: float = -600
+    _attr_native_max_value: float = 600
     _attribute_name = "mmwave_x_max"
     _attr_translation_key: str = "mmwave_x_max"
     _attr_fallback_name = "mmWave Width Maximum (Right)"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -808,10 +812,11 @@ class InovelliMmwaveYMin(NumberConfigurationEntity):
     _unique_id_suffix = "mmwave_y_min"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_max_value: float = 600
     _attribute_name = "mmwave_y_min"
     _attr_translation_key: str = "mmwave_y_min"
     _attr_fallback_name = "mmWave Depth Minimum (Near)"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -823,10 +828,11 @@ class InovelliMmwaveYMax(NumberConfigurationEntity):
     _unique_id_suffix = "mmwave_y_max"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_max_value: float = 600
     _attribute_name = "mmwave_y_max"
     _attr_translation_key: str = "mmwave_y_max"
     _attr_fallback_name = "mmWave Depth Maximum (Far)"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -838,7 +844,7 @@ class InovelliMmwaveTargetInfoReport(NumberConfigurationEntity):
     _unique_id_suffix = "mmwave_target_info_report"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_max_value: float = 1
     _attribute_name = "mmwave_target_info_report"
     _attr_translation_key: str = "mmwave_target_info_report"
     _attr_fallback_name = "mmWave Target Info Report"
@@ -853,10 +859,11 @@ class InovelliMmwaveStayLife(NumberConfigurationEntity):
     _unique_id_suffix = "mmwave_stay_life"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_max_value: float = 4294967295
     _attribute_name = "mmwave_stay_life"
     _attr_translation_key: str = "mmwave_stay_life"
     _attr_fallback_name = "mmWave Stay Life"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
@@ -868,7 +875,7 @@ class InovelliMmwaveDetectSensitivity(NumberConfigurationEntity):
     _unique_id_suffix = "mmwave_detect_sensitivity"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_max_value: float = 2
     _attribute_name = "mmwave_detect_sensitivity"
     _attr_translation_key: str = "mmwave_detect_sensitivity"
     _attr_fallback_name = "mmWave Sensitivity"
@@ -883,7 +890,7 @@ class InovelliMmwaveDetectTrigger(NumberConfigurationEntity):
     _unique_id_suffix = "mmwave_detect_trigger"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_max_value: float = 2
     _attribute_name = "mmwave_detect_trigger"
     _attr_translation_key: str = "mmwave_detect_trigger"
     _attr_fallback_name = "mmWave Target Speed"
@@ -898,10 +905,11 @@ class InovelliMmwaveHoldTime(NumberConfigurationEntity):
     _unique_id_suffix = "mmwave_hold_time"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 255
+    _attr_native_max_value: float = 4294967296
     _attribute_name = "mmwave_hold_time"
     _attr_translation_key: str = "mmwave_hold_time"
     _attr_fallback_name = "mmWave Detection Timeout"
+    _attr_mode: NumberMode = NumberMode.BOX
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
