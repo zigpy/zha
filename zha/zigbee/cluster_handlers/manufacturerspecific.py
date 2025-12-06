@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -28,6 +29,7 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_ID,
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
+    CLUSTER_HANDLER_INOVELLI_MMWAVE,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     IKEA_SHORTCUT_V1_CLUSTER,
@@ -505,6 +507,11 @@ class InovelliMmwaveClusterHandler(ClusterHandler):
                 "mmwave_detect_trigger": True,
                 "mmwave_hold_time": True,
             }
+
+    @functools.cached_property
+    def name(self) -> str:
+        """Return friendly name."""
+        return CLUSTER_HANDLER_INOVELLI_MMWAVE
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_AIR_PURIFIER_CLUSTER)
