@@ -737,6 +737,7 @@ class InovelliLightOnPresenceBehavior(NumberConfigurationEntity):
     _attr_native_max_value: float = 255
     _attribute_name = "light_on_presence_behavior"
     _attr_translation_key: str = "light_on_presence_behavior"
+    _attr_fallback_name = "Light On Presence Behavior"
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
