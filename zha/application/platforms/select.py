@@ -31,6 +31,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_HUE_OCCUPANCY,
     CLUSTER_HANDLER_IAS_WD,
     CLUSTER_HANDLER_INOVELLI,
+    CLUSTER_HANDLER_INOVELLI_MMWAVE,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_THERMOSTAT,
@@ -580,6 +581,48 @@ class InovelliLedScalingModeEntity(ZCLEnumSelectEntity):
     _attribute_name = "led_scaling_mode"
     _enum = InovelliLedScalingMode
     _attr_translation_key: str = "led_scaling_mode"
+
+
+class InovelliMmwaveSensitivity(types.enum8):
+    """Inovelli mmwave sensitivity."""
+
+    Low = 0x00
+    Medium = 0x01
+    High = 0x02
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveSensitivityEntity(ZCLEnumSelectEntity):
+    """Inovelli mmwave sensitivity control."""
+
+    _unique_id_suffix = "mmwave_detect_sensitivity"
+    _attribute_name = "mmwave_detect_sensitivity"
+    _enum = InovelliMmwaveSensitivity
+    _attr_translation_key: str = "mmwave_detect_sensitivity"
+    _attr_fallback_name = "mmWave Sensitivity"
+
+
+class InovelliMmwaveTargetSpeed(types.enum8):
+    """Inovelli mmwave target speed."""
+
+    Low = 0x00  # 5s
+    Medium = 0x01  # 1s
+    Fast = 0x02  # 0.2s
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
+)
+class InovelliMmwaveTargetSpeedEntity(ZCLEnumSelectEntity):
+    """Inovelli mmwave target speed control."""
+
+    _unique_id_suffix = "mmwave_detect_trigger"
+    _attribute_name = "mmwave_detect_trigger"
+    _enum = InovelliMmwaveTargetSpeed
+    _attr_translation_key: str = "mmwave_detect_trigger"
+    _attr_fallback_name = "mmWave Target Speed"
 
 
 class InovelliFanLedScalingMode(types.enum8):

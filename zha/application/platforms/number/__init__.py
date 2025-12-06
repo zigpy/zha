@@ -838,67 +838,6 @@ class InovelliMmwaveYMax(NumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
 )
-class InovelliMmwaveTargetInfoReport(NumberConfigurationEntity):
-    """Inovelli mmwave target info report configuration entity."""
-
-    _unique_id_suffix = "mmwave_target_info_report"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 1
-    _attribute_name = "mmwave_target_info_report"
-    _attr_translation_key: str = "mmwave_target_info_report"
-    _attr_fallback_name = "mmWave Target Info Report"
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
-)
-class InovelliMmwaveStayLife(NumberConfigurationEntity):
-    """Inovelli mmwave stay life configuration entity."""
-
-    _unique_id_suffix = "mmwave_stay_life"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 4294967295
-    _attribute_name = "mmwave_stay_life"
-    _attr_translation_key: str = "mmwave_stay_life"
-    _attr_fallback_name = "mmWave Stay Life"
-    _attr_mode: NumberMode = NumberMode.BOX
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
-)
-class InovelliMmwaveDetectSensitivity(NumberConfigurationEntity):
-    """Inovelli mmwave detect sensitivity configuration entity."""
-
-    _unique_id_suffix = "mmwave_detect_sensitivity"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 2
-    _attribute_name = "mmwave_detect_sensitivity"
-    _attr_translation_key: str = "mmwave_detect_sensitivity"
-    _attr_fallback_name = "mmWave Sensitivity"
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
-)
-class InovelliMmwaveDetectTrigger(NumberConfigurationEntity):
-    """Inovelli mmwave detect trigger configuration entity."""
-
-    _unique_id_suffix = "mmwave_detect_trigger"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 0
-    _attr_native_max_value: float = 2
-    _attribute_name = "mmwave_detect_trigger"
-    _attr_translation_key: str = "mmwave_detect_trigger"
-    _attr_fallback_name = "mmWave Target Speed"
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
-)
 class InovelliMmwaveHoldTime(NumberConfigurationEntity):
     """Inovelli mmwave hold time configuration entity."""
 
