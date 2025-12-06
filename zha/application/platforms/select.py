@@ -625,6 +625,28 @@ class InovelliMmwaveTargetSpeedEntity(ZCLEnumSelectEntity):
     _attr_fallback_name = "mmWave Target Speed"
 
 
+class InovelliMmwaveRoomSizePreset(types.enum8):
+    """Inovelli mmwave room size preset."""
+
+    Custom = 0x00  # User-defined
+    Small = 0x01  # X: -100 to 100, Y: 0 to 200, Z: -100 to 100
+    Medium = 0x02  # X: -160 to 160, Y: 0 to 280, Z: -100 to 100
+    Large = 0x03  # X: -210 to 210, Y: 0 to 360, Z: -100 to 100
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM32-SN"}
+)
+class InovelliMmwaveRoomSizePresetEntity(ZCLEnumSelectEntity):
+    """Inovelli mmwave room size preset control."""
+
+    _unique_id_suffix = "mmwave_room_size_preset"
+    _attribute_name = "mmwave_room_size_preset"
+    _enum = InovelliMmwaveRoomSizePreset
+    _attr_translation_key: str = "mmwave_room_size_preset"
+    _attr_fallback_name = "Room Size Preset"
+
+
 class InovelliFanLedScalingMode(types.enum8):
     """Inovelli fan led mode."""
 

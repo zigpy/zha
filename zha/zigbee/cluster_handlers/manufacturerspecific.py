@@ -29,6 +29,7 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_ID,
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
+    CLUSTER_HANDLER_INOVELLI,
     CLUSTER_HANDLER_INOVELLI_MMWAVE,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
@@ -407,6 +408,7 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
                 "firmware_progress_led": True,
                 "disable_clear_notifications_double_tap": True,
                 "light_on_presence_behavior": True,
+                "mmwave_room_size_preset": True,
             }
         elif self.cluster.endpoint.model == "VZM35-SN":
             self.ZCL_INIT_ATTRS = {
@@ -481,6 +483,11 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
         await self.individual_led_effect(
             led_number, effect_type, color, level, duration, expect_reply=False
         )
+
+    @functools.cached_property
+    def name(self) -> str:
+        """Return friendly name."""
+        return CLUSTER_HANDLER_INOVELLI
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(INOVELLI_MMWAVE_CLUSTER)
