@@ -508,8 +508,6 @@ class InovelliMmwaveClusterHandler(ClusterHandler):
                 "mmwave_x_max": True,
                 "mmwave_y_min": True,
                 "mmwave_y_max": True,
-                "mmwave_target_info_report": True,
-                "mmwave_stay_life": True,
                 "mmwave_detect_sensitivity": True,
                 "mmwave_detect_trigger": True,
                 "mmwave_hold_time": True,
