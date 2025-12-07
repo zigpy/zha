@@ -384,7 +384,7 @@ class InovelliConfigEntityClusterHandler(ClusterHandler):
                 "periodic_power_and_energy_reports": True,
                 "active_energy_reports": True,
                 "power_type": False,
-                "switch_type": False,
+                "switch_type": True,
                 "increased_non_neutral_output": True,
                 "leading_or_trailing_edge": True,
                 "internal_temp_monitor": True,

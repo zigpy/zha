@@ -545,6 +545,26 @@ class InovelliSwitchTypeEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "switch_type"
 
 
+class InovelliVZM32SwitchType(types.enum8):
+    """Inovelli VZM32-SN switch type."""
+
+    Single_Pole = 0x00
+    Three_Way_AUX = 0x01
+
+
+@CONFIG_DIAGNOSTIC_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_INOVELLI, models={"VZM32-SN"}
+)
+class InovelliVZM32SwitchTypeEntity(ZCLEnumSelectEntity):
+    """Inovelli VZM32-SN switch type control."""
+
+    _unique_id_suffix = "switch_type"
+    _attribute_name = "switch_type"
+    _enum = InovelliVZM32SwitchType
+    _attr_translation_key: str = "switch_type"
+    _attr_fallback_name = "Switch Type"
+
+
 class InovelliFanSwitchType(types.enum1):
     """Inovelli fan switch mode."""
 
