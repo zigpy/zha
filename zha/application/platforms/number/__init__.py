@@ -725,8 +725,6 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     _attr_translation_key: str = "double_tap_down_level"
 
 
-
-
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
 )
