@@ -500,7 +500,7 @@
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": false,
+          "primary": true,
           "cluster_handlers": [
             {
               "class_name": "MeteringClusterHandler",
@@ -679,50 +679,6 @@
           "measurement_type",
           "rms_voltage_max"
         ]
-      }
-    ],
-    "switch": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:5e:6a:9a:13-1",
-          "migrate_unique_ids": [],
-          "platform": "switch",
-          "class_name": "Switch",
-          "translation_key": "switch",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "ab:cd:ef:12:5e:6a:9a:13:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:5e:6a:9a:13",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null
-        },
-        "state": {
-          "class_name": "Switch",
-          "state": false,
-          "available": true
-        }
       }
     ],
     "update": [
