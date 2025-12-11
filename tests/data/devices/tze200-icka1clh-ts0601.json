@@ -1,0 +1,440 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:8b:0c:ae:49",
+  "nwk": "0xAC3C",
+  "manufacturer": "_TZE200_icka1clh",
+  "model": "TS0601",
+  "friendly_manufacturer": "_TZE200_icka1clh",
+  "friendly_model": "TS0601",
+  "name": "_TZE200_icka1clh TS0601",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.ts0601_cover.TuyaMoesCover0601",
+  "exposes_features": [],
+  "manufacturer_code": 4098,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-12-11T00:56:57.898176+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4098,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_DEVICE",
+        "id": 514
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 65
+            },
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "_TZE200_icka1clh"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "TS0601"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": [
+            {
+              "id": "0x0007",
+              "name": "config_status",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0008",
+              "name": "current_position_lift_percentage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0009",
+              "name": "current_position_tilt_percentage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "installed_closed_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0013",
+              "name": "installed_closed_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0010",
+              "name": "installed_open_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "installed_open_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0017",
+              "name": "window_covering_mode",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "window_covering_type",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xef00",
+          "endpoint_attribute": "tuya_manufacturer",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "original_signature": {
+    "models_info": [
+      [
+        "_TZE200_vdiuwbkq",
+        "TS0601"
+      ],
+      [
+        "_TZE200_zah67ekd",
+        "TS0601"
+      ],
+      [
+        "_TZE200_nueqqe6k",
+        "TS0601"
+      ],
+      [
+        "_TZE200_gubdgai2",
+        "TS0601"
+      ],
+      [
+        "_TZE200_5sbebbzs",
+        "TS0601"
+      ],
+      [
+        "_TZE200_hsgrhjpf",
+        "TS0601"
+      ],
+      [
+        "_TZE200_68nvbio9",
+        "TS0601"
+      ],
+      [
+        "_TZE200_ergbiejo",
+        "TS0601"
+      ],
+      [
+        "_TZE200_nhyj64w2",
+        "TS0601"
+      ],
+      [
+        "_TZE200_cf1sl3tj",
+        "TS0601"
+      ],
+      [
+        "_TZE200_7eue9vhc",
+        "TS0601"
+      ],
+      [
+        "_TZE200_bv1jcqqu",
+        "TS0601"
+      ],
+      [
+        "_TZE200_nw1r9hp6",
+        "TS0601"
+      ],
+      [
+        "_TZE200_gaj531w3",
+        "TS0601"
+      ],
+      [
+        "_TZE200_icka1clh",
+        "TS0601"
+      ],
+      [
+        "_TZE200_1vxgqfba",
+        "TS0601"
+      ],
+      [
+        "_TZE200_fctwhugx",
+        "TS0601"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
+        "input_clusters": [
+          "0x0000",
+          "0x0004",
+          "0x0005",
+          "0xef00"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
+  "zha_lib_entities": {
+    "cover": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8b:0c:ae:49-1-258",
+          "migrate_unique_ids": [],
+          "platform": "cover",
+          "class_name": "Cover",
+          "translation_key": "cover",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": true,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "1:0x0102",
+              "unique_id": "ab:cd:ef:12:8b:0c:ae:49:1:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8b:0c:ae:49",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Cover",
+          "available": true,
+          "current_position": null,
+          "current_tilt_position": null,
+          "state": null,
+          "is_opening": null,
+          "is_closing": null,
+          "is_closed": null
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8b:0c:ae:49-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:8b:0c:ae:49:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8b:0c:ae:49",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8b:0c:ae:49-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:8b:0c:ae:49:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8b:0c:ae:49",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8b:0c:ae:49-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:8b:0c:ae:49:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8b:0c:ae:49",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": null,
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

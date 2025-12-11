@@ -39,6 +39,7 @@ testing = [
 enabled = true
 
 [tool.codespell]
+skip = ["tests/data/devices/*"]
 ignore-words-list = "hass, checkin"
 
 [tool.mypy]

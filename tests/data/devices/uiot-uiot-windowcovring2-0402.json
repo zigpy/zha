@@ -1,0 +1,878 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:c1:6d:31:24",
+  "nwk": "0xD24F",
+  "manufacturer": "UIOT",
+  "model": "UIOT-WindowCovring2[04,02]",
+  "friendly_manufacturer": "UIOT",
+  "friendly_model": "UIOT-WindowCovring2[04,02]",
+  "name": "UIOT UIOT-WindowCovring2[04,02]",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "exposes_features": [],
+  "manufacturer_code": 4657,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-12-11T00:56:57.397793+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4657,
+    "maximum_buffer_size": 127,
+    "maximum_incoming_transfer_size": 100,
+    "server_mask": 0,
+    "maximum_outgoing_transfer_size": 100,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "UIOT"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "UIOT-WindowCovring2[04,02]"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": [
+            {
+              "id": "0x0002",
+              "name": "current_file_version",
+              "zcl_type": "uint32",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": [
+            {
+              "id": "0x0007",
+              "name": "config_status",
+              "zcl_type": "map8",
+              "value": 3
+            },
+            {
+              "id": "0x0008",
+              "name": "current_position_lift_percentage",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0009",
+              "name": "current_position_tilt_percentage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "installed_closed_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0013",
+              "name": "installed_closed_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0010",
+              "name": "installed_open_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "installed_open_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0017",
+              "name": "window_covering_mode",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "window_covering_type",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfe00",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xffff",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xfe00",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xffff",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": [
+            {
+              "id": "0x0007",
+              "name": "config_status",
+              "zcl_type": "map8",
+              "value": 3
+            },
+            {
+              "id": "0x0008",
+              "name": "current_position_lift_percentage",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0009",
+              "name": "current_position_tilt_percentage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "installed_closed_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0013",
+              "name": "installed_closed_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0010",
+              "name": "installed_open_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "installed_open_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0017",
+              "name": "window_covering_mode",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "window_covering_type",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xffff",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xffff",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ]
+    },
+    "3": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "WINDOW_COVERING_CONTROLLER",
+        "id": 515
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": [
+            {
+              "id": "0x0007",
+              "name": "config_status",
+              "zcl_type": "map8",
+              "value": 3
+            },
+            {
+              "id": "0x0008",
+              "name": "current_position_lift_percentage",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0009",
+              "name": "current_position_tilt_percentage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "installed_closed_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0013",
+              "name": "installed_closed_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0010",
+              "name": "installed_open_limit_lift",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "installed_open_limit_tilt",
+              "zcl_type": "uint16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0017",
+              "name": "window_covering_mode",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "window_covering_type",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xffff",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0102",
+          "endpoint_attribute": "window_covering",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0xffff",
+          "endpoint_attribute": "manufacturer_specific",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-1-3",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:1:0x0003",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "cover": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-1-258",
+          "migrate_unique_ids": [],
+          "platform": "cover",
+          "class_name": "Cover",
+          "translation_key": "cover",
+          "translation_placeholders": null,
+          "device_class": "shade",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "1:0x0102",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:1:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Cover",
+          "available": true,
+          "current_position": 100,
+          "current_tilt_position": null,
+          "state": "open",
+          "is_opening": false,
+          "is_closing": false,
+          "is_closed": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-2-258",
+          "migrate_unique_ids": [],
+          "platform": "cover",
+          "class_name": "Cover",
+          "translation_key": "cover",
+          "translation_placeholders": null,
+          "device_class": "shade",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "2:0x0102",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:2:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Cover",
+          "available": true,
+          "current_position": 100,
+          "current_tilt_position": null,
+          "state": "open",
+          "is_opening": false,
+          "is_closing": false,
+          "is_closed": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-3-258",
+          "migrate_unique_ids": [],
+          "platform": "cover",
+          "class_name": "Cover",
+          "translation_key": "cover",
+          "translation_placeholders": null,
+          "device_class": "shade",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 3,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "3:0x0102",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:3:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Cover",
+          "available": true,
+          "current_position": 100,
+          "current_tilt_position": null,
+          "state": "open",
+          "is_opening": false,
+          "is_closing": false,
+          "is_closed": false
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-1-258-window_covering_type",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "WindowCoveringTypeSensor",
+          "translation_key": "window_covering_type",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "1:0x0102",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:1:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "WindowCoveringTypeSensor",
+          "available": true,
+          "state": "Rollershade"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-2-258-window_covering_type",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "WindowCoveringTypeSensor",
+          "translation_key": "window_covering_type",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "2:0x0102",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:2:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "WindowCoveringTypeSensor",
+          "available": true,
+          "state": "Rollershade"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-3-258-window_covering_type",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "WindowCoveringTypeSensor",
+          "translation_key": "window_covering_type",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "WindowCoveringClusterHandler",
+              "generic_id": "cluster_handler_0x0102",
+              "endpoint_id": 3,
+              "cluster": {
+                "id": 258,
+                "name": "Window Covering",
+                "type": "server"
+              },
+              "id": "3:0x0102",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:3:0x0102",
+              "status": "INITIALIZED",
+              "value_attribute": "current_position_lift_percentage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "WindowCoveringTypeSensor",
+          "available": true,
+          "state": "Rollershade"
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:c1:6d:31:24-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClusterHandler",
+              "generic_id": "cluster_handler_0x0019",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "server"
+              },
+              "id": "1:0x0019",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:1:0x0019",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            },
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:c1:6d:31:24:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:c1:6d:31:24",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": null,
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}
