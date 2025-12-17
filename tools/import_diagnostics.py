@@ -215,7 +215,7 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                 patch_cluster_for_testing(real_cluster)
             for attr_id, attr in cluster["attributes"].items():
                 if (
-                    attr.get("value", None) is None
+                    attr.get("value") is None
                     or attr_id in cluster["unsupported_attributes"]
                 ):
                     continue
