@@ -953,7 +953,7 @@ class SoilMoisture(Sensor):
     """Soil Moisture sensor."""
 
     _attribute_name = "measured_value"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.HUMIDITY
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.MOISTURE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_translation_key: str = "soil_moisture"
     _divisor = 100
