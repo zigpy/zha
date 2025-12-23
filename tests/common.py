@@ -415,16 +415,21 @@ def zigpy_device_from_device_data(
 
                 for attr in cluster["attributes"]:
                     attrid = int(attr["id"], 16)
+                    attr_name = attr.get("name")
+
+                    # Look up by name to avoid ambiguity with manufacturer-specific attrs
+                    if attr_name is not None:
+                        attr_def = real_cluster.find_attribute(attr_name)
+                        assert attr_def.id == attrid
+                    else:
+                        attr_def = real_cluster.find_attribute(attrid)
 
                     if attr.get("value", None) is not None:
-                        real_cluster._attr_cache[attrid] = attr["value"]
+                        real_cluster._attr_cache.set_value(attr_def, attr["value"])
                         real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
 
                     if attr.get("unsupported", False):
-                        real_cluster.unsupported_attributes.add(attrid)
-
-                        if attr["name"] is not None:
-                            real_cluster.unsupported_attributes.add(attr["name"])
+                        real_cluster.add_unsupported_attribute(attr_def)
 
     for obj in device_data["neighbors"]:
         app.topology.neighbors[device.ieee].append(

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -13,6 +12,12 @@ from zhaquirks.quirk_ids import (
     XIAOMI_AQARA_VIBRATION_AQ1,
 )
 import zigpy.zcl
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
 from zigpy.zcl.clusters.closures import DoorLock
 from zigpy.zcl.clusters.homeautomation import Diagnostic
 from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
@@ -234,20 +239,21 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
             "SmartThings",
         )
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Handle attribute updates on this cluster."""
-        super().attribute_updated(attrid, value, timestamp)
-        try:
-            attr_name = self._cluster.attributes[attrid].name
-        except KeyError:
-            attr_name = UNKNOWN
-
+        super()._handle_attribute_updated_event(event)
         self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,
             {
-                ATTRIBUTE_ID: attrid,
-                ATTRIBUTE_NAME: attr_name,
-                ATTRIBUTE_VALUE: value,
+                ATTRIBUTE_ID: event.attribute_id,
+                ATTRIBUTE_NAME: event.attribute_name or UNKNOWN,
+                ATTRIBUTE_VALUE: event.value,
             },
         )
 
@@ -256,7 +262,13 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
 class InovelliNotificationClientClusterHandler(ClientClusterHandler):
     """Inovelli Notification cluster handler."""
 
-    def attribute_updated(self, attrid: int, value: Any, _: Any) -> None:
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Handle an attribute updated on this cluster."""
 
     def cluster_command(self, tsn, command_id, args):

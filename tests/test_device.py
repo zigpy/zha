@@ -1,7 +1,6 @@
 """Test ZHA device switch."""
 
 import asyncio
-from datetime import UTC, datetime
 import logging
 import time
 from unittest import mock
@@ -824,19 +823,17 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
 
     # If we update the entity, the device updates as well
     update_entity = get_entity(zha_device, platform=Platform.UPDATE)
-    update_entity._ota_cluster_handler.attribute_updated(
-        attrid=Ota.AttributeDefs.current_file_version.id,
-        value=zigpy.types.uint32_t(0xABCD1234),
-        timestamp=datetime.now(UTC),
+    update_entity._ota_cluster_handler.cluster.update_attribute(
+        Ota.AttributeDefs.current_file_version.id,
+        zigpy.types.uint32_t(0xABCD1234),
     )
 
     assert zha_device.firmware_version == "0xabcd1234"
 
     # Duplicate updates are ignored
-    update_entity._ota_cluster_handler.attribute_updated(
-        attrid=Ota.AttributeDefs.current_file_version.id,
-        value=zigpy.types.uint32_t(0xABCD1234),
-        timestamp=datetime.now(UTC),
+    update_entity._ota_cluster_handler.cluster.update_attribute(
+        Ota.AttributeDefs.current_file_version.id,
+        zigpy.types.uint32_t(0xABCD1234),
     )
 
     assert zha_device.firmware_version == "0xabcd1234"

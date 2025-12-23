@@ -607,7 +607,10 @@ async def test_devices_from_files(
         # XXX: attribute updates during device initialization unfortunately triggers
         # logic within quirks to "fix" attributes. Since these attributes are *read out*
         # in this state, this will compound the "fix" repeatedly.
-        with mock.patch("zigpy.zcl.Cluster._update_attribute"):
+        with (
+            mock.patch("zigpy.zcl.Cluster._update_attribute"),
+            mock.patch("zigpy.zcl.helpers.AttributeCache.set_value"),
+        ):
             zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
             await zha_gateway.async_block_till_done(wait_background_tasks=True)
             assert zha_device is not None
@@ -673,6 +676,5 @@ async def test_devices_from_files(
                         not in ("HDC52EastwindFan", "HBUniversalCFRemote")
                     ),
                     manufacturer=None,
-                    tsn=None,
                 )
             ]

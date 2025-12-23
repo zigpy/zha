@@ -5,13 +5,18 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Coroutine
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Final
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
 from zigpy.zcl.clusters.general import (
     Alarms,
     AnalogInput,
@@ -466,13 +471,22 @@ class LevelControlClusterHandler(ClusterHandler):
                 SIGNAL_MOVE_LEVEL, -args[1] if args[0] else args[1]
             )
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Handle attribute updates on this cluster."""
-        self.debug("received attribute: %s update with value: %s", attrid, value)
-        if attrid == self.CURRENT_LEVEL:
-            self.dispatch_level_change(SIGNAL_SET_LEVEL, value)
-        else:
-            super().attribute_updated(attrid, value, timestamp)
+        self.debug(
+            "received attribute: %s update with value: %s",
+            event.attribute_id,
+            event.value,
+        )
+        if event.attribute_id == self.CURRENT_LEVEL:
+            self.dispatch_level_change(SIGNAL_SET_LEVEL, event.value)
+        super()._handle_attribute_updated_event(event)
 
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
@@ -667,12 +681,17 @@ class OtaClientClusterHandler(ClientClusterHandler):
         """Return cached value of current_file_version attribute."""
         return self.cluster.get(Ota.AttributeDefs.current_file_version.name)
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Handle an attribute updated on this cluster."""
-
         # We intentionally avoid the `ClientClusterHandler` attribute update handler:
         # it emits a logbook event on every update, which pollutes the logbook
-        ClusterHandler.attribute_updated(self, attrid, value, timestamp)
+        ClusterHandler._handle_attribute_updated_event(self, event)
 
     def cluster_command(
         self, tsn: int, command_id: int, args: list[Any] | None
