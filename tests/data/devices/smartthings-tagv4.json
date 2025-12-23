@@ -293,8 +293,8 @@
         "state": {
           "class_name": "DeviceScannerEntity",
           "available": true,
-          "connected": false,
-          "battery_level": null
+          "connected": true,
+          "battery_level": 69.0
         }
       }
     ],

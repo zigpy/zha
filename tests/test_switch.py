@@ -146,7 +146,6 @@ async def test_switch(zha_gateway: Gateway) -> None:
             cluster.commands_by_name["on"].schema,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
 
     # Fail turn off from client
@@ -167,7 +166,6 @@ async def test_switch(zha_gateway: Gateway) -> None:
             cluster.commands_by_name["off"].schema,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
 
     # turn off from client
@@ -185,7 +183,6 @@ async def test_switch(zha_gateway: Gateway) -> None:
             cluster.commands_by_name["off"].schema,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
 
     # Fail turn on from client
@@ -206,7 +203,6 @@ async def test_switch(zha_gateway: Gateway) -> None:
             cluster.commands_by_name["on"].schema,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
 
     # test updating entity state from client
@@ -269,7 +265,6 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
             group_cluster_on_off.commands_by_name["on"].schema,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
     assert bool(entity.state["state"]) is True
 
@@ -288,7 +283,6 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
             group_cluster_on_off.commands_by_name["off"].schema,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
     assert bool(entity.state["state"]) is False
 

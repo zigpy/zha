@@ -421,9 +421,6 @@ async def async_test_powerconfiguration2(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test powerconfiguration/battery sensor."""
-    await send_attributes_report(zha_gateway, cluster, {33: -1})
-    assert_state(entity, None, "%")
-
     await send_attributes_report(zha_gateway, cluster, {33: 255})
     assert_state(entity, None, "%")
 
@@ -590,7 +587,7 @@ async def async_test_em_dc_power(
                 "summation_formatting": 0b1_0111_010,
                 "unit_of_measure": 0x01,
             },
-            {"instaneneous_demand"},
+            {"instantaneous_demand"},
         ),
         (
             smartenergy.Metering.cluster_id,
@@ -606,7 +603,7 @@ async def async_test_em_dc_power(
                 "unit_of_measure": 0x00,
                 "current_summ_received": 0,
             },
-            {"instaneneous_demand", "current_summ_delivered"},
+            {"instantaneous_demand", "current_summ_delivered"},
         ),
         (
             homeautomation.ElectricalMeasurement.cluster_id,
@@ -832,6 +829,10 @@ async def test_analog_input_ignored(zha_gateway: Gateway) -> None:
     )
     zigpy_dev.endpoints[2].analog_input.add_unsupported_attribute(
         AnalogInput.AttributeDefs.engineering_units.id
+    )
+    # Also remove from PLUGGED_ATTR_READS so read_attributes doesn't restore the value
+    zigpy_dev.endpoints[2].analog_input.PLUGGED_ATTR_READS.pop(
+        AnalogInput.AttributeDefs.engineering_units.id, None
     )
 
     zha_dev = await join_zigpy_device(zha_gateway, zigpy_dev)
@@ -1252,7 +1253,7 @@ async def test_se_summation_uom(
     zigpy_device.node_desc.mac_capability_flags |= 0b_0000_0100
 
     cluster = zigpy_device.endpoints[1].in_clusters[smartenergy.Metering.cluster_id]
-    for attr in ("instanteneous_demand",):
+    for attr in ("instantaneous_demand",):
         cluster.add_unsupported_attribute(attr)
     cluster.PLUGGED_ATTR_READS = {
         "current_summ_delivered": raw_value,

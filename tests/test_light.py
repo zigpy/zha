@@ -454,7 +454,6 @@ async def test_light(
             transition_time=100.0,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
         cluster_color.request.reset_mock()
 
@@ -476,7 +475,6 @@ async def test_light(
             transition_time=0,
             expect_reply=True,
             manufacturer=None,
-            tsn=None,
         )
 
         cluster_color.request.reset_mock()
@@ -553,7 +551,6 @@ async def async_test_on_off_from_client(
         cluster.commands_by_name["on"].schema,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     await async_test_off_from_client(zha_gateway, cluster, entity)
@@ -579,7 +576,6 @@ async def async_test_off_from_client(
         cluster.commands_by_name["off"].schema,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
 
@@ -623,7 +619,6 @@ async def async_test_level_on_off_from_client(
         on_off_cluster.commands_by_name["on"].schema,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     await _reset_light()
@@ -644,7 +639,6 @@ async def async_test_level_on_off_from_client(
         transition_time=100,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     await _reset_light()
@@ -665,7 +659,6 @@ async def async_test_level_on_off_from_client(
         transition_time=int(expected_default_transition),
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     await _reset_light()
@@ -720,7 +713,6 @@ async def async_test_flash_from_client(
         effect_variant=general.Identify.EffectVariant.Default,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
 
@@ -1172,7 +1164,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_1_light_entity.state["on"]) is True
@@ -1192,7 +1183,6 @@ async def test_transitions(
         eWeLink_cluster_on_off.commands_by_name["on"].schema,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert eWeLink_cluster_color.request.call_count == 0
     assert eWeLink_cluster_color.request.await_count == 0
@@ -1206,7 +1196,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(eWeLink_light_entity.state["on"]) is True
@@ -1234,7 +1223,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_1_light_entity.state["on"]) is True
@@ -1261,7 +1249,6 @@ async def test_transitions(
         transition_time=35,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_color.request.call_args == call(
         False,
@@ -1271,7 +1258,6 @@ async def test_transitions(
         transition_time=35,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_1_light_entity.state["on"]) is True
@@ -1299,7 +1285,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_1_light_entity.state["on"]) is False
@@ -1327,7 +1312,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_color.request.call_args == call(
         False,
@@ -1337,7 +1321,6 @@ async def test_transitions(
         transition_time=0,  # no transition when new_color_provided_while_off
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_level.request.call_args_list[1] == call(
         False,
@@ -1347,7 +1330,6 @@ async def test_transitions(
         transition_time=10,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_1_light_entity.state["on"]) is True
@@ -1393,7 +1375,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_color.request.call_args == call(
         False,
@@ -1403,7 +1384,6 @@ async def test_transitions(
         transition_time=0,  # no transition when new_color_provided_while_off
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_level.request.call_args_list[1] == call(
         False,
@@ -1413,7 +1393,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_1_light_entity.state["on"]) is True
@@ -1455,7 +1434,6 @@ async def test_transitions(
         dev1_cluster_on_off.commands_by_name["on"].schema,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert dev1_cluster_color.request.call_args == call(
@@ -1466,7 +1444,6 @@ async def test_transitions(
         transition_time=0,  # no transition when new_color_provided_while_off
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_1_light_entity.state["on"]) is True
@@ -1513,7 +1490,6 @@ async def test_transitions(
         transition_time=1,  # transition time - sengled light uses default minimum
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_2_light_entity.state["on"]) is True
@@ -1555,7 +1531,6 @@ async def test_transitions(
         transition_time=1,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev2_cluster_color.request.call_args == call(
         False,
@@ -1565,7 +1540,6 @@ async def test_transitions(
         transition_time=1,  # sengled transition == 1 when new_color_provided_while_off
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev2_cluster_level.request.call_args_list[1] == call(
         False,
@@ -1575,7 +1549,6 @@ async def test_transitions(
         transition_time=10,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_2_light_entity.state["on"]) is True
@@ -1622,7 +1595,6 @@ async def test_transitions(
         transition_time=10,  # sengled transition == 1 when new_color_provided_while_off
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert group_level_cluster_handler.request.call_args == call(
         False,
@@ -1632,7 +1604,6 @@ async def test_transitions(
         transition_time=10,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(entity.state["on"]) is True
@@ -1674,7 +1645,6 @@ async def test_transitions(
         transition_time=20,  # transition time
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_2_light_entity.state["on"]) is False
@@ -1698,7 +1668,6 @@ async def test_transitions(
         transition_time=1,  # transition time - sengled light uses default minimum
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(device_2_light_entity.state["on"]) is True
@@ -1725,7 +1694,6 @@ async def test_transitions(
         eWeLink_cluster_on_off.commands_by_name["on"].schema,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert eWeLink_cluster_color.request.call_args == call(
         False,
@@ -1735,7 +1703,6 @@ async def test_transitions(
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(eWeLink_light_entity.state["on"]) is True
@@ -1792,7 +1759,6 @@ async def test_on_with_off_color(zha_gateway: Gateway) -> None:
         dev1_cluster_on_off.commands_by_name["on"].schema,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_color.request.call_args == call(
         False,
@@ -1802,7 +1768,6 @@ async def test_on_with_off_color(zha_gateway: Gateway) -> None:
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(entity.state["on"]) is True
@@ -1846,7 +1811,6 @@ async def test_on_with_off_color(zha_gateway: Gateway) -> None:
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_color.request.call_args == call(
         False,
@@ -1856,7 +1820,6 @@ async def test_on_with_off_color(zha_gateway: Gateway) -> None:
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
     assert dev1_cluster_level.request.call_args_list[1] == call(
         False,
@@ -1866,7 +1829,6 @@ async def test_on_with_off_color(zha_gateway: Gateway) -> None:
         transition_time=0,
         expect_reply=True,
         manufacturer=None,
-        tsn=None,
     )
 
     assert bool(entity.state["on"]) is True
