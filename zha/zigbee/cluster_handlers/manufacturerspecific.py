@@ -502,12 +502,12 @@ class InovelliMmwaveClusterHandler(ClusterHandler):
         super().__init__(cluster, endpoint)
         if self.cluster.endpoint.model == "VZM32-SN":
             self.ZCL_INIT_ATTRS = {
-                "mmwave_z_min": True,
-                "mmwave_z_max": True,
-                "mmwave_x_min": True,
-                "mmwave_x_max": True,
-                "mmwave_y_min": True,
-                "mmwave_y_max": True,
+                "mmwave_height_minimum_floor": True,
+                "mmwave_height_maximum_ceiling": True,
+                "mmwave_width_minimum_left": True,
+                "mmwave_width_maximum_right": True,
+                "mmwave_depth_minimum_near": True,
+                "mmwave_depth_maximum_far": True,
                 "mmwave_detect_sensitivity": True,
                 "mmwave_detect_trigger": True,
                 "mmwave_hold_time": True,

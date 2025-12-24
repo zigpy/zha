@@ -731,12 +731,12 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
 class InovelliMmwaveZMin(NumberConfigurationEntity):
     """Inovelli mmwave Z minimum configuration entity."""
 
-    _unique_id_suffix = "mmwave_z_min"
+    _unique_id_suffix = "mmwave_height_minimum_floor"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = -600
     _attr_native_max_value: float = 600
-    _attribute_name = "mmwave_z_min"
-    _attr_translation_key: str = "mmwave_z_min"
+    _attribute_name = "mmwave_height_minimum_floor"
+    _attr_translation_key: str = "mmwave_height_minimum_floor"
     _attr_fallback_name = "mmWave Height Minimum (Floor)"
     _attr_mode: NumberMode = NumberMode.BOX
 
@@ -747,12 +747,12 @@ class InovelliMmwaveZMin(NumberConfigurationEntity):
 class InovelliMmwaveZMax(NumberConfigurationEntity):
     """Inovelli mmwave Z maximum configuration entity."""
 
-    _unique_id_suffix = "mmwave_z_max"
+    _unique_id_suffix = "mmwave_height_maximum_ceiling"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = -600
     _attr_native_max_value: float = 600
-    _attribute_name = "mmwave_z_max"
-    _attr_translation_key: str = "mmwave_z_max"
+    _attribute_name = "mmwave_height_maximum_ceiling"
+    _attr_translation_key: str = "mmwave_height_maximum_ceiling"
     _attr_fallback_name = "mmWave Height Maximum (Ceiling)"
     _attr_mode: NumberMode = NumberMode.BOX
 
@@ -763,12 +763,12 @@ class InovelliMmwaveZMax(NumberConfigurationEntity):
 class InovelliMmwaveXMin(NumberConfigurationEntity):
     """Inovelli mmwave X minimum configuration entity."""
 
-    _unique_id_suffix = "mmwave_x_min"
+    _unique_id_suffix = "mmwave_width_minimum_left"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = -600
     _attr_native_max_value: float = 600
-    _attribute_name = "mmwave_x_min"
-    _attr_translation_key: str = "mmwave_x_min"
+    _attribute_name = "mmwave_width_minimum_left"
+    _attr_translation_key: str = "mmwave_width_minimum_left"
     _attr_fallback_name = "mmWave Width Minimum (Left)"
     _attr_mode: NumberMode = NumberMode.BOX
 
@@ -779,12 +779,12 @@ class InovelliMmwaveXMin(NumberConfigurationEntity):
 class InovelliMmwaveXMax(NumberConfigurationEntity):
     """Inovelli mmwave X maximum configuration entity."""
 
-    _unique_id_suffix = "mmwave_x_max"
+    _unique_id_suffix = "mmwave_width_maximum_right"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = -600
     _attr_native_max_value: float = 600
-    _attribute_name = "mmwave_x_max"
-    _attr_translation_key: str = "mmwave_x_max"
+    _attribute_name = "mmwave_width_maximum_right"
+    _attr_translation_key: str = "mmwave_width_maximum_right"
     _attr_fallback_name = "mmWave Width Maximum (Right)"
     _attr_mode: NumberMode = NumberMode.BOX
 
@@ -795,12 +795,12 @@ class InovelliMmwaveXMax(NumberConfigurationEntity):
 class InovelliMmwaveYMin(NumberConfigurationEntity):
     """Inovelli mmwave Y minimum configuration entity."""
 
-    _unique_id_suffix = "mmwave_y_min"
+    _unique_id_suffix = "mmwave_depth_minimum_near"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 600
-    _attribute_name = "mmwave_y_min"
-    _attr_translation_key: str = "mmwave_y_min"
+    _attribute_name = "mmwave_depth_minimum_near"
+    _attr_translation_key: str = "mmwave_depth_minimum_near"
     _attr_fallback_name = "mmWave Depth Minimum (Near)"
     _attr_mode: NumberMode = NumberMode.BOX
 
@@ -811,12 +811,12 @@ class InovelliMmwaveYMin(NumberConfigurationEntity):
 class InovelliMmwaveYMax(NumberConfigurationEntity):
     """Inovelli mmwave Y maximum configuration entity."""
 
-    _unique_id_suffix = "mmwave_y_max"
+    _unique_id_suffix = "mmwave_depth_maximum_far"
     _attr_entity_category = EntityCategory.CONFIG
     _attr_native_min_value: float = 0
     _attr_native_max_value: float = 600
-    _attribute_name = "mmwave_y_max"
-    _attr_translation_key: str = "mmwave_y_max"
+    _attribute_name = "mmwave_depth_maximum_far"
+    _attr_translation_key: str = "mmwave_depth_maximum_far"
     _attr_fallback_name = "mmWave Depth Maximum (Far)"
     _attr_mode: NumberMode = NumberMode.BOX
 
