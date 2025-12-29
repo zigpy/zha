@@ -190,6 +190,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
         self._attr_latest_version = None
         self._attr_release_summary = None
         self._attr_release_notes = None
+        self._attr_release_url = None
 
         latest_firmware: OtaImageWithMetadata | None = None
 
@@ -199,6 +200,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
             self._attr_latest_version = f"0x{latest_firmware.version:08x}"
             self._attr_release_summary = latest_firmware.metadata.changelog or None
             self._attr_release_notes = latest_firmware.metadata.release_notes or None
+            self._attr_release_url = latest_firmware.metadata.release_url or None
         elif images_result.downgrades:
             # If not, note the version of the most recent firmware
             latest_firmware = None

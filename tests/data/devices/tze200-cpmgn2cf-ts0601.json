@@ -1,0 +1,1721 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:e8:32:c6:e4",
+  "nwk": "0xECD7",
+  "manufacturer": "_TZE200_cpmgn2cf",
+  "model": "TS0601",
+  "friendly_manufacturer": "_TZE200_cpmgn2cf",
+  "friendly_model": "TS0601",
+  "name": "_TZE200_cpmgn2cf TS0601",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "exposes_features": [],
+  "manufacturer_code": 4098,
+  "power_source": "Battery or Unknown",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-12-11T01:40:26.932351+00:00",
+  "available": true,
+  "device_type": "EndDevice",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "EndDevice",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 128,
+    "manufacturer_code": 4098,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 82,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 82,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "THERMOSTAT",
+        "id": 769
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0004",
+          "endpoint_attribute": "groups",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0005",
+          "endpoint_attribute": "scenes",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0201",
+          "endpoint_attribute": "thermostat",
+          "attributes": [
+            {
+              "id": "0x0006",
+              "name": "abs_max_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0004",
+              "name": "abs_max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0005",
+              "name": "abs_min_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0003",
+              "name": "abs_min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x001b",
+              "name": "ctrl_sequence_of_oper",
+              "zcl_type": "enum8",
+              "value": 2
+            },
+            {
+              "id": "0x0000",
+              "name": "local_temperature",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0010",
+              "name": "local_temperature_calibration",
+              "zcl_type": "int8",
+              "value": 350
+            },
+            {
+              "id": "0x0018",
+              "name": "max_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0016",
+              "name": "max_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0017",
+              "name": "min_cool_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0015",
+              "name": "min_heat_setpoint_limit",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0002",
+              "name": "occupancy",
+              "zcl_type": "map8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0011",
+              "name": "occupied_cooling_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0012",
+              "name": "occupied_heating_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0007",
+              "name": "pi_cooling_demand",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0008",
+              "name": "pi_heating_demand",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0025",
+              "name": "programing_oper_mode",
+              "zcl_type": "map8",
+              "value": 0
+            },
+            {
+              "id": "0x001e",
+              "name": "running_mode",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0029",
+              "name": "running_state",
+              "zcl_type": "map16",
+              "unsupported": true
+            },
+            {
+              "id": "0x001c",
+              "name": "system_mode",
+              "zcl_type": "enum8",
+              "value": 4
+            },
+            {
+              "id": "0x0013",
+              "name": "unoccupied_cooling_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            },
+            {
+              "id": "0x0014",
+              "name": "unoccupied_heating_setpoint",
+              "zcl_type": "int16",
+              "unsupported": true
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0204",
+          "endpoint_attribute": "thermostat_ui",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "keypad_lockout",
+              "zcl_type": "enum8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xef00",
+          "endpoint_attribute": null,
+          "attributes": []
+        }
+      ],
+      "out_clusters": [
+        {
+          "cluster_id": "0x000a",
+          "endpoint_attribute": "time",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0019",
+          "endpoint_attribute": "ota",
+          "attributes": []
+        }
+      ]
+    },
+    "2": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_SWITCH",
+        "id": 0
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "3": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 262144
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Valve State"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 98
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 100
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 0
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "4": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 851968
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Temperature Calibration"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 62
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 9
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": -9
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "5": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 917504
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Boost Time"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 73
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 9999
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 0
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "6": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "ON_OFF_SWITCH",
+        "id": 0
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0006",
+          "endpoint_attribute": "on_off",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "on_off",
+              "zcl_type": "bool",
+              "unsupported": true
+            },
+            {
+              "id": "0x4003",
+              "name": "start_up_on_off",
+              "zcl_type": "enum8",
+              "unsupported": true
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "7": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 851968
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Min. temperature"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 62
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 15
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 5
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "8": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 851968
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Max. temperature"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 62
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 35
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 15
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "9": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 851968
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Comfort temperature"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 62
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 35
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 5
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "10": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 851968
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Eco temperature"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 62
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 35
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 5
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "11": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "CONSUMPTION_AWARENESS_DEVICE",
+        "id": 13
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x000d",
+          "endpoint_attribute": "analog_output",
+          "attributes": [
+            {
+              "id": "0x0100",
+              "name": "application_type",
+              "zcl_type": "uint32",
+              "value": 851968
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Away temperature"
+            },
+            {
+              "id": "0x0075",
+              "name": "engineering_units",
+              "zcl_type": "enum16",
+              "value": 62
+            },
+            {
+              "id": "0x0041",
+              "name": "max_present_value",
+              "zcl_type": "single",
+              "value": 35
+            },
+            {
+              "id": "0x0045",
+              "name": "min_present_value",
+              "zcl_type": "single",
+              "value": 5
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x0068",
+              "name": "relinquish_default",
+              "zcl_type": "single",
+              "unsupported": true
+            },
+            {
+              "id": "0x006a",
+              "name": "resolution",
+              "zcl_type": "single",
+              "value": 1
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    }
+  },
+  "zha_lib_entities": {
+    "climate": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1",
+          "migrate_unique_ids": [],
+          "platform": "climate",
+          "class_name": "MoesThermostat",
+          "translation_key": "thermostat",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "Thermostat",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "max_temp": 30.0,
+          "min_temp": 7.0,
+          "supported_features": 401,
+          "fan_modes": null,
+          "preset_modes": [
+            "none",
+            "away",
+            "Schedule",
+            "comfort",
+            "eco",
+            "boost",
+            "Complex"
+          ],
+          "hvac_modes": [
+            "heat"
+          ]
+        },
+        "state": {
+          "class_name": "MoesThermostat",
+          "available": true,
+          "current_temperature": null,
+          "outdoor_temperature": null,
+          "target_temperature": null,
+          "target_temperature_high": null,
+          "target_temperature_low": null,
+          "hvac_action": null,
+          "hvac_mode": "heat",
+          "preset_mode": "none",
+          "fan_mode": "auto",
+          "system_mode": "[4]/heat",
+          "occupancy": null,
+          "occupied_cooling_setpoint": null,
+          "occupied_heating_setpoint": null,
+          "pi_heating_demand": null,
+          "pi_cooling_demand": null,
+          "unoccupied_cooling_setpoint": null,
+          "unoccupied_heating_setpoint": null
+        },
+        "extra_state_attributes": [
+          "occupancy",
+          "occupied_cooling_setpoint",
+          "occupied_heating_setpoint",
+          "pi_cooling_demand",
+          "pi_heating_demand",
+          "system_mode",
+          "unoccupied_cooling_setpoint",
+          "unoccupied_heating_setpoint"
+        ]
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-513-local_temperature_calibration",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "ThermostatLocalTempCalibration",
+          "translation_key": "local_temperature_calibration",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "Thermostat",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 2.5,
+          "native_min_value": -2.5,
+          "native_step": 0.1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "ThermostatLocalTempCalibration",
+          "available": true,
+          "state": 35.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Eco temperature",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-10-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 10,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "10:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:10:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 10,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 35,
+          "native_min_value": 5,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Away temperature",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-11-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 11,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "11:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:11:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 11,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 35,
+          "native_min_value": 5,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Valve State",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-3-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 3,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "3:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:3:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 3,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Temperature Calibration",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-4-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 4,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "4:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:4:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 4,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 9,
+          "native_min_value": -9,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Boost Time",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-5-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 5,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "5:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:5:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 5,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 9999,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Min. temperature",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-7-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 7,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "7:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:7:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 7,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 15,
+          "native_min_value": 5,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Max. temperature",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-8-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 8,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "8:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:8:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 8,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 35,
+          "native_min_value": 15,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Comfort temperature",
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-9-13",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AnalogOutputNumber",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "AnalogOutputClusterHandler",
+              "generic_id": "cluster_handler_0x000d",
+              "endpoint_id": 9,
+              "cluster": {
+                "id": 13,
+                "name": "AnalogOutput",
+                "type": "server"
+              },
+              "id": "9:0x000d",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:9:0x000d",
+              "status": "INITIALIZED",
+              "value_attribute": "present_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 9,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 35,
+          "native_min_value": 5,
+          "native_step": 1,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "AnalogOutputNumber",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-516-keypad_lockout",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "KeypadLockout",
+          "translation_key": "keypad_lockout",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "UserInterfaceClusterHandler",
+              "generic_id": "cluster_handler_0x0204",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 516,
+                "name": "Thermostat User Interface Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0204",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0204",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "KeypadLockoutEnum",
+          "options": [
+            "Unlock",
+            "Lock1",
+            "Lock2",
+            "Lock3",
+            "Lock4"
+          ]
+        },
+        "state": {
+          "class_name": "KeypadLockout",
+          "available": true,
+          "state": "Unlock"
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-1",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0001",
+              "status": "INITIALIZED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": null
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-513-setpoint_change_source",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SetpointChangeSource",
+          "translation_key": "setpoint_change_source",
+          "translation_placeholders": null,
+          "device_class": "enum",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "Thermostat",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "SetpointChangeSource",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-513-setpoint_change_source_timestamp",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SetpointChangeSourceTimestamp",
+          "translation_key": "setpoint_change_source_timestamp",
+          "translation_placeholders": null,
+          "device_class": "timestamp",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "Thermostat",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "SetpointChangeSourceTimestamp",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-6",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "Switch",
+          "translation_key": "switch",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 6,
+                "name": "On/Off",
+                "type": "server"
+              },
+              "id": "1:0x0006",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0006",
+              "status": "INITIALIZED",
+              "value_attribute": "on_off"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null
+        },
+        "state": {
+          "class_name": "Switch",
+          "state": false,
+          "available": true
+        }
+      }
+    ],
+    "update": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-25-firmware_update",
+          "migrate_unique_ids": [],
+          "platform": "update",
+          "class_name": "FirmwareUpdateEntity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "firmware",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OtaClientClusterHandler",
+              "generic_id": "cluster_handler_0x0019_client",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 25,
+                "name": "Ota",
+                "type": "client"
+              },
+              "id": "1:0x0019_client",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0019_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "supported_features": 7
+        },
+        "state": {
+          "class_name": "FirmwareUpdateEntity",
+          "available": true,
+          "installed_version": null,
+          "in_progress": false,
+          "update_percentage": null,
+          "latest_version": null,
+          "release_summary": null,
+          "release_notes": null,
+          "release_url": null
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

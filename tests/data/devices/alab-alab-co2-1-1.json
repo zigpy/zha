@@ -1,0 +1,426 @@
+{
+  "version": 1,
+  "ieee": "ab:cd:ef:12:d6:a0:0e:81",
+  "nwk": "0xBF64",
+  "manufacturer": "Alab",
+  "model": "Alab-CO2-1.1",
+  "friendly_manufacturer": "Alab",
+  "friendly_model": "Alab-CO2-1.1",
+  "name": "Alab Alab-CO2-1.1",
+  "quirk_applied": false,
+  "quirk_class": "zigpy.device.Device",
+  "exposes_features": [],
+  "manufacturer_code": 4660,
+  "power_source": "Mains",
+  "lqi": null,
+  "rssi": null,
+  "last_seen": "2025-12-11T01:25:35.199816+00:00",
+  "available": true,
+  "device_type": "Router",
+  "active_coordinator": false,
+  "node_descriptor": {
+    "logical_type": "Router",
+    "complex_descriptor_available": false,
+    "user_descriptor_available": false,
+    "reserved": 0,
+    "aps_flags": 0,
+    "frequency_band": 8,
+    "mac_capability_flags": 142,
+    "manufacturer_code": 4660,
+    "maximum_buffer_size": 108,
+    "maximum_incoming_transfer_size": 1617,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 1617,
+    "descriptor_capability_field": 0
+  },
+  "endpoints": {
+    "1": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "TEMPERATURE_SENSOR",
+        "id": 770
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "manufacturer",
+              "zcl_type": "string",
+              "value": "Alab"
+            },
+            {
+              "id": "0x0005",
+              "name": "model",
+              "zcl_type": "string",
+              "value": "Alab-CO2-1.1"
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0001",
+          "endpoint_attribute": "power",
+          "attributes": [
+            {
+              "id": "0x0021",
+              "name": "battery_percentage_remaining",
+              "zcl_type": "uint8",
+              "value": 255
+            },
+            {
+              "id": "0x0033",
+              "name": "battery_quantity",
+              "zcl_type": "uint8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0031",
+              "name": "battery_size",
+              "zcl_type": "enum8",
+              "unsupported": true
+            },
+            {
+              "id": "0x0020",
+              "name": "battery_voltage",
+              "zcl_type": "uint8",
+              "value": 255
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0402",
+          "endpoint_attribute": "temperature",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "int16",
+              "value": 2010
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0405",
+          "endpoint_attribute": "humidity",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "uint16",
+              "value": 3592
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x040d",
+          "endpoint_attribute": "carbon_dioxide_concentration",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "single",
+              "value": 812.0
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "242": {
+      "profile_id": 41440,
+      "device_type": {
+        "name": "PROXY_BASIC",
+        "id": 97
+      },
+      "in_clusters": [],
+      "out_clusters": [
+        {
+          "cluster_id": "0x0021",
+          "endpoint_attribute": "green_power",
+          "attributes": []
+        }
+      ]
+    }
+  },
+  "zha_lib_entities": {
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d6:a0:0e:81-1-3",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "IdentifyButton",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "identify",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IdentifyClusterHandler",
+              "generic_id": "cluster_handler_0x0003",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 3,
+                "name": "Identify",
+                "type": "server"
+              },
+              "id": "1:0x0003",
+              "unique_id": "ab:cd:ef:12:d6:a0:0e:81:1:0x0003",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d6:a0:0e:81",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "command": "identify",
+          "args": [
+            5
+          ],
+          "kwargs": {}
+        },
+        "state": {
+          "class_name": "IdentifyButton",
+          "available": true
+        }
+      }
+    ],
+    "sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d6:a0:0e:81-1-0-lqi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "LQISensor",
+          "translation_key": "lqi",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:d6:a0:0e:81:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d6:a0:0e:81",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "LQISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d6:a0:0e:81-1-0-rssi",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "RSSISensor",
+          "translation_key": "rssi",
+          "translation_placeholders": null,
+          "device_class": "signal_strength",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "BasicClusterHandler",
+              "generic_id": "cluster_handler_0x0000",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 0,
+                "name": "Basic",
+                "type": "server"
+              },
+              "id": "1:0x0000",
+              "unique_id": "ab:cd:ef:12:d6:a0:0e:81:1:0x0000",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d6:a0:0e:81",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "dBm"
+        },
+        "state": {
+          "class_name": "RSSISensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d6:a0:0e:81-1-1026",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Temperature",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TemperatureMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0402",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1026,
+                "name": "Temperature Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0402",
+              "unique_id": "ab:cd:ef:12:d6:a0:0e:81:1:0x0402",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d6:a0:0e:81",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "\u00b0C"
+        },
+        "state": {
+          "class_name": "Temperature",
+          "available": true,
+          "state": 20.1
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d6:a0:0e:81-1-1029",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Humidity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "humidity",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "RelativeHumidityClusterHandler",
+              "generic_id": "cluster_handler_0x0405",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1029,
+                "name": "Relative Humidity Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0405",
+              "unique_id": "ab:cd:ef:12:d6:a0:0e:81:1:0x0405",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d6:a0:0e:81",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Humidity",
+          "available": true,
+          "state": 35.92
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:d6:a0:0e:81-1-1037",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "CarbonDioxideConcentration",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "carbon_dioxide",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "CarbonDioxideConcentrationClusterHandler",
+              "generic_id": "cluster_handler_0x040d",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1037,
+                "name": "Carbon Dioxide (CO\u2082) Concentration",
+                "type": "server"
+              },
+              "id": "1:0x040d",
+              "unique_id": "ab:cd:ef:12:d6:a0:0e:81:1:0x040d",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:d6:a0:0e:81",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "ppm"
+        },
+        "state": {
+          "class_name": "CarbonDioxideConcentration",
+          "available": true,
+          "state": 812000000.0
+        }
+      }
+    ]
+  },
+  "neighbors": [],
+  "routes": []
+}

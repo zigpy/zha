@@ -372,6 +372,7 @@
         },
         "state": {
           "class_name": "MinTransitionLight",
+          "available": true,
           "on": true,
           "brightness": 255,
           "xy_color": null,
@@ -387,8 +388,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
