@@ -9,7 +9,7 @@
   "name": "Aqara lumi.light.agl003",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",
   "lqi": 65,

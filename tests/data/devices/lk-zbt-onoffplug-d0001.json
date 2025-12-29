@@ -9,7 +9,7 @@
   "name": "lk ZBT-OnOffPlug-D0001",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4456,
   "power_source": "Mains",
   "lqi": null,

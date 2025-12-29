@@ -9,7 +9,7 @@
   "name": "Keen Home Inc SV01-410-MP-1.1",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.keenhome.sv02612mp13.KeenHomeSmartVent",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4443,
   "power_source": "Battery or Unknown",
   "lqi": null,

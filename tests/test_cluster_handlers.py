@@ -525,10 +525,10 @@ async def test_out_cluster_handler_config(
 def test_cluster_handler_registry() -> None:
     """Test ZIGBEE cluster handler Registry."""
 
-    # get all quirk ID from zigpy quirks registry
-    cluster_quirk_id_map: dict[int, set[str | None]] = {}
+    # get all exposed features from zigpy quirks registry
+    cluster_exposed_feature_map: dict[int, set[str | None]] = {}
     for cluster_id in CLUSTERS_BY_ID:
-        cluster_quirk_id_map[cluster_id] = {None}
+        cluster_exposed_feature_map[cluster_id] = {None}
 
     # loop over custom clusters in v2 quirks registry
     for quirks in _DEVICE_REGISTRY.registry_v2.values():
@@ -538,13 +538,15 @@ def test_cluster_handler_registry() -> None:
                 rm.add for rm in quirk_reg_entry.replaces_metadata
             }
             for metadata in all_metadata:
-                cluster_quirk_id_map[metadata.cluster.cluster_id] = {None}
+                cluster_exposed_feature_map[metadata.cluster.cluster_id] = {None}
 
     # loop over custom clusters in v1 quirks registry
     for manufacturer in _DEVICE_REGISTRY.registry_v1.values():
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
-                quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
+                qid: set[str] | str = getattr(quirk, ATTR_QUIRK_ID, set())
+                exposed_features: set[str] = {qid} if isinstance(qid, str) else set(qid)
+
                 device_description: dict[str, dict[str, Any]] = getattr(
                     quirk, "replacement", None
                 ) or getattr(quirk, "signature", None)
@@ -558,22 +560,30 @@ def test_cluster_handler_registry() -> None:
                     for cluster_id in cluster_ids:
                         if not isinstance(cluster_id, int):
                             cluster_id = cluster_id.cluster_id
-                        if cluster_id not in cluster_quirk_id_map:
-                            cluster_quirk_id_map[cluster_id] = {None}
-                        cluster_quirk_id_map[cluster_id].add(quirk_id)
+                        if cluster_id not in cluster_exposed_feature_map:
+                            cluster_exposed_feature_map[cluster_id] = {None}
+                        cluster_exposed_feature_map[cluster_id].update(exposed_features)
 
     for (
         cluster_id,
         cluster_handler_classes,
     ) in CLUSTER_HANDLER_REGISTRY.items():
+        # test cluster_id is valid
         assert isinstance(cluster_id, int)
         assert 0 <= cluster_id <= 0xFFFF
-        assert cluster_id in cluster_quirk_id_map
+
+        # test all registered clusters are used in zigpy or quirks
+        assert cluster_id in cluster_exposed_feature_map
+
         assert isinstance(cluster_handler_classes, dict)
-        for quirk_id, cluster_handler in cluster_handler_classes.items():
-            assert quirk_id is None or isinstance(quirk_id, str)
+        for ch_exposed_feature, cluster_handler in cluster_handler_classes.items():
+            # test cluster handler is not quirk specific
+            # or only has a single exposed feature
+            assert ch_exposed_feature is None or isinstance(ch_exposed_feature, str)
             assert issubclass(cluster_handler, ClusterHandler)
-            assert quirk_id in cluster_quirk_id_map[cluster_id]
+
+            # test cluster handler exposed feature is used in quirk with that cluster
+            assert ch_exposed_feature in cluster_exposed_feature_map[cluster_id]
 
 
 def test_epch_unclaimed_cluster_handlers(cluster_handler) -> None:
@@ -811,7 +821,7 @@ async def test_ep_cluster_handlers_configure(cluster_handler) -> None:
     )
     zha_dev = mock.MagicMock(spec=Device)
     zha_dev.unique_id = "00:11:22:33:44:55:66:77"
-    type(zha_dev).quirk_id = mock.PropertyMock(return_value=None)
+    type(zha_dev).exposes_features = mock.PropertyMock(return_value=set())
     endpoint = Endpoint.new(endpoint_mock, zha_dev)
 
     claimed = {ch_1.id: ch_1, ch_2.id: ch_2, ch_3.id: ch_3}
@@ -1014,7 +1024,7 @@ async def test_invalid_cluster_handler(zha_gateway: Gateway, caplog) -> None:  #
     )
 
     mock_zha_device = mock.AsyncMock(spec=Device)
-    mock_zha_device.quirk_id = None
+    mock_zha_device.exposes_features = set()
     mock_zha_device.unique_id = "aa:bb:cc:dd:11:22:33:44"
 
     zha_endpoint = Endpoint(zigpy_ep, mock_zha_device)
@@ -1059,14 +1069,14 @@ async def test_standard_cluster_handler(
     )
 
     mock_zha_device = mock.AsyncMock(spec=Device)
-    mock_zha_device.quirk_id = None
+    mock_zha_device.exposes_features = set()
     mock_zha_device.unique_id = "aa:bb:cc:dd:11:22:33:44"
 
     zha_endpoint = Endpoint(zigpy_ep, mock_zha_device)
 
     with patch.dict(
         CLUSTER_HANDLER_REGISTRY[cluster.cluster_id],
-        {"__test_quirk_id": TestZigbeeClusterHandler},
+        {"__exposed_feature_id": TestZigbeeClusterHandler},
     ):
         zha_endpoint.add_all_cluster_handlers()
 
@@ -1076,10 +1086,10 @@ async def test_standard_cluster_handler(
     )
 
 
-async def test_quirk_id_cluster_handler(
+async def test_exposed_feature_cluster_handler(
     zha_gateway: Gateway,
 ) -> None:  # pylint: disable=unused-argument
-    """Test setting up a cluster handler that matches a standard cluster."""
+    """Test setting up a cluster handler with an exposed feature."""
 
     class TestZigbeeClusterHandler(ColorClusterHandler):
         """Test cluster handler that matches a standard cluster."""
@@ -1100,12 +1110,12 @@ async def test_quirk_id_cluster_handler(
 
     mock_zha_device = mock.AsyncMock(spec=Device)
     mock_zha_device.unique_id = "aa:bb:cc:dd:11:22:33:44"
-    mock_zha_device.quirk_id = "__test_quirk_id"
+    mock_zha_device.exposes_features = {"__exposed_feature_id"}
     zha_endpoint = Endpoint(zigpy_ep, mock_zha_device)
 
     with patch.dict(
         CLUSTER_HANDLER_REGISTRY[cluster.cluster_id],
-        {"__test_quirk_id": TestZigbeeClusterHandler},
+        {"__exposed_feature_id": TestZigbeeClusterHandler},
     ):
         zha_endpoint.add_all_cluster_handlers()
 

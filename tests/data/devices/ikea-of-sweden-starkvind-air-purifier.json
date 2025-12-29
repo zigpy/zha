@@ -9,7 +9,7 @@
   "name": "IKEA of Sweden STARKVIND Air purifier",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.ikea.starkvind.IkeaSTARKVIND",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4476,
   "power_source": "Mains",
   "lqi": null,

@@ -119,7 +119,7 @@ class MatchRule:
     manufacturers: frozenset[str] | Callable[[str], bool] = frozenset()
     models: frozenset[str] | Callable[[str], bool] = frozenset()
     aux_cluster_handlers: frozenset[str] | Callable[[str], bool] = frozenset()
-    quirk_ids: frozenset[str] | Callable[[str], bool] = frozenset()
+    exposed_features: frozenset[str] | Callable[[str], bool] = frozenset()
 
     def __post_init__(self) -> None:
         """Convert passed arguments to a set or a callable."""
@@ -132,7 +132,9 @@ class MatchRule:
         object.__setattr__(
             self, "aux_cluster_handlers", set_or_callable(self.aux_cluster_handlers)
         )
-        object.__setattr__(self, "quirk_ids", set_or_callable(self.quirk_ids))
+        object.__setattr__(
+            self, "exposed_features", set_or_callable(self.exposed_features)
+        )
 
     @property
     def weight(self) -> int:
@@ -148,8 +150,10 @@ class MatchRule:
         multiple cluster handlers a better priority over rules matching a single cluster handler.
         """
         weight = 0
-        if self.quirk_ids:
-            weight += 501 - (1 if callable(self.quirk_ids) else len(self.quirk_ids))
+        if self.exposed_features:
+            weight += 501 - (
+                1 if callable(self.exposed_features) else len(self.exposed_features)
+            )
 
         if self.models:
             weight += 401 - (1 if callable(self.models) else len(self.models))
@@ -189,27 +193,31 @@ class MatchRule:
         manufacturer: str,
         model: str,
         cluster_handlers: list,
-        quirk_id: str | None,
+        exposes_features: set[str],
     ) -> bool:
         """Return True if this device matches the criteria."""
-        return all(self._matched(manufacturer, model, cluster_handlers, quirk_id))
+        return all(
+            self._matched(manufacturer, model, cluster_handlers, exposes_features)
+        )
 
     def loose_matched(
         self,
         manufacturer: str,
         model: str,
         cluster_handlers: list,
-        quirk_id: str | None,
+        exposes_features: set[str],
     ) -> bool:
         """Return True if this device matches the criteria."""
-        return any(self._matched(manufacturer, model, cluster_handlers, quirk_id))
+        return any(
+            self._matched(manufacturer, model, cluster_handlers, exposes_features)
+        )
 
     def _matched(
         self,
         manufacturer: str,
         model: str,
         cluster_handlers: list,
-        quirk_id: str | None,
+        exposes_features: set[str],
     ) -> list:
         """Return a list of field matches."""
         if not any(
@@ -219,7 +227,7 @@ class MatchRule:
                 self.manufacturers,
                 self.models,
                 self.aux_cluster_handlers,
-                self.quirk_ids,
+                self.exposed_features,
             ]
         ):
             return [False]
@@ -245,11 +253,15 @@ class MatchRule:
             else:
                 matches.append(model in self.models)
 
-        if self.quirk_ids:
-            if callable(self.quirk_ids):
-                matches.append(self.quirk_ids(quirk_id))
+        if self.exposed_features:
+            if callable(self.exposed_features):
+                matches.append(
+                    any(self.exposed_features(qid) for qid in exposes_features)
+                )
             else:
-                matches.append(quirk_id in self.quirk_ids)
+                matches.append(
+                    any(qid in self.exposed_features for qid in exposes_features)
+                )
 
         return matches
 
@@ -290,13 +302,15 @@ class PlatformEntityRegistry:
         manufacturer: str,
         model: str,
         cluster_handlers: list[ClusterHandler],
-        quirk_id: str | None,
+        exposes_features: set[str],
         default: type[PlatformEntity] | None = None,
     ) -> tuple[type[PlatformEntity] | None, list[ClusterHandler]]:
         """Match a ZHA ClusterHandler to a ZHA Entity class."""
         matches = self._strict_registry[platform]
         for match in sorted(matches, key=WEIGHT_ATTR, reverse=True):
-            if match.strict_matched(manufacturer, model, cluster_handlers, quirk_id):
+            if match.strict_matched(
+                manufacturer, model, cluster_handlers, exposes_features
+            ):
                 claimed = match.claim_cluster_handlers(cluster_handlers)
                 return self._strict_registry[platform][match], claimed
 
@@ -307,7 +321,7 @@ class PlatformEntityRegistry:
         manufacturer: str,
         model: str,
         cluster_handlers: list[ClusterHandler],
-        quirk_id: str | None,
+        exposes_features: set[str],
     ) -> tuple[
         dict[Platform, list[EntityClassAndClusterHandlers]], list[ClusterHandler]
     ]:
@@ -321,7 +335,7 @@ class PlatformEntityRegistry:
                 sorted_matches = sorted(matches, key=WEIGHT_ATTR, reverse=True)
                 for match in sorted_matches:
                     if match.strict_matched(
-                        manufacturer, model, cluster_handlers, quirk_id
+                        manufacturer, model, cluster_handlers, exposes_features
                     ):
                         claimed = match.claim_cluster_handlers(cluster_handlers)
                         for ent_class in matches[match]:
@@ -340,7 +354,7 @@ class PlatformEntityRegistry:
         manufacturer: str,
         model: str,
         cluster_handlers: list[ClusterHandler],
-        quirk_id: str | None,
+        exposes_features: set[str],
     ) -> tuple[
         dict[Platform, list[EntityClassAndClusterHandlers]], list[ClusterHandler]
     ]:
@@ -357,7 +371,7 @@ class PlatformEntityRegistry:
                 sorted_matches = sorted(matches, key=WEIGHT_ATTR, reverse=True)
                 for match in sorted_matches:
                     if match.strict_matched(
-                        manufacturer, model, cluster_handlers, quirk_id
+                        manufacturer, model, cluster_handlers, exposes_features
                     ):
                         claimed = match.claim_cluster_handlers(cluster_handlers)
                         for ent_class in matches[match]:
@@ -383,7 +397,7 @@ class PlatformEntityRegistry:
         manufacturers: Callable | set[str] | str | None = None,
         models: Callable | set[str] | str | None = None,
         aux_cluster_handlers: Callable | set[str] | str | None = None,
-        quirk_ids: set[str] | str | None = None,
+        exposed_features: set[str] | str | None = None,
     ) -> Callable[[type[PlatformEntity]], type[PlatformEntity]]:
         """Decorate a strict match rule."""
 
@@ -393,7 +407,7 @@ class PlatformEntityRegistry:
             manufacturers,
             models,
             aux_cluster_handlers,
-            quirk_ids,
+            exposed_features,
         )
 
         def decorator(zha_ent: type[PlatformEntity]) -> type[PlatformEntity]:
@@ -415,7 +429,7 @@ class PlatformEntityRegistry:
         models: Callable | set[str] | str | None = None,
         aux_cluster_handlers: Callable | set[str] | str | None = None,
         stop_on_match_group: int | str | None = None,
-        quirk_ids: set[str] | str | None = None,
+        exposed_features: set[str] | str | None = None,
     ) -> Callable[[type[PlatformEntity]], type[PlatformEntity]]:
         """Decorate a loose match rule."""
 
@@ -425,7 +439,7 @@ class PlatformEntityRegistry:
             manufacturers,
             models,
             aux_cluster_handlers,
-            quirk_ids,
+            exposed_features,
         )
 
         def decorator(zha_entity: type[PlatformEntity]) -> type[PlatformEntity]:
@@ -450,7 +464,7 @@ class PlatformEntityRegistry:
         models: Callable | set[str] | str | None = None,
         aux_cluster_handlers: Callable | set[str] | str | None = None,
         stop_on_match_group: int | str | None = None,
-        quirk_ids: set[str] | str | None = None,
+        exposed_features: set[str] | str | None = None,
     ) -> Callable[[type[PlatformEntity]], type[PlatformEntity]]:
         """Decorate a loose match rule."""
 
@@ -460,7 +474,7 @@ class PlatformEntityRegistry:
             manufacturers,
             models,
             aux_cluster_handlers,
-            quirk_ids,
+            exposed_features,
         )
 
         def decorator(zha_entity: type[PlatformEntity]) -> type[PlatformEntity]:

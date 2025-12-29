@@ -920,7 +920,7 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossExerciseTriggerTime(NumberConfigurationEntity):
     """Danfoss proprietary attribute to set the time to exercise the valve."""
@@ -936,7 +936,7 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
     """Danfoss proprietary attribute to communicate the value of the external temperature sensor."""
@@ -950,7 +950,7 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossLoadRoomMean(NumberConfigurationEntity):
     """Danfoss proprietary attribute to set a value for the load."""
@@ -965,7 +965,7 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     """Danfoss proprietary attribute to set the regulation setpoint offset."""

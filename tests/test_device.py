@@ -11,7 +11,12 @@ import pytest
 from zigpy.exceptions import ZigbeeException
 import zigpy.profiles.zha
 from zigpy.quirks.registry import DeviceRegistry
-from zigpy.quirks.v2 import DeviceAlertLevel, DeviceAlertMetadata, QuirkBuilder
+from zigpy.quirks.v2 import (
+    DeviceAlertLevel,
+    DeviceAlertMetadata,
+    ExposesFeatureMetadata,
+    QuirkBuilder,
+)
 from zigpy.quirks.v2.homeassistant import EntityType
 from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 import zigpy.types
@@ -1120,6 +1125,36 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
         entity.translation_placeholders
         == entity.info_object.translation_placeholders
         == {"sensor_index": "1"}
+    )
+
+
+async def test_quirks_v2_exposed_features(zha_gateway: Gateway) -> None:
+    """Test quirks v2 exposed features."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .exposes_feature("some_feature")
+        .exposes_feature("another_feature", config={"option": True})
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # can access the set of exposed features, similar to v1 quirks
+    assert zha_device.exposes_features == {"some_feature", "another_feature"}
+
+    # can access the quirk metadata for config features
+    assert zha_device.quirk_metadata.exposes_features == (
+        ExposesFeatureMetadata(feature="some_feature"),
+        ExposesFeatureMetadata(feature="another_feature", config={"option": True}),
     )
 
 

@@ -9,7 +9,7 @@
   "name": "aqara lumi.motion.ac01",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.motion_ac01.AqaraLumiMotionAc01",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Mains",
   "lqi": null,

@@ -7,9 +7,9 @@
   "friendly_manufacturer": "EcoDim BV",
   "friendly_model": "Eco-Dim.05 Zigbee",
   "name": "EcoDim BV Eco-Dim.05 Zigbee",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Mains",
   "lqi": 179,
@@ -291,6 +291,7 @@
       ]
     }
   },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {

@@ -9,7 +9,7 @@
   "name": "LUMI lumi.sensor_86sw2",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.remote_b286acn01.RemoteB286ACN01",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",
   "lqi": null,

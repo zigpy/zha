@@ -9,7 +9,7 @@
   "name": "Third Reality, Inc 3RSB22BZ",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.thirdreality.button.Button",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
   "lqi": null,

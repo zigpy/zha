@@ -9,7 +9,7 @@
   "name": "Smartwings WM25/L-Z",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.smartwings.wm25lz.WM25LBlinds",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
   "lqi": null,

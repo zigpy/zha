@@ -187,7 +187,7 @@ class DeviceInfo:
     name: str
     quirk_applied: bool
     quirk_class: str
-    quirk_id: str | None
+    exposes_features: set[str]
     manufacturer_code: int | None
     power_source: str
     lqi: int
@@ -267,7 +267,17 @@ class Device(LogMixin, EventBase):
             f"{self._zigpy_device.__class__.__module__}."
             f"{self._zigpy_device.__class__.__name__}"
         )
-        self.quirk_id: str | None = getattr(self._zigpy_device, ATTR_QUIRK_ID, None)
+
+        # add v1 quirk exposed features (legacy quirk id)
+        qid: set[str] | str = getattr(self._zigpy_device, ATTR_QUIRK_ID, set())
+        self.exposes_features: set[str] = {qid} if isinstance(qid, str) else set(qid)
+
+        # add v2 quirk exposed features
+        if self.quirk_metadata is not None:
+            self.exposes_features.update(
+                f.feature for f in self.quirk_metadata.exposes_features
+            )
+
         self._power_config_ch: ClusterHandler | None = None
         self._identify_ch: ClusterHandler | None = None
         self._basic_ch: ClusterHandler | None = None
@@ -312,7 +322,7 @@ class Device(LogMixin, EventBase):
             f"{repr(self._zigpy_device)} - "
             f"quirk_applied: {self.quirk_applied} - "
             f"quirk_or_device_class: {self.quirk_class} - "
-            f"quirk_id: {self.quirk_id}"
+            f"exposes_features: {self.exposes_features}"
         )
 
     @property
@@ -740,7 +750,7 @@ class Device(LogMixin, EventBase):
             name=self.name,
             quirk_applied=self.quirk_applied,
             quirk_class=self.quirk_class,
-            quirk_id=self.quirk_id,
+            exposes_features=self.exposes_features,
             manufacturer_code=self.manufacturer_code,
             power_source=self.power_source,
             lqi=self.lqi,
@@ -1431,7 +1441,7 @@ class Device(LogMixin, EventBase):
         info["name"] = self.name
         info["quirk_applied"] = self.quirk_applied
         info["quirk_class"] = self.quirk_class
-        info["quirk_id"] = self.quirk_id
+        info["exposes_features"] = self.exposes_features
         info["manufacturer_code"] = self.manufacturer_code
         info["power_source"] = self.power_source
         info["lqi"] = self.lqi

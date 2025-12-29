@@ -9,7 +9,7 @@
   "name": "Third Reality, Inc 3RSM0147Z",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 5127,
   "power_source": "Battery or Unknown",
   "lqi": null,

@@ -111,7 +111,7 @@ class TuyaClusterHandler(ClusterHandler):
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize TuyaClusterHandler."""
         super().__init__(cluster, endpoint)
-        if endpoint.device.quirk_id == TUYA_PLUG_MANUFACTURER:
+        if TUYA_PLUG_MANUFACTURER in endpoint.device.exposes_features:
             self.ZCL_INIT_ATTRS = {
                 "backlight_mode": True,
                 "power_on_state": True,

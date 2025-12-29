@@ -9,7 +9,7 @@
   "name": "_TZE200_b6wax7g0 TS0601",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts0601_trv.MoesHY368_Type1new",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
   "lqi": 0,

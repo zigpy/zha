@@ -9,7 +9,7 @@
   "name": "_TYZB01_1xktopx6 TS0041A",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts0041.TuyaSmartRemote0041_var04",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
   "lqi": 204,

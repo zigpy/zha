@@ -9,7 +9,7 @@
   "name": "_TZE284_f5efvtbv TS0601",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": 200,

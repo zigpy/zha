@@ -389,6 +389,7 @@ class ZHAData:
     )
     allow_polling: bool = dataclasses.field(default=False)
     local_timezone: datetime.tzinfo = dataclasses.field(default=datetime.UTC)
+    country_code: str | None = None
 
 
 class GlobalUpdater:

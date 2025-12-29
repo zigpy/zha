@@ -408,7 +408,7 @@ class EndpointProbe:
                 endpoint.device.manufacturer,
                 endpoint.device.model,
                 cluster_handlers,
-                endpoint.device.quirk_id,
+                endpoint.device.exposes_features,
             )
             if entity_class is None:
                 return
@@ -437,7 +437,7 @@ class EndpointProbe:
             endpoint.device.manufacturer,
             endpoint.device.model,
             [cluster_handler],
-            endpoint.device.quirk_id,
+            endpoint.device.exposes_features,
         )
         if entity_class is None:
             return
@@ -500,14 +500,16 @@ class EndpointProbe:
                 cluster_id, {None: ClusterHandler}
             )
 
-            quirk_id = (
-                endpoint.device.quirk_id
-                if endpoint.device.quirk_id in cluster_handler_classes
-                else None
-            )
+            # get first exposed feature from device
+            # that matches a registered cluster handler
+            cluster_exposed_feature: str | None = None
+            for exposed_features in endpoint.device.exposes_features:
+                if exposed_features in cluster_handler_classes:
+                    cluster_exposed_feature = exposed_features
+                    break
 
             cluster_handler_class = cluster_handler_classes.get(
-                quirk_id, ClusterHandler
+                cluster_exposed_feature, ClusterHandler
             )
 
             cluster_handler = cluster_handler_class(cluster, endpoint)
@@ -539,14 +541,14 @@ class EndpointProbe:
                 device.manufacturer,
                 device.model,
                 cluster_handlers,
-                device.quirk_id,
+                device.exposes_features,
             )
         else:
             matches, claimed = PLATFORM_ENTITIES.get_multi_entity(
                 device.manufacturer,
                 device.model,
                 endpoint.unclaimed_cluster_handlers(),
-                device.quirk_id,
+                device.exposes_features,
             )
 
         endpoint.claim_cluster_handlers(claimed)

@@ -9,7 +9,9 @@
   "name": "LUMI lumi.vibration.aq1",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.vibration_aq1.VibrationAQ1",
-  "quirk_id": "xiaomi.aqara_vibration_aq1",
+  "exposes_features": [
+    "xiaomi.aqara_vibration_aq1"
+  ],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",
   "lqi": null,

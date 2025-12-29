@@ -1,20 +1,20 @@
 {
   "version": 1,
-  "ieee": "ab:cd:ef:12:dc:6a:11:ac",
-  "nwk": "0x7F3C",
-  "manufacturer": "LUMI",
-  "model": "lumi.curtain.acn002",
-  "friendly_manufacturer": "LUMI",
-  "friendly_model": "lumi.curtain.acn002",
-  "name": "LUMI lumi.curtain.acn002",
+  "ieee": "ab:cd:ef:12:b5:0f:0b:2f",
+  "nwk": "0x5C8B",
+  "manufacturer": "_TZE200_a7sghmms",
+  "model": "TS0601",
+  "friendly_manufacturer": "_TZE200_a7sghmms",
+  "friendly_model": "TS0601",
+  "name": "_TZE200_a7sghmms TS0601",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
-  "manufacturer_code": 4447,
+  "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
   "lqi": null,
   "rssi": null,
-  "last_seen": "2025-08-23T20:52:03.003610+00:00",
+  "last_seen": "2025-07-05T08:46:21.109364+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -26,19 +26,19 @@
     "aps_flags": 0,
     "frequency_band": 8,
     "mac_capability_flags": 128,
-    "manufacturer_code": 4447,
-    "maximum_buffer_size": 127,
-    "maximum_incoming_transfer_size": 100,
-    "server_mask": 11264,
-    "maximum_outgoing_transfer_size": 100,
+    "manufacturer_code": 4417,
+    "maximum_buffer_size": 66,
+    "maximum_incoming_transfer_size": 66,
+    "server_mask": 10752,
+    "maximum_outgoing_transfer_size": 66,
     "descriptor_capability_field": 0
   },
   "endpoints": {
     "1": {
       "profile_id": 260,
       "device_type": {
-        "name": "ON_OFF_LIGHT",
-        "id": 256
+        "name": "SMART_PLUG",
+        "id": 81
       },
       "in_clusters": [
         {
@@ -46,22 +46,22 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
-              "id": "0x0006",
-              "name": "date_code",
-              "zcl_type": "string",
-              "value": "09-12-2023"
+              "id": "0x0001",
+              "name": "app_version",
+              "zcl_type": "uint8",
+              "value": 72
             },
             {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
-              "value": "LUMI"
+              "value": "_TZE200_a7sghmms"
             },
             {
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "lumi.curtain.acn002"
+              "value": "TS0601"
             }
           ]
         },
@@ -73,38 +73,27 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 158
+              "value": 180
             },
             {
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
-              "value": 1
+              "value": 4
+            },
+            {
+              "id": "0x0034",
+              "name": "battery_rated_voltage",
+              "zcl_type": "uint8",
+              "value": 15
             },
             {
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 255
+              "value": 3
             }
           ]
-        },
-        {
-          "cluster_id": "0x0002",
-          "endpoint_attribute": "device_temperature",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_temperature",
-              "zcl_type": "int16",
-              "value": 2400
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
         },
         {
           "cluster_id": "0x0004",
@@ -119,181 +108,102 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0x0009",
-          "endpoint_attribute": "alarms",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0x000d",
-          "endpoint_attribute": "analog_output",
           "attributes": [
-            {
-              "id": "0x0100",
-              "name": "application_type",
-              "zcl_type": "uint32",
-              "unsupported": true
-            },
-            {
-              "id": "0x001c",
-              "name": "description",
-              "zcl_type": "string",
-              "value": "Current position"
-            },
-            {
-              "id": "0x0075",
-              "name": "engineering_units",
-              "zcl_type": "enum16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0041",
-              "name": "max_present_value",
-              "zcl_type": "single",
-              "value": 100.0
-            },
-            {
-              "id": "0x0045",
-              "name": "min_present_value",
-              "zcl_type": "single",
-              "value": 0.0
-            },
-            {
-              "id": "0x0051",
-              "name": "out_of_service",
-              "zcl_type": "bool",
-              "value": 0
-            },
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "single",
-              "value": 0.0
-            },
-            {
-              "id": "0x0068",
-              "name": "relinquish_default",
-              "zcl_type": "single",
-              "unsupported": true
-            },
-            {
-              "id": "0x006a",
-              "name": "resolution",
-              "zcl_type": "single",
-              "value": 1.0
-            },
-            {
-              "id": "0x006f",
-              "name": "status_flags",
-              "zcl_type": "map8",
-              "value": 0
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0013",
-          "endpoint_attribute": "multistate_output",
-          "attributes": [
-            {
-              "id": "0x0055",
-              "name": "present_value",
-              "zcl_type": "uint16",
-              "value": 2
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0102",
-          "endpoint_attribute": "window_covering",
-          "attributes": [
-            {
-              "id": "0x0007",
-              "name": "config_status",
-              "zcl_type": "map8",
-              "value": 43
-            },
-            {
-              "id": "0x0008",
-              "name": "current_position_lift_percentage",
-              "zcl_type": "uint8",
-              "value": 100
-            },
-            {
-              "id": "0x0009",
-              "name": "current_position_tilt_percentage",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0011",
-              "name": "installed_closed_limit_lift",
-              "zcl_type": "uint16",
-              "value": 65535
-            },
-            {
-              "id": "0x0013",
-              "name": "installed_closed_limit_tilt",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0010",
-              "name": "installed_open_limit_lift",
-              "zcl_type": "uint16",
-              "value": 0
-            },
-            {
-              "id": "0x0012",
-              "name": "installed_open_limit_tilt",
-              "zcl_type": "uint16",
-              "unsupported": true
-            },
-            {
-              "id": "0x0017",
-              "name": "window_covering_mode",
-              "zcl_type": "map8",
-              "value": 8
-            },
             {
               "id": "0x0000",
-              "name": "window_covering_type",
-              "zcl_type": "enum8",
+              "name": "on_off",
+              "zcl_type": "bool",
               "value": 0
             }
           ]
         },
         {
-          "cluster_id": "0xfcc0",
-          "endpoint_attribute": "opple_cluster",
+          "cluster_id": "0x0702",
+          "endpoint_attribute": "smartenergy_metering",
           "attributes": [
             {
-              "id": "0x00f7",
-              "name": "aqara_attributes",
-              "zcl_type": "octstr",
-              "value": {
-                "__type": "<class 'bytes'>",
-                "repr": "b'\\x03(\\x18\\x05!\\xb3\\x03\\t!\\x00\\x01\\n!\\x00\\x00\\x0b \\x00\\x0c \\x01\\r#\\x1f\\x0e\\x00\\x00\\x11#\\x01\\x00\\x00\\x00d \\x00e Of \\x80g li \\x02j!\\xa4\\x1ek \\x00'"
-              }
+              "id": "0x0000",
+              "name": "current_summ_delivered",
+              "zcl_type": "uint48",
+              "value": 0
             },
             {
-              "id": "0x0409",
-              "name": "charging",
-              "zcl_type": "uint8",
+              "id": "0x0400",
+              "name": "instantaneous_demand",
+              "zcl_type": "int24",
+              "unsupported": true
+            },
+            {
+              "id": "0x0306",
+              "name": "metering_device_type",
+              "zcl_type": "map8",
               "value": 2
             },
             {
-              "id": "0x0402",
-              "name": "positions_stored",
+              "id": "0x0300",
+              "name": "unit_of_measure",
+              "zcl_type": "enum8",
+              "value": 7
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xef00",
+          "endpoint_attribute": "tuya_manufacturer",
+          "attributes": [
+            {
+              "id": "0xef67",
+              "name": "irrigation_cycles",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0xef72",
+              "name": "irrigation_duration",
+              "zcl_type": "uint32",
+              "value": 6
+            },
+            {
+              "id": "0xef66",
+              "name": "irrigation_end_time",
+              "zcl_type": "string",
+              "value": "2025-07-05 09:33:23.709383+04:00"
+            },
+            {
+              "id": "0xef69",
+              "name": "irrigation_interval",
+              "zcl_type": "uint32",
+              "value": 0
+            },
+            {
+              "id": "0xef01",
+              "name": "irrigation_mode",
               "zcl_type": "bool",
-              "value": 1
+              "value": 0
             },
             {
-              "id": "0x0408",
-              "name": "speed",
-              "zcl_type": "uint8",
-              "value": 2
+              "id": "0xef65",
+              "name": "irrigation_start_time",
+              "zcl_type": "string",
+              "value": "2025-07-05 09:33:17.905219+04:00"
+            },
+            {
+              "id": "0xef68",
+              "name": "irrigation_target",
+              "zcl_type": "uint32",
+              "value": 0
+            },
+            {
+              "id": "0xef00",
+              "name": "mcu_version",
+              "zcl_type": "uint48",
+              "value": "1.0.15"
+            },
+            {
+              "id": "0xef6b",
+              "name": "weather_delay",
+              "zcl_type": "enum8",
+              "value": 0
             }
           ]
         }
@@ -312,224 +222,24 @@
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": 3615
+              "value": 72
             }
           ]
-        }
-      ]
-    },
-    "242": {
-      "profile_id": 41440,
-      "device_type": {
-        "name": "PROXY_BASIC",
-        "id": 97
-      },
-      "in_clusters": [],
-      "out_clusters": [
-        {
-          "cluster_id": "0x0021",
-          "endpoint_attribute": "green_power",
-          "attributes": []
         }
       ]
     }
   },
   "original_signature": {},
   "zha_lib_entities": {
-    "binary_sensor": [
+    "number": [
       {
         "info_object": {
-          "fallback_name": "Charging",
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-charging",
+          "fallback_name": "Irrigation cycles",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-irrigation_cycles",
           "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "BinarySensor",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "battery_charging",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OppleRemoteClusterHandler",
-              "generic_id": "cluster_handler_0xfcc0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64704,
-                "name": "XiaomiAqaraRollerE1",
-                "type": "server"
-              },
-              "id": "1:0xfcc0",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0xfcc0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "charging"
-        },
-        "state": {
-          "class_name": "BinarySensor",
-          "available": true,
-          "state": false
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": "Calibrated",
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-positions_stored",
-          "migrate_unique_ids": [],
-          "platform": "binary_sensor",
-          "class_name": "BinarySensor",
-          "translation_key": "calibrated",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OppleRemoteClusterHandler",
-              "generic_id": "cluster_handler_0xfcc0",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 64704,
-                "name": "XiaomiAqaraRollerE1",
-                "type": "server"
-              },
-              "id": "1:0xfcc0",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0xfcc0",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "attribute_name": "positions_stored"
-        },
-        "state": {
-          "class_name": "BinarySensor",
-          "available": true,
-          "state": true
-        }
-      }
-    ],
-    "button": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-3",
-          "migrate_unique_ids": [],
-          "platform": "button",
-          "class_name": "IdentifyButton",
-          "translation_key": null,
-          "translation_placeholders": null,
-          "device_class": "identify",
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "command": "identify",
-          "args": [
-            5
-          ],
-          "kwargs": {}
-        },
-        "state": {
-          "class_name": "IdentifyButton",
-          "available": true
-        }
-      }
-    ],
-    "cover": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-258",
-          "migrate_unique_ids": [],
-          "platform": "cover",
-          "class_name": "Cover",
-          "translation_key": "cover",
-          "translation_placeholders": null,
-          "device_class": "shade",
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 258,
-                "name": "Window Covering",
-                "type": "server"
-              },
-              "id": "1:0x0102",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0102",
-              "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null
-        },
-        "state": {
-          "class_name": "Cover",
-          "available": true,
-          "current_position": 0,
-          "current_tilt_position": null,
-          "state": "closed",
-          "is_opening": false,
-          "is_closing": false,
-          "is_closed": true
-        }
-      }
-    ],
-    "select": [
-      {
-        "info_object": {
-          "fallback_name": "Speed",
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-speed",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "ZCLEnumSelectEntity",
-          "translation_key": "speed",
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "irrigation_cycles",
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
@@ -539,35 +249,226 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OppleRemoteClusterHandler",
-              "generic_id": "cluster_handler_0xfcc0",
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
               "endpoint_id": 1,
               "cluster": {
-                "id": 64704,
-                "name": "XiaomiAqaraRollerE1",
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
                 "type": "server"
               },
-              "id": "1:0xfcc0",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0xfcc0",
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "enum": "AqaraRollerDriverSpeed",
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Irrigation interval",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-irrigation_interval",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "irrigation_interval",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 43200,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Irrigation target",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-irrigation_target",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "irrigation_target",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 43200,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": 0
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": "Irrigation mode",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-irrigation_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "irrigation_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "GiexIrrigationMode",
           "options": [
-            "Low",
-            "Medium",
-            "High"
+            "Duration",
+            "Capacity"
           ]
         },
         "state": {
           "class_name": "ZCLEnumSelectEntity",
           "available": true,
-          "state": "High"
+          "state": "Duration"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Weather delay",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-weather_delay",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "weather_delay",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": false,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "GiexIrrigationWeatherDelay",
+          "options": [
+            "NoDelay",
+            "TwentyFourHourDelay",
+            "FortyEightHourDelay",
+            "SeventyTwoHourDelay"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": "NoDelay"
         }
       }
     ],
@@ -575,7 +476,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-0-lqi",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -594,16 +495,16 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 0,
-                "name": "BasicCluster",
+                "name": "Basic",
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0000",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -619,7 +520,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-0-rssi",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -638,16 +539,16 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 0,
-                "name": "BasicCluster",
+                "name": "Basic",
                 "type": "server"
               },
               "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0000",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -663,7 +564,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-1",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -686,12 +587,12 @@
                 "type": "server"
               },
               "id": "1:0x0001",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0001",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0x0001",
               "status": "INITIALIZED",
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -701,9 +602,9 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 79.0,
-          "battery_size": "Unknown",
-          "battery_quantity": 1
+          "state": 90.0,
+          "battery_size": "AA",
+          "battery_quantity": 4
         },
         "extra_state_attributes": [
           "battery_quantity",
@@ -714,79 +615,130 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-2",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-1794-summation_delivered",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "DeviceTemperature",
-          "translation_key": "device_temperature",
+          "class_name": "SmartEnergySummation",
+          "translation_key": "summation_delivered",
           "translation_placeholders": null,
-          "device_class": "temperature",
-          "state_class": "measurement",
-          "entity_category": "diagnostic",
+          "device_class": "volume",
+          "state_class": "total_increasing",
+          "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "DeviceTemperatureClusterHandler",
-              "generic_id": "cluster_handler_0x0002",
+              "class_name": "MeteringClusterHandler",
+              "generic_id": "cluster_handler_0x0702",
               "endpoint_id": 1,
               "cluster": {
-                "id": 2,
-                "name": "Device Temperature",
+                "id": 1794,
+                "name": "TuyaValveWaterConsumedNoInstDemand",
                 "type": "server"
               },
-              "id": "1:0x0002",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0002",
+              "id": "1:0x0702",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0x0702",
               "status": "INITIALIZED",
-              "value_attribute": "current_temperature"
+              "value_attribute": "instantaneous_demand"
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 3,
+          "unit": "L"
+        },
+        "state": {
+          "class_name": "SmartEnergySummation",
+          "available": true,
+          "state": 0.0,
+          "device_type": "Water Metering",
+          "zcl_unit_of_measurement": 7
+        },
+        "extra_state_attributes": [
+          "device_type",
+          "status",
+          "zcl_unit_of_measurement"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": "Irrigation duration",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-irrigation_duration",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "irrigation_duration",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
           "suggested_display_precision": null,
-          "unit": "\u00b0C"
+          "unit": "s"
         },
         "state": {
-          "class_name": "DeviceTemperature",
+          "class_name": "Sensor",
           "available": true,
-          "state": 24.0
+          "state": 6
         }
       },
       {
         "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-258-window_covering_type",
+          "fallback_name": "Irrigation end time",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-irrigation_end_time",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "WindowCoveringTypeSensor",
-          "translation_key": "window_covering_type",
+          "class_name": "Sensor",
+          "translation_key": "irrigation_end_time",
           "translation_placeholders": null,
-          "device_class": "enum",
+          "device_class": "timestamp",
           "state_class": null,
-          "entity_category": "diagnostic",
+          "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
               "endpoint_id": 1,
               "cluster": {
-                "id": 258,
-                "name": "Window Covering",
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
                 "type": "server"
               },
-              "id": "1:0x0102",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0102",
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
               "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
+              "value_attribute": null
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -794,9 +746,53 @@
           "unit": null
         },
         "state": {
-          "class_name": "WindowCoveringTypeSensor",
+          "class_name": "Sensor",
           "available": true,
-          "state": "Rollershade"
+          "state": "2025-07-05 09:33:23.709383+04:00"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Irrigation start time",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-irrigation_start_time",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "irrigation_start_time",
+          "translation_placeholders": null,
+          "device_class": "timestamp",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": "2025-07-05 09:33:17.905219+04:00"
         }
       }
     ],
@@ -804,49 +800,43 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-258-inverted",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1",
           "migrate_unique_ids": [],
           "platform": "switch",
-          "class_name": "WindowCoveringInversionSwitch",
-          "translation_key": "inverted",
+          "class_name": "Switch",
+          "translation_key": "switch",
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
-          "entity_category": "config",
+          "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": false,
+          "primary": true,
           "cluster_handlers": [
             {
-              "class_name": "WindowCoveringClusterHandler",
-              "generic_id": "cluster_handler_0x0102",
+              "class_name": "OnOffClusterHandler",
+              "generic_id": "cluster_handler_0x0006",
               "endpoint_id": 1,
               "cluster": {
-                "id": 258,
-                "name": "Window Covering",
+                "id": 6,
+                "name": "On/Off",
                 "type": "server"
               },
-              "id": "1:0x0102",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0102",
+              "id": "1:0x0006",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0x0006",
               "status": "INITIALIZED",
-              "value_attribute": "current_position_lift_percentage"
+              "value_attribute": "on_off"
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
-          "group_id": null,
-          "attribute_name": "config_status",
-          "invert_attribute_name": null,
-          "force_inverted": false,
-          "off_value": 0,
-          "on_value": 1
+          "group_id": null
         },
         "state": {
-          "class_name": "WindowCoveringInversionSwitch",
-          "available": true,
-          "state": false,
-          "inverted": false
+          "class_name": "Switch",
+          "state": 0,
+          "available": true
         }
       }
     ],
@@ -854,7 +844,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:dc:6a:11:ac-1-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:b5:0f:0b:2f-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -877,12 +867,12 @@
                 "type": "client"
               },
               "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:dc:6a:11:ac:1:0x0019_CLIENT",
+              "unique_id": "ab:cd:ef:12:b5:0f:0b:2f:1:0x0019_CLIENT",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "ab:cd:ef:12:dc:6a:11:ac",
+          "device_ieee": "ab:cd:ef:12:b5:0f:0b:2f",
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
@@ -891,7 +881,7 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x00000e1f",
+          "installed_version": "0x00000048",
           "in_progress": false,
           "update_percentage": null,
           "latest_version": null,

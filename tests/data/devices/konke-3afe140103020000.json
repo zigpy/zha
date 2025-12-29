@@ -9,7 +9,7 @@
   "name": "Konke 3AFE140103020000",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.konke.temp.KonkeTempHumidity",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
   "lqi": null,

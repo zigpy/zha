@@ -9,7 +9,7 @@
   "name": "Philips ROM001",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.philips.rom001.PhilipsROM001",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
   "lqi": null,

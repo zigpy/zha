@@ -149,13 +149,17 @@ class Endpoint:
             cluster_handler_classes = CLUSTER_HANDLER_REGISTRY.get(
                 cluster_id, {None: ClusterHandler}
             )
-            quirk_id = (
-                self.device.quirk_id
-                if self.device.quirk_id in cluster_handler_classes
-                else None
-            )
+
+            # get first exposed feature from device
+            # that matches a registered cluster handler
+            cluster_exposed_features: str | None = None
+            for exposed_features in self.device.exposes_features:
+                if exposed_features in cluster_handler_classes:
+                    cluster_exposed_features = exposed_features
+                    break
+
             cluster_handler_class = cluster_handler_classes.get(
-                quirk_id, ClusterHandler
+                cluster_exposed_features, ClusterHandler
             )
 
             # Allow cluster handler to filter out bad matches

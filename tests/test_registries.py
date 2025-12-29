@@ -25,7 +25,7 @@ from zha.application.registries import (
 MANUFACTURER = "mock manufacturer"
 MODEL = "mock model"
 QUIRK_CLASS = "mock.test.quirk.class"
-QUIRK_ID = "quirk_id"
+EXPOSED_FEATURE = "EXPOSED_FEATURE_ID"
 
 
 @pytest.fixture
@@ -97,14 +97,20 @@ def cluster_handlers(cluster_handler):
             MatchRule(models="no match", aux_cluster_handlers="aux_cluster_handler"),
             False,
         ),
-        (MatchRule(quirk_ids=QUIRK_ID), True),
-        (MatchRule(quirk_ids="no match"), False),
+        (MatchRule(exposed_features=EXPOSED_FEATURE), True),
+        (MatchRule(exposed_features="no match"), False),
+        (MatchRule(exposed_features={"no match for this yet", EXPOSED_FEATURE}), True),
         (
-            MatchRule(quirk_ids=QUIRK_ID, aux_cluster_handlers="aux_cluster_handler"),
+            MatchRule(
+                exposed_features=EXPOSED_FEATURE,
+                aux_cluster_handlers="aux_cluster_handler",
+            ),
             True,
         ),
         (
-            MatchRule(quirk_ids="no match", aux_cluster_handlers="aux_cluster_handler"),
+            MatchRule(
+                exposed_features="no match", aux_cluster_handlers="aux_cluster_handler"
+            ),
             False,
         ),
         # match everything
@@ -114,7 +120,7 @@ def cluster_handlers(cluster_handler):
                 cluster_handler_names={"on_off", "level"},
                 manufacturers=MANUFACTURER,
                 models=MODEL,
-                quirk_ids=QUIRK_ID,
+                exposed_features=EXPOSED_FEATURE,
             ),
             True,
         ),
@@ -167,31 +173,33 @@ def cluster_handlers(cluster_handler):
         (
             MatchRule(
                 cluster_handler_names="on_off",
-                quirk_ids={"random quirk", QUIRK_ID},
+                exposed_features={"random quirk", EXPOSED_FEATURE},
             ),
             True,
         ),
         (
             MatchRule(
                 cluster_handler_names="on_off",
-                quirk_ids={"random quirk", "another quirk"},
+                exposed_features={"random quirk", "another quirk"},
             ),
             False,
         ),
         (
             MatchRule(
-                cluster_handler_names="on_off", quirk_ids=lambda x: x == QUIRK_ID
+                cluster_handler_names="on_off",
+                exposed_features=lambda x: x == EXPOSED_FEATURE,
             ),
             True,
         ),
         (
             MatchRule(
-                cluster_handler_names="on_off", quirk_ids=lambda x: x != QUIRK_ID
+                cluster_handler_names="on_off",
+                exposed_features=lambda x: x != EXPOSED_FEATURE,
             ),
             False,
         ),
         (
-            MatchRule(cluster_handler_names="on_off", quirk_ids=QUIRK_ID),
+            MatchRule(cluster_handler_names="on_off", exposed_features=EXPOSED_FEATURE),
             True,
         ),
     ],
@@ -199,7 +207,8 @@ def cluster_handlers(cluster_handler):
 def test_registry_matching(rule, matched, cluster_handlers) -> None:
     """Test strict rule matching."""
     assert (
-        rule.strict_matched(MANUFACTURER, MODEL, cluster_handlers, QUIRK_ID) is matched
+        rule.strict_matched(MANUFACTURER, MODEL, cluster_handlers, {EXPOSED_FEATURE})
+        is matched
     )
 
 
@@ -287,8 +296,8 @@ def test_registry_matching(rule, matched, cluster_handlers) -> None:
         (MatchRule(manufacturers=MANUFACTURER), True),
         (MatchRule(models=MODEL), True),
         (MatchRule(models="no match"), False),
-        (MatchRule(quirk_ids=QUIRK_ID), True),
-        (MatchRule(quirk_ids="no match"), False),
+        (MatchRule(exposed_features=EXPOSED_FEATURE), True),
+        (MatchRule(exposed_features="no match"), False),
         # match everything
         (
             MatchRule(
@@ -296,7 +305,7 @@ def test_registry_matching(rule, matched, cluster_handlers) -> None:
                 cluster_handler_names={"on_off", "level"},
                 manufacturers=MANUFACTURER,
                 models=MODEL,
-                quirk_ids=QUIRK_ID,
+                exposed_features=EXPOSED_FEATURE,
             ),
             True,
         ),
@@ -305,7 +314,8 @@ def test_registry_matching(rule, matched, cluster_handlers) -> None:
 def test_registry_loose_matching(rule, matched, cluster_handlers) -> None:
     """Test loose rule matching."""
     assert (
-        rule.loose_matched(MANUFACTURER, MODEL, cluster_handlers, QUIRK_ID) is matched
+        rule.loose_matched(MANUFACTURER, MODEL, cluster_handlers, {EXPOSED_FEATURE})
+        is matched
     )
 
 
@@ -369,12 +379,12 @@ def entity_registry():
 
 
 @pytest.mark.parametrize(
-    ("manufacturer", "model", "quirk_id", "match_name"),
+    ("manufacturer", "model", "exposes_features", "match_name"),
     [
         ("random manufacturer", "random model", "random.class", "OnOff"),
         ("random manufacturer", MODEL, "random.class", "OnOffModel"),
         (MANUFACTURER, "random model", "random.class", "OnOffManufacturer"),
-        ("random manufacturer", "random model", QUIRK_ID, "OnOffQuirk"),
+        ("random manufacturer", "random model", EXPOSED_FEATURE, "OnOffQuirk"),
         (MANUFACTURER, MODEL, "random.class", "OnOffModelManufacturer"),
         (MANUFACTURER, "some model", "random.class", "OnOffMultimodel"),
     ],
@@ -384,7 +394,7 @@ def test_weighted_match(
     entity_registry: PlatformEntityRegistry,
     manufacturer,
     model,
-    quirk_id,
+    exposes_features,
     match_name,
 ) -> None:
     """Test weightedd match."""
@@ -425,7 +435,7 @@ def test_weighted_match(
         """OnOff model and manufacturer cluster handler."""
 
     @entity_registry.strict_match(
-        s.component, cluster_handler_names="on_off", quirk_ids=QUIRK_ID
+        s.component, cluster_handler_names="on_off", exposed_features=EXPOSED_FEATURE
     )
     class OnOffQuirk:  # pylint: disable=unused-variable
         """OnOff quirk cluster handler."""
@@ -434,7 +444,7 @@ def test_weighted_match(
     ch_level = cluster_handler("level", 8)
 
     match, claimed = entity_registry.get_entity(
-        s.component, manufacturer, model, [ch_on_off, ch_level], quirk_id
+        s.component, manufacturer, model, [ch_on_off, ch_level], {exposes_features}
     )
 
     assert match.__name__ == match_name
@@ -462,7 +472,7 @@ def test_multi_sensor_match(
         "manufacturer",
         "model",
         cluster_handlers=[ch_se, ch_illuminati],
-        quirk_id="quirk_id",
+        exposes_features={"exposed_feature_id"},
     )
 
     assert s.binary_sensor in match
@@ -492,7 +502,7 @@ def test_multi_sensor_match(
         "manufacturer",
         "model",
         cluster_handlers={ch_se, ch_illuminati},
-        quirk_id="quirk_id",
+        exposes_features={"exposed_feature_id"},
     )
 
     assert s.binary_sensor in match
@@ -540,21 +550,23 @@ def test_quirk_classes() -> None:
                 quirk_class_validator(v)
             return
 
-        if value not in all_quirk_ids:
-            raise ValueError(f"Quirk ID '{value}' does not exist.")
+        if value not in all_exposed_features:
+            raise ValueError(f"Exposed feature '{value}' does not exist.")
 
     # get all quirk ID from zigpy quirks registry
-    all_quirk_ids = []
+    all_exposed_features: set[str] = set()
     for manufacturer in zigpy_quirks._DEVICE_REGISTRY.registry_v1.values():
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
-                quirk_id = getattr(quirk, ATTR_QUIRK_ID, None)
-                if quirk_id is not None and quirk_id not in all_quirk_ids:
-                    all_quirk_ids.append(quirk_id)
+                qid: set[str] | str = getattr(quirk, ATTR_QUIRK_ID, set())
+                device_exposed_features: set[str] = (
+                    {qid} if isinstance(qid, str) else set(qid)
+                )
+                all_exposed_features.update(device_exposed_features)
 
     # validate all quirk IDs used in component match rules
     for rule, _ in iter_all_rules():
-        quirk_class_validator(rule.quirk_ids)
+        quirk_class_validator(rule.exposed_features)
 
 
 def test_entity_names() -> None:

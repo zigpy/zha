@@ -9,7 +9,7 @@
   "name": "_TZ3000_idhkkbqj TS0012",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts001x.TuyaDoubleNoNeutralSwitch",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
   "lqi": 109,

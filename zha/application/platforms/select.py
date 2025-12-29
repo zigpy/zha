@@ -283,10 +283,10 @@ class TuyaPowerOnState(types.enum8):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ON_OFF, quirk_ids=TUYA_PLUG_ONOFF
+    cluster_handler_names=CLUSTER_HANDLER_ON_OFF, exposed_features=TUYA_PLUG_ONOFF
 )
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="tuya_manufacturer", quirk_ids=TUYA_PLUG_MANUFACTURER
+    cluster_handler_names="tuya_manufacturer", exposed_features=TUYA_PLUG_MANUFACTURER
 )
 class TuyaPowerOnStateSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA power on state select entity."""
@@ -306,7 +306,7 @@ class TuyaBacklightMode(types.enum8):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ON_OFF, quirk_ids=TUYA_PLUG_ONOFF
+    cluster_handler_names=CLUSTER_HANDLER_ON_OFF, exposed_features=TUYA_PLUG_ONOFF
 )
 class TuyaBacklightModeSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA backlight mode select entity."""
@@ -327,7 +327,7 @@ class MoesBacklightMode(types.enum8):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="tuya_manufacturer", quirk_ids=TUYA_PLUG_MANUFACTURER
+    cluster_handler_names="tuya_manufacturer", exposed_features=TUYA_PLUG_MANUFACTURER
 )
 class MoesBacklightModeSelectEntity(ZCLEnumSelectEntity):
     """Moes devices have a different backlight mode select options."""
@@ -733,7 +733,7 @@ class KeypadLockout(ZCLEnumSelectEntity):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the day of the week for exercising."""
@@ -753,7 +753,7 @@ class DanfossOrientationEnum(types.enum8):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossOrientation(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the orientation of the valve.
@@ -770,7 +770,7 @@ class DanfossOrientation(ZCLEnumSelectEntity):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for controlling the current adaptation run."""
@@ -808,7 +808,7 @@ class DanfossControlAlgorithmScaleFactorEnum(types.enum8):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossControlAlgorithmScaleFactor(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the scale factor of the setpoint filter time constant."""
@@ -821,7 +821,7 @@ class DanfossControlAlgorithmScaleFactor(ZCLEnumSelectEntity):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="thermostat_ui",
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossViewingDirection(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the viewing direction of the screen."""

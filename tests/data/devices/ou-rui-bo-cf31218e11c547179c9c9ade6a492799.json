@@ -9,7 +9,7 @@
   "name": "\u6b27\u745e\u535a cf31218e11c547179c9c9ade6a492799",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Battery or Unknown",
   "lqi": null,

@@ -9,7 +9,9 @@
   "name": "_TZ3000_w0qqde0g TS011F",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.tuya.ts011f_plug.Plug_v2",
-  "quirk_id": "tuya.plug_on_off_attributes",
+  "exposes_features": [
+    "tuya.plug_on_off_attributes"
+  ],
   "manufacturer_code": 4660,
   "power_source": "Mains",
   "lqi": null,

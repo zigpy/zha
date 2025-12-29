@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
 from zigpy.application import ControllerApplication
+from zigpy.config import CONF_NWK, CONF_NWK_COUNTRY_CODE
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
@@ -806,6 +807,34 @@ def test_radio_type():
 
     with pytest.raises(ValueError):
         RadioType.get_by_description("Invalid description")
+
+
+@pytest.mark.parametrize(
+    ("country_code", "yaml_config", "expected_country_code"),
+    [
+        (None, {}, None),
+        ("US", {}, "US"),
+        ("GB", {}, "GB"),
+        ("US", {CONF_NWK: {}}, "US"),
+        ("US", {CONF_NWK: {CONF_NWK_COUNTRY_CODE: "GB"}}, "GB"),
+    ],
+)
+async def test_country_code_passthrough(
+    zha_data: ZHAData,
+    country_code: str | None,
+    yaml_config: dict,
+    expected_country_code: str | None,
+) -> None:
+    """Test country code passthrough from Home Assistant to zigpy."""
+    zha_data.country_code = country_code
+    zha_data.zigpy_config = yaml_config
+
+    gateway = Gateway(zha_data)
+    _, app_config = gateway.get_application_controller_data()
+
+    assert (
+        app_config.get(CONF_NWK, {}).get(CONF_NWK_COUNTRY_CODE) == expected_country_code
+    )
 
 
 async def test_gateway_network_scan(zha_gateway: Gateway) -> None:

@@ -9,7 +9,7 @@
   "name": "LUMI lumi.sensor_ht.agl02",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.sensor_ht_agl02.LumiSensorHtAgl02",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
   "lqi": null,

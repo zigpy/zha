@@ -9,7 +9,7 @@
   "name": "Jasco Products 45856",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4388,
   "power_source": "Mains",
   "lqi": null,

@@ -9,7 +9,7 @@
   "name": "SmartThings tagv4",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.smartthings.tag_v4.SmartThingsTagV4",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4362,
   "power_source": "Battery or Unknown",
   "lqi": null,

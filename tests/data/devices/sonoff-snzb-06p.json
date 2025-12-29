@@ -9,7 +9,7 @@
   "name": "SONOFF SNZB-06P",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.sonoff.snzb06p.SonoffPresenceSenorSNZB06P",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Mains",
   "lqi": 240,

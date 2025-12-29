@@ -9,7 +9,7 @@
   "name": "LUMI lumi.switch.n0agl1",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.switch_t1.SwitchT1Alt3",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",
   "lqi": 255,

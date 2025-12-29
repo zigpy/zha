@@ -9,7 +9,9 @@
   "name": "Konke 3AFE280100510001",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.konke.button.KonkeButtonRemote1",
-  "quirk_id": "konke.button_remote",
+  "exposes_features": [
+    "konke.button_remote"
+  ],
   "manufacturer_code": 4712,
   "power_source": "Battery or Unknown",
   "lqi": null,

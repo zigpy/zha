@@ -398,7 +398,7 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossMountingModeActive(BinarySensor):
     """Danfoss TRV proprietary attribute exposing whether in mounting mode."""
@@ -412,7 +412,7 @@ class DanfossMountingModeActive(BinarySensor):
 
 @MULTI_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossHeatRequired(BinarySensor):
     """Danfoss TRV proprietary attribute exposing whether heat is required."""
@@ -424,7 +424,7 @@ class DanfossHeatRequired(BinarySensor):
 
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    quirk_ids={DANFOSS_ALLY_THERMOSTAT},
+    exposed_features={DANFOSS_ALLY_THERMOSTAT},
 )
 class DanfossPreheatStatus(BinarySensor):
     """Danfoss TRV proprietary attribute exposing whether in pre-heating mode."""

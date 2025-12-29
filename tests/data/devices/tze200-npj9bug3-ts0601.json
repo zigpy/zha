@@ -9,7 +9,7 @@
   "name": "_TZE200_npj9bug3 TS0601",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
   "lqi": 180,

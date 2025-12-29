@@ -9,7 +9,7 @@
   "name": "MLI ZBT-Remote-ALL-RGBW",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.mli.tint.TintRemote",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4635,
   "power_source": "Battery or Unknown",
   "lqi": 255,
