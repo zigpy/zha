@@ -421,6 +421,7 @@
         },
         "state": {
           "class_name": "HueLight",
+          "available": true,
           "on": false,
           "brightness": 1,
           "xy_color": [
@@ -442,8 +443,7 @@
             "xy"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
