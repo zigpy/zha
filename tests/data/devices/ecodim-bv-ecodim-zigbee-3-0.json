@@ -410,6 +410,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": true,
           "brightness": 190,
           "xy_color": null,
@@ -425,8 +426,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -491,6 +491,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": 210,
           "xy_color": null,
@@ -506,8 +507,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
