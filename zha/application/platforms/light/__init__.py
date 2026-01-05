@@ -24,8 +24,10 @@ from zha.application.platforms import (
     DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
     BaseEntity,
     BaseEntityInfo,
+    ClusterHandlerMatch,
     GroupEntity,
     PlatformEntity,
+    register_entity,
 )
 from zha.application.platforms.helpers import (
     find_state_attributes,
@@ -743,16 +745,23 @@ class BaseClusterHandlerLight(BaseLight):
         await super().on_remove()
 
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
-    aux_cluster_handlers={CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL},
-)
+@register_entity
 class Light(BaseClusterHandlerLight, PlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            optional_cluster_handlers=frozenset(
+                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+            ),
+        )
 
     def __init__(
         self,
@@ -1023,38 +1032,73 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
-    aux_cluster_handlers={CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL},
-    manufacturers={"Philips", "Signify Netherlands B.V."},
-)
+@register_entity
 class HueLight(Light):
     """Representation of a HUE light which does not report attributes."""
 
     _REFRESH_INTERVAL = (180, 300)
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if endpoint.device.manufacturer not in {"Philips", "Signify Netherlands B.V."}:
+            return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            optional_cluster_handlers=frozenset(
+                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+            ),
+            manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
+        )
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
-    aux_cluster_handlers={CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL},
-    manufacturers={"Jasco", "Jasco Products", "Quotra-Vision", "eWeLight", "eWeLink"},
-)
+
+@register_entity
 class ForceOnLight(Light):
     """Representation of a light which does not respect on/off for move_to_level_with_on_off commands."""
 
     _FORCE_ON = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if endpoint.device.manufacturer not in {
+            "Jasco",
+            "Jasco Products",
+            "Quotra-Vision",
+            "eWeLight",
+            "eWeLink",
+        }:
+            return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            optional_cluster_handlers=frozenset(
+                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+            ),
+            manufacturers=frozenset(
+                {"Jasco", "Jasco Products", "Quotra-Vision", "eWeLight", "eWeLink"}
+            ),
+        )
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
-    aux_cluster_handlers={CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL},
-    manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
-)
+
+@register_entity
 class MinTransitionLight(Light):
     """Representation of a light which does not react to any "move to" calls with 0 as a transition."""
 
     # Transitions are counted in 1/10th of a second increments, so this is the smallest
     _DEFAULT_MIN_TRANSITION_TIME = 0.1
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if endpoint.device.manufacturer not in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
+            return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            optional_cluster_handlers=frozenset(
+                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+            ),
+            manufacturers=frozenset(DEFAULT_MIN_TRANSITION_MANUFACTURERS),
+        )
 
 
 @GROUP_MATCH()
