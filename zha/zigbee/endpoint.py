@@ -96,6 +96,11 @@ class Endpoint:
         return self._zigpy_endpoint.endpoint_id
 
     @functools.cached_property
+    def cluster_handlers_by_name(self) -> dict[str, ClusterHandler]:
+        """Return cluster handlers indexed by name."""
+        return {ch.name: ch for ch in self._all_cluster_handlers.values()}
+
+    @functools.cached_property
     def unique_id(self) -> str:
         """Return the unique id for this endpoint."""
         return self._unique_id

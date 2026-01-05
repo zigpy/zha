@@ -13,7 +13,11 @@ from zigpy.zcl.clusters.general import OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import (
+    ClusterHandlerMatch,
+    PlatformEntity,
+    register_entity,
+)
 from zha.application.platforms.cover.const import (
     ATTR_CURRENT_POSITION,
     ATTR_CURRENT_TILT_POSITION,
@@ -28,7 +32,6 @@ from zha.application.platforms.cover.const import (
     CoverState,
     WCAttrs,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import WindowCoveringClusterHandler
@@ -48,8 +51,6 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
-
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
 # Timeout for device transition state following a position attribute update
 DEFAULT_MOVEMENT_TIMEOUT: float = 5
@@ -119,11 +120,20 @@ class BaseCover(PlatformEntity, ABC):
         """Stop the cover."""
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
+@register_entity
 class Cover(BaseCover):
     """Representation of a ZHA cover."""
 
     _attr_translation_key: str = "cover"
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_COVER in endpoint.cluster_handlers_by_name:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_COVER})
+            )
+        return None
 
     def __init__(
         self,
@@ -676,13 +686,7 @@ class Cover(BaseCover):
         return 100 - position
 
 
-@MULTI_MATCH(
-    cluster_handler_names={
-        CLUSTER_HANDLER_LEVEL,
-        CLUSTER_HANDLER_ON_OFF,
-        CLUSTER_HANDLER_SHADE,
-    }
-)
+@register_entity
 class Shade(BaseCover):
     """ZHA Shade."""
 
@@ -694,6 +698,24 @@ class Shade(BaseCover):
         | CoverEntityFeature.STOP
         | CoverEntityFeature.SET_POSITION
     )
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        handlers = endpoint.cluster_handlers_by_name
+        if (
+            CLUSTER_HANDLER_LEVEL in handlers
+            and CLUSTER_HANDLER_ON_OFF in handlers
+            and CLUSTER_HANDLER_SHADE in handlers
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({
+                    CLUSTER_HANDLER_LEVEL,
+                    CLUSTER_HANDLER_ON_OFF,
+                    CLUSTER_HANDLER_SHADE,
+                })
+            )
+        return None
 
     def __init__(
         self,
@@ -845,15 +867,27 @@ class Shade(BaseCover):
         return round(level * 100 / 255)
 
 
-@MULTI_MATCH(
-    cluster_handler_names={CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF},
-    manufacturers="Keen Home Inc",
-)
+@register_entity
 class KeenVent(Shade):
     """Keen vent cover."""
 
     _attr_device_class = CoverDeviceClass.DAMPER
     _attr_translation_key: str = "keen_vent"
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        handlers = endpoint.cluster_handlers_by_name
+        if (
+            CLUSTER_HANDLER_LEVEL in handlers
+            and CLUSTER_HANDLER_ON_OFF in handlers
+            and endpoint.device.manufacturer == "Keen Home Inc"
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
+                manufacturers=frozenset({"Keen Home Inc"}),
+            )
+        return None
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover."""

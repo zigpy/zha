@@ -25,8 +25,12 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
-from zha.application.registries import PLATFORM_ENTITIES
+from zha.application.platforms import (
+    BaseEntityInfo,
+    ClusterHandlerMatch,
+    PlatformEntity,
+    register_entity,
+)
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
 from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
 
@@ -35,7 +39,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SIREN)
 DEFAULT_DURATION = 5  # seconds
 
 ATTR_AVAILABLE_TONES: Final[str] = "available_tones"
@@ -62,13 +65,21 @@ class SirenEntityInfo(BaseEntityInfo):
     supported_features: SirenEntityFeature
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_WD)
+@register_entity
 class Siren(PlatformEntity):
     """Representation of a ZHA siren."""
 
     PLATFORM = Platform.SIREN
     _attr_fallback_name: str = "Siren"
-    _attr_primary_weight = 10
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_IAS_WD in endpoint.cluster_handlers_by_name:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD})
+            )
+        return None
 
     def __init__(
         self,

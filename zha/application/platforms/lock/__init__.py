@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
-import functools
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import (
+    ClusterHandlerMatch,
+    PlatformEntity,
+    register_entity,
+)
 from zha.application.platforms.lock.const import (
     STATE_LOCKED,
     STATE_UNLOCKED,
     VALUE_TO_STATE,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import DoorLockClusterHandler
 from zha.zigbee.cluster_handlers.const import (
@@ -28,16 +30,22 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.LOCK)
 
-
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_DOORLOCK)
+@register_entity
 class DoorLock(PlatformEntity):
     """Representation of a ZHA lock."""
 
     PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
-    _attr_primary_weight = 10
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_DOORLOCK in endpoint.cluster_handlers_by_name:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_DOORLOCK})
+            )
+        return None
 
     def __init__(
         self,

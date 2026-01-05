@@ -10,9 +10,12 @@ from typing import TYPE_CHECKING, Any, cast
 from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import (
+    ClusterHandlerMatch,
+    PlatformEntity,
+    register_entity,
+)
 from zha.application.platforms.sensor import Battery
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -26,10 +29,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(
-    PLATFORM_ENTITIES.strict_match, Platform.DEVICE_TRACKER
-)
-
 
 class SourceType(StrEnum):
     """Source type for device trackers."""
@@ -40,7 +39,7 @@ class SourceType(StrEnum):
     BLUETOOTH_LE = "bluetooth_le"
 
 
-@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
+@register_entity
 class DeviceScannerEntity(PlatformEntity):
     """Represent a tracked device."""
 
@@ -49,6 +48,15 @@ class DeviceScannerEntity(PlatformEntity):
     _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_POWER_CONFIGURATION in endpoint.cluster_handlers_by_name:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION})
+            )
+        return None
 
     def __init__(
         self,

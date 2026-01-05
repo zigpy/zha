@@ -11,7 +11,12 @@ from typing import TYPE_CHECKING, Any, cast
 from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    ClusterHandlerMatch,
+    PlatformEntity,
+    register_entity,
+)
 from zha.application.platforms.climate.const import (
     ATTR_HVAC_MODE,
     ATTR_OCCP_COOL_SETPT,
@@ -37,7 +42,6 @@ from zha.application.platforms.climate.const import (
     HVACMode,
     Preset,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import UnitOfTemperature
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
@@ -53,9 +57,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.CLIMATE)
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.CLIMATE)
-
 
 @dataclass(frozen=True, kw_only=True)
 class ThermostatEntityInfo(BaseEntityInfo):
@@ -69,11 +70,7 @@ class ThermostatEntityInfo(BaseEntityInfo):
     hvac_modes: list[HVACMode]
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    aux_cluster_handlers=CLUSTER_HANDLER_FAN,
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity
 class Thermostat(PlatformEntity):
     """Representation of a ZHA Thermostat device."""
 
@@ -95,7 +92,19 @@ class Thermostat(PlatformEntity):
         ATTR_UNOCCP_COOL_SETPT,
         ATTR_UNOCCP_HEAT_SETPT,
     }
-    _attr_primary_weight = 10
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name:
+            optional = frozenset()
+            if CLUSTER_HANDLER_FAN in endpoint.cluster_handlers_by_name:
+                optional = frozenset({CLUSTER_HANDLER_FAN})
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                optional_cluster_handlers=optional,
+            )
+        return None
 
     def __init__(
         self,
@@ -498,16 +507,26 @@ class Thermostat(PlatformEntity):
         await handler(enable)
 
 
-@MULTI_MATCH(
-    cluster_handler_names={CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"},
-    manufacturers="Sinope Technologies",
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity
 class SinopeTechnologiesThermostat(Thermostat):
     """Sinope Technologies Thermostat."""
 
     manufacturer = 0x119C
     __polling_interval: int
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and "sinope_manufacturer_specific" in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer == "Sinope Technologies"
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"}),
+                manufacturers=frozenset({"Sinope Technologies"}),
+            )
+        return None
 
     def __init__(
         self,
@@ -605,21 +624,32 @@ class SinopeTechnologiesThermostat(Thermostat):
         )
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    aux_cluster_handlers=CLUSTER_HANDLER_FAN,
-    manufacturers={"Zen Within", "LUX"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity
 class ZenWithinThermostat(Thermostat):
     """Zen Within Thermostat implementation."""
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer in {"Zen Within", "LUX"}
+        ):
+            optional = frozenset()
+            if CLUSTER_HANDLER_FAN in endpoint.cluster_handlers_by_name:
+                optional = frozenset({CLUSTER_HANDLER_FAN})
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                optional_cluster_handlers=optional,
+                manufacturers=frozenset({"Zen Within", "LUX"}),
+            )
+        return None
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+
+ZEHNDER_MANUFACTURERS = frozenset({"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"})
+
+
+@register_entity
 class ZehnderThermostat(Thermostat):
     """Zehnder thermostat to adapt AUTO mode behavior."""
 
@@ -634,6 +664,19 @@ class ZehnderThermostat(Thermostat):
     }
 
     hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer in ZEHNDER_MANUFACTURERS
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                manufacturers=ZEHNDER_MANUFACTURERS,
+            )
+        return None
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target operation mode."""
@@ -681,37 +724,63 @@ class ZehnderThermostat(Thermostat):
         )
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    aux_cluster_handlers=CLUSTER_HANDLER_FAN,
-    manufacturers="Centralite",
-    models={"3157100", "3157100-E"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity
 class CentralitePearl(ZenWithinThermostat):
     """Centralite Pearl Thermostat implementation."""
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer == "Centralite"
+            and endpoint.device.model in {"3157100", "3157100-E"}
+        ):
+            optional = frozenset()
+            if CLUSTER_HANDLER_FAN in endpoint.cluster_handlers_by_name:
+                optional = frozenset({CLUSTER_HANDLER_FAN})
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                optional_cluster_handlers=optional,
+                manufacturers=frozenset({"Centralite"}),
+                models=frozenset({"3157100", "3157100-E"}),
+            )
+        return None
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={
-        "_TZE200_ckud7u2l",
-        "_TZE200_ywdxldoj",
-        "_TZE200_cwnjrr72",
-        "_TZE200_2atgpdho",
-        "_TZE200_pvvbommb",
-        "_TZE200_4eeyebrt",
-        "_TZE200_cpmgn2cf",
-        "_TZE200_9sfg7gm0",
-        "_TZE200_8whxpsiw",
-        "_TYST11_ckud7u2l",
-        "_TYST11_ywdxldoj",
-        "_TYST11_cwnjrr72",
-        "_TYST11_2atgpdho",
-    },
-)
+
+MOES_MANUFACTURERS = frozenset({
+    "_TZE200_ckud7u2l",
+    "_TZE200_ywdxldoj",
+    "_TZE200_cwnjrr72",
+    "_TZE200_2atgpdho",
+    "_TZE200_pvvbommb",
+    "_TZE200_4eeyebrt",
+    "_TZE200_cpmgn2cf",
+    "_TZE200_9sfg7gm0",
+    "_TZE200_8whxpsiw",
+    "_TYST11_ckud7u2l",
+    "_TYST11_ywdxldoj",
+    "_TYST11_cwnjrr72",
+    "_TYST11_2atgpdho",
+})
+
+
+@register_entity
 class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer in MOES_MANUFACTURERS
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                manufacturers=MOES_MANUFACTURERS,
+            )
+        return None
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
@@ -786,14 +855,22 @@ class MoesThermostat(Thermostat):
             )
 
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={
-        "_TZE200_b6wax7g0",
-    },
-)
+@register_entity
 class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer == "_TZE200_b6wax7g0"
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                manufacturers=frozenset({"_TZE200_b6wax7g0"}),
+            )
+        return None
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
@@ -861,14 +938,24 @@ class BecaThermostat(Thermostat):
             )
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers="Stelpro",
-    models={"SORB"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity
 class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer == "Stelpro"
+            and endpoint.device.model in {"SORB"}
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                manufacturers=frozenset({"Stelpro"}),
+                models=frozenset({"SORB"}),
+            )
+        return None
 
     @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
@@ -876,19 +963,19 @@ class StelproFanHeater(Thermostat):
         return [HVACMode.HEAT]
 
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={
-        "_TZE200_7yoranx2",
-        "_TZE200_e9ba97vf",  # TV01-ZG
-        "_TZE200_hue3yfsn",  # TV02-ZG
-        "_TZE200_husqqvux",  # TSL-TRV-TV01ZG
-        "_TZE200_kds0pmmv",  # MOES TRV TV02
-        "_TZE200_kly8gjlz",  # TV05-ZG
-        "_TZE200_lnbfnyxd",
-        "_TZE200_mudxchsu",
-    },
-)
+ZONNSMART_MANUFACTURERS = frozenset({
+    "_TZE200_7yoranx2",
+    "_TZE200_e9ba97vf",  # TV01-ZG
+    "_TZE200_hue3yfsn",  # TV02-ZG
+    "_TZE200_husqqvux",  # TSL-TRV-TV01ZG
+    "_TZE200_kds0pmmv",  # MOES TRV TV02
+    "_TZE200_kly8gjlz",  # TV05-ZG
+    "_TZE200_lnbfnyxd",
+    "_TZE200_mudxchsu",
+})
+
+
+@register_entity
 class ZONNSMARTThermostat(Thermostat):
     """ZONNSMART Thermostat implementation.
 
@@ -898,6 +985,19 @@ class ZONNSMARTThermostat(Thermostat):
 
     PRESET_HOLIDAY = "holiday"
     PRESET_FROST = "frost protect"
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_THERMOSTAT in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer in ZONNSMART_MANUFACTURERS
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+                manufacturers=ZONNSMART_MANUFACTURERS,
+            )
+        return None
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""

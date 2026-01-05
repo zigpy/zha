@@ -26,7 +26,9 @@ from zigpy.zcl.clusters.general import Ota
 from zha.application import Platform, const as zha_const
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
+    ENTITY_REGISTRY,
     BaseEntity,
+    ClusterHandlerMatch,
     PlatformEntity,
     alarm_control_panel,
     binary_sensor,
@@ -633,3 +635,108 @@ def determine_group_entity_platforms(group: Group) -> list[Platform]:
         group.group_id,
     )
     return entity_platforms
+
+
+def _match_applies(
+    match: ClusterHandlerMatch,
+    endpoint: Endpoint,
+) -> set[str] | None:
+    """Check if a match applies to an endpoint.
+
+    Returns the set of handler names to claim if the match applies, None otherwise.
+    """
+    by_name = endpoint.cluster_handlers_by_name
+    device = endpoint.device
+
+    # Check required handlers exist
+    if not match.cluster_handlers.issubset(by_name.keys()):
+        return None
+
+    # Check device filters
+    if match.manufacturers is not None:
+        if device.manufacturer not in match.manufacturers:
+            return None
+
+    if match.models is not None:
+        if device.model not in match.models:
+            return None
+
+    if match.exposed_features is not None:
+        if not match.exposed_features & device.exposes_features:
+            return None
+
+    # Build handler set: required + available optional
+    handlers = set(match.cluster_handlers)
+    for opt in match.optional_cluster_handlers:
+        if opt in by_name:
+            handlers.add(opt)
+
+    return handlers
+
+
+def discover_entities_for_endpoint(
+    endpoint: Endpoint,
+) -> Iterator[PlatformEntity]:
+    """Discover entities for an endpoint using the new registry-based discovery."""
+    device = endpoint.device
+    by_name = endpoint.cluster_handlers_by_name
+
+    # Collect valid matches
+    matches: list[tuple[type[PlatformEntity], ClusterHandlerMatch, set[str]]] = []
+
+    for entity_class in ENTITY_REGISTRY:
+        match = entity_class.match_cluster_handlers(endpoint)
+        if match is None:
+            continue
+
+        handler_names = _match_applies(match, endpoint)
+        if handler_names is None:
+            continue
+
+        matches.append((entity_class, match, handler_names))
+
+    # Sort by weight descending (most specific first)
+    matches.sort(key=lambda x: x[1].weight, reverse=True)
+
+    # Track claimed handler names
+    claimed: set[str] = set()
+
+    for entity_class, match, handler_names in matches:
+        # Skip if any required handler was claimed by higher-priority entity
+        if handler_names & claimed:
+            _LOGGER.debug(
+                "Skipping %s: handlers %s already claimed",
+                entity_class.__name__,
+                handler_names & claimed,
+            )
+            continue
+
+        # Claim handlers
+        claimed.update(handler_names)
+
+        # Get actual cluster handler objects
+        cluster_handlers = [by_name[name] for name in handler_names]
+
+        # Claim on endpoint
+        endpoint.claim_cluster_handlers(cluster_handlers)
+
+        # Compute legacy unique ID
+        first_ch = cluster_handlers[0]
+        legacy_discovery_unique_id = (
+            f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
+        )
+
+        _LOGGER.debug(
+            "'%s' platform -> '%s' using %s (weight=%d)",
+            entity_class.PLATFORM,
+            entity_class.__name__,
+            [ch.name for ch in cluster_handlers],
+            match.weight,
+        )
+
+        yield entity_class(
+            cluster_handlers=cluster_handlers,
+            endpoint=endpoint,
+            device=device,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )

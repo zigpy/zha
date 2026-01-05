@@ -10,7 +10,12 @@ from typing import TYPE_CHECKING, Any, cast
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    ClusterHandlerMatch,
+    PlatformEntity,
+    register_entity,
+)
 from zha.application.platforms.alarm_control_panel.const import (
     IAS_ACE_STATE_MAP,
     SUPPORT_ALARM_ARM_AWAY,
@@ -20,7 +25,6 @@ from zha.application.platforms.alarm_control_panel.const import (
     AlarmState,
     CodeFormat,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_IAS_ACE,
     CLUSTER_HANDLER_STATE_CHANGED,
@@ -35,10 +39,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(
-    PLATFORM_ENTITIES.strict_match, Platform.ALARM_CONTROL_PANEL
-)
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -52,12 +52,21 @@ class AlarmControlPanelEntityInfo(BaseEntityInfo):
     translation_key: str
 
 
-@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_IAS_ACE)
+@register_entity
 class AlarmControlPanel(PlatformEntity):
     """Entity for ZHA alarm control devices."""
 
     _attr_translation_key: str = "alarm_control_panel"
     PLATFORM = Platform.ALARM_CONTROL_PANEL
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_IAS_ACE in endpoint.cluster_handlers_by_name:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE})
+            )
+        return None
 
     def __init__(
         self,

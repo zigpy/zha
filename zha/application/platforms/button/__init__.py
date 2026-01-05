@@ -14,23 +14,18 @@ from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
+    ClusterHandlerMatch,
     EntityCategory,
     PlatformEntity,
+    register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
-
-
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.BUTTON)
-CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    PLATFORM_ENTITIES.config_diagnostic_match, Platform.BUTTON
-)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -111,7 +106,7 @@ class Button(PlatformEntity):
         await command(*arguments, **kwargs)
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_IDENTIFY)
+@register_entity
 class IdentifyButton(Button):
     """Defines a ZHA identify button."""
 
@@ -120,6 +115,15 @@ class IdentifyButton(Button):
     _command_name = "identify"
     _kwargs = {}
     _args = [DEFAULT_DURATION]
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_IDENTIFY in endpoint.cluster_handlers_by_name:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_IDENTIFY})
+            )
+        return None
 
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
@@ -173,12 +177,7 @@ class WriteAttributeButton(PlatformEntity):
         )
 
 
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="tuya_manufacturer",
-    manufacturers={
-        "_TZE200_htnnfasr",
-    },
-)
+@register_entity
 class FrostLockResetButton(WriteAttributeButton):
     """Defines a ZHA frost lock reset button."""
 
@@ -189,10 +188,21 @@ class FrostLockResetButton(WriteAttributeButton):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "reset_frost_lock"
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            "tuya_manufacturer" in endpoint.cluster_handlers_by_name
+            and endpoint.device.manufacturer == "_TZE200_htnnfasr"
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({"tuya_manufacturer"}),
+                manufacturers=frozenset({"_TZE200_htnnfasr"}),
+            )
+        return None
 
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="opple_cluster", models={"lumi.motion.ac01"}
-)
+
+@register_entity
 class NoPresenceStatusResetButton(WriteAttributeButton):
     """Defines a ZHA no presence status reset button."""
 
@@ -203,8 +213,21 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "reset_no_presence_status"
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            "opple_cluster" in endpoint.cluster_handlers_by_name
+            and endpoint.device.model in {"lumi.motion.ac01"}
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({"opple_cluster"}),
+                models=frozenset({"lumi.motion.ac01"}),
+            )
+        return None
 
-@MULTI_MATCH(cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"})
+
+@register_entity
 class AqaraPetFeederFeedButton(WriteAttributeButton):
     """Defines a feed button for the aqara c1 pet feeder."""
 
@@ -213,10 +236,21 @@ class AqaraPetFeederFeedButton(WriteAttributeButton):
     _attribute_value = 1
     _attr_translation_key = "feed"
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            "opple_cluster" in endpoint.cluster_handlers_by_name
+            and endpoint.device.model in {"aqara.feeder.acn001"}
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({"opple_cluster"}),
+                models=frozenset({"aqara.feeder.acn001"}),
+            )
+        return None
 
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
-)
+
+@register_entity
 class AqaraSelfTestButton(WriteAttributeButton):
     """Defines a ZHA self-test button for Aqara smoke sensors."""
 
@@ -225,3 +259,16 @@ class AqaraSelfTestButton(WriteAttributeButton):
     _attribute_value = 1
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "self_test"
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            "opple_cluster" in endpoint.cluster_handlers_by_name
+            and endpoint.device.model in {"lumi.sensor_smoke.acn03"}
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({"opple_cluster"}),
+                models=frozenset({"lumi.sensor_smoke.acn03"}),
+            )
+        return None

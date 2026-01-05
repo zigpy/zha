@@ -28,6 +28,7 @@ from zigpy.zcl.clusters.smartenergy import (
 )
 
 from zha.application import Platform
+from zha.application.discovery import ClusterHandlerMatch, register_entity
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -127,14 +128,9 @@ BATTERY_SIZES = {
 
 _LOGGER = logging.getLogger(__name__)
 
-CLUSTER_HANDLER_ST_HUMIDITY_CLUSTER = (
-    f"cluster_handler_0x{SMARTTHINGS_HUMIDITY_CLUSTER:04x}"
-)
 STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.SENSOR)
 MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SENSOR)
-CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    PLATFORM_ENTITIES.config_diagnostic_match, Platform.SENSOR
-)
+CONFIG_DIAGNOSTIC_MATCH = functools.partial(PLATFORM_ENTITIES.config_diagnostic_match, Platform.SENSOR)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -569,25 +565,39 @@ class EnumSensor(Sensor):
         return self._enum(value).name
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT,
-    manufacturers="Digi",
-    stop_on_match_group=CLUSTER_HANDLER_ANALOG_INPUT,
-)
+@register_entity
 class DigiAnalogInput(Sensor):
     """Sensor that displays analog input values."""
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "analog_input"
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if endpoint.device.manufacturer != "Digi":
+            return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
+            manufacturers=frozenset({"Digi"}),
+        )
 
-@CONFIG_DIAGNOSTIC_MATCH(cluster_handler_names=CLUSTER_HANDLER_ANALOG_INPUT)
+
+@register_entity
 class AnalogInputSensor(Sensor):
     """Sensor that displays analog input values."""
 
     _attribute_name = "present_value"
     _unique_id_suffix = "analog_input"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
+        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -631,7 +641,7 @@ class AnalogInputSensor(Sensor):
         return super()._is_supported()
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_POWER_CONFIGURATION)
+@register_entity
 class Battery(Sensor):
     """Battery sensor of power configuration cluster."""
 
@@ -646,6 +656,13 @@ class Battery(Sensor):
         "battery_quantity",
         "battery_voltage",
     }
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
+        )
 
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
@@ -750,28 +767,43 @@ class ElectricalMeasurementActivePower(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    models={"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"},
-)
+@register_entity
 class ReportingElectricalMeasurement(ElectricalMeasurementActivePower):
     """Unpolled active power measurement."""
 
-    pass
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if endpoint.device.model not in {
+            "VZM31-SN",
+            "SP 234",
+            "outletv4",
+            "INSPELNING Smart plug",
+        }:
+            return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+            models=frozenset(
+                {"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"}
+            ),
+        )
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-    stop_on_match_group=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT,
-)
+@register_entity
 class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
     """Polled active power measurement that polls all relevant EM attributes."""
 
     _use_custom_polling: bool = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementActivePowerPhB(ElectricalMeasurementActivePower):
     """Active power phase B measurement."""
 
@@ -781,8 +813,15 @@ class ElectricalMeasurementActivePowerPhB(ElectricalMeasurementActivePower):
     _attr_max_attribute_name = "active_power_max_ph_b"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementActivePowerPhC(ElectricalMeasurementActivePower):
     """Active power phase C measurement."""
 
@@ -792,8 +831,15 @@ class ElectricalMeasurementActivePowerPhC(ElectricalMeasurementActivePower):
     _attr_max_attribute_name = "active_power_max_ph_c"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementTotalActivePower(ElectricalMeasurementActivePower):
     """Total active power measurement."""
 
@@ -802,8 +848,15 @@ class ElectricalMeasurementTotalActivePower(ElectricalMeasurementActivePower):
     _attr_translation_key: str = "total_active_power"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     """Apparent power measurement."""
 
@@ -814,8 +867,15 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     """RMS current measurement."""
 
@@ -827,8 +887,15 @@ class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     """RMS current phase B measurement."""
 
@@ -838,8 +905,15 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     _attr_max_attribute_name: str = "rms_current_max_ph_b"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     """RMS current phase C measurement."""
 
@@ -849,8 +923,15 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     _attr_max_attribute_name: str = "rms_current_max_ph_c"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     """RMS Voltage measurement."""
 
@@ -862,8 +943,15 @@ class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
     """RMS voltage phase B measurement."""
 
@@ -873,8 +961,15 @@ class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
     _attr_max_attribute_name = "rms_voltage_max_ph_b"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
     """RMS voltage phase C measurement."""
 
@@ -884,8 +979,15 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
     _attr_max_attribute_name = "rms_voltage_max_ph_c"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     """Frequency measurement."""
 
@@ -898,8 +1000,15 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     """Power Factor measurement."""
 
@@ -908,8 +1017,15 @@ class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
     """Power factor phase B measurement."""
 
@@ -918,8 +1034,15 @@ class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
     _attr_translation_key: str = "power_factor_ph_b"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT)
+
+@register_entity
 class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
     """Power factor phase C measurement."""
 
@@ -928,15 +1051,15 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
     _attr_translation_key: str = "power_factor_ph_c"
     _skip_creation_if_no_attr_cache = True
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        )
 
-@MULTI_MATCH(
-    generic_ids=CLUSTER_HANDLER_ST_HUMIDITY_CLUSTER,
-    stop_on_match_group=CLUSTER_HANDLER_HUMIDITY,
-)
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_HUMIDITY,
-    stop_on_match_group=CLUSTER_HANDLER_HUMIDITY,
-)
+
+@register_entity
 class Humidity(Sensor):
     """Humidity sensor."""
 
@@ -947,8 +1070,22 @@ class Humidity(Sensor):
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        # Match either standard handler or SmartThings generic_id
+        for handler_name in (
+            CLUSTER_HANDLER_HUMIDITY,
+            f"cluster_handler_0x{SMARTTHINGS_HUMIDITY_CLUSTER:04x}",
+        ):
+            if handler_name in endpoint.cluster_handlers_by_name:
+                return ClusterHandlerMatch(
+                    cluster_handlers=frozenset({handler_name}),
+                )
+        return None
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_SOIL_MOISTURE)
+
+@register_entity
 class SoilMoisture(Sensor):
     """Soil Moisture sensor."""
 
@@ -960,8 +1097,15 @@ class SoilMoisture(Sensor):
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_SOIL_MOISTURE}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_LEAF_WETNESS)
+
+@register_entity
 class LeafWetness(Sensor):
     """Leaf Wetness sensor."""
 
@@ -973,8 +1117,15 @@ class LeafWetness(Sensor):
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
 
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_LEAF_WETNESS}),
+        )
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_ILLUMINANCE)
+
+@register_entity
 class Illuminance(Sensor):
     """Illuminance Sensor."""
 
@@ -983,6 +1134,13 @@ class Illuminance(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
     _attr_primary_weight = 1
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ILLUMINANCE}),
+        )
 
     def formatter(self, value: int) -> int | None:
         """Convert illumination data."""
@@ -1004,10 +1162,7 @@ class SmartEnergyMeteringEntityDescription:
     device_class: SensorDeviceClass | None = None
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
-    stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
-)
+@register_entity
 class SmartEnergyMetering(PollableSensor):
     """Metering sensor."""
 
@@ -1021,6 +1176,13 @@ class SmartEnergyMetering(PollableSensor):
         "zcl_unit_of_measurement",
     }
     _attr_primary_weight = 1
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+        )
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(
@@ -1160,10 +1322,7 @@ class SmartEnergySummationEntityDescription(SmartEnergyMeteringEntityDescription
     state_class: SensorStateClass | None = SensorStateClass.TOTAL_INCREASING
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_SMARTENERGY_METERING,
-    stop_on_match_group=CLUSTER_HANDLER_SMARTENERGY_METERING,
-)
+@register_entity
 class SmartEnergySummation(SmartEnergyMetering):
     """Smart Energy Metering summation sensor."""
 
@@ -1172,6 +1331,13 @@ class SmartEnergySummation(SmartEnergyMetering):
     _unique_id_suffix = "summation_delivered"
     _attr_translation_key: str = "summation_delivered"
     _attr_suggested_display_precision: int = 3
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
+        )
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergySummationEntityDescription(

@@ -14,8 +14,10 @@ from zha.application import Platform
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
+    ClusterHandlerMatch,
     GroupEntity,
     PlatformEntity,
+    register_entity,
 )
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
@@ -58,9 +60,7 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.FAN)
 GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -246,9 +246,18 @@ class BaseFan(BaseEntity):
         return percentage_to_ordered_list_item(LEGACY_SPEED_LIST, percentage)
 
 
-@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_FAN)
+@register_entity
 class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if CLUSTER_HANDLER_FAN in endpoint.cluster_handlers_by_name:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_FAN})
+            )
+        return None
 
     def __init__(
         self,
@@ -362,10 +371,7 @@ class FanGroup(BaseFan, GroupEntity):
         self.maybe_emit_state_changed_event()
 
 
-@MULTI_MATCH(
-    cluster_handler_names="ikea_airpurifier",
-    models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
-)
+@register_entity
 class IkeaFan(BaseFan, PlatformEntity):
     """Representation of an Ikea fan."""
 
@@ -375,6 +381,19 @@ class IkeaFan(BaseFan, PlatformEntity):
         | FanEntityFeature.TURN_OFF
         | FanEntityFeature.TURN_ON
     )
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            "ikea_airpurifier" in endpoint.cluster_handlers_by_name
+            and endpoint.device.model in {"STARKVIND Air purifier", "STARKVIND Air purifier table"}
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({"ikea_airpurifier"}),
+                models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
+            )
+        return None
 
     def __init__(
         self,
@@ -458,10 +477,7 @@ class IkeaFan(BaseFan, PlatformEntity):
         await self._async_set_fan_mode(fan_mode)
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_FAN,
-    models={"HBUniversalCFRemote", "HDC52EastwindFan"},
-)
+@register_entity
 class KofFan(Fan):
     """Representation of a fan made by King Of Fans."""
 
@@ -471,6 +487,19 @@ class KofFan(Fan):
         | FanEntityFeature.TURN_OFF
         | FanEntityFeature.TURN_ON
     )
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            CLUSTER_HANDLER_FAN in endpoint.cluster_handlers_by_name
+            and endpoint.device.model in {"HBUniversalCFRemote", "HDC52EastwindFan"}
+        ):
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+                models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),
+            )
+        return None
 
     @functools.cached_property
     def speed_range(self) -> tuple[int, int]:
