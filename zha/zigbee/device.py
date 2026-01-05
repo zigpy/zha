@@ -951,11 +951,9 @@ class Device(LogMixin, EventBase):
         new_entities: Iterator[BaseEntity]
 
         if self.is_active_coordinator:
-            new_entities = discovery.DEVICE_PROBE.discover_coordinator_device_entities(
-                self
-            )
+            new_entities = discovery.discover_coordinator_device_entities(self)
         else:
-            new_entities = discovery.DEVICE_PROBE.discover_device_entities(self)
+            new_entities = discovery.discover_device_entities(self)
 
         # Discover all applicable entities
         for entity in new_entities:

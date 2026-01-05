@@ -342,7 +342,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             # we can do this here because the entities are in the
             # entity registry tied to the devices
 
-            for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+            for entity in discovery.discover_group_entities(zha_group):
                 entity.on_add()
 
     @property
@@ -474,7 +474,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
 
-        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+        for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
 
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
@@ -488,7 +488,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
 
-        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+        for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
 
         zha_group.info("group_member_added - endpoint: %s", endpoint)

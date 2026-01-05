@@ -53,7 +53,12 @@ from tests.common import (
     zigpy_device_from_device_data,
 )
 from zha.application import Platform
-from zha.application.discovery import ENDPOINT_PROBE, EndpointProbe
+from zha.application.discovery import (
+    endpoint_discover_by_cluster_id,
+    endpoint_discover_by_device_type,
+    endpoint_discover_entities,
+    probe_single_cluster,
+)
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
@@ -69,14 +74,14 @@ def _get_identify_cluster(zigpy_device):
             return endpoint.identify
 
 
-@mock.patch("zha.application.discovery.EndpointProbe.discover_by_device_type")
-@mock.patch("zha.application.discovery.EndpointProbe.discover_by_cluster_id")
+@mock.patch("zha.application.discovery.endpoint_discover_by_device_type")
+@mock.patch("zha.application.discovery.endpoint_discover_by_cluster_id")
 def test_discover_entities(m1, m2) -> None:
     """Test discover endpoint class method."""
     endpoint = mock.MagicMock()
     endpoint.device.is_coordinator = False
 
-    for _entity in ENDPOINT_PROBE.discover_entities(endpoint, device_overrides={}):
+    for _entity in endpoint_discover_entities(endpoint, device_overrides={}):
         pass
 
     assert m1.call_count == 1
@@ -110,9 +115,7 @@ def test_discover_by_device_type(device_type, platform, hit) -> None:
         "zha.application.registries.PLATFORM_ENTITIES.get_entity",
         get_entity_mock,
     ):
-        entities = list(
-            ENDPOINT_PROBE.discover_by_device_type(endpoint, device_overrides={})
-        )
+        entities = list(endpoint_discover_by_device_type(endpoint, device_overrides={}))
 
     if hit:
         assert len(entities) == 1
@@ -149,7 +152,7 @@ def test_discover_by_device_type_override() -> None:
         ),
     ):
         entities = list(
-            ENDPOINT_PROBE.discover_by_device_type(
+            endpoint_discover_by_device_type(
                 endpoint,
                 device_overrides={
                     "00:11:22:33:44:55:66:77-1": DeviceOverridesConfiguration(
@@ -188,7 +191,7 @@ def test_discover_probe_single_cluster() -> None:
         "zha.application.registries.PLATFORM_ENTITIES.get_entity",
         get_entity_mock,
     ):
-        for _entity in ENDPOINT_PROBE.probe_single_cluster(
+        for _entity in probe_single_cluster(
             Platform.SWITCH, cluster_handler_mock, endpoint
         ):
             pass
@@ -251,11 +254,11 @@ def test_single_input_cluster_device_class_by_cluster_class() -> None:
             clear=True,
         ),
         mock.patch(
-            "zha.application.discovery.EndpointProbe.probe_single_cluster",
+            "zha.application.discovery.probe_single_cluster",
             new=mock.MagicMock(),
         ) as probe_mock,
     ):
-        for _entity in EndpointProbe().discover_by_cluster_id(endpoint):
+        for _entity in endpoint_discover_by_cluster_id(endpoint):
             pass
 
         assert probe_mock.call_count == len(endpoint.unclaimed_cluster_handlers())
