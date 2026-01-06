@@ -86,8 +86,10 @@ class AlarmControlPanel(PlatformEntity):
             cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
             legacy_discovery_unique_id=(
                 f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type
-                == zha.DeviceType.IAS_ANCILLARY_CONTROL
+                if (
+                    endpoint.zigpy_endpoint.device_type
+                    == zha.DeviceType.IAS_ANCILLARY_CONTROL
+                )
                 else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
             ),
         )

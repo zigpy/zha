@@ -183,9 +183,10 @@ class Occupancy(BinarySensor):
 
 
 @register_entity
-class HueOccupancy(Occupancy):
+class HueOccupancy(BinarySensor):
     """ZHA Hue occupancy."""
 
+    _attribute_name = "occupancy"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
     _attr_primary_weight = 3
 
@@ -261,19 +262,23 @@ class BinaryInput(BinarySensor):
 
 
 @register_entity
-class IkeaMotion(Opening):
+class IkeaMotion(BinarySensor):
     """ZHA OnOff BinarySensor with motion device class for IKEA devices."""
 
+    _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
+    _attr_primary_weight = 1
 
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "IKEA of Sweden":
+        if (
+            endpoint.device.manufacturer != "IKEA of Sweden"
+            or not endpoint.device.model
+            or "motion" not in endpoint.device.model
+        ):
             return None
-        model = endpoint.device.model
-        if not isinstance(model, str) or model.find("motion") == -1:
-            return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"IKEA of Sweden"}),
@@ -281,10 +286,12 @@ class IkeaMotion(Opening):
 
 
 @register_entity
-class PhilipsMotion(Opening):
+class PhilipsMotion(BinarySensor):
     """ZHA OnOff BinarySensor with motion device class for Philips devices."""
 
+    _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
+    _attr_primary_weight = 1
 
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
