@@ -9,6 +9,7 @@ import logging
 from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
+from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import SwitchMetadata
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
 from zigpy.zcl.clusters.general import BinaryOutput, OnOff
@@ -127,6 +128,30 @@ class Switch(PlatformEntity, BaseSwitch):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for switch entity."""
+
+        # Do not create switch entities for lights
+        if (
+            endpoint.zigpy_endpoint.profile_id,
+            endpoint.zigpy_endpoint.device_type,
+        ) in {
+            # ZHA
+            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
+            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
+            (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
+            # ZLL
+            (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
+            (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
+        }:
+            return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
         )
@@ -502,7 +527,9 @@ class ChildLock(ConfigurableAttributeSwitch):
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
-            models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
+            models=frozenset(
+                {"STARKVIND Air purifier", "STARKVIND Air purifier table"}
+            ),
         )
 
 
@@ -518,7 +545,9 @@ class DisableLed(ConfigurableAttributeSwitch):
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
-            models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
+            models=frozenset(
+                {"STARKVIND Air purifier", "STARKVIND Air purifier table"}
+            ),
         )
 
 

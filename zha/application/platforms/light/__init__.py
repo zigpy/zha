@@ -15,6 +15,7 @@ import itertools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
+from zigpy.profiles import zha, zll
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
@@ -753,16 +754,6 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            optional_cluster_handlers=frozenset(
-                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-            ),
-        )
-
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -790,6 +781,38 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self._refresh_task: asyncio.Task | None = None
 
         self.recompute_capabilities()
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            endpoint.zigpy_endpoint.profile_id,
+            endpoint.zigpy_endpoint.device_type,
+        ) not in {
+            # ZHA
+            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
+            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
+            (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
+            # ZLL
+            (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
+            (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
+            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
+        }:
+            return None
+
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            optional_cluster_handlers=frozenset(
+                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+            ),
+        )
 
     @property
     def _gateway(self) -> Gateway:
@@ -1069,6 +1092,7 @@ class ForceOnLight(Light):
             "eWeLink",
         }:
             return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
@@ -1092,6 +1116,7 @@ class MinTransitionLight(Light):
         """Match cluster handlers for this entity."""
         if endpoint.device.manufacturer not in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
             return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(

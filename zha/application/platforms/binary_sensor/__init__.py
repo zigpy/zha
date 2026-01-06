@@ -25,7 +25,6 @@ from zha.application.platforms.binary_sensor.const import (
     BinarySensorDeviceClass,
 )
 from zha.application.platforms.helpers import validate_device_class
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ACCELEROMETER,
@@ -43,14 +42,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-
-STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.BINARY_SENSOR)
-MULTI_MATCH = functools.partial(
-    PLATFORM_ENTITIES.multipass_match, Platform.BINARY_SENSOR
-)
-CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    PLATFORM_ENTITIES.config_diagnostic_match, Platform.BINARY_SENSOR
-)
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -170,7 +161,9 @@ class Accelerometer(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_ACCELEROMETER}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ACCELEROMETER})
+        )
 
 
 @register_entity
@@ -184,7 +177,9 @@ class Occupancy(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY})
+        )
 
 
 @register_entity
@@ -197,7 +192,9 @@ class HueOccupancy(Occupancy):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_HUE_OCCUPANCY}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_HUE_OCCUPANCY})
+        )
 
 
 @register_entity
@@ -211,7 +208,9 @@ class Opening(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}))
+        return ClusterHandlerMatch(
+            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF})
+        )
 
 
 @register_entity
@@ -223,7 +222,9 @@ class BinaryInputWithDescription(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
+        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -247,7 +248,9 @@ class BinaryInput(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
+        )
 
     def _is_supported(self) -> bool:
         # Prefer to use the "WithDescription" variant above
@@ -563,8 +566,6 @@ class DanfossMountingModeActive(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if DANFOSS_ALLY_THERMOSTAT not in endpoint.device.quirk_ids:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -582,8 +583,6 @@ class DanfossHeatRequired(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if DANFOSS_ALLY_THERMOSTAT not in endpoint.device.quirk_ids:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -603,8 +602,6 @@ class DanfossPreheatStatus(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if DANFOSS_ALLY_THERMOSTAT not in endpoint.device.quirk_ids:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),

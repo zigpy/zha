@@ -30,6 +30,11 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
+# TODO: this is a fake device type that is used by a single quirk to match against this
+# platform. This needs to be reworked.
+SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE = 0x8000
+
+
 class SourceType(StrEnum):
     """Source type for device trackers."""
 
@@ -49,15 +54,6 @@ class DeviceScannerEntity(PlatformEntity):
     _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_POWER_CONFIGURATION in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION})
-            )
-        return None
-
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -75,6 +71,19 @@ class DeviceScannerEntity(PlatformEntity):
         self._keepalive_interval: int = 60
         self._should_poll: bool = True
         self._battery_level: float | None = None
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if (
+            endpoint.zigpy_endpoint.device_type
+            != SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
+        ):
+            return None
+
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION})
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""

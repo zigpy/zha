@@ -41,30 +41,15 @@ ENTITY_REGISTRY: list[type[PlatformEntity]] = []
 class ClusterHandlerMatch:
     """Declares cluster handler requirements for an entity class."""
 
-    cluster_handlers: frozenset[str]
+    cluster_handlers: frozenset[str] = frozenset()
+    client_cluster_handlers: frozenset[str] = frozenset()
     optional_cluster_handlers: frozenset[str] = frozenset()
+
     manufacturers: frozenset[str] | None = None
     models: frozenset[str] | None = None
     exposed_features: frozenset[str] | None = None
 
-    @property
-    def weight(self) -> int:
-        """Compute priority weight based on match specificity."""
-        weight = 0
-
-        if self.exposed_features:
-            weight += 501 - len(self.exposed_features)
-
-        if self.models:
-            weight += 401 - len(self.models)
-
-        if self.manufacturers:
-            weight += 301 - len(self.manufacturers)
-
-        weight += 10 * len(self.cluster_handlers)
-        weight += len(self.optional_cluster_handlers)
-
-        return weight
+    weight_adjustment: int = 0
 
 
 def register_entity(cls: type[PlatformEntity]) -> type[PlatformEntity]:

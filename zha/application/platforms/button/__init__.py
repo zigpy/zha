@@ -119,11 +119,9 @@ class IdentifyButton(Button):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_IDENTIFY in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_IDENTIFY})
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_IDENTIFY})
+        )
 
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
@@ -191,15 +189,10 @@ class FrostLockResetButton(WriteAttributeButton):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            "tuya_manufacturer" in endpoint.cluster_handlers_by_name
-            and endpoint.device.manufacturer == "_TZE200_htnnfasr"
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({"tuya_manufacturer"}),
-                manufacturers=frozenset({"_TZE200_htnnfasr"}),
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({"tuya_manufacturer"}),
+            manufacturers=frozenset({"_TZE200_htnnfasr"}),
+        )
 
 
 @register_entity
@@ -216,15 +209,10 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            "opple_cluster" in endpoint.cluster_handlers_by_name
-            and endpoint.device.model in {"lumi.motion.ac01"}
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({"opple_cluster"}),
-                models=frozenset({"lumi.motion.ac01"}),
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({"opple_cluster"}),
+            models=frozenset({"lumi.motion.ac01"}),
+        )
 
 
 @register_entity
@@ -239,15 +227,10 @@ class AqaraPetFeederFeedButton(WriteAttributeButton):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            "opple_cluster" in endpoint.cluster_handlers_by_name
-            and endpoint.device.model in {"aqara.feeder.acn001"}
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({"opple_cluster"}),
-                models=frozenset({"aqara.feeder.acn001"}),
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({"opple_cluster"}),
+            models=frozenset({"aqara.feeder.acn001"}),
+        )
 
 
 @register_entity
@@ -263,12 +246,7 @@ class AqaraSelfTestButton(WriteAttributeButton):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            "opple_cluster" in endpoint.cluster_handlers_by_name
-            and endpoint.device.model in {"lumi.sensor_smoke.acn03"}
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({"opple_cluster"}),
-                models=frozenset({"lumi.sensor_smoke.acn03"}),
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({"opple_cluster"}),
+            models=frozenset({"lumi.sensor_smoke.acn03"}),
+        )

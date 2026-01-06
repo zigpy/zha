@@ -21,7 +21,6 @@ from zigpy.quirks.v2 import (
 )
 from zigpy.state import State
 from zigpy.zcl import ClusterType
-from zigpy.zcl.clusters.general import Ota
 
 from zha.application import Platform, const as zha_const
 from zha.application.helpers import DeviceOverridesConfiguration
@@ -46,13 +45,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
 )
-from zha.application.registries import (
-    DEVICE_CLASS,
-    PLATFORM_ENTITIES,
-    REMOTE_DEVICE_TYPES,
-    SINGLE_INPUT_CLUSTER_DEVICE_CLASS,
-    SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS,
-)
+from zha.application.registries import DEVICE_CLASS, PLATFORM_ENTITIES
 
 # importing cluster handlers updates registries
 from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-import
@@ -69,10 +62,6 @@ from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-i
     protocol,
     security,
     smartenergy,
-)
-from zha.zigbee.cluster_handlers.registries import (
-    CLUSTER_HANDLER_ONLY_CLUSTERS,
-    CLUSTER_HANDLER_REGISTRY,
 )
 from zha.zigbee.group import Group
 
@@ -236,14 +225,7 @@ def endpoint_discover_entities(
         endpoint.id,
     )
 
-    yield from endpoint_discover_by_device_type(endpoint, device_overrides)
-    yield from endpoint_discover_multi_entities(
-        endpoint, config_diagnostic_entities=False
-    )
-    yield from endpoint_discover_by_cluster_id(endpoint)
-    yield from endpoint_discover_multi_entities(
-        endpoint, config_diagnostic_entities=True
-    )
+    yield from discover_entities_for_endpoint(endpoint)
 
 
 def endpoint_discover_by_device_type(
@@ -286,165 +268,6 @@ def endpoint_discover_by_device_type(
             cluster_handlers=claimed,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
         )
-
-
-def probe_single_cluster(
-    platform: Platform | None,
-    cluster_handler: ClusterHandler,
-    endpoint: Endpoint,
-) -> Iterator[PlatformEntity]:
-    """Probe specified cluster for specific platform."""
-    if platform is None or platform not in PLATFORMS:
-        return
-
-    entity_class, claimed = PLATFORM_ENTITIES.get_entity(
-        platform,
-        endpoint.device.manufacturer,
-        endpoint.device.model,
-        [cluster_handler],
-        endpoint.device.exposes_features,
-    )
-    if entity_class is None:
-        return
-
-    endpoint.claim_cluster_handlers(claimed)
-    device = endpoint.device
-
-    yield entity_class(
-        endpoint=endpoint,
-        device=endpoint.device,
-        cluster_handlers=claimed,
-        legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}-{cluster_handler.cluster.cluster_id}",
-    )
-
-
-def endpoint_discover_by_cluster_id(endpoint: Endpoint) -> Iterator[PlatformEntity]:
-    """Process an endpoint on a zigpy device."""
-
-    single_input_clusters = {
-        cluster_class: match
-        for cluster_class, match in SINGLE_INPUT_CLUSTER_DEVICE_CLASS.items()
-        if not isinstance(cluster_class, int)
-    }
-
-    remaining_cluster_handlers = endpoint.unclaimed_cluster_handlers()
-    for cluster_handler in remaining_cluster_handlers:
-        if cluster_handler.cluster.cluster_id in CLUSTER_HANDLER_ONLY_CLUSTERS:
-            endpoint.claim_cluster_handlers([cluster_handler])
-            continue
-
-        platform = SINGLE_INPUT_CLUSTER_DEVICE_CLASS.get(
-            cluster_handler.cluster.cluster_id
-        )
-        if platform is None:
-            for cluster_class, match in single_input_clusters.items():
-                if isinstance(cluster_handler.cluster, cluster_class):
-                    platform = match
-                    break
-
-        yield from probe_single_cluster(platform, cluster_handler, endpoint)
-
-    # until we can get rid of registries
-    yield from handle_on_off_output_cluster_exception(endpoint)
-
-
-def handle_on_off_output_cluster_exception(
-    endpoint: Endpoint,
-) -> Iterator[PlatformEntity]:
-    """Process output clusters of the endpoint."""
-
-    profile_id = endpoint.zigpy_endpoint.profile_id
-    device_type = endpoint.zigpy_endpoint.device_type
-    if device_type in REMOTE_DEVICE_TYPES.get(profile_id, []):
-        return
-
-    for cluster_id, cluster in endpoint.zigpy_endpoint.out_clusters.items():
-        platform = SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS.get(cluster.cluster_id)
-        if platform is None:
-            continue
-
-        cluster_handler_classes = CLUSTER_HANDLER_REGISTRY.get(
-            cluster_id, {None: ClusterHandler}
-        )
-
-        # get first exposed feature from device
-        # that matches a registered cluster handler
-        cluster_exposed_feature: str | None = None
-        for exposed_features in endpoint.device.exposes_features:
-            if exposed_features in cluster_handler_classes:
-                cluster_exposed_feature = exposed_features
-                break
-
-        cluster_handler_class = cluster_handler_classes.get(
-            cluster_exposed_feature, ClusterHandler
-        )
-
-        cluster_handler = cluster_handler_class(cluster, endpoint)
-        cluster_handler.on_add()
-
-        yield from probe_single_cluster(platform, cluster_handler, endpoint)
-
-
-def endpoint_discover_multi_entities(
-    endpoint: Endpoint,
-    config_diagnostic_entities: bool = False,
-) -> Iterator[PlatformEntity]:
-    """Process an endpoint on and discover multiple entities."""
-
-    device = endpoint.device
-    ep_profile_id = endpoint.zigpy_endpoint.profile_id
-    ep_device_type = endpoint.zigpy_endpoint.device_type
-    cmpt_by_dev_type = DEVICE_CLASS[ep_profile_id].get(ep_device_type)
-
-    if config_diagnostic_entities:
-        cluster_handlers = list(endpoint.all_cluster_handlers.values())
-        ota_handler_id = f"{endpoint.id}:0x{Ota.cluster_id:04x}_client"
-        if ota_handler_id in endpoint.client_cluster_handlers:
-            # TODO: why is this override here?
-            cluster_handlers.append(endpoint.client_cluster_handlers[ota_handler_id])
-        matches, claimed = PLATFORM_ENTITIES.get_config_diagnostic_entity(
-            device.manufacturer,
-            device.model,
-            cluster_handlers,
-            device.exposes_features,
-        )
-    else:
-        matches, claimed = PLATFORM_ENTITIES.get_multi_entity(
-            device.manufacturer,
-            device.model,
-            endpoint.unclaimed_cluster_handlers(),
-            device.exposes_features,
-        )
-
-    endpoint.claim_cluster_handlers(claimed)
-    for platform, ent_n_handler_list in matches.items():
-        for entity_and_handler in ent_n_handler_list:
-            _LOGGER.debug(
-                "'%s' platform -> '%s' using %s",
-                platform,
-                entity_and_handler.entity_class.__name__,
-                [ch.name for ch in entity_and_handler.claimed_cluster_handlers],
-            )
-
-            if platform == cmpt_by_dev_type:
-                # for well known device types,
-                # like thermostats we'll take only 1st class
-                yield entity_and_handler.entity_class(
-                    endpoint=endpoint,
-                    device=device,
-                    cluster_handlers=entity_and_handler.claimed_cluster_handlers,
-                    legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
-                )
-                break
-
-            first_ch = entity_and_handler.claimed_cluster_handlers[0]
-
-            yield entity_and_handler.entity_class(
-                endpoint=endpoint,
-                device=device,
-                cluster_handlers=entity_and_handler.claimed_cluster_handlers,
-                legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}",
-            )
 
 
 def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
@@ -640,38 +463,54 @@ def determine_group_entity_platforms(group: Group) -> list[Platform]:
 def _match_applies(
     match: ClusterHandlerMatch,
     endpoint: Endpoint,
-) -> set[str] | None:
-    """Check if a match applies to an endpoint.
-
-    Returns the set of handler names to claim if the match applies, None otherwise.
-    """
-    by_name = endpoint.cluster_handlers_by_name
+) -> tuple[int, set[str], set[str]] | tuple[None, None, None]:
+    """Check if a match applies to an endpoint and return the match weight."""
     device = endpoint.device
+    weight = 0
 
     # Check required handlers exist
-    if not match.cluster_handlers.issubset(by_name.keys()):
-        return None
+    if not match.cluster_handlers.issubset(endpoint.cluster_handlers_by_name.keys()):
+        return None, None, None
+
+    if not match.client_cluster_handlers.issubset(
+        endpoint.client_cluster_handlers_by_name.keys()
+    ):
+        return None, None, None
+
+    weight += 10 * len(match.cluster_handlers)
+    weight += 10 * len(match.client_cluster_handlers)
 
     # Check device filters
     if match.manufacturers is not None:
         if device.manufacturer not in match.manufacturers:
-            return None
+            return None, None, None
+
+        weight += 301 - len(match.manufacturers)
 
     if match.models is not None:
         if device.model not in match.models:
-            return None
+            return None, None, None
+
+        weight += 401 - len(match.models)
 
     if match.exposed_features is not None:
         if not match.exposed_features & device.exposes_features:
-            return None
+            return None, None, None
+
+        weight += 501 - len(match.exposed_features)
 
     # Build handler set: required + available optional
-    handlers = set(match.cluster_handlers)
+    server_handlers = set(match.cluster_handlers)
     for opt in match.optional_cluster_handlers:
-        if opt in by_name:
-            handlers.add(opt)
+        if opt in endpoint.cluster_handlers_by_name:
+            server_handlers.add(opt)
+            weight += 10
+        else:
+            weight -= 1
 
-    return handlers
+    client_handlers = set(match.client_cluster_handlers)
+
+    return weight, server_handlers, client_handlers
 
 
 def discover_entities_for_endpoint(
@@ -679,63 +518,55 @@ def discover_entities_for_endpoint(
 ) -> Iterator[PlatformEntity]:
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
-    by_name = endpoint.cluster_handlers_by_name
 
     # Collect valid matches
-    matches: list[tuple[type[PlatformEntity], ClusterHandlerMatch, set[str]]] = []
+    matches: list[
+        tuple[type[PlatformEntity], int, ClusterHandlerMatch, set[str], set[str]]
+    ] = []
 
     for entity_class in ENTITY_REGISTRY:
         match = entity_class.match_cluster_handlers(endpoint)
         if match is None:
             continue
 
-        handler_names = _match_applies(match, endpoint)
-        if handler_names is None:
+        weight, server_handlers, client_handlers = _match_applies(match, endpoint)
+        if weight is None:
             continue
 
-        matches.append((entity_class, match, handler_names))
+        matches.append((entity_class, weight, match, server_handlers, client_handlers))
 
     # Sort by weight descending (most specific first)
-    matches.sort(key=lambda x: x[1].weight, reverse=True)
+    matches.sort(key=lambda x: x[1], reverse=True)
 
-    # Track claimed handler names
-    claimed: set[str] = set()
-
-    for entity_class, match, handler_names in matches:
-        # Skip if any required handler was claimed by higher-priority entity
-        if handler_names & claimed:
-            _LOGGER.debug(
-                "Skipping %s: handlers %s already claimed",
-                entity_class.__name__,
-                handler_names & claimed,
-            )
-            continue
-
-        # Claim handlers
-        claimed.update(handler_names)
-
-        # Get actual cluster handler objects
-        cluster_handlers = [by_name[name] for name in handler_names]
+    for entity_class, weight, match, server_handlers, client_handlers in matches:
+        server_cluster_handlers = [
+            endpoint.cluster_handlers_by_name[name] for name in server_handlers
+        ]
+        client_cluster_handlers = [
+            endpoint.client_cluster_handlers_by_name[name] for name in client_handlers
+        ]
 
         # Claim on endpoint
-        endpoint.claim_cluster_handlers(cluster_handlers)
+        endpoint.claim_cluster_handlers(server_cluster_handlers)
+        endpoint.claim_cluster_handlers(client_cluster_handlers)
 
         # Compute legacy unique ID
-        first_ch = cluster_handlers[0]
+        first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
         legacy_discovery_unique_id = (
             f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
         )
 
         _LOGGER.debug(
-            "'%s' platform -> '%s' using %s (weight=%d)",
+            "'%s' platform -> '%s' using %s + %s (weight=%d)",
             entity_class.PLATFORM,
             entity_class.__name__,
-            [ch.name for ch in cluster_handlers],
-            match.weight,
+            [ch.name for ch in server_cluster_handlers],
+            [ch.name for ch in client_cluster_handlers],
+            weight,
         )
 
         yield entity_class(
-            cluster_handlers=cluster_handlers,
+            cluster_handlers=server_cluster_handlers + client_cluster_handlers,
             endpoint=endpoint,
             device=device,
             legacy_discovery_unique_id=legacy_discovery_unique_id,

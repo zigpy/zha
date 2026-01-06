@@ -53,12 +53,6 @@ from tests.common import (
     zigpy_device_from_device_data,
 )
 from zha.application import Platform
-from zha.application.discovery import (
-    endpoint_discover_by_cluster_id,
-    endpoint_discover_by_device_type,
-    endpoint_discover_entities,
-    probe_single_cluster,
-)
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor

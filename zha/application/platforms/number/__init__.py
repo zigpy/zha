@@ -126,15 +126,6 @@ class BaseNumber(PlatformEntity):
 class AnalogOutputNumber(BaseNumber):
     """Representation of a ZHA Number entity."""
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_ANALOG_OUTPUT in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_OUTPUT})
-            )
-        return None
-
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -147,6 +138,13 @@ class AnalogOutputNumber(BaseNumber):
         self._analog_output_cluster_handler: ClusterHandler = self.cluster_handlers[
             CLUSTER_HANDLER_ANALOG_OUTPUT
         ]
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_OUTPUT})
+        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -325,15 +323,10 @@ class AqaraMotionDetectionInterval(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            "opple_cluster" in endpoint.cluster_handlers_by_name
-            and endpoint.device.model in {"lumi.motion.ac02", "lumi.motion.agl04"}
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({"opple_cluster"}),
-                models=frozenset({"lumi.motion.ac02", "lumi.motion.agl04"}),
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({"opple_cluster"}),
+            models=frozenset({"lumi.motion.ac02", "lumi.motion.agl04"}),
+        )
 
 
 @register_entity
@@ -349,9 +342,7 @@ class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_LEVEL in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
 @register_entity
@@ -367,9 +358,7 @@ class OnLevelConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_LEVEL in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
 @register_entity
@@ -385,9 +374,7 @@ class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_LEVEL in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
 @register_entity
@@ -403,9 +390,7 @@ class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_LEVEL in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
 @register_entity
@@ -421,9 +406,7 @@ class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_LEVEL in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
 @register_entity
@@ -439,9 +422,7 @@ class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_LEVEL in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
 @register_entity
@@ -457,9 +438,7 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_COLOR in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_COLOR}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_COLOR}))
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -483,15 +462,10 @@ class TimerDurationMinutes(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            "tuya_manufacturer" in endpoint.cluster_handlers_by_name
-            and endpoint.device.manufacturer == "_TZE200_htnnfasr"
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({"tuya_manufacturer"}),
-                manufacturers=frozenset({"_TZE200_htnnfasr"}),
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({"tuya_manufacturer"}),
+            manufacturers=frozenset({"_TZE200_htnnfasr"}),
+        )
 
 
 @register_entity
@@ -509,9 +483,7 @@ class FilterLifeTime(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if "ikea_airpurifier" in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(cluster_handlers=frozenset({"ikea_airpurifier"}))
-        return None
+        return ClusterHandlerMatch(cluster_handlers=frozenset({"ikea_airpurifier"}))
 
 
 @register_entity
@@ -527,17 +499,11 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            CLUSTER_HANDLER_BASIC in endpoint.cluster_handlers_by_name
-            and endpoint.device.manufacturer == "TexasInstruments"
-            and endpoint.device.model in {"ti.router"}
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
-                manufacturers=frozenset({"TexasInstruments"}),
-                models=frozenset({"ti.router"}),
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
+            manufacturers=frozenset({"TexasInstruments"}),
+            models=frozenset({"ti.router"}),
+        )
 
 
 @register_entity
@@ -554,7 +520,9 @@ class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -571,7 +539,9 @@ class InovelliButtonDelay(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -588,7 +558,9 @@ class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -605,7 +577,9 @@ class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -622,7 +596,9 @@ class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -639,7 +615,9 @@ class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -656,7 +634,9 @@ class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -673,7 +653,9 @@ class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -690,7 +672,9 @@ class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -707,7 +691,9 @@ class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -724,7 +710,9 @@ class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -741,7 +729,9 @@ class InovelliAutoShutoffTimer(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -758,7 +748,9 @@ class InovelliLocalDefaultLevel(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -775,7 +767,9 @@ class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -792,7 +786,9 @@ class InovelliStartupDefaultLevel(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -831,7 +827,9 @@ class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -848,7 +846,9 @@ class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -865,7 +865,9 @@ class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -882,7 +884,9 @@ class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -899,7 +903,9 @@ class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -916,7 +922,9 @@ class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -933,7 +941,9 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+        )
 
 
 @register_entity
@@ -1029,7 +1039,9 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT})
+        )
 
 
 @register_entity
@@ -1071,12 +1083,14 @@ class BoschThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
             return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-            models=frozenset({
-                "RBSH-RTH0-ZB-EU",
-                "RBSH-TRV0-ZB-EU",
-                "RBSH-TRV1-ZB-EU",
-                "RBSH-RTH0-BAT-ZB-EU",
-            }),
+            models=frozenset(
+                {
+                    "RBSH-RTH0-ZB-EU",
+                    "RBSH-TRV0-ZB-EU",
+                    "RBSH-TRV1-ZB-EU",
+                    "RBSH-RTH0-BAT-ZB-EU",
+                }
+            ),
         )
 
 
@@ -1150,7 +1164,9 @@ class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT})
+        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -1178,7 +1194,9 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT})
+        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -1206,8 +1224,6 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if DANFOSS_ALLY_THERMOSTAT not in endpoint.device.quirk_ids:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1227,8 +1243,6 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if DANFOSS_ALLY_THERMOSTAT not in endpoint.device.quirk_ids:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1249,8 +1263,6 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if DANFOSS_ALLY_THERMOSTAT not in endpoint.device.quirk_ids:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1274,8 +1286,6 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if DANFOSS_ALLY_THERMOSTAT not in endpoint.device.quirk_ids:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1296,8 +1306,6 @@ class SinopeDimmerOnLevelConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
             models=frozenset({"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"}),
@@ -1318,25 +1326,18 @@ class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {
-            "DM2500ZB",
-            "DM2500ZB-G2",
-            "DM2550ZB",
-            "DM2550ZB-G2",
-            "SW2500ZB",
-            "SW2500ZB-G2",
-        }:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
-            models=frozenset({
-                "DM2500ZB",
-                "DM2500ZB-G2",
-                "DM2550ZB",
-                "DM2550ZB-G2",
-                "SW2500ZB",
-                "SW2500ZB-G2",
-            }),
+            models=frozenset(
+                {
+                    "DM2500ZB",
+                    "DM2500ZB-G2",
+                    "DM2550ZB",
+                    "DM2550ZB-G2",
+                    "SW2500ZB",
+                    "SW2500ZB-G2",
+                }
+            ),
         )
 
 
@@ -1354,23 +1355,16 @@ class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {
-            "DM2500ZB",
-            "DM2500ZB-G2",
-            "DM2550ZB",
-            "DM2550ZB-G2",
-            "SW2500ZB",
-            "SW2500ZB-G2",
-        }:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
-            models=frozenset({
-                "DM2500ZB",
-                "DM2500ZB-G2",
-                "DM2550ZB",
-                "DM2550ZB-G2",
-                "SW2500ZB",
-                "SW2500ZB-G2",
-            }),
+            models=frozenset(
+                {
+                    "DM2500ZB",
+                    "DM2500ZB-G2",
+                    "DM2550ZB",
+                    "DM2550ZB-G2",
+                    "SW2500ZB",
+                    "SW2500ZB-G2",
+                }
+            ),
         )

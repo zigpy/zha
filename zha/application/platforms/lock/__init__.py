@@ -41,11 +41,9 @@ class DoorLock(PlatformEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_DOORLOCK in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_DOORLOCK})
-            )
-        return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_DOORLOCK})
+        )
 
     def __init__(
         self,

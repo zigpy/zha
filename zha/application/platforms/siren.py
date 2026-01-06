@@ -72,15 +72,6 @@ class Siren(PlatformEntity):
     PLATFORM = Platform.SIREN
     _attr_fallback_name: str = "Siren"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_IAS_WD in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD})
-            )
-        return None
-
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -110,6 +101,11 @@ class Siren(PlatformEntity):
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_is_on: bool = False
         self._off_listener: asyncio.TimerHandle | None = None
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
     @functools.cached_property
     def info_object(self) -> SirenEntityInfo:

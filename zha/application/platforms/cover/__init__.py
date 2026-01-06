@@ -126,15 +126,6 @@ class Cover(BaseCover):
 
     _attr_translation_key: str = "cover"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        if CLUSTER_HANDLER_COVER in endpoint.cluster_handlers_by_name:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_COVER})
-            )
-        return None
-
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -175,6 +166,11 @@ class Cover(BaseCover):
 
         self._state: CoverState | None = None
         self._determine_cover_state(refresh=True)
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}))
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags based on the window covering type."""
@@ -699,24 +695,6 @@ class Shade(BaseCover):
         | CoverEntityFeature.SET_POSITION
     )
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        handlers = endpoint.cluster_handlers_by_name
-        if (
-            CLUSTER_HANDLER_LEVEL in handlers
-            and CLUSTER_HANDLER_ON_OFF in handlers
-            and CLUSTER_HANDLER_SHADE in handlers
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({
-                    CLUSTER_HANDLER_LEVEL,
-                    CLUSTER_HANDLER_ON_OFF,
-                    CLUSTER_HANDLER_SHADE,
-                })
-            )
-        return None
-
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -737,6 +715,19 @@ class Shade(BaseCover):
             self._level_cluster_handler.current_level
         )
         self.recompute_capabilities()
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset(
+                {
+                    CLUSTER_HANDLER_LEVEL,
+                    CLUSTER_HANDLER_ON_OFF,
+                    CLUSTER_HANDLER_SHADE,
+                }
+            )
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -877,17 +868,13 @@ class KeenVent(Shade):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        handlers = endpoint.cluster_handlers_by_name
-        if (
-            CLUSTER_HANDLER_LEVEL in handlers
-            and CLUSTER_HANDLER_ON_OFF in handlers
-            and endpoint.device.manufacturer == "Keen Home Inc"
-        ):
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
-                manufacturers=frozenset({"Keen Home Inc"}),
-            )
-        return None
+        if endpoint.device.manufacturer != "Keen Home Inc":
+            return None
+
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
+            manufacturers=frozenset({"Keen Home Inc"}),
+        )
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover."""
