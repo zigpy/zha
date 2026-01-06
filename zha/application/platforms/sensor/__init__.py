@@ -586,7 +586,6 @@ class AnalogInputSensor(Sensor):
     _attribute_name = "present_value"
     _unique_id_suffix = "analog_input"
     _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:

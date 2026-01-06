@@ -84,7 +84,7 @@ class Thermostat(PlatformEntity):
     DEFAULT_MAX_TEMP = 35
     DEFAULT_MIN_TEMP = 7
 
-    _attr_primary_weight = 3
+    _attr_primary_weight = 10
     _attr_precision = PRECISION_TENTHS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key: str = "thermostat"
