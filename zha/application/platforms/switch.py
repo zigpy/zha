@@ -791,6 +791,7 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             exposed_features=frozenset({TUYA_PLUG_ONOFF}),
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
 
