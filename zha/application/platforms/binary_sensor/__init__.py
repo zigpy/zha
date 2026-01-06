@@ -9,6 +9,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
+from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import BinarySensorMetadata
 from zigpy.zcl.clusters.security import IasZone
 
@@ -209,6 +210,42 @@ class Opening(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
+
+        if (
+            endpoint.zigpy_endpoint.profile_id,
+            endpoint.zigpy_endpoint.device_type,
+        ) in {
+            (zha.PROFILE_ID, zha.DeviceType.COLOR_CONTROLLER),
+            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMER_SWITCH),
+            (zha.PROFILE_ID, zha.DeviceType.COLOR_SCENE_CONTROLLER),
+            (zha.PROFILE_ID, zha.DeviceType.DIMMER_SWITCH),
+            (zha.PROFILE_ID, zha.DeviceType.LEVEL_CONTROL_SWITCH),
+            (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_CONTROLLER),
+            (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_SCENE_CONTROLLER),
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_SWITCH),
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT_SWITCH),
+            (zha.PROFILE_ID, zha.DeviceType.REMOTE_CONTROL),
+            (zha.PROFILE_ID, zha.DeviceType.SCENE_SELECTOR),
+            (zll.PROFILE_ID, zll.DeviceType.COLOR_CONTROLLER),
+            (zll.PROFILE_ID, zll.DeviceType.COLOR_SCENE_CONTROLLER),
+            (zll.PROFILE_ID, zll.DeviceType.CONTROL_BRIDGE),
+            (zll.PROFILE_ID, zll.DeviceType.CONTROLLER),
+            (zll.PROFILE_ID, zll.DeviceType.SCENE_CONTROLLER),
+        }:
+            return None
+
+        """
+        SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS = {
+            zcl.clusters.general.OnOff.cluster_id: Platform.BINARY_SENSOR,
+            zcl.clusters.security.IasAce.cluster_id: Platform.ALARM_CONTROL_PANEL,
+        }
+
+        for cluster_id, cluster in endpoint.zigpy_endpoint.out_clusters.items():
+            platform = SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS.get(cluster.cluster_id)
+            if platform is None:
+                continue
+        """
+
         return ClusterHandlerMatch(
             client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF})
         )
