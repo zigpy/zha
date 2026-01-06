@@ -9,6 +9,7 @@ import math
 from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters import hvac
+from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -264,6 +265,11 @@ class Fan(BaseFan, PlatformEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
+
+        # Thermostat entities take over the fan cluster, we don't need two entities
+        if Thermostat.cluster_id in endpoint.zigpy_endpoint.in_clusters:
+            return None
+
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}))
 
     def on_add(self) -> None:
