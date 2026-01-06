@@ -82,7 +82,8 @@ class DeviceScannerEntity(PlatformEntity):
             return None
 
         return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION})
+            cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
     def on_add(self) -> None:

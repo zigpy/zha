@@ -63,24 +63,6 @@ SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS = {
     zcl.clusters.security.IasAce.cluster_id: Platform.ALARM_CONTROL_PANEL,
 }
 
-DEVICE_CLASS = {
-    zigpy.profiles.zha.PROFILE_ID: {
-        SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE: Platform.DEVICE_TRACKER,
-        zigpy.profiles.zha.DeviceType.THERMOSTAT: Platform.CLIMATE,
-        zigpy.profiles.zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT: Platform.COVER,
-        # zigpy.profiles.zha.DeviceType.ON_OFF_BALLAST: Platform.SWITCH,
-        # zigpy.profiles.zha.DeviceType.ON_OFF_PLUG_IN_UNIT: Platform.SWITCH,
-        zigpy.profiles.zha.DeviceType.SHADE: Platform.COVER,
-        # zigpy.profiles.zha.DeviceType.SMART_PLUG: Platform.SWITCH,
-        zigpy.profiles.zha.DeviceType.IAS_ANCILLARY_CONTROL: Platform.ALARM_CONTROL_PANEL,
-        zigpy.profiles.zha.DeviceType.IAS_WARNING_DEVICE: Platform.SIREN,
-    },
-    zigpy.profiles.zll.PROFILE_ID: {
-        # zigpy.profiles.zll.DeviceType.ON_OFF_PLUGIN_UNIT: Platform.SWITCH,
-    },
-}
-DEVICE_CLASS = collections.defaultdict(dict, DEVICE_CLASS)
-
 WEIGHT_ATTR = attrgetter("weight")
 
 

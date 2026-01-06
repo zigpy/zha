@@ -9,7 +9,8 @@ from enum import IntFlag
 import functools
 from typing import TYPE_CHECKING, Any, Final, cast
 
-from zigpy.zcl.clusters.security import IasWd as WD
+from zigpy.profiles import zha
+from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import (
@@ -105,7 +106,17 @@ class Siren(PlatformEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if (
+                    endpoint.zigpy_endpoint.device_type
+                    == zha.DeviceType.IAS_WARNING_DEVICE
+                )
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasWd.cluster_id)}"
+            ),
+        )
 
     @functools.cached_property
     def info_object(self) -> SirenEntityInfo:
@@ -139,7 +150,7 @@ class Siren(PlatformEntity):
             self._off_listener.cancel()
             self._off_listener = None
         tone_cache = self._cluster_handler.data_cache.get(
-            WD.Warning.WarningMode.__name__
+            IasWd.Warning.WarningMode.__name__
         )
         siren_tone = (
             tone_cache.value
@@ -148,7 +159,7 @@ class Siren(PlatformEntity):
         )
         siren_duration = DEFAULT_DURATION
         level_cache = self._cluster_handler.data_cache.get(
-            WD.Warning.SirenLevel.__name__
+            IasWd.Warning.SirenLevel.__name__
         )
         siren_level = (
             level_cache.value if level_cache is not None else WARNING_DEVICE_SOUND_HIGH
@@ -158,7 +169,7 @@ class Siren(PlatformEntity):
             strobe_cache.value if strobe_cache is not None else Strobe.No_Strobe
         )
         strobe_level_cache = self._cluster_handler.data_cache.get(
-            WD.StrobeLevel.__name__
+            IasWd.StrobeLevel.__name__
         )
         strobe_level = (
             strobe_level_cache.value

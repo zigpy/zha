@@ -8,7 +8,13 @@ import datetime as dt
 import functools
 from typing import TYPE_CHECKING, Any, cast
 
-from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
+from zigpy.profiles import zha
+from zigpy.zcl.clusters.hvac import (
+    FanMode,
+    RunningState,
+    SystemMode,
+    Thermostat as ThermostatCluster,
+)
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -78,6 +84,7 @@ class Thermostat(PlatformEntity):
     DEFAULT_MAX_TEMP = 35
     DEFAULT_MIN_TEMP = 7
 
+    _attr_primary_weight = 3
     _attr_precision = PRECISION_TENTHS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key: str = "thermostat"
@@ -121,6 +128,11 @@ class Thermostat(PlatformEntity):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -533,6 +545,11 @@ class SinopeTechnologiesThermostat(Thermostat):
                 {CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"}
             ),
             manufacturers=frozenset({"Sinope Technologies"}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -632,6 +649,11 @@ class ZenWithinThermostat(Thermostat):
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
             manufacturers=frozenset({"Zen Within", "LUX"}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
 
@@ -664,6 +686,11 @@ class ZehnderThermostat(Thermostat):
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset(
                 {"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"}
+            ),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
             ),
         )
 
@@ -731,6 +758,11 @@ class CentralitePearl(ZenWithinThermostat):
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
             manufacturers=frozenset({"Centralite"}),
             models=frozenset({"3157100", "3157100-E"}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
 
@@ -766,6 +798,11 @@ class MoesThermostat(Thermostat):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=MOES_MANUFACTURERS,
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -854,6 +891,11 @@ class BecaThermostat(Thermostat):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset({"_TZE200_b6wax7g0"}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -936,6 +978,11 @@ class StelproFanHeater(Thermostat):
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset({"Stelpro"}),
             models=frozenset({"SORB"}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
     @functools.cached_property
@@ -972,12 +1019,15 @@ class ZONNSMARTThermostat(Thermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer not in ZONNSMART_MANUFACTURERS:
-            return None
 
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=ZONNSMART_MANUFACTURERS,
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+            ),
         )
 
     def recompute_capabilities(self) -> None:

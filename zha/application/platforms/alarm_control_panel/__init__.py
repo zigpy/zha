@@ -7,6 +7,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
+from zigpy.profiles import zha
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
@@ -82,7 +83,13 @@ class AlarmControlPanel(PlatformEntity):
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE})
+            cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type
+                == zha.DeviceType.IAS_ANCILLARY_CONTROL
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
+            ),
         )
 
     def on_add(self) -> None:

@@ -812,6 +812,7 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
             optional_cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
             ),
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
     @property

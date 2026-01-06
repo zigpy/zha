@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import astuple
 import functools
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
@@ -45,7 +45,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
 )
-from zha.application.registries import DEVICE_CLASS, PLATFORM_ENTITIES
+from zha.application.registries import PLATFORM_ENTITIES
 
 # importing cluster handlers updates registries
 from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-import
@@ -226,48 +226,6 @@ def endpoint_discover_entities(
     )
 
     yield from discover_entities_for_endpoint(endpoint)
-
-
-def endpoint_discover_by_device_type(
-    endpoint: Endpoint,
-    device_overrides: dict[str, DeviceOverridesConfiguration],
-) -> Iterator[PlatformEntity]:
-    """Process an endpoint on a zigpy device."""
-
-    device = endpoint.device
-    legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
-
-    platform: str | None = None
-    if legacy_discovery_unique_id in device_overrides:
-        platform = device_overrides[legacy_discovery_unique_id].type
-
-    if platform is None:
-        ep_profile_id = endpoint.zigpy_endpoint.profile_id
-        ep_device_type = endpoint.zigpy_endpoint.device_type
-        platform = DEVICE_CLASS[ep_profile_id].get(ep_device_type)
-
-    if platform and platform in PLATFORMS:
-        platform = cast(Platform, platform)
-
-        cluster_handlers = endpoint.unclaimed_cluster_handlers()
-        entity_class, claimed = PLATFORM_ENTITIES.get_entity(
-            platform,
-            endpoint.device.manufacturer,
-            endpoint.device.model,
-            cluster_handlers,
-            endpoint.device.exposes_features,
-        )
-        if entity_class is None:
-            return
-
-        endpoint.claim_cluster_handlers(claimed)
-
-        yield entity_class(
-            endpoint=endpoint,
-            device=endpoint.device,
-            cluster_handlers=claimed,
-            legacy_discovery_unique_id=legacy_discovery_unique_id,
-        )
 
 
 def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
@@ -550,11 +508,13 @@ def discover_entities_for_endpoint(
         endpoint.claim_cluster_handlers(server_cluster_handlers)
         endpoint.claim_cluster_handlers(client_cluster_handlers)
 
-        # Compute legacy unique ID
-        first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
-        legacy_discovery_unique_id = (
-            f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
-        )
+        if match.legacy_discovery_unique_id is not None:
+            legacy_discovery_unique_id = match.legacy_discovery_unique_id
+        else:
+            first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
+            legacy_discovery_unique_id = (
+                f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
+            )
 
         _LOGGER.debug(
             "'%s' platform -> '%s' using %s + %s (weight=%d)",

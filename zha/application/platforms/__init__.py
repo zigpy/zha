@@ -49,7 +49,7 @@ class ClusterHandlerMatch:
     models: frozenset[str] | None = None
     exposed_features: frozenset[str] | None = None
 
-    weight_adjustment: int = 0
+    legacy_discovery_unique_id: str | None = None
 
 
 def register_entity(cls: type[PlatformEntity]) -> type[PlatformEntity]:

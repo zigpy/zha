@@ -129,12 +129,12 @@ class Switch(PlatformEntity, BaseSwitch):
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for switch entity."""
 
-        # Do not create switch entities for lights
+        # Do not create switch entities unless required
         if (
             endpoint.zigpy_endpoint.profile_id,
             endpoint.zigpy_endpoint.device_type,
         ) in {
-            # ZHA
+            # Light
             (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
             (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
             (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
@@ -142,18 +142,35 @@ class Switch(PlatformEntity, BaseSwitch):
             (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
             (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
             (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
-            # ZLL
             (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
             (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
             (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
             (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
             (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
             (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
+            # Cover
+            (zha.PROFILE_ID, zha.DeviceType.SHADE),
         }:
             return None
 
+        # Maintain backwards compatibility with old unique ID format
+        if (
+            endpoint.zigpy_endpoint.profile_id,
+            endpoint.zigpy_endpoint.device_type,
+        ) in {
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_BALLAST),
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_PLUG_IN_UNIT),
+            (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
+            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
+        }:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+                legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+            )
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}",
         )
 
     def on_add(self) -> None:

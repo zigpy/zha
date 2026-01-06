@@ -9,7 +9,9 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from zigpy.zcl.clusters.general import OnOff
+from zigpy.profiles import zha
+from zigpy.zcl.clusters.closures import WindowCovering
+from zigpy.zcl.clusters.general import OnOff, OnOff as OnOffCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -170,7 +172,15 @@ class Cover(BaseCover):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type
+                == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(WindowCovering.cluster_id)}"
+            ),
+        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags based on the window covering type."""
@@ -726,7 +736,12 @@ class Shade(BaseCover):
                     CLUSTER_HANDLER_ON_OFF,
                     CLUSTER_HANDLER_SHADE,
                 }
-            )
+            ),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.SHADE
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOffCluster.cluster_id)}"
+            ),
         )
 
     def on_add(self) -> None:
@@ -874,6 +889,11 @@ class KeenVent(Shade):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Keen Home Inc"}),
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.SHADE
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOffCluster.cluster_id)}"
+            ),
         )
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument

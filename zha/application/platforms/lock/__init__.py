@@ -37,6 +37,7 @@ class DoorLock(PlatformEntity):
 
     PLATFORM = Platform.LOCK
     _attr_translation_key: str = "door_lock"
+    _attr_primary_weight = 5
 
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
