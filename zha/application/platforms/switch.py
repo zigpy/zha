@@ -25,7 +25,6 @@ from zha.application.platforms import (
     PlatformEntity,
     register_entity,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
@@ -46,8 +45,6 @@ if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
-
-GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.SWITCH)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -278,7 +275,6 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
             self.maybe_emit_state_changed_event()
 
 
-@GROUP_MATCH()
 class SwitchGroup(GroupEntity, BaseSwitch):
     """Representation of a switch group."""
 

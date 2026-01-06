@@ -57,7 +57,6 @@ from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
 from zha.application.platforms.number import BaseNumber, NumberMode
-from zha.application.registries import SINGLE_INPUT_CLUSTER_DEVICE_CLASS
 from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.endpoint import Endpoint
 
@@ -209,60 +208,6 @@ def _ch_mock(cluster):
         return_value=cluster(mock.MagicMock())
     )
     return cluster_handler
-
-
-def test_single_input_cluster_device_class_by_cluster_class() -> None:
-    """Test SINGLE_INPUT_CLUSTER_DEVICE_CLASS matching by cluster id or class."""
-
-    class QuirkedIAS(zigpy.quirks.CustomCluster, zigpy.zcl.clusters.security.IasZone):
-        """Quirked IAS Zone cluster."""
-
-    class _Analog(zigpy.quirks.CustomCluster, zigpy.zcl.clusters.general.AnalogInput):
-        pass
-
-    door_ch = _ch_mock(zigpy.zcl.clusters.closures.DoorLock)
-    cover_ch = _ch_mock(zigpy.zcl.clusters.closures.WindowCovering)
-    multistate_ch = _ch_mock(zigpy.zcl.clusters.general.MultistateInput)
-    ias_ch = _ch_mock(QuirkedIAS)
-    analog_ch = _ch_mock(_Analog)
-
-    endpoint = mock.MagicMock(spec_set=Endpoint)
-    endpoint.unclaimed_cluster_handlers.return_value = [
-        door_ch,
-        cover_ch,
-        multistate_ch,
-        ias_ch,
-        analog_ch,
-    ]
-
-    with (
-        mock.patch.dict(
-            SINGLE_INPUT_CLUSTER_DEVICE_CLASS,
-            {
-                zigpy.zcl.clusters.closures.DoorLock.cluster_id: Platform.LOCK,
-                zigpy.zcl.clusters.closures.WindowCovering.cluster_id: Platform.COVER,
-                zigpy.zcl.clusters.general.AnalogInput.cluster_id: Platform.SENSOR,
-                zigpy.zcl.clusters.general.MultistateInput.cluster_id: Platform.SENSOR,
-                zigpy.zcl.clusters.security.IasZone.cluster_id: Platform.BINARY_SENSOR,
-            },
-            clear=True,
-        ),
-        mock.patch(
-            "zha.application.discovery.probe_single_cluster",
-            new=mock.MagicMock(),
-        ) as probe_mock,
-    ):
-        for _entity in endpoint_discover_by_cluster_id(endpoint):
-            pass
-
-        assert probe_mock.call_count == len(endpoint.unclaimed_cluster_handlers())
-        assert [m for m in probe_mock.mock_calls if m != call().__iter__()] == [
-            call(Platform.LOCK, door_ch, endpoint),
-            call(Platform.COVER, cover_ch, endpoint),
-            call(Platform.SENSOR, multistate_ch, endpoint),
-            call(Platform.BINARY_SENSOR, ias_ch, endpoint),
-            call(Platform.SENSOR, analog_ch, endpoint),
-        ]
 
 
 @pytest.mark.parametrize("override", [None, "switch"])

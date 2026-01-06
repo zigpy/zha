@@ -51,7 +51,6 @@ from zha.application.platforms.sensor.helpers import (
     create_number_formatter,
     resolution_to_decimal_precision,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
@@ -128,12 +127,6 @@ BATTERY_SIZES = {
 }
 
 _LOGGER = logging.getLogger(__name__)
-
-STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.SENSOR)
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.SENSOR)
-CONFIG_DIAGNOSTIC_MATCH = functools.partial(
-    PLATFORM_ENTITIES.config_diagnostic_match, Platform.SENSOR
-)
 
 
 @dataclass(frozen=True, kw_only=True)

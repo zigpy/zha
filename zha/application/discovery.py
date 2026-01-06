@@ -45,7 +45,6 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 
 # importing cluster handlers updates registries
 from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-import
@@ -203,11 +202,16 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
         return
 
     for platform in entity_platforms:
-        entity_class = PLATFORM_ENTITIES.get_group_entity(platform)
-        if entity_class is None:
-            continue
-        _LOGGER.info("Creating entity : %s for group %s", entity_class, group.name)
-        yield entity_class(group)
+        # TODO: implement group entities
+        if False:
+            yield  # type: ignore[unreachable]
+
+        break
+        # entity_class = PLATFORM_ENTITIES.get_group_entity(platform)
+        # if entity_class is None:
+        #     continue
+        # _LOGGER.info("Creating entity : %s for group %s", entity_class, group.name)
+        # yield entity_class(group)
 
 
 def endpoint_discover_entities(

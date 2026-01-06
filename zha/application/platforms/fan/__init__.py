@@ -40,7 +40,6 @@ from zha.application.platforms.fan.helpers import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import (
     ClusterAttributeUpdatedEvent,
     wrap_zigpy_exceptions,
@@ -59,8 +58,6 @@ if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
-
-GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -304,7 +301,6 @@ class Fan(BaseFan, PlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
-@GROUP_MATCH()
 class FanGroup(BaseFan, GroupEntity):
     """Representation of a fan group."""
 

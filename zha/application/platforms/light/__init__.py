@@ -64,7 +64,6 @@ from zha.application.platforms.light.helpers import (
     filter_supported_color_modes,
     is_brightness_supported,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.debounce import Debouncer
 from zha.decorators import periodic
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
@@ -91,9 +90,6 @@ if TYPE_CHECKING:
     from zha.zigbee.group import Group
 
 _LOGGER = logging.getLogger(__name__)
-
-STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.LIGHT)
-GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.LIGHT)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1127,7 +1123,6 @@ class MinTransitionLight(Light):
         )
 
 
-@GROUP_MATCH()
 class LightGroup(BaseClusterHandlerLight, GroupEntity):
     """Representation of a light group."""
 
