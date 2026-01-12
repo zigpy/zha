@@ -162,20 +162,6 @@ class OppleRemoteClusterHandler(ClusterHandler):
                 "serving_size": True,
                 "portion_weight": True,
             }
-        elif self.cluster.endpoint.model == "lumi.airrtc.agl001":
-            self.ZCL_INIT_ATTRS = {
-                "system_mode": True,
-                "preset": True,
-                "window_detection": True,
-                "valve_detection": True,
-                "valve_alarm": True,
-                "child_lock": True,
-                "away_preset_temperature": True,
-                "window_open": True,
-                "calibrated": True,
-                "schedule": True,
-                "sensor": True,
-            }
         elif self.cluster.endpoint.model == "lumi.sensor_smoke.acn03":
             self.ZCL_INIT_ATTRS = {
                 "buzzer_manual_mute": True,

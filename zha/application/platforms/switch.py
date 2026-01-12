@@ -654,39 +654,6 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
-)
-class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
-    """Representation of an Aqara thermostat window detection configuration entity."""
-
-    _unique_id_suffix = "window_detection"
-    _attribute_name = "window_detection"
-    _attr_translation_key = "window_detection"
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
-)
-class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
-    """Representation of an Aqara thermostat valve detection configuration entity."""
-
-    _unique_id_suffix = "valve_detection"
-    _attribute_name = "valve_detection"
-    _attr_translation_key = "valve_detection"
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
-)
-class AqaraThermostatChildLock(ConfigurableAttributeSwitch):
-    """Representation of an Aqara thermostat child lock configuration entity."""
-
-    _unique_id_suffix = "child_lock"
-    _attribute_name = "child_lock"
-    _attr_translation_key = "child_lock"
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"lumi.sensor_smoke.acn03"}
 )
 class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
