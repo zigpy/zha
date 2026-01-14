@@ -1851,8 +1851,8 @@ class FormaldehydeConcentration(Sensor):
 
 
 @register_entity
-class SinopeHVACAction(Sensor):
-    """Sinope Thermostat HVAC action sensor."""
+class ThermostatHVACAction(Sensor):
+    """Thermostat HVAC action sensor."""
 
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
@@ -1860,11 +1860,8 @@ class SinopeHVACAction(Sensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "Sinope Technologies":
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-            manufacturers=frozenset({"Sinope Technologies"}),
         )
 
     def _is_supported(self) -> bool:
@@ -1894,6 +1891,43 @@ class SinopeHVACAction(Sensor):
         return self._pi_demand_action
 
     @property
+    def _rm_rs_action(self) -> HVACAction | None:
+        """Return the current HVAC action based on running mode and running state."""
+
+        if (running_state := self._cluster_handler.running_state) is None:
+            return None
+
+        rs_heat = (
+            self._cluster_handler.RunningState.Heat_State_On
+            | self._cluster_handler.RunningState.Heat_2nd_Stage_On
+        )
+        if running_state & rs_heat:
+            return HVACAction.HEATING
+
+        rs_cool = (
+            self._cluster_handler.RunningState.Cool_State_On
+            | self._cluster_handler.RunningState.Cool_2nd_Stage_On
+        )
+        if running_state & rs_cool:
+            return HVACAction.COOLING
+
+        running_state = self._cluster_handler.running_state
+        if running_state and running_state & (
+            self._cluster_handler.RunningState.Fan_State_On
+            | self._cluster_handler.RunningState.Fan_2nd_Stage_On
+            | self._cluster_handler.RunningState.Fan_3rd_Stage_On
+        ):
+            return HVACAction.FAN
+
+        running_state = self._cluster_handler.running_state
+        if running_state and running_state & self._cluster_handler.RunningState.Idle:
+            return HVACAction.IDLE
+
+        if self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off:
+            return HVACAction.IDLE
+        return HVACAction.OFF
+
+    @property
     def _pi_demand_action(self) -> HVACAction:
         """Return the current HVAC action based on pi_demands."""
 
@@ -1907,6 +1941,21 @@ class SinopeHVACAction(Sensor):
         if self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off:
             return HVACAction.IDLE
         return HVACAction.OFF
+
+
+@register_entity
+class SinopeHVACAction(ThermostatHVACAction):
+    """Sinope Thermostat HVAC action sensor."""
+
+    @classmethod
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
+        if endpoint.device.manufacturer != "Sinope Technologies":
+            return None
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+            manufacturers=frozenset({"Sinope Technologies"}),
+        )
 
     @property
     def _rm_rs_action(self) -> HVACAction:
