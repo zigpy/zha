@@ -891,11 +891,7 @@ class KeenVent(Shade):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Keen Home Inc"}),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.SHADE
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOffCluster.cluster_id)}"
-            ),
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
