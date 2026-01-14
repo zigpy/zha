@@ -22,7 +22,7 @@ from zha.zigbee.cluster_handlers.const import (
 class DoorLockClusterHandler(ClusterHandler):
     """Door lock cluster handler."""
 
-    _value_attribute: str = DoorLock.AttributeDefs.lock_state.name
+    value_attribute: str = DoorLock.AttributeDefs.lock_state.name
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=DoorLock.AttributeDefs.lock_state.name,
@@ -151,6 +151,10 @@ class WindowCoveringClusterHandler(ClusterHandler):
         WindowCovering.AttributeDefs.installed_open_limit_lift.name: True,
         WindowCovering.AttributeDefs.installed_open_limit_tilt.name: True,
     }
+
+    value_attribute: str = (
+        WindowCovering.AttributeDefs.current_position_lift_percentage.name
+    )
 
     async def async_update(self):
         """Retrieve latest state."""

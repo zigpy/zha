@@ -105,6 +105,8 @@ class AnalogInputClusterHandler(ClusterHandler):
         AnalogInput.AttributeDefs.application_type.name: True,
     }
 
+    value_attribute: str = AnalogInput.AttributeDefs.present_value.name
+
     @property
     def present_value(self) -> float | None:
         """Return cached value of present_value."""
@@ -185,6 +187,8 @@ class AnalogOutputClusterHandler(ClusterHandler):
         AnalogOutput.AttributeDefs.engineering_units.name: True,
         AnalogOutput.AttributeDefs.application_type.name: True,
     }
+
+    value_attribute: str = AnalogOutput.AttributeDefs.present_value.name
 
     @property
     def present_value(self) -> float | None:
@@ -307,6 +311,8 @@ class BinaryInputClusterHandler(ClusterHandler):
         BinaryInput.AttributeDefs.description.name: True,
     }
 
+    value_attribute: str = BinaryInput.AttributeDefs.present_value.name
+
     @property
     def description(self) -> str | None:
         """Return cached value of description."""
@@ -327,6 +333,8 @@ class BinaryOutputClusterHandler(ClusterHandler):
     ZCL_INIT_ATTRS = {
         BinaryOutput.AttributeDefs.description.name: True,
     }
+
+    value_attribute: str = BinaryOutput.AttributeDefs.present_value.name
 
     @property
     def description(self) -> str | None:
@@ -378,6 +386,8 @@ class DeviceTemperatureClusterHandler(ClusterHandler):
             "config": (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
         },
     )
+
+    value_attribute: str = DeviceTemperature.AttributeDefs.current_temperature.name
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(GreenPowerProxy.cluster_id)
@@ -433,6 +443,8 @@ class LevelControlClusterHandler(ClusterHandler):
         LevelControl.AttributeDefs.default_move_rate.name: True,
         LevelControl.AttributeDefs.start_up_current_level.name: True,
     }
+
+    value_attribute: str = LevelControl.AttributeDefs.current_level.name
 
     @property
     def current_level(self) -> int | None:
@@ -496,6 +508,8 @@ class MultistateInputClusterHandler(ClusterHandler):
         ),
     )
 
+    value_attribute: str = MultistateInput.AttributeDefs.present_value.name
+
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
 class MultistateOutputClusterHandler(ClusterHandler):
@@ -508,6 +522,8 @@ class MultistateOutputClusterHandler(ClusterHandler):
         ),
     )
 
+    value_attribute: str = MultistateOutput.AttributeDefs.present_value.name
+
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateValue.cluster_id)
 class MultistateValueClusterHandler(ClusterHandler):
@@ -519,6 +535,8 @@ class MultistateValueClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_DEFAULT,
         ),
     )
+
+    value_attribute: str = MultistateValue.AttributeDefs.present_value.name
 
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(OnOff.cluster_id)
@@ -539,6 +557,8 @@ class OnOffClusterHandler(ClusterHandler):
     ZCL_INIT_ATTRS = {
         OnOff.AttributeDefs.start_up_on_off.name: True,
     }
+
+    value_attribute: str = OnOff.AttributeDefs.on_off.name
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize OnOffClusterHandler."""
@@ -711,6 +731,8 @@ class PowerConfigurationClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_BATTERY_SAVE,
         ),
     )
+
+    value_attribute: str = PowerConfiguration.AttributeDefs.battery_voltage.name
 
     def async_initialize_cluster_handler_specific(self, from_cache: bool) -> Coroutine:
         """Initialize cluster handler specific attrs."""

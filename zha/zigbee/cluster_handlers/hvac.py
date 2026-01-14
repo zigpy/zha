@@ -31,7 +31,7 @@ class DehumidificationClusterHandler(ClusterHandler):
 class FanClusterHandler(ClusterHandler):
     """Fan cluster handler."""
 
-    _value_attribute: str = Fan.AttributeDefs.fan_mode.name
+    value_attribute: str = Fan.AttributeDefs.fan_mode.name
 
     REPORT_CONFIG = (
         AttrReportConfig(attr=Fan.AttributeDefs.fan_mode.name, config=REPORT_CONFIG_OP),
@@ -127,6 +127,8 @@ class ThermostatClusterHandler(ClusterHandler):
         Thermostat.AttributeDefs.local_temperature_calibration.name: True,
         Thermostat.AttributeDefs.setpoint_change_source.name: True,
     }
+
+    value_attribute: str = Thermostat.AttributeDefs.local_temperature.name
 
     @property
     def abs_max_cool_setpoint_limit(self) -> int:

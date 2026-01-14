@@ -127,6 +127,8 @@ class MeteringClusterHandler(ClusterHandler):
         Metering.AttributeDefs.unit_of_measure.name: True,
     }
 
+    value_attribute: str = Metering.AttributeDefs.instantaneous_demand.name
+
     METERING_DEVICE_TYPES_ELECTRIC = {
         0,
         7,
