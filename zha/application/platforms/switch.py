@@ -12,7 +12,7 @@ from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import SwitchMetadata
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
-from zigpy.zcl.clusters.general import BinaryOutput, OnOff
+from zigpy.zcl.clusters.general import BinaryOutput, LevelControl, OnOff
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -148,6 +148,13 @@ class Switch(PlatformEntity, BaseSwitch):
             # Cover
             (zha.PROFILE_ID, zha.DeviceType.SHADE),
         }:
+            return None
+
+        # Ignore Keen Vent
+        if (
+            endpoint.zigpy_endpoint.device.manufacturer == "Keen Home Inc"
+            and LevelControl.cluster_id in endpoint.zigpy_endpoint.in_clusters
+        ):
             return None
 
         # Maintain backwards compatibility with old unique ID format

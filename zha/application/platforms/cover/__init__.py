@@ -176,8 +176,10 @@ class Cover(BaseCover):
             cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
             legacy_discovery_unique_id=(
                 f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type
-                == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
+                if (
+                    endpoint.zigpy_endpoint.device_type
+                    == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
+                )
                 else f"{endpoint.device.ieee}-{endpoint.id}-{int(WindowCovering.cluster_id)}"
             ),
         )
