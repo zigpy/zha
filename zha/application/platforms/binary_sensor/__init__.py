@@ -234,17 +234,11 @@ class Opening(BinarySensor):
         }:
             return None
 
-        """
-        SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS = {
-            zcl.clusters.general.OnOff.cluster_id: Platform.BINARY_SENSOR,
-            zcl.clusters.security.IasAce.cluster_id: Platform.ALARM_CONTROL_PANEL,
-        }
+        if IkeaMotion.match_cluster_handlers(endpoint) is not None:
+            return None
 
-        for cluster_id, cluster in endpoint.zigpy_endpoint.out_clusters.items():
-            platform = SINGLE_OUTPUT_CLUSTER_DEVICE_CLASS.get(cluster.cluster_id)
-            if platform is None:
-                continue
-        """
+        if PhilipsMotion.match_cluster_handlers(endpoint) is not None:
+            return None
 
         return ClusterHandlerMatch(
             client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF})
@@ -317,7 +311,7 @@ class IkeaMotion(BinarySensor):
             return None
 
         return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"IKEA of Sweden"}),
         )
 
@@ -338,7 +332,7 @@ class PhilipsMotion(BinarySensor):
         if endpoint.device.model not in {"SML001", "SML002"}:
             return None
         return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Philips"}),
             models=frozenset({"SML001", "SML002"}),
         )

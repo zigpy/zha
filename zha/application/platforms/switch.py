@@ -795,10 +795,25 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
 
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+        if (
+            endpoint.zigpy_endpoint.profile_id,
+            endpoint.zigpy_endpoint.device_type,
+        ) in {
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_BALLAST),
+            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_PLUG_IN_UNIT),
+            (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
+            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
+        }:
+            return ClusterHandlerMatch(
+                cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+                exposed_features=frozenset({TUYA_PLUG_ONOFF}),
+                legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+            )
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             exposed_features=frozenset({TUYA_PLUG_ONOFF}),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}",
         )
 
 

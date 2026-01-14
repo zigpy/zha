@@ -83,9 +83,9 @@ class AlarmControlPanel(PlatformEntity):
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
+            client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
             legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
+                f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
                 if (
                     endpoint.zigpy_endpoint.device_type
                     == zha.DeviceType.IAS_ANCILLARY_CONTROL

@@ -26,7 +26,6 @@ from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_OTA,
-    CLUSTER_HANDLER_OTA_SERVER,
 )
 from zha.zigbee.endpoint import Endpoint
 
@@ -340,7 +339,7 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
 
         # Some devices make it a server cluster, not a client cluster...
         self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_OTA_SERVER
+            CLUSTER_HANDLER_OTA
         ]
         self._attr_installed_version: str | None = self._get_cluster_version()
         self._compatible_images: OtaImagesResult = OtaImagesResult(
@@ -350,9 +349,7 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_OTA_SERVER})
-        )
+        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_OTA}))
 
     def on_add(self) -> None:
         """Call when entity is added."""

@@ -36,7 +36,7 @@ class ClusterHandlerStateChangedEvent:
     event: Final[str] = "cluster_handler_state_changed"
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
+@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
 class IasAceClusterHandler(ClusterHandler):
     """IAS Ancillary Control Equipment cluster handler."""
 
