@@ -50,8 +50,6 @@ class FlowMeasurementClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = FlowMeasurement.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(IlluminanceLevelSensing.cluster_id)
 class IlluminanceLevelSensingClusterHandler(ClusterHandler):
@@ -63,8 +61,6 @@ class IlluminanceLevelSensingClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_DEFAULT,
         ),
     )
-
-    value_attribute: str = IlluminanceLevelSensing.AttributeDefs.level_status.name
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(IlluminanceMeasurement.cluster_id)
@@ -78,8 +74,6 @@ class IlluminanceMeasurementClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = IlluminanceMeasurement.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(OccupancySensing.cluster_id)
 class OccupancySensingClusterHandler(ClusterHandler):
@@ -91,8 +85,6 @@ class OccupancySensingClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_IMMEDIATE,
         ),
     )
-
-    value_attribute: str = OccupancySensing.AttributeDefs.occupancy.name
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize Occupancy cluster handler."""
@@ -117,8 +109,6 @@ class PressureMeasurementClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = PressureMeasurement.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(RelativeHumidity.cluster_id)
 class RelativeHumidityClusterHandler(ClusterHandler):
@@ -130,8 +120,6 @@ class RelativeHumidityClusterHandler(ClusterHandler):
             config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
         ),
     )
-
-    value_attribute: str = RelativeHumidity.AttributeDefs.measured_value.name
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(SoilMoisture.cluster_id)
@@ -145,8 +133,6 @@ class SoilMoistureClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = SoilMoisture.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(LeafWetness.cluster_id)
 class LeafWetnessClusterHandler(ClusterHandler):
@@ -158,8 +144,6 @@ class LeafWetnessClusterHandler(ClusterHandler):
             config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
         ),
     )
-
-    value_attribute: str = LeafWetness.AttributeDefs.measured_value.name
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(TemperatureMeasurement.cluster_id)
@@ -173,8 +157,6 @@ class TemperatureMeasurementClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = TemperatureMeasurement.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(CarbonMonoxideConcentration.cluster_id)
 class CarbonMonoxideConcentrationClusterHandler(ClusterHandler):
@@ -186,8 +168,6 @@ class CarbonMonoxideConcentrationClusterHandler(ClusterHandler):
             config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
         ),
     )
-
-    value_attribute: str = CarbonMonoxideConcentration.AttributeDefs.measured_value.name
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(CarbonDioxideConcentration.cluster_id)
@@ -201,8 +181,6 @@ class CarbonDioxideConcentrationClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = CarbonDioxideConcentration.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(PM25.cluster_id)
 class PM25ClusterHandler(ClusterHandler):
@@ -214,8 +192,6 @@ class PM25ClusterHandler(ClusterHandler):
             config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.1),
         ),
     )
-
-    value_attribute: str = PM25.AttributeDefs.measured_value.name
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(FormaldehydeConcentration.cluster_id)
@@ -229,8 +205,6 @@ class FormaldehydeConcentrationClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = FormaldehydeConcentration.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(ElectricalConductivity.cluster_id)
 class ElectricalConductivityClusterHandler(ClusterHandler):
@@ -243,8 +217,6 @@ class ElectricalConductivityClusterHandler(ClusterHandler):
         ),
     )
 
-    value_attribute: str = ElectricalConductivity.AttributeDefs.measured_value.name
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(WindSpeed.cluster_id)
 class WindSpeedClusterHandler(ClusterHandler):
@@ -256,5 +228,3 @@ class WindSpeedClusterHandler(ClusterHandler):
             config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.01),
         ),
     )
-
-    value_attribute: str = WindSpeed.AttributeDefs.measured_value.name

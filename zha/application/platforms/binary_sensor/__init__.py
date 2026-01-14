@@ -138,7 +138,6 @@ class BinarySensor(PlatformEntity):
     async def async_update(self) -> None:
         """Attempt to retrieve on off state from the binary sensor."""
         await super().async_update()
-        # TODO: is this needed?
         attribute = getattr(self._cluster_handler, "value_attribute", "on_off")
         # this is a cached read to get the value for state mgt so there is no double read
         attr_value = await self._cluster_handler.get_attribute_value(attribute)

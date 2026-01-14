@@ -188,10 +188,6 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name: True,
     }
 
-    value_attribute: str = (
-        ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier.name
-    )
-
     async def async_update(self):
         """Retrieve latest state."""
         self.debug("async_update")

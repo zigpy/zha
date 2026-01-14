@@ -14,7 +14,12 @@ from typing import TYPE_CHECKING, Any, Final, ParamSpec, TypedDict
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl
-from zigpy.zcl.foundation import CommandSchema, ConfigureReportingResponseRecord, Status
+from zigpy.zcl.foundation import (
+    CommandSchema,
+    ConfigureReportingResponseRecord,
+    Status,
+    ZCLAttributeDef,
+)
 
 from zha.application.const import (
     ZHA_CLUSTER_HANDLER_MSG,
@@ -192,8 +197,6 @@ class ClusterHandler(LogMixin, EventBase):
     # attribute read is acceptable.
     ZCL_INIT_ATTRS: dict[str, bool] = {}
 
-    value_attribute: str | None = None
-
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize ClusterHandler."""
         super().__init__()
@@ -203,6 +206,11 @@ class ClusterHandler(LogMixin, EventBase):
         self._id: str = f"{endpoint.id}:0x{cluster.cluster_id:04x}"
         unique_id: str = endpoint.unique_id.replace("-", ":")
         self._unique_id: str = f"{unique_id}:0x{cluster.cluster_id:04x}"
+        if not hasattr(self, "_value_attribute") and self.REPORT_CONFIG:
+            attr_def: ZCLAttributeDef = self.cluster.attributes_by_name[
+                self.REPORT_CONFIG[0]["attr"]
+            ]
+            self.value_attribute = attr_def.name
         self._status: ClusterHandlerStatus = ClusterHandlerStatus.CREATED
         self.data_cache: dict[str, Any] = {}
 
@@ -235,7 +243,7 @@ class ClusterHandler(LogMixin, EventBase):
             id=self._id,
             unique_id=self._unique_id,
             status=self._status.name,
-            value_attribute=self.value_attribute,
+            value_attribute=getattr(self, "value_attribute", None),
         )
 
     @functools.cached_property

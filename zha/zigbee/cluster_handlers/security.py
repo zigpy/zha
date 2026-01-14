@@ -328,7 +328,7 @@ class IasWdClusterHandler(ClusterHandler):
 class IASZoneClusterHandler(ClusterHandler):
     """Cluster handler for the IASZone Zigbee cluster."""
 
-    value_attribute: str = IasZone.AttributeDefs.zone_status.name
+    _value_attribute: str = IasZone.AttributeDefs.zone_status.name
 
     ZCL_INIT_ATTRS = {
         IasZone.AttributeDefs.zone_status.name: False,

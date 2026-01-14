@@ -14,7 +14,6 @@ from zhaquirks.quirk_ids import (
 )
 import zigpy.zcl
 from zigpy.zcl.clusters.closures import DoorLock
-from zigpy.zcl.clusters.general import MultistateInput
 from zigpy.zcl.clusters.homeautomation import Diagnostic
 from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
 
@@ -52,6 +51,7 @@ from zha.zigbee.cluster_handlers.const import (
     TUYA_MANUFACTURER_CLUSTER,
     UNKNOWN,
 )
+from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
 
 from .homeautomation import DiagnosticClusterHandler
 from .hvac import ThermostatClusterHandler, UserInterfaceClusterHandler
@@ -506,18 +506,8 @@ class IkeaSymfoniskRemoteClientClusterHandler(ClientClusterHandler):
 @registries.CLUSTER_HANDLER_REGISTRY.register(
     DoorLock.cluster_id, XIAOMI_AQARA_VIBRATION_AQ1
 )
-class XiaomiVibrationAQ1ClusterHandler(ClusterHandler):
+class XiaomiVibrationAQ1ClusterHandler(MultistateInputClusterHandler):
     """Xiaomi DoorLock Cluster is in fact a MultiStateInput Cluster."""
-
-    # TODO: how does this work?
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=MultistateInput.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-    value_attribute: str = MultistateInput.AttributeDefs.present_value.name
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SONOFF_CLUSTER)
@@ -620,6 +610,7 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
         ]:
             self.ZCL_INIT_ATTRS["on_intensity"] = True
 
+    _value_attribute = "action_report"
     REPORT_CONFIG = (
         AttrReportConfig(
             attr="action_report",
@@ -630,7 +621,6 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
             ),
         ),
     )
-    value_attribute = "action_report"
 
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:
