@@ -31,7 +31,13 @@ from zigpy.zcl.foundation import (
     ZCLCommandDef,
 )
 import zigpy.zdo.types as zdo_types
-from zigpy.zdo.types import Neighbor, RouteStatus
+from zigpy.zdo.types import (
+    DeviceType,
+    PermitJoins,
+    Relationship,
+    RouteStatus,
+    RxOnWhenIdle,
+)
 
 from zha.application import Platform, discovery
 from zha.application.const import (
@@ -202,13 +208,13 @@ class DeviceInfo:
 class NeighborInfo:
     """Describes a neighbor."""
 
-    device_type: Neighbor.DeviceType
-    rx_on_when_idle: Neighbor.RxOnWhenIdle
-    relationship: Neighbor.Relationship
+    device_type: DeviceType
+    rx_on_when_idle: RxOnWhenIdle
+    relationship: Relationship
     extended_pan_id: ExtendedPanId
     ieee: EUI64
     nwk: NWK
-    permit_joining: Neighbor.PermitJoins
+    permit_joining: PermitJoins
     depth: uint8_t
     lqi: uint8_t
 
