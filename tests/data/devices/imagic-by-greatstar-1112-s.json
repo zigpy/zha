@@ -229,7 +229,7 @@
               },
               "id": "1:0x0501",
               "unique_id": "ab:cd:ef:12:06:61:9f:d3:1:0x0501",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],

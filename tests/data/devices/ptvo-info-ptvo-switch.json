@@ -397,18 +397,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:1:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:1a:bc:2b:a0",
@@ -440,18 +440,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 2,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "2:0x0006",
-              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:2:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "2:0x0006_client",
+              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:2:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:1a:bc:2b:a0",
@@ -483,18 +483,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 3,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "3:0x0006",
-              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:3:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "3:0x0006_client",
+              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:3:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:1a:bc:2b:a0",
@@ -526,18 +526,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 4,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "4:0x0006",
-              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:4:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "4:0x0006_client",
+              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:4:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:1a:bc:2b:a0",
@@ -569,18 +569,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 5,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "5:0x0006",
-              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:5:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "5:0x0006_client",
+              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:5:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:1a:bc:2b:a0",
@@ -612,18 +612,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 6,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "6:0x0006",
-              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:6:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "6:0x0006_client",
+              "unique_id": "ab:cd:ef:12:1a:bc:2b:a0:6:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:1a:bc:2b:a0",

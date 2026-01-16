@@ -291,7 +291,7 @@
           "unique_id": "28:2c:02:bf:ff:e0:16:01-1-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
-          "class_name": "FirmwareUpdateEntity",
+          "class_name": "FirmwareUpdateServerEntity",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "firmware",
@@ -323,7 +323,7 @@
           "supported_features": 7
         },
         "state": {
-          "class_name": "FirmwareUpdateEntity",
+          "class_name": "FirmwareUpdateServerEntity",
           "available": true,
           "installed_version": null,
           "in_progress": false,

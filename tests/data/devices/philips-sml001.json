@@ -263,7 +263,7 @@
           "unique_id": "00:17:88:01:06:f5:ac:71-1-6",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
-          "class_name": "Motion",
+          "class_name": "PhilipsMotion",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "motion",
@@ -274,18 +274,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "00:17:88:01:06:f5:ac:71:1:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "00:17:88:01:06:f5:ac:71:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "00:17:88:01:06:f5:ac:71",
@@ -295,7 +295,7 @@
           "attribute_name": "on_off"
         },
         "state": {
-          "class_name": "Motion",
+          "class_name": "PhilipsMotion",
           "available": true,
           "state": false
         }

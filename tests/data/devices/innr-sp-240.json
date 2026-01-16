@@ -8,7 +8,7 @@
   "friendly_model": "SP 240",
   "name": "innr SP 240",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.innr.innr_sp240_plug.SP240",
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Mains",
@@ -202,7 +202,7 @@
               "id": "0x0302",
               "name": "divisor",
               "zcl_type": "uint24",
-              "value": 100
+              "value": 1000
             },
             {
               "id": "0x0400",
@@ -523,44 +523,7 @@
       ]
     }
   },
-  "original_signature": {
-    "models_info": [
-      [
-        "innr",
-        "SP 240"
-      ]
-    ],
-    "endpoints": {
-      "1": {
-        "profile_id": "0x0104",
-        "device_type": "0x010a",
-        "input_clusters": [
-          "0x0000",
-          "0x0003",
-          "0x0004",
-          "0x0005",
-          "0x0006",
-          "0x0008",
-          "0x0702",
-          "0x0b04",
-          "0x1000",
-          "0xe001"
-        ],
-        "output_clusters": [
-          "0x000a",
-          "0x0019"
-        ]
-      },
-      "242": {
-        "profile_id": "0xa1e0",
-        "device_type": "0x0061",
-        "input_clusters": [],
-        "output_clusters": [
-          "0x0021"
-        ]
-      }
-    }
-  },
+  "original_signature": {},
   "zha_lib_entities": {
     "button": [
       {
@@ -607,243 +570,6 @@
         "state": {
           "class_name": "IdentifyButton",
           "available": true
-        }
-      }
-    ],
-    "number": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:39:51:53:67-1-8-off_transition_time",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "OffTransitionTimeConfigurationEntity",
-          "translation_key": "off_transition_time",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:39:51:53:67:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:39:51:53:67",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 65534,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "OffTransitionTimeConfigurationEntity",
-          "available": true,
-          "state": 65535
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:39:51:53:67-1-8-on_level",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "OnLevelConfigurationEntity",
-          "translation_key": "on_level",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:39:51:53:67:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:39:51:53:67",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 255,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "OnLevelConfigurationEntity",
-          "available": true,
-          "state": 255
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:39:51:53:67-1-8-on_off_transition_time",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "OnOffTransitionTimeConfigurationEntity",
-          "translation_key": "on_off_transition_time",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:39:51:53:67:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:39:51:53:67",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 65535,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "OnOffTransitionTimeConfigurationEntity",
-          "available": true,
-          "state": 0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:39:51:53:67-1-8-on_transition_time",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "OnTransitionTimeConfigurationEntity",
-          "translation_key": "on_transition_time",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:39:51:53:67:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:39:51:53:67",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 65534,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "OnTransitionTimeConfigurationEntity",
-          "available": true,
-          "state": 65535
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:39:51:53:67-1-8-start_up_current_level",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "StartUpCurrentLevelConfigurationEntity",
-          "translation_key": "start_up_current_level",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:39:51:53:67:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:39:51:53:67",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 255,
-          "native_min_value": 0,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "StartUpCurrentLevelConfigurationEntity",
-          "available": true,
-          "state": 255
         }
       }
     ],
@@ -1009,7 +735,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 1794,
-                "name": "MeteringClusterInnr",
+                "name": "MeteringClusterInnrNew",
                 "type": "server"
               },
               "id": "1:0x0702",
@@ -1028,7 +754,7 @@
         "state": {
           "class_name": "SmartEnergySummation",
           "available": true,
-          "state": 1.43,
+          "state": 0.143,
           "device_type": "Electric Metering",
           "status": "NO_ALARMS",
           "zcl_unit_of_measurement": 0

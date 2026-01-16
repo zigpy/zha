@@ -455,7 +455,7 @@
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": false,
+          "primary": true,
           "cluster_handlers": [
             {
               "class_name": "OnOffClusterHandler",

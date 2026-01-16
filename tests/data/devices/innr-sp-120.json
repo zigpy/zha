@@ -764,7 +764,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 1794,
-                "name": "MeteringClusterInnr",
+                "name": "MeteringClusterInnrOld",
                 "type": "server"
               },
               "id": "1:0x0702",

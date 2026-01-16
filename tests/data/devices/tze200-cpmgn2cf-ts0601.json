@@ -1534,6 +1534,50 @@
       {
         "info_object": {
           "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-513-hvac_action",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ThermostatHVACAction",
+          "translation_key": "hvac_action",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "Thermostat",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:e8:32:c6:e4:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e8:32:c6:e4",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "ThermostatHVACAction",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
           "unique_id": "ab:cd:ef:12:e8:32:c6:e4-1-513-setpoint_change_source",
           "migrate_unique_ids": [],
           "platform": "sensor",

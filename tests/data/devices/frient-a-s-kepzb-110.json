@@ -229,7 +229,7 @@
               },
               "id": "44:0x0501",
               "unique_id": "00:15:bc:00:43:00:4a:39:44:0x0501",
-              "status": "CONFIGURED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],

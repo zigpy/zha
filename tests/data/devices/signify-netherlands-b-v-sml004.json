@@ -281,18 +281,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 2,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "2:0x0006",
-              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "2:0x0006_client",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "00:17:88:01:0c:dc:9d:61",

@@ -386,6 +386,56 @@
           "available": true,
           "state": null
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "24:fd:5b:00:01:01:4f:5d-1-1",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Battery",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "battery",
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "PowerConfigurationClusterHandler",
+              "generic_id": "cluster_handler_0x0001",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 1,
+                "name": "Power Configuration",
+                "type": "server"
+              },
+              "id": "1:0x0001",
+              "unique_id": "24:fd:5b:00:01:01:4f:5d:1:0x0001",
+              "status": "INITIALIZED",
+              "value_attribute": "battery_voltage"
+            }
+          ],
+          "device_ieee": "24:fd:5b:00:01:01:4f:5d",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "Battery",
+          "available": true,
+          "state": 69.0,
+          "battery_voltage": 2.4
+        },
+        "extra_state_attributes": [
+          "battery_quantity",
+          "battery_size",
+          "battery_voltage"
+        ]
       }
     ],
     "update": [
