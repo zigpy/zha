@@ -105,7 +105,7 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
                 attr_def.zcl_type.name if attr_def.zcl_type.name != "bool_" else "bool"
             ),
             "value": cluster.get(attr_def.name),
-            "unsupported": cluster.is_attribute_unsupported(attr_def.id),
+            "unsupported": cluster.is_attribute_unsupported(attr_def),
         }
 
         # Don't unnecessarily list out attributes that are just unread
