@@ -138,7 +138,7 @@ async def test_quirks_v2_entity_discovery(
 
     (
         QuirkBuilder(
-            "Ikea of Sweden", "TRADFRI remote control", zigpy.quirks._DEVICE_REGISTRY
+            "Ikea of Sweden", "TRADFRI remote control", zigpy.quirks.DEVICE_REGISTRY
         )
         .replaces(PowerConfig1CRCluster)
         .replaces(ScenesCluster, cluster_type=ClusterType.Client)
@@ -157,7 +157,7 @@ async def test_quirks_v2_entity_discovery(
         .add_to_registry()
     )
 
-    zigpy_device = zigpy.quirks._DEVICE_REGISTRY.get_device(zigpy_device)
+    zigpy_device = zigpy.quirks.DEVICE_REGISTRY.get_device(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
         "battery_voltage": 3,
         "battery_percentage_remaining": 100,
@@ -259,7 +259,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         manufacturer="LUMI",
         model="lumi.curtain.agl006",
     )
-    aqara_E1_device = zigpy.quirks._DEVICE_REGISTRY.get_device(aqara_E1_device)
+    aqara_E1_device = zigpy.quirks.DEVICE_REGISTRY.get_device(aqara_E1_device)
 
     aqara_E1_device.endpoints[1].opple_cluster.PLUGGED_ATTR_READS = {
         "hand_open": 0,
@@ -344,7 +344,7 @@ def _get_test_device(
     )
 
     quirk_builder = (
-        QuirkBuilder(manufacturer, model, zigpy.quirks._DEVICE_REGISTRY)
+        QuirkBuilder(manufacturer, model, zigpy.quirks.DEVICE_REGISTRY)
         .replaces(PowerConfig1CRCluster)
         .replaces(ScenesCluster, cluster_type=ClusterType.Client)
         .number(
@@ -384,7 +384,7 @@ def _get_test_device(
 
     quirk_builder.add_to_registry()
 
-    zigpy_device = zigpy.quirks._DEVICE_REGISTRY.get_device(zigpy_device)
+    zigpy_device = zigpy.quirks.DEVICE_REGISTRY.get_device(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
         "battery_voltage": 3,
         "battery_percentage_remaining": 100,
@@ -547,7 +547,7 @@ async def test_quirks_v2_metadata_bad_device_classes(
     assert expected_exception_string in caplog.text
 
     # remove the device so we don't pollute the rest of the tests
-    zigpy.quirks._DEVICE_REGISTRY.remove(zigpy_device)
+    zigpy.quirks.DEVICE_REGISTRY.remove(zigpy_device)
 
 
 async def test_quirks_v2_fallback_name(zha_gateway: Gateway) -> None:

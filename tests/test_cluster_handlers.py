@@ -16,7 +16,7 @@ from zhaquirks.xiaomi.aqara.sensor_switch_aq3 import BUTTON_DEVICE_TYPE, SwitchA
 from zigpy.device import Device as ZigpyDevice
 from zigpy.endpoint import Endpoint as ZigpyEndpoint
 import zigpy.profiles.zha
-from zigpy.quirks import _DEVICE_REGISTRY
+from zigpy.quirks import DEVICE_REGISTRY
 import zigpy.types as t
 from zigpy.zcl import foundation
 import zigpy.zcl.clusters
@@ -539,7 +539,7 @@ def test_cluster_handler_registry() -> None:
         cluster_exposed_feature_map[cluster_id] = {None}
 
     # loop over custom clusters in v2 quirks registry
-    for quirks in _DEVICE_REGISTRY.registry_v2.values():
+    for quirks in DEVICE_REGISTRY.registry_v2.values():
         for quirk_reg_entry in quirks:
             # get standalone adds_metadata and adds_metadata from replaces_metadata
             all_metadata = set(quirk_reg_entry.adds_metadata) | {
@@ -549,7 +549,7 @@ def test_cluster_handler_registry() -> None:
                 cluster_exposed_feature_map[metadata.cluster.cluster_id] = {None}
 
     # loop over custom clusters in v1 quirks registry
-    for manufacturer in _DEVICE_REGISTRY.registry_v1.values():
+    for manufacturer in DEVICE_REGISTRY.registry_v1.values():
         for model_quirk_list in manufacturer.values():
             for quirk in model_quirk_list:
                 qid: set[str] | str = getattr(quirk, ATTR_QUIRK_ID, set())
