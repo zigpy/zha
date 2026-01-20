@@ -235,9 +235,9 @@ class Sensor(PlatformEntity):
 
     def _is_supported(self) -> bool:
         if (
-            self._cluster_handler.cluster.is_attribute_unsupported(self._attribute_name)
-            or self._attribute_name
-            not in self._cluster_handler.cluster.attributes_by_name
+            self._attribute_name not in self._cluster_handler.cluster.attributes_by_name
+        ) or self._cluster_handler.cluster.is_attribute_unsupported(
+            self._attribute_name
         ):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
