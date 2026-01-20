@@ -223,7 +223,7 @@ class NumberConfigurationEntity(BaseNumber):
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
         if (
-            self._attribute_name in self._cluster_handler.cluster.unsupported_attributes
+            self._cluster_handler.cluster.is_attribute_unsupported(self._attribute_name)
             or (
                 self._attribute_name
                 not in self._cluster_handler.cluster.attributes_by_name

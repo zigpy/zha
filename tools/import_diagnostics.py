@@ -230,13 +230,13 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                     "0x"
                 ):
                     attrid = int(unsupported_attr, 16)
-                    real_cluster.unsupported_attributes.add(attrid)
+                    real_cluster.add_unsupported_attribute(attrid)
                     if attrid in real_cluster.attributes:
-                        real_cluster.unsupported_attributes.add(
+                        real_cluster.add_unsupported_attribute(
                             real_cluster.attributes[attrid].name
                         )
                 else:
-                    real_cluster.unsupported_attributes.add(unsupported_attr)
+                    real_cluster.add_unsupported_attribute(unsupported_attr)
 
         for cluster_id, cluster in ep["out_clusters"].items():
             try:
@@ -271,13 +271,13 @@ def zigpy_device_from_legacy_diagnostics(  # noqa: C901
                     "0x"
                 ):
                     attrid = int(unsupported_attr, 16)
-                    real_cluster.unsupported_attributes.add(attrid)
+                    real_cluster.add_unsupported_attribute(attrid)
                     if attrid in real_cluster.attributes:
-                        real_cluster.unsupported_attributes.add(
+                        real_cluster.add_unsupported_attribute(
                             real_cluster.attributes[attrid].name
                         )
                 else:
-                    real_cluster.unsupported_attributes.add(unsupported_attr)
+                    real_cluster.add_unsupported_attribute(unsupported_attr)
 
     if device.model is None and device.manufacturer is None:
         return None

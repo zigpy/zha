@@ -241,7 +241,7 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         attrs = [
             attr
             for attr in self.ZCL_POLLING_ATTRS
-            if attr not in self.cluster.unsupported_attributes
+            if not self.cluster.is_attribute_unsupported(attr)
         ]
         await self.get_attributes(attrs, from_cache=False, only_cache=False)
 
