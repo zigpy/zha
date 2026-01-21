@@ -409,49 +409,6 @@ def determine_group_entity_platforms(group: Group) -> list[Platform]:
     return entity_platforms
 
 
-def _match_applies(
-    match: ClusterHandlerMatch,
-    endpoint: Endpoint,
-) -> tuple[set[str], set[str]] | tuple[None, None]:
-    """Check if a match applies to an endpoint and return the match weight."""
-    device = endpoint.device
-
-    # Check required handlers exist
-    if not match.cluster_handlers.issubset(endpoint.cluster_handlers_by_name.keys()):
-        return None, None
-
-    if not match.client_cluster_handlers.issubset(
-        endpoint.client_cluster_handlers_by_name.keys()
-    ):
-        return None, None
-
-    if (
-        match.exposed_features is not None
-        and not match.exposed_features & device.exposes_features
-    ):
-        return None, None
-
-    if (
-        match.manufacturers is not None
-        and device.manufacturer not in match.manufacturers
-    ):
-        return None, None
-
-    if match.models is not None and device.model not in match.models:
-        return None, None
-
-    # Build handler set: required + available optional
-    server_handlers = set(match.cluster_handlers)
-
-    for opt in match.optional_cluster_handlers:
-        if opt in endpoint.cluster_handlers_by_name:
-            server_handlers.add(opt)
-
-    client_handlers = set(match.client_cluster_handlers)
-
-    return server_handlers, client_handlers
-
-
 def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
@@ -472,10 +429,38 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         if match is None:
             continue
 
-        server_handlers, client_handlers = _match_applies(match, endpoint)
-
-        if server_handlers is None or client_handlers is None:
+        if not match.cluster_handlers.issubset(
+            endpoint.cluster_handlers_by_name.keys()
+        ):
             continue
+
+        if not match.client_cluster_handlers.issubset(
+            endpoint.client_cluster_handlers_by_name.keys()
+        ):
+            continue
+
+        if (
+            match.exposed_features is not None
+            and not match.exposed_features & device.exposes_features
+        ):
+            continue
+
+        if (
+            match.manufacturers is not None
+            and device.manufacturer not in match.manufacturers
+        ):
+            continue
+
+        if match.models is not None and device.model not in match.models:
+            continue
+
+        server_handlers = set(match.cluster_handlers)
+
+        for optional in match.optional_cluster_handlers:
+            if optional in endpoint.cluster_handlers_by_name:
+                server_handlers.add(optional)
+
+        client_handlers = set(match.client_cluster_handlers)
 
         server_cluster_handlers = [
             endpoint.cluster_handlers_by_name[name] for name in server_handlers
