@@ -1862,6 +1862,11 @@ class ThermostatHVACAction(Sensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
+        if endpoint.device.manufacturer in {
+            "Sinope Technologies",
+        }:
+            return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
         )
