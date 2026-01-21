@@ -1410,6 +1410,9 @@ class SmartEnergySummation(SmartEnergyMetering):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
+        if endpoint.device.model in {"TS011F", "ZLinky_TIC", "TICMeter"}:
+            return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
         )
@@ -1741,6 +1744,9 @@ class VOCLevel(Sensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
+        if endpoint.device.model in {"lumi.airmonitor.acn01"}:
+            return None
+
         # Match either quirked handler name or generic_id for cluster 0x042e
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"voc_level"}),

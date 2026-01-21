@@ -234,10 +234,17 @@ class Opening(BinarySensor):
         }:
             return None
 
-        if IkeaMotion.match_cluster_handlers(endpoint) is not None:
+        if endpoint.device.manufacturer == "Philips" and endpoint.device.model in {
+            "SML001",
+            "SML002",
+        }:
             return None
 
-        if PhilipsMotion.match_cluster_handlers(endpoint) is not None:
+        if (
+            endpoint.device.manufacturer == "IKEA of Sweden"
+            and endpoint.device.model
+            and "motion" in endpoint.device.model
+        ):
             return None
 
         return ClusterHandlerMatch(

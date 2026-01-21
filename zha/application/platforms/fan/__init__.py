@@ -270,6 +270,12 @@ class Fan(BaseFan, PlatformEntity):
         if Thermostat.cluster_id in endpoint.zigpy_endpoint.in_clusters:
             return None
 
+        if endpoint.device.model in {
+            "HBUniversalCFRemote",
+            "HDC52EastwindFan",
+        }:
+            return None
+
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}))
 
     def on_add(self) -> None:
