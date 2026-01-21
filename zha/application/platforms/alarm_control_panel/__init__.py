@@ -32,7 +32,7 @@ from zha.zigbee.cluster_handlers.const import (
 )
 from zha.zigbee.cluster_handlers.security import (
     ClusterHandlerStateChangedEvent,
-    IasAceClusterHandler,
+    IasAceClientClusterHandler,
 )
 
 if TYPE_CHECKING:
@@ -70,8 +70,8 @@ class AlarmControlPanel(PlatformEntity):
         """Initialize the ZHA alarm control device."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
         alarm_options = device.gateway.config.config.alarm_control_panel_options
-        self._cluster_handler: IasAceClusterHandler = cast(
-            IasAceClusterHandler, cluster_handlers[0]
+        self._cluster_handler: IasAceClientClusterHandler = cast(
+            IasAceClientClusterHandler, cluster_handlers[0]
         )
         self._cluster_handler.panel_code = alarm_options.master_code
         self._cluster_handler.code_required_arm_actions = (

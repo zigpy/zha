@@ -18,7 +18,12 @@ from zigpy.zcl.clusters.security import (
 )
 
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import ClusterHandler, ClusterHandlerStatus, registries
+from zha.zigbee.cluster_handlers import (
+    ClientClusterHandler,
+    ClusterHandler,
+    ClusterHandlerStatus,
+    registries,
+)
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_STATE_CHANGED
 
 if TYPE_CHECKING:
@@ -37,7 +42,7 @@ class ClusterHandlerStateChangedEvent:
 
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
-class IasAceClusterHandler(ClusterHandler):
+class IasAceClientClusterHandler(ClientClusterHandler):
     """IAS Ancillary Control Equipment cluster handler."""
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
