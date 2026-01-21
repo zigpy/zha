@@ -24,6 +24,7 @@ from zha.application.platforms import (
     GroupEntity,
     PlatformEntity,
     register_entity,
+    register_group_entity,
 )
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
@@ -289,6 +290,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
             self.maybe_emit_state_changed_event()
 
 
+@register_group_entity
 class SwitchGroup(GroupEntity, BaseSwitch):
     """Representation of a switch group."""
 

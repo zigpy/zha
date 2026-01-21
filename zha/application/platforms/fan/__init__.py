@@ -19,6 +19,7 @@ from zha.application.platforms import (
     GroupEntity,
     PlatformEntity,
     register_entity,
+    register_group_entity,
 )
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
@@ -315,6 +316,7 @@ class Fan(BaseFan, PlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
+@register_group_entity
 class FanGroup(BaseFan, GroupEntity):
     """Representation of a fan group."""
 

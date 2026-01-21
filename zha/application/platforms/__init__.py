@@ -35,6 +35,7 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 
 ENTITY_REGISTRY: list[type[PlatformEntity]] = []
+GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
 @dataclasses.dataclass(frozen=True)
@@ -55,6 +56,12 @@ class ClusterHandlerMatch:
 def register_entity(cls: type[PlatformEntity]) -> type[PlatformEntity]:
     """Register an entity class for discovery."""
     ENTITY_REGISTRY.append(cls)
+    return cls
+
+
+def register_group_entity(cls: type[GroupEntity]) -> type[GroupEntity]:
+    """Register a group entity class for discovery."""
+    GROUP_ENTITY_REGISTRY.append(cls)
     return cls
 
 

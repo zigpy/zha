@@ -29,6 +29,7 @@ from zha.application.platforms import (
     GroupEntity,
     PlatformEntity,
     register_entity,
+    register_group_entity,
 )
 from zha.application.platforms.helpers import (
     find_state_attributes,
@@ -1215,6 +1216,7 @@ class MinTransitionLight(Light):
         )
 
 
+@register_group_entity
 class LightGroup(BaseClusterHandlerLight, GroupEntity):
     """Representation of a light group."""
 

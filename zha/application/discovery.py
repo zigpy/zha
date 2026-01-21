@@ -25,6 +25,7 @@ from zigpy.zcl import ClusterType
 from zha.application import Platform, const as zha_const
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     ENTITY_REGISTRY,
+    GROUP_ENTITY_REGISTRY,
     BaseEntity,
     ClusterHandlerMatch,
     PlatformEntity,
@@ -200,23 +201,16 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
         group.group_entities.clear()
         return
 
-    entity_platforms = determine_group_entity_platforms(group)
-
-    if not entity_platforms:
-        _LOGGER.info("No entity platforms discovered for group %s", group.name)
-        return
-
-    for platform in entity_platforms:
-        # TODO: implement group entities
-        if False:
-            yield  # type: ignore[unreachable]
-
-        break
-        # entity_class = PLATFORM_ENTITIES.get_group_entity(platform)
-        # if entity_class is None:
-        #     continue
-        # _LOGGER.info("Creating entity : %s for group %s", entity_class, group.name)
-        # yield entity_class(group)
+    for platform in determine_group_entity_platforms(group):
+        for group_entity_class in GROUP_ENTITY_REGISTRY:
+            if platform != group_entity_class.PLATFORM:
+                continue
+            _LOGGER.info(
+                "Creating group entity %s for group %s",
+                group_entity_class,
+                group.name,
+            )
+            yield group_entity_class(group)
 
 
 def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
