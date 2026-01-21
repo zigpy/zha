@@ -805,8 +805,6 @@ class InovelliQuickStartTime(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"VZM35-SN"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
             models=frozenset({"VZM35-SN"}),
@@ -962,8 +960,6 @@ class AqaraPetFeederServingSize(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"aqara.feeder.acn001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"aqara.feeder.acn001"}),
@@ -987,8 +983,6 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"aqara.feeder.acn001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"aqara.feeder.acn001"}),
@@ -1013,8 +1007,6 @@ class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.airrtc.agl001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -1055,8 +1047,6 @@ class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"TRVZB"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             models=frozenset({"TRVZB"}),
@@ -1074,13 +1064,6 @@ class BoschThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {
-            "RBSH-RTH0-ZB-EU",
-            "RBSH-TRV0-ZB-EU",
-            "RBSH-TRV1-ZB-EU",
-            "RBSH-RTH0-BAT-ZB-EU",
-        }:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             models=frozenset(
@@ -1110,8 +1093,6 @@ class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"SNZB-06P", "SNZB-03P"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY}),
             models=frozenset({"SNZB-06P", "SNZB-03P"}),

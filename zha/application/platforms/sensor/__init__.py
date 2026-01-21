@@ -571,8 +571,6 @@ class DigiAnalogInput(Sensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "Digi":
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
             manufacturers=frozenset({"Digi"}),
@@ -1786,8 +1784,6 @@ class PPBVOCLevel(Sensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model != "lumi.airmonitor.acn01":
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"voc_level"}),
             models=frozenset({"lumi.airmonitor.acn01"}),
@@ -1950,8 +1946,6 @@ class SinopeHVACAction(ThermostatHVACAction):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "Sinope Technologies":
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset({"Sinope Technologies"}),
@@ -2110,8 +2104,6 @@ class TimeLeft(Sensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer not in {"_TZE200_htnnfasr"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"tuya_manufacturer"}),
             manufacturers=frozenset({"_TZE200_htnnfasr"}),

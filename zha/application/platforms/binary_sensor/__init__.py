@@ -303,11 +303,7 @@ class IkeaMotion(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            endpoint.device.manufacturer != "IKEA of Sweden"
-            or not endpoint.device.model
-            or "motion" not in endpoint.device.model
-        ):
+        if not endpoint.device.model or "motion" not in endpoint.device.model:
             return None
 
         return ClusterHandlerMatch(
@@ -327,10 +323,6 @@ class PhilipsMotion(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "Philips":
-            return None
-        if endpoint.device.model not in {"SML001", "SML002"}:
-            return None
         return ClusterHandlerMatch(
             client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Philips"}),
@@ -389,8 +381,6 @@ class SinopeLeakStatus(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"WL4200", "WL4200S"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ZONE}),
             models=frozenset({"WL4200", "WL4200S"}),
@@ -409,8 +399,6 @@ class FrostLock(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer not in {"_TZE200_htnnfasr"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"tuya_manufacturer"}),
             manufacturers=frozenset({"_TZE200_htnnfasr"}),
@@ -444,8 +432,6 @@ class AqaraPetFeederErrorDetected(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"aqara.feeder.acn001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"aqara.feeder.acn001"}),
@@ -464,8 +450,6 @@ class XiaomiPlugConsumerConnected(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.plug.mmeu01", "lumi.plug.maeu01"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
@@ -483,8 +467,6 @@ class AqaraThermostatWindowOpen(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.airrtc.agl001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -503,8 +485,6 @@ class AqaraThermostatValveAlarm(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.airrtc.agl001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -523,8 +503,6 @@ class AqaraThermostatCalibrated(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.airrtc.agl001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -543,8 +521,6 @@ class AqaraThermostatExternalSensor(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.airrtc.agl001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -563,8 +539,6 @@ class AqaraLinkageAlarmState(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.sensor_smoke.acn03"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.sensor_smoke.acn03"}),
@@ -583,8 +557,6 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"lumi.curtain.agl001"}:
-            return None
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.curtain.agl001"}),

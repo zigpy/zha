@@ -396,12 +396,6 @@ class IkeaFan(BaseFan, PlatformEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {
-            "STARKVIND Air purifier",
-            "STARKVIND Air purifier table",
-        }:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
             models=frozenset(
@@ -492,9 +486,6 @@ class KofFan(Fan):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.model not in {"HBUniversalCFRemote", "HDC52EastwindFan"}:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
             models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),

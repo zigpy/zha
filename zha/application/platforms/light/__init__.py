@@ -1101,15 +1101,12 @@ class HueLight(Light):
         }:
             return None
 
-        # No collision with `HueLight`
-        if endpoint.device.manufacturer not in {"Philips", "Signify Netherlands B.V."}:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
             ),
+            manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
@@ -1145,19 +1142,19 @@ class ForceOnLight(Light):
         }:
             return None
 
-        if endpoint.device.manufacturer not in {
-            "Jasco",
-            "Jasco Products",
-            "Quotra-Vision",
-            "eWeLight",
-            "eWeLink",
-        }:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+            ),
+            manufacturers=frozenset(
+                {
+                    "Jasco",
+                    "Jasco Products",
+                    "Quotra-Vision",
+                    "eWeLight",
+                    "eWeLink",
+                }
             ),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
@@ -1195,14 +1192,12 @@ class MinTransitionLight(Light):
         }:
             return None
 
-        if endpoint.device.manufacturer not in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
             ),
+            manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 

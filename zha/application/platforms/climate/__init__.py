@@ -537,9 +537,6 @@ class SinopeTechnologiesThermostat(Thermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "Sinope Technologies":
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"}
@@ -642,9 +639,6 @@ class ZenWithinThermostat(Thermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer not in {"Zen Within", "LUX"}:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
@@ -676,12 +670,6 @@ class ZehnderThermostat(Thermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer not in {
-            "ZEHNDER GROUP VAUX ANDIGNY      ",
-            "ZEHNDER GROUP VAUX ANDIGNY",
-        }:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset(
@@ -747,12 +735,6 @@ class CentralitePearl(ZenWithinThermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            endpoint.device.manufacturer != "Centralite"
-            or endpoint.device.model not in {"3157100", "3157100-E"}
-        ):
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
@@ -792,9 +774,6 @@ class MoesThermostat(Thermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer not in MOES_MANUFACTURERS:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=MOES_MANUFACTURERS,
@@ -885,9 +864,6 @@ class BecaThermostat(Thermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "_TZE200_b6wax7g0":
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset({"_TZE200_b6wax7g0"}),
@@ -971,9 +947,6 @@ class StelproFanHeater(Thermostat):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "Stelpro" or endpoint.device.model != "SORB":
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset({"Stelpro"}),

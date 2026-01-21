@@ -885,9 +885,6 @@ class KeenVent(Shade):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if endpoint.device.manufacturer != "Keen Home Inc":
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Keen Home Inc"}),
