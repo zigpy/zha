@@ -779,9 +779,16 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self.recompute_capabilities()
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
+        # Respect platform override unconditionally
+        if platform_override is not None and platform_override is not Platform.LIGHT:
+            return None
+
+        # Only match light device types (unless overridden)
+        if platform_override is None and (
             endpoint.zigpy_endpoint.profile_id,
             endpoint.zigpy_endpoint.device_type,
         ) not in {
@@ -1077,7 +1084,9 @@ class HueLight(Light):
     _REFRESH_INTERVAL = (180, 300)
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         if (
             endpoint.zigpy_endpoint.profile_id,
@@ -1098,7 +1107,7 @@ class HueLight(Light):
             (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
             (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
             (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-        }:
+        } and platform_override is not Platform.LIGHT:
             return None
 
         return ClusterHandlerMatch(
@@ -1118,7 +1127,9 @@ class ForceOnLight(Light):
     _FORCE_ON = True
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         if (
             endpoint.zigpy_endpoint.profile_id,
@@ -1139,7 +1150,7 @@ class ForceOnLight(Light):
             (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
             (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
             (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-        }:
+        } and platform_override is not Platform.LIGHT:
             return None
 
         return ClusterHandlerMatch(
@@ -1168,7 +1179,9 @@ class MinTransitionLight(Light):
     _DEFAULT_MIN_TRANSITION_TIME = 0.1
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         if (
             endpoint.zigpy_endpoint.profile_id,
@@ -1189,7 +1202,7 @@ class MinTransitionLight(Light):
             (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
             (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
             (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-        }:
+        } and platform_override is not Platform.LIGHT:
             return None
 
         return ClusterHandlerMatch(

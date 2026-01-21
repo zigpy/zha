@@ -263,7 +263,9 @@ class Fan(BaseFan, PlatformEntity):
         self.recompute_capabilities()
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
 
         # Thermostat entities take over the fan cluster, we don't need two entities
@@ -400,7 +402,9 @@ class IkeaFan(BaseFan, PlatformEntity):
         )
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
@@ -490,7 +494,9 @@ class KofFan(Fan):
     )
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),

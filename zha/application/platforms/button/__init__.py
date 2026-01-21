@@ -117,7 +117,9 @@ class IdentifyButton(Button):
     _args = [DEFAULT_DURATION]
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_IDENTIFY})
@@ -187,7 +189,9 @@ class FrostLockResetButton(WriteAttributeButton):
     _attr_translation_key = "reset_frost_lock"
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"tuya_manufacturer"}),
@@ -207,7 +211,9 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
     _attr_translation_key = "reset_no_presence_status"
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -225,7 +231,9 @@ class AqaraPetFeederFeedButton(WriteAttributeButton):
     _attr_translation_key = "feed"
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -244,7 +252,9 @@ class AqaraSelfTestButton(WriteAttributeButton):
     _attr_translation_key = "self_test"
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),

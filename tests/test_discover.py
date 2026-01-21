@@ -8,7 +8,7 @@ import json
 import pathlib
 import re
 from unittest import mock
-from unittest.mock import AsyncMock, call
+from unittest.mock import AsyncMock
 import warnings
 
 import pytest
@@ -51,14 +51,13 @@ from tests.common import (
     join_zigpy_device,
     update_attribute_cache,
     zigpy_device_from_device_data,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
 from zha.application.platforms.number import BaseNumber, NumberMode
-from zha.zigbee.cluster_handlers import ClusterHandler
-from zha.zigbee.endpoint import Endpoint
 
 
 def _get_identify_cluster(zigpy_device):
@@ -67,126 +66,45 @@ def _get_identify_cluster(zigpy_device):
             return endpoint.identify
 
 
-def test_discover_by_device_type_override() -> None:
-    """Test entity discovery by device type overriding."""
-
-    device = mock.MagicMock()
-    device.ieee = zigpy.types.EUI64.convert("00:11:22:33:44:55:66:77")
-
-    endpoint = mock.MagicMock(spec_set=Endpoint)
-    endpoint.id = 1
-    endpoint.device = device
-
-    entity_cls = mock.MagicMock()
-
-    get_entity_mock = mock.MagicMock(return_value=(entity_cls, mock.sentinel.claimed))
-    with (
-        mock.patch(
-            "zha.application.registries.PLATFORM_ENTITIES.get_entity",
-            get_entity_mock,
-        ),
-    ):
-        entities = list(
-            endpoint_discover_by_device_type(
-                endpoint,
-                device_overrides={
-                    "00:11:22:33:44:55:66:77-1": DeviceOverridesConfiguration(
-                        type=Platform.SIREN
-                    )
-                },
-            )
-        )
-
-        assert len(entities) == 1
-        assert entity_cls.mock_calls == [
-            call(
-                endpoint=endpoint,
-                device=device,
-                cluster_handlers=mock.sentinel.claimed,
-                legacy_discovery_unique_id="00:11:22:33:44:55:66:77-1",
-            )
-        ]
-
-        assert get_entity_mock.mock_calls[0].args[0] == Platform.SIREN
-
-
-def test_discover_probe_single_cluster() -> None:
-    """Test entity discovery by single cluster."""
-
-    endpoint = mock.MagicMock(spec_set=Endpoint)
-    ep_mock = mock.PropertyMock()
-    ep_mock.return_value.profile_id = 0x0104
-    ep_mock.return_value.device_type = 0x0100
-    type(endpoint).zigpy_endpoint = ep_mock
-
-    entity_cls = mock.MagicMock()
-    get_entity_mock = mock.MagicMock(return_value=(entity_cls, mock.sentinel.claimed))
-    cluster_handler_mock = mock.MagicMock(spec_set=ClusterHandler)
-    with mock.patch(
-        "zha.application.registries.PLATFORM_ENTITIES.get_entity",
-        get_entity_mock,
-    ):
-        for _entity in probe_single_cluster(
-            Platform.SWITCH, cluster_handler_mock, endpoint
-        ):
-            pass
-
-    assert entity_cls.mock_calls == [
-        call(
-            endpoint=endpoint,
-            device=endpoint.device,
-            cluster_handlers=mock.sentinel.claimed,
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}-{cluster_handler_mock.cluster.cluster_id}",
-        )
-    ]
-
-    assert get_entity_mock.mock_calls[0].args[0] == Platform.SWITCH
-
-
-def _ch_mock(cluster):
-    """Return mock of a cluster_handler with a cluster."""
-    cluster_handler = mock.MagicMock()
-    type(cluster_handler).cluster = mock.PropertyMock(
-        return_value=cluster(mock.MagicMock())
-    )
-    return cluster_handler
-
-
-@pytest.mark.parametrize("override", [None, "switch"])
+@pytest.mark.parametrize("override_platform", [Platform.SWITCH, Platform.LIGHT])
 async def test_device_override(
-    zha_gateway: Gateway,
-    override: str | None,
+    zha_gateway: Gateway, override_platform: Platform
 ) -> None:
     """Test device discovery override."""
 
-    zigpy_device = create_mock_zigpy_device(
-        zha_gateway,
-        {
-            1: {
-                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.COLOR_DIMMABLE_LIGHT,
-                "endpoint_id": 1,
-                SIG_EP_INPUT: [0, 3, 4, 5, 6, 8, 768, 2821, 64513],
-                SIG_EP_OUTPUT: [25],
-                SIG_EP_PROFILE: 260,
-            }
-        },
-        "00:11:22:33:44:55:66:77",
-        "manufacturer",
-        "model",
-        patch_cluster=False,
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/sonoff-basiczbr3.json",
     )
 
-    if override is not None:
-        overrides = {
-            "00:11:22:33:44:55:66:77-1": DeviceOverridesConfiguration(type=override)
-        }
-        zha_gateway.config.config.device_overrides = overrides
+    zha_gateway.config.config.device_overrides = {
+        f"{zigpy_device.ieee}-1": DeviceOverridesConfiguration(type=override_platform)
+    }
 
-    await zha_gateway.async_device_initialized(zigpy_device)
-    await zha_gateway.async_block_till_done()
-    zha_device = zha_gateway.get_device(zigpy_device.ieee)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    get_entity(zha_device, platform=Platform.SWITCH if override else Platform.LIGHT)
+    # The overridden entity exists
+    entity = get_entity(
+        zha_device,
+        platform=override_platform,
+        qualifier_func=(
+            lambda entity: entity.cluster_handlers["on_off"].cluster
+            == zigpy_device.endpoints[1].on_off
+        ),
+    )
+
+    # The original one does not
+    with pytest.raises(KeyError):
+        get_entity(
+            zha_device,
+            platform=(
+                Platform.LIGHT
+                if override_platform == Platform.SWITCH
+                else Platform.SWITCH
+            ),
+            qualifier_func=lambda entity: entity.cluster_handlers["on_off"].cluster
+            == zigpy_device.endpoints[1].on_off,
+        )
 
 
 async def test_quirks_v2_entity_discovery(

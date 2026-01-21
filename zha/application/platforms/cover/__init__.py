@@ -170,7 +170,9 @@ class Cover(BaseCover):
         self._determine_cover_state(refresh=True)
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
@@ -729,7 +731,9 @@ class Shade(BaseCover):
         self.recompute_capabilities()
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset(
@@ -883,7 +887,9 @@ class KeenVent(Shade):
     _attr_translation_key: str = "keen_vent"
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),

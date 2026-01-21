@@ -73,7 +73,9 @@ class DeviceScannerEntity(PlatformEntity):
         self._battery_level: float | None = None
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         if (
             endpoint.zigpy_endpoint.device_type

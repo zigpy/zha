@@ -123,7 +123,9 @@ class Thermostat(PlatformEntity):
         self.recompute_capabilities()
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         # Exclude manufacturers with specific thermostat implementations
         if endpoint.device.manufacturer in {
@@ -587,7 +589,9 @@ class SinopeTechnologiesThermostat(Thermostat):
         self._time_update_task: Task | None = None
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset(
@@ -689,7 +693,9 @@ class ZenWithinThermostat(Thermostat):
     """Zen Within Thermostat implementation."""
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -720,7 +726,9 @@ class ZehnderThermostat(Thermostat):
     hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -785,7 +793,9 @@ class CentralitePearl(ZenWithinThermostat):
     """Centralite Pearl Thermostat implementation."""
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -824,7 +834,9 @@ class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -914,7 +926,9 @@ class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -997,7 +1011,9 @@ class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -1042,7 +1058,9 @@ class ZONNSMARTThermostat(Thermostat):
     PRESET_FROST = "frost protect"
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
 
         return ClusterHandlerMatch(

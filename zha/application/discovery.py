@@ -464,8 +464,19 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
 
+    # TODO: deprecate device platform overrides. The only use case is to swap between
+    # `light` and `switch` for devices whose device type is incorrect.
+    platform_override: Platform | None = None
+
+    if (
+        device_override := device.gateway.config.config.device_overrides.get(
+            f"{device.ieee}-{endpoint.id}"
+        )
+    ) is not None:
+        platform_override = device_override.type
+
     for entity_class in ENTITY_REGISTRY:
-        match = entity_class.match_cluster_handlers(endpoint)
+        match = entity_class.match_cluster_handlers(endpoint, platform_override)
         if match is None:
             continue
 

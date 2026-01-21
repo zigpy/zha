@@ -80,7 +80,9 @@ class AlarmControlPanel(PlatformEntity):
         self._cluster_handler.max_invalid_tries = alarm_options.failed_tries
 
     @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(
+        cls, endpoint: Endpoint, platform_override: Platform | None
+    ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
