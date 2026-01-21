@@ -445,6 +445,15 @@ def _match_applies(
     ):
         return None, None
 
+    if (
+        match.manufacturers is not None
+        and device.manufacturer not in match.manufacturers
+    ):
+        return None, None
+
+    if match.models is not None and device.model not in match.models:
+        return None, None
+
     # Build handler set: required + available optional
     server_handlers = set(match.cluster_handlers)
 
