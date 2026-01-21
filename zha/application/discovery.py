@@ -139,11 +139,16 @@ def discover_device_entities(device: Device) -> Iterator[BaseEntity]:
     assert not device.is_active_coordinator
 
     for ep_id, endpoint in device.endpoints.items():
-        if ep_id != 0:
-            yield from endpoint_discover_entities(
-                endpoint,
-                device.gateway.config.config.device_overrides,
-            )
+        if ep_id == 0:
+            continue
+
+        _LOGGER.debug(
+            "Discovering entities for endpoint: %s-%s",
+            str(endpoint.device.ieee),
+            endpoint.id,
+        )
+
+        yield from discover_entities_for_endpoint(endpoint)
 
     yield from discover_quirks_v2_entities(device)
 
@@ -220,17 +225,6 @@ def endpoint_discover_entities(
     device_overrides: dict[str, DeviceOverridesConfiguration],
 ) -> Iterator[PlatformEntity]:
     """Process an endpoint on a zigpy device."""
-
-    if endpoint.device.is_coordinator:
-        return
-
-    _LOGGER.debug(
-        "Discovering entities for endpoint: %s-%s",
-        str(endpoint.device.ieee),
-        endpoint.id,
-    )
-
-    yield from discover_entities_for_endpoint(endpoint)
 
 
 def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
@@ -466,9 +460,7 @@ def _match_applies(
     return server_handlers, client_handlers
 
 
-def discover_entities_for_endpoint(
-    endpoint: Endpoint,
-) -> Iterator[PlatformEntity]:
+def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
 

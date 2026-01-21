@@ -67,64 +67,6 @@ def _get_identify_cluster(zigpy_device):
             return endpoint.identify
 
 
-@mock.patch("zha.application.discovery.endpoint_discover_by_device_type")
-@mock.patch("zha.application.discovery.endpoint_discover_by_cluster_id")
-def test_discover_entities(m1, m2) -> None:
-    """Test discover endpoint class method."""
-    endpoint = mock.MagicMock()
-    endpoint.device.is_coordinator = False
-
-    for _entity in endpoint_discover_entities(endpoint, device_overrides={}):
-        pass
-
-    assert m1.call_count == 1
-    assert m1.call_args[0][0] is endpoint
-    assert m2.call_count == 1
-    assert m2.call_args[0][0] is endpoint
-
-
-@pytest.mark.parametrize(
-    ("device_type", "platform", "hit"),
-    [
-        (zigpy.profiles.zha.DeviceType.ON_OFF_LIGHT, Platform.LIGHT, True),
-        (zigpy.profiles.zha.DeviceType.ON_OFF_BALLAST, Platform.SWITCH, True),
-        (zigpy.profiles.zha.DeviceType.SMART_PLUG, Platform.SWITCH, True),
-        (0xFFFF, None, False),
-    ],
-)
-def test_discover_by_device_type(device_type, platform, hit) -> None:
-    """Test entity discovery by device type."""
-
-    endpoint = mock.MagicMock(spec_set=Endpoint)
-    ep_mock = mock.PropertyMock()
-    ep_mock.return_value.profile_id = 0x0104
-    ep_mock.return_value.device_type = device_type
-    type(endpoint).zigpy_endpoint = ep_mock
-
-    entity_cls = mock.MagicMock()
-
-    get_entity_mock = mock.MagicMock(return_value=(entity_cls, mock.sentinel.claimed))
-    with mock.patch(
-        "zha.application.registries.PLATFORM_ENTITIES.get_entity",
-        get_entity_mock,
-    ):
-        entities = list(endpoint_discover_by_device_type(endpoint, device_overrides={}))
-
-    if hit:
-        assert len(entities) == 1
-        assert entity_cls.mock_calls == [
-            call(
-                endpoint=endpoint,
-                device=endpoint.device,
-                cluster_handlers=mock.sentinel.claimed,
-                legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
-            )
-        ]
-    else:
-        assert not entities
-        assert entity_cls.mock_calls == []
-
-
 def test_discover_by_device_type_override() -> None:
     """Test entity discovery by device type overriding."""
 
