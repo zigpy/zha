@@ -5,19 +5,10 @@ from unittest.mock import AsyncMock, call, patch, sentinel
 
 import pytest
 from zigpy.device import Device as ZigpyDevice
-from zigpy.profiles import zha
 from zigpy.zcl.clusters import security
 import zigpy.zcl.foundation as zcl_f
-import zigpy.zdo.types as zdo_t
 
-from tests.common import (
-    SIG_EP_INPUT,
-    SIG_EP_OUTPUT,
-    SIG_EP_PROFILE,
-    SIG_EP_TYPE,
-    create_mock_zigpy_device,
-    join_zigpy_device,
-)
+from tests.common import join_zigpy_device, zigpy_device_from_json
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms.alarm_control_panel import AlarmControlPanel
@@ -25,16 +16,6 @@ from zha.application.platforms.alarm_control_panel.const import AlarmState
 from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
-
-
-ZIGPY_DEVICE = {
-    1: {
-        SIG_EP_INPUT: [security.IasAce.cluster_id],
-        SIG_EP_OUTPUT: [],
-        SIG_EP_TYPE: zha.DeviceType.IAS_ANCILLARY_CONTROL,
-        SIG_EP_PROFILE: zha.PROFILE_ID,
-    }
-}
 
 
 @patch(
@@ -46,33 +27,19 @@ async def test_alarm_control_panel(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test zhaws alarm control panel platform."""
-    zigpy_device: ZigpyDevice = create_mock_zigpy_device(
-        zha_gateway,
-        ZIGPY_DEVICE,
-        node_descriptor=zdo_t.NodeDescriptor(
-            logical_type=zdo_t.LogicalType.EndDevice,
-            complex_descriptor_available=0,
-            user_descriptor_available=0,
-            reserved=0,
-            aps_flags=0,
-            frequency_band=zdo_t.NodeDescriptor.FrequencyBand.Freq2400MHz,
-            mac_capability_flags=(
-                zdo_t.NodeDescriptor.MACCapabilityFlags.MainsPowered
-                | zdo_t.NodeDescriptor.MACCapabilityFlags.RxOnWhenIdle
-                | zdo_t.NodeDescriptor.MACCapabilityFlags.AllocateAddress
-            ),
-            manufacturer_code=4098,
-            maximum_buffer_size=82,
-            maximum_incoming_transfer_size=82,
-            server_mask=0,
-            maximum_outgoing_transfer_size=82,
-            descriptor_capability_field=zdo_t.NodeDescriptor.DescriptorCapability.NONE,
-        ),
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
     )
     zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
-    cluster: security.IasAce = zigpy_device.endpoints.get(1).ias_ace
+    cluster: security.IasAce = zigpy_device.endpoints[44].out_clusters[
+        security.IasAce.cluster_id
+    ]
     alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
-        (Platform.ALARM_CONTROL_PANEL, "00:0d:6f:00:0a:90:69:e7-1")
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
     )
     assert alarm_entity is not None
     assert isinstance(alarm_entity, AlarmControlPanel)
