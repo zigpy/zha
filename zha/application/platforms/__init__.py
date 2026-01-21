@@ -391,11 +391,12 @@ class PlatformEntity(BaseEntity):
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
     @classmethod
+    @abstractmethod
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Check if this entity class matches the given endpoint."""
-        return None
+        raise NotImplementedError
 
     def __init__(
         self,
