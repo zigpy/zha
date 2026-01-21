@@ -49,6 +49,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
 # importing cluster handlers updates registries
 from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-import
     AttrReportConfig,
+    ClientClusterHandler,
     ClusterHandler,
     closures,
     general,
@@ -425,54 +426,35 @@ def determine_group_entity_platforms(group: Group) -> list[Platform]:
 def _match_applies(
     match: ClusterHandlerMatch,
     endpoint: Endpoint,
-) -> tuple[int, set[str], set[str]] | tuple[None, None, None]:
+) -> tuple[set[str], set[str]] | tuple[None, None]:
     """Check if a match applies to an endpoint and return the match weight."""
     device = endpoint.device
-    weight = 0
 
     # Check required handlers exist
     if not match.cluster_handlers.issubset(endpoint.cluster_handlers_by_name.keys()):
-        return None, None, None
+        return None, None
 
     if not match.client_cluster_handlers.issubset(
         endpoint.client_cluster_handlers_by_name.keys()
     ):
-        return None, None, None
+        return None, None
 
-    weight += 10 * len(match.cluster_handlers)
-    weight += 10 * len(match.client_cluster_handlers)
-
-    # Check device filters
-    if match.manufacturers is not None:
-        if device.manufacturer not in match.manufacturers:
-            return None, None, None
-
-        weight += 301 - len(match.manufacturers)
-
-    if match.models is not None:
-        if device.model not in match.models:
-            return None, None, None
-
-        weight += 401 - len(match.models)
-
-    if match.exposed_features is not None:
-        if not match.exposed_features & device.exposes_features:
-            return None, None, None
-
-        weight += 501 - len(match.exposed_features)
+    if (
+        match.exposed_features is not None
+        and not match.exposed_features & device.exposes_features
+    ):
+        return None, None
 
     # Build handler set: required + available optional
     server_handlers = set(match.cluster_handlers)
+
     for opt in match.optional_cluster_handlers:
         if opt in endpoint.cluster_handlers_by_name:
             server_handlers.add(opt)
-            weight += 10
-        else:
-            weight -= 1
 
     client_handlers = set(match.client_cluster_handlers)
 
-    return weight, server_handlers, client_handlers
+    return server_handlers, client_handlers
 
 
 def discover_entities_for_endpoint(
@@ -481,26 +463,16 @@ def discover_entities_for_endpoint(
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
 
-    # Collect valid matches
-    matches: list[
-        tuple[type[PlatformEntity], int, ClusterHandlerMatch, set[str], set[str]]
-    ] = []
-
     for entity_class in ENTITY_REGISTRY:
         match = entity_class.match_cluster_handlers(endpoint)
         if match is None:
             continue
 
-        weight, server_handlers, client_handlers = _match_applies(match, endpoint)
-        if weight is None:
+        server_handlers, client_handlers = _match_applies(match, endpoint)
+
+        if server_handlers is None or client_handlers is None:
             continue
 
-        matches.append((entity_class, weight, match, server_handlers, client_handlers))
-
-    # Sort by weight descending (most specific first)
-    matches.sort(key=lambda x: x[1], reverse=True)
-
-    for entity_class, weight, match, server_handlers, client_handlers in matches:
         server_cluster_handlers = [
             endpoint.cluster_handlers_by_name[name] for name in server_handlers
         ]
@@ -521,16 +493,20 @@ def discover_entities_for_endpoint(
             )
 
         _LOGGER.debug(
-            "'%s' platform -> '%s' using %s + %s (weight=%d)",
+            "'%s' platform -> '%s' using %s + %s",
             entity_class.PLATFORM,
             entity_class.__name__,
             [ch.name for ch in server_cluster_handlers],
             [ch.name for ch in client_cluster_handlers],
-            weight,
+        )
+
+        # XXX: Combining server and client cluster handlers should not be done
+        cluster_handlers: list[ClusterHandler | ClientClusterHandler] = (
+            server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
         )
 
         yield entity_class(
-            cluster_handlers=server_cluster_handlers + client_cluster_handlers,
+            cluster_handlers=cluster_handlers,
             endpoint=endpoint,
             device=device,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
