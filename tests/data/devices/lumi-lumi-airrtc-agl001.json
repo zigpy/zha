@@ -1,20 +1,20 @@
 {
   "version": 1,
   "ieee": "ab:cd:ef:12:ce:61:df:4c",
-  "nwk": "0x7E61",
+  "nwk": "0xF049",
   "manufacturer": "LUMI",
   "model": "lumi.airrtc.agl001",
   "friendly_manufacturer": "LUMI",
   "friendly_model": "lumi.airrtc.agl001",
   "name": "LUMI lumi.airrtc.agl001",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.xiaomi.aqara.thermostat_agl001.AGL001",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-10-28T18:05:43.578732+00:00",
+  "lqi": 140,
+  "rssi": -65,
+  "last_seen": "2026-01-14T04:37:29.927773+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -46,6 +46,12 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": "Feb 20 2023"
+            },
+            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -56,6 +62,12 @@
               "name": "model",
               "zcl_type": "string",
               "value": "lumi.airrtc.agl001"
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "value": "0.0.0_0030"
             }
           ]
         },
@@ -67,7 +79,7 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "unsupported": true
+              "value": 200
             },
             {
               "id": "0x0033",
@@ -80,12 +92,6 @@
               "name": "battery_size",
               "zcl_type": "enum8",
               "value": 10
-            },
-            {
-              "id": "0x0020",
-              "name": "battery_voltage",
-              "zcl_type": "uint8",
-              "unsupported": true
             }
           ]
         },
@@ -137,7 +143,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "value": 2170
+              "value": 2090
             },
             {
               "id": "0x0010",
@@ -170,12 +176,6 @@
               "unsupported": true
             },
             {
-              "id": "0x0002",
-              "name": "occupancy",
-              "zcl_type": "map8",
-              "unsupported": true
-            },
-            {
               "id": "0x0011",
               "name": "occupied_cooling_setpoint",
               "zcl_type": "int16",
@@ -185,31 +185,7 @@
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 2000
-            },
-            {
-              "id": "0x0007",
-              "name": "pi_cooling_demand",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0008",
-              "name": "pi_heating_demand",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
-              "id": "0x001e",
-              "name": "running_mode",
-              "zcl_type": "enum8",
-              "unsupported": true
-            },
-            {
-              "id": "0x0029",
-              "name": "running_state",
-              "zcl_type": "map16",
-              "unsupported": true
+              "value": 2300
             },
             {
               "id": "0x0030",
@@ -239,8 +215,90 @@
         },
         {
           "cluster_id": "0xfcc0",
-          "endpoint_attribute": "manufacturer_specific",
-          "attributes": []
+          "endpoint_attribute": "opple_cluster",
+          "attributes": [
+            {
+              "id": "0x0279",
+              "name": "away_preset_temperature",
+              "zcl_type": "uint32",
+              "value": 1500
+            },
+            {
+              "id": "0x040a",
+              "name": "battery_percentage",
+              "zcl_type": "uint8",
+              "value": 100
+            },
+            {
+              "id": "0x027b",
+              "name": "calibrated",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0277",
+              "name": "child_lock",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0272",
+              "name": "preset",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x027d",
+              "name": "schedule",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0276",
+              "name": "schedule_settings",
+              "zcl_type": "octstr",
+              "value": {
+                "__type": "<class 'bytes'>",
+                "repr": "b'\\x04>\\x01\\xe0\\x00\\x00\\t`\\x048\\x00\\x00\\x06\\xa4\\x05d\\x00\\x00\\x08\\x98\\x81\\xe0\\x00\\x00\\x08\\x98'"
+              }
+            },
+            {
+              "id": "0x027e",
+              "name": "sensor",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0271",
+              "name": "system_mode",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x0275",
+              "name": "valve_alarm",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0274",
+              "name": "valve_detection",
+              "zcl_type": "uint8",
+              "value": 0
+            },
+            {
+              "id": "0x0273",
+              "name": "window_detection",
+              "zcl_type": "uint8",
+              "value": 1
+            },
+            {
+              "id": "0x027a",
+              "name": "window_open",
+              "zcl_type": "uint8",
+              "value": 0
+            }
+          ]
         }
       ],
       "out_clusters": [
@@ -275,13 +333,214 @@
         },
         {
           "cluster_id": "0xfcc0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "opple_cluster",
           "attributes": []
         }
       ]
     }
   },
+  "original_signature": {
+    "models_info": [
+      [
+        "LUMI",
+        "lumi.airrtc.agl001"
+      ]
+    ],
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0301",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0201",
+          "0x000a",
+          "0x0001",
+          "0xfcc0"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0201",
+          "0xfcc0"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-calibrated",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "AqaraThermostatCalibrated",
+          "translation_key": "calibrated",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "calibrated"
+        },
+        "state": {
+          "class_name": "AqaraThermostatCalibrated",
+          "available": true,
+          "state": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-sensor",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "AqaraThermostatExternalSensor",
+          "translation_key": "external_sensor",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "sensor"
+        },
+        "state": {
+          "class_name": "AqaraThermostatExternalSensor",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-valve_alarm",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "AqaraThermostatValveAlarm",
+          "translation_key": "valve_alarm",
+          "translation_placeholders": null,
+          "device_class": "problem",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "valve_alarm"
+        },
+        "state": {
+          "class_name": "AqaraThermostatValveAlarm",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-window_open",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "AqaraThermostatWindowOpen",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "window",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "window_open"
+        },
+        "state": {
+          "class_name": "AqaraThermostatWindowOpen",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
     "button": [
       {
         "info_object": {
@@ -353,7 +612,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 513,
-                "name": "Thermostat",
+                "name": "ThermostatCluster",
                 "type": "server"
               },
               "id": "1:0x0201",
@@ -379,9 +638,9 @@
         "state": {
           "class_name": "Thermostat",
           "available": true,
-          "current_temperature": 21.7,
+          "current_temperature": 20.9,
           "outdoor_temperature": null,
-          "target_temperature": 20.0,
+          "target_temperature": 23.0,
           "target_temperature_high": null,
           "target_temperature_low": null,
           "hvac_action": null,
@@ -391,7 +650,7 @@
           "system_mode": "[4]/heat",
           "occupancy": null,
           "occupied_cooling_setpoint": 2600,
-          "occupied_heating_setpoint": 2000,
+          "occupied_heating_setpoint": 2300,
           "pi_heating_demand": null,
           "pi_cooling_demand": null,
           "unoccupied_cooling_setpoint": null,
@@ -407,6 +666,105 @@
           "unoccupied_cooling_setpoint",
           "unoccupied_heating_setpoint"
         ]
+      }
+    ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-away_preset_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "AqaraThermostatAwayTemp",
+          "translation_key": "away_preset_temperature",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "slider",
+          "native_max_value": 30,
+          "native_min_value": 5,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "AqaraThermostatAwayTemp",
+          "available": true,
+          "state": 15.0
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-preset",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "AqaraThermostatPreset",
+          "translation_key": "preset",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "AqaraThermostatPresetMode",
+          "options": [
+            "Manual",
+            "Auto",
+            "Away"
+          ]
+        },
+        "state": {
+          "class_name": "AqaraThermostatPreset",
+          "available": true,
+          "state": "Manual"
+        }
       }
     ],
     "sensor": [
@@ -451,7 +809,7 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 140
         }
       },
       {
@@ -495,7 +853,7 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -65
         }
       },
       {
@@ -539,7 +897,7 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": null,
+          "state": 100.0,
           "battery_size": "CR2032",
           "battery_quantity": 1
         },
@@ -571,7 +929,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 513,
-                "name": "Thermostat",
+                "name": "ThermostatCluster",
                 "type": "server"
               },
               "id": "1:0x0201",
@@ -589,6 +947,50 @@
         },
         "state": {
           "class_name": "ThermostatHVACAction",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-513-pi_heating_demand",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "PiHeatingDemand",
+          "translation_key": "pi_heating_demand",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "ThermostatCluster",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "PiHeatingDemand",
           "available": true,
           "state": null
         }
@@ -615,7 +1017,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 513,
-                "name": "Thermostat",
+                "name": "ThermostatCluster",
                 "type": "server"
               },
               "id": "1:0x0201",
@@ -635,6 +1037,152 @@
           "class_name": "SetpointChangeSourceTimestamp",
           "available": true,
           "state": null
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-child_lock",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "AqaraThermostatChildLock",
+          "translation_key": "child_lock",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "child_lock",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "AqaraThermostatChildLock",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-valve_detection",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "AqaraThermostatValveDetection",
+          "translation_key": "valve_detection",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "valve_detection",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "AqaraThermostatValveDetection",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ce:61:df:4c-1-64704-window_detection",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "AqaraThermostatWindowDetection",
+          "translation_key": "window_detection",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraThermostatSpecificCluster",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:ce:61:df:4c:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ce:61:df:4c",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "window_detection",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "AqaraThermostatWindowDetection",
+          "available": true,
+          "state": true,
+          "inverted": false
         }
       }
     ],
