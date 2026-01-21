@@ -219,16 +219,16 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "IasAceClientClusterHandler",
-              "generic_id": "cluster_handler_0x0501_client",
+              "class_name": "IasAceClusterHandler",
+              "generic_id": "cluster_handler_0x0501",
               "endpoint_id": 44,
               "cluster": {
                 "id": 1281,
                 "name": "IAS Ancillary Control Equipment",
                 "type": "client"
               },
-              "id": "44:0x0501_client",
-              "unique_id": "00:15:bc:00:43:00:4a:39:44:0x0501_CLIENT",
+              "id": "44:0x0501",
+              "unique_id": "00:15:bc:00:43:00:4a:39:44:0x0501",
               "status": "INITIALIZED",
               "value_attribute": null
             }

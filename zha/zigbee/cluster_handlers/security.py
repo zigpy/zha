@@ -18,12 +18,7 @@ from zigpy.zcl.clusters.security import (
 )
 
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import (
-    ClientClusterHandler,
-    ClusterHandler,
-    ClusterHandlerStatus,
-    registries,
-)
+from zha.zigbee.cluster_handlers import ClusterHandler, ClusterHandlerStatus, registries
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_STATE_CHANGED
 
 if TYPE_CHECKING:
@@ -41,8 +36,7 @@ class ClusterHandlerStateChangedEvent:
     event: Final[str] = "cluster_handler_state_changed"
 
 
-# TODO: is IasAce supposed to be a server cluster or a client cluster?
-@registries.CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
+@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
 class IasAceClusterHandler(ClusterHandler):
     """IAS Ancillary Control Equipment cluster handler."""
 
@@ -245,12 +239,6 @@ class IasAceClusterHandler(ClusterHandler):
         self, starting_zone_id, max_zone_ids, zone_status_mask_flag, zone_status_mask
     ):
         """Handle the IAS ACE zone status command."""
-
-
-# TODO: is IasAce supposed to be a server cluster or a client cluster?
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(AceCluster.cluster_id)
-class IasAceClientClusterHandler(IasAceClusterHandler, ClientClusterHandler):
-    """IAS Ancillary Control Equipment client cluster handler."""
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IasWd.cluster_id)
