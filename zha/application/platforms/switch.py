@@ -133,7 +133,7 @@ class Switch(PlatformEntity, BaseSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for switch entity."""
+        """Match cluster handlers for this entity."""
         # Respect platform override unconditionally
         if platform_override is not None and platform_override is not Platform.SWITCH:
             return None
@@ -244,7 +244,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for binary output switch entity."""
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_OUTPUT})
         )
@@ -497,6 +497,7 @@ class OnOffWindowDetectionFunctionConfigurationEntity(ConfigurableAttributeSwitc
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"tuya_manufacturer"}),
             manufacturers=frozenset({"_TZE200_b6wax7g0"}),
@@ -515,6 +516,7 @@ class P1MotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.motion.ac02"}),
@@ -533,6 +535,7 @@ class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
@@ -551,6 +554,7 @@ class HueMotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
             manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
@@ -570,6 +574,7 @@ class ChildLock(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
             models=frozenset(
@@ -590,6 +595,7 @@ class DisableLed(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
             models=frozenset(
@@ -610,6 +616,7 @@ class InovelliInvertSwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -627,6 +634,7 @@ class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -644,6 +652,7 @@ class InovelliSmartFanMode(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
             models=frozenset({"VZM35-SN"}),
@@ -662,6 +671,7 @@ class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -679,6 +689,7 @@ class InovelliDoubleTapDownEnabled(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -696,6 +707,7 @@ class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -713,6 +725,7 @@ class InovelliBindingOffToOnSyncLevel(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -730,6 +743,7 @@ class InovelliLocalProtection(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -747,6 +761,7 @@ class InovelliOnOffLEDMode(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -764,6 +779,7 @@ class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -781,6 +797,7 @@ class InovelliRelayClickInOnOffMode(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -798,6 +815,7 @@ class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
         )
@@ -816,6 +834,7 @@ class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"aqara.feeder.acn001"}),
@@ -834,6 +853,7 @@ class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"aqara.feeder.acn001"}),
@@ -852,6 +872,7 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         if (
             endpoint.zigpy_endpoint.profile_id,
             endpoint.zigpy_endpoint.device_type,
@@ -886,6 +907,7 @@ class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -904,6 +926,7 @@ class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -922,6 +945,7 @@ class AqaraThermostatChildLock(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.airrtc.agl001"}),
@@ -940,6 +964,7 @@ class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.sensor_smoke.acn03"}),
@@ -958,6 +983,7 @@ class AqaraLinkageAlarm(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.sensor_smoke.acn03"}),
@@ -976,6 +1002,7 @@ class AqaraBuzzerManualMute(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.sensor_smoke.acn03"}),
@@ -994,6 +1021,7 @@ class AqaraBuzzerManualAlarm(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.sensor_smoke.acn03"}),
@@ -1015,6 +1043,7 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
         )
@@ -1104,6 +1133,7 @@ class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
             models=frozenset({"lumi.curtain.agl001"}),
@@ -1122,6 +1152,7 @@ class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1140,6 +1171,7 @@ class DanfossWindowOpenFeature(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1158,6 +1190,7 @@ class DanfossMountingModeControl(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1176,6 +1209,7 @@ class DanfossRadiatorCovered(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1194,6 +1228,7 @@ class DanfossHeatAvailable(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1212,6 +1247,7 @@ class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1233,6 +1269,7 @@ class DanfossAdaptationRunSettings(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
@@ -1251,6 +1288,7 @@ class SinopeLightDoubleTapFullSwitch(ConfigurableAttributeSwitch):
     def match_cluster_handlers(
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
+        """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
             models=frozenset({"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"}),

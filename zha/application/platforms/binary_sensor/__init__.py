@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import BinarySensorMetadata
-from zigpy.zcl.clusters.general import BinaryInput, OnOff
+from zigpy.zcl.clusters.general import BinaryInput as BinaryInputCluster, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.clusters.measurement import OccupancySensing
 from zigpy.zcl.clusters.security import IasZone
@@ -267,7 +267,7 @@ class Opening(BinarySensor):
         )
 
 
-@register_entity(BinaryInput.cluster_id)
+@register_entity(BinaryInputCluster.cluster_id)
 class BinaryInputWithDescription(BinarySensor):
     """ZHA BinarySensor."""
 
@@ -294,7 +294,7 @@ class BinaryInputWithDescription(BinarySensor):
         return super()._is_supported()
 
 
-@register_entity(BinaryInput.cluster_id)
+@register_entity(BinaryInputCluster.cluster_id)
 class BinaryInput(BinarySensor):
     """ZHA BinarySensor."""
 

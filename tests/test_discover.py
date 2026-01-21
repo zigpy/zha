@@ -84,13 +84,16 @@ async def test_device_override(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     # The overridden entity exists
-    entity = get_entity(
-        zha_device,
-        platform=override_platform,
-        qualifier_func=(
-            lambda entity: entity.cluster_handlers["on_off"].cluster
-            == zigpy_device.endpoints[1].on_off
-        ),
+    assert (
+        get_entity(
+            zha_device,
+            platform=override_platform,
+            qualifier_func=(
+                lambda entity: entity.cluster_handlers["on_off"].cluster
+                == zigpy_device.endpoints[1].on_off
+            ),
+        )
+        is not None
     )
 
     # The original one does not
