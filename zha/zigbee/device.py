@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable
 import copy
 import dataclasses
 from dataclasses import dataclass
@@ -948,10 +948,13 @@ class Device(LogMixin, EventBase):
                 entity._attr_fallback_name = meta.new_fallback_name
 
     def _discover_new_entities(self) -> None:
-        new_entities: Iterator[BaseEntity]
+        new_entities: Iterable[BaseEntity]
 
         if self.is_active_coordinator:
             new_entities = discovery.discover_coordinator_device_entities(self)
+        elif self.is_coordinator:
+            # TODO: purge old coordinator entities
+            new_entities = []
         else:
             new_entities = discovery.discover_device_entities(self)
 
