@@ -6,6 +6,7 @@ from collections import Counter
 from collections.abc import Callable, Iterator
 from dataclasses import astuple
 import functools
+import itertools
 import logging
 from typing import TYPE_CHECKING
 
@@ -418,79 +419,85 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
     ) is not None:
         platform_override = device_override.type
 
-    for entity_class in ENTITY_REGISTRY:
-        match = entity_class.match_cluster_handlers(endpoint, platform_override)
-        if match is None:
-            continue
+    for cluster in itertools.chain(
+        endpoint.zigpy_endpoint.in_clusters.values(),
+        endpoint.zigpy_endpoint.out_clusters.values(),
+    ):
+        # To speed up lookups, we key ENTITY_REGISTRY by cluster ID
+        for entity_class in ENTITY_REGISTRY.get(cluster.cluster_id, []):
+            match = entity_class.match_cluster_handlers(endpoint, platform_override)
+            if match is None:
+                continue
 
-        if not match.cluster_handlers.issubset(
-            endpoint.cluster_handlers_by_name.keys()
-        ):
-            continue
+            if not match.cluster_handlers.issubset(
+                endpoint.cluster_handlers_by_name.keys()
+            ):
+                continue
 
-        if not match.client_cluster_handlers.issubset(
-            endpoint.client_cluster_handlers_by_name.keys()
-        ):
-            continue
+            if not match.client_cluster_handlers.issubset(
+                endpoint.client_cluster_handlers_by_name.keys()
+            ):
+                continue
 
-        if (
-            match.exposed_features is not None
-            and not match.exposed_features & device.exposes_features
-        ):
-            continue
+            if (
+                match.exposed_features is not None
+                and not match.exposed_features & device.exposes_features
+            ):
+                continue
 
-        if (
-            match.manufacturers is not None
-            and device.manufacturer not in match.manufacturers
-        ):
-            continue
+            if (
+                match.manufacturers is not None
+                and device.manufacturer not in match.manufacturers
+            ):
+                continue
 
-        if match.models is not None and device.model not in match.models:
-            continue
+            if match.models is not None and device.model not in match.models:
+                continue
 
-        server_handlers = set(match.cluster_handlers)
+            server_handlers = set(match.cluster_handlers)
 
-        for optional in match.optional_cluster_handlers:
-            if optional in endpoint.cluster_handlers_by_name:
-                server_handlers.add(optional)
+            for optional in match.optional_cluster_handlers:
+                if optional in endpoint.cluster_handlers_by_name:
+                    server_handlers.add(optional)
 
-        client_handlers = set(match.client_cluster_handlers)
+            client_handlers = set(match.client_cluster_handlers)
 
-        server_cluster_handlers = [
-            endpoint.cluster_handlers_by_name[name] for name in server_handlers
-        ]
-        client_cluster_handlers = [
-            endpoint.client_cluster_handlers_by_name[name] for name in client_handlers
-        ]
+            server_cluster_handlers = [
+                endpoint.cluster_handlers_by_name[name] for name in server_handlers
+            ]
+            client_cluster_handlers = [
+                endpoint.client_cluster_handlers_by_name[name]
+                for name in client_handlers
+            ]
 
-        # Claim on endpoint
-        endpoint.claim_cluster_handlers(server_cluster_handlers)
-        endpoint.claim_cluster_handlers(client_cluster_handlers)
+            # Claim on endpoint
+            endpoint.claim_cluster_handlers(server_cluster_handlers)
+            endpoint.claim_cluster_handlers(client_cluster_handlers)
 
-        if match.legacy_discovery_unique_id is not None:
-            legacy_discovery_unique_id = match.legacy_discovery_unique_id
-        else:
-            first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
-            legacy_discovery_unique_id = (
-                f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
+            if match.legacy_discovery_unique_id is not None:
+                legacy_discovery_unique_id = match.legacy_discovery_unique_id
+            else:
+                first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
+                legacy_discovery_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
+                )
+
+            _LOGGER.debug(
+                "'%s' platform -> '%s' using %s + %s",
+                entity_class.PLATFORM,
+                entity_class.__name__,
+                [ch.name for ch in server_cluster_handlers],
+                [ch.name for ch in client_cluster_handlers],
             )
 
-        _LOGGER.debug(
-            "'%s' platform -> '%s' using %s + %s",
-            entity_class.PLATFORM,
-            entity_class.__name__,
-            [ch.name for ch in server_cluster_handlers],
-            [ch.name for ch in client_cluster_handlers],
-        )
+            # XXX: Combining server and client cluster handlers should not be done
+            cluster_handlers: list[ClusterHandler | ClientClusterHandler] = (
+                server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
+            )
 
-        # XXX: Combining server and client cluster handlers should not be done
-        cluster_handlers: list[ClusterHandler | ClientClusterHandler] = (
-            server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
-        )
-
-        yield entity_class(
-            cluster_handlers=cluster_handlers,
-            endpoint=endpoint,
-            device=device,
-            legacy_discovery_unique_id=legacy_discovery_unique_id,
-        )
+            yield entity_class(
+                cluster_handlers=cluster_handlers,
+                endpoint=endpoint,
+                device=device,
+                legacy_discovery_unique_id=legacy_discovery_unique_id,
+            )

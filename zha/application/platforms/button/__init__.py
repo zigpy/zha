@@ -8,6 +8,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetadata
+from zigpy.zcl.clusters.general import Identify
 
 from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
@@ -20,7 +21,11 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
-from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IDENTIFY
+from zha.zigbee.cluster_handlers.const import (
+    AQARA_OPPLE_CLUSTER,
+    CLUSTER_HANDLER_IDENTIFY,
+    TUYA_MANUFACTURER_CLUSTER,
+)
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -106,7 +111,7 @@ class Button(PlatformEntity):
         await command(*arguments, **kwargs)
 
 
-@register_entity
+@register_entity(Identify.cluster_id)
 class IdentifyButton(Button):
     """Defines a ZHA identify button."""
 
@@ -177,7 +182,7 @@ class WriteAttributeButton(PlatformEntity):
         )
 
 
-@register_entity
+@register_entity(TUYA_MANUFACTURER_CLUSTER)
 class FrostLockResetButton(WriteAttributeButton):
     """Defines a ZHA frost lock reset button."""
 
@@ -199,7 +204,7 @@ class FrostLockResetButton(WriteAttributeButton):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class NoPresenceStatusResetButton(WriteAttributeButton):
     """Defines a ZHA no presence status reset button."""
 
@@ -221,7 +226,7 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederFeedButton(WriteAttributeButton):
     """Defines a feed button for the aqara c1 pet feeder."""
 
@@ -241,7 +246,7 @@ class AqaraPetFeederFeedButton(WriteAttributeButton):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraSelfTestButton(WriteAttributeButton):
     """Defines a ZHA self-test button for Aqara smoke sensors."""
 

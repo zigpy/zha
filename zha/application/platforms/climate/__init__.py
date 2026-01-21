@@ -76,7 +76,7 @@ class ThermostatEntityInfo(BaseEntityInfo):
     hvac_modes: list[HVACMode]
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class Thermostat(PlatformEntity):
     """Representation of a ZHA Thermostat device."""
 
@@ -568,7 +568,7 @@ class Thermostat(PlatformEntity):
         await handler(enable)
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class SinopeTechnologiesThermostat(Thermostat):
     """Sinope Technologies Thermostat."""
 
@@ -688,7 +688,7 @@ class SinopeTechnologiesThermostat(Thermostat):
         )
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class ZenWithinThermostat(Thermostat):
     """Zen Within Thermostat implementation."""
 
@@ -709,7 +709,7 @@ class ZenWithinThermostat(Thermostat):
         )
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class ZehnderThermostat(Thermostat):
     """Zehnder thermostat to adapt AUTO mode behavior."""
 
@@ -788,7 +788,7 @@ class ZehnderThermostat(Thermostat):
         )
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class CentralitePearl(ZenWithinThermostat):
     """Centralite Pearl Thermostat implementation."""
 
@@ -829,7 +829,7 @@ MOES_MANUFACTURERS = frozenset(
 )
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
 
@@ -921,7 +921,7 @@ class MoesThermostat(Thermostat):
             )
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
 
@@ -1006,7 +1006,7 @@ class BecaThermostat(Thermostat):
             )
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
 
@@ -1046,7 +1046,7 @@ ZONNSMART_MANUFACTURERS = frozenset(
 )
 
 
-@register_entity
+@register_entity(ThermostatCluster.cluster_id)
 class ZONNSMARTThermostat(Thermostat):
     """ZONNSMART Thermostat implementation.
 

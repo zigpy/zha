@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 import asyncio
+from collections import defaultdict
 from collections.abc import Callable
 from contextlib import suppress
 import dataclasses
@@ -19,6 +20,7 @@ from zha.application import Platform
 from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
+from zigpy.types import ClusterId
 from zha.event import EventBase
 from zha.mixins import LogMixin
 from zha.zigbee.cluster_handlers import ClusterHandlerInfo
@@ -34,7 +36,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
 
-ENTITY_REGISTRY: list[type[PlatformEntity]] = []
+ENTITY_REGISTRY: dict[ClusterId, list[type[PlatformEntity]]] = defaultdict(list)
 GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
@@ -53,10 +55,13 @@ class ClusterHandlerMatch:
     legacy_discovery_unique_id: str | None = None
 
 
-def register_entity(cls: type[PlatformEntity]) -> type[PlatformEntity]:
+def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
     """Register an entity class for discovery."""
-    ENTITY_REGISTRY.append(cls)
-    return cls
+    def inner(cls: T) -> T:
+        ENTITY_REGISTRY[cluster_id].append(cls)
+        return cls
+
+    return inner
 
 
 def register_group_entity(cls: type[GroupEntity]) -> type[GroupEntity]:

@@ -11,6 +11,9 @@ from typing import TYPE_CHECKING, Any
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import BinarySensorMetadata
+from zigpy.zcl.clusters.general import BinaryInput, OnOff
+from zigpy.zcl.clusters.hvac import Thermostat
+from zigpy.zcl.clusters.measurement import OccupancySensing
 from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
@@ -28,6 +31,7 @@ from zha.application.platforms.binary_sensor.const import (
 from zha.application.platforms.helpers import validate_device_class
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
+    AQARA_OPPLE_CLUSTER,
     CLUSTER_HANDLER_ACCELEROMETER,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BINARY_INPUT,
@@ -36,6 +40,9 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_THERMOSTAT,
     CLUSTER_HANDLER_ZONE,
+    IKEA_AIR_PURIFIER_CLUSTER,
+    SMARTTHINGS_ACCELERATION_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
 )
 
 if TYPE_CHECKING:
@@ -151,7 +158,7 @@ class BinarySensor(PlatformEntity):
         return bool(value)
 
 
-@register_entity
+@register_entity(SMARTTHINGS_ACCELERATION_CLUSTER)
 class Accelerometer(BinarySensor):
     """ZHA BinarySensor."""
 
@@ -169,7 +176,7 @@ class Accelerometer(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(OccupancySensing.cluster_id)
 class Occupancy(BinarySensor):
     """ZHA BinarySensor."""
 
@@ -187,7 +194,7 @@ class Occupancy(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(OccupancySensing.cluster_id)
 class HueOccupancy(BinarySensor):
     """ZHA Hue occupancy."""
 
@@ -205,7 +212,7 @@ class HueOccupancy(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class Opening(BinarySensor):
     """ZHA OnOff BinarySensor."""
 
@@ -260,7 +267,7 @@ class Opening(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(BinaryInput.cluster_id)
 class BinaryInputWithDescription(BinarySensor):
     """ZHA BinarySensor."""
 
@@ -287,7 +294,7 @@ class BinaryInputWithDescription(BinarySensor):
         return super()._is_supported()
 
 
-@register_entity
+@register_entity(BinaryInput.cluster_id)
 class BinaryInput(BinarySensor):
     """ZHA BinarySensor."""
 
@@ -311,7 +318,7 @@ class BinaryInput(BinarySensor):
         return super()._is_supported()
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class IkeaMotion(BinarySensor):
     """ZHA OnOff BinarySensor with motion device class for IKEA devices."""
 
@@ -333,7 +340,7 @@ class IkeaMotion(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class PhilipsMotion(BinarySensor):
     """ZHA OnOff BinarySensor with motion device class for Philips devices."""
 
@@ -353,7 +360,7 @@ class PhilipsMotion(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(IasZone.cluster_id)
 class IASZone(BinarySensor):
     """ZHA IAS BinarySensor."""
 
@@ -395,7 +402,7 @@ class IASZone(BinarySensor):
         await PlatformEntity.async_update(self)
 
 
-@register_entity
+@register_entity(IasZone.cluster_id)
 class SinopeLeakStatus(BinarySensor):
     """Sinope water leak sensor."""
 
@@ -414,7 +421,7 @@ class SinopeLeakStatus(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(TUYA_MANUFACTURER_CLUSTER)
 class FrostLock(BinarySensor):
     """ZHA BinarySensor."""
 
@@ -434,7 +441,7 @@ class FrostLock(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class ReplaceFilter(BinarySensor):
     """ZHA BinarySensor."""
 
@@ -452,7 +459,7 @@ class ReplaceFilter(BinarySensor):
         return ClusterHandlerMatch(cluster_handlers=frozenset({"ikea_airpurifier"}))
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederErrorDetected(BinarySensor):
     """ZHA aqara pet feeder error detected binary sensor."""
 
@@ -471,7 +478,7 @@ class AqaraPetFeederErrorDetected(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class XiaomiPlugConsumerConnected(BinarySensor):
     """ZHA Xiaomi plug consumer connected binary sensor."""
 
@@ -491,7 +498,7 @@ class XiaomiPlugConsumerConnected(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatWindowOpen(BinarySensor):
     """ZHA Aqara thermostat window open binary sensor."""
 
@@ -510,7 +517,7 @@ class AqaraThermostatWindowOpen(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatValveAlarm(BinarySensor):
     """ZHA Aqara thermostat valve alarm binary sensor."""
 
@@ -530,7 +537,7 @@ class AqaraThermostatValveAlarm(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatCalibrated(BinarySensor):
     """ZHA Aqara thermostat calibrated binary sensor."""
 
@@ -550,7 +557,7 @@ class AqaraThermostatCalibrated(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatExternalSensor(BinarySensor):
     """ZHA Aqara thermostat external sensor binary sensor."""
 
@@ -570,7 +577,7 @@ class AqaraThermostatExternalSensor(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraLinkageAlarmState(BinarySensor):
     """ZHA Aqara linkage alarm state binary sensor."""
 
@@ -590,7 +597,7 @@ class AqaraLinkageAlarmState(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
     """Opened by hand binary sensor."""
 
@@ -610,7 +617,7 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossMountingModeActive(BinarySensor):
     """Danfoss TRV proprietary attribute exposing whether in mounting mode."""
 
@@ -631,7 +638,7 @@ class DanfossMountingModeActive(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossHeatRequired(BinarySensor):
     """Danfoss TRV proprietary attribute exposing whether heat is required."""
 
@@ -650,7 +657,7 @@ class DanfossHeatRequired(BinarySensor):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossPreheatStatus(BinarySensor):
     """Danfoss TRV proprietary attribute exposing whether in pre-heating mode."""
 

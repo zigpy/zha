@@ -49,6 +49,7 @@ from zha.zigbee.cluster_handlers import (
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
+    IKEA_AIR_PURIFIER_CLUSTER,
 )
 from zha.zigbee.cluster_handlers.hvac import FanClusterHandler
 from zha.zigbee.cluster_handlers.manufacturerspecific import (
@@ -245,7 +246,7 @@ class BaseFan(BaseEntity):
         return percentage_to_ordered_list_item(LEGACY_SPEED_LIST, percentage)
 
 
-@register_entity
+@register_entity(hvac.Fan.cluster_id)
 class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
 
@@ -379,7 +380,7 @@ class FanGroup(BaseFan, GroupEntity):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity
+@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class IkeaFan(BaseFan, PlatformEntity):
     """Representation of an Ikea fan."""
 
@@ -484,7 +485,7 @@ class IkeaFan(BaseFan, PlatformEntity):
         await self._async_set_fan_mode(fan_mode)
 
 
-@register_entity
+@register_entity(hvac.Fan.cluster_id)
 class KofFan(Fan):
     """Representation of a fan made by King Of Fans."""
 

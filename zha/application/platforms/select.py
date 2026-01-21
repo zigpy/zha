@@ -19,6 +19,8 @@ from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleClu
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata
 from zigpy.zcl.clusters.general import OnOff
+from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
+from zigpy.zcl.clusters.measurement import OccupancySensing
 from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
@@ -32,6 +34,7 @@ from zha.application.platforms import (
 )
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
+    AQARA_OPPLE_CLUSTER,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_HUE_OCCUPANCY,
     CLUSTER_HANDLER_IAS_WD,
@@ -39,6 +42,9 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_THERMOSTAT,
+    INOVELLI_CLUSTER,
+    SINOPE_MANUFACTURER_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
 )
 
 if TYPE_CHECKING:
@@ -128,7 +134,7 @@ class NonZCLSelectEntity(EnumSelectEntity):
         return True
 
 
-@register_entity
+@register_entity(IasWd.cluster_id)
 class DefaultToneSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren tone select entity."""
 
@@ -144,7 +150,7 @@ class DefaultToneSelectEntity(NonZCLSelectEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
 
-@register_entity
+@register_entity(IasWd.cluster_id)
 class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren level select entity."""
 
@@ -160,7 +166,7 @@ class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
 
-@register_entity
+@register_entity(IasWd.cluster_id)
 class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren strobe level select entity."""
 
@@ -176,7 +182,7 @@ class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
 
-@register_entity
+@register_entity(IasWd.cluster_id)
 class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     """Representation of a ZHA default siren strobe select entity."""
 
@@ -293,7 +299,7 @@ class ZCLEnumSelectEntity(PlatformEntity):
         # Select entities backed by the ZCL cache don't need to restore their state!
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA startup onoff select entity."""
 
@@ -318,7 +324,7 @@ class TuyaPowerOnState(types.enum8):
     LastState = 0x02
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class TuyaPowerOnStateSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA power on state select entity."""
 
@@ -338,7 +344,7 @@ class TuyaPowerOnStateSelectEntity(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(TUYA_MANUFACTURER_CLUSTER)
 class TuyaManufacturerPowerOnStateSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA power on state select entity."""
 
@@ -366,7 +372,7 @@ class TuyaBacklightMode(types.enum8):
     LightWhenOff = 0x02
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class TuyaBacklightModeSelectEntity(ZCLEnumSelectEntity):
     """Representation of a ZHA backlight mode select entity."""
 
@@ -395,7 +401,7 @@ class MoesBacklightMode(types.enum8):
     Freeze = 0x03
 
 
-@register_entity
+@register_entity(TUYA_MANUFACTURER_CLUSTER)
 class MoesBacklightModeSelectEntity(ZCLEnumSelectEntity):
     """Moes devices have a different backlight mode select options."""
 
@@ -423,7 +429,7 @@ class AqaraMotionSensitivities(types.enum8):
     High = 0x03
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraMotionSensitivity(ZCLEnumSelectEntity):
     """Representation of a ZHA motion sensitivity configuration entity."""
 
@@ -453,7 +459,7 @@ class HueV1MotionSensitivities(types.enum8):
     High = 0x02
 
 
-@register_entity
+@register_entity(OccupancySensing.cluster_id)
 class HueV1MotionSensitivity(ZCLEnumSelectEntity):
     """Representation of a ZHA motion sensitivity configuration entity."""
 
@@ -484,7 +490,7 @@ class HueV2MotionSensitivities(types.enum8):
     Highest = 0x04
 
 
-@register_entity
+@register_entity(OccupancySensing.cluster_id)
 class HueV2MotionSensitivity(ZCLEnumSelectEntity):
     """Representation of a ZHA motion sensitivity configuration entity."""
 
@@ -512,7 +518,7 @@ class AqaraMonitoringModess(types.enum8):
     Left_Right = 0x01
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraMonitoringMode(ZCLEnumSelectEntity):
     """Representation of a ZHA monitoring mode configuration entity."""
 
@@ -540,7 +546,7 @@ class AqaraApproachDistances(types.enum8):
     Near = 0x02
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraApproachDistance(ZCLEnumSelectEntity):
     """Representation of a ZHA approach distance configuration entity."""
 
@@ -560,7 +566,7 @@ class AqaraApproachDistance(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(MagnetAC01OppleCluster.cluster_id)
 class AqaraMagnetAC01DetectionDistance(ZCLEnumSelectEntity):
     """Representation of a ZHA detection distance configuration entity."""
 
@@ -580,7 +586,7 @@ class AqaraMagnetAC01DetectionDistance(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(T2RelayOppleCluster.cluster_id)
 class AqaraT2RelaySwitchMode(ZCLEnumSelectEntity):
     """Representation of a ZHA switch mode configuration entity."""
 
@@ -600,7 +606,7 @@ class AqaraT2RelaySwitchMode(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(T2RelayOppleCluster.cluster_id)
 class AqaraT2RelaySwitchType(ZCLEnumSelectEntity):
     """Representation of a ZHA switch type configuration entity."""
 
@@ -620,7 +626,7 @@ class AqaraT2RelaySwitchType(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(T2RelayOppleCluster.cluster_id)
 class AqaraT2RelayStartupOnOff(ZCLEnumSelectEntity):
     """Representation of a ZHA startup on off configuration entity."""
 
@@ -640,7 +646,7 @@ class AqaraT2RelayStartupOnOff(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(T2RelayOppleCluster.cluster_id)
 class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
     """Representation of a ZHA switch decoupled mode configuration entity."""
 
@@ -667,7 +673,7 @@ class InovelliOutputMode(types.enum1):
     OnOff = 0x01
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliOutputModeEntity(ZCLEnumSelectEntity):
     """Inovelli output mode control."""
 
@@ -695,7 +701,7 @@ class InovelliSwitchType(types.enum8):
     Single_Pole_Full_Sine = 0x03
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliSwitchTypeEntity(ZCLEnumSelectEntity):
     """Inovelli switch type control."""
 
@@ -722,7 +728,7 @@ class InovelliFanSwitchType(types.enum1):
     Three_Way_AUX = 0x01
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliFanSwitchTypeEntity(ZCLEnumSelectEntity):
     """Inovelli fan switch type control."""
 
@@ -749,7 +755,7 @@ class InovelliLedScalingMode(types.enum1):
     LZW31SN = 0x01
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliLedScalingModeEntity(ZCLEnumSelectEntity):
     """Inovelli led mode control."""
 
@@ -784,7 +790,7 @@ class InovelliFanLedScalingMode(types.enum8):
     Adaptive = 0x0A
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliFanLedScalingModeEntity(ZCLEnumSelectEntity):
     """Inovelli fan switch led mode control."""
 
@@ -811,7 +817,7 @@ class InovelliNonNeutralOutput(types.enum1):
     High = 0x01
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliNonNeutralOutputEntity(ZCLEnumSelectEntity):
     """Inovelli non neutral output control."""
 
@@ -837,7 +843,7 @@ class InovelliDimmingMode(types.enum1):
     TrailingEdge = 0x01
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliDimmingModeEntity(ZCLEnumSelectEntity):
     """Inovelli dimming mode control."""
 
@@ -864,7 +870,7 @@ class AqaraFeedingMode(types.enum8):
     Schedule = 0x01
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederMode(ZCLEnumSelectEntity):
     """Representation of an Aqara pet feeder mode configuration entity."""
 
@@ -892,7 +898,7 @@ class AqaraThermostatPresetMode(types.enum8):
     Away = 0x02
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatPreset(ZCLEnumSelectEntity):
     """Representation of an Aqara thermostat preset configuration entity."""
 
@@ -920,7 +926,7 @@ class SonoffPresenceDetectionSensitivityEnum(types.enum8):
     High = 0x03
 
 
-@register_entity
+@register_entity(OccupancySensing.cluster_id)
 class SonoffPresenceDetectionSensitivity(ZCLEnumSelectEntity):
     """Entity to set the detection sensitivity of the Sonoff SNZB-06P."""
 
@@ -950,7 +956,7 @@ class KeypadLockoutEnum(types.enum8):
     Lock4 = 0x04
 
 
-@register_entity
+@register_entity(UserInterface.cluster_id)
 class KeypadLockout(ZCLEnumSelectEntity):
     """Mandatory attribute for thermostat_ui cluster.
 
@@ -971,7 +977,7 @@ class KeypadLockout(ZCLEnumSelectEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({"thermostat_ui"}))
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the day of the week for exercising."""
 
@@ -998,7 +1004,7 @@ class DanfossOrientationEnum(types.enum8):
     Vertical = 0x01
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossOrientation(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the orientation of the valve.
 
@@ -1022,7 +1028,7 @@ class DanfossOrientation(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for controlling the current adaptation run."""
 
@@ -1067,7 +1073,7 @@ class DanfossControlAlgorithmScaleFactorEnum(types.enum8):
     quick_open_disabled = 0x11  # not sure what it does; also requires lower 4 bits to be in [1, 10] I assume
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossControlAlgorithmScaleFactor(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the scale factor of the setpoint filter time constant."""
 
@@ -1087,7 +1093,7 @@ class DanfossControlAlgorithmScaleFactor(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(UserInterface.cluster_id)
 class DanfossViewingDirection(ZCLEnumSelectEntity):
     """Danfoss proprietary attribute for setting the viewing direction of the screen."""
 
@@ -1129,7 +1135,7 @@ SINOPE_MODELS = frozenset(
 )
 
 
-@register_entity
+@register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
     """Representation of the marker LED Off-state color of Sinope light switches."""
 
@@ -1149,7 +1155,7 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
         )
 
 
-@register_entity
+@register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
     """Representation of the marker LED On-state color of Sinope light switches."""
 

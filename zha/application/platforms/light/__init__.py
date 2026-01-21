@@ -743,7 +743,7 @@ class BaseClusterHandlerLight(BaseLight):
         await super().on_remove()
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class Light(BaseClusterHandlerLight, PlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
@@ -1078,7 +1078,7 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class HueLight(Light):
     """Representation of a HUE light which does not report attributes."""
 
@@ -1121,7 +1121,7 @@ class HueLight(Light):
         )
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class ForceOnLight(Light):
     """Representation of a light which does not respect on/off for move_to_level_with_on_off commands."""
 
@@ -1172,7 +1172,7 @@ class ForceOnLight(Light):
         )
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class MinTransitionLight(Light):
     """Representation of a light which does not react to any "move to" calls with 0 as a transition."""
 

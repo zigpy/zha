@@ -122,7 +122,7 @@ class BaseCover(PlatformEntity, ABC):
         """Stop the cover."""
 
 
-@register_entity
+@register_entity(WindowCovering.cluster_id)
 class Cover(BaseCover):
     """Representation of a ZHA cover."""
 
@@ -696,7 +696,7 @@ class Cover(BaseCover):
         return 100 - position
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class Shade(BaseCover):
     """ZHA Shade."""
 
@@ -879,7 +879,7 @@ class Shade(BaseCover):
         return round(level * 100 / 255)
 
 
-@register_entity
+@register_entity(OnOff.cluster_id)
 class KeenVent(Shade):
     """Keen vent cover."""
 

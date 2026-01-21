@@ -9,7 +9,10 @@ from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import NumberMetadata
+from zigpy.zcl.clusters.general import AnalogOutput, Basic, LevelControl
 from zigpy.zcl.clusters.hvac import Thermostat
+from zigpy.zcl.clusters.lighting import Color
+from zigpy.zcl.clusters.measurement import OccupancySensing
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -25,6 +28,7 @@ from zha.application.platforms.number.const import ICONS, NumberDeviceClass, Num
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
+    AQARA_OPPLE_CLUSTER,
     CLUSTER_HANDLER_ANALOG_OUTPUT,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_BASIC,
@@ -33,6 +37,10 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_THERMOSTAT,
+    IKEA_AIR_PURIFIER_CLUSTER,
+    INOVELLI_CLUSTER,
+    SINOPE_MANUFACTURER_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
 )
 
 if TYPE_CHECKING:
@@ -122,7 +130,7 @@ class BaseNumber(PlatformEntity):
         raise NotImplementedError
 
 
-@register_entity
+@register_entity(AnalogOutput.cluster_id)
 class AnalogOutputNumber(BaseNumber):
     """Representation of a ZHA Number entity."""
 
@@ -312,7 +320,7 @@ class NumberConfigurationEntity(BaseNumber):
             self.maybe_emit_state_changed_event()
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraMotionDetectionInterval(NumberConfigurationEntity):
     """Representation of a ZHA motion detection interval configuration entity."""
 
@@ -333,7 +341,7 @@ class AqaraMotionDetectionInterval(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(LevelControl.cluster_id)
 class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on off transition time configuration entity."""
 
@@ -351,7 +359,7 @@ class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
-@register_entity
+@register_entity(LevelControl.cluster_id)
 class OnLevelConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on level configuration entity."""
 
@@ -369,7 +377,7 @@ class OnLevelConfigurationEntity(NumberConfigurationEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
-@register_entity
+@register_entity(LevelControl.cluster_id)
 class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA on transition time configuration entity."""
 
@@ -387,7 +395,7 @@ class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
-@register_entity
+@register_entity(LevelControl.cluster_id)
 class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA off transition time configuration entity."""
 
@@ -405,7 +413,7 @@ class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
-@register_entity
+@register_entity(LevelControl.cluster_id)
 class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA default move rate configuration entity."""
 
@@ -423,7 +431,7 @@ class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
-@register_entity
+@register_entity(LevelControl.cluster_id)
 class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA startup current level configuration entity."""
 
@@ -441,7 +449,7 @@ class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}))
 
 
-@register_entity
+@register_entity(Color.cluster_id)
 class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     """Representation of a ZHA startup color temperature configuration entity."""
 
@@ -465,7 +473,7 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
         self._attr_native_max_value = self._cluster_handler.max_mireds
 
 
-@register_entity
+@register_entity(TUYA_MANUFACTURER_CLUSTER)
 class TimerDurationMinutes(NumberConfigurationEntity):
     """Representation of a ZHA timer duration configuration entity."""
 
@@ -488,7 +496,7 @@ class TimerDurationMinutes(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class FilterLifeTime(NumberConfigurationEntity):
     """Representation of a ZHA filter lifetime configuration entity."""
 
@@ -508,7 +516,7 @@ class FilterLifeTime(NumberConfigurationEntity):
         return ClusterHandlerMatch(cluster_handlers=frozenset({"ikea_airpurifier"}))
 
 
-@register_entity
+@register_entity(Basic.cluster_id)
 class TiRouterTransmitPower(NumberConfigurationEntity):
     """Representation of a ZHA TI transmit power configuration entity."""
 
@@ -530,7 +538,7 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
     """Inovelli remote dimming up speed configuration entity."""
 
@@ -551,7 +559,7 @@ class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliButtonDelay(NumberConfigurationEntity):
     """Inovelli button delay configuration entity."""
 
@@ -572,7 +580,7 @@ class InovelliButtonDelay(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
     """Inovelli local dimming up speed configuration entity."""
 
@@ -593,7 +601,7 @@ class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
     """Inovelli off to on local ramp rate configuration entity."""
 
@@ -614,7 +622,7 @@ class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
     """Inovelli off to on remote ramp rate configuration entity."""
 
@@ -635,7 +643,7 @@ class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
     """Inovelli remote dimming down speed configuration entity."""
 
@@ -656,7 +664,7 @@ class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
     """Inovelli local dimming down speed configuration entity."""
 
@@ -677,7 +685,7 @@ class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
     """Inovelli local on to off ramp rate configuration entity."""
 
@@ -698,7 +706,7 @@ class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
     """Inovelli remote on to off ramp rate configuration entity."""
 
@@ -719,7 +727,7 @@ class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
     """Inovelli minimum load dimming level configuration entity."""
 
@@ -740,7 +748,7 @@ class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
     """Inovelli maximum load dimming level configuration entity."""
 
@@ -761,7 +769,7 @@ class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliAutoShutoffTimer(NumberConfigurationEntity):
     """Inovelli automatic switch shutoff timer configuration entity."""
 
@@ -782,7 +790,7 @@ class InovelliAutoShutoffTimer(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliLocalDefaultLevel(NumberConfigurationEntity):
     """Inovelli local default dimming/fan level configuration entity."""
 
@@ -803,7 +811,7 @@ class InovelliLocalDefaultLevel(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
     """Inovelli remote default dimming/fan level configuration entity."""
 
@@ -824,7 +832,7 @@ class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliStartupDefaultLevel(NumberConfigurationEntity):
     """Inovelli start-up default dimming/fan level configuration entity."""
 
@@ -845,7 +853,7 @@ class InovelliStartupDefaultLevel(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliQuickStartTime(NumberConfigurationEntity):
     """Inovelli fan quick start time configuration entity."""
 
@@ -867,7 +875,7 @@ class InovelliQuickStartTime(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
     """Inovelli load level indicator timeout configuration entity."""
 
@@ -888,7 +896,7 @@ class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
     """Inovelli default all led color when on configuration entity."""
 
@@ -909,7 +917,7 @@ class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
     """Inovelli default all led color when off configuration entity."""
 
@@ -930,7 +938,7 @@ class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
     """Inovelli default all led intensity when on configuration entity."""
 
@@ -951,7 +959,7 @@ class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
     """Inovelli default all led intensity when off configuration entity."""
 
@@ -972,7 +980,7 @@ class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
     """Inovelli double tap up level configuration entity."""
 
@@ -993,7 +1001,7 @@ class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(INOVELLI_CLUSTER)
 class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     """Inovelli double tap down level configuration entity."""
 
@@ -1014,7 +1022,7 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederServingSize(NumberConfigurationEntity):
     """Aqara pet feeder serving size configuration entity."""
 
@@ -1038,7 +1046,7 @@ class AqaraPetFeederServingSize(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
     """Aqara pet feeder portion weight configuration entity."""
 
@@ -1063,7 +1071,7 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     """Aqara away preset temperature configuration entity."""
 
@@ -1089,7 +1097,7 @@ class AqaraThermostatAwayTemp(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     """Local temperature calibration."""
 
@@ -1126,7 +1134,7 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
     """Local temperature calibration for the Sonoff TRVZB."""
 
@@ -1145,7 +1153,7 @@ class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class BoschThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
     """Local temperature calibration for the Bosch TRV/RTH."""
 
@@ -1171,7 +1179,7 @@ class BoschThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
         )
 
 
-@register_entity
+@register_entity(OccupancySensing.cluster_id)
 class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
     """Configuration of Sonoff sensor presence detection timeout."""
 
@@ -1226,7 +1234,7 @@ class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     """Max heat setpoint setting on thermostats.
 
@@ -1258,7 +1266,7 @@ class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     """Min heat setpoint setting on thermostats.
 
@@ -1290,7 +1298,7 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossExerciseTriggerTime(NumberConfigurationEntity):
     """Danfoss proprietary attribute to set the time to exercise the valve."""
 
@@ -1313,7 +1321,7 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
     """Danfoss proprietary attribute to communicate the value of the external temperature sensor."""
 
@@ -1334,7 +1342,7 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossLoadRoomMean(NumberConfigurationEntity):
     """Danfoss proprietary attribute to set a value for the load."""
 
@@ -1356,7 +1364,7 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(Thermostat.cluster_id)
 class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     """Danfoss proprietary attribute to set the regulation setpoint offset."""
 
@@ -1381,7 +1389,7 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeDimmerOnLevelConfigurationEntity(NumberConfigurationEntity):
     """Representation of a Sinope dimmer switch on level."""
 
@@ -1403,7 +1411,7 @@ class SinopeDimmerOnLevelConfigurationEntity(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
     """Representation of a Sinope switch LED on-level brightness."""
 
@@ -1434,7 +1442,7 @@ class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
         )
 
 
-@register_entity
+@register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
     """Representation of a Sinope switch LED off-level brightness."""
 

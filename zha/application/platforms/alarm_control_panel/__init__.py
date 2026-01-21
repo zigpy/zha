@@ -53,7 +53,7 @@ class AlarmControlPanelEntityInfo(BaseEntityInfo):
     translation_key: str
 
 
-@register_entity
+@register_entity(IasAce.cluster_id)
 class AlarmControlPanel(PlatformEntity):
     """Entity for ZHA alarm control devices."""
 

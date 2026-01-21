@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
-@register_entity
+@register_entity(DoorLockCluster.cluster_id)
 class DoorLock(PlatformEntity):
     """Representation of a ZHA lock."""
 

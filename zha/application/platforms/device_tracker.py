@@ -44,7 +44,7 @@ class SourceType(StrEnum):
     BLUETOOTH_LE = "bluetooth_le"
 
 
-@register_entity
+@register_entity(PowerConfiguration.cluster_id)
 class DeviceScannerEntity(PlatformEntity):
     """Represent a tracked device."""
 

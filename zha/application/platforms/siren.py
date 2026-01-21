@@ -66,7 +66,7 @@ class SirenEntityInfo(BaseEntityInfo):
     supported_features: SirenEntityFeature
 
 
-@register_entity
+@register_entity(IasWd.cluster_id)
 class Siren(PlatformEntity):
     """Representation of a ZHA siren."""
 
