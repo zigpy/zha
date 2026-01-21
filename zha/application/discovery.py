@@ -23,7 +23,6 @@ from zigpy.state import State
 from zigpy.zcl import ClusterType
 
 from zha.application import Platform, const as zha_const
-from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     ENTITY_REGISTRY,
     BaseEntity,
@@ -218,13 +217,6 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
         #     continue
         # _LOGGER.info("Creating entity : %s for group %s", entity_class, group.name)
         # yield entity_class(group)
-
-
-def endpoint_discover_entities(
-    endpoint: Endpoint,
-    device_overrides: dict[str, DeviceOverridesConfiguration],
-) -> Iterator[PlatformEntity]:
-    """Process an endpoint on a zigpy device."""
 
 
 def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:

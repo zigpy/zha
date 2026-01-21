@@ -661,10 +661,6 @@ def test_epch_claim_cluster_handlers(cluster_handler) -> None:
 
 
 @mock.patch("zha.zigbee.endpoint.Endpoint.add_client_cluster_handlers")
-@mock.patch(
-    "zha.application.discovery.endpoint_discover_entities",
-    mock.MagicMock(),
-)
 async def test_ep_cluster_handlers_all_cluster_handlers(
     m1,  # pylint: disable=unused-argument
     zha_gateway: Gateway,
@@ -713,10 +709,6 @@ async def test_ep_cluster_handlers_all_cluster_handlers(
 
 
 @mock.patch("zha.zigbee.endpoint.Endpoint.add_client_cluster_handlers")
-@mock.patch(
-    "zha.application.discovery.endpoint_discover_entities",
-    mock.MagicMock(),
-)
 async def test_cluster_handler_power_config(
     m1,  # pylint: disable=unused-argument
     zha_gateway: Gateway,
@@ -917,10 +909,6 @@ async def test_zll_device_groups(zha_gateway: Gateway) -> None:
         )
 
 
-@mock.patch(
-    "zha.application.discovery.endpoint_discover_entities",
-    mock.MagicMock(),
-)
 async def test_cluster_no_ep_attribute(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:
