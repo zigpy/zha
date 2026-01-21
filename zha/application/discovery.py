@@ -202,7 +202,20 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
         group.group_entities.clear()
         return
 
-    for platform in determine_group_entity_platforms(group):
+    # We only create groups with two or more devices
+    platform_counts: Counter[Platform] = Counter()
+
+    for member in group.members:
+        if member.device.is_coordinator:
+            continue
+
+        for entity in member.associated_entities:
+            platform_counts[entity.PLATFORM] += 1
+
+    for platform, count in platform_counts.items():
+        if count < 2:
+            continue
+
         for group_entity_class in GROUP_ENTITY_REGISTRY:
             if platform != group_entity_class.PLATFORM:
                 continue
@@ -373,35 +386,6 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
             # only v2 entities need it.
             if not reporting_found:
                 cluster_handler.BIND = False
-
-
-def determine_group_entity_platforms(group: Group) -> list[Platform]:
-    """Determine the entity platforms for this group."""
-    entity_domains: list[Platform] = []
-    all_platform_occurrences = []
-    for member in group.members:
-        if member.device.is_coordinator:
-            continue
-        entities = member.associated_entities
-        all_platform_occurrences.extend(
-            [
-                entity.PLATFORM
-                for entity in entities
-                if entity.PLATFORM in GROUP_PLATFORMS
-            ]
-        )
-    if not all_platform_occurrences:
-        return entity_domains
-    # get all platforms we care about if there are more than 2 entities of this platform
-    counts = Counter(all_platform_occurrences)
-    entity_platforms = [platform[0] for platform in counts.items() if platform[1] >= 2]
-    _LOGGER.debug(
-        "The entity platforms are: %s for group: %s:0x%04x",
-        entity_platforms,
-        group.name,
-        group.group_id,
-    )
-    return entity_platforms
 
 
 def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:
