@@ -125,6 +125,58 @@ class Thermostat(PlatformEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
+        # Exclude manufacturers with specific thermostat implementations
+        if endpoint.device.manufacturer in {
+            # SinopeTechnologiesThermostat
+            "Sinope Technologies",
+            # ZenWithinThermostat
+            "Zen Within",
+            "LUX",
+            # ZehnderThermostat
+            "ZEHNDER GROUP VAUX ANDIGNY      ",
+            "ZEHNDER GROUP VAUX ANDIGNY",
+            # MoesThermostat
+            "_TZE200_ckud7u2l",
+            "_TZE200_ywdxldoj",
+            "_TZE200_cwnjrr72",
+            "_TZE200_2atgpdho",
+            "_TZE200_pvvbommb",
+            "_TZE200_4eeyebrt",
+            "_TZE200_cpmgn2cf",
+            "_TZE200_9sfg7gm0",
+            "_TZE200_8whxpsiw",
+            "_TYST11_ckud7u2l",
+            "_TYST11_ywdxldoj",
+            "_TYST11_cwnjrr72",
+            "_TYST11_2atgpdho",
+            # BecaThermostat
+            "_TZE200_b6wax7g0",
+            # ZONNSMARTThermostat
+            "_TZE200_7yoranx2",
+            "_TZE200_e9ba97vf",
+            "_TZE200_hue3yfsn",
+            "_TZE200_husqqvux",
+            "_TZE200_lnbfnyxd",
+            "_TZE200_mudxchsu",
+            "_TZE200_kds0pmmv",
+            "_TZE200_py4mm1fs",
+        }:
+            return None
+
+        # CentralitePearl (manufacturer + model)
+        if endpoint.device.manufacturer == "Centralite" and endpoint.device.model in {
+            "3157100",
+            "3157100-E",
+        }:
+            return None
+
+        # StelproFanHeater (manufacturer + model)
+        if (
+            endpoint.device.manufacturer == "Stelpro"
+            and endpoint.device.model == "SORB"
+        ):
+            return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),

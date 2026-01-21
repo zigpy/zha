@@ -1031,6 +1031,18 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
+        # Exclude models with specific implementations
+        if endpoint.device.model in {
+            # SonoffThermostatLocalTempCalibration
+            "TRVZB",
+            # BoschThermostatLocalTempCalibration
+            "RBSH-RTH0-ZB-EU",
+            "RBSH-TRV0-ZB-EU",
+            "RBSH-TRV1-ZB-EU",
+            "RBSH-RTH0-BAT-ZB-EU",
+        }:
+            return None
+
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT})
         )
