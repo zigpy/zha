@@ -20,10 +20,16 @@ from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
 from zigpy.zcl import foundation
 from zigpy.zcl.clusters.closures import WindowCovering
-from zigpy.zcl.clusters.general import AnalogInput, Basic, DeviceTemperature as DeviceTemperatureCluster, PowerConfiguration
+from zigpy.zcl.clusters.general import (
+    AnalogInput,
+    Basic,
+    DeviceTemperature as DeviceTemperatureCluster,
+    PowerConfiguration,
+)
 from zigpy.zcl.clusters.homeautomation import Diagnostic, ElectricalMeasurement
 from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.clusters.measurement import (
+    PM25 as PM25Cluster,
     CarbonDioxideConcentration as CarbonDioxideConcentrationCluster,
     CarbonMonoxideConcentration as CarbonMonoxideConcentrationCluster,
     ElectricalConductivity as ElectricalConductivityCluster,
@@ -31,8 +37,6 @@ from zigpy.zcl.clusters.measurement import (
     FormaldehydeConcentration as FormaldehydeConcentrationCluster,
     IlluminanceMeasurement,
     LeafWetness as LeafWetnessCluster,
-    OccupancySensing,
-    PM25 as PM25Cluster,
     PressureMeasurement,
     RelativeHumidity,
     SoilMoisture as SoilMoistureCluster,

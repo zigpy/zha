@@ -14,13 +14,13 @@ import logging
 from typing import TYPE_CHECKING, Any, Final, final
 
 from zigpy.quirks.v2 import EntityMetadata, EntityType
+from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
 from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
-from zigpy.types import ClusterId
 from zha.event import EventBase
 from zha.mixins import LogMixin
 from zha.zigbee.cluster_handlers import ClusterHandlerInfo
@@ -57,6 +57,7 @@ class ClusterHandlerMatch:
 
 def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
     """Register an entity class for discovery."""
+
     def inner(cls: T) -> T:
         ENTITY_REGISTRY[cluster_id].append(cls)
         return cls
