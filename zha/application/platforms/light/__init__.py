@@ -781,9 +781,7 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self.recompute_capabilities()
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
@@ -1043,9 +1041,7 @@ class HueLight(Light):
     _REFRESH_INTERVAL = (180, 300)
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
@@ -1067,9 +1063,7 @@ class ForceOnLight(Light):
     _FORCE_ON = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
@@ -1100,9 +1094,7 @@ class MinTransitionLight(Light):
     _DEFAULT_MIN_TRANSITION_TIME = 0.1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),

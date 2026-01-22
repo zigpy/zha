@@ -74,9 +74,7 @@ class DeviceScannerEntity(PlatformEntity):
         self._battery_level: float | None = None
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),

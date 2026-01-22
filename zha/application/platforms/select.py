@@ -143,9 +143,7 @@ class DefaultToneSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_siren_tone"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
@@ -159,9 +157,7 @@ class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_siren_level"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
@@ -175,9 +171,7 @@ class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_strobe_level"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
@@ -191,9 +185,7 @@ class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_strobe"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}))
 
@@ -309,9 +301,7 @@ class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "start_up_on_off"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}))
 
@@ -334,9 +324,7 @@ class TuyaPowerOnStateSelectEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "power_on_state"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
@@ -354,9 +342,7 @@ class TuyaManufacturerPowerOnStateSelectEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "power_on_state"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"tuya_manufacturer"}),
@@ -382,9 +368,7 @@ class TuyaBacklightModeSelectEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "backlight_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
@@ -411,9 +395,7 @@ class MoesBacklightModeSelectEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "backlight_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"tuya_manufacturer"}),
@@ -439,9 +421,7 @@ class AqaraMotionSensitivity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "motion_sensitivity"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -469,9 +449,7 @@ class HueV1MotionSensitivity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "motion_sensitivity"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_HUE_OCCUPANCY}),
@@ -500,9 +478,7 @@ class HueV2MotionSensitivity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "motion_sensitivity"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_HUE_OCCUPANCY}),
@@ -528,9 +504,7 @@ class AqaraMonitoringMode(ZCLEnumSelectEntity):
     _attr_translation_key: str = "monitoring_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -556,9 +530,7 @@ class AqaraApproachDistance(ZCLEnumSelectEntity):
     _attr_translation_key: str = "approach_distance"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -576,9 +548,7 @@ class AqaraMagnetAC01DetectionDistance(ZCLEnumSelectEntity):
     _attr_translation_key: str = "detection_distance"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -596,9 +566,7 @@ class AqaraT2RelaySwitchMode(ZCLEnumSelectEntity):
     _attr_translation_key: str = "switch_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -616,9 +584,7 @@ class AqaraT2RelaySwitchType(ZCLEnumSelectEntity):
     _attr_translation_key: str = "switch_type"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -636,9 +602,7 @@ class AqaraT2RelayStartupOnOff(ZCLEnumSelectEntity):
     _attr_translation_key: str = "start_up_on_off"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -656,9 +620,7 @@ class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
     _attr_translation_key: str = "decoupled_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -683,9 +645,7 @@ class InovelliOutputModeEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "output_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
@@ -711,9 +671,7 @@ class InovelliSwitchTypeEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "switch_type"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
@@ -738,9 +696,7 @@ class InovelliFanSwitchTypeEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "switch_type"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
@@ -765,9 +721,7 @@ class InovelliLedScalingModeEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "led_scaling_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
@@ -800,9 +754,7 @@ class InovelliFanLedScalingModeEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "smart_fan_led_display_levels"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
@@ -827,9 +779,7 @@ class InovelliNonNeutralOutputEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "increased_non_neutral_output"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
@@ -853,9 +803,7 @@ class InovelliDimmingModeEntity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "leading_or_trailing_edge"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
@@ -880,9 +828,7 @@ class AqaraPetFeederMode(ZCLEnumSelectEntity):
     _attr_translation_key: str = "feeding_mode"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -908,9 +854,7 @@ class AqaraThermostatPreset(ZCLEnumSelectEntity):
     _attr_translation_key: str = "preset"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -936,9 +880,7 @@ class SonoffPresenceDetectionSensitivity(ZCLEnumSelectEntity):
     _attr_translation_key: str = "detection_sensitivity"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY}),
@@ -970,9 +912,7 @@ class KeypadLockout(ZCLEnumSelectEntity):
     _attr_translation_key: str = "keypad_lockout"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(cluster_handlers=frozenset({"thermostat_ui"}))
 
@@ -987,9 +927,7 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
     _enum = danfoss_thermostat.DanfossExerciseDayOfTheWeekEnum
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -1018,9 +956,7 @@ class DanfossOrientation(ZCLEnumSelectEntity):
     _enum = DanfossOrientationEnum
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -1038,9 +974,7 @@ class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
     _enum = danfoss_thermostat.DanfossAdaptationRunControlEnum
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -1083,9 +1017,7 @@ class DanfossControlAlgorithmScaleFactor(ZCLEnumSelectEntity):
     _enum = DanfossControlAlgorithmScaleFactorEnum
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -1103,9 +1035,7 @@ class DanfossViewingDirection(ZCLEnumSelectEntity):
     _enum = danfoss_thermostat.DanfossViewingDirectionEnum
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"thermostat_ui"}),
@@ -1145,9 +1075,7 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
     _enum = SinopeLightLedColors
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
@@ -1165,9 +1093,7 @@ class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
     _enum = SinopeLightLedColors
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"sinope_manufacturer_specific"}),

@@ -596,9 +596,7 @@ class DigiAnalogInput(Sensor):
     _attr_translation_key: str = "analog_input"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
@@ -615,9 +613,7 @@ class AnalogInputSensor(Sensor):
     _attr_state_class = SensorStateClass.MEASUREMENT
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
@@ -682,9 +678,7 @@ class Battery(Sensor):
     }
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
@@ -798,9 +792,7 @@ class ReportingElectricalMeasurement(ElectricalMeasurementActivePower):
     """Unpolled active power measurement."""
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -817,9 +809,7 @@ class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
     _use_custom_polling: bool = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -837,9 +827,7 @@ class ElectricalMeasurementActivePowerPhB(ElectricalMeasurementActivePower):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -857,9 +845,7 @@ class ElectricalMeasurementActivePowerPhC(ElectricalMeasurementActivePower):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -876,9 +862,7 @@ class ElectricalMeasurementTotalActivePower(ElectricalMeasurementActivePower):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -897,9 +881,7 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -919,9 +901,7 @@ class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -939,9 +919,7 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -959,9 +937,7 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -981,9 +957,7 @@ class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -1001,9 +975,7 @@ class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -1021,9 +993,7 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -1044,9 +1014,7 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -1063,9 +1031,7 @@ class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = PERCENTAGE
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -1082,9 +1048,7 @@ class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -1101,9 +1065,7 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
@@ -1122,9 +1084,7 @@ class Humidity(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_HUMIDITY}),
@@ -1143,9 +1103,7 @@ class SmartThingsHumidity(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset(
@@ -1167,9 +1125,7 @@ class SoilMoisture(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SOIL_MOISTURE}),
@@ -1189,9 +1145,7 @@ class LeafWetness(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_LEAF_WETNESS}),
@@ -1209,9 +1163,7 @@ class Illuminance(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ILLUMINANCE}),
@@ -1253,9 +1205,7 @@ class SmartEnergyMetering(PollableSensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1485,9 +1435,7 @@ class SmartEnergySummation(SmartEnergyMetering):
         return float(summation_formater.format(scaled_value))
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         if endpoint.device.model in {"TS011F", "ZLinky_TIC", "TICMeter"}:
             return None
@@ -1504,9 +1452,7 @@ class PolledSmartEnergySummation(SmartEnergySummation):
     _use_custom_polling: bool = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1524,9 +1470,7 @@ class Tier1SmartEnergySummation(PolledSmartEnergySummation):
     _attr_translation_key: str = "tier1_summation_delivered"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1544,9 +1488,7 @@ class Tier2SmartEnergySummation(PolledSmartEnergySummation):
     _attr_translation_key: str = "tier2_summation_delivered"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1564,9 +1506,7 @@ class Tier3SmartEnergySummation(PolledSmartEnergySummation):
     _attr_translation_key: str = "tier3_summation_delivered"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1584,9 +1524,7 @@ class Tier4SmartEnergySummation(PolledSmartEnergySummation):
     _attr_translation_key: str = "tier4_summation_delivered"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1604,9 +1542,7 @@ class Tier5SmartEnergySummation(PolledSmartEnergySummation):
     _attr_translation_key: str = "tier5_summation_delivered"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1624,9 +1560,7 @@ class Tier6SmartEnergySummation(PolledSmartEnergySummation):
     _attr_translation_key: str = "tier6_summation_delivered"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1653,9 +1587,7 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
     _skip_creation_if_no_attr_cache = True
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_SMARTENERGY_METERING}),
@@ -1674,9 +1606,7 @@ class Pressure(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_PRESSURE}),
@@ -1695,9 +1625,7 @@ class Flow(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_FLOW}),
@@ -1716,9 +1644,7 @@ class Temperature(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_TEMPERATURE}),
@@ -1739,9 +1665,7 @@ class DeviceTemperature(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_DEVICE_TEMPERATURE}),
@@ -1760,9 +1684,7 @@ class InovelliInternalTemperature(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
@@ -1787,9 +1709,7 @@ class InovelliOverheated(EnumSensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
@@ -1809,9 +1729,7 @@ class CarbonDioxideConcentration(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"carbon_dioxide_concentration"}),
@@ -1831,9 +1749,7 @@ class CarbonMonoxideConcentration(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"carbon_monoxide_concentration"}),
@@ -1853,9 +1769,7 @@ class VOCLevel(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         if endpoint.device.model in {"lumi.airmonitor.acn01"}:
             return None
@@ -1879,9 +1793,7 @@ class GenericVOCLevel(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"cluster_handler_0x042e"}),
@@ -1903,9 +1815,7 @@ class PPBVOCLevel(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"voc_level"}),
@@ -1925,9 +1835,7 @@ class PM25(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"pm25"}),
@@ -1944,9 +1852,7 @@ class ElectricalConductivity(Sensor):
     _attr_native_unit_of_measurement = UnitOfConductivity.MICROSIEMENS_PER_CM
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_CONDUCTIVITY}),
@@ -1966,9 +1872,7 @@ class FormaldehydeConcentration(Sensor):
     _attr_primary_weight = 1
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"formaldehyde_concentration"}),
@@ -1983,9 +1887,7 @@ class ThermostatHVACAction(Sensor):
     _attr_translation_key: str = "hvac_action"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         if endpoint.device.manufacturer in {
             "Sinope Technologies",
@@ -2080,9 +1982,7 @@ class SinopeHVACAction(ThermostatHVACAction):
     """Sinope Thermostat HVAC action sensor."""
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2128,9 +2028,7 @@ class RSSISensor(Sensor):
     _attr_translation_key: str = "rssi"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
@@ -2212,9 +2110,7 @@ class LQISensor(RSSISensor):
     _attr_translation_key = "lqi"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
@@ -2244,9 +2140,7 @@ class TimeLeft(Sensor):
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"tuya_manufacturer"}),
@@ -2266,9 +2160,7 @@ class IkeaDeviceRunTime(Sensor):
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
@@ -2287,9 +2179,7 @@ class IkeaFilterRunTime(Sensor):
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"ikea_airpurifier"}),
@@ -2313,9 +2203,7 @@ class AqaraPetFeederLastFeedingSource(EnumSensor):
     _enum = AqaraFeedingSource
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -2332,9 +2220,7 @@ class AqaraPetFeederLastFeedingSize(Sensor):
     _attr_translation_key: str = "last_feeding_size"
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -2352,9 +2238,7 @@ class AqaraPetFeederPortionsDispensed(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -2373,9 +2257,7 @@ class AqaraPetFeederWeightDispensed(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -2395,9 +2277,7 @@ class AqaraSmokeDensityDbm(Sensor):
     _attr_suggested_display_precision = 3
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -2422,9 +2302,7 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
     _enum = SonoffIlluminationStates
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"sonoff_manufacturer"}),
@@ -2449,9 +2327,7 @@ class PiHeatingDemand(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2480,9 +2356,7 @@ class SetpointChangeSource(EnumSensor):
     _enum = SetpointChangeSourceEnum
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2503,9 +2377,7 @@ class SetpointChangeSourceTimestamp(TimestampSensor):
     _attr_device_class = SensorDeviceClass.TIMESTAMP
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2527,9 +2399,7 @@ class WindowCoveringTypeSensor(EnumSensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
@@ -2547,9 +2417,7 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
@@ -2577,9 +2445,7 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({"opple_cluster"}),
@@ -2651,9 +2517,7 @@ class DanfossOpenWindowDetection(EnumSensor):
     _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2671,9 +2535,7 @@ class DanfossLoadEstimate(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2692,9 +2554,7 @@ class DanfossAdaptationRunStatus(BitMapSensor):
     _bitmap = danfoss_thermostat.DanfossAdaptationRunStatusBitmap
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2713,9 +2573,7 @@ class DanfossPreheatTime(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
@@ -2734,9 +2592,7 @@ class DanfossSoftwareErrorCode(BitMapSensor):
     _bitmap = danfoss_thermostat.DanfossSoftwareErrorCodeBitmap
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_DIAGNOSTIC}),
@@ -2754,9 +2610,7 @@ class DanfossMotorStepCounter(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_DIAGNOSTIC}),
@@ -2776,9 +2630,7 @@ class WindSpeed(Sensor):
     _attr_primary_weight = 2
 
     @classmethod
-    def match_cluster_handlers(
-        cls, endpoint: Endpoint, platform_override: Platform | None
-    ) -> ClusterHandlerMatch | None:
+    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_WIND_SPEED}),
