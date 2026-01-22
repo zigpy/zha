@@ -7,6 +7,7 @@ import functools
 import time
 from typing import TYPE_CHECKING, Any, cast
 
+from zigpy.profiles import zha
 from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
@@ -77,14 +78,11 @@ class DeviceScannerEntity(PlatformEntity):
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            endpoint.zigpy_endpoint.device_type
-            != SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
-        ):
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
+            profile_device_types=frozenset(
+                {(zha.PROFILE_ID, SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE)}
+            ),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
