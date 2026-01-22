@@ -270,12 +270,3 @@ class Endpoint:
     def claim_cluster_handlers(self, cluster_handlers: list[ClusterHandler]) -> None:
         """Claim cluster handlers."""
         self.claimed_cluster_handlers.update({ch.id: ch for ch in cluster_handlers})
-
-    def unclaimed_cluster_handlers(self) -> list[ClusterHandler]:
-        """Return a list of available (unclaimed) cluster handlers."""
-        claimed = set(self.claimed_cluster_handlers)
-        available = set(self.all_cluster_handlers)
-        return [
-            self.all_cluster_handlers[cluster_id]
-            for cluster_id in (available - claimed)
-        ]

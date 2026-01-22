@@ -586,45 +586,6 @@ def test_cluster_handler_registry() -> None:
             assert ch_exposed_feature in cluster_exposed_feature_map[cluster_id]
 
 
-def test_epch_unclaimed_cluster_handlers(cluster_handler) -> None:
-    """Test unclaimed cluster handlers."""
-
-    ch_1 = cluster_handler(CLUSTER_HANDLER_ON_OFF, 6)
-    ch_2 = cluster_handler(CLUSTER_HANDLER_LEVEL, 8)
-    ch_3 = cluster_handler(CLUSTER_HANDLER_COLOR, 768)
-
-    mock_dev = mock.MagicMock(spec=Device)
-    mock_dev.unique_id = "00:11:22:33:44:55:66:77"
-
-    ep_cluster_handlers = Endpoint(mock.MagicMock(spec_set=ZigpyEndpoint), mock_dev)
-    all_cluster_handlers = {ch_1.id: ch_1, ch_2.id: ch_2, ch_3.id: ch_3}
-    with mock.patch.dict(
-        ep_cluster_handlers.all_cluster_handlers, all_cluster_handlers, clear=True
-    ):
-        available = ep_cluster_handlers.unclaimed_cluster_handlers()
-        assert ch_1 in available
-        assert ch_2 in available
-        assert ch_3 in available
-
-        ep_cluster_handlers.claimed_cluster_handlers[ch_2.id] = ch_2
-        available = ep_cluster_handlers.unclaimed_cluster_handlers()
-        assert ch_1 in available
-        assert ch_2 not in available
-        assert ch_3 in available
-
-        ep_cluster_handlers.claimed_cluster_handlers[ch_1.id] = ch_1
-        available = ep_cluster_handlers.unclaimed_cluster_handlers()
-        assert ch_1 not in available
-        assert ch_2 not in available
-        assert ch_3 in available
-
-        ep_cluster_handlers.claimed_cluster_handlers[ch_3.id] = ch_3
-        available = ep_cluster_handlers.unclaimed_cluster_handlers()
-        assert ch_1 not in available
-        assert ch_2 not in available
-        assert ch_3 not in available
-
-
 def test_epch_claim_cluster_handlers(cluster_handler) -> None:
     """Test cluster handler claiming."""
 
