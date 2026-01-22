@@ -404,18 +404,18 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
     ) is not None:
         platform_override = device_override.type
 
+    matches_by_feature_and_priority: defaultdict[
+        PlatformFeatureGroup | None,
+        defaultdict[
+            int,  # Weight
+            list[tuple[ClusterHandlerMatch, type[PlatformEntity]]],
+        ],
+    ] = defaultdict(lambda: defaultdict(list))
+
     for cluster in itertools.chain(
         endpoint.zigpy_endpoint.in_clusters.values(),
         endpoint.zigpy_endpoint.out_clusters.values(),
     ):
-        matches_by_feature_and_priority: defaultdict[
-            PlatformFeatureGroup | None,
-            defaultdict[
-                int,  # Weight
-                list[tuple[ClusterHandlerMatch, type[PlatformEntity]]],
-            ],
-        ] = defaultdict(lambda: defaultdict(list))
-
         # To speed up lookups, we key ENTITY_REGISTRY by cluster ID. First, we find all
         # compatible entities and their matching criteria.
         for entity_class in ENTITY_REGISTRY.get(cluster.cluster_id, []):
@@ -482,70 +482,70 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 (match, entity_class)
             )
 
-        # Then, we process the matches and discard entities with lower weights (when
-        # feature groups are used)
-        for feature, matches_by_priority in matches_by_feature_and_priority.items():
-            highest_priority = max(matches_by_priority.keys())
+    # Then, we process the matches and discard entities with lower weights (when
+    # feature groups are used)
+    for feature, matches_by_priority in matches_by_feature_and_priority.items():
+        highest_priority = max(matches_by_priority.keys())
 
-            if _LOGGER.getEffectiveLevel() <= logging.DEBUG:
-                ignored_matches = [
-                    (priority, matches)
-                    for priority, matches in matches_by_priority.items()
-                    if priority < highest_priority
-                ]
+        if _LOGGER.getEffectiveLevel() <= logging.DEBUG:
+            ignored_matches = [
+                (priority, matches)
+                for priority, matches in matches_by_priority.items()
+                if priority < highest_priority
+            ]
 
-                if ignored_matches:
-                    _LOGGER.debug(
-                        "Ignored matches for feature '%s': %s",
-                        feature,
-                        ignored_matches,
-                    )
-
-            for match, entity_class in matches_by_priority[highest_priority]:
-                server_handlers = set(match.cluster_handlers)
-
-                for optional in match.optional_cluster_handlers:
-                    if optional in endpoint.cluster_handlers_by_name:
-                        server_handlers.add(optional)
-
-                client_handlers = set(match.client_cluster_handlers)
-
-                server_cluster_handlers = [
-                    endpoint.cluster_handlers_by_name[name] for name in server_handlers
-                ]
-                client_cluster_handlers = [
-                    endpoint.client_cluster_handlers_by_name[name]
-                    for name in client_handlers
-                ]
-
-                # Claim on endpoint
-                endpoint.claim_cluster_handlers(server_cluster_handlers)
-                endpoint.claim_cluster_handlers(client_cluster_handlers)
-
-                if match.legacy_discovery_unique_id is not None:
-                    legacy_discovery_unique_id = match.legacy_discovery_unique_id
-                else:
-                    first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
-                    legacy_discovery_unique_id = (
-                        f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
-                    )
-
+            if ignored_matches:
                 _LOGGER.debug(
-                    "'%s' platform -> '%s' using %s + %s",
-                    entity_class.PLATFORM,
-                    entity_class.__name__,
-                    [ch.name for ch in server_cluster_handlers],
-                    [ch.name for ch in client_cluster_handlers],
+                    "Ignored matches for feature '%s': %s",
+                    feature,
+                    ignored_matches,
                 )
 
-                # XXX: Combining server and client cluster handlers should not be done
-                cluster_handlers: list[ClusterHandler | ClientClusterHandler] = (
-                    server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
+        for match, entity_class in matches_by_priority[highest_priority]:
+            server_handlers = set(match.cluster_handlers)
+
+            for optional in match.optional_cluster_handlers:
+                if optional in endpoint.cluster_handlers_by_name:
+                    server_handlers.add(optional)
+
+            client_handlers = set(match.client_cluster_handlers)
+
+            server_cluster_handlers = [
+                endpoint.cluster_handlers_by_name[name] for name in server_handlers
+            ]
+            client_cluster_handlers = [
+                endpoint.client_cluster_handlers_by_name[name]
+                for name in client_handlers
+            ]
+
+            # Claim on endpoint
+            endpoint.claim_cluster_handlers(server_cluster_handlers)
+            endpoint.claim_cluster_handlers(client_cluster_handlers)
+
+            if match.legacy_discovery_unique_id is not None:
+                legacy_discovery_unique_id = match.legacy_discovery_unique_id
+            else:
+                first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
+                legacy_discovery_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
                 )
 
-                yield entity_class(
-                    cluster_handlers=cluster_handlers,
-                    endpoint=endpoint,
-                    device=device,
-                    legacy_discovery_unique_id=legacy_discovery_unique_id,
-                )
+            _LOGGER.debug(
+                "'%s' platform -> '%s' using %s + %s",
+                entity_class.PLATFORM,
+                entity_class.__name__,
+                [ch.name for ch in server_cluster_handlers],
+                [ch.name for ch in client_cluster_handlers],
+            )
+
+            # XXX: Combining server and client cluster handlers should not be done
+            cluster_handlers: list[ClusterHandler | ClientClusterHandler] = (
+                server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
+            )
+
+            yield entity_class(
+                cluster_handlers=cluster_handlers,
+                endpoint=endpoint,
+                device=device,
+                legacy_discovery_unique_id=legacy_discovery_unique_id,
+            )
