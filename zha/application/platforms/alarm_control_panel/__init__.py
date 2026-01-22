@@ -60,6 +60,10 @@ class AlarmControlPanel(PlatformEntity):
     _attr_translation_key: str = "alarm_control_panel"
     PLATFORM = Platform.ALARM_CONTROL_PANEL
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -93,13 +97,6 @@ class AlarmControlPanel(PlatformEntity):
             alarm_options.arm_requires_code
         )
         self._cluster_handler.max_invalid_tries = alarm_options.failed_tries
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
-        )
 
     def on_add(self) -> None:
         """Run when entity is added."""

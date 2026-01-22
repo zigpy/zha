@@ -54,6 +54,18 @@ class PlatformFeatureGroup(StrEnum):
     # Thermostat entities encompass the functionality of Fan entities
     THERMOSTAT_FAN = "thermostat_fan"
 
+    # Model-specific overrides for HVAC action
+    HVAC_ACTION = "hvac_action"
+
+    # Model-specific overrides for VOC level
+    VOC_LEVEL = "voc_level"
+
+    # Model-specific overrides for Smart Energy Summation
+    SMART_ENERGY_SUMMATION = "smart_energy_summation"
+
+    # Model-specific overrides for local temperature calibration
+    LOCAL_TEMPERATURE_CALIBRATION = "local_temperature_calibration"
+
 
 @dataclasses.dataclass(frozen=True)
 class ClusterHandlerMatch:
@@ -426,10 +438,8 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Check if this entity class matches the given endpoint."""
-        return None
+    # Auto-discovery for the entity
+    _cluster_handler_match: ClusterHandlerMatch | None
 
     def __init__(
         self,

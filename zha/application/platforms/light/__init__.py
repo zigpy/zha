@@ -752,6 +752,15 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        optional_cluster_handlers=frozenset(
+            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+        ),
+        profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -785,18 +794,6 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self._refresh_task: asyncio.Task | None = None
 
         self.recompute_capabilities()
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            optional_cluster_handlers=frozenset(
-                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-            ),
-            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
-            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
-        )
 
     @property
     def _gateway(self) -> Gateway:
@@ -1045,19 +1042,16 @@ class HueLight(Light):
 
     _REFRESH_INTERVAL = (180, 300)
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            optional_cluster_handlers=frozenset(
-                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-            ),
-            manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
-            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
-            # We want this entity to be preferred over the base light
-            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        optional_cluster_handlers=frozenset(
+            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+        ),
+        manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
+        profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+        # We want this entity to be preferred over the base light
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+    )
 
 
 @register_entity(OnOff.cluster_id)
@@ -1066,27 +1060,24 @@ class ForceOnLight(Light):
 
     _FORCE_ON = True
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            optional_cluster_handlers=frozenset(
-                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-            ),
-            manufacturers=frozenset(
-                {
-                    "Jasco",
-                    "Jasco Products",
-                    "Quotra-Vision",
-                    "eWeLight",
-                    "eWeLink",
-                }
-            ),
-            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
-            # We want this entity to be preferred over the base light
-            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        optional_cluster_handlers=frozenset(
+            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+        ),
+        manufacturers=frozenset(
+            {
+                "Jasco",
+                "Jasco Products",
+                "Quotra-Vision",
+                "eWeLight",
+                "eWeLink",
+            }
+        ),
+        profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+        # We want this entity to be preferred over the base light
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+    )
 
 
 @register_entity(OnOff.cluster_id)
@@ -1096,19 +1087,16 @@ class MinTransitionLight(Light):
     # Transitions are counted in 1/10th of a second increments, so this is the smallest
     _DEFAULT_MIN_TRANSITION_TIME = 0.1
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            optional_cluster_handlers=frozenset(
-                {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-            ),
-            manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
-            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
-            # We want this entity to be preferred over the base light
-            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        optional_cluster_handlers=frozenset(
+            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
+        ),
+        manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
+        profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+        # We want this entity to be preferred over the base light
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+    )
 
 
 @register_group_entity

@@ -121,12 +121,9 @@ class IdentifyButton(Button):
     _kwargs = {}
     _args = [DEFAULT_DURATION]
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_IDENTIFY})
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_IDENTIFY})
+    )
 
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
@@ -191,13 +188,10 @@ class FrostLockResetButton(WriteAttributeButton):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "reset_frost_lock"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"tuya_manufacturer"}),
-            manufacturers=frozenset({"_TZE200_htnnfasr"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"tuya_manufacturer"}),
+        manufacturers=frozenset({"_TZE200_htnnfasr"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -211,13 +205,10 @@ class NoPresenceStatusResetButton(WriteAttributeButton):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "reset_no_presence_status"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.motion.ac01"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.motion.ac01"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -229,13 +220,10 @@ class AqaraPetFeederFeedButton(WriteAttributeButton):
     _attribute_value = 1
     _attr_translation_key = "feed"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"aqara.feeder.acn001"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"aqara.feeder.acn001"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -248,10 +236,7 @@ class AqaraSelfTestButton(WriteAttributeButton):
     _attr_entity_category = EntityCategory.CONFIG
     _attr_translation_key = "self_test"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.sensor_smoke.acn03"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.sensor_smoke.acn03"}),
+    )

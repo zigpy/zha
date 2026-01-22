@@ -133,6 +133,10 @@ class Cover(BaseCover):
 
     _attr_translation_key: str = "cover"
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -188,13 +192,6 @@ class Cover(BaseCover):
 
         self._state: CoverState | None = None
         self._determine_cover_state(refresh=True)
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
-        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags based on the window covering type."""
@@ -713,6 +710,20 @@ class Shade(BaseCover):
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        optional_cluster_handlers=frozenset(
+            {CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_SHADE}
+        ),
+        profile_device_types=frozenset(
+            {
+                (zha.PROFILE_ID, zha.DeviceType.SHADE),
+                (512, zha.DeviceType.SHADE),  # TODO: remove this Tuya hack
+            }
+        ),
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -744,23 +755,6 @@ class Shade(BaseCover):
             )
 
         self.recompute_capabilities()
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            optional_cluster_handlers=frozenset(
-                {CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_SHADE}
-            ),
-            profile_device_types=frozenset(
-                {
-                    (zha.PROFILE_ID, zha.DeviceType.SHADE),
-                    (512, zha.DeviceType.SHADE),  # TODO: remove this Tuya hack
-                }
-            ),
-            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
-        )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -915,14 +909,11 @@ class KeenVent(Shade):
     _attr_device_class = CoverDeviceClass.DAMPER
     _attr_translation_key: str = "keen_vent"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
-            manufacturers=frozenset({"Keen Home Inc"}),
-            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
+        manufacturers=frozenset({"Keen Home Inc"}),
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+    )
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover."""

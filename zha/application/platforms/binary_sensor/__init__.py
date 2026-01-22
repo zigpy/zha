@@ -167,12 +167,9 @@ class Accelerometer(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOVING
     _attr_translation_key: str = "accelerometer"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ACCELEROMETER})
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ACCELEROMETER})
+    )
 
 
 @register_entity(OccupancySensing.cluster_id)
@@ -183,12 +180,9 @@ class Occupancy(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
     _attr_primary_weight = 2
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY})
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY})
+    )
 
 
 @register_entity(OccupancySensing.cluster_id)
@@ -199,12 +193,9 @@ class HueOccupancy(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
     _attr_primary_weight = 3
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_HUE_OCCUPANCY})
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_HUE_OCCUPANCY})
+    )
 
 
 @register_entity(OnOff.cluster_id)
@@ -215,34 +206,30 @@ class Opening(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_primary_weight = 1
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-
-        return ClusterHandlerMatch(
-            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            not_profile_device_types=frozenset(
-                {
-                    (zha.PROFILE_ID, zha.DeviceType.COLOR_CONTROLLER),
-                    (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMER_SWITCH),
-                    (zha.PROFILE_ID, zha.DeviceType.COLOR_SCENE_CONTROLLER),
-                    (zha.PROFILE_ID, zha.DeviceType.DIMMER_SWITCH),
-                    (zha.PROFILE_ID, zha.DeviceType.LEVEL_CONTROL_SWITCH),
-                    (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_CONTROLLER),
-                    (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_SCENE_CONTROLLER),
-                    (zha.PROFILE_ID, zha.DeviceType.ON_OFF_SWITCH),
-                    (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT_SWITCH),
-                    (zha.PROFILE_ID, zha.DeviceType.REMOTE_CONTROL),
-                    (zha.PROFILE_ID, zha.DeviceType.SCENE_SELECTOR),
-                    (zll.PROFILE_ID, zll.DeviceType.COLOR_CONTROLLER),
-                    (zll.PROFILE_ID, zll.DeviceType.COLOR_SCENE_CONTROLLER),
-                    (zll.PROFILE_ID, zll.DeviceType.CONTROL_BRIDGE),
-                    (zll.PROFILE_ID, zll.DeviceType.CONTROLLER),
-                    (zll.PROFILE_ID, zll.DeviceType.SCENE_CONTROLLER),
-                }
-            ),
-            feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 0),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        not_profile_device_types=frozenset(
+            {
+                (zha.PROFILE_ID, zha.DeviceType.COLOR_CONTROLLER),
+                (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMER_SWITCH),
+                (zha.PROFILE_ID, zha.DeviceType.COLOR_SCENE_CONTROLLER),
+                (zha.PROFILE_ID, zha.DeviceType.DIMMER_SWITCH),
+                (zha.PROFILE_ID, zha.DeviceType.LEVEL_CONTROL_SWITCH),
+                (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_CONTROLLER),
+                (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_SCENE_CONTROLLER),
+                (zha.PROFILE_ID, zha.DeviceType.ON_OFF_SWITCH),
+                (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT_SWITCH),
+                (zha.PROFILE_ID, zha.DeviceType.REMOTE_CONTROL),
+                (zha.PROFILE_ID, zha.DeviceType.SCENE_SELECTOR),
+                (zll.PROFILE_ID, zll.DeviceType.COLOR_CONTROLLER),
+                (zll.PROFILE_ID, zll.DeviceType.COLOR_SCENE_CONTROLLER),
+                (zll.PROFILE_ID, zll.DeviceType.CONTROL_BRIDGE),
+                (zll.PROFILE_ID, zll.DeviceType.CONTROLLER),
+                (zll.PROFILE_ID, zll.DeviceType.SCENE_CONTROLLER),
+            }
+        ),
+        feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 0),
+    )
 
 
 @register_entity(BinaryInputCluster.cluster_id)
@@ -251,12 +238,9 @@ class BinaryInputWithDescription(BinarySensor):
 
     _attribute_name = "present_value"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
+    )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -277,12 +261,9 @@ class BinaryInput(BinarySensor):
     _attribute_name = "present_value"
     _attr_translation_key: str = "binary_input"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
+    )
 
     def _is_supported(self) -> bool:
         # Prefer to use the "WithDescription" variant above
@@ -300,17 +281,12 @@ class IkeaMotion(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        if not endpoint.device.model or "motion" not in endpoint.device.model:
-            return None
-
-        return ClusterHandlerMatch(
-            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            manufacturers=frozenset({"IKEA of Sweden"}),
-            feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        manufacturers=frozenset({"IKEA of Sweden"}),
+        models=frozenset({"TRADFRI motion sensor"}),
+        feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
+    )
 
 
 @register_entity(OnOff.cluster_id)
@@ -321,15 +297,12 @@ class PhilipsMotion(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-            manufacturers=frozenset({"Philips"}),
-            models=frozenset({"SML001", "SML002"}),
-            feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        manufacturers=frozenset({"Philips"}),
+        models=frozenset({"SML001", "SML002"}),
+        feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
+    )
 
 
 @register_entity(IasZone.cluster_id)
@@ -341,10 +314,9 @@ class IASZone(BinarySensor):
 
     # TODO: split this sensor off into individual sensor classes per IASZone type
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_ZONE}))
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ZONE})
+    )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -380,13 +352,10 @@ class SinopeLeakStatus(BinarySensor):
     _attr_device_class = BinarySensorDeviceClass.MOISTURE
     _attr_primary_weight = 1
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_ZONE}),
-            models=frozenset({"WL4200", "WL4200S"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ZONE}),
+        models=frozenset({"WL4200", "WL4200S"}),
+    )
 
 
 @register_entity(TUYA_MANUFACTURER_CLUSTER)
@@ -398,13 +367,10 @@ class FrostLock(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.LOCK
     _attr_translation_key: str = "frost_lock"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"tuya_manufacturer"}),
-            manufacturers=frozenset({"_TZE200_htnnfasr"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"tuya_manufacturer"}),
+        manufacturers=frozenset({"_TZE200_htnnfasr"}),
+    )
 
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
@@ -417,10 +383,9 @@ class ReplaceFilter(BinarySensor):
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
     _attr_translation_key: str = "replace_filter"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({"ikea_airpurifier"}))
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"ikea_airpurifier"})
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -431,13 +396,10 @@ class AqaraPetFeederErrorDetected(BinarySensor):
     _unique_id_suffix = "error_detected"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"aqara.feeder.acn001"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"aqara.feeder.acn001"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -449,13 +411,10 @@ class XiaomiPlugConsumerConnected(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PLUG
     _attr_translation_key: str = "consumer_connected"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -466,13 +425,10 @@ class AqaraThermostatWindowOpen(BinarySensor):
     _unique_id_suffix = "window_open"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.WINDOW
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.airrtc.agl001"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.airrtc.agl001"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -484,13 +440,10 @@ class AqaraThermostatValveAlarm(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
     _attr_translation_key: str = "valve_alarm"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.airrtc.agl001"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.airrtc.agl001"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -502,13 +455,10 @@ class AqaraThermostatCalibrated(BinarySensor):
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
     _attr_translation_key: str = "calibrated"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.airrtc.agl001"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.airrtc.agl001"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -520,13 +470,10 @@ class AqaraThermostatExternalSensor(BinarySensor):
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
     _attr_translation_key: str = "external_sensor"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.airrtc.agl001"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.airrtc.agl001"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -538,13 +485,10 @@ class AqaraLinkageAlarmState(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.SMOKE
     _attr_translation_key: str = "linkage_alarm_state"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.sensor_smoke.acn03"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.sensor_smoke.acn03"}),
+    )
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -556,13 +500,10 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
     _attr_translation_key = "hand_open"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"opple_cluster"}),
-            models=frozenset({"lumi.curtain.agl001"}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"opple_cluster"}),
+        models=frozenset({"lumi.curtain.agl001"}),
+    )
 
 
 @register_entity(Thermostat.cluster_id)
@@ -575,13 +516,10 @@ class DanfossMountingModeActive(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-            exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
+    )
 
 
 @register_entity(Thermostat.cluster_id)
@@ -592,13 +530,10 @@ class DanfossHeatRequired(BinarySensor):
     _attribute_name = "heat_required"
     _attr_translation_key: str = "heat_required"
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-            exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
+    )
 
 
 @register_entity(Thermostat.cluster_id)
@@ -611,10 +546,7 @@ class DanfossPreheatStatus(BinarySensor):
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-            exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
+    )

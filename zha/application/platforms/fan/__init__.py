@@ -250,6 +250,12 @@ class BaseFan(BaseEntity):
 class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        # We prefer Thermostat entities if possible
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, -1),
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -263,15 +269,6 @@ class Fan(BaseFan, PlatformEntity):
             FanClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_FAN]
         )
         self.recompute_capabilities()
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
-            # We prefer Thermostat entities if possible
-            feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, -1),
-        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -382,6 +379,11 @@ class IkeaFan(BaseFan, PlatformEntity):
         | FanEntityFeature.TURN_ON
     )
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"ikea_airpurifier"}),
+        models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -393,16 +395,6 @@ class IkeaFan(BaseFan, PlatformEntity):
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._fan_cluster_handler: IkeaAirPurifierClusterHandler = cast(
             IkeaAirPurifierClusterHandler, self.cluster_handlers["ikea_airpurifier"]
-        )
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({"ikea_airpurifier"}),
-            models=frozenset(
-                {"STARKVIND Air purifier", "STARKVIND Air purifier table"}
-            ),
         )
 
     def on_add(self) -> None:
@@ -485,14 +477,11 @@ class KofFan(Fan):
         | FanEntityFeature.TURN_ON
     )
 
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
-            models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),
-            feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
-        )
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
+    )
 
     @functools.cached_property
     def speed_range(self) -> tuple[int, int]:

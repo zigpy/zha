@@ -419,7 +419,7 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         # To speed up lookups, we key ENTITY_REGISTRY by cluster ID. First, we find all
         # compatible entities and their matching criteria.
         for entity_class in ENTITY_REGISTRY.get(cluster.cluster_id, []):
-            match = entity_class.match_cluster_handlers(endpoint)
+            match = entity_class._cluster_handler_match
             if match is None:
                 continue
 

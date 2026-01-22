@@ -283,6 +283,10 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
 
     _unique_id_suffix = "firmware_update"
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        client_cluster_handlers=frozenset({CLUSTER_HANDLER_OTA})
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -299,13 +303,6 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
         self._attr_installed_version: str | None = self._get_cluster_version()
         self._compatible_images: OtaImagesResult = OtaImagesResult(
             upgrades=(), downgrades=()
-        )
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            client_cluster_handlers=frozenset({CLUSTER_HANDLER_OTA})
         )
 
     def on_add(self) -> None:
@@ -336,6 +333,9 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
     """Representation of a ZHA firmware update entity."""
 
     _unique_id_suffix = "firmware_update"
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_OTA})
+    )
 
     def __init__(
         self,
@@ -355,11 +355,6 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
         self._compatible_images: OtaImagesResult = OtaImagesResult(
             upgrades=(), downgrades=()
         )
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_OTA}))
 
     def on_add(self) -> None:
         """Call when entity is added."""

@@ -55,6 +55,13 @@ class DeviceScannerEntity(PlatformEntity):
     _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
+        profile_device_types=frozenset(
+            {(zha.PROFILE_ID, SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE)}
+        ),
+    )
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -78,16 +85,6 @@ class DeviceScannerEntity(PlatformEntity):
         self._keepalive_interval: int = 60
         self._should_poll: bool = True
         self._battery_level: float | None = None
-
-    @classmethod
-    def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
-        """Match cluster handlers for this entity."""
-        return ClusterHandlerMatch(
-            cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
-            profile_device_types=frozenset(
-                {(zha.PROFILE_ID, SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE)}
-            ),
-        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
