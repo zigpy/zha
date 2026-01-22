@@ -68,7 +68,22 @@ class AlarmControlPanel(PlatformEntity):
         **kwargs,
     ) -> None:
         """Initialize the ZHA alarm control device."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
+            if (
+                endpoint.zigpy_endpoint.device_type
+                == zha.DeviceType.IAS_ANCILLARY_CONTROL
+            )
+            else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
+        )
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
+
         alarm_options = device.gateway.config.config.alarm_control_panel_options
         self._cluster_handler: IasAceClientClusterHandler = cast(
             IasAceClientClusterHandler, cluster_handlers[0]
@@ -84,14 +99,6 @@ class AlarmControlPanel(PlatformEntity):
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
-                if (
-                    endpoint.zigpy_endpoint.device_type
-                    == zha.DeviceType.IAS_ANCILLARY_CONTROL
-                )
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
-            ),
         )
 
     def on_add(self) -> None:

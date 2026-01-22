@@ -90,8 +90,6 @@ class ClusterHandlerMatch:
     # For a given feature, only entities with the highest priority will be considered
     feature_priority: tuple[PlatformFeatureGroup, int] | None = None
 
-    legacy_discovery_unique_id: str | None = None
-
 
 def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
     """Register an entity class for discovery."""
@@ -440,12 +438,17 @@ class PlatformEntity(BaseEntity):
         device: Device,
         *,
         entity_metadata: EntityMetadata | None = None,
-        legacy_discovery_unique_id: str,
+        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
+
+        if legacy_discovery_unique_id is None:
+            legacy_discovery_unique_id = (
+                f"{device.ieee}-{endpoint.id}-{cluster_handlers[0].cluster.cluster_id}"
+            )
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"

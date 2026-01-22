@@ -82,6 +82,25 @@ class Siren(PlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this siren."""
+        self._cluster_handler: IasWdClusterHandler = cast(
+            IasWdClusterHandler, cluster_handlers[0]
+        )
+
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}"
+            if (
+                endpoint.zigpy_endpoint.device_type == zha.DeviceType.IAS_WARNING_DEVICE
+            )
+            else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasWd.cluster_id)}"
+        )
+
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
         self._attr_supported_features = (
             SirenEntityFeature.TURN_ON
             | SirenEntityFeature.TURN_OFF
@@ -97,10 +116,6 @@ class Siren(PlatformEntity):
             WARNING_DEVICE_MODE_FIRE_PANIC: "Fire Panic",
             WARNING_DEVICE_MODE_EMERGENCY_PANIC: "Emergency Panic",
         }
-        self._cluster_handler: IasWdClusterHandler = cast(
-            IasWdClusterHandler, cluster_handlers[0]
-        )
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_is_on: bool = False
         self._off_listener: asyncio.TimerHandle | None = None
 
@@ -109,14 +124,6 @@ class Siren(PlatformEntity):
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if (
-                    endpoint.zigpy_endpoint.device_type
-                    == zha.DeviceType.IAS_WARNING_DEVICE
-                )
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasWd.cluster_id)}"
-            ),
         )
 
     @functools.cached_property

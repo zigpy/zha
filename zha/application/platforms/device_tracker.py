@@ -63,7 +63,13 @@ class DeviceScannerEntity(PlatformEntity):
         **kwargs,
     ):
         """Initialize the ZHA device tracker."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+        )
         self._battery_cluster_handler: PowerConfigurationClusterHandler = cast(
             PowerConfigurationClusterHandler,
             self.cluster_handlers[CLUSTER_HANDLER_POWER_CONFIGURATION],
@@ -81,7 +87,6 @@ class DeviceScannerEntity(PlatformEntity):
             profile_device_types=frozenset(
                 {(zha.PROFILE_ID, SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE)}
             ),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
     def on_add(self) -> None:

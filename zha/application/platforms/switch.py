@@ -125,7 +125,28 @@ class Switch(PlatformEntity, BaseSwitch):
         **kwargs: Any,
     ) -> None:
         """Initialize the ZHA switch."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}"
+            if (
+                endpoint.zigpy_endpoint.profile_id,
+                endpoint.zigpy_endpoint.device_type,
+            )
+            in {
+                (zha.PROFILE_ID, zha.DeviceType.ON_OFF_BALLAST),
+                (zha.PROFILE_ID, zha.DeviceType.ON_OFF_PLUG_IN_UNIT),
+                (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
+                (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
+            }
+            else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}"
+        )
+
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
         self._on_off_cluster_handler: OnOffClusterHandler = cast(
             OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
         )
@@ -133,29 +154,10 @@ class Switch(PlatformEntity, BaseSwitch):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-
-        # Maintain backwards compatibility with old unique ID format
-        if (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) in {
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_BALLAST),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_PLUG_IN_UNIT),
-            (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
-            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
-        }:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-                # Switch entities have the lowest priority
-                feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, -1),
-                legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
-            )
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             # Switch entities have the lowest priority
             feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, -1),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}",
         )
 
     def on_add(self) -> None:
@@ -329,11 +331,36 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
+        *,
+        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
         self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+
+        if legacy_discovery_unique_id is None:
+            legacy_discovery_unique_id = (
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if (
+                    endpoint.zigpy_endpoint.profile_id,
+                    endpoint.zigpy_endpoint.device_type,
+                )
+                in {
+                    (zha.PROFILE_ID, zha.DeviceType.ON_OFF_BALLAST),
+                    (zha.PROFILE_ID, zha.DeviceType.ON_OFF_PLUG_IN_UNIT),
+                    (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
+                    (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
+                }
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(cluster_handlers[0].cluster.cluster_id)}"
+            )
+
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
         self._cluster_handler.on_event(
             CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
             self.handle_cluster_handler_attribute_updated,
@@ -798,25 +825,9 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
     @classmethod
     def match_cluster_handlers(cls, endpoint: Endpoint) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) in {
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_BALLAST),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_PLUG_IN_UNIT),
-            (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
-            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
-        }:
-            return ClusterHandlerMatch(
-                cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-                exposed_features=frozenset({TUYA_PLUG_ONOFF}),
-                legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
-            )
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             exposed_features=frozenset({TUYA_PLUG_ONOFF}),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}",
         )
 
 

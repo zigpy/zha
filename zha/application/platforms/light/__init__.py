@@ -760,7 +760,13 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         **kwargs,
     ) -> None:
         """Initialize the light."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+        )
         self._on_off_cluster_handler: OnOffClusterHandler = cast(
             OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
         )
@@ -790,7 +796,6 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
             ),
             profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
             feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
     @property
@@ -1052,7 +1057,6 @@ class HueLight(Light):
             profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
             # We want this entity to be preferred over the base light
             feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
 
@@ -1082,7 +1086,6 @@ class ForceOnLight(Light):
             profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
             # We want this entity to be preferred over the base light
             feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
 
@@ -1105,7 +1108,6 @@ class MinTransitionLight(Light):
             profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
             # We want this entity to be preferred over the base light
             feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
 

@@ -141,7 +141,22 @@ class Cover(BaseCover):
         **kwargs,
     ) -> None:
         """Init this cover."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}"
+            if (
+                endpoint.zigpy_endpoint.device_type
+                == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
+            )
+            else f"{endpoint.device.ieee}-{endpoint.id}-{int(WindowCovering.cluster_id)}"
+        )
+
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
         cluster_handler = self.cluster_handlers.get(CLUSTER_HANDLER_COVER)
         assert cluster_handler
 
@@ -179,14 +194,6 @@ class Cover(BaseCover):
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if (
-                    endpoint.zigpy_endpoint.device_type
-                    == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
-                )
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(WindowCovering.cluster_id)}"
-            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -714,7 +721,13 @@ class Shade(BaseCover):
         **kwargs,
     ) -> None:
         """Initialize the ZHA shade."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+        )
         self._on_off_cluster_handler: OnOffClusterHandler = cast(
             OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
         )
@@ -747,7 +760,6 @@ class Shade(BaseCover):
                 }
             ),
             feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
     def recompute_capabilities(self) -> None:
@@ -909,7 +921,6 @@ class KeenVent(Shade):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Keen Home Inc"}),
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
             feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
         )
 

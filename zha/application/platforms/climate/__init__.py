@@ -109,7 +109,18 @@ class Thermostat(PlatformEntity):
         **kwargs,
     ):
         """Initialize ZHA Thermostat instance."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}"
+            if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+            else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+        )
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
         self._preset: Preset | str = Preset.NONE
         self._presets: list[Preset | str] = []
 
@@ -131,11 +142,6 @@ class Thermostat(PlatformEntity):
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
             # We prefer Thermostat entities over Fan entities if possible
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -545,11 +551,6 @@ class SinopeTechnologiesThermostat(Thermostat):
                 {CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"}
             ),
             manufacturers=frozenset({"Sinope Technologies"}),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -647,11 +648,6 @@ class ZenWithinThermostat(Thermostat):
             optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
             manufacturers=frozenset({"Zen Within", "LUX"}),
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
 
@@ -680,11 +676,6 @@ class ZehnderThermostat(Thermostat):
                 {"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"}
             ),
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
@@ -746,11 +737,6 @@ class CentralitePearl(Thermostat):
             manufacturers=frozenset({"Centralite"}),
             models=frozenset({"3157100", "3157100-E"}),
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
 
@@ -784,11 +770,6 @@ class MoesThermostat(Thermostat):
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=MOES_MANUFACTURERS,
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -875,11 +856,6 @@ class BecaThermostat(Thermostat):
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=frozenset({"_TZE200_b6wax7g0"}),
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
     def recompute_capabilities(self) -> None:
@@ -960,11 +936,6 @@ class StelproFanHeater(Thermostat):
             manufacturers=frozenset({"Stelpro"}),
             models=frozenset({"SORB"}),
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
     @functools.cached_property
@@ -1006,11 +977,6 @@ class ZONNSMARTThermostat(Thermostat):
             cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
             manufacturers=ZONNSMART_MANUFACTURERS,
             feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
-            ),
         )
 
     def recompute_capabilities(self) -> None:

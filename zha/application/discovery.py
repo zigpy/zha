@@ -522,14 +522,6 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
             endpoint.claim_cluster_handlers(server_cluster_handlers)
             endpoint.claim_cluster_handlers(client_cluster_handlers)
 
-            if match.legacy_discovery_unique_id is not None:
-                legacy_discovery_unique_id = match.legacy_discovery_unique_id
-            else:
-                first_ch = (server_cluster_handlers + client_cluster_handlers)[0]
-                legacy_discovery_unique_id = (
-                    f"{device.ieee}-{endpoint.id}-{first_ch.cluster.cluster_id}"
-                )
-
             _LOGGER.debug(
                 "'%s' platform -> '%s' using %s + %s",
                 entity_class.PLATFORM,
@@ -547,5 +539,4 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 cluster_handlers=cluster_handlers,
                 endpoint=endpoint,
                 device=device,
-                legacy_discovery_unique_id=legacy_discovery_unique_id,
             )
