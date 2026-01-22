@@ -51,6 +51,9 @@ class PlatformFeatureGroup(StrEnum):
     # fall back to generic binary sensors
     BINARY_SENSOR = "binary_sensor"
 
+    # Thermostat entities encompass the functionality of Fan entities
+    THERMOSTAT_FAN = "thermostat_fan"
+
 
 @dataclasses.dataclass(frozen=True)
 class ClusterHandlerMatch:

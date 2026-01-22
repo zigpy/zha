@@ -9,7 +9,6 @@ import math
 from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters import hvac
-from zigpy.zcl.clusters.hvac import Thermostat
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -18,6 +17,7 @@ from zha.application.platforms import (
     ClusterHandlerMatch,
     GroupEntity,
     PlatformEntity,
+    PlatformFeatureGroup,
     register_entity,
     register_group_entity,
 )
@@ -269,18 +269,11 @@ class Fan(BaseFan, PlatformEntity):
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-
-        # Thermostat entities take over the fan cluster, we don't need two entities
-        if Thermostat.cluster_id in endpoint.zigpy_endpoint.in_clusters:
-            return None
-
-        if endpoint.device.model in {
-            "HBUniversalCFRemote",
-            "HDC52EastwindFan",
-        }:
-            return None
-
-        return ClusterHandlerMatch(cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}))
+        return ClusterHandlerMatch(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+            # We prefer Thermostat entities if possible
+            feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, -1),
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -504,6 +497,7 @@ class KofFan(Fan):
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
             models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),
+            feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
         )
 
     @functools.cached_property
