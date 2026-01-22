@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import astuple
 import functools
 import itertools
@@ -416,9 +416,10 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
             ],
         ] = defaultdict(lambda: defaultdict(list))
 
-        # To speed up lookups, we key ENTITY_REGISTRY by cluster ID
+        # To speed up lookups, we key ENTITY_REGISTRY by cluster ID. First, we find all
+        # compatible entities and their matching criteria.
         for entity_class in ENTITY_REGISTRY.get(cluster.cluster_id, []):
-            match = entity_class.match_cluster_handlers(endpoint, platform_override)
+            match = entity_class.match_cluster_handlers(endpoint, None)
             if match is None:
                 continue
 
@@ -469,36 +470,38 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 feature = None
                 priority = 0
 
+            # Finally, account for `platform_override` by boosting the priority of
+            # matching platforms
+            if (
+                platform_override is not None
+                and platform_override == entity_class.PLATFORM
+            ):
+                priority += 1000
+
             matches_by_feature_and_priority[feature][priority].append(
                 (match, entity_class)
             )
 
+        # Then, we process the matches and discard entities with lower weights (when
+        # feature groups are used)
         for feature, matches_by_priority in matches_by_feature_and_priority.items():
-            matches: Iterable[tuple[ClusterHandlerMatch, type[PlatformEntity]]]
+            highest_priority = max(matches_by_priority.keys())
 
-            if feature is None:
-                # Without a specified feature, priority is ignored
-                matches = itertools.chain.from_iterable(matches_by_priority.values())
-            else:
-                highest_priority = max(matches_by_priority.keys())
+            if _LOGGER.getEffectiveLevel() <= logging.DEBUG:
+                ignored_matches = [
+                    (priority, matches)
+                    for priority, matches in matches_by_priority.items()
+                    if priority < highest_priority
+                ]
 
-                if _LOGGER.getEffectiveLevel() <= logging.DEBUG:
-                    ignored_matches = [
-                        (priority, matches)
-                        for priority, matches in matches_by_priority.items()
-                        if priority < highest_priority
-                    ]
+                if ignored_matches:
+                    _LOGGER.debug(
+                        "Ignored matches for feature '%s': %s",
+                        feature,
+                        ignored_matches,
+                    )
 
-                    if ignored_matches:
-                        _LOGGER.debug(
-                            "Ignored matches for feature '%s': %s",
-                            feature,
-                            ignored_matches,
-                        )
-
-                matches = matches_by_priority[highest_priority]
-
-            for match, entity_class in matches:
+            for match, entity_class in matches_by_priority[highest_priority]:
                 server_handlers = set(match.cluster_handlers)
 
                 for optional in match.optional_cluster_handlers:
