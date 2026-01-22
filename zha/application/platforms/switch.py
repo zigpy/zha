@@ -12,7 +12,7 @@ from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import SwitchMetadata
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
-from zigpy.zcl.clusters.general import Basic, BinaryOutput, LevelControl, OnOff
+from zigpy.zcl.clusters.general import Basic, BinaryOutput, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.foundation import Status
 
@@ -24,6 +24,7 @@ from zha.application.platforms import (
     EntityCategory,
     GroupEntity,
     PlatformEntity,
+    PlatformFeatureGroup,
     register_entity,
     register_group_entity,
 )
@@ -134,40 +135,6 @@ class Switch(PlatformEntity, BaseSwitch):
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        # Respect platform override unconditionally
-        if platform_override is not None and platform_override is not Platform.SWITCH:
-            return None
-
-        # Do not create switch entities if this is a light or cover (unless overridden)
-        if platform_override is None and (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) in {
-            # Light
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
-            (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
-            (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-            # Cover
-            (zha.PROFILE_ID, zha.DeviceType.SHADE),
-        }:
-            return None
-
-        # Ignore Keen Vent
-        if (
-            endpoint.zigpy_endpoint.device.manufacturer == "Keen Home Inc"
-            and LevelControl.cluster_id in endpoint.zigpy_endpoint.in_clusters
-        ):
-            return None
 
         # Maintain backwards compatibility with old unique ID format
         if (
@@ -181,11 +148,15 @@ class Switch(PlatformEntity, BaseSwitch):
         }:
             return ClusterHandlerMatch(
                 cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+                # Switch entities have the lowest priority
+                feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, -1),
                 legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
             )
 
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            # Switch entities have the lowest priority
+            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, -1),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}",
         )
 

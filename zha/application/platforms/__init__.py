@@ -11,8 +11,9 @@ import dataclasses
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, final
+from typing import TYPE_CHECKING, Any, Final, Literal, final
 
+from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
@@ -40,6 +41,17 @@ ENTITY_REGISTRY: dict[ClusterId, list[type[PlatformEntity]]] = defaultdict(list)
 GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 
 
+class PlatformFeatureGroup(StrEnum):
+    """Feature groups for platform entities."""
+
+    # OnOff server clusters can be turned into lights, shades, or switches (fallback)
+    LIGHT_OR_SWITCH_OR_SHADE = "light_or_switch_or_shade"
+
+    # OnOff client clusters can be turned into manufacturer-specific motion sensors or
+    # fall back to generic binary sensors
+    BINARY_SENSOR = "binary_sensor"
+
+
 @dataclasses.dataclass(frozen=True)
 class ClusterHandlerMatch:
     """Declares cluster handler requirements for an entity class."""
@@ -48,9 +60,32 @@ class ClusterHandlerMatch:
     client_cluster_handlers: frozenset[str] = frozenset()
     optional_cluster_handlers: frozenset[str] = frozenset()
 
+    # Strict filters: if present, device info must match
     manufacturers: frozenset[str] | None = None
     models: frozenset[str] | None = None
     exposed_features: frozenset[str] | None = None
+
+    # If present, device must match one of the given profile and device type combinations.
+    # This will be ignored if `platform_override` is used.
+    profile_device_types: (  # type:ignore[valid-type]
+        frozenset[
+            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
+            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
+            | tuple[int, int]
+        ]
+        | None
+    ) = None
+    not_profile_device_types: (  # type:ignore[valid-type]
+        frozenset[
+            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
+            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
+            | tuple[int, int]
+        ]
+        | None
+    ) = None
+
+    # For a given feature, only entities with the highest priority will be considered
+    feature_priority: tuple[PlatformFeatureGroup, int] | None = None
 
     legacy_discovery_unique_id: str | None = None
 

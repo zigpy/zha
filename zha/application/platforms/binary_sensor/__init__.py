@@ -22,6 +22,7 @@ from zha.application.platforms import (
     ClusterHandlerMatch,
     EntityCategory,
     PlatformEntity,
+    PlatformFeatureGroup,
     register_entity,
 )
 from zha.application.platforms.binary_sensor.const import (
@@ -226,44 +227,29 @@ class Opening(BinarySensor):
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
 
-        if (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) in {
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_CONTROLLER),
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMER_SWITCH),
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_SCENE_CONTROLLER),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMER_SWITCH),
-            (zha.PROFILE_ID, zha.DeviceType.LEVEL_CONTROL_SWITCH),
-            (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_CONTROLLER),
-            (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_SCENE_CONTROLLER),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_SWITCH),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT_SWITCH),
-            (zha.PROFILE_ID, zha.DeviceType.REMOTE_CONTROL),
-            (zha.PROFILE_ID, zha.DeviceType.SCENE_SELECTOR),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_CONTROLLER),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_SCENE_CONTROLLER),
-            (zll.PROFILE_ID, zll.DeviceType.CONTROL_BRIDGE),
-            (zll.PROFILE_ID, zll.DeviceType.CONTROLLER),
-            (zll.PROFILE_ID, zll.DeviceType.SCENE_CONTROLLER),
-        }:
-            return None
-
-        if endpoint.device.manufacturer == "Philips" and endpoint.device.model in {
-            "SML001",
-            "SML002",
-        }:
-            return None
-
-        if (
-            endpoint.device.manufacturer == "IKEA of Sweden"
-            and endpoint.device.model
-            and "motion" in endpoint.device.model
-        ):
-            return None
-
         return ClusterHandlerMatch(
-            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF})
+            client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            not_profile_device_types=frozenset(
+                {
+                    (zha.PROFILE_ID, zha.DeviceType.COLOR_CONTROLLER),
+                    (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMER_SWITCH),
+                    (zha.PROFILE_ID, zha.DeviceType.COLOR_SCENE_CONTROLLER),
+                    (zha.PROFILE_ID, zha.DeviceType.DIMMER_SWITCH),
+                    (zha.PROFILE_ID, zha.DeviceType.LEVEL_CONTROL_SWITCH),
+                    (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_CONTROLLER),
+                    (zha.PROFILE_ID, zha.DeviceType.NON_COLOR_SCENE_CONTROLLER),
+                    (zha.PROFILE_ID, zha.DeviceType.ON_OFF_SWITCH),
+                    (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT_SWITCH),
+                    (zha.PROFILE_ID, zha.DeviceType.REMOTE_CONTROL),
+                    (zha.PROFILE_ID, zha.DeviceType.SCENE_SELECTOR),
+                    (zll.PROFILE_ID, zll.DeviceType.COLOR_CONTROLLER),
+                    (zll.PROFILE_ID, zll.DeviceType.COLOR_SCENE_CONTROLLER),
+                    (zll.PROFILE_ID, zll.DeviceType.CONTROL_BRIDGE),
+                    (zll.PROFILE_ID, zll.DeviceType.CONTROLLER),
+                    (zll.PROFILE_ID, zll.DeviceType.SCENE_CONTROLLER),
+                }
+            ),
+            feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 0),
         )
 
 
@@ -337,6 +323,7 @@ class IkeaMotion(BinarySensor):
         return ClusterHandlerMatch(
             client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"IKEA of Sweden"}),
+            feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
         )
 
 
@@ -357,6 +344,7 @@ class PhilipsMotion(BinarySensor):
             client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Philips"}),
             models=frozenset({"SML001", "SML002"}),
+            feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
         )
 
 

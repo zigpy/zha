@@ -18,6 +18,7 @@ from zha.application import Platform
 from zha.application.platforms import (
     ClusterHandlerMatch,
     PlatformEntity,
+    PlatformFeatureGroup,
     register_entity,
 )
 from zha.application.platforms.cover.const import (
@@ -45,7 +46,11 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_SHADE,
 )
-from zha.zigbee.cluster_handlers.general import LevelChangeEvent
+from zha.zigbee.cluster_handlers.general import (
+    LevelChangeEvent,
+    LevelControlClusterHandler,
+    OnOffClusterHandler,
+)
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -696,20 +701,12 @@ class Cover(BaseCover):
         return 100 - position
 
 
-# TODO: use device type to allow for featureless "on/off" shades without position or
-# start/stop control
-@register_entity(OnOff.cluster_id)
+@register_entity(OnOffCluster.cluster_id)
 class Shade(BaseCover):
     """ZHA Shade."""
 
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
-    _attr_supported_features: CoverEntityFeature = (
-        CoverEntityFeature.OPEN
-        | CoverEntityFeature.CLOSE
-        | CoverEntityFeature.STOP
-        | CoverEntityFeature.SET_POSITION
-    )
 
     def __init__(
         self,
@@ -720,16 +717,21 @@ class Shade(BaseCover):
     ) -> None:
         """Initialize the ZHA shade."""
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_ON_OFF
-        ]
-        self._level_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_LEVEL
-        ]
-        self._is_open: bool | None = self._on_off_cluster_handler.on_off
-        self._position: int | None = self._zcl_level_to_ha_position(
-            self._level_cluster_handler.current_level
+        self._on_off_cluster_handler: OnOffClusterHandler = cast(
+            OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
         )
+        self._level_cluster_handler: LevelControlClusterHandler | None = cast(
+            LevelControlClusterHandler, self.cluster_handlers.get(CLUSTER_HANDLER_LEVEL)
+        )
+
+        self._is_open: bool | None = self._on_off_cluster_handler.on_off
+        self._position: int | None = None
+
+        if self._level_cluster_handler is not None:
+            self._position = self._zcl_level_to_ha_position(
+                self._level_cluster_handler.current_level
+            )
+
         self.recompute_capabilities()
 
     @classmethod
@@ -738,34 +740,45 @@ class Shade(BaseCover):
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
         return ClusterHandlerMatch(
-            cluster_handlers=frozenset(
+            cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+            optional_cluster_handlers=frozenset(
+                {CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_SHADE}
+            ),
+            profile_device_types=frozenset(
                 {
-                    CLUSTER_HANDLER_LEVEL,
-                    CLUSTER_HANDLER_ON_OFF,
-                    CLUSTER_HANDLER_SHADE,
+                    (zha.PROFILE_ID, zha.DeviceType.SHADE),
+                    (512, zha.DeviceType.SHADE),  # TODO: remove this Tuya hack
                 }
             ),
-            legacy_discovery_unique_id=(
-                f"{endpoint.device.ieee}-{endpoint.id}"
-                if endpoint.zigpy_endpoint.device_type == zha.DeviceType.SHADE
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOffCluster.cluster_id)}"
-            ),
+            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
+
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        self._attr_supported_features = (
+            CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE
+        )
+
+        if self._level_cluster_handler is not None:
+            self._attr_supported_features |= (
+                CoverEntityFeature.STOP | CoverEntityFeature.SET_POSITION
+            )
 
     def on_add(self) -> None:
         """Run when entity is added."""
-        super().on_add()
         self._on_remove_callbacks.append(
             self._on_off_cluster_handler.on_event(
                 CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 self.handle_cluster_handler_attribute_updated,
             )
         )
-        self._on_remove_callbacks.append(
-            self._level_cluster_handler.on_event(
-                CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+        if self._level_cluster_handler is not None:
+            self._on_remove_callbacks.append(
+                self._level_cluster_handler.on_event(
+                    CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+                )
             )
-        )
 
     @property
     def state(self) -> dict[str, Any]:
@@ -850,6 +863,9 @@ class Shade(BaseCover):
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
         """Move the roller shutter to a specific position."""
+        if not self._level_cluster_handler:
+            return
+
         new_pos = kwargs[ATTR_POSITION]
         res = await self._level_cluster_handler.move_to_level_with_on_off(
             self._ha_position_to_zcl_level(new_pos), 1
@@ -863,6 +879,9 @@ class Shade(BaseCover):
 
     async def async_stop_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Stop the cover."""
+        if not self._level_cluster_handler:
+            return
+
         res = await self._level_cluster_handler.stop()
         if res[1] != Status.SUCCESS:
             raise ZHAException(f"Failed to stop cover: {res[1]}")
@@ -897,10 +916,13 @@ class KeenVent(Shade):
             cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
             manufacturers=frozenset({"Keen Home Inc"}),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
         )
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         """Open the cover."""
+        assert self._level_cluster_handler is not None
+
         position = self._position or 100
         await asyncio.gather(
             self._level_cluster_handler.move_to_level_with_on_off(

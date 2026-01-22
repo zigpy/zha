@@ -3,6 +3,7 @@
 from enum import IntFlag, StrEnum
 from typing import Final
 
+from zigpy.profiles import zha, zll
 from zigpy.zcl.clusters.general import Identify
 
 DEFAULT_ON_OFF_TRANSITION = 1  # most bulbs default to a 1-second turn on/off transition
@@ -89,3 +90,23 @@ VALID_COLOR_MODES = {
 }
 COLOR_MODES_BRIGHTNESS = VALID_COLOR_MODES - {ColorMode.ONOFF}
 COLOR_MODES_COLOR = {ColorMode.XY}
+
+LIGHT_PROFILE_DEVICE_TYPES = frozenset(
+    {
+        # ZHA
+        (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
+        (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
+        (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
+        # ZLL
+        (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
+        (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
+    }
+)

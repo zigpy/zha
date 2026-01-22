@@ -15,7 +15,6 @@ import itertools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from zigpy.profiles import zha, zll
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import Status
@@ -28,6 +27,7 @@ from zha.application.platforms import (
     ClusterHandlerMatch,
     GroupEntity,
     PlatformEntity,
+    PlatformFeatureGroup,
     register_entity,
     register_group_entity,
 )
@@ -57,6 +57,7 @@ from zha.application.platforms.light.const import (
     EFFECT_COLORLOOP,
     EFFECT_OFF,
     FLASH_EFFECTS,
+    LIGHT_PROFILE_DEVICE_TYPES,
     ColorMode,
     FlashMode,
     LightEntityFeature,
@@ -784,56 +785,13 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        # Respect platform override unconditionally
-        if platform_override is not None and platform_override is not Platform.LIGHT:
-            return None
-
-        # Only match light device types (unless overridden)
-        if platform_override is None and (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) not in {
-            # ZHA
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
-            (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
-            # ZLL
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
-            (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-        }:
-            return None
-
-        # No collision with `HueLight`
-        if endpoint.device.manufacturer in {"Philips", "Signify Netherlands B.V."}:
-            return None
-
-        # Or with `MinTransitionLight`
-        if endpoint.device.manufacturer in DEFAULT_MIN_TRANSITION_MANUFACTURERS:
-            return None
-
-        # Or with `ForceOnLight`
-        if endpoint.device.manufacturer in {
-            "Jasco",
-            "Jasco Products",
-            "Quotra-Vision",
-            "eWeLight",
-            "eWeLink",
-        }:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
             ),
+            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
@@ -1089,34 +1047,15 @@ class HueLight(Light):
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) not in {
-            # ZHA
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
-            (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
-            # ZLL
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
-            (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-        } and platform_override is not Platform.LIGHT:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
             ),
             manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
+            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+            # We want this entity to be preferred over the base light
+            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
@@ -1132,28 +1071,6 @@ class ForceOnLight(Light):
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) not in {
-            # ZHA
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
-            (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
-            # ZLL
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
-            (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-        } and platform_override is not Platform.LIGHT:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
@@ -1168,6 +1085,9 @@ class ForceOnLight(Light):
                     "eWeLink",
                 }
             ),
+            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+            # We want this entity to be preferred over the base light
+            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
@@ -1184,34 +1104,15 @@ class MinTransitionLight(Light):
         cls, endpoint: Endpoint, platform_override: Platform | None
     ) -> ClusterHandlerMatch | None:
         """Match cluster handlers for this entity."""
-        if (
-            endpoint.zigpy_endpoint.profile_id,
-            endpoint.zigpy_endpoint.device_type,
-        ) not in {
-            # ZHA
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
-            (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
-            # ZLL
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
-            (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
-            (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
-        } and platform_override is not Platform.LIGHT:
-            return None
-
         return ClusterHandlerMatch(
             cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
             optional_cluster_handlers=frozenset(
                 {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
             ),
             manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
+            profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
+            # We want this entity to be preferred over the base light
+            feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
 
