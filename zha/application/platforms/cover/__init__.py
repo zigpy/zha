@@ -696,6 +696,8 @@ class Cover(BaseCover):
         return 100 - position
 
 
+# TODO: use device type to allow for featureless "on/off" shades without position or
+# start/stop control
 @register_entity(OnOff.cluster_id)
 class Shade(BaseCover):
     """ZHA Shade."""
