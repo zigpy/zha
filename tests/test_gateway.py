@@ -5,7 +5,15 @@ from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
 from zigpy.application import ControllerApplication
-from zigpy.config import CONF_NWK, CONF_NWK_COUNTRY_CODE
+from zigpy.config import (
+    CONF_NWK,
+    CONF_NWK_COUNTRY_CODE,
+    CONF_OTA,
+    CONF_OTA_EXTRA_PROVIDERS,
+    CONF_OTA_PROVIDER_CHANNEL,
+    CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS,
+    CONF_OTA_PROVIDER_TYPE,
+)
 from zigpy.profiles import zha
 import zigpy.types
 from zigpy.zcl.clusters import general, lighting
@@ -835,6 +843,97 @@ async def test_country_code_passthrough(
     assert (
         app_config.get(CONF_NWK, {}).get(CONF_NWK_COUNTRY_CODE) == expected_country_code
     )
+
+
+@pytest.mark.parametrize(
+    ("use_beta_channel", "yaml_config", "expected_extra_providers"),
+    [
+        # Beta channel disabled (default) - no extra providers added
+        (False, {}, None),
+        # Beta channel enabled - zigpy_ota provider with beta channel added
+        (
+            True,
+            {},
+            [
+                {
+                    CONF_OTA_PROVIDER_TYPE: "zigpy_ota",
+                    CONF_OTA_PROVIDER_CHANNEL: "beta",
+                    CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS: True,
+                }
+            ],
+        ),
+        # Beta channel enabled with existing OTA config - provider appended
+        (
+            True,
+            {CONF_OTA: {}},
+            [
+                {
+                    CONF_OTA_PROVIDER_TYPE: "zigpy_ota",
+                    CONF_OTA_PROVIDER_CHANNEL: "beta",
+                    CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS: True,
+                }
+            ],
+        ),
+        # Beta channel enabled with existing non-zigpy_ota extra_providers - provider appended
+        (
+            True,
+            {CONF_OTA: {CONF_OTA_EXTRA_PROVIDERS: [{CONF_OTA_PROVIDER_TYPE: "ikea"}]}},
+            [
+                {CONF_OTA_PROVIDER_TYPE: "ikea"},
+                {
+                    CONF_OTA_PROVIDER_TYPE: "zigpy_ota",
+                    CONF_OTA_PROVIDER_CHANNEL: "beta",
+                    CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS: True,
+                },
+            ],
+        ),
+        # Beta channel enabled but zigpy_ota already in YAML - YAML takes precedence
+        (
+            True,
+            {
+                CONF_OTA: {
+                    CONF_OTA_EXTRA_PROVIDERS: [
+                        {
+                            CONF_OTA_PROVIDER_TYPE: "zigpy_ota",
+                            CONF_OTA_PROVIDER_CHANNEL: "dev",
+                            CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS: True,
+                        }
+                    ]
+                }
+            },
+            [
+                {
+                    CONF_OTA_PROVIDER_TYPE: "zigpy_ota",
+                    CONF_OTA_PROVIDER_CHANNEL: "dev",
+                    CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS: True,
+                }
+            ],
+        ),
+    ],
+)
+async def test_ota_beta_channel_passthrough(
+    zha_data: ZHAData,
+    use_beta_channel: bool,
+    yaml_config: dict,
+    expected_extra_providers: list | None,
+) -> None:
+    """Test OTA beta channel config passthrough to zigpy."""
+    zha_data.config.ota_configuration.use_beta_channel = use_beta_channel
+    zha_data.zigpy_config = yaml_config
+
+    gateway = Gateway(zha_data)
+    _, app_config = gateway.get_application_controller_data()
+
+    if expected_extra_providers is None:
+        assert (
+            CONF_OTA not in app_config
+            or CONF_OTA_EXTRA_PROVIDERS not in app_config.get(CONF_OTA, {})
+        )
+    else:
+        assert (
+            app_config.get(CONF_OTA, {}).get(CONF_OTA_EXTRA_PROVIDERS)
+            == expected_extra_providers
+        )
 
 
 async def test_gateway_network_scan(zha_gateway: Gateway) -> None:

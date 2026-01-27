@@ -22,6 +22,11 @@ from zigpy.config import (
     CONF_NWK,
     CONF_NWK_COUNTRY_CODE,
     CONF_NWK_VALIDATE_SETTINGS,
+    CONF_OTA,
+    CONF_OTA_EXTRA_PROVIDERS,
+    CONF_OTA_PROVIDER_CHANNEL,
+    CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS,
+    CONF_OTA_PROVIDER_TYPE,
 )
 import zigpy.device
 import zigpy.endpoint
@@ -224,6 +229,24 @@ class Gateway(AsyncUtilMixin, EventBase):
             and app_config[CONF_DEVICE][CONF_DEVICE_PATH].startswith("socket://")
         ):
             app_config[CONF_USE_THREAD] = False
+
+        # Configure zigpy-ota beta channel if enabled, preferring explicit YAML config
+        if self.config.config.ota_configuration.use_beta_channel:
+            extra_providers = app_config.get(CONF_OTA, {}).get(
+                CONF_OTA_EXTRA_PROVIDERS, []
+            )
+            has_zigpy_ota = any(
+                p.get(CONF_OTA_PROVIDER_TYPE) == "zigpy_ota" for p in extra_providers
+            )
+            if not has_zigpy_ota:
+                app_config.setdefault(CONF_OTA, {})
+                app_config[CONF_OTA].setdefault(CONF_OTA_EXTRA_PROVIDERS, []).append(
+                    {
+                        CONF_OTA_PROVIDER_TYPE: "zigpy_ota",
+                        CONF_OTA_PROVIDER_CHANNEL: "beta",
+                        CONF_OTA_PROVIDER_OVERRIDE_PREVIOUS: True,
+                    }
+                )
 
         return self.radio_type.controller, app_config
 

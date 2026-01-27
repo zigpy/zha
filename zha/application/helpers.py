@@ -348,6 +348,13 @@ class QuirksConfiguration:
 
 
 @dataclass(kw_only=True, slots=True)
+class OTAConfiguration:
+    """ZHA OTA firmware configuration."""
+
+    use_beta_channel: bool = dataclasses.field(default=False)
+
+
+@dataclass(kw_only=True, slots=True)
 class DeviceOverridesConfiguration:
     """ZHA device overrides configuration."""
 
@@ -363,6 +370,9 @@ class ZHAConfiguration:
     )
     quirks_configuration: QuirksConfiguration = dataclasses.field(
         default_factory=QuirksConfiguration
+    )
+    ota_configuration: OTAConfiguration = dataclasses.field(
+        default_factory=OTAConfiguration
     )
     device_overrides: dict[str, DeviceOverridesConfiguration] = dataclasses.field(
         default_factory=dict
