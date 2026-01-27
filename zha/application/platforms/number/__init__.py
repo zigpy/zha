@@ -758,24 +758,6 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
 
 
 @CONFIG_DIAGNOSTIC_MATCH(
-    cluster_handler_names="opple_cluster", models={"lumi.airrtc.agl001"}
-)
-class AqaraThermostatAwayTemp(NumberConfigurationEntity):
-    """Aqara away preset temperature configuration entity."""
-
-    _unique_id_suffix = "away_preset_temperature"
-    _attr_entity_category = EntityCategory.CONFIG
-    _attr_native_min_value: float = 5
-    _attr_native_max_value: float = 30
-    _multiplier: float = 0.01
-    _attribute_name = "away_preset_temperature"
-    _attr_translation_key: str = "away_preset_temperature"
-
-    _attr_mode: NumberMode = NumberMode.SLIDER
-    _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
-
-
-@CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
     stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
 )
