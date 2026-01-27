@@ -204,6 +204,16 @@ class OppleRemoteClusterHandler(ClusterHandler):
                 "light_level": True,
                 "hand_open": True,
             }
+        elif self.cluster.endpoint.model in (
+            "lumi.switch.n1aeu1",
+            "lumi.switch.n2aeu1",
+        ):
+            self.ZCL_INIT_ATTRS = {
+                "power_outage_memory": True,
+                "reverse_indicator_light": True,
+                "operation_mode": True,
+                "do_not_disturb": True,
+            }
 
     async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:  # pylint: disable=unused-argument
         """Initialize cluster handler specific."""
