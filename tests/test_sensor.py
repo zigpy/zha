@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from functools import partial
 import math
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
@@ -1689,7 +1689,13 @@ async def test_state_class(
 
 async def test_cluster_handler_quirks_attribute_reporting(zha_gateway: Gateway) -> None:
     """Test quirks sensor setting up ZCL_INIT_ATTRS and REPORT_CONFIG correctly."""
-    zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
+
+    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
+    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
+    # We want to test the handler also gets claimed via quirks v2 reporting config.
+    with patch("zha.application.discovery.discover_entities_for_endpoint"):
+        zha_device, cluster = await zigpy_device_aqara_sensor_v2_mock(zha_gateway)
+
     assert isinstance(zha_device.device, CustomDeviceV2)
 
     # get cluster handler of OppleCluster
@@ -1768,7 +1774,12 @@ async def test_cluster_handler_quirks_attribute_reading(zha_gateway: Gateway) ->
     )
     zigpy_device = registry.get_device(zigpy_device)
 
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
+    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
+    # We want to test the handler also gets claimed via quirks v2 attributes init.
+    with patch("zha.application.discovery.discover_entities_for_endpoint"):
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
     assert isinstance(zha_device.device, CustomDeviceV2)
 
     # get cluster handler of OppleCluster
