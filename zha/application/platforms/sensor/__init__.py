@@ -1014,6 +1014,60 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
     )
 
 
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
+    """DC Voltage measurement."""
+
+    _attribute_name = "dc_voltage"
+    _unique_id_suffix = "dc_voltage"
+    _attr_translation_key: str = "dc_voltage"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
+    _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _divisor_attribute_name = "dc_voltage_divisor"
+    _multiplier_attribute_name = "dc_voltage_multiplier"
+    _skip_creation_if_no_attr_cache = True
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
+    """DC Current measurement."""
+
+    _attribute_name = "dc_current"
+    _unique_id_suffix = "dc_current"
+    _attr_translation_key: str = "dc_current"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
+    _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+    _divisor_attribute_name = "dc_current_divisor"
+    _multiplier_attribute_name = "dc_current_multiplier"
+    _skip_creation_if_no_attr_cache = True
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
+    """DC Power measurement."""
+
+    _attribute_name = "dc_power"
+    _unique_id_suffix = "dc_power"
+    _attr_translation_key: str = "dc_power"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _divisor_attribute_name = "dc_power_divisor"
+    _multiplier_attribute_name = "dc_power_multiplier"
+    _skip_creation_if_no_attr_cache = True
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+    )
+
+
 @register_entity(RelativeHumidity.cluster_id)
 class Humidity(Sensor):
     """Humidity sensor."""

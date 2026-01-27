@@ -141,6 +141,42 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             attr=ElectricalMeasurement.AttributeDefs.ac_frequency.name,
             config=REPORT_CONFIG_OP,
         ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_voltage_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_current_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_current_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_power_multiplier.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_power_divisor.name,
+            config=REPORT_CONFIG_IMMEDIATE,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_voltage.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_current.name,
+            config=REPORT_CONFIG_OP,
+        ),
+        AttrReportConfig(
+            attr=ElectricalMeasurement.AttributeDefs.dc_power.name,
+            config=REPORT_CONFIG_OP,
+        ),
     )
     ZCL_POLLING_ATTRS = [
         ElectricalMeasurement.AttributeDefs.ac_frequency.name,
@@ -168,6 +204,9 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         ElectricalMeasurement.AttributeDefs.rms_voltage_max.name,
         ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name,
         ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name,
+        ElectricalMeasurement.AttributeDefs.dc_voltage.name,
+        ElectricalMeasurement.AttributeDefs.dc_current.name,
+        ElectricalMeasurement.AttributeDefs.dc_power.name,
     ]
     ZCL_INIT_ATTRS = {
         ElectricalMeasurement.AttributeDefs.ac_frequency_divisor.name: True,
@@ -186,6 +225,12 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         ElectricalMeasurement.AttributeDefs.rms_voltage_max.name: True,
         ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name: True,
         ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name: True,
+        ElectricalMeasurement.AttributeDefs.dc_voltage_divisor.name: True,
+        ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier.name: True,
+        ElectricalMeasurement.AttributeDefs.dc_current_divisor.name: True,
+        ElectricalMeasurement.AttributeDefs.dc_current_multiplier.name: True,
+        ElectricalMeasurement.AttributeDefs.dc_power_divisor.name: True,
+        ElectricalMeasurement.AttributeDefs.dc_power_multiplier.name: True,
     }
 
     async def async_update(self):
@@ -271,9 +316,67 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
 
     @property
     def ac_power_multiplier(self) -> int:
-        """Return active power divisor."""
+        """Return active power multiplier."""
         return self.cluster.get(
             ElectricalMeasurement.AttributeDefs.ac_power_multiplier.name,
+            self.cluster.get(ElectricalMeasurement.AttributeDefs.power_multiplier.name)
+            or 1,
+        )
+
+    @property
+    def dc_voltage_divisor(self) -> int:
+        """Return DC voltage divisor."""
+        return (
+            self.cluster.get(
+                ElectricalMeasurement.AttributeDefs.dc_voltage_divisor.name
+            )
+            or 1
+        )
+
+    @property
+    def dc_voltage_multiplier(self) -> int:
+        """Return DC voltage multiplier."""
+        return (
+            self.cluster.get(
+                ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier.name
+            )
+            or 1
+        )
+
+    @property
+    def dc_current_divisor(self) -> int:
+        """Return DC current divisor."""
+        return (
+            self.cluster.get(
+                ElectricalMeasurement.AttributeDefs.dc_current_divisor.name
+            )
+            or 1
+        )
+
+    @property
+    def dc_current_multiplier(self) -> int:
+        """Return DC current multiplier."""
+        return (
+            self.cluster.get(
+                ElectricalMeasurement.AttributeDefs.dc_current_multiplier.name
+            )
+            or 1
+        )
+
+    @property
+    def dc_power_divisor(self) -> int:
+        """Return DC power divisor."""
+        return self.cluster.get(
+            ElectricalMeasurement.AttributeDefs.dc_power_divisor.name,
+            self.cluster.get(ElectricalMeasurement.AttributeDefs.power_divisor.name)
+            or 1,
+        )
+
+    @property
+    def dc_power_multiplier(self) -> int:
+        """Return DC power multiplier."""
+        return self.cluster.get(
+            ElectricalMeasurement.AttributeDefs.dc_power_multiplier.name,
             self.cluster.get(ElectricalMeasurement.AttributeDefs.power_multiplier.name)
             or 1,
         )
