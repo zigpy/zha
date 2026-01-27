@@ -377,7 +377,9 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
 
         # if the cluster handler is unclaimed, claim it and set BIND accordingly,
         # so ZHA configures the cluster handler: reporting + reads attributes
-        if attribute_initialization_found or reporting_found:
+        if (attribute_initialization_found or reporting_found) and (
+            cluster_handler not in endpoint.claimed_cluster_handlers.values()
+        ):
             endpoint.claim_cluster_handlers([cluster_handler])
             # BIND is True by default, so only set to False if no reporting found.
             # We can safely do this, since quirks v2 entities are initialized last,
