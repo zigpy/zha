@@ -71,6 +71,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
+    CLUSTER_HANDLER_PHILIPS_HUE_LIGHT,
 )
 from zha.zigbee.cluster_handlers.general import (
     IdentifyClusterHandler,
@@ -1032,6 +1033,75 @@ class HueLight(Light):
     """Representation of a HUE light which does not report attributes."""
 
     _REFRESH_INTERVAL = (180, 300)
+
+
+@STRICT_MATCH(
+    cluster_handler_names=CLUSTER_HANDLER_ON_OFF,
+    aux_cluster_handlers={
+        CLUSTER_HANDLER_COLOR,
+        CLUSTER_HANDLER_LEVEL,
+        CLUSTER_HANDLER_PHILIPS_HUE_LIGHT,
+    },
+    manufacturers={"Philips", "Signify Netherlands B.V."},
+)
+class HueEffectLight(HueLight):
+    """Specialization of a HUE light with effects."""
+
+    # Supported effects and their ID used in commands
+    HUE_EFFECTS = {"candle": 1, "fireplace": 2, "prism": 3}
+
+    """Representation of a HUE light with effects."""
+
+    def __init__(
+        self,
+        unique_id: str,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs,
+    ) -> None:
+        """Initialize the ZHA light."""
+        super().__init__(unique_id, cluster_handlers, endpoint, device, **kwargs)
+        self._hue_light_cluster = self.cluster_handlers.get(
+            CLUSTER_HANDLER_PHILIPS_HUE_LIGHT
+        )
+        self._effect_list.extend(self.HUE_EFFECTS.keys())
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the entity on."""
+        # If only change of brightness is requested, the effect doesn't have to be interrupted
+        if kwargs.get(ATTR_BRIGHTNESS) is not None and all(
+            kwargs.get(attr) is None for attr in (kwargs.keys() - {ATTR_BRIGHTNESS})
+        ):
+            effect = self._effect
+        else:
+            effect = kwargs.get(ATTR_EFFECT)
+
+        await super().async_turn_on(**kwargs)
+
+        if effect == self._effect:
+            return
+
+        if effect in self.HUE_EFFECTS:
+            effect_id = self.HUE_EFFECTS[effect]
+            await self._hue_light_cluster.multicolor(
+                data=bytearray([0x22, 0x00, self._brightness, effect_id])
+            )
+            self._effect = effect
+        elif (
+            effect is None or effect == EFFECT_OFF
+        ) and self._effect in self.HUE_EFFECTS:
+            # Only stop effect if it was started by us
+            # Following command will stop the effect while preserving brightness
+            await self._hue_light_cluster.multicolor(
+                data=bytearray([0x20, 0x00, 0x00, 0x00])
+            )
+            self._effect = EFFECT_OFF
+        else:
+            # Don't react on unknown effects, for example 'colorloop'
+            return
+
+        self.maybe_emit_state_changed_event()
 
 
 @STRICT_MATCH(
