@@ -375,6 +375,8 @@ def zigpy_device_from_device_data(
             for cluster in ep["out_clusters"]:
                 endpoint.add_output_cluster(int(cluster["cluster_id"], 16))
 
+    device.original_signature = device.get_signature()
+
     if quirk:
         device = quirk(app, device.ieee, device.nwk, device)
     else:
