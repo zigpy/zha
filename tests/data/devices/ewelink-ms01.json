@@ -103,14 +103,14 @@
               "name": "cie_addr",
               "zcl_type": "EUI64",
               "value": [
-                103,
-                70,
-                219,
-                254,
-                255,
-                193,
-                199,
-                92
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
               ]
             },
             {
@@ -141,6 +141,40 @@
           "attributes": []
         }
       ]
+    }
+  },
+  "original_signature": {
+    "manufacturer": "eWeLink",
+    "model": "MS01",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 0,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 160,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 160,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0402",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0500"
+        ],
+        "output_clusters": [
+          "0x0003"
+        ]
+      }
     }
   },
   "zha_lib_entities": {

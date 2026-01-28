@@ -111,6 +111,12 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
+              "id": "0x0031",
+              "name": "philips",
+              "zcl_type": "map16",
+              "value": 11
+            },
+            {
               "id": "0x0007",
               "name": "power_source",
               "zcl_type": "enum8",
@@ -181,24 +187,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Philips",
-        "RWL020"
-      ],
-      [
-        "Signify Netherlands B.V.",
-        "RWL020"
-      ],
-      [
-        "Philips",
-        "RWL021"
-      ],
-      [
-        "Signify Netherlands B.V.",
-        "RWL021"
-      ]
-    ],
+    "manufacturer": "Philips",
+    "model": "RWL020",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 71,
+      "maximum_incoming_transfer_size": 45,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 45,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0xc05e",

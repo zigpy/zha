@@ -194,7 +194,77 @@
       "out_clusters": []
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "smarthjemmet.dk",
+    "model": "QUAD-ZIG-SW",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 64447,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 160,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 160,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0007"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0012"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0007",
+          "0x0012"
+        ],
+        "output_clusters": []
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0007",
+          "0x0012"
+        ],
+        "output_clusters": []
+      },
+      "4": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0007",
+          "0x0012"
+        ],
+        "output_clusters": []
+      },
+      "5": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0007",
+          "0x0012"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
   "zha_lib_entities": {
     "sensor": [
       {

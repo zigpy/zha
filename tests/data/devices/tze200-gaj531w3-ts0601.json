@@ -156,76 +156,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "_TZE200_vdiuwbkq",
-        "TS0601"
-      ],
-      [
-        "_TZE200_zah67ekd",
-        "TS0601"
-      ],
-      [
-        "_TZE200_nueqqe6k",
-        "TS0601"
-      ],
-      [
-        "_TZE200_gubdgai2",
-        "TS0601"
-      ],
-      [
-        "_TZE200_5sbebbzs",
-        "TS0601"
-      ],
-      [
-        "_TZE200_hsgrhjpf",
-        "TS0601"
-      ],
-      [
-        "_TZE200_68nvbio9",
-        "TS0601"
-      ],
-      [
-        "_TZE200_ergbiejo",
-        "TS0601"
-      ],
-      [
-        "_TZE200_nhyj64w2",
-        "TS0601"
-      ],
-      [
-        "_TZE200_cf1sl3tj",
-        "TS0601"
-      ],
-      [
-        "_TZE200_7eue9vhc",
-        "TS0601"
-      ],
-      [
-        "_TZE200_bv1jcqqu",
-        "TS0601"
-      ],
-      [
-        "_TZE200_nw1r9hp6",
-        "TS0601"
-      ],
-      [
-        "_TZE200_gaj531w3",
-        "TS0601"
-      ],
-      [
-        "_TZE200_icka1clh",
-        "TS0601"
-      ],
-      [
-        "_TZE200_1vxgqfba",
-        "TS0601"
-      ],
-      [
-        "_TZE200_fctwhugx",
-        "TS0601"
-      ]
-    ],
+    "manufacturer": "_TZE200_gaj531w3",
+    "model": "TS0601",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

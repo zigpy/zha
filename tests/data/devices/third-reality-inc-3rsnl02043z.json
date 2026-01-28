@@ -299,12 +299,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Third Reality, Inc",
-        "3RSNL02043Z"
-      ]
-    ],
+    "manufacturer": "Third Reality, Inc",
+    "model": "3RSNL02043Z",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4877,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 242,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 242,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

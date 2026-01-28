@@ -97,10 +97,58 @@
         {
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
-          "attributes": []
+          "attributes": [
+            {
+              "id": "0x0010",
+              "name": "cie_addr",
+              "zcl_type": "EUI64",
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
+            }
+          ]
         }
       ],
       "out_clusters": []
+    }
+  },
+  "original_signature": {
+    "manufacturer": "_TZE200_nojsjtj2",
+    "model": "TS0601",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0402",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0500"
+        ],
+        "output_clusters": []
+      }
     }
   },
   "zha_lib_entities": {

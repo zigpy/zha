@@ -162,12 +162,8 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.weather"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.weather",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,

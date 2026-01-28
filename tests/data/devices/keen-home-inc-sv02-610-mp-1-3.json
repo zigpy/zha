@@ -183,52 +183,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Keen Home Inc",
-        "SV01-410-MP-1.0"
-      ],
-      [
-        "Keen Home Inc",
-        "SV01-410-MP-1.1"
-      ],
-      [
-        "Keen Home Inc",
-        "SV01-410-MP-1.4"
-      ],
-      [
-        "Keen Home Inc",
-        "SV01-410-MP-1.5"
-      ],
-      [
-        "Keen Home Inc",
-        "SV02-410-MP-1.2"
-      ],
-      [
-        "Keen Home Inc",
-        "SV02-410-MP-1.3"
-      ],
-      [
-        "Keen Home Inc",
-        "SV01-412-MP-1.0"
-      ],
-      [
-        "Keen Home Inc",
-        "SV01-610-MP-1.0"
-      ],
-      [
-        "Keen Home Inc",
-        "SV02-610-MP-1.3"
-      ],
-      [
-        "Keen Home Inc",
-        "SV01-612-MP-1.0"
-      ],
-      [
-        "Keen Home Inc",
-        "SV02-612-MP-1.3"
-      ]
-    ],
+    "manufacturer": "Keen Home Inc",
+    "model": "SV02-610-MP-1.3",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4443,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

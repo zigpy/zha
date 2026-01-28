@@ -222,12 +222,8 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.vibration.aq1"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.vibration.aq1",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,

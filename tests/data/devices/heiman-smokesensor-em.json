@@ -103,14 +103,14 @@
               "name": "cie_addr",
               "zcl_type": "EUI64",
               "value": [
-                184,
-                163,
-                90,
-                254,
-                255,
-                192,
-                130,
-                240
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
               ]
             },
             {
@@ -144,12 +144,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "HEIMAN",
-        "SmokeSensor-EM"
-      ]
-    ],
+    "manufacturer": "HEIMAN",
+    "model": "SmokeSensor-EM",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4619,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

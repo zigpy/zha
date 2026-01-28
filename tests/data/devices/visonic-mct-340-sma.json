@@ -127,14 +127,14 @@
               "name": "cie_addr",
               "zcl_type": "EUI64",
               "value": [
-                110,
-                210,
-                211,
-                254,
-                255,
+                50,
+                79,
+                50,
+                2,
+                0,
                 141,
-                121,
-                224
+                21,
+                0
               ]
             },
             {
@@ -173,16 +173,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Visonic",
-        "MCT-340 E"
-      ],
-      [
-        "Visonic",
-        "MCT-340 SMA"
-      ]
-    ],
+    "manufacturer": "Visonic",
+    "model": "MCT-340 SMA",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4113,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

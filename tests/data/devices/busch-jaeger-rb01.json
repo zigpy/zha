@@ -116,6 +116,45 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "Busch-Jaeger",
+    "model": "RB01",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 1,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4398,
+      "maximum_buffer_size": 89,
+      "maximum_incoming_transfer_size": 61,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 61,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "10": {
+        "profile_id": "0xc05e",
+        "device_type": "0x0810",
+        "input_clusters": [
+          "0x0000",
+          "0x1000"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0019",
+          "0x0300",
+          "0x1000"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "sensor": [
       {

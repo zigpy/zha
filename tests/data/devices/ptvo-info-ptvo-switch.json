@@ -378,6 +378,111 @@
       "out_clusters": []
     }
   },
+  "original_signature": {
+    "manufacturer": "ptvo.info",
+    "model": "ptvo.switch",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 64447,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 160,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 160,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0000",
+          "0x0006",
+          "0x0007"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0006"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0006",
+          "0x0007"
+        ],
+        "output_clusters": [
+          "0x0006"
+        ]
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0006",
+          "0x0007"
+        ],
+        "output_clusters": [
+          "0x0006"
+        ]
+      },
+      "4": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0006",
+          "0x0007"
+        ],
+        "output_clusters": [
+          "0x0006"
+        ]
+      },
+      "5": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0006",
+          "0x0007"
+        ],
+        "output_clusters": [
+          "0x0006"
+        ]
+      },
+      "6": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0006",
+          "0x0007"
+        ],
+        "output_clusters": [
+          "0x0006"
+        ]
+      },
+      "7": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0402"
+        ],
+        "output_clusters": []
+      },
+      "8": {
+        "profile_id": "0x0104",
+        "device_type": "0xfffe",
+        "input_clusters": [
+          "0x0402"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {

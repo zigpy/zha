@@ -130,12 +130,8 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.sensor_switch"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.sensor_switch",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,

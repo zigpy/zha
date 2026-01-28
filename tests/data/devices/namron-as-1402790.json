@@ -401,6 +401,53 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "NAMRON AS",
+    "model": "1402790",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 140,
+      "manufacturer_code": 4660,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 0,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 0,
+      "descriptor_capability_field": 80
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0006",
+          "0x0402",
+          "0x0702",
+          "0x0b04"
+        ],
+        "output_clusters": [
+          "0x0003"
+        ]
+      },
+      "10": {
+        "profile_id": "0x0104",
+        "device_type": "0xfff0",
+        "input_clusters": [
+          "0x0000"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
