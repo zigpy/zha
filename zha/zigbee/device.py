@@ -1538,11 +1538,6 @@ class Device(LogMixin, EventBase):
                             f"0x{c:04x}" for c in ep["output_clusters"]
                         ]
 
-            if "node_desc" in original_signature:
-                original_signature["node_desc"] = original_signature[
-                    "node_desc"
-                ].as_dict()
-
             info["original_signature"] = original_signature
 
         info["zha_lib_entities"] = defaultdict(list)
