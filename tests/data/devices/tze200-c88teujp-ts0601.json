@@ -101,19 +101,19 @@
               "id": "0x0010",
               "name": "local_temperature_calibration",
               "zcl_type": "int8",
-              "value": 20
+              "unsupported": true
             },
             {
               "id": "0x0016",
               "name": "max_heat_setpoint_limit",
               "zcl_type": "int16",
-              "value": 3000
+              "unsupported": true
             },
             {
               "id": "0x0015",
               "name": "min_heat_setpoint_limit",
               "zcl_type": "int16",
-              "value": 500
+              "unsupported": true
             },
             {
               "id": "0x0012",
@@ -385,147 +385,6 @@
       }
     ],
     "number": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:f0:e2:89:82-1-513-local_temperature_calibration",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "ThermostatLocalTempCalibration",
-          "translation_key": "local_temperature_calibration",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "TuyaThermostatV2NoSchedule",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:f0:e2:89:82:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:f0:e2:89:82",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 2.5,
-          "native_min_value": -2.5,
-          "native_step": 0.1,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "ThermostatLocalTempCalibration",
-          "available": true,
-          "state": 2.0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:f0:e2:89:82-1-513-max_heat_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "MaxHeatSetpointLimit",
-          "translation_key": "max_heat_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "TuyaThermostatV2NoSchedule",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:f0:e2:89:82:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:f0:e2:89:82",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 30.0,
-          "native_min_value": 5.0,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "MaxHeatSetpointLimit",
-          "available": true,
-          "state": 30.0
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:f0:e2:89:82-1-513-min_heat_setpoint_limit",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "MinHeatSetpointLimit",
-          "translation_key": "min_heat_setpoint_limit",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ThermostatClusterHandler",
-              "generic_id": "cluster_handler_0x0201",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 513,
-                "name": "TuyaThermostatV2NoSchedule",
-                "type": "server"
-              },
-              "id": "1:0x0201",
-              "unique_id": "ab:cd:ef:12:f0:e2:89:82:1:0x0201",
-              "status": "INITIALIZED",
-              "value_attribute": "local_temperature"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:f0:e2:89:82",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "mode": "box",
-          "native_max_value": 30.0,
-          "native_min_value": 5.0,
-          "native_step": 0.5,
-          "native_unit_of_measurement": "\u00b0C"
-        },
-        "state": {
-          "class_name": "MinHeatSetpointLimit",
-          "available": true,
-          "state": 5.0
-        }
-      },
       {
         "info_object": {
           "fallback_name": "Local temperature calibration",

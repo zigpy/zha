@@ -426,11 +426,16 @@ def zigpy_device_from_device_data(
                     else:
                         attr_def = real_cluster.find_attribute(attrid)
 
+                    # Quirks can mark attributes as unsupported during cluster init so
+                    # the attribute both has a cached value and is unsupported. We need
+                    # to preserve the "unsupported" state.
+                    was_unsupported = real_cluster.is_attribute_unsupported(attr_def)
+
                     if attr.get("value", None) is not None:
                         real_cluster._attr_cache.set_value(attr_def, attr["value"])
                         real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
 
-                    if attr.get("unsupported", False):
+                    if attr.get("unsupported", False) or was_unsupported:
                         real_cluster.add_unsupported_attribute(attr_def)
 
     for obj in device_data["neighbors"]:
