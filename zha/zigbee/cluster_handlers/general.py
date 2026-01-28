@@ -486,7 +486,8 @@ class LevelControlClusterHandler(ClusterHandler):
         )
         if event.attribute_id == self.CURRENT_LEVEL:
             self.dispatch_level_change(SIGNAL_SET_LEVEL, event.value)
-        super()._handle_attribute_updated_event(event)
+        else:
+            super()._handle_attribute_updated_event(event)
 
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
