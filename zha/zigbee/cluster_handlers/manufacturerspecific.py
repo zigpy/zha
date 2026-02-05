@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -77,6 +78,14 @@ class SmartThingsHumidityClusterHandler(ClusterHandler):
             "config": (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
         },
     )
+
+    @functools.cached_property
+    def name(self) -> str:
+        """Return the internal name for the cluster handler."""
+
+        # This cluster's endpoint attribute is `humidity` and collides with the built-in
+        # humidity cluster, requiring an override to avoid collisions.
+        return self._generic_id
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(OSRAM_BUTTON_CLUSTER)
