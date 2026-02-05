@@ -28,6 +28,7 @@ from zha.application.platforms import (
     register_entity,
     register_group_entity,
 )
+from zha.application.platforms.light.const import LIGHT_PROFILE_DEVICE_TYPES
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
@@ -143,6 +144,13 @@ class Switch(PlatformEntity, BaseSwitch):
                 (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
                 (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
             }
+            | (
+                # For platform overrides, to account for the `unique_id` format from the
+                # Light platform, Switch needs to be aware of the device types that
+                # trigger the old "{ieee}-{ep}" format instead of the "{ieee}-{ep}-
+                # {cluster}" format.
+                LIGHT_PROFILE_DEVICE_TYPES
+            )
             else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}"
         )
 
