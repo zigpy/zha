@@ -441,7 +441,7 @@
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "TemperatureMeasurementClusterHandler",
@@ -469,6 +469,50 @@
           "class_name": "Temperature",
           "available": true,
           "state": 21.37
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:ef:57:4b:ce-1-64581",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "SmartThingsHumidity",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "humidity",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SmartThingsHumidityClusterHandler",
+              "generic_id": "cluster_handler_0xfc45",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64581,
+                "name": "Smartthings Relative Humidity Measurement",
+                "type": "server"
+              },
+              "id": "1:0xfc45",
+              "unique_id": "ab:cd:ef:12:ef:57:4b:ce:1:0xfc45",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:ef:57:4b:ce",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "%"
+        },
+        "state": {
+          "class_name": "SmartThingsHumidity",
+          "available": true,
+          "state": 59.87
         }
       }
     ],
