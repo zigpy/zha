@@ -528,9 +528,21 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                     ignored_matches,
                 )
 
-        matches = matches_by_priority[highest_priority]
+        selected_matches = matches_by_priority[highest_priority]
 
-        for match, entity_class in matches:
+        # Use platform overrides to replace the results of the normal priority scoring
+        # system when competing entities are part of the same feature group
+        if platform_override is not None and feature is not None:
+            override_matches = [
+                (match, entity)
+                for priority_matches in matches_by_priority.values()
+                for match, entity in priority_matches
+                if platform_override == entity.PLATFORM
+            ]
+            if override_matches:
+                selected_matches = override_matches
+
+        for match, entity_class in selected_matches:
             server_handlers = set(match.cluster_handlers)
 
             for optional in match.optional_cluster_handlers:
