@@ -86,7 +86,16 @@ from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
-from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
+from zha.zigbee.cluster_config import (
+    aggregate_cluster_configs,
+    configure_cluster_configs,
+    initialize_cluster_configs,
+)
+from zha.zigbee.cluster_handlers import (
+    ClusterHandler,
+    ClusterHandlerStatus,
+    ZDOClusterHandler,
+)
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
@@ -950,6 +959,21 @@ class Device(LogMixin, EventBase):
             *(endpoint.async_configure() for endpoint in self._endpoints.values())
         )
 
+        # Configure binding and reporting from entity-level cluster configs
+        aggregated = aggregate_cluster_configs(self._pending_entities)
+        if aggregated:
+            await configure_cluster_configs(aggregated, self.manufacturer_code)
+
+            # Mark cluster handlers as CONFIGURED for ClusterMatch entities
+            for entity in self._pending_entities:
+                if (
+                    not hasattr(entity, "_cluster_match")
+                    or entity._cluster_match is None
+                ):
+                    continue
+                for ch in entity._cluster_handlers:
+                    ch._status = ClusterHandlerStatus.CONFIGURED
+
         self.emit_reconfigure_done()
 
         self.debug("completed configuration")
@@ -1230,6 +1254,21 @@ class Device(LogMixin, EventBase):
                 await endpoint.async_initialize(from_cache)
             except Exception:  # pylint: disable=broad-exception-caught
                 self.debug("Failed to initialize endpoint", exc_info=True)
+
+        # Read initial attributes from entity-level cluster configs
+        aggregated = aggregate_cluster_configs(self._pending_entities)
+        if aggregated:
+            await initialize_cluster_configs(aggregated, from_cache)
+
+            # Mark cluster handlers as INITIALIZED for ClusterMatch entities
+            for entity in self._pending_entities:
+                if (
+                    not hasattr(entity, "_cluster_match")
+                    or entity._cluster_match is None
+                ):
+                    continue
+                for ch in entity._cluster_handlers:
+                    ch._status = ClusterHandlerStatus.INITIALIZED
 
         # And add them after. Emit events only on re-initialization, not the first.
         await self._add_pending_entities(emit_event=self._initialized)

@@ -53,10 +53,13 @@ from zigpy.zcl.clusters.smartenergy import (
 
 from zha.application import Platform
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntity,
     BaseEntityInfo,
     BaseIdentifiers,
+    ClusterConfig,
     ClusterHandlerMatch,
+    ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -124,6 +127,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_WIND_SPEED,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
+    REPORT_CONFIG_DEFAULT,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
@@ -630,9 +634,46 @@ class AnalogInputSensor(Sensor):
     _unique_id_suffix = "analog_input"
     _attr_state_class = SensorStateClass.MEASUREMENT
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_INPUT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AnalogInput.cluster_id}),
     )
+
+    _server_cluster_config = {
+        AnalogInput.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                AnalogInput.AttributeDefs.present_value: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                AnalogInput.AttributeDefs.description: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.max_present_value: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.min_present_value: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.out_of_service: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.reliability: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.resolution: AttrConfig(read_on_startup=False),
+                AnalogInput.AttributeDefs.status_flags: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.engineering_units: AttrConfig(
+                    read_on_startup=False
+                ),
+                AnalogInput.AttributeDefs.application_type: AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""

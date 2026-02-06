@@ -29,6 +29,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     GROUP_ENTITY_REGISTRY,
     BaseEntity,
     ClusterHandlerMatch,
+    ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
     alarm_control_panel,
@@ -390,6 +391,44 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
                 cluster_handler.BIND = False
 
 
+def _resolve_cluster_handlers_for_match(
+    endpoint: Endpoint, match: ClusterMatch
+) -> list[ClusterHandler]:
+    """Resolve server cluster handlers from a ClusterMatch."""
+    result: list[ClusterHandler] = []
+
+    for cluster_id in match.server_clusters:
+        key = f"{endpoint.id}:0x{cluster_id:04x}"
+        if key in endpoint.all_cluster_handlers:
+            result.append(endpoint.all_cluster_handlers[key])
+
+    for cluster_id in match.optional_server_clusters:
+        key = f"{endpoint.id}:0x{cluster_id:04x}"
+        if key in endpoint.all_cluster_handlers:
+            result.append(endpoint.all_cluster_handlers[key])
+
+    return result
+
+
+def _resolve_client_cluster_handlers_for_match(
+    endpoint: Endpoint, match: ClusterMatch
+) -> list[ClientClusterHandler]:
+    """Resolve client cluster handlers from a ClusterMatch."""
+    result: list[ClientClusterHandler] = []
+
+    for cluster_id in match.client_clusters:
+        key = f"{endpoint.id}:0x{cluster_id:04x}_client"
+        if key in endpoint.client_cluster_handlers:
+            result.append(endpoint.client_cluster_handlers[key])
+
+    for cluster_id in match.optional_client_clusters:
+        key = f"{endpoint.id}:0x{cluster_id:04x}_client"
+        if key in endpoint.client_cluster_handlers:
+            result.append(endpoint.client_cluster_handlers[key])
+
+    return result
+
+
 def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:  # noqa: C901
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
@@ -409,9 +448,12 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         PlatformFeatureGroup | None,
         defaultdict[
             int,  # Weight
-            list[tuple[ClusterHandlerMatch, type[PlatformEntity]]],
+            list[tuple[ClusterHandlerMatch | ClusterMatch, type[PlatformEntity]]],
         ],
     ] = defaultdict(lambda: defaultdict(list))
+
+    in_cluster_ids = set(endpoint.zigpy_endpoint.in_clusters)
+    out_cluster_ids = set(endpoint.zigpy_endpoint.out_clusters)
 
     for cluster in itertools.chain(
         endpoint.zigpy_endpoint.in_clusters.values(),
@@ -420,19 +462,31 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         # To speed up lookups, we key ENTITY_REGISTRY by cluster ID. First, we find all
         # compatible entities and their matching criteria.
         for entity_class in ENTITY_REGISTRY.get(cluster.cluster_id, []):
-            match = entity_class._cluster_handler_match
-            if match is None:
+            match: ClusterHandlerMatch | ClusterMatch | None
+
+            if entity_class._cluster_match is not None:
+                match = entity_class._cluster_match
+            elif entity_class._cluster_handler_match is not None:
+                match = entity_class._cluster_handler_match
+            else:
                 continue
 
-            if not match.cluster_handlers.issubset(
-                endpoint.cluster_handlers_by_name.keys()
-            ):
-                continue
+            if isinstance(match, ClusterMatch):
+                if not match.server_clusters.issubset(in_cluster_ids):
+                    continue
 
-            if not match.client_cluster_handlers.issubset(
-                endpoint.client_cluster_handlers_by_name.keys()
-            ):
-                continue
+                if not match.client_clusters.issubset(out_cluster_ids):
+                    continue
+            else:
+                if not match.cluster_handlers.issubset(
+                    endpoint.cluster_handlers_by_name.keys()
+                ):
+                    continue
+
+                if not match.client_cluster_handlers.issubset(
+                    endpoint.client_cluster_handlers_by_name.keys()
+                ):
+                    continue
 
             if (
                 match.exposed_features is not None
@@ -543,25 +597,38 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 selected_matches = override_matches
 
         for match, entity_class in selected_matches:
-            server_handlers = set(match.cluster_handlers)
+            if isinstance(match, ClusterMatch):
+                # New cluster-based discovery: resolve cluster handlers from
+                # cluster IDs for backward compatibility during migration.
+                # Handlers are NOT claimed: configuration is handled by
+                # configure_cluster_configs/initialize_cluster_configs.
+                server_cluster_handlers = _resolve_cluster_handlers_for_match(
+                    endpoint, match
+                )
+                client_cluster_handlers = _resolve_client_cluster_handlers_for_match(
+                    endpoint, match
+                )
+            else:
+                server_handlers = set(match.cluster_handlers)
 
-            for optional in match.optional_cluster_handlers:
-                if optional in endpoint.cluster_handlers_by_name:
-                    server_handlers.add(optional)
+                for optional in match.optional_cluster_handlers:
+                    if optional in endpoint.cluster_handlers_by_name:
+                        server_handlers.add(optional)
 
-            client_handlers = set(match.client_cluster_handlers)
+                client_handlers = set(match.client_cluster_handlers)
 
-            server_cluster_handlers = [
-                endpoint.cluster_handlers_by_name[name] for name in server_handlers
-            ]
-            client_cluster_handlers = [
-                endpoint.client_cluster_handlers_by_name[name]
-                for name in client_handlers
-            ]
+                server_cluster_handlers = [
+                    endpoint.cluster_handlers_by_name[name] for name in server_handlers
+                ]
+                client_cluster_handlers = [
+                    endpoint.client_cluster_handlers_by_name[name]
+                    for name in client_handlers
+                ]
 
-            # Claim on endpoint
-            endpoint.claim_cluster_handlers(server_cluster_handlers)
-            endpoint.claim_cluster_handlers(client_cluster_handlers)
+            # Claim on endpoint (only for legacy ClusterHandlerMatch entities)
+            if not isinstance(match, ClusterMatch):
+                endpoint.claim_cluster_handlers(server_cluster_handlers)
+                endpoint.claim_cluster_handlers(client_cluster_handlers)
 
             _LOGGER.debug(
                 "'%s' platform -> '%s' using %s + %s",

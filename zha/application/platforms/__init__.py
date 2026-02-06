@@ -8,6 +8,7 @@ from collections import defaultdict
 from collections.abc import Callable
 from contextlib import suppress
 import dataclasses
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cached_property
 import logging
@@ -17,6 +18,7 @@ from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
+from zigpy.zcl.foundation import ZCLAttributeDef
 
 from zha.application import Platform
 from zha.application.const import UniqueIdMigration
@@ -77,6 +79,64 @@ class PlatformFeatureGroup(StrEnum):
 
     # IAS WD siren entity selection
     SIREN = "siren"
+
+
+@dataclass(frozen=True)
+class AttrConfig:
+    """Per-attribute configuration for cluster setup."""
+
+    read_on_startup: bool
+    """Whether to force a fresh read on startup (True) or use cache (False)."""
+
+    reporting: tuple[int, int, int | float] | None = None
+    """Reporting config: (min_interval, max_interval, reportable_change) or None."""
+
+
+@dataclass(frozen=True)
+class ClusterConfig:
+    """Per-cluster configuration."""
+
+    bind: bool = False
+    """Whether to bind this cluster to the coordinator."""
+
+    attributes: dict[ZCLAttributeDef, AttrConfig] = field(default_factory=dict)
+    """Per-attribute configuration keyed by ZCL attribute definition."""
+
+
+@dataclass(frozen=True)
+class ClusterMatch:
+    """Declares which clusters an entity requires for discovery."""
+
+    server_clusters: frozenset[int] = frozenset()
+    client_clusters: frozenset[int] = frozenset()
+    optional_server_clusters: frozenset[int] = frozenset()
+    optional_client_clusters: frozenset[int] = frozenset()
+
+    # Strict filters: if present, device info must match
+    manufacturers: frozenset[str] | None = None
+    models: frozenset[str] | None = None
+    exposed_features: frozenset[str] | None = None
+
+    # Profile and device type filters
+    profile_device_types: (
+        frozenset[
+            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
+            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
+            | tuple[int, int]
+        ]
+        | None
+    ) = None
+    not_profile_device_types: (
+        frozenset[
+            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
+            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
+            | tuple[int, int]
+        ]
+        | None
+    ) = None
+
+    # For a given feature, only entities with the highest priority will be considered
+    feature_priority: tuple[PlatformFeatureGroup, int] | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -451,8 +511,15 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
-    # Auto-discovery for the entity
-    _cluster_handler_match: ClusterHandlerMatch | None
+    # Legacy: Auto-discovery for the entity (being phased out)
+    _cluster_handler_match: ClusterHandlerMatch | None = None
+
+    # New: Direct cluster matching for discovery
+    _cluster_match: ClusterMatch | None = None
+
+    # New: Per-cluster configuration (keyed by cluster ID)
+    _server_cluster_config: dict[int, ClusterConfig] = {}
+    _client_cluster_config: dict[int, ClusterConfig] = {}
 
     def __init__(
         self,
