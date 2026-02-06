@@ -14,7 +14,8 @@ from zigpy.zcl.clusters.security import IasAce
 from zha.application import Platform
 from zha.application.platforms import (
     BaseEntityInfo,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     PlatformEntity,
     register_entity,
 )
@@ -27,10 +28,7 @@ from zha.application.platforms.alarm_control_panel.const import (
     AlarmState,
     CodeFormat,
 )
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_IAS_ACE,
-    CLUSTER_HANDLER_STATE_CHANGED,
-)
+from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_STATE_CHANGED
 from zha.zigbee.cluster_handlers.security import (
     ClusterHandlerStateChangedEvent,
     IasAceClientClusterHandler,
@@ -133,9 +131,15 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         | SUPPORT_ALARM_TRIGGER
     )
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({IasAce.cluster_id}),
     )
+
+    _client_cluster_config = {
+        IasAce.cluster_id: ClusterConfig(
+            bind=True,
+        ),
+    }
 
     def __init__(
         self,

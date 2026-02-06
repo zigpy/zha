@@ -30,7 +30,9 @@ from zha.application.const import (
 )
 from zha.application.platforms import (
     BaseEntityInfo,
+    ClusterConfig,
     ClusterHandlerMatch,
+    ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
     register_entity,
@@ -128,6 +130,14 @@ class BaseZclSiren(BaseSiren, ABC):
 
     _cluster_handler: IasWdClusterHandler
     _off_listener: asyncio.TimerHandle | None
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasWd.cluster_id}),
+    )
+    _server_cluster_config = {
+        IasWd.cluster_id: ClusterConfig(
+            bind=True,
+        ),
+    }
 
     def __init__(
         self,

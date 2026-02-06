@@ -13,7 +13,9 @@ from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
 from zha.application.platforms import (
-    ClusterHandlerMatch,
+    AttrConfig,
+    ClusterConfig,
+    ClusterMatch,
     PlatformEntity,
     register_entity,
 )
@@ -23,6 +25,7 @@ from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_POWER_CONFIGURATION,
+    REPORT_CONFIG_BATTERY_SAVE,
 )
 from zha.zigbee.cluster_handlers.general import PowerConfigurationClusterHandler
 
@@ -87,12 +90,34 @@ class DeviceScannerEntity(BaseDeviceTracker):
     _attr_fallback_name: str = "Device scanner"
     __polling_interval: int
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_POWER_CONFIGURATION}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({PowerConfiguration.cluster_id}),
         profile_device_types=frozenset(
             {(zha.PROFILE_ID, SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE)}
         ),
     )
+
+    _server_cluster_config = {
+        PowerConfiguration.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                ),
+                PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                ),
+                PowerConfiguration.AttributeDefs.battery_size: AttrConfig(
+                    read_on_startup=True,
+                ),
+                PowerConfiguration.AttributeDefs.battery_quantity: AttrConfig(
+                    read_on_startup=True,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,

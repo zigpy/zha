@@ -10,7 +10,9 @@ from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
-    ClusterHandlerMatch,
+    AttrConfig,
+    ClusterConfig,
+    ClusterMatch,
     PlatformEntity,
     register_entity,
 )
@@ -24,6 +26,7 @@ from zha.zigbee.cluster_handlers.closures import DoorLockClusterHandler
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_DOORLOCK,
+    REPORT_CONFIG_IMMEDIATE,
 )
 
 if TYPE_CHECKING:
@@ -65,9 +68,21 @@ class DoorLock(BaseLock):
     _attr_translation_key: str = "door_lock"
     _attr_primary_weight = 5
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_DOORLOCK})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({DoorLockCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        DoorLockCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                DoorLockCluster.AttributeDefs.lock_state: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
