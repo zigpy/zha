@@ -109,6 +109,39 @@ async def test_device_override(
         )
 
 
+async def test_device_override_entities(zha_gateway: Gateway) -> None:
+    """Test device discovery entity changes."""
+    device_data_text = await asyncio.get_running_loop().run_in_executor(
+        None, pathlib.Path("tests/data/devices/tz3000-tqlv4ug4-ts0001.json").read_text
+    )
+    device_data = json.loads(device_data_text)
+
+    zigpy_device = zigpy_device_from_device_data(
+        app=zha_gateway.application_controller, device_data=device_data
+    )
+
+    zha_gateway.config.config.device_overrides = {
+        f"{zigpy_device.ieee}-1": DeviceOverridesConfiguration(type=Platform.SWITCH)
+    }
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    loaded_device_data = json.loads(
+        json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
+    )
+
+    expected_loaded_device_data = device_data
+
+    # The light is gone
+    assert len(expected_loaded_device_data["zha_lib_entities"].pop("light")) == 1
+
+    # And has been replaced with a single switch
+    expected_loaded_device_data["zha_lib_entities"]["switch"] = [
+        loaded_device_data["zha_lib_entities"]["switch"][0]
+    ]
+
+    assert loaded_device_data == expected_loaded_device_data
+
+
 async def test_quirks_v2_entity_discovery(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:

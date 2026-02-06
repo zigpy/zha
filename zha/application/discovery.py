@@ -475,6 +475,7 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
             if (
                 platform_override is not None
                 and platform_override == entity_class.PLATFORM
+                and feature is not None
             ):
                 priority += 1000
 
