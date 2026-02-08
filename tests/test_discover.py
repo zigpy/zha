@@ -134,7 +134,8 @@ async def test_device_override_entities(zha_gateway: Gateway) -> None:
     expected_loaded_device_data = device_data
 
     # The light is gone
-    assert len(expected_loaded_device_data["zha_lib_entities"].pop("light")) == 1
+    light_entities = expected_loaded_device_data["zha_lib_entities"].pop("light")
+    assert len(light_entities) == 1
 
     # And has been replaced with a single switch
     expected_loaded_device_data["zha_lib_entities"]["switch"] = [
