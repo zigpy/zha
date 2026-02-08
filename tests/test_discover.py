@@ -174,6 +174,30 @@ async def test_device_override_picks_highest_priority(
     assert len(switch_entities) == 1
 
 
+async def test_device_override_filter_bypassing(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that profile filtering is only bypassed for the override platform."""
+
+    # The sercomm device is an ON_OFF_LIGHT with a PowerConfiguration cluster.
+    # DeviceTracker matches PowerConfiguration but is restricted by profile_device_types
+    # to the SmartThings arrival sensor device type. A SWITCH override should not cause
+    # DeviceTracker to bypass that filter.
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/sercomm-corp-sz-esw01-au.json",
+    )
+
+    zha_gateway.config.config.device_overrides = {
+        f"{zigpy_device.ieee}-1": DeviceOverridesConfiguration(type=Platform.SWITCH)
+    }
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    with pytest.raises(KeyError):
+        get_entity(zha_device, platform=Platform.DEVICE_TRACKER)
+
+
 async def test_quirks_v2_entity_discovery(
     zha_gateway: Gateway,  # pylint: disable=unused-argument
 ) -> None:

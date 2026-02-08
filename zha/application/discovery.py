@@ -452,15 +452,23 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 endpoint.zigpy_endpoint.profile_id,
                 endpoint.zigpy_endpoint.device_type,
             )
-            if platform_override is None and (
+            if (
                 match.profile_device_types is not None
                 and profile_device_type not in match.profile_device_types
+                and not (
+                    platform_override is not None
+                    and platform_override == entity_class.PLATFORM
+                )
             ):
                 continue
 
-            if platform_override is None and (
+            if (
                 match.not_profile_device_types is not None
                 and profile_device_type in match.not_profile_device_types
+                and not (
+                    platform_override is not None
+                    and platform_override == entity_class.PLATFORM
+                )
             ):
                 continue
 
