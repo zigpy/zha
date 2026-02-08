@@ -54,9 +54,11 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform
+from zha.application.discovery import discover_device_entities
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
+from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
 
 
@@ -140,6 +142,36 @@ async def test_device_override_entities(zha_gateway: Gateway) -> None:
     ]
 
     assert loaded_device_data == expected_loaded_device_data
+
+
+async def test_device_override_picks_highest_priority(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that a device override selects only the highest-priority match."""
+
+    # A Philips light matches both Light (priority 0) and HueLight (priority 1) in the
+    # LIGHT_OR_SWITCH_OR_SHADE feature group. With a SWITCH override, only one Switch
+    # entity should be created, not duplicates from collecting all priority levels.
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/philips-lct014.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    # Only one light entity will be discovered
+    entities = list(discover_device_entities(zha_device))
+    light_entities = [e for e in entities if e.PLATFORM == Platform.LIGHT]
+    assert len(light_entities) == 1
+    assert isinstance(light_entities[0], HueLight)
+
+    # With an override, it is going to be one switch
+    zha_gateway.config.config.device_overrides = {
+        f"{zigpy_device.ieee}-11": DeviceOverridesConfiguration(type=Platform.SWITCH)
+    }
+
+    entities = list(discover_device_entities(zha_device))
+    switch_entities = [e for e in entities if e.PLATFORM == Platform.SWITCH]
+    assert len(switch_entities) == 1
 
 
 async def test_quirks_v2_entity_discovery(
