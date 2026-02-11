@@ -127,17 +127,22 @@ async def test_device_override_entities(zha_gateway: Gateway) -> None:
     }
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    # The light is gone
+    with pytest.raises(KeyError):
+        get_entity(zha_device, platform=Platform.LIGHT)
+
+    # And has been replaced by a switch with the same unique ID
+    switch = get_entity(zha_device, platform=Platform.SWITCH)
+    assert switch.unique_id == f"{zigpy_device.ieee}-1"
+
+    # All other entities and diagnostics stay the same
     loaded_device_data = json.loads(
         json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
     )
 
     expected_loaded_device_data = device_data
-
-    # The light is gone
-    light_entities = expected_loaded_device_data["zha_lib_entities"].pop("light")
-    assert len(light_entities) == 1
-
-    # And has been replaced with a single switch
+    expected_loaded_device_data["zha_lib_entities"].pop("light")
     expected_loaded_device_data["zha_lib_entities"]["switch"] = [
         loaded_device_data["zha_lib_entities"]["switch"][0]
     ]
