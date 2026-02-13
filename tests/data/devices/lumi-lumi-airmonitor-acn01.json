@@ -85,7 +85,7 @@
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 7
+              "value": 10
             },
             {
               "id": "0x0020",
@@ -379,7 +379,7 @@
           "class_name": "Battery",
           "available": true,
           "state": 100.0,
-          "battery_size": "CR2",
+          "battery_size": "CR2032",
           "battery_quantity": 1,
           "battery_voltage": 3.0
         },
