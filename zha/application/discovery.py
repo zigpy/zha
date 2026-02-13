@@ -65,6 +65,7 @@ from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-i
     security,
     smartenergy,
 )
+from zha.zigbee.cluster_handlers.registries import CLUSTER_HANDLER_ONLY_CLUSTERS
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -562,3 +563,13 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 endpoint=endpoint,
                 device=device,
             )
+
+    # Claim any remaining unclaimed cluster handlers that don't produce entities but
+    # still need to be configured for bare events (bound, reporting set up, etc.)
+    for cluster_handler in endpoint.all_cluster_handlers.values():
+        if (
+            cluster_handler.id not in endpoint.claimed_cluster_handlers
+            and cluster_handler.cluster.cluster_id in CLUSTER_HANDLER_ONLY_CLUSTERS
+        ):
+            _LOGGER.debug("Claiming entityless cluster handler %s", cluster_handler)
+            endpoint.claim_cluster_handlers([cluster_handler])

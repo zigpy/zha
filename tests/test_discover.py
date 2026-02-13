@@ -60,6 +60,7 @@ from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
 from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
+from zha.zigbee.cluster_handlers.const import PHILLIPS_REMOTE_CLUSTER
 
 
 def _get_identify_cluster(zigpy_device):
@@ -772,3 +773,20 @@ async def test_devices_from_files(
                     manufacturer=None,
                 )
             ]
+
+
+async def test_cluster_handler_only_clusters_are_bound(zha_gateway: Gateway) -> None:
+    """Test CLUSTER_HANDLER_ONLY_CLUSTERS causes binds even without entities."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/signify-netherlands-b-v-rwl022.json",
+    )
+
+    # The Philips remote cluster (0xFC00) is in CLUSTER_HANDLER_ONLY_CLUSTERS: it
+    # doesn't produce any entities but must still be bound
+    philips_cluster = zigpy_device.endpoints[1].in_clusters[PHILLIPS_REMOTE_CLUSTER]
+
+    await join_zigpy_device(zha_gateway, zigpy_device)
+    await zha_gateway.async_block_till_done(wait_background_tasks=True)
+
+    assert len(philips_cluster.bind.mock_calls) == 1
