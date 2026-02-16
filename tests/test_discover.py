@@ -91,8 +91,10 @@ async def test_device_override(
         zha_device,
         platform=override_platform,
         qualifier_func=(
-            lambda entity: entity.cluster_handlers["on_off"].cluster
-            == zigpy_device.endpoints[1].on_off
+            lambda entity: (
+                entity.cluster_handlers["on_off"].cluster
+                == zigpy_device.endpoints[1].on_off
+            )
         ),
     )
     assert entity is not None
@@ -107,8 +109,10 @@ async def test_device_override(
                 if override_platform == Platform.SWITCH
                 else Platform.SWITCH
             ),
-            qualifier_func=lambda entity: entity.cluster_handlers["on_off"].cluster
-            == zigpy_device.endpoints[1].on_off,
+            qualifier_func=lambda entity: (
+                entity.cluster_handlers["on_off"].cluster
+                == zigpy_device.endpoints[1].on_off
+            ),
         )
 
 
