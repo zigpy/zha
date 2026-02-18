@@ -97,6 +97,9 @@ class AlarmControlPanel(PlatformEntity):
             alarm_options.arm_requires_code
         )
         self._cluster_handler.max_invalid_tries = alarm_options.failed_tries
+        self._cluster_handler.exit_delay_away = alarm_options.exit_delay_away
+        self._cluster_handler.exit_delay_home = alarm_options.exit_delay_home
+        self._cluster_handler.exit_delay_night = alarm_options.exit_delay_night
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -158,19 +161,19 @@ class AlarmControlPanel(PlatformEntity):
         self._cluster_handler.arm(IasAce.ArmMode.Disarm, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_home(self, code: str | None = None) -> None:
+    async def async_alarm_arm_home(self, code: str | None = None, delay: int = 0) -> None:
         """Send arm home command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_Day_Home_Only, code, 0)
+        self._cluster_handler.arm(IasAce.ArmMode.Arm_Day_Home_Only, code, delay)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_away(self, code: str | None = None) -> None:
+    async def async_alarm_arm_away(self, code: str | None = None, delay: int = 0) -> None:
         """Send arm away command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_All_Zones, code, 0)
+        self._cluster_handler.arm(IasAce.ArmMode.Arm_All_Zones, code, delay)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_night(self, code: str | None = None) -> None:
+    async def async_alarm_arm_night(self, code: str | None = None, delay: int = 0) -> None:
         """Send arm night command."""
-        self._cluster_handler.arm(IasAce.ArmMode.Arm_Night_Sleep_Only, code, 0)
+        self._cluster_handler.arm(IasAce.ArmMode.Arm_Night_Sleep_Only, code, delay)
         self.maybe_emit_state_changed_event()
 
     async def async_alarm_trigger(self, code: str | None = None) -> None:  # pylint: disable=unused-argument

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable
 import dataclasses
+import time
 from typing import TYPE_CHECKING, Any, Final
 
 import zigpy.zcl
@@ -73,9 +75,17 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self.panel_code: str = "1234"
         self.code_required_arm_actions = False
         self.max_invalid_tries: int = 3
+        self.exit_delay_away: int = 30
+        self.exit_delay_home: int = 0
+        self.exit_delay_night: int = 0
 
         # where do we store this to handle restarts
         self.alarm_status: AceCluster.AlarmStatus = AceCluster.AlarmStatus.No_Alarm
+        
+        # Exit delay timer management
+        self._exit_delay_task: asyncio.Task | None = None
+        self._exit_delay_end_time: float | None = None
+        self._pending_arm_mode: AceCluster.PanelStatus | None = None
 
     def cluster_command(self, tsn, command_id, args) -> None:
         """Handle commands received to this cluster."""
@@ -111,6 +121,12 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
     def _disarm(self, code: str):
         """Test the code and disarm the panel if the code is correct."""
+        # Cancel any active exit delay
+        if self._exit_delay_task and not self._exit_delay_task.done():
+            self._exit_delay_task.cancel()
+        self._exit_delay_end_time = None
+        self._pending_arm_mode = None
+        
         if (
             code != self.panel_code
             and self.armed_state != AceCluster.PanelStatus.Panel_Disarmed
@@ -144,6 +160,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         """Arm the panel for day / home zones."""
         return self._handle_arm(
             code,
+            self.exit_delay_home,  # Use configured exit delay
             AceCluster.PanelStatus.Armed_Stay,
             AceCluster.ArmNotification.Only_Day_Home_Zones_Armed,
         )
@@ -152,6 +169,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         """Arm the panel for night / sleep zones."""
         return self._handle_arm(
             code,
+            self.exit_delay_night,  # Use configured exit delay
             AceCluster.PanelStatus.Armed_Night,
             AceCluster.ArmNotification.Only_Night_Sleep_Zones_Armed,
         )
@@ -160,6 +178,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         """Arm the panel for away mode."""
         return self._handle_arm(
             code,
+            self.exit_delay_away,  # Use configured exit delay
             AceCluster.PanelStatus.Armed_Away,
             AceCluster.ArmNotification.All_Zones_Armed,
         )
@@ -167,6 +186,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
     def _handle_arm(
         self,
         code: str,
+        exit_delay: int,
         panel_status: AceCluster.PanelStatus,
         armed_type: AceCluster.ArmNotification,
     ) -> None:
@@ -177,8 +197,12 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                 AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
             )
         else:
-            self.debug("Arming all IAS ACE zones")
-            self.armed_state = panel_status
+            self.debug(
+                "Arming all IAS ACE zones with %d second exit delay (configured in ZHA options)",
+                exit_delay,
+            )
+            # Use configured exit delay in seconds
+            self._start_exit_delay(exit_delay, panel_status)
             zigbee_reply = self.arm_response(armed_type)
         return zigbee_reply
 
@@ -207,6 +231,49 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self.armed_state = AceCluster.PanelStatus.In_Alarm
         self._emit_panel_status_changed()
 
+    def _get_seconds_remaining(self) -> int:
+        """Get seconds remaining in exit delay."""
+        if self._exit_delay_end_time is None:
+            return 0
+        remaining = int(self._exit_delay_end_time - time.time())
+        return max(0, remaining)
+
+    async def _exit_delay_complete(self) -> None:
+        """Handle exit delay timer completion."""
+        if self._pending_arm_mode:
+            self.armed_state = self._pending_arm_mode
+            self._pending_arm_mode = None
+        self._exit_delay_end_time = None
+        self._emit_panel_status_changed()
+
+    def _start_exit_delay(self, delay_seconds: int, target_panel_status: AceCluster.PanelStatus) -> None:
+        """Start exit delay timer."""
+        # Cancel any existing timer
+        if self._exit_delay_task and not self._exit_delay_task.done():
+            self._exit_delay_task.cancel()
+        
+        if delay_seconds > 0:
+            # Set to exit delay state
+            self.armed_state = AceCluster.PanelStatus.Exit_Delay
+            self._exit_delay_end_time = time.time() + delay_seconds
+            self._pending_arm_mode = target_panel_status
+            
+            # Start timer
+            self._exit_delay_task = self._endpoint.device.gateway.async_create_task(
+                self._exit_delay_timer(delay_seconds)
+            )
+        else:
+            # No delay - arm immediately
+            self.armed_state = target_panel_status
+
+    async def _exit_delay_timer(self, delay_seconds: int) -> None:
+        """Timer that transitions from exit delay to armed state."""
+        try:
+            await asyncio.sleep(delay_seconds)
+            await self._exit_delay_complete()
+        except asyncio.CancelledError:
+            pass
+
     def _get_zone_id_map(self):
         """Handle the IAS ACE zone id map command."""
 
@@ -215,9 +282,10 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
     def _send_panel_status_response(self) -> None:
         """Handle the IAS ACE panel status response command."""
+        seconds_remaining = self._get_seconds_remaining()
         response = self.panel_status_response(
             self.armed_state,
-            0x00,
+            seconds_remaining,
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )
@@ -225,9 +293,10 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
     def _emit_panel_status_changed(self) -> None:
         """Handle the IAS ACE panel status changed command."""
+        seconds_remaining = self._get_seconds_remaining()
         response = self.panel_status_changed(
             self.armed_state,
-            0x00,
+            seconds_remaining,
             AceCluster.AudibleNotification.Default_Sound,
             self.alarm_status,
         )

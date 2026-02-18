@@ -34,6 +34,7 @@ IAS_ACE_STATE_MAP = {
     IasAce.PanelStatus.Armed_Stay: AlarmState.ARMED_HOME,
     IasAce.PanelStatus.Armed_Night: AlarmState.ARMED_NIGHT,
     IasAce.PanelStatus.Armed_Away: AlarmState.ARMED_AWAY,
+    IasAce.PanelStatus.Exit_Delay: AlarmState.ARMING,
     IasAce.PanelStatus.In_Alarm: AlarmState.TRIGGERED,
 }
 
