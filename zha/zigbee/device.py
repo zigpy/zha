@@ -7,6 +7,7 @@ from __future__ import annotations
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable, Iterable
+import copy
 import dataclasses
 from dataclasses import dataclass
 from enum import Enum
@@ -1515,7 +1516,7 @@ class Device(LogMixin, EventBase):
                 ],
             }
 
-        original_signature = self.device.original_signature
+        original_signature = copy.deepcopy(self.device.original_signature)
 
         # if we have a quirked device we add the original signature to the output and
         # convert the profile_id, device_type, input_clusters and output_clusters to hex

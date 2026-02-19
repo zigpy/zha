@@ -786,6 +786,7 @@ class ReportingElectricalMeasurement(ElectricalMeasurementActivePower):
     _cluster_handler_match = ClusterHandlerMatch(
         cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
         models=frozenset({"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"}),
+        feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 1),
     )
 
 
@@ -797,7 +798,32 @@ class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
 
     _cluster_handler_match = ClusterHandlerMatch(
         cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 0),
     )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class UbisysPolledElectricalMeasurement(PolledElectricalMeasurement):
+    """Polled active power for ubisys that keeps polling even when disabled.
+
+    ubisys devices disable the active power entity by default via a quirk, but
+    this entity still needs to poll the EM cluster so that other EM entities
+    (voltage, current, power factor) receive updated values.
+    """
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ELECTRICAL_MEASUREMENT}),
+        manufacturers=frozenset({"ubisys"}),
+        feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 1),
+    )
+
+    def disable(self) -> None:
+        """Disable the entity but keep polling for EM cluster updates."""
+        PlatformEntity.disable(self)
+
+    def enable(self) -> None:
+        """Enable the entity without starting a duplicate polling task."""
+        PlatformEntity.enable(self)
 
 
 @register_entity(ElectricalMeasurement.cluster_id)

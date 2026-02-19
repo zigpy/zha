@@ -2151,3 +2151,42 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     )
 
     assert entity.state["state"] == "undefined_0xab"  # TODO: should this be `None`?
+
+
+async def test_ubisys_polled_em_keeps_polling_when_disabled(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that UbisysPolledElectricalMeasurement keeps polling when disabled."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ubisys-s1-5501.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        exact_entity_type=sensor.UbisysPolledElectricalMeasurement,
+    )
+
+    assert isinstance(entity, sensor.UbisysPolledElectricalMeasurement)
+    assert entity._use_custom_polling is True
+    assert entity._polling_task is not None
+    assert entity.enabled is True
+
+    # Disable the entity (simulating what the quirk does)
+    entity.disable()
+
+    assert entity.enabled is False
+    # Polling task must still be running
+    assert entity._polling_task is not None
+    assert not entity._polling_task.done()
+
+    # Re-enable the entity
+    entity.enable()
+
+    assert entity.enabled is True
+    # Polling task must still be running (no duplicate created)
+    assert entity._polling_task is not None
+    assert not entity._polling_task.done()
