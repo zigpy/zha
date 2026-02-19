@@ -316,7 +316,6 @@ async def test_climate_hvac_action_running_state(
     assert entity.state.hvac_action == "off"
     assert sensor_entity.state.state == "off"
 
-
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x001E: Thermostat.RunningMode.Off}
     )
