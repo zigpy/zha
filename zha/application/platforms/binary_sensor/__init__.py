@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass
 import functools
@@ -62,13 +63,30 @@ class BinarySensorEntityInfo(BaseEntityInfo):
     device_class: BinarySensorDeviceClass | None
 
 
-class BinarySensor(PlatformEntity):
+class BaseBinarySensor(PlatformEntity, ABC):
+    """Abstract base class for ZHA binary sensors."""
+
+    PLATFORM: Platform = Platform.BINARY_SENSOR
+
+    @property
+    def state(self) -> dict:
+        """Return the state of the binary sensor."""
+        response = super().state
+        response["state"] = self.is_on
+        return response
+
+    @property
+    @abstractmethod
+    def is_on(self) -> bool:
+        """Return True if the binary sensor is on."""
+
+
+class BinarySensor(BaseBinarySensor):
     """ZHA BinarySensor."""
 
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
     _attribute_converter: Callable[[Any], Any] | None = None
-    PLATFORM: Platform = Platform.BINARY_SENSOR
 
     def __init__(
         self,
@@ -114,13 +132,6 @@ class BinarySensor(PlatformEntity):
             **super().info_object.__dict__,
             attribute_name=self._attribute_name,
         )
-
-    @property
-    def state(self) -> dict:
-        """Return the state of the binary sensor."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
 
     @property
     def is_on(self) -> bool:
