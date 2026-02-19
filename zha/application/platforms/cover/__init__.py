@@ -71,11 +71,12 @@ class BaseCover(PlatformEntity, ABC):
     PLATFORM = Platform.COVER
 
     _attr_primary_weight = 10
+    _attr_supported_features: CoverEntityFeature
 
     @property
-    @abstractmethod
     def supported_features(self) -> CoverEntityFeature:
         """Return supported features."""
+        return self._attr_supported_features
 
     @property
     @abstractmethod
@@ -265,11 +266,6 @@ class Cover(BaseCover):
                 functools.partial(self._determine_cover_state, refresh=True),
             )
         )
-
-    @property
-    def supported_features(self) -> CoverEntityFeature:
-        """Return supported features."""
-        return self._attr_supported_features
 
     @property
     def state(self) -> dict[str, Any]:
@@ -794,11 +790,6 @@ class Shade(BaseCover):
             }
         )
         return response
-
-    @functools.cached_property
-    def supported_features(self) -> CoverEntityFeature:
-        """Return supported features."""
-        return self._attr_supported_features
 
     @property
     def current_cover_position(self) -> int | None:

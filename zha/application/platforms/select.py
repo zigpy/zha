@@ -69,17 +69,19 @@ class BaseSelectEntity(PlatformEntity, ABC):
 
     PLATFORM = Platform.SELECT
 
+    _attr_options: list[str]
+
+    @property
+    def options(self) -> list[str]:
+        """Return the list of available options."""
+        return self._attr_options
+
     @property
     def state(self) -> dict[str, Any]:
         """Return the state of the select."""
         response = super().state
         response["state"] = self.current_option
         return response
-
-    @property
-    @abstractmethod
-    def options(self) -> list[str]:
-        """Return the list of available options."""
 
     @property
     @abstractmethod
@@ -110,11 +112,6 @@ class EnumSelectEntity(BaseSelectEntity):
         self._attribute_name = self._enum.__name__
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
-
-    @property
-    def options(self) -> list[str]:
-        """Return the list of available options."""
-        return self._attr_options
 
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:
@@ -262,11 +259,6 @@ class ZCLEnumSelectEntity(BaseSelectEntity):
         super()._init_from_quirks_metadata(entity_metadata)
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
-
-    @property
-    def options(self) -> list[str]:
-        """Return the list of available options."""
-        return self._attr_options
 
     @functools.cached_property
     def info_object(self) -> EnumSelectInfo:

@@ -72,6 +72,10 @@ class BaseSiren(PlatformEntity, ABC):
 
     PLATFORM = Platform.SIREN
 
+    _attr_is_on: bool = False
+    _attr_available_tones: dict[int, str]
+    _attr_supported_features: SirenEntityFeature
+
     @property
     def state(self) -> dict[str, Any]:
         """Get the state of the siren."""
@@ -80,19 +84,19 @@ class BaseSiren(PlatformEntity, ABC):
         return response
 
     @property
-    @abstractmethod
     def is_on(self) -> bool:
         """Return true if the entity is on."""
+        return self._attr_is_on
 
     @property
-    @abstractmethod
     def available_tones(self) -> dict[int, str]:
         """Return available tones."""
+        return self._attr_available_tones
 
     @property
-    @abstractmethod
     def supported_features(self) -> SirenEntityFeature:
         """Return supported features."""
+        return self._attr_supported_features
 
     @functools.cached_property
     def info_object(self) -> SirenEntityInfo:
@@ -170,23 +174,7 @@ class Siren(BaseSiren):
             WARNING_DEVICE_MODE_FIRE_PANIC: "Fire Panic",
             WARNING_DEVICE_MODE_EMERGENCY_PANIC: "Emergency Panic",
         }
-        self._attr_is_on: bool = False
         self._off_listener: asyncio.TimerHandle | None = None
-
-    @property
-    def available_tones(self) -> dict[int, str]:
-        """Return available tones."""
-        return self._attr_available_tones
-
-    @property
-    def supported_features(self) -> SirenEntityFeature:
-        """Return supported features."""
-        return self._attr_supported_features
-
-    @property
-    def is_on(self) -> bool:
-        """Return true if the entity is on."""
-        return self._attr_is_on
 
     async def async_turn_on(
         self,

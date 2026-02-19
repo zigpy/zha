@@ -76,15 +76,18 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
     def code_arm_required(self) -> bool:
         """Whether the code is required for arm actions."""
 
-    @property
-    @abstractmethod
-    def code_format(self) -> CodeFormat:
-        """Code format or None if no code is required."""
+    _attr_code_format: CodeFormat
+    _attr_supported_features: int
 
     @property
-    @abstractmethod
+    def code_format(self) -> CodeFormat:
+        """Code format or None if no code is required."""
+        return self._attr_code_format
+
+    @property
     def supported_features(self) -> int:
         """Return the list of supported features."""
+        return self._attr_supported_features
 
     @functools.cached_property
     def info_object(self) -> AlarmControlPanelEntityInfo:
@@ -122,6 +125,13 @@ class AlarmControlPanel(BaseAlarmControlPanel):
     """Entity for ZHA alarm control devices."""
 
     _attr_translation_key: str = "alarm_control_panel"
+    _attr_code_format = CodeFormat.NUMBER
+    _attr_supported_features = (
+        SUPPORT_ALARM_ARM_HOME
+        | SUPPORT_ALARM_ARM_AWAY
+        | SUPPORT_ALARM_ARM_NIGHT
+        | SUPPORT_ALARM_TRIGGER
+    )
 
     _cluster_handler_match = ClusterHandlerMatch(
         client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
@@ -181,21 +191,6 @@ class AlarmControlPanel(BaseAlarmControlPanel):
     def code_arm_required(self) -> bool:
         """Whether the code is required for arm actions."""
         return self._cluster_handler.code_required_arm_actions
-
-    @functools.cached_property
-    def code_format(self) -> CodeFormat:
-        """Code format or None if no code is required."""
-        return CodeFormat.NUMBER
-
-    @functools.cached_property
-    def supported_features(self) -> int:
-        """Return the list of supported features."""
-        return (
-            SUPPORT_ALARM_ARM_HOME
-            | SUPPORT_ALARM_ARM_AWAY
-            | SUPPORT_ALARM_ARM_NIGHT
-            | SUPPORT_ALARM_TRIGGER
-        )
 
     def handle_cluster_handler_state_changed(
         self,
