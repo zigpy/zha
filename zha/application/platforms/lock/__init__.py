@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
@@ -31,11 +32,36 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
-@register_entity(DoorLockCluster.cluster_id)
-class DoorLock(PlatformEntity):
-    """Representation of a ZHA lock."""
+class BaseLock(PlatformEntity, ABC):
+    """Abstract base class for ZHA lock entities."""
 
     PLATFORM = Platform.LOCK
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the lock."""
+        response = super().state
+        response["is_locked"] = self.is_locked
+        return response
+
+    @property
+    @abstractmethod
+    def is_locked(self) -> bool:
+        """Return true if entity is locked."""
+
+    @abstractmethod
+    async def async_lock(self) -> None:
+        """Lock the lock."""
+
+    @abstractmethod
+    async def async_unlock(self) -> None:
+        """Unlock the lock."""
+
+
+@register_entity(DoorLockCluster.cluster_id)
+class DoorLock(BaseLock):
+    """Representation of a ZHA lock."""
+
     _attr_translation_key: str = "door_lock"
     _attr_primary_weight = 5
 
@@ -68,13 +94,6 @@ class DoorLock(PlatformEntity):
                 self.handle_cluster_handler_attribute_updated,
             )
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Get the state of the lock."""
-        response = super().state
-        response["is_locked"] = self.is_locked
-        return response
 
     @property
     def is_locked(self) -> bool:

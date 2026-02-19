@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from enum import StrEnum
 import functools
 import time
@@ -45,11 +46,42 @@ class SourceType(StrEnum):
     BLUETOOTH_LE = "bluetooth_le"
 
 
-@register_entity(PowerConfiguration.cluster_id)
-class DeviceScannerEntity(PlatformEntity):
-    """Represent a tracked device."""
+class BaseDeviceTracker(PlatformEntity, ABC):
+    """Abstract base class for ZHA device tracker entities."""
 
     PLATFORM = Platform.DEVICE_TRACKER
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the device."""
+        response = super().state
+        response.update(
+            {
+                "connected": self.is_connected,
+                "battery_level": self.battery_level,
+            }
+        )
+        return response
+
+    @property
+    @abstractmethod
+    def is_connected(self) -> bool:
+        """Return true if the device is connected to the network."""
+
+    @property
+    @abstractmethod
+    def battery_level(self) -> float | None:
+        """Return the battery level of the device."""
+
+    @property
+    @abstractmethod
+    def source_type(self) -> SourceType:
+        """Return the source type, eg gps or router, of the device."""
+
+
+@register_entity(PowerConfiguration.cluster_id)
+class DeviceScannerEntity(BaseDeviceTracker):
+    """Represent a tracked device."""
 
     _attr_should_poll = True  # BaseZhaEntity defaults to False
     _attr_fallback_name: str = "Device scanner"
@@ -108,18 +140,6 @@ class DeviceScannerEntity(PlatformEntity):
             "started polling with refresh interval of %s",
             getattr(self, "__polling_interval"),
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the device."""
-        response = super().state
-        response.update(
-            {
-                "connected": self._connected,
-                "battery_level": self._battery_level,
-            }
-        )
-        return response
 
     @property
     def is_connected(self):

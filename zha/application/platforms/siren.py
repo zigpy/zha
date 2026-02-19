@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 import asyncio
 import contextlib
 from dataclasses import dataclass
@@ -66,11 +67,55 @@ class SirenEntityInfo(BaseEntityInfo):
     supported_features: SirenEntityFeature
 
 
-@register_entity(IasWd.cluster_id)
-class Siren(PlatformEntity):
-    """Representation of a ZHA siren."""
+class BaseSiren(PlatformEntity, ABC):
+    """Abstract base class for ZHA siren entities."""
 
     PLATFORM = Platform.SIREN
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the siren."""
+        response = super().state
+        response["state"] = self.is_on
+        return response
+
+    @property
+    @abstractmethod
+    def is_on(self) -> bool:
+        """Return true if the entity is on."""
+
+    @property
+    @abstractmethod
+    def available_tones(self) -> dict[int, str]:
+        """Return available tones."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> SirenEntityFeature:
+        """Return supported features."""
+
+    @functools.cached_property
+    def info_object(self) -> SirenEntityInfo:
+        """Return representation of the siren."""
+        return SirenEntityInfo(
+            **super().info_object.__dict__,
+            available_tones=self.available_tones,
+            supported_features=self.supported_features,
+        )
+
+    @abstractmethod
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn on siren."""
+
+    @abstractmethod
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn off siren."""
+
+
+@register_entity(IasWd.cluster_id)
+class Siren(BaseSiren):
+    """Representation of a ZHA siren."""
+
     _attr_fallback_name: str = "Siren"
     _attr_primary_weight = 4
 
@@ -123,21 +168,10 @@ class Siren(PlatformEntity):
         self._attr_is_on: bool = False
         self._off_listener: asyncio.TimerHandle | None = None
 
-    @functools.cached_property
-    def info_object(self) -> SirenEntityInfo:
-        """Return representation of the siren."""
-        return SirenEntityInfo(
-            **super().info_object.__dict__,
-            available_tones=self._attr_available_tones,
-            supported_features=self._attr_supported_features,
-        )
-
     @property
-    def state(self) -> dict[str, Any]:
-        """Get the state of the siren."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
+    def available_tones(self) -> dict[int, str]:
+        """Return available tones."""
+        return self._attr_available_tones
 
     @property
     def supported_features(self) -> SirenEntityFeature:

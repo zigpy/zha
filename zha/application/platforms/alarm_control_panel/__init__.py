@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import logging
@@ -53,12 +54,74 @@ class AlarmControlPanelEntityInfo(BaseEntityInfo):
     translation_key: str
 
 
+class BaseAlarmControlPanel(PlatformEntity, ABC):
+    """Abstract base class for ZHA alarm control panel entities."""
+
+    PLATFORM = Platform.ALARM_CONTROL_PANEL
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the alarm control panel."""
+        response = super().state
+        response["state"] = self.alarm_state
+        return response
+
+    @property
+    @abstractmethod
+    def alarm_state(self) -> AlarmState:
+        """Return the current alarm state."""
+
+    @property
+    @abstractmethod
+    def code_arm_required(self) -> bool:
+        """Whether the code is required for arm actions."""
+
+    @property
+    @abstractmethod
+    def code_format(self) -> CodeFormat:
+        """Code format or None if no code is required."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> int:
+        """Return the list of supported features."""
+
+    @functools.cached_property
+    def info_object(self) -> AlarmControlPanelEntityInfo:
+        """Return a representation of the alarm control panel."""
+        return AlarmControlPanelEntityInfo(
+            **super().info_object.__dict__,
+            code_arm_required=self.code_arm_required,
+            code_format=self.code_format,
+            supported_features=self.supported_features,
+        )
+
+    @abstractmethod
+    async def async_alarm_disarm(self, code: str | None = None) -> None:
+        """Send disarm command."""
+
+    @abstractmethod
+    async def async_alarm_arm_home(self, code: str | None = None) -> None:
+        """Send arm home command."""
+
+    @abstractmethod
+    async def async_alarm_arm_away(self, code: str | None = None) -> None:
+        """Send arm away command."""
+
+    @abstractmethod
+    async def async_alarm_arm_night(self, code: str | None = None) -> None:
+        """Send arm night command."""
+
+    @abstractmethod
+    async def async_alarm_trigger(self, code: str | None = None) -> None:
+        """Send alarm trigger command."""
+
+
 @register_entity(IasAce.cluster_id)
-class AlarmControlPanel(PlatformEntity):
+class AlarmControlPanel(BaseAlarmControlPanel):
     """Entity for ZHA alarm control devices."""
 
     _attr_translation_key: str = "alarm_control_panel"
-    PLATFORM = Platform.ALARM_CONTROL_PANEL
 
     _cluster_handler_match = ClusterHandlerMatch(
         client_cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_ACE}),
@@ -107,24 +170,12 @@ class AlarmControlPanel(PlatformEntity):
             )
         )
 
-    @functools.cached_property
-    def info_object(self) -> AlarmControlPanelEntityInfo:
-        """Return a representation of the alarm control panel."""
-        return AlarmControlPanelEntityInfo(
-            **super().info_object.__dict__,
-            code_arm_required=self.code_arm_required,
-            code_format=self.code_format,
-            supported_features=self.supported_features,
-        )
-
     @property
-    def state(self) -> dict[str, Any]:
-        """Get the state of the alarm control panel."""
-        response = super().state
-        response["state"] = IAS_ACE_STATE_MAP.get(
+    def alarm_state(self) -> AlarmState:
+        """Return the current alarm state."""
+        return IAS_ACE_STATE_MAP.get(
             self._cluster_handler.armed_state, AlarmState.UNKNOWN
         )
-        return response
 
     @property
     def code_arm_required(self) -> bool:

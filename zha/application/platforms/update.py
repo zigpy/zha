@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC
 from dataclasses import dataclass
 from enum import IntFlag, StrEnum
 import functools
@@ -70,8 +71,8 @@ class UpdateEntityInfo(BaseEntityInfo):
     device_class: UpdateDeviceClass
 
 
-class BaseFirmwareUpdateEntity(PlatformEntity):
-    """Base representation of a ZHA firmware update entity."""
+class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
+    """Abstract base class for ZHA firmware update entities."""
 
     PLATFORM = Platform.UPDATE
 
@@ -99,7 +100,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity):
         )
 
     @property
-    def state(self):
+    def state(self) -> dict[str, Any]:
         """Get the state for the entity."""
         response = super().state
         if (release_summary := self.release_summary) is not None:

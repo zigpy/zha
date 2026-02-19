@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import logging
@@ -36,7 +37,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class CommandButtonEntityInfo(BaseEntityInfo):
+class ButtonEntityInfo(BaseEntityInfo):
+    """Button entity info."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class CommandButtonEntityInfo(ButtonEntityInfo):
     """Command button entity info."""
 
     command: str
@@ -45,17 +51,30 @@ class CommandButtonEntityInfo(BaseEntityInfo):
 
 
 @dataclass(frozen=True, kw_only=True)
-class WriteAttributeButtonEntityInfo(BaseEntityInfo):
+class WriteAttributeButtonEntityInfo(ButtonEntityInfo):
     """Write attribute button entity info."""
 
     attribute_name: str
     attribute_value: Any
 
 
-class Button(PlatformEntity):
-    """Defines a ZHA button."""
+class BaseButton(PlatformEntity, ABC):
+    """Base representation of a ZHA button."""
 
     PLATFORM = Platform.BUTTON
+
+    @functools.cached_property
+    def info_object(self) -> ButtonEntityInfo:
+        """Return a representation of the button."""
+        return ButtonEntityInfo(**super().info_object.__dict__)
+
+    @abstractmethod
+    async def async_press(self) -> None:
+        """Send out a press command."""
+
+
+class Button(BaseButton):
+    """Defines a ZHA button."""
 
     _command_name: str
     _args: list[Any]
@@ -131,10 +150,8 @@ class IdentifyButton(Button):
         return not any(type(entity) is cls for entity in entities)
 
 
-class WriteAttributeButton(PlatformEntity):
+class WriteAttributeButton(BaseButton):
     """Defines a ZHA button, which writes a value to an attribute."""
-
-    PLATFORM = Platform.BUTTON
 
     _attribute_name: str
     _attribute_value: Any = None
