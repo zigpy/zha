@@ -182,8 +182,6 @@ ignore = [
     "PLW2901", # Outer {outer_kind} variable {name} overwritten by inner {inner_kind} target
     "UP006", # keep type annotation style as is
     "UP007", # keep type annotation style as is
-    # Ignored due to performance: https://github.com/charliermarsh/ruff/issues/2923
-    "UP038", # Use `X | Y` in `isinstance` call instead of `(X, Y)`
 
     # Ignored due to incompatible with mypy: https://github.com/python/mypy/issues/15238
     "UP040", # Checks for use of TypeAlias annotation for declaring type aliases.
@@ -211,8 +209,6 @@ ignore = [
     "SIM103", # Return the condition {condition} directly
 ]
 
-# Allow unused import cleaning in `__init__.py` files
-ignore-init-module-imports = false
 extend-safe-fixes = ["F401"]
 
 [tool.ruff.lint.flake8-pytest-style]
