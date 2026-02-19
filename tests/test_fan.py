@@ -299,7 +299,7 @@ async def test_zha_group_fan_entity(
 
     assert entity.group_id == zha_group.group_id
     assert isinstance(entity, GroupEntity)
-    assert entity.info_object.fallback_name == zha_group.name
+    assert entity.state.fallback_name == zha_group.name
 
     group_fan_cluster = zha_group.zigpy_group.endpoint[hvac.Fan.cluster_id]
 

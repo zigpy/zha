@@ -127,10 +127,10 @@ async def test_number(
     assert entity.state.state == 15.0
 
     # test attributes
-    assert entity.info_object.native_min_value == 1.0
-    assert entity.info_object.native_max_value == 100.0
-    assert entity.info_object.native_step == 1.1
-    assert entity.info_object.mode == NumberMode.AUTO
+    assert entity.state.native_min_value == 1.0
+    assert entity.state.native_max_value == 100.0
+    assert entity.state.native_step == 1.1
+    assert entity.state.mode == NumberMode.AUTO
 
     assert entity.icon == "mdi:percent"
     assert entity.native_unit_of_measurement == "%"

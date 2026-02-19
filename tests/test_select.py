@@ -55,7 +55,7 @@ async def test_select(zha_gateway: Gateway) -> None:
 
     entity = get_entity(zha_device, platform=Platform.SELECT, qualifier=select_name)
     assert entity.state.state is None  # unknown in HA
-    assert entity.info_object.options == [
+    assert entity.state.options == [
         "Stop",
         "Burglar",
         "Fire",
@@ -191,7 +191,7 @@ async def test_on_off_select_attribute_report_v2(
     entity = get_entity(
         zha_device,
         platform=Platform.SELECT,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith("motion_sensitivity"),
+        qualifier_func=lambda e: e.state.unique_id.endswith("motion_sensitivity"),
     )
 
     # test that the state is in default medium state

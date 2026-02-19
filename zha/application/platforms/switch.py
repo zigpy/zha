@@ -411,6 +411,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         """Return the state of the switch."""
         return ConfigurableAttributeSwitchState(
             **super().state.__dict__,
+            state=self.is_on,
             inverted=self.inverted,
             attribute_name=self._attribute_name,
             invert_attribute_name=self._inverter_attribute_name,

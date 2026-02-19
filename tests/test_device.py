@@ -1123,7 +1123,7 @@ async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
 
     assert (
         entity.translation_placeholders
-        == entity.info_object.translation_placeholders
+        == entity.state.translation_placeholders
         == {"sensor_index": "1"}
     )
 

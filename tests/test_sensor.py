@@ -252,7 +252,7 @@ async def async_test_smart_energy_summation_delivered(
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
     assert entity.state.status == "NO_ALARMS"
     assert entity.state.device_type == "Electric Metering"
-    assert entity.info_object.device_class == SensorDeviceClass.ENERGY
+    assert entity.state.device_class == SensorDeviceClass.ENERGY
 
 
 async def async_test_smart_energy_summation_received(
@@ -266,7 +266,7 @@ async def async_test_smart_energy_summation_received(
     assert_state(entity, 12.321, UnitOfEnergy.KILO_WATT_HOUR)
     assert entity.state.status == "NO_ALARMS"
     assert entity.state.device_type == "Electric Metering"
-    assert entity.info_object.device_class == SensorDeviceClass.ENERGY
+    assert entity.state.device_class == SensorDeviceClass.ENERGY
 
 
 async def async_test_smart_energy_summation(
@@ -800,11 +800,11 @@ async def test_analog_input_simple(zha_gateway: Gateway) -> None:
 
     assert entity.state.available is True
     assert entity.state.state == 2.1322579383850098
-    assert entity.info_object.fallback_name == "Some description"
-    assert entity.info_object.translation_key is None
-    assert entity.info_object.unit == UnitOfElectricPotential.VOLT
-    assert entity.info_object.device_class is None
-    assert entity.info_object.suggested_display_precision is None
+    assert entity.state.fallback_name == "Some description"
+    assert entity.state.translation_key is None
+    assert entity.state.unit == UnitOfElectricPotential.VOLT
+    assert entity.state.device_class is None
+    assert entity.state.suggested_display_precision is None
 
 
 async def test_analog_input_ignored(zha_gateway: Gateway) -> None:
@@ -875,11 +875,11 @@ async def test_analog_input_complex(zha_gateway: Gateway) -> None:
 
     assert entity.state.available is True
     assert entity.state.state == 2.1322579383850098
-    assert entity.info_object.fallback_name == "Some description"
-    assert entity.info_object.translation_key is None
-    assert entity.info_object.unit is PERCENTAGE  # overridden!
-    assert entity.info_object.device_class is SensorDeviceClass.HUMIDITY  # overridden!
-    assert entity.info_object.suggested_display_precision == 2
+    assert entity.state.fallback_name == "Some description"
+    assert entity.state.translation_key is None
+    assert entity.state.unit is PERCENTAGE  # overridden!
+    assert entity.state.device_class is SensorDeviceClass.HUMIDITY  # overridden!
+    assert entity.state.suggested_display_precision == 2
 
 
 def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -> None:
@@ -889,7 +889,7 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     attribute report it received correctly.
     """
     assert entity.state.state == state
-    assert entity.info_object.unit == unit_of_measurement
+    assert entity.state.unit == unit_of_measurement
 
 
 async def test_electrical_measurement_init(
@@ -1667,12 +1667,12 @@ async def test_state_class(
     power_entity = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith("power"),
+        qualifier_func=lambda e: e.state.unique_id.endswith("power"),
     )
     energy_entity = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith("energy"),
+        qualifier_func=lambda e: e.state.unique_id.endswith("energy"),
     )
     energy_delivered_entity = get_entity(
         zha_device, platform=Platform.SENSOR, qualifier="energy_delivered"
@@ -1818,7 +1818,7 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     entity = get_entity(
         coordinator,
         platform=Platform.SENSOR,
-        qualifier_func=lambda e: e.info_object.unique_id.endswith(
+        qualifier_func=lambda e: e.state.unique_id.endswith(
             "ezsp_counters_counter_1"
         ),
     )

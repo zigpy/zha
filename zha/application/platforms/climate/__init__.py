@@ -294,17 +294,21 @@ class Thermostat(BaseThermostat):
         )
 
     @property
+    def system_mode_string(self) -> str | None:
+        """Return a formatted system mode string."""
+        if self.hvac_mode is None:
+            return None
+        thermostat = self._thermostat_cluster_handler
+        system_mode = SYSTEM_MODE_2_HVAC.get(thermostat.system_mode, "unknown")
+        return f"[{thermostat.system_mode}]/{system_mode}"
+
+    @property
     def state(self) -> ThermostatState:
         """Get the state of the thermostat."""
         thermostat = self._thermostat_cluster_handler
-        system_mode = SYSTEM_MODE_2_HVAC.get(thermostat.system_mode, "unknown")
         return ThermostatState(
             **super().state.__dict__,
-            sys_mode=(
-                f"[{thermostat.system_mode}]/{system_mode}"
-                if self.hvac_mode is not None
-                else None
-            ),
+            sys_mode=self.system_mode_string,
             occupancy=thermostat.occupancy,
             occupied_cooling_setpoint=thermostat.occupied_cooling_setpoint,
             occupied_heating_setpoint=thermostat.occupied_heating_setpoint,
@@ -792,20 +796,15 @@ class ZehnderThermostat(Thermostat):
         return None
 
     @property
-    def state(self) -> ThermostatState:
-        """Get the state of the thermostat."""
+    def system_mode_string(self) -> str | None:
+        """Return a formatted system mode string."""
+        if self.hvac_mode is None:
+            return None
         thermostat = self._thermostat_cluster_handler
         system_mode = ZehnderThermostat.ZEHNDER_SYSTEM_MODE_2_HVAC.get(
             thermostat.system_mode, "unknown"
         )
-        return ThermostatState(
-            **super().state.__dict__,
-            sys_mode=(
-                f"[{thermostat.system_mode}]/{system_mode}"
-                if self.hvac_mode is not None
-                else None
-            ),
-        )
+        return f"[{thermostat.system_mode}]/{system_mode}"
 
     @property
     def hvac_mode(self) -> HVACMode | None:

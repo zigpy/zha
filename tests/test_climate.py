@@ -316,6 +316,7 @@ async def test_climate_hvac_action_running_state(
     assert entity.state.hvac_action == "off"
     assert sensor_entity.state.state == "off"
 
+
     await send_attributes_report(
         zha_gateway, thrm_cluster, {0x001E: Thermostat.RunningMode.Off}
     )
@@ -1623,9 +1624,9 @@ async def test_thermostat_default_local_temperature_calibration_config(
     ]
     assert local_temperature_calibration_entity
     assert isinstance(local_temperature_calibration_entity, NumberConfigurationEntity)
-    assert local_temperature_calibration_entity.info_object.native_min_value == -2.5
-    assert local_temperature_calibration_entity.info_object.native_max_value == 2.5
-    assert local_temperature_calibration_entity.info_object.native_step == 0.1
+    assert local_temperature_calibration_entity.state.native_min_value == -2.5
+    assert local_temperature_calibration_entity.state.native_max_value == 2.5
+    assert local_temperature_calibration_entity.state.native_step == 0.1
     assert local_temperature_calibration_entity._multiplier == 0.1
 
 
@@ -1667,7 +1668,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
     ]
     assert local_temperature_calibration_entity
     assert isinstance(local_temperature_calibration_entity, NumberConfigurationEntity)
-    assert local_temperature_calibration_entity.info_object.native_min_value == -5.0
-    assert local_temperature_calibration_entity.info_object.native_max_value == 5.0
-    assert local_temperature_calibration_entity.info_object.native_step == 0.1
+    assert local_temperature_calibration_entity.state.native_min_value == -5.0
+    assert local_temperature_calibration_entity.state.native_max_value == 5.0
+    assert local_temperature_calibration_entity.state.native_step == 0.1
     assert local_temperature_calibration_entity._multiplier == 0.1

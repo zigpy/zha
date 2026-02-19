@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from asyncio import Task
 import contextlib
+import dataclasses
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 import enum
@@ -515,7 +516,6 @@ class DeviceCounterSensor(BaseEntity):
             **super().state.__dict__,
             state=self._zigpy_counter.value,
             suggested_display_precision=self._attr_suggested_display_precision,
-            device_ieee=self._device.ieee,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,
             counter_groups=self._zigpy_counter_groups,

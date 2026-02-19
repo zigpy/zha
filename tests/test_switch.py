@@ -242,7 +242,7 @@ async def test_zha_group_switch_entity(zha_gateway: Gateway) -> None:
 
     entity: GroupEntity = get_group_entity(zha_group, platform=Platform.SWITCH)
     assert entity.group_id == zha_group.group_id
-    assert entity.info_object.fallback_name == zha_group.name
+    assert entity.state.fallback_name == zha_group.name
 
     group_cluster_on_off = zha_group.zigpy_group.endpoint[general.OnOff.cluster_id]
     dev1_cluster_on_off = device_switch_1.device.endpoints[1].on_off
@@ -864,7 +864,7 @@ async def test_binary_output_cluster(zha_gateway: Gateway) -> None:
     # Clear out the attribute first, to test handling of the missing state
     cluster.update_attribute(BinaryOutput.AttributeDefs.present_value.id, None)
 
-    assert switch_entity.info_object.fallback_name == "Entity Description"
+    assert switch_entity.state.fallback_name == "Entity Description"
     assert switch_entity.state.state is False
 
     # Turn it on

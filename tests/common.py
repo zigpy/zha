@@ -256,7 +256,7 @@ def get_group_entity(
         if not isinstance(entity, entity_type):
             continue
 
-        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+        if qualifier is not None and qualifier not in entity.state.unique_id:
             continue
 
         return entity
@@ -287,7 +287,7 @@ def get_entity(
         if exact_entity_type is not None and type(entity) is not exact_entity_type:
             continue
 
-        if qualifier is not None and qualifier not in entity.info_object.unique_id:
+        if qualifier is not None and qualifier not in entity.state.unique_id:
             continue
 
         if not qualifier_func(entity):

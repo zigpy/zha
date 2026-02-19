@@ -761,7 +761,7 @@ async def test_zha_group_light_entity(
 
     entity: GroupEntity = get_group_entity(zha_group, platform=Platform.LIGHT)
     assert entity.group_id == zha_group.group_id
-    assert entity.info_object.fallback_name == zha_group.name
+    assert entity.state.fallback_name == zha_group.name
 
     device_1_light_entity = get_entity(device_light_1, platform=Platform.LIGHT)
     device_2_light_entity = get_entity(device_light_2, platform=Platform.LIGHT)
