@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from dataclasses import dataclass
-import functools
+import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -19,7 +18,7 @@ from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterHandlerMatch,
     EntityCategory,
     PlatformEntity,
@@ -55,25 +54,18 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
-class BinarySensorEntityInfo(BaseEntityInfo):
-    """Binary sensor entity info."""
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class BinarySensorState(BaseEntityState):
+    """State for binary sensor entities."""
 
+    state: bool
     attribute_name: str
-    device_class: BinarySensorDeviceClass | None
 
 
 class BaseBinarySensor(PlatformEntity, ABC):
     """Abstract base class for ZHA binary sensors."""
 
     PLATFORM: Platform = Platform.BINARY_SENSOR
-
-    @property
-    def state(self) -> dict:
-        """Return the state of the binary sensor."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
 
     @property
     @abstractmethod
@@ -87,6 +79,15 @@ class BinarySensor(BaseBinarySensor):
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
     _attribute_converter: Callable[[Any], Any] | None = None
+
+    @property
+    def state(self) -> BinarySensorState:
+        """Return the state of the binary sensor."""
+        return BinarySensorState(
+            **super().state.__dict__,
+            state=self.is_on,
+            attribute_name=self._attribute_name,
+        )
 
     def __init__(
         self,
@@ -124,14 +125,6 @@ class BinarySensor(BaseBinarySensor):
                 Platform.BINARY_SENSOR.value,
                 _LOGGER,
             )
-
-    @functools.cached_property
-    def info_object(self) -> BinarySensorEntityInfo:
-        """Return a representation of the binary sensor."""
-        return BinarySensorEntityInfo(
-            **super().info_object.__dict__,
-            attribute_name=self._attribute_name,
-        )
 
     @property
     def is_on(self) -> bool:

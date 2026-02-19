@@ -7,16 +7,18 @@ import enum
 import logging
 from typing import TYPE_CHECKING, Any, overload
 
+from zha.application.platforms import BaseEntityState
+
 if TYPE_CHECKING:
     from zha.application.platforms.binary_sensor.const import BinarySensorDeviceClass
     from zha.application.platforms.number.const import NumberDeviceClass
     from zha.application.platforms.sensor.const import SensorDeviceClass
 
 
-def find_state_attributes(states: list[dict], key: str) -> Iterator[Any]:
+def find_state_attributes(states: list[BaseEntityState], key: str) -> Iterator[Any]:
     """Find attributes with matching key from states."""
     for state in states:
-        if (value := state.get(key)) is not None:
+        if (value := getattr(state, key, None)) is not None:
             yield value
 
 
@@ -31,7 +33,7 @@ def mean_tuple(*args: Any) -> tuple:
 
 
 def reduce_attribute(
-    states: list[dict],
+    states: list[BaseEntityState],
     key: str,
     default: Any | None = None,
     reduce: Callable[..., Any] = mean_int,

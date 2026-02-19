@@ -15,7 +15,7 @@ from zha.application import Platform
 from zha.application.const import ENTITY_METADATA
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterHandlerMatch,
     EntityCategory,
     PlatformEntity,
@@ -37,13 +37,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class ButtonEntityInfo(BaseEntityInfo):
-    """Button entity info."""
+class ButtonState(BaseEntityState):
+    """State for button entities."""
+
+    pass
 
 
 @dataclass(frozen=True, kw_only=True)
-class CommandButtonEntityInfo(ButtonEntityInfo):
-    """Command button entity info."""
+class CommandButtonState(ButtonState):
+    """State for command button entities."""
 
     command: str
     args: list[Any]
@@ -51,8 +53,8 @@ class CommandButtonEntityInfo(ButtonEntityInfo):
 
 
 @dataclass(frozen=True, kw_only=True)
-class WriteAttributeButtonEntityInfo(ButtonEntityInfo):
-    """Write attribute button entity info."""
+class WriteAttributeButtonState(ButtonState):
+    """State for write attribute button entities."""
 
     attribute_name: str
     attribute_value: Any
@@ -63,10 +65,10 @@ class BaseButton(PlatformEntity, ABC):
 
     PLATFORM = Platform.BUTTON
 
-    @functools.cached_property
-    def info_object(self) -> ButtonEntityInfo:
-        """Return a representation of the button."""
-        return ButtonEntityInfo(**super().info_object.__dict__)
+    @property
+    def state(self) -> ButtonState:
+        """Return the state of the button."""
+        return ButtonState(**super().state.__dict__)
 
     @abstractmethod
     async def async_press(self) -> None:
@@ -102,11 +104,11 @@ class Button(BaseButton):
         self._args = entity_metadata.args
         self._kwargs = entity_metadata.kwargs
 
-    @functools.cached_property
-    def info_object(self) -> CommandButtonEntityInfo:
-        """Return a representation of the button."""
-        return CommandButtonEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> CommandButtonState:
+        """Return the state of the button."""
+        return CommandButtonState(
+            **super().state.__dict__,
             command=self._command_name,
             args=self._args,
             kwargs=self._kwargs,
@@ -178,11 +180,11 @@ class WriteAttributeButton(BaseButton):
         self._attribute_name = entity_metadata.attribute_name
         self._attribute_value = entity_metadata.attribute_value
 
-    @functools.cached_property
-    def info_object(self) -> WriteAttributeButtonEntityInfo:
-        """Return a representation of the button."""
-        return WriteAttributeButtonEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> WriteAttributeButtonState:
+        """Return the state of the button."""
+        return WriteAttributeButtonState(
+            **super().state.__dict__,
             attribute_name=self._attribute_name,
             attribute_value=self._attribute_value,
         )

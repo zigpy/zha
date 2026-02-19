@@ -5,6 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import asyncio
 from collections import deque
+import dataclasses
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
@@ -16,14 +17,13 @@ from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
+    BaseEntityState,
     ClusterHandlerMatch,
     PlatformEntity,
     PlatformFeatureGroup,
     register_entity,
 )
 from zha.application.platforms.cover.const import (
-    ATTR_CURRENT_POSITION,
-    ATTR_CURRENT_TILT_POSITION,
     POSITION_CLOSED,
     POSITION_OPEN,
     WCT,
@@ -63,6 +63,18 @@ DEFAULT_MOVEMENT_TIMEOUT: float = 5
 # Upper limit for dynamic timeout
 LIFT_MOVEMENT_TIMEOUT_RANGE: float = 300
 TILT_MOVEMENT_TIMEOUT_RANGE: float = 30
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class CoverEntityState(BaseEntityState):
+    """State for cover entities."""
+
+    current_position: int | None
+    current_tilt_position: int | None
+    state: CoverState | None
+    is_opening: bool | None
+    is_closing: bool | None
+    is_closed: bool | None
 
 
 class BaseCover(PlatformEntity, ABC):
@@ -268,20 +280,17 @@ class Cover(BaseCover):
         )
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> CoverEntityState:
         """Get the state of the cover."""
-        response = super().state
-        response.update(
-            {
-                ATTR_CURRENT_POSITION: self.current_cover_position,
-                ATTR_CURRENT_TILT_POSITION: self.current_cover_tilt_position,
-                "state": self._state,
-                "is_opening": self.is_opening,
-                "is_closing": self.is_closing,
-                "is_closed": self.is_closed,
-            }
+        return CoverEntityState(
+            **super().state.__dict__,
+            current_position=self.current_cover_position,
+            current_tilt_position=self.current_cover_tilt_position,
+            state=self._state,
+            is_opening=self.is_opening,
+            is_closing=self.is_closing,
+            is_closed=self.is_closed,
         )
-        return response
 
     @property
     def is_closed(self) -> bool | None:
@@ -775,21 +784,21 @@ class Shade(BaseCover):
             )
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> CoverEntityState:
         """Get the state of the cover."""
         if (closed := self.is_closed) is None:
             state = None
         else:
             state = CoverState.CLOSED if closed else CoverState.OPEN
-        response = super().state
-        response.update(
-            {
-                ATTR_CURRENT_POSITION: self.current_cover_position,
-                "is_closed": self.is_closed,
-                "state": state,
-            }
+        return CoverEntityState(
+            **super().state.__dict__,
+            current_position=self.current_cover_position,
+            current_tilt_position=self.current_cover_tilt_position,
+            state=state,
+            is_opening=self.is_opening,
+            is_closing=self.is_closing,
+            is_closed=self.is_closed,
         )
-        return response
 
     @property
     def current_cover_position(self) -> int | None:

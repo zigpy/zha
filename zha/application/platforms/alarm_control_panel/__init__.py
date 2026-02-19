@@ -3,17 +3,16 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-import functools
+import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.security import IasAce
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterHandlerMatch,
     PlatformEntity,
     register_entity,
@@ -44,14 +43,14 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True, kw_only=True)
-class AlarmControlPanelEntityInfo(BaseEntityInfo):
-    """Alarm control panel entity info."""
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class AlarmControlPanelState(BaseEntityState):
+    """State for alarm control panel entities."""
 
+    state: AlarmState
     code_arm_required: bool
     code_format: CodeFormat
     supported_features: int
-    translation_key: str
 
 
 class BaseAlarmControlPanel(PlatformEntity, ABC):
@@ -60,11 +59,15 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
     PLATFORM = Platform.ALARM_CONTROL_PANEL
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> AlarmControlPanelState:
         """Get the state of the alarm control panel."""
-        response = super().state
-        response["state"] = self.alarm_state
-        return response
+        return AlarmControlPanelState(
+            **super().state.__dict__,
+            state=self.alarm_state,
+            code_arm_required=self.code_arm_required,
+            code_format=self.code_format,
+            supported_features=self.supported_features,
+        )
 
     @property
     @abstractmethod
@@ -88,16 +91,6 @@ class BaseAlarmControlPanel(PlatformEntity, ABC):
     def supported_features(self) -> int:
         """Return the list of supported features."""
         return self._attr_supported_features
-
-    @functools.cached_property
-    def info_object(self) -> AlarmControlPanelEntityInfo:
-        """Return a representation of the alarm control panel."""
-        return AlarmControlPanelEntityInfo(
-            **super().info_object.__dict__,
-            code_arm_required=self.code_arm_required,
-            code_format=self.code_format,
-            supported_features=self.supported_features,
-        )
 
     @abstractmethod
     async def async_alarm_disarm(self, code: str | None = None) -> None:

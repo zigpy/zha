@@ -74,7 +74,7 @@ from zha.application.const import (
 from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
 )
@@ -244,7 +244,7 @@ class ExtendedDeviceInfo(DeviceInfo):
     """Describes a ZHA device."""
 
     active_coordinator: bool
-    entities: dict[str, BaseEntityInfo]
+    entities: dict[str, BaseEntityState]
     neighbors: list[NeighborInfo]
     routes: list[RouteInfo]
     endpoint_names: list[EndpointNameInfo]
@@ -794,7 +794,7 @@ class Device(LogMixin, EventBase):
             **self.device_info.__dict__,
             active_coordinator=self.is_active_coordinator,
             entities={
-                platform_entity.unique_id: platform_entity.info_object
+                platform_entity.unique_id: platform_entity.state
                 for platform_entity in self.platform_entities.values()
             },
             neighbors=[
@@ -1406,7 +1406,7 @@ class Device(LogMixin, EventBase):
         candidates = [
             e
             for e in self._platform_entities.values()
-            if e.enabled and hasattr(e, "info_object") and e._attr_primary is not False
+            if e.enabled and e._attr_primary is not False
         ]
         candidates.sort(reverse=True, key=lambda e: e.primary_weight)
 
@@ -1419,11 +1419,9 @@ class Device(LogMixin, EventBase):
         # We have a clear winner
         if not others or winner.primary_weight > others[0].primary_weight:
             winner.primary = True
-            del winner.info_object
 
             for entity in others:
                 entity.primary = False
-                del entity.info_object
 
             return
 
@@ -1433,7 +1431,6 @@ class Device(LogMixin, EventBase):
 
         for entity in candidates:
             entity.primary = False
-            del entity.info_object
 
     def get_diagnostics_json(self):
         """Get ZHA device information."""
@@ -1547,28 +1544,18 @@ class Device(LogMixin, EventBase):
         for (platform, _unique_id), platform_entity in sorted(
             self.platform_entities.items()
         ):
-            info_object = dataclasses.asdict(platform_entity.info_object)
-            info_object["cluster_handlers"].sort(key=lambda i: i["unique_id"])
-            info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
-            info_object["device_ieee"] = str(info_object["device_ieee"])
+            state_dict = dataclasses.asdict(platform_entity.state)
+            state_dict["cluster_handlers"].sort(key=lambda i: i["unique_id"])
+            state_dict["migrate_unique_ids"] = list(state_dict["migrate_unique_ids"])
+            state_dict["device_ieee"] = str(state_dict["device_ieee"])
 
-            for cluster_handler_info in info_object["cluster_handlers"]:
+            for cluster_handler_info in state_dict["cluster_handlers"]:
                 cluster_info = cluster_handler_info["cluster"]
 
                 if cluster_info is not None:
                     cluster_info.pop("commands", None)
 
-            obj: dict[str, Any] = {
-                "info_object": info_object,
-                "state": platform_entity.state,
-            }
-
-            if platform_entity.extra_state_attribute_names is not None:
-                obj["extra_state_attributes"] = sorted(
-                    platform_entity.extra_state_attribute_names
-                )
-
-            info["zha_lib_entities"][platform].append(obj)
+            info["zha_lib_entities"][platform].append(state_dict)
 
         topology = self.gateway.application_controller.topology
         info["neighbors"] = [

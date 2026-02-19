@@ -13,7 +13,7 @@ import zigpy.exceptions
 from zigpy.types.named import EUI64
 
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     EntityStateChangedEvent,
     PlatformEntity,
 )
@@ -55,7 +55,7 @@ class GroupMemberInfo:
     ieee: EUI64
     endpoint_id: int
     device_info: ExtendedDeviceInfo
-    entities: dict[str, BaseEntityInfo]
+    entities: dict[str, BaseEntityState]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -65,7 +65,7 @@ class GroupInfo:
     group_id: int
     name: str
     members: list[GroupMemberInfo]
-    entities: dict[str, BaseEntityInfo]
+    entities: dict[str, BaseEntityState]
 
 
 class GroupMember(LogMixin):
@@ -105,8 +105,7 @@ class GroupMember(LogMixin):
             endpoint_id=self.endpoint_id,
             device_info=self.device.extended_device_info,
             entities={
-                entity.unique_id: entity.info_object
-                for entity in self.associated_entities
+                entity.unique_id: entity.state for entity in self.associated_entities
             },
         )
 
@@ -206,7 +205,7 @@ class Group(LogMixin):
             name=self.name,
             members=[member.member_info for member in self.members],
             entities={
-                unique_id: entity.info_object
+                unique_id: entity.state
                 for unique_id, entity in self._group_entities.items()
             },
         )

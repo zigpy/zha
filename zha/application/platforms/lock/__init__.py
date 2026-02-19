@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Literal, cast
+import dataclasses
+from typing import TYPE_CHECKING, Literal, cast
 
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
+    BaseEntityState,
     ClusterHandlerMatch,
     PlatformEntity,
     register_entity,
@@ -32,17 +34,25 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class LockState(BaseEntityState):
+    """State for lock entities."""
+
+    is_locked: bool
+
+
 class BaseLock(PlatformEntity, ABC):
     """Abstract base class for ZHA lock entities."""
 
     PLATFORM = Platform.LOCK
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> LockState:
         """Get the state of the lock."""
-        response = super().state
-        response["is_locked"] = self.is_locked
-        return response
+        return LockState(
+            **super().state.__dict__,
+            is_locked=self.is_locked,
+        )
 
     @property
     @abstractmethod

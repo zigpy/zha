@@ -53,7 +53,7 @@ from zigpy.zcl.clusters.smartenergy import (
 from zha.application import Platform
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     BaseIdentifiers,
     ClusterHandlerMatch,
     EntityCategory,
@@ -159,22 +159,20 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class SensorEntityInfo(BaseEntityInfo):
-    """Sensor entity info."""
+class SensorState(BaseEntityState):
+    """State for sensor entities."""
 
+    state: date | datetime | str | int | float | None
     suggested_display_precision: int | None = None
     unit: str | None = None
-    device_class: SensorDeviceClass | None = None
-    state_class: SensorStateClass | None = None
 
 
 @dataclass(frozen=True, kw_only=True)
-class DeviceCounterEntityInfo(BaseEntityInfo):
-    """Device counter entity info."""
+class DeviceCounterSensorState(BaseEntityState):
+    """State for device counter sensor entities."""
 
-    device_ieee: str
+    state: int | None
     suggested_display_precision: int
-    available: bool
     counter: str
     counter_value: int
     counter_groups: str
@@ -208,21 +206,15 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the unit of measurement."""
         return self._attr_native_unit_of_measurement
 
-    @functools.cached_property
-    def info_object(self) -> SensorEntityInfo:
-        """Return a representation of the sensor."""
-        return SensorEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> SensorState:
+        """Return the state for this sensor."""
+        return SensorState(
+            **super().state.__dict__,
+            state=self.native_value,
             suggested_display_precision=self.suggested_display_precision,
             unit=self.native_unit_of_measurement,
         )
-
-    @property
-    def state(self) -> dict:
-        """Return the state for this sensor."""
-        response = super().state
-        response["state"] = self.native_value
-        return response
 
     @property
     @abstractmethod
@@ -516,24 +508,19 @@ class DeviceCounterSensor(BaseEntity):
             **super().identifiers.__dict__, device_ieee=str(self._device.ieee)
         )
 
-    @functools.cached_property
-    def info_object(self) -> DeviceCounterEntityInfo:
-        """Return a representation of the platform entity."""
-        return DeviceCounterEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> DeviceCounterSensorState:
+        """Return the state for this sensor."""
+        return DeviceCounterSensorState(
+            **super().state.__dict__,
+            state=self._zigpy_counter.value,
             suggested_display_precision=self._attr_suggested_display_precision,
+            device_ieee=self._device.ieee,
             counter=self._zigpy_counter.name,
             counter_value=self._zigpy_counter.value,
             counter_groups=self._zigpy_counter_groups,
             counter_group=self._zigpy_counter_group,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state for this sensor."""
-        response = super().state
-        response["state"] = self._zigpy_counter.value
-        return response
 
     @property
     def native_value(self) -> int | None:
@@ -673,6 +660,15 @@ class AnalogInputSensor(Sensor):
         return super()._is_supported()
 
 
+@dataclass(frozen=True, kw_only=True)
+class BatterySensorState(SensorState):
+    """State for battery sensor entities."""
+
+    battery_size: str | None = None
+    battery_quantity: int | None = None
+    battery_voltage: float | None = None
+
+
 @register_entity(PowerConfiguration.cluster_id)
 class Battery(Sensor):
     """Battery sensor of power configuration cluster."""
@@ -706,19 +702,35 @@ class Battery(Sensor):
         return value / 2
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> BatterySensorState:
         """Return the state for battery sensors."""
-        response = super().state
-        battery_size = self._cluster_handler.cluster.get("battery_size")
-        if battery_size is not None:
-            response["battery_size"] = BATTERY_SIZES.get(battery_size, "Unknown")
+        battery_size_raw = self._cluster_handler.cluster.get("battery_size")
+        battery_size = (
+            BATTERY_SIZES.get(battery_size_raw, "Unknown")
+            if battery_size_raw is not None
+            else None
+        )
         battery_quantity = self._cluster_handler.cluster.get("battery_quantity")
-        if battery_quantity is not None:
-            response["battery_quantity"] = battery_quantity
-        battery_voltage = self._cluster_handler.cluster.get("battery_voltage")
-        if battery_voltage is not None:
-            response["battery_voltage"] = round(battery_voltage / 10, 2)
-        return response
+        battery_voltage_raw = self._cluster_handler.cluster.get("battery_voltage")
+        battery_voltage = (
+            round(battery_voltage_raw / 10, 2)
+            if battery_voltage_raw is not None
+            else None
+        )
+        return BatterySensorState(
+            **super().state.__dict__,
+            battery_size=battery_size,
+            battery_quantity=battery_quantity,
+            battery_voltage=battery_voltage,
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class ElectricalMeasurementState(SensorState):
+    """State for electrical measurement sensor entities."""
+
+    measurement_type: str | None = None
+    max_value: float | int | None = None
 
 
 class BaseElectricalMeasurement(PollableSensor):
@@ -745,19 +757,21 @@ class BaseElectricalMeasurement(PollableSensor):
             self._attr_extra_state_attribute_names.add(self._attr_max_attribute_name)
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> ElectricalMeasurementState:
         """Return the state for this sensor."""
-        response = super().state
-        if self._cluster_handler.measurement_type is not None:
-            response["measurement_type"] = self._cluster_handler.measurement_type
-
-        if (max_attr_name := self._attr_max_attribute_name) is None:
-            return response
-
-        if (max_v := self._cluster_handler.cluster.get(max_attr_name)) is not None:
-            response[max_attr_name] = self.formatter(max_v)
-
-        return response
+        measurement_type = self._cluster_handler.measurement_type
+        max_value = None
+        if (max_attr_name := self._attr_max_attribute_name) is not None:
+            max_v = self._cluster_handler.cluster.get(max_attr_name)
+            if max_v is not None:
+                max_value = self.formatter(max_v)
+        return ElectricalMeasurementState(
+            **super().state.__dict__,
+            measurement_type=str(measurement_type)
+            if measurement_type is not None
+            else None,
+            max_value=max_value,
+        )
 
     @property
     def _multiplier(self) -> int | float | None:
@@ -1213,6 +1227,15 @@ class SmartEnergyMeteringEntityDescription:
     device_class: SensorDeviceClass | None = None
 
 
+@dataclass(frozen=True, kw_only=True)
+class SmartEnergySensorState(SensorState):
+    """State for smart energy metering sensor entities."""
+
+    device_type: int | None = None
+    status: str | None = None
+    zcl_unit_of_measurement: int | None = None
+
+
 @register_entity(Metering.cluster_id)
 class SmartEnergyMetering(PollableSensor):
     """Metering sensor."""
@@ -1311,20 +1334,22 @@ class SmartEnergyMetering(PollableSensor):
             )
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SmartEnergySensorState:
         """Return state for this sensor."""
-        response = super().state
-        if self._cluster_handler.device_type is not None:
-            response["device_type"] = self._cluster_handler.device_type
-        if (status := self._cluster_handler.metering_status) is not None:
-            if isinstance(status, enum.IntFlag):
-                response["status"] = str(
-                    status.name if status.name is not None else status.value
+        status = None
+        if (raw_status := self._cluster_handler.metering_status) is not None:
+            if isinstance(raw_status, enum.IntFlag):
+                status = str(
+                    raw_status.name if raw_status.name is not None else raw_status.value
                 )
             else:
-                response["status"] = str(status)[len(status.__class__.__name__) + 1 :]
-        response["zcl_unit_of_measurement"] = self._cluster_handler.unit_of_measurement
-        return response
+                status = str(raw_status)[len(raw_status.__class__.__name__) + 1 :]
+        return SmartEnergySensorState(
+            **super().state.__dict__,
+            device_type=self._cluster_handler.device_type,
+            status=status,
+            zcl_unit_of_measurement=self._cluster_handler.unit_of_measurement,
+        )
 
     @property
     def _multiplier(self) -> int | float | None:
@@ -1853,19 +1878,6 @@ class ThermostatHVACAction(Sensor):
         return PlatformEntity._is_supported(self)
 
     @property
-    def state(self) -> dict:
-        """Return the current HVAC action."""
-        response = super().state
-        if (
-            self._cluster_handler.pi_heating_demand is None
-            and self._cluster_handler.pi_cooling_demand is None
-        ):
-            response["state"] = self._rm_rs_action
-        else:
-            response["state"] = self._pi_demand_action
-        return response
-
-    @property
     def native_value(self) -> str | None:
         """Return the current HVAC action."""
         if (
@@ -2011,13 +2023,6 @@ class RSSISensor(Sensor):
         return not any(type(entity) is cls for entity in entities)
 
     @property
-    def state(self) -> dict:
-        """Return the state of the sensor."""
-        response = super().state
-        response["state"] = self.device.device.rssi
-        return response
-
-    @property
     def native_value(self) -> str | int | float | None:
         """Return the state of the entity."""
         return self._device.device.rssi
@@ -2058,13 +2063,6 @@ class LQISensor(RSSISensor):
     _cluster_handler_match = ClusterHandlerMatch(
         cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
     )
-
-    @property
-    def state(self) -> dict:
-        """Return the state of the sensor."""
-        response = super().state
-        response["state"] = self.device.device.lqi
-        return response
 
     @property
     def native_value(self) -> str | int | float | None:
@@ -2351,6 +2349,13 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     )
 
 
+@dataclass(frozen=True, kw_only=True)
+class BitmapSensorState(SensorState):
+    """State for bitmap sensor entities."""
+
+    bit_states: dict[str, bool]
+
+
 class BitMapSensor(Sensor):
     """A sensor with only state attributes.
 
@@ -2373,17 +2378,19 @@ class BitMapSensor(Sensor):
         }
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> BitmapSensorState:
         """Return the state for this sensor."""
-        response = super().state
-        response["state"] = self.native_value
         value = self._cluster_handler.cluster.get(self._attribute_name)
+        bit_states = {}
         for bit in list(self._bitmap):
             if value is None:
-                response[bit.name] = False
+                bit_states[bit.name] = False
             else:
-                response[bit.name] = bit in self._bitmap(value)
-        return response
+                bit_states[bit.name] = bit in self._bitmap(value)
+        return BitmapSensorState(
+            **super().state.__dict__,
+            bit_states=bit_states,
+        )
 
     def formatter(self, _value: int) -> str:
         """Summary of all attributes."""

@@ -17,7 +17,7 @@ from zigpy.zcl.clusters.measurement import OccupancySensing
 
 from zha.application import Platform
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterHandlerMatch,
     EntityCategory,
     PlatformEntity,
@@ -54,9 +54,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class NumberEntityInfo(BaseEntityInfo):
-    """Number entity info."""
+class NumberState(BaseEntityState):
+    """State for number entities."""
 
+    state: float | None
     mode: NumberMode
     native_max_value: float
     native_min_value: float
@@ -83,24 +84,18 @@ class BaseNumber(PlatformEntity, ABC):
     def native_value(self) -> float | None:
         """Return the current value."""
 
-    @functools.cached_property
-    def info_object(self) -> NumberEntityInfo:
-        """Return a representation of the number entity."""
-        return NumberEntityInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> NumberState:
+        """Return the state of the entity."""
+        return NumberState(
+            **super().state.__dict__,
+            state=self.native_value,
             mode=self.mode,
             native_max_value=self.native_max_value,
             native_min_value=self.native_min_value,
             native_step=self.native_step,
             native_unit_of_measurement=self.native_unit_of_measurement,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the entity."""
-        response = super().state
-        response["state"] = self.native_value
-        return response
 
     @property
     def native_min_value(self) -> float:
@@ -276,13 +271,6 @@ class NumberConfigurationEntity(BaseNumber):
             self._attr_native_unit_of_measurement = entity_metadata.unit
         if entity_metadata.mode in NumberMode:
             self._attr_mode = NumberMode(entity_metadata.mode)
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the entity."""
-        response = super().state
-        response["state"] = self.native_value
-        return response
 
     @property
     def native_value(self) -> float | None:

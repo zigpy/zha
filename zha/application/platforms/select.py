@@ -5,7 +5,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -27,7 +26,7 @@ from zigpy.zcl.clusters.security import IasWd
 from zha.application import Platform
 from zha.application.const import Strobe
 from zha.application.platforms import (
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterHandlerMatch,
     EntityCategory,
     PlatformEntity,
@@ -57,8 +56,15 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class EnumSelectInfo(BaseEntityInfo):
-    """Enum select entity info."""
+class SelectState(BaseEntityState):
+    """State for select entities."""
+
+    state: str | None
+
+
+@dataclass(frozen=True, kw_only=True)
+class EnumSelectState(SelectState):
+    """State for enum select entities."""
 
     enum: str
     options: list[str]
@@ -77,11 +83,12 @@ class BaseSelectEntity(PlatformEntity, ABC):
         return self._attr_options
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SelectState:
         """Return the state of the select."""
-        response = super().state
-        response["state"] = self.current_option
-        return response
+        return SelectState(
+            **super().state.__dict__,
+            state=self.current_option,
+        )
 
     @property
     @abstractmethod
@@ -113,11 +120,11 @@ class EnumSelectEntity(BaseSelectEntity):
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
 
-    @functools.cached_property
-    def info_object(self) -> EnumSelectInfo:
-        """Return a representation of the select."""
-        return EnumSelectInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> EnumSelectState:
+        """Return the state of the select."""
+        return EnumSelectState(
+            **super().state.__dict__,
             enum=self._enum.__name__,
             options=self.options,
         )
@@ -260,11 +267,11 @@ class ZCLEnumSelectEntity(BaseSelectEntity):
         self._attribute_name = entity_metadata.attribute_name
         self._enum = entity_metadata.enum
 
-    @functools.cached_property
-    def info_object(self) -> EnumSelectInfo:
-        """Return a representation of the select."""
-        return EnumSelectInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> EnumSelectState:
+        """Return the state of the select."""
+        return EnumSelectState(
+            **super().state.__dict__,
             enum=self._enum.__name__,
             options=self.options,
         )

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
@@ -19,7 +18,7 @@ from zigpy.zcl.foundation import Status
 from zha.application import Platform
 from zha.application.platforms import (
     BaseEntity,
-    BaseEntityInfo,
+    BaseEntityState,
     ClusterHandlerMatch,
     EntityCategory,
     GroupEntity,
@@ -59,9 +58,17 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, kw_only=True)
-class ConfigurableAttributeSwitchInfo(BaseEntityInfo):
-    """Switch configuration entity info."""
+class SwitchState(BaseEntityState):
+    """State for switch entities."""
 
+    state: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class ConfigurableAttributeSwitchState(SwitchState):
+    """State for configurable attribute switch entities."""
+
+    inverted: bool
     attribute_name: str
     invert_attribute_name: str | None
     force_inverted: bool
@@ -75,11 +82,12 @@ class BaseSwitch(BaseEntity, ABC):
     PLATFORM = Platform.SWITCH
 
     @property
-    def state(self) -> dict[str, Any]:
+    def state(self) -> SwitchState:
         """Return the state of the switch."""
-        response = super().state
-        response["state"] = self.is_on
-        return response
+        return SwitchState(
+            **super().state.__dict__,
+            state=self.is_on,
+        )
 
     @property
     @abstractmethod
@@ -96,7 +104,7 @@ class BaseSwitch(BaseEntity, ABC):
 
 
 @register_entity(OnOff.cluster_id)
-class Switch(PlatformEntity, BaseSwitch):
+class Switch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
     """ZHA switch."""
 
     _attr_translation_key = "switch"
@@ -200,7 +208,7 @@ class Switch(PlatformEntity, BaseSwitch):
 
 
 @register_entity(BinaryOutput.cluster_id)
-class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
+class BinaryOutputSwitch(PlatformEntity, BaseSwitch):  # type: ignore[misc]
     """BinaryOutputCluster switch."""
 
     _attr_primary_weight = 10
@@ -270,7 +278,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
 
 
 @register_group_entity
-class SwitchGroup(GroupEntity, BaseSwitch):
+class SwitchGroup(GroupEntity, BaseSwitch):  # type: ignore[misc]
     """Representation of a switch group."""
 
     _attr_primary_weight = 10
@@ -280,8 +288,6 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         super().__init__(group)
         self._state: bool
         self._on_off_cluster_handler = group.zigpy_group.endpoint[OnOff.cluster_id]
-        if hasattr(self, "info_object"):
-            delattr(self, "info_object")
         self.update()
 
     @property
@@ -309,11 +315,11 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         """Query all members and determine the light group state."""
         self.debug("Updating switch group entity state")
         platform_entities = self._group.get_platform_entities(self.PLATFORM)
-        all_states = [entity.state for entity in platform_entities]
+        all_states = [cast(SwitchState, entity.state) for entity in platform_entities]
         self.debug(
             "All platform entity states for group entity members: %s", all_states
         )
-        on_states = [state for state in all_states if state["state"]]
+        on_states = [state for state in all_states if state.state]
 
         self._state = len(on_states) > 0
 
@@ -400,25 +406,18 @@ class ConfigurableAttributeSwitch(PlatformEntity):
 
         return super()._is_supported()
 
-    @functools.cached_property
-    def info_object(self) -> ConfigurableAttributeSwitchInfo:
-        """Return representation of the switch configuration entity."""
-        return ConfigurableAttributeSwitchInfo(
-            **super().info_object.__dict__,
+    @property
+    def state(self) -> ConfigurableAttributeSwitchState:
+        """Return the state of the switch."""
+        return ConfigurableAttributeSwitchState(
+            **super().state.__dict__,
+            inverted=self.inverted,
             attribute_name=self._attribute_name,
             invert_attribute_name=self._inverter_attribute_name,
             force_inverted=self._force_inverted,
             off_value=self._off_value,
             on_value=self._on_value,
         )
-
-    @property
-    def state(self) -> dict[str, Any]:
-        """Return the state of the switch."""
-        response = super().state
-        response["state"] = self.is_on
-        response["inverted"] = self.inverted
-        return response
 
     @property
     def inverted(self) -> bool:
