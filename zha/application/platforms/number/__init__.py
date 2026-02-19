@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import logging
@@ -63,7 +64,7 @@ class NumberEntityInfo(BaseEntityInfo):
     native_unit_of_measurement: str | None
 
 
-class BaseNumber(PlatformEntity):
+class BaseNumber(PlatformEntity, ABC):
     """Representation of a ZHA Number entity."""
 
     PLATFORM = Platform.NUMBER
@@ -78,9 +79,9 @@ class BaseNumber(PlatformEntity):
     _attr_native_unit_of_measurement: str | None = None
 
     @property
+    @abstractmethod
     def native_value(self) -> float | None:
         """Return the current value."""
-        raise NotImplementedError
 
     @functools.cached_property
     def info_object(self) -> NumberEntityInfo:
@@ -126,9 +127,9 @@ class BaseNumber(PlatformEntity):
         """Return the mode of the entity."""
         return self._attr_mode
 
+    @abstractmethod
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
-        raise NotImplementedError
 
 
 @register_entity(AnalogOutput.cluster_id)
