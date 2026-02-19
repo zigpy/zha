@@ -198,7 +198,7 @@ class Group(LogMixin):
         ]
 
     @cached_property
-    def info_object(self) -> GroupInfo:
+    def state(self) -> GroupInfo:
         """Get ZHA group info."""
         return GroupInfo(
             group_id=self.group_id,
@@ -254,8 +254,8 @@ class Group(LogMixin):
         """Clear cached properties."""
         if hasattr(self, "all_member_entity_unique_ids"):
             delattr(self, "all_member_entity_unique_ids")
-        if hasattr(self, "info_object"):
-            delattr(self, "info_object")
+        if hasattr(self, "state"):
+            delattr(self, "state")
         if hasattr(self, "members"):
             delattr(self, "members")
 

@@ -156,7 +156,7 @@ async def async_test_temperature(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test temperature sensor."""
-    assert entity.extra_state_attribute_names is None
+    assert entity.state.extra_state_attribute_names is None
     await send_attributes_report(zha_gateway, cluster, {1: 1, 0: 2900, 2: 100})
     assert_state(entity, 29.0, "°C")
 
@@ -187,7 +187,7 @@ async def async_test_metering(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test Smart Energy metering sensor."""
-    assert entity.extra_state_attribute_names == {
+    assert entity.state.extra_state_attribute_names == {
         "status",
         "device_type",
         "zcl_unit_of_measurement",
@@ -241,7 +241,7 @@ async def async_test_smart_energy_summation_delivered(
     zha_gateway: Gateway, cluster, entity
 ):
     """Test SmartEnergy Summation delivered sensor."""
-    assert entity.extra_state_attribute_names == {
+    assert entity.state.extra_state_attribute_names == {
         "status",
         "device_type",
         "zcl_unit_of_measurement",
@@ -310,7 +310,7 @@ async def async_test_electrical_measurement(
     assert_state(entity, 9.9, "W")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x050D: 88})
-    assert entity.state.active_power_max == 8.8
+    assert entity.state.max_value == 8.8
 
 
 async def async_test_em_apparent_power(
@@ -337,7 +337,7 @@ async def async_test_em_power_factor(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ):
     """Test electrical measurement Power Factor sensor."""
-    assert entity.extra_state_attribute_names == {"measurement_type"}
+    assert entity.state.extra_state_attribute_names == {"measurement_type"}
 
     # update divisor cached value
     await send_attributes_report(zha_gateway, cluster, {"ac_power_divisor": 1})
@@ -383,7 +383,10 @@ async def async_test_em_rms_voltage(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement RMS Voltage sensor."""
-    assert entity.extra_state_attribute_names == {"measurement_type", "rms_voltage_max"}
+    assert entity.state.extra_state_attribute_names == {
+        "measurement_type",
+        "rms_voltage_max",
+    }
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0505: 1234})
     assert_state(entity, 123.4, "V")
@@ -396,14 +399,14 @@ async def async_test_em_rms_voltage(
     assert_state(entity, 22.36, "V")
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0507: 888})
-    assert entity.state.rms_voltage_max == 8.88
+    assert entity.state.max_value == 8.88
 
 
 async def async_test_powerconfiguration(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test powerconfiguration/battery sensor."""
-    assert entity.extra_state_attribute_names == {
+    assert entity.state.extra_state_attribute_names == {
         "battery_voltage",
         "battery_quantity",
         "battery_size",
@@ -474,7 +477,7 @@ async def async_test_em_dc_voltage(
     zha_gateway: Gateway, cluster: Cluster, entity: PlatformEntity
 ) -> None:
     """Test electrical measurement DC Voltage sensor."""
-    assert entity.extra_state_attribute_names == {"measurement_type"}
+    assert entity.state.extra_state_attribute_names == {"measurement_type"}
 
     await send_attributes_report(zha_gateway, cluster, {0: 1, 0x0100: 1234})
     assert_state(entity, 123.4, "V")
@@ -1818,9 +1821,7 @@ async def test_device_counter_sensors(zha_gateway: Gateway) -> None:
     entity = get_entity(
         coordinator,
         platform=Platform.SENSOR,
-        qualifier_func=lambda e: e.state.unique_id.endswith(
-            "ezsp_counters_counter_1"
-        ),
+        qualifier_func=lambda e: e.state.unique_id.endswith("ezsp_counters_counter_1"),
     )
 
     assert entity.state.state == 1
@@ -1983,9 +1984,9 @@ async def test_danfoss_thermostat_sw_error(zha_gateway: Gateway) -> None:
     )
 
     assert entity.state.state == "something"
-    assert entity.extra_state_attribute_names
-    assert "Top_pcb_sensor_error" in entity.extra_state_attribute_names
-    assert entity.state.Top_pcb_sensor_error
+    assert entity.state.extra_state_attribute_names
+    assert "Top_pcb_sensor_error" in entity.state.extra_state_attribute_names
+    assert entity.state.bit_states["Top_pcb_sensor_error"]
 
 
 async def test_quirks_sensor_attr_converter(zha_gateway: Gateway) -> None:

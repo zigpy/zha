@@ -150,6 +150,8 @@ class BaseEntityState:
     enabled: bool = True
     primary: bool
 
+    extra_state_attribute_names: frozenset[str] | None
+
     # For platform entities
     device_ieee: EUI64 | None
     endpoint_id: int | None
@@ -209,6 +211,7 @@ class BaseEntity(LogMixin, EventBase):
     _attr_device_class: str | None = None
     _attr_state_class: str | None = None
     _attr_enabled: bool = True
+    _attr_extra_state_attribute_names: set[str] | None = None
     _attr_always_supported: bool = False
     _attr_primary: bool | None = None
 
@@ -356,6 +359,11 @@ class BaseEntity(LogMixin, EventBase):
             entity_registry_enabled_default=self.entity_registry_enabled_default,
             enabled=self.enabled,
             primary=self.primary,
+            extra_state_attribute_names=(
+                frozenset(self._attr_extra_state_attribute_names)
+                if self._attr_extra_state_attribute_names is not None
+                else None
+            ),
             # Set by platform entities
             device_ieee=None,
             endpoint_id=None,

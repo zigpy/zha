@@ -5,7 +5,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from asyncio import Task
 import contextlib
-import dataclasses
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 import enum
@@ -345,9 +344,8 @@ class Sensor(BaseSensor):
         if (
             event.attribute_name == self._attribute_name
             or (
-                hasattr(self, "_attr_extra_state_attribute_names")
-                and event.attribute_name
-                in getattr(self, "_attr_extra_state_attribute_names")
+                self._attr_extra_state_attribute_names is not None
+                and event.attribute_name in self._attr_extra_state_attribute_names
             )
             or self._attribute_name is None
         ):

@@ -1551,6 +1551,10 @@ class Device(LogMixin, EventBase):
             state_dict = dataclasses.asdict(platform_entity.state)
             state_dict["migrate_unique_ids"] = list(state_dict["migrate_unique_ids"])
             state_dict["device_ieee"] = str(state_dict["device_ieee"])
+            if state_dict["extra_state_attribute_names"] is not None:
+                state_dict["extra_state_attribute_names"] = sorted(
+                    state_dict["extra_state_attribute_names"]
+                )
 
             ch_dicts = [
                 dataclasses.asdict(ch.info_object)
