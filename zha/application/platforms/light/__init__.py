@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 import asyncio
 from collections import Counter
 import contextlib
@@ -216,6 +216,7 @@ class BaseLight(BaseEntity, ABC):
         """Return the warmest color_temp that this light supports."""
         return self._max_mireds
 
+    @abstractmethod
     async def async_turn_on(
         self,
         *,
@@ -227,11 +228,10 @@ class BaseLight(BaseEntity, ABC):
         xy_color: tuple[int, int] | None = None,
     ) -> None:
         """Turn the entity on."""
-        raise NotImplementedError
 
+    @abstractmethod
     async def async_turn_off(self, *, transition: float | None = None) -> None:
         """Turn the entity off."""
-        raise NotImplementedError
 
     def restore_external_state_attributes(
         self,
@@ -287,9 +287,9 @@ class BaseClusterHandlerLight(BaseLight):
         self._internal_supported_color_modes: set[ColorMode] = set()
 
     @property
+    @abstractmethod
     def _gateway(self) -> Gateway:
         """Return the gateway."""
-        raise NotImplementedError
 
     @property
     def state(self) -> dict[str, Any]:
