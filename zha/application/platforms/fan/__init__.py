@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import math
@@ -73,7 +73,7 @@ class FanEntityInfo(BaseEntityInfo):
     speed_list: list[str]
 
 
-class BaseFan(BaseEntity):
+class BaseFan(BaseEntity, ABC):
     """Base representation of a ZHA fan."""
 
     PLATFORM = Platform.FAN
