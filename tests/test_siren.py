@@ -59,7 +59,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         | SirenEntityFeature.DURATION
     )
 
-    assert entity.state["state"] is False
+    assert entity.state.state is False
 
     # turn on from client
     with patch(
@@ -78,7 +78,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state["state"] is True
+    assert entity.state.state is True
 
     # turn off from client
     with patch(
@@ -97,7 +97,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         cluster.request.reset_mock()
 
     # test that the state has changed to off
-    assert entity.state["state"] is False
+    assert entity.state.state is False
 
     # turn on from client with options
     with patch(
@@ -116,7 +116,7 @@ async def test_siren(zha_gateway: Gateway) -> None:
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state["state"] is True
+    assert entity.state.state is True
 
 
 async def test_siren_timed_off(zha_gateway: Gateway) -> None:
@@ -126,7 +126,7 @@ async def test_siren_timed_off(zha_gateway: Gateway) -> None:
 
     entity = get_entity(zha_device, platform=Platform.SIREN)
 
-    assert entity.state["state"] is False
+    assert entity.state.state is False
 
     # turn on from client
     with patch(
@@ -145,9 +145,9 @@ async def test_siren_timed_off(zha_gateway: Gateway) -> None:
         cluster.request.reset_mock()
 
     # test that the state has changed to on
-    assert entity.state["state"] is True
+    assert entity.state.state is True
 
     await asyncio.sleep(6)
 
     # test that the state has changed to off from the timer
-    assert entity.state["state"] is False
+    assert entity.state.state is False

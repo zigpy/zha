@@ -313,51 +313,51 @@ async def group_entity_availability_test(
 ):
     """Test group entity availability handling."""
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_1.on_network = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.on_network = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is False
+    assert entity.state.available is False
 
     device_1.on_network = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.on_network = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_1.available = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.available = False
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is False
+    assert entity.state.available is False
 
     device_1.available = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
     device_2.available = True
     await asyncio.sleep(0.1)
     await zha_gateway.async_block_till_done()
 
-    assert entity.state["available"] is True
+    assert entity.state.available is True
 
 
 def zigpy_device_from_device_data(
