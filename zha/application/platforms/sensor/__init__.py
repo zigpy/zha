@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from asyncio import Task
 import contextlib
 from dataclasses import dataclass
@@ -187,18 +188,55 @@ class DeviceCounterSensorIdentifiers(BaseIdentifiers):
     device_ieee: str
 
 
-class Sensor(PlatformEntity):
-    """Base ZHA sensor."""
+class BaseSensor(PlatformEntity, ABC):
+    """Abstract base class for ZHA sensor entities."""
 
     PLATFORM = Platform.SENSOR
-    _attribute_name: int | str | None = None
-    _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
-    _divisor: int | float | None = None
-    _multiplier: int | float | None = None
+
     _attr_suggested_display_precision: int | None = None
     _attr_native_unit_of_measurement: str | None = None
     _attr_device_class: SensorDeviceClass | None = None
     _attr_state_class: SensorStateClass | None = None
+
+    @property
+    def suggested_display_precision(self) -> int | None:
+        """Return the suggested display precision."""
+        return self._attr_suggested_display_precision
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the unit of measurement."""
+        return self._attr_native_unit_of_measurement
+
+    @functools.cached_property
+    def info_object(self) -> SensorEntityInfo:
+        """Return a representation of the sensor."""
+        return SensorEntityInfo(
+            **super().info_object.__dict__,
+            suggested_display_precision=self.suggested_display_precision,
+            unit=self.native_unit_of_measurement,
+        )
+
+    @property
+    def state(self) -> dict:
+        """Return the state for this sensor."""
+        response = super().state
+        response["state"] = self.native_value
+        return response
+
+    @property
+    @abstractmethod
+    def native_value(self) -> date | datetime | str | int | float | None:
+        """Return the current sensor value."""
+
+
+class Sensor(BaseSensor):
+    """Base ZHA sensor."""
+
+    _attribute_name: int | str | None = None
+    _attribute_converter: typing.Callable[[typing.Any], typing.Any] | None = None
+    _divisor: int | float | None = None
+    _multiplier: int | float | None = None
     _skip_creation_if_no_attr_cache: bool = False
 
     def __init__(
@@ -292,27 +330,6 @@ class Sensor(PlatformEntity):
             )
         if entity_metadata.unit is not None:
             self._attr_native_unit_of_measurement = entity_metadata.unit
-
-    @functools.cached_property
-    def info_object(self) -> SensorEntityInfo:
-        """Return a representation of the sensor."""
-        return SensorEntityInfo(
-            **super().info_object.__dict__,
-            suggested_display_precision=self._attr_suggested_display_precision,
-            unit=(
-                getattr(self, "entity_description").native_unit_of_measurement
-                if getattr(self, "entity_description", None) is not None
-                else self._attr_native_unit_of_measurement
-            ),
-        )
-
-    @property
-    def state(self) -> dict:
-        """Return the state for this sensor."""
-        response = super().state
-        native_value = self.native_value
-        response["state"] = native_value
-        return response
 
     @property
     def native_value(self) -> date | datetime | str | int | float | None:
@@ -1289,6 +1306,9 @@ class SmartEnergyMetering(PollableSensor):
             self.entity_description = entity_description
             self._attr_device_class = entity_description.device_class
             self._attr_state_class = entity_description.state_class
+            self._attr_native_unit_of_measurement = (
+                entity_description.native_unit_of_measurement
+            )
 
     @property
     def state(self) -> dict[str, Any]:
