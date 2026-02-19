@@ -104,11 +104,16 @@ class BaseSiren(PlatformEntity, ABC):
         )
 
     @abstractmethod
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    async def async_turn_on(
+        self,
+        duration: int | None = None,
+        tone: int | None = None,
+        volume_level: int | None = None,
+    ) -> None:
         """Turn on siren."""
 
     @abstractmethod
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self) -> None:
         """Turn off siren."""
 
 
@@ -183,7 +188,12 @@ class Siren(BaseSiren):
         """Return true if the entity is on."""
         return self._attr_is_on
 
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    async def async_turn_on(
+        self,
+        duration: int | None = None,
+        tone: int | None = None,
+        volume_level: int | None = None,
+    ) -> None:
         """Turn on siren."""
         if self._off_listener:
             self._off_listener.cancel()
@@ -215,12 +225,12 @@ class Siren(BaseSiren):
             if strobe_level_cache is not None
             else WARNING_DEVICE_STROBE_HIGH
         )
-        if (duration := kwargs.get(ATTR_DURATION)) is not None:
+        if duration is not None:
             siren_duration = duration
-        if (tone := kwargs.get(ATTR_TONE)) is not None:
+        if tone is not None:
             siren_tone = tone
-        if (level := kwargs.get(ATTR_VOLUME_LEVEL)) is not None:
-            siren_level = int(level)
+        if volume_level is not None:
+            siren_level = int(volume_level)
         await self._cluster_handler.issue_start_warning(
             mode=siren_tone,
             warning_duration=siren_duration,
@@ -236,7 +246,7 @@ class Siren(BaseSiren):
         self._tracked_handles.append(self._off_listener)
         self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_off(self) -> None:
         """Turn off siren."""
         await self._cluster_handler.issue_start_warning(
             mode=WARNING_DEVICE_MODE_STOP, strobe=WARNING_DEVICE_STROBE_NO

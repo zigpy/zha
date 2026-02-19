@@ -25,16 +25,12 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.climate.const import (
-    ATTR_HVAC_MODE,
     ATTR_OCCP_COOL_SETPT,
     ATTR_OCCP_HEAT_SETPT,
     ATTR_OCCUPANCY,
     ATTR_PI_COOLING_DEMAND,
     ATTR_PI_HEATING_DEMAND,
     ATTR_SYS_MODE,
-    ATTR_TARGET_TEMP_HIGH,
-    ATTR_TARGET_TEMP_LOW,
-    ATTR_TEMPERATURE,
     ATTR_UNOCCP_COOL_SETPT,
     ATTR_UNOCCP_HEAT_SETPT,
     FAN_AUTO,
@@ -470,45 +466,46 @@ class Thermostat(PlatformEntity):
         self._preset = preset_mode
         self.maybe_emit_state_changed_event()
 
-    async def async_set_temperature(self, **kwargs: Any) -> None:
+    async def async_set_temperature(
+        self,
+        target_temp_low: float | None = None,
+        target_temp_high: float | None = None,
+        temperature: float | None = None,
+        hvac_mode: HVACMode | None = None,
+    ) -> None:
         """Set new target temperature."""
-        low_temp = kwargs.get(ATTR_TARGET_TEMP_LOW)
-        high_temp = kwargs.get(ATTR_TARGET_TEMP_HIGH)
-        temp = kwargs.get(ATTR_TEMPERATURE)
-        hvac_mode = kwargs.get(ATTR_HVAC_MODE)
-
         if hvac_mode is not None:
             await self.async_set_hvac_mode(hvac_mode)
 
         is_away = self.preset_mode == Preset.AWAY
 
         if self.hvac_mode == HVACMode.HEAT_COOL:
-            if low_temp is not None:
+            if target_temp_low is not None:
                 await self._thermostat_cluster_handler.async_set_heating_setpoint(
-                    temperature=int(low_temp * ZCL_TEMP),
+                    temperature=int(target_temp_low * ZCL_TEMP),
                     is_away=is_away,
                 )
-            if high_temp is not None:
+            if target_temp_high is not None:
                 await self._thermostat_cluster_handler.async_set_cooling_setpoint(
-                    temperature=int(high_temp * ZCL_TEMP),
+                    temperature=int(target_temp_high * ZCL_TEMP),
                     is_away=is_away,
                 )
-        elif temp is not None:
+        elif temperature is not None:
             if self.hvac_mode == HVACMode.COOL:
                 await self._thermostat_cluster_handler.async_set_cooling_setpoint(
-                    temperature=int(temp * ZCL_TEMP),
+                    temperature=int(temperature * ZCL_TEMP),
                     is_away=is_away,
                 )
             elif self.hvac_mode == HVACMode.HEAT:
                 await self._thermostat_cluster_handler.async_set_heating_setpoint(
-                    temperature=int(temp * ZCL_TEMP),
+                    temperature=int(temperature * ZCL_TEMP),
                     is_away=is_away,
                 )
             else:
                 self.debug("Not setting temperature for '%s' mode", self.hvac_mode)
                 return
         else:
-            self.debug("incorrect %s setting for '%s' mode", kwargs, self.hvac_mode)
+            self.debug("incorrect temperature setting for '%s' mode", self.hvac_mode)
             return
 
         self.maybe_emit_state_changed_event()

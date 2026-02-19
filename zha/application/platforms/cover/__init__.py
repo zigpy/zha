@@ -24,8 +24,6 @@ from zha.application.platforms import (
 from zha.application.platforms.cover.const import (
     ATTR_CURRENT_POSITION,
     ATTR_CURRENT_TILT_POSITION,
-    ATTR_POSITION,
-    ATTR_TILT_POSITION,
     POSITION_CLOSED,
     POSITION_OPEN,
     WCT,
@@ -111,19 +109,19 @@ class BaseCover(PlatformEntity, ABC):
         """
 
     @abstractmethod
-    async def async_open_cover(self, **kwargs: Any) -> None:
+    async def async_open_cover(self) -> None:
         """Open the cover."""
 
     @abstractmethod
-    async def async_close_cover(self, **kwargs: Any) -> None:
+    async def async_close_cover(self) -> None:
         """Close the cover."""
 
     @abstractmethod
-    async def async_set_cover_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_position(self, position: int) -> None:
         """Move the cover to a specific position."""
 
     @abstractmethod
-    async def async_stop_cover(self, **kwargs: Any) -> None:
+    async def async_stop_cover(self) -> None:
         """Stop the cover."""
 
 
@@ -578,7 +576,7 @@ class Cover(BaseCover):
         self._tilt_state = None
         self.maybe_emit_state_changed_event()
 
-    async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_open_cover(self) -> None:
         """Open the cover."""
         self._set_lift_transition_target(POSITION_OPEN)
         res = await self._cover_cluster_handler.up_open()
@@ -590,7 +588,7 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.OPENING)
         self._start_lift_transition()
 
-    async def async_open_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_open_cover_tilt(self) -> None:
         """Open the cover tilt."""
         self._set_tilt_transition_target(POSITION_OPEN)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
@@ -604,7 +602,7 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.OPENING)
         self._start_tilt_transition()
 
-    async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_close_cover(self) -> None:
         """Close the cover."""
         self._set_lift_transition_target(POSITION_CLOSED)
         res = await self._cover_cluster_handler.down_close()
@@ -616,7 +614,7 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.CLOSING)
         self._start_lift_transition()
 
-    async def async_close_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_close_cover_tilt(self) -> None:
         """Close the cover tilt."""
         self._set_tilt_transition_target(POSITION_CLOSED)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
@@ -630,11 +628,10 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.CLOSING)
         self._start_tilt_transition()
 
-    async def async_set_cover_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_position(self, position: int) -> None:
         """Move the cover to a specific position."""
         assert self.current_cover_position is not None
-        target_position = kwargs[ATTR_POSITION]
-        assert target_position is not None
+        target_position = position
 
         self._set_lift_transition_target(target_position)
         res = await self._cover_cluster_handler.go_to_lift_percentage(
@@ -652,11 +649,10 @@ class Cover(BaseCover):
             )
         self._start_lift_transition()
 
-    async def async_set_cover_tilt_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_tilt_position(self, tilt_position: int) -> None:
         """Move the cover tilt to a specific position."""
         assert self.current_cover_tilt_position is not None
-        target_position = kwargs[ATTR_TILT_POSITION]
-        assert target_position is not None
+        target_position = tilt_position
 
         self._set_tilt_transition_target(target_position)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
@@ -674,7 +670,7 @@ class Cover(BaseCover):
             )
         self._start_tilt_transition()
 
-    async def async_stop_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_stop_cover(self) -> None:
         """Stop the cover.
 
         Upon receipt of this command the cover stops both lift and tilt movement.
@@ -686,12 +682,12 @@ class Cover(BaseCover):
         self._clear_tilt_transition()
         self._determine_cover_state(refresh=True)
 
-    async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
+    async def async_stop_cover_tilt(self) -> None:
         """Stop the cover tilt.
 
         This is handled by async_stop_cover because there is no tilt specific command for Zigbee covers.
         """
-        await self.async_stop_cover(**kwargs)
+        await self.async_stop_cover()
 
     @staticmethod
     def _ha_position_to_zcl(position: int) -> int:
@@ -845,7 +841,7 @@ class Shade(BaseCover):
         self._position = self._zcl_level_to_ha_position(event.level)
         self.maybe_emit_state_changed_event()
 
-    async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_open_cover(self) -> None:
         """Open the window cover."""
         res = await self._on_off_cluster_handler.on()
         if res[1] != Status.SUCCESS:
@@ -854,7 +850,7 @@ class Shade(BaseCover):
         self._is_open = True
         self.maybe_emit_state_changed_event()
 
-    async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_close_cover(self) -> None:
         """Close the window cover."""
         res = await self._on_off_cluster_handler.off()
         if res[1] != Status.SUCCESS:
@@ -863,12 +859,12 @@ class Shade(BaseCover):
         self._is_open = False
         self.maybe_emit_state_changed_event()
 
-    async def async_set_cover_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_position(self, position: int) -> None:
         """Move the roller shutter to a specific position."""
         if not self._level_cluster_handler:
             return
 
-        new_pos = kwargs[ATTR_POSITION]
+        new_pos = position
         res = await self._level_cluster_handler.move_to_level_with_on_off(
             self._ha_position_to_zcl_level(new_pos), 1
         )
@@ -879,7 +875,7 @@ class Shade(BaseCover):
         self._position = new_pos
         self.maybe_emit_state_changed_event()
 
-    async def async_stop_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_stop_cover(self) -> None:
         """Stop the cover."""
         if not self._level_cluster_handler:
             return
@@ -915,7 +911,7 @@ class KeenVent(Shade):
         feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
     )
 
-    async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_open_cover(self) -> None:
         """Open the cover."""
         assert self._level_cluster_handler is not None
 

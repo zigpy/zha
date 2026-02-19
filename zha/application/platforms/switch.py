@@ -87,11 +87,11 @@ class BaseSwitch(BaseEntity, ABC):
         """Return if the switch is on based on the statemachine."""
 
     @abstractmethod
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    async def async_turn_on(self) -> None:
         """Turn the entity on."""
 
     @abstractmethod
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self) -> None:
         """Turn the entity off."""
 
 
@@ -157,12 +157,12 @@ class Switch(PlatformEntity, BaseSwitch):
             return False
         return self._on_off_cluster_handler.on_off
 
-    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_on(self) -> None:
         """Turn the entity on."""
         await self._on_off_cluster_handler.turn_on()
         self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_off(self) -> None:
         """Turn the entity off."""
         await self._on_off_cluster_handler.turn_off()
         self.maybe_emit_state_changed_event()
@@ -250,12 +250,12 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
             return False
         return bool(self._binary_output_cluster_handler.present_value)
 
-    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_on(self) -> None:
         """Turn the entity on."""
         await self._binary_output_cluster_handler.async_set_present_value(True)
         self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_off(self) -> None:
         """Turn the entity off."""
         await self._binary_output_cluster_handler.async_set_present_value(False)
         self.maybe_emit_state_changed_event()
@@ -289,7 +289,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         """Return if the switch is on based on the statemachine."""
         return bool(self._state)
 
-    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_on(self) -> None:
         """Turn the entity on."""
         result = await self._on_off_cluster_handler.on()
         if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
@@ -297,7 +297,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self._state = True
         self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_off(self) -> None:
         """Turn the entity off."""
         result = await self._on_off_cluster_handler.off()
         if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
@@ -461,11 +461,11 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             )
         self.maybe_emit_state_changed_event()
 
-    async def async_turn_on(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_on(self) -> None:
         """Turn the entity on."""
         await self.async_turn_on_off(True)
 
-    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_off(self) -> None:
         """Turn the entity off."""
         await self.async_turn_on_off(False)
 
@@ -919,11 +919,11 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
         )
         return ConfigStatus.Open_up_commands_reversed in config_status
 
-    async def async_turn_on(self, **kwargs: Any) -> None:
+    async def async_turn_on(self) -> None:
         """Turn the entity on."""
         await self._async_on_off(True)
 
-    async def async_turn_off(self, **kwargs: Any) -> None:
+    async def async_turn_off(self) -> None:
         """Turn the entity off."""
         await self._async_on_off(False)
 
