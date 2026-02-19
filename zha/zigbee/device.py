@@ -80,7 +80,7 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
 from zha.const import STATE_CHANGED
-from zha.event import EventBase
+from zha.event import EventBase, suppress_events
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
 from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
@@ -1021,8 +1021,12 @@ class Device(LogMixin, EventBase):
             _LOGGER.debug("Discovered new entities %r", new_entities)
             self._platform_entities.update(new_entities)
 
-        # At this point we can compute a primary entity
-        self._compute_primary_entity()
+        # Compute primary entity within suppress_events so that the change to
+        # `primary` is absorbed into __previous_state without emitting events.
+        with suppress_events():
+            self._compute_primary_entity()
+            for entity in self._platform_entities.values():
+                entity.maybe_emit_state_changed_event()
 
         # Sync the device's firmware version with the first platform entity
         for (platform, _unique_id), entity in self.platform_entities.items():
@@ -1545,15 +1549,18 @@ class Device(LogMixin, EventBase):
             self.platform_entities.items()
         ):
             state_dict = dataclasses.asdict(platform_entity.state)
-            state_dict["cluster_handlers"].sort(key=lambda i: i["unique_id"])
             state_dict["migrate_unique_ids"] = list(state_dict["migrate_unique_ids"])
             state_dict["device_ieee"] = str(state_dict["device_ieee"])
 
-            for cluster_handler_info in state_dict["cluster_handlers"]:
-                cluster_info = cluster_handler_info["cluster"]
-
-                if cluster_info is not None:
-                    cluster_info.pop("commands", None)
+            ch_dicts = [
+                dataclasses.asdict(ch.info_object)
+                for ch in platform_entity._cluster_handlers
+            ]
+            ch_dicts.sort(key=lambda i: i["unique_id"])
+            for ch_dict in ch_dicts:
+                if ch_dict["cluster"] is not None:
+                    ch_dict["cluster"].pop("commands", None)
+            state_dict["cluster_handlers"] = ch_dicts
 
             info["zha_lib_entities"][platform].append(state_dict)
 
