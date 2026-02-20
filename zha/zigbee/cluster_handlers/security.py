@@ -160,7 +160,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         """Arm the panel for day / home zones."""
         return self._handle_arm(
             code,
-            self.exit_delay_home,  # Use configured exit delay
+            self.exit_delay_home,
             AceCluster.PanelStatus.Armed_Stay,
             AceCluster.ArmNotification.Only_Day_Home_Zones_Armed,
         )
@@ -169,7 +169,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         """Arm the panel for night / sleep zones."""
         return self._handle_arm(
             code,
-            self.exit_delay_night,  # Use configured exit delay
+            self.exit_delay_night,
             AceCluster.PanelStatus.Armed_Night,
             AceCluster.ArmNotification.Only_Night_Sleep_Zones_Armed,
         )
@@ -178,7 +178,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         """Arm the panel for away mode."""
         return self._handle_arm(
             code,
-            self.exit_delay_away,  # Use configured exit delay
+            self.exit_delay_away,
             AceCluster.PanelStatus.Armed_Away,
             AceCluster.ArmNotification.All_Zones_Armed,
         )
@@ -296,7 +296,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                 self._exit_delay_timer(delay_seconds)
             )
 
-            # Notify the keypad and Home Assistant about the state change
+            # Notify devices about the state change
             self._emit_panel_status_changed()
         else:
             # No delay - arm immediately
@@ -379,7 +379,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         )
         self._endpoint.device.gateway.async_create_task(response)
 
-        # Notify Home Assistant
+        # Notify state change listeners
         self.emit(
             CLUSTER_HANDLER_STATE_CHANGED,
             ClusterHandlerStateChangedEvent(),
