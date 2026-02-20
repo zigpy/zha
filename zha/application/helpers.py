@@ -329,8 +329,8 @@ class AlarmControlPanelOptions:
     master_code: str = dataclasses.field(default="1234")
     failed_tries: int = dataclasses.field(default=3)
     arm_requires_code: bool = dataclasses.field(default=False)
-    # Exit delays in seconds
-    exit_delay_away: int = dataclasses.field(default=30)
+    # Exit delays in seconds (0 = disabled, can be overridden by zha.set_exit_delay service)
+    exit_delay_away: int = dataclasses.field(default=0)
     exit_delay_home: int = dataclasses.field(default=0)
     exit_delay_night: int = dataclasses.field(default=0)
 

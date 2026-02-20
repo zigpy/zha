@@ -87,6 +87,10 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._exit_delay_end_time: float | None = None
         self._pending_arm_mode: AceCluster.PanelStatus | None = None
 
+        # Entry delay timer management
+        self._entry_delay_task: asyncio.Task | None = None
+        self._entry_delay_end_time: float | None = None
+
     def cluster_command(self, tsn, command_id, args) -> None:
         """Handle commands received to this cluster."""
         self.debug(
@@ -152,8 +156,14 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                     AceCluster.ArmNotification.All_Zones_Disarmed
                 )
 
+            # Cancel any active entry delay timer
+            self.cancel_entry_delay()
+            
             self.armed_state = AceCluster.PanelStatus.Panel_Disarmed
             self.alarm_status = AceCluster.AlarmStatus.No_Alarm
+            
+            # Push status update to keypad immediately
+            self._emit_panel_status_changed()
         return zigbee_reply
 
     def _arm_day(self, code: str) -> None:
@@ -202,7 +212,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                 exit_delay,
             )
             # Use configured exit delay in seconds
-            self._start_exit_delay(exit_delay, panel_status)
+            self.start_exit_delay(exit_delay, panel_status)
             zigbee_reply = self.arm_response(armed_type)
         return zigbee_reply
 
@@ -232,11 +242,18 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._emit_panel_status_changed()
 
     def _get_seconds_remaining(self) -> int:
-        """Get seconds remaining in exit delay."""
-        if self._exit_delay_end_time is None:
-            return 0
-        remaining = int(self._exit_delay_end_time - time.time())
-        return max(0, remaining)
+        """Get seconds remaining in exit or entry delay."""
+        # Check entry delay first (higher priority)
+        if self._entry_delay_end_time is not None:
+            remaining = int(self._entry_delay_end_time - time.time())
+            return max(0, remaining)
+        
+        # Check exit delay
+        if self._exit_delay_end_time is not None:
+            remaining = int(self._exit_delay_end_time - time.time())
+            return max(0, remaining)
+        
+        return 0
 
     async def _exit_delay_complete(self) -> None:
         """Handle exit delay timer completion."""
@@ -246,8 +263,13 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._exit_delay_end_time = None
         self._emit_panel_status_changed()
 
-    def _start_exit_delay(self, delay_seconds: int, target_panel_status: AceCluster.PanelStatus) -> None:
-        """Start exit delay timer."""
+    def start_exit_delay(self, delay_seconds: int, target_panel_status: AceCluster.PanelStatus) -> None:
+        """Start exit delay timer.
+        
+        Can be called:
+        - Internally when arming (uses configured delays)
+        - Externally via service (overrides with service duration)
+        """
         # Cancel any existing timer
         if self._exit_delay_task and not self._exit_delay_task.done():
             self._exit_delay_task.cancel()
@@ -262,9 +284,13 @@ class IasAceClientClusterHandler(ClientClusterHandler):
             self._exit_delay_task = self._endpoint.device.gateway.async_create_task(
                 self._exit_delay_timer(delay_seconds)
             )
+            
+            # Notify the keypad and Home Assistant about the state change
+            self._emit_panel_status_changed()
         else:
             # No delay - arm immediately
             self.armed_state = target_panel_status
+            self._emit_panel_status_changed()
 
     async def _exit_delay_timer(self, delay_seconds: int) -> None:
         """Timer that transitions from exit delay to armed state."""
@@ -273,6 +299,53 @@ class IasAceClientClusterHandler(ClientClusterHandler):
             await self._exit_delay_complete()
         except asyncio.CancelledError:
             pass
+
+    def start_entry_delay(self, delay_seconds: int) -> None:
+        """Start entry delay timer.
+        
+        Can be called externally via service (e.g., from Alarmo).
+        """
+        # Cancel any existing entry delay timer
+        if self._entry_delay_task and not self._entry_delay_task.done():
+            self._entry_delay_task.cancel()
+        
+        if delay_seconds > 0:
+            # Set to entry delay state
+            self.armed_state = AceCluster.PanelStatus.Entry_Delay
+            self._entry_delay_end_time = time.time() + delay_seconds
+            
+            # Start timer
+            self._entry_delay_task = self._endpoint.device.gateway.async_create_task(
+                self._entry_delay_timer(delay_seconds)
+            )
+            self._emit_panel_status_changed()
+        else:
+            # No delay - immediate state
+            self.info("Entry delay called with 0 seconds, skipping")
+
+    async def _entry_delay_timer(self, delay_seconds: int) -> None:
+        """Timer for entry delay countdown."""
+        try:
+            await asyncio.sleep(delay_seconds)
+            await self._entry_delay_complete()
+        except asyncio.CancelledError:
+            pass
+
+    async def _entry_delay_complete(self) -> None:
+        """Handle entry delay timer completion - alarm should trigger."""
+        # Entry delay timer expired without disarming
+        # Transition to In_Alarm state
+        self.armed_state = AceCluster.PanelStatus.In_Alarm
+        self._entry_delay_end_time = None
+        self._emit_panel_status_changed()
+        self.info("Entry delay expired - alarm triggered")
+
+    def cancel_entry_delay(self) -> None:
+        """Cancel entry delay timer (called when alarm is disarmed)."""
+        if self._entry_delay_task and not self._entry_delay_task.done():
+            self._entry_delay_task.cancel()
+            self._entry_delay_task = None
+        self._entry_delay_end_time = None
 
     def _get_zone_id_map(self):
         """Handle the IAS ACE zone id map command."""
