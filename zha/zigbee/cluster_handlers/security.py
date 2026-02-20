@@ -365,15 +365,22 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._endpoint.device.gateway.async_create_task(response)
 
     def _emit_panel_status_changed(self) -> None:
-        """Handle the IAS ACE panel status changed command."""
-        seconds_remaining = self._get_seconds_remaining()
-        response = self.panel_status_changed(
-            self.armed_state,
-            seconds_remaining,
-            AceCluster.AudibleNotification.Default_Sound,
-            self.alarm_status,
-        )
-        self._endpoint.device.gateway.async_create_task(response)
+        """Send panel status changed notification to keypad."""
+        async def send_notification():
+            seconds_remaining = self._get_seconds_remaining()
+            try:
+                await self.panel_status_changed(
+                    self.armed_state,
+                    seconds_remaining,
+                    AceCluster.AudibleNotification.Default_Sound,
+                    self.alarm_status,
+                )
+            except Exception as ex:
+                self.debug("Failed to send panel status changed: %s", ex)
+                
+        self._endpoint.device.gateway.async_create_task(send_notification())
+        
+        # Notify Home Assistant
         self.emit(
             CLUSTER_HANDLER_STATE_CHANGED,
             ClusterHandlerStateChangedEvent(),
