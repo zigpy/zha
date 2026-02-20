@@ -333,6 +333,8 @@ class AlarmControlPanelOptions:
     exit_delay_away: int = dataclasses.field(default=0)
     exit_delay_home: int = dataclasses.field(default=0)
     exit_delay_night: int = dataclasses.field(default=0)
+    # Entry delay in seconds (0 = disabled, can be overridden by zha.set_entry_delay service)
+    entry_delay: int = dataclasses.field(default=0)
 
 
 @dataclass(kw_only=True, slots=True)

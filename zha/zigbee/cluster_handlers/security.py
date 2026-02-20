@@ -81,7 +81,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
         # where do we store this to handle restarts
         self.alarm_status: AceCluster.AlarmStatus = AceCluster.AlarmStatus.No_Alarm
-        
+
         # Exit delay timer management
         self._exit_delay_task: asyncio.Task | None = None
         self._exit_delay_end_time: float | None = None
@@ -130,7 +130,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
             self._exit_delay_task.cancel()
         self._exit_delay_end_time = None
         self._pending_arm_mode = None
-        
+
         if (
             code != self.panel_code
             and self.armed_state != AceCluster.PanelStatus.Panel_Disarmed
@@ -158,12 +158,11 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
             # Cancel any active entry delay timer
             self.cancel_entry_delay()
-            
+
             self.armed_state = AceCluster.PanelStatus.Panel_Disarmed
             self.alarm_status = AceCluster.AlarmStatus.No_Alarm
-            
-            # Push status update to keypad immediately
-            self._emit_panel_status_changed()
+
+            # arm_response already notifies keypad, no need for additional status update
         return zigbee_reply
 
     def _arm_day(self, code: str) -> None:
@@ -247,12 +246,12 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         if self._entry_delay_end_time is not None:
             remaining = int(self._entry_delay_end_time - time.time())
             return max(0, remaining)
-        
+
         # Check exit delay
         if self._exit_delay_end_time is not None:
             remaining = int(self._exit_delay_end_time - time.time())
             return max(0, remaining)
-        
+
         return 0
 
     async def _exit_delay_complete(self) -> None:
@@ -263,9 +262,11 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._exit_delay_end_time = None
         self._emit_panel_status_changed()
 
-    def start_exit_delay(self, delay_seconds: int, target_panel_status: AceCluster.PanelStatus) -> None:
+    def start_exit_delay(
+        self, delay_seconds: int, target_panel_status: AceCluster.PanelStatus
+    ) -> None:
         """Start exit delay timer.
-        
+
         Can be called:
         - Internally when arming (uses configured delays)
         - Externally via service (overrides with service duration)
@@ -273,24 +274,24 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         # Cancel any existing timer
         if self._exit_delay_task and not self._exit_delay_task.done():
             self._exit_delay_task.cancel()
-        
+
         if delay_seconds > 0:
             # Set to exit delay state
             self.armed_state = AceCluster.PanelStatus.Exit_Delay
             self._exit_delay_end_time = time.time() + delay_seconds
             self._pending_arm_mode = target_panel_status
-            
+
             # Start timer
             self._exit_delay_task = self._endpoint.device.gateway.async_create_task(
                 self._exit_delay_timer(delay_seconds)
             )
-            
+
             # Notify the keypad and Home Assistant about the state change
             self._emit_panel_status_changed()
         else:
             # No delay - arm immediately
+            # Don't call _emit_panel_status_changed here as arm_response will be sent right after
             self.armed_state = target_panel_status
-            self._emit_panel_status_changed()
 
     async def _exit_delay_timer(self, delay_seconds: int) -> None:
         """Timer that transitions from exit delay to armed state."""
@@ -302,18 +303,18 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
     def start_entry_delay(self, delay_seconds: int) -> None:
         """Start entry delay timer.
-        
+
         Can be called externally via service (e.g., from Alarmo).
         """
         # Cancel any existing entry delay timer
         if self._entry_delay_task and not self._entry_delay_task.done():
             self._entry_delay_task.cancel()
-        
+
         if delay_seconds > 0:
             # Set to entry delay state
             self.armed_state = AceCluster.PanelStatus.Entry_Delay
             self._entry_delay_end_time = time.time() + delay_seconds
-            
+
             # Start timer
             self._entry_delay_task = self._endpoint.device.gateway.async_create_task(
                 self._entry_delay_timer(delay_seconds)
@@ -366,6 +367,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
     def _emit_panel_status_changed(self) -> None:
         """Send panel status changed notification to keypad."""
+
         async def send_notification():
             seconds_remaining = self._get_seconds_remaining()
             try:
@@ -377,9 +379,9 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                 )
             except Exception as ex:
                 self.debug("Failed to send panel status changed: %s", ex)
-                
+
         self._endpoint.device.gateway.async_create_task(send_notification())
-        
+
         # Notify Home Assistant
         self.emit(
             CLUSTER_HANDLER_STATE_CHANGED,

@@ -161,17 +161,23 @@ class AlarmControlPanel(PlatformEntity):
         self._cluster_handler.arm(IasAce.ArmMode.Disarm, code, 0)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_home(self, code: str | None = None, delay: int = 0) -> None:
+    async def async_alarm_arm_home(
+        self, code: str | None = None, delay: int = 0
+    ) -> None:
         """Send arm home command."""
         self._cluster_handler.arm(IasAce.ArmMode.Arm_Day_Home_Only, code, delay)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_away(self, code: str | None = None, delay: int = 0) -> None:
+    async def async_alarm_arm_away(
+        self, code: str | None = None, delay: int = 0
+    ) -> None:
         """Send arm away command."""
         self._cluster_handler.arm(IasAce.ArmMode.Arm_All_Zones, code, delay)
         self.maybe_emit_state_changed_event()
 
-    async def async_alarm_arm_night(self, code: str | None = None, delay: int = 0) -> None:
+    async def async_alarm_arm_night(
+        self, code: str | None = None, delay: int = 0
+    ) -> None:
         """Send arm night command."""
         self._cluster_handler.arm(IasAce.ArmMode.Arm_Night_Sleep_Only, code, delay)
         self.maybe_emit_state_changed_event()
