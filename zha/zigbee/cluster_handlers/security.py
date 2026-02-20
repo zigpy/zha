@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 import dataclasses
-import time
 from typing import TYPE_CHECKING, Any, Final
 
 import zigpy.zcl
@@ -75,7 +74,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self.panel_code: str = "1234"
         self.code_required_arm_actions = False
         self.max_invalid_tries: int = 3
-        self.exit_delay_away: int = 30
+        self.exit_delay_away: int = 0
         self.exit_delay_home: int = 0
         self.exit_delay_night: int = 0
 
@@ -125,12 +124,6 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
     def _disarm(self, code: str):
         """Test the code and disarm the panel if the code is correct."""
-        # Cancel any active exit delay
-        if self._exit_delay_task and not self._exit_delay_task.done():
-            self._exit_delay_task.cancel()
-        self._exit_delay_end_time = None
-        self._pending_arm_mode = None
-
         if (
             code != self.panel_code
             and self.armed_state != AceCluster.PanelStatus.Panel_Disarmed
@@ -141,6 +134,7 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                 AceCluster.ArmNotification.Invalid_Arm_Disarm_Code
             )
         else:
+            self._cancel_all_timers()
             self.invalid_tries = 0
             if (
                 self.armed_state == AceCluster.PanelStatus.Panel_Disarmed
@@ -155,9 +149,6 @@ class IasAceClientClusterHandler(ClientClusterHandler):
                 zigbee_reply = self.arm_response(
                     AceCluster.ArmNotification.All_Zones_Disarmed
                 )
-
-            # Cancel any active entry delay timer
-            self.cancel_entry_delay()
 
             self.armed_state = AceCluster.PanelStatus.Panel_Disarmed
             self.alarm_status = AceCluster.AlarmStatus.No_Alarm
@@ -240,16 +231,35 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self.armed_state = AceCluster.PanelStatus.In_Alarm
         self._emit_panel_status_changed()
 
+    def _cancel_all_timers(self) -> None:
+        """Cancel all active timers and clear timer state.
+
+        Ensures only one timer is active at a time and prevents race conditions.
+        """
+        if self._exit_delay_task and not self._exit_delay_task.done():
+            self._exit_delay_task.cancel()
+        self._exit_delay_task = None
+        self._exit_delay_end_time = None
+        self._pending_arm_mode = None
+
+        if self._entry_delay_task and not self._entry_delay_task.done():
+            self._entry_delay_task.cancel()
+        self._entry_delay_task = None
+        self._entry_delay_end_time = None
+
     def _get_seconds_remaining(self) -> int:
         """Get seconds remaining in exit or entry delay."""
+        loop = asyncio.get_running_loop()
+        current_time = loop.time()
+
         # Check entry delay first (higher priority)
         if self._entry_delay_end_time is not None:
-            remaining = int(self._entry_delay_end_time - time.time())
+            remaining = int(self._entry_delay_end_time - current_time)
             return max(0, remaining)
 
         # Check exit delay
         if self._exit_delay_end_time is not None:
-            remaining = int(self._exit_delay_end_time - time.time())
+            remaining = int(self._exit_delay_end_time - current_time)
             return max(0, remaining)
 
         return 0
@@ -271,14 +281,14 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         - Internally when arming (uses configured delays)
         - Externally via service (overrides with service duration)
         """
-        # Cancel any existing timer
-        if self._exit_delay_task and not self._exit_delay_task.done():
-            self._exit_delay_task.cancel()
+        # Cancel all timers to ensure only one is active
+        self._cancel_all_timers()
 
         if delay_seconds > 0:
             # Set to exit delay state
             self.armed_state = AceCluster.PanelStatus.Exit_Delay
-            self._exit_delay_end_time = time.time() + delay_seconds
+            loop = asyncio.get_running_loop()
+            self._exit_delay_end_time = loop.time() + delay_seconds
             self._pending_arm_mode = target_panel_status
 
             # Start timer
@@ -306,14 +316,14 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
         Can be called externally via service (e.g., from Alarmo).
         """
-        # Cancel any existing entry delay timer
-        if self._entry_delay_task and not self._entry_delay_task.done():
-            self._entry_delay_task.cancel()
+        # Cancel all timers to ensure only one is active
+        self._cancel_all_timers()
 
         if delay_seconds > 0:
             # Set to entry delay state
             self.armed_state = AceCluster.PanelStatus.Entry_Delay
-            self._entry_delay_end_time = time.time() + delay_seconds
+            loop = asyncio.get_running_loop()
+            self._entry_delay_end_time = loop.time() + delay_seconds
 
             # Start timer
             self._entry_delay_task = self._endpoint.device.gateway.async_create_task(
@@ -341,13 +351,6 @@ class IasAceClientClusterHandler(ClientClusterHandler):
         self._emit_panel_status_changed()
         self.info("Entry delay expired - alarm triggered")
 
-    def cancel_entry_delay(self) -> None:
-        """Cancel entry delay timer (called when alarm is disarmed)."""
-        if self._entry_delay_task and not self._entry_delay_task.done():
-            self._entry_delay_task.cancel()
-            self._entry_delay_task = None
-        self._entry_delay_end_time = None
-
     def _get_zone_id_map(self):
         """Handle the IAS ACE zone id map command."""
 
@@ -367,20 +370,14 @@ class IasAceClientClusterHandler(ClientClusterHandler):
 
     def _emit_panel_status_changed(self) -> None:
         """Send panel status changed notification to keypad."""
-
-        async def send_notification():
-            seconds_remaining = self._get_seconds_remaining()
-            try:
-                await self.panel_status_changed(
-                    self.armed_state,
-                    seconds_remaining,
-                    AceCluster.AudibleNotification.Default_Sound,
-                    self.alarm_status,
-                )
-            except Exception as ex:
-                self.debug("Failed to send panel status changed: %s", ex)
-
-        self._endpoint.device.gateway.async_create_task(send_notification())
+        seconds_remaining = self._get_seconds_remaining()
+        response = self.panel_status_changed(
+            self.armed_state,
+            seconds_remaining,
+            AceCluster.AudibleNotification.Default_Sound,
+            self.alarm_status,
+        )
+        self._endpoint.device.gateway.async_create_task(response)
 
         # Notify Home Assistant
         self.emit(
