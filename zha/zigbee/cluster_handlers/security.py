@@ -291,9 +291,12 @@ class IasAceClientClusterHandler(ClientClusterHandler):
             self._exit_delay_end_time = loop.time() + delay_seconds
             self._pending_arm_mode = target_panel_status
 
-            # Start timer
-            self._exit_delay_task = self._endpoint.device.gateway.async_create_task(
-                self._exit_delay_timer(delay_seconds)
+            # Start timer as background task
+            self._exit_delay_task = (
+                self._endpoint.device.gateway.async_create_background_task(
+                    self._exit_delay_timer(delay_seconds),
+                    name=f"exit_delay_{self.unique_id}",
+                )
             )
 
             # Notify devices about the state change
@@ -325,9 +328,12 @@ class IasAceClientClusterHandler(ClientClusterHandler):
             loop = asyncio.get_running_loop()
             self._entry_delay_end_time = loop.time() + delay_seconds
 
-            # Start timer
-            self._entry_delay_task = self._endpoint.device.gateway.async_create_task(
-                self._entry_delay_timer(delay_seconds)
+            # Start timer as background task
+            self._entry_delay_task = (
+                self._endpoint.device.gateway.async_create_background_task(
+                    self._entry_delay_timer(delay_seconds),
+                    name=f"entry_delay_{self.unique_id}",
+                )
             )
             self._emit_panel_status_changed()
         else:

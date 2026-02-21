@@ -1,5 +1,6 @@
 """Test zha alarm control panel."""
 
+import asyncio
 import logging
 from unittest.mock import AsyncMock, call, patch, sentinel
 
@@ -242,3 +243,377 @@ async def reset_alarm_panel(
         security.IasAce.AlarmStatus.No_Alarm,
     )
     cluster.client_command.reset_mock()
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_exit_delays(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test alarm control panel exit delay functionality."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster: security.IasAce = zigpy_device.endpoints[44].out_clusters[
+        security.IasAce.cluster_id
+    ]
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+    assert isinstance(alarm_entity, AlarmControlPanel)
+    cluster_handler = alarm_entity._cluster_handler
+
+    # Configure exit delays
+    cluster_handler.exit_delay_away = 3
+    cluster_handler.exit_delay_home = 2
+    cluster_handler.exit_delay_night = 1
+
+    # Test arm_away with exit delay
+    cluster.client_command.reset_mock()
+    await alarm_entity.async_alarm_arm_away("4321")
+    await zha_gateway.async_block_till_done()
+
+    # Should be in exit delay state
+    assert alarm_entity.state["state"] == AlarmState.ARMING
+
+    # Wait for exit delay to complete
+    await asyncio.sleep(3.5)
+    await zha_gateway.async_block_till_done()
+
+    # Should now be armed away
+    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+
+    # Reset
+    await alarm_entity.async_alarm_disarm("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+
+    # Test arm_home with exit delay
+    cluster.client_command.reset_mock()
+    await alarm_entity.async_alarm_arm_home("4321")
+    await zha_gateway.async_block_till_done()
+
+    # Should be in exit delay state
+    assert alarm_entity.state["state"] == AlarmState.ARMING
+
+    # Wait for exit delay to complete
+    await asyncio.sleep(2.5)
+    await zha_gateway.async_block_till_done()
+
+    # Should now be armed home
+    assert alarm_entity.state["state"] == AlarmState.ARMED_HOME
+
+    # Reset
+    await alarm_entity.async_alarm_disarm("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+
+    # Test arm_night with exit delay
+    cluster.client_command.reset_mock()
+    await alarm_entity.async_alarm_arm_night("4321")
+    await zha_gateway.async_block_till_done()
+
+    # Should be in exit delay state
+    assert alarm_entity.state["state"] == AlarmState.ARMING
+
+    # Wait for exit delay to complete
+    await asyncio.sleep(1.5)
+    await zha_gateway.async_block_till_done()
+
+    # Should now be armed night
+    assert alarm_entity.state["state"] == AlarmState.ARMED_NIGHT
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_exit_delay_cancellation(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that disarming during exit delay cancels the timer."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+    cluster_handler = alarm_entity._cluster_handler
+
+    # Configure exit delay
+    cluster_handler.exit_delay_away = 5
+
+    # Start arming with exit delay
+    await alarm_entity.async_alarm_arm_away("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.ARMING
+
+    # Disarm before exit delay completes
+    await asyncio.sleep(1)
+    await alarm_entity.async_alarm_disarm("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+
+    # Wait to ensure timer was cancelled and doesn't fire
+    await asyncio.sleep(5)
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_entry_delay(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test alarm control panel entry delay functionality."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+    cluster_handler = alarm_entity._cluster_handler
+
+    # Arm the panel first (no exit delay for this test)
+    cluster_handler.exit_delay_away = 0
+    await alarm_entity.async_alarm_arm_away("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+
+    # Start entry delay (simulating zone trigger from external system like Alarmo)
+    cluster_handler.start_entry_delay(3)
+    await zha_gateway.async_block_till_done()
+
+    # Should be in entry delay state
+    assert alarm_entity.state["state"] == AlarmState.PENDING
+
+    # Wait for entry delay to complete
+    await asyncio.sleep(3.5)
+    await zha_gateway.async_block_till_done()
+
+    # Should now be triggered
+    assert alarm_entity.state["state"] == AlarmState.TRIGGERED
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_entry_delay_disarm(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that disarming during entry delay prevents alarm trigger."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+    cluster_handler = alarm_entity._cluster_handler
+
+    # Arm the panel
+    cluster_handler.exit_delay_away = 0
+    await alarm_entity.async_alarm_arm_away("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+
+    # Start entry delay
+    cluster_handler.start_entry_delay(5)
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.PENDING
+
+    # Disarm before entry delay completes
+    await asyncio.sleep(1)
+    await alarm_entity.async_alarm_disarm("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+
+    # Wait to ensure timer was cancelled and alarm doesn't trigger
+    await asyncio.sleep(5)
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.DISARMED
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_zero_exit_delay(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that zero exit delay arms immediately."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+    cluster_handler = alarm_entity._cluster_handler
+
+    # Configure zero exit delay
+    cluster_handler.exit_delay_away = 0
+
+    # Arm away
+    await alarm_entity.async_alarm_arm_away("4321")
+    await zha_gateway.async_block_till_done()
+
+    # Should be armed immediately, not in arming state
+    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_zero_entry_delay(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test that zero entry delay is handled gracefully."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+    cluster_handler = alarm_entity._cluster_handler
+
+    # Arm the panel
+    cluster_handler.exit_delay_away = 0
+    await alarm_entity.async_alarm_arm_away("4321")
+    await zha_gateway.async_block_till_done()
+    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+
+    # Try to start entry delay with 0 seconds
+    cluster_handler.start_entry_delay(0)
+    await zha_gateway.async_block_till_done()
+
+    # Should remain armed (not enter pending state)
+    assert alarm_entity.state["state"] == AlarmState.ARMED_AWAY
+    assert "Entry delay called with 0 seconds" in caplog.text
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_panel_status_commands(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test panel status request/response commands."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster: security.IasAce = zigpy_device.endpoints[44].out_clusters[
+        security.IasAce.cluster_id
+    ]
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+
+    # Test get_panel_status command
+    cluster.client_command.reset_mock()
+
+    # Simulate get_panel_status command from keypad
+    cluster.listener_event(
+        "cluster_command",
+        1,
+        security.IasAce.ServerCommandDefs.get_panel_status.id,
+        [],
+    )
+    await zha_gateway.async_block_till_done()
+
+    # Should send panel_status_response
+    assert cluster.client_command.call_count >= 1
+
+
+@patch(
+    "zigpy.zcl.clusters.security.IasAce.client_command",
+    new=AsyncMock(return_value=[sentinel.data, zcl_f.Status.SUCCESS]),
+)
+async def test_alarm_control_panel_bypass_command(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Test bypass command handling."""
+    zigpy_device: ZigpyDevice = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-kepzb-110.json",
+    )
+    zha_device: Device = await join_zigpy_device(zha_gateway, zigpy_device)
+    cluster: security.IasAce = zigpy_device.endpoints[44].out_clusters[
+        security.IasAce.cluster_id
+    ]
+    alarm_entity: AlarmControlPanel = zha_device.platform_entities.get(
+        (
+            Platform.ALARM_CONTROL_PANEL,
+            f"{zigpy_device.ieee}-44-{security.IasAce.cluster_id}",
+        )
+    )
+    assert alarm_entity is not None
+
+    # Simulate bypass command from keypad
+    zone_list = [1, 2, 3]
+    code = "4321"
+    cluster.listener_event(
+        "cluster_command",
+        1,
+        security.IasAce.ServerCommandDefs.bypass.id,
+        [zone_list, code],
+    )
+    await zha_gateway.async_block_till_done()
+
+    # Command should be logged/emitted as event
+    # (Current implementation emits ZHA event but doesn't store bypass state)
