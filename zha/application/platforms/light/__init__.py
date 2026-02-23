@@ -758,7 +758,7 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
             {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
         ),
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, 0),
     )
 
     def __init__(
@@ -1050,7 +1050,7 @@ class HueLight(Light):
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         # We want this entity to be preferred over the base light
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, 1),
     )
 
 
@@ -1076,7 +1076,7 @@ class ForceOnLight(Light):
         ),
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         # We want this entity to be preferred over the base light
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, 1),
     )
 
 
@@ -1095,7 +1095,7 @@ class MinTransitionLight(Light):
         manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         # We want this entity to be preferred over the base light
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, 1),
     )
 
 

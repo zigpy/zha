@@ -157,7 +157,7 @@ async def test_device_override_picks_highest_priority(
     """Test that a device override selects only the highest-priority match."""
 
     # A Philips light matches both Light (priority 0) and HueLight (priority 1) in the
-    # LIGHT_OR_SWITCH_OR_SHADE feature group. With a SWITCH override, only one Switch
+    # GENERIC_OPEN_CLOSE feature group. With a SWITCH override, only one Switch
     # entity should be created, not duplicates from collecting all priority levels.
     zigpy_device = await zigpy_device_from_json(
         zha_gateway.application_controller,

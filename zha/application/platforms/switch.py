@@ -121,7 +121,7 @@ class Switch(PlatformEntity, BaseSwitch):
     _cluster_handler_match = ClusterHandlerMatch(
         cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
         # Switch entities have the lowest priority
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, -1),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, -1),
     )
 
     def __init__(

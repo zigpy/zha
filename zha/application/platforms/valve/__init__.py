@@ -143,7 +143,7 @@ class Valve(PlatformEntity, BaseValve):
         cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
         optional_cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}),
         # Keep valve as opt-in via platform override.
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, -2),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, -2),
     )
 
     def __init__(

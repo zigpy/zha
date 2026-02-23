@@ -721,7 +721,7 @@ class Shade(BaseCover):
                 (512, zha.DeviceType.SHADE),  # TODO: remove this Tuya hack
             }
         ),
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, 0),
     )
 
     def __init__(
@@ -912,7 +912,7 @@ class KeenVent(Shade):
     _cluster_handler_match = ClusterHandlerMatch(
         cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
         manufacturers=frozenset({"Keen Home Inc"}),
-        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+        feature_priority=(PlatformFeatureGroup.GENERIC_OPEN_CLOSE, 1),
     )
 
     async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
