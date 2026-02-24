@@ -69,6 +69,9 @@ class PlatformFeatureGroup(StrEnum):
     # Model-specific overrides for local temperature calibration
     LOCAL_TEMPERATURE_CALIBRATION = "local_temperature_calibration"
 
+    # IAS WD siren entity selection
+    SIREN = "siren"
+
 
 @dataclasses.dataclass(frozen=True)
 class ClusterHandlerMatch:

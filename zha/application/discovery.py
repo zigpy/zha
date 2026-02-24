@@ -107,6 +107,7 @@ QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
     (Platform.SENSOR, ZCLSensorMetadata): sensor.Sensor,
     (Platform.SELECT, ZCLEnumMetadata): select.ZCLEnumSelectEntity,
     (Platform.NUMBER, NumberMetadata): number.NumberConfigurationEntity,
+    (Platform.SIREN, SwitchMetadata): siren.ConfigurableAttributeSiren,
     (Platform.SWITCH, SwitchMetadata): switch.ConfigurableAttributeSwitch,
 }
 
