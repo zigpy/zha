@@ -7,9 +7,11 @@
   "friendly_manufacturer": "ubisys",
   "friendly_model": "S1 (5501)",
   "name": "ubisys S1 (5501)",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
-  "exposes_features": [],
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
+  "exposes_features": [
+    "se_poll_summation"
+  ],
   "manufacturer_code": 4338,
   "power_source": "Mains",
   "lqi": 188,
@@ -89,6 +91,24 @@
               "name": "start_up_on_off",
               "zcl_type": "enum8",
               "value": 255
+            }
+          ]
+        },
+        {
+          "cluster_id": "0xfbff",
+          "endpoint_attribute": "ubisys_input_config",
+          "attributes": [
+            {
+              "id": "0x0001",
+              "name": "detached",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0000",
+              "name": "input_mode",
+              "zcl_type": "enum8",
+              "value": 0
             }
           ]
         }
@@ -268,7 +288,7 @@
               "id": "0x0603",
               "name": "ac_current_divisor",
               "zcl_type": "uint16",
-              "unsupported": true
+              "value": 1000
             },
             {
               "id": "0x0602",
@@ -553,7 +573,7 @@
         },
         {
           "cluster_id": "0xfc00",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "ubisys_cluster",
           "attributes": []
         }
       ],
@@ -777,6 +797,54 @@
           "class_name": "StartupOnOffSelectEntity",
           "available": true,
           "state": "PreviousValue"
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Input mode",
+          "unique_id": "ab:cd:ef:12:e4:d6:5c:c2-1-input_mode",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "input_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfbff",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64511,
+                "name": "Ubisys Input Configuration",
+                "type": "server"
+              },
+              "id": "1:0xfbff",
+              "unique_id": "ab:cd:ef:12:e4:d6:5c:c2:1:0xfbff",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e4:d6:5c:c2",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "InputMode",
+          "options": [
+            "Toggle",
+            "Toggle switch",
+            "On off switch"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": "Toggle"
         }
       }
     ],
@@ -1034,7 +1102,7 @@
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
-          "entity_registry_enabled_default": true,
+          "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
           "cluster_handlers": [
@@ -1257,7 +1325,7 @@
         "state": {
           "class_name": "ElectricalMeasurementRMSCurrent",
           "available": true,
-          "state": 4.0,
+          "state": 0.004,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
         },
         "extra_state_attributes": [
@@ -1326,7 +1394,7 @@
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
-          "entity_registry_enabled_default": true,
+          "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
           "cluster_handlers": [
@@ -1405,6 +1473,54 @@
           "class_name": "Switch",
           "state": 1,
           "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Detached mode",
+          "unique_id": "ab:cd:ef:12:e4:d6:5c:c2-1-detached",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "detached",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfbff",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64511,
+                "name": "Ubisys Input Configuration",
+                "type": "server"
+              },
+              "id": "1:0xfbff",
+              "unique_id": "ab:cd:ef:12:e4:d6:5c:c2:1:0xfbff",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:e4:d6:5c:c2",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "detached",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],

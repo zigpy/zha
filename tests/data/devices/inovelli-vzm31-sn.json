@@ -590,7 +590,7 @@
             {
               "id": "0x0020",
               "name": "internal_temp_monitor",
-              "zcl_type": "uint8",
+              "zcl_type": "int8",
               "value": 39
             },
             {
@@ -680,13 +680,13 @@
             {
               "id": "0x0013",
               "name": "periodic_power_and_energy_reports",
-              "zcl_type": "uint8",
+              "zcl_type": "uint16",
               "value": 3600
             },
             {
               "id": "0x0015",
               "name": "power_type",
-              "zcl_type": "uint8",
+              "zcl_type": "bool",
               "value": 1
             },
             {

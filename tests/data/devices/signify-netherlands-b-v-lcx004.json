@@ -4,11 +4,11 @@
   "nwk": "0xAD32",
   "manufacturer": "Signify Netherlands B.V.",
   "model": "LCX004",
-  "friendly_manufacturer": "Signify Netherlands B.V.",
-  "friendly_model": "LCX004",
-  "name": "Signify Netherlands B.V. LCX004",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "friendly_manufacturer": "Philips",
+  "friendly_model": "Hue Gradient lightstrip",
+  "name": "Philips Hue Gradient lightstrip",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Mains",
@@ -230,7 +230,7 @@
         },
         {
           "cluster_id": "0xfc03",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "philips_hue_light_cluster",
           "attributes": []
         }
       ],

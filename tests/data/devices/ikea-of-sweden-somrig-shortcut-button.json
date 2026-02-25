@@ -88,11 +88,6 @@
           "attributes": []
         },
         {
-          "cluster_id": "0x0004",
-          "endpoint_attribute": "groups",
-          "attributes": []
-        },
-        {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
           "attributes": [
@@ -180,11 +175,6 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "attributes": []
-        },
-        {
-          "cluster_id": "0x0004",
-          "endpoint_attribute": "groups",
           "attributes": []
         },
         {

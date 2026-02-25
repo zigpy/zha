@@ -417,6 +417,92 @@
           "class_name": "IdentifyButton",
           "available": true
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Boost mode",
+          "unique_id": "ab:cd:ef:12:4d:04:9a:8f-1-boost_mode",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "boost_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SonoffPresenceSenorClusterHandler",
+              "generic_id": "cluster_handler_0xfc11",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64529,
+                "name": "CustomSonoffCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc11",
+              "unique_id": "ab:cd:ef:12:4d:04:9a:8f:1:0xfc11",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:4d:04:9a:8f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "temporary_mode",
+          "attribute_value": 0
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Timer mode",
+          "unique_id": "ab:cd:ef:12:4d:04:9a:8f-1-timer_mode",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "timer_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SonoffPresenceSenorClusterHandler",
+              "generic_id": "cluster_handler_0xfc11",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64529,
+                "name": "CustomSonoffCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc11",
+              "unique_id": "ab:cd:ef:12:4d:04:9a:8f:1:0xfc11",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:4d:04:9a:8f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "temporary_mode",
+          "attribute_value": 1
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
+        }
       }
     ],
     "climate": [
@@ -696,7 +782,7 @@
           "class_name": "NumberConfigurationEntity",
           "translation_key": "frost_protection_temperature",
           "translation_placeholders": null,
-          "device_class": null,
+          "device_class": "temperature",
           "state_class": null,
           "entity_category": "config",
           "entity_registry_enabled_default": true,
@@ -773,6 +859,100 @@
           "native_max_value": -0.2,
           "native_min_value": -1.0,
           "native_step": 0.2,
+          "native_unit_of_measurement": "\u00b0C"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Temporary mode duration",
+          "unique_id": "ab:cd:ef:12:4d:04:9a:8f-1-temporary_mode_duration",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "temporary_mode_duration",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SonoffPresenceSenorClusterHandler",
+              "generic_id": "cluster_handler_0xfc11",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64529,
+                "name": "CustomSonoffCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc11",
+              "unique_id": "ab:cd:ef:12:4d:04:9a:8f:1:0xfc11",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:4d:04:9a:8f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 1440,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "min"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Timer mode target temperature",
+          "unique_id": "ab:cd:ef:12:4d:04:9a:8f-1-timer_mode_target_temperature",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "timer_mode_target_temperature",
+          "translation_placeholders": null,
+          "device_class": "temperature",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SonoffPresenceSenorClusterHandler",
+              "generic_id": "cluster_handler_0xfc11",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64529,
+                "name": "CustomSonoffCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc11",
+              "unique_id": "ab:cd:ef:12:4d:04:9a:8f:1:0xfc11",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:4d:04:9a:8f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 35.0,
+          "native_min_value": 4.0,
+          "native_step": 0.5,
           "native_unit_of_measurement": "\u00b0C"
         },
         "state": {
@@ -1282,6 +1462,54 @@
           "force_inverted": false,
           "off_value": 0,
           "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Adaptive mode",
+          "unique_id": "ab:cd:ef:12:4d:04:9a:8f-1-smart_temperature_control",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "adaptive_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SonoffPresenceSenorClusterHandler",
+              "generic_id": "cluster_handler_0xfc11",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64529,
+                "name": "CustomSonoffCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc11",
+              "unique_id": "ab:cd:ef:12:4d:04:9a:8f:1:0xfc11",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:4d:04:9a:8f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "smart_temperature_control",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 2
         },
         "state": {
           "class_name": "ConfigurableAttributeSwitch",

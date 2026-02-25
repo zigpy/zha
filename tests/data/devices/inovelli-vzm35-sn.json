@@ -320,7 +320,7 @@
             {
               "id": "0x0015",
               "name": "power_type",
-              "zcl_type": "uint8",
+              "zcl_type": "bool",
               "value": 0
             },
             {

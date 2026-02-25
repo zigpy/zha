@@ -470,7 +470,7 @@
             {
               "id": "0x0020",
               "name": "internal_temp_monitor",
-              "zcl_type": "uint8",
+              "zcl_type": "int8",
               "value": 31
             },
             {
