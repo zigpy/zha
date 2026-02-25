@@ -1020,6 +1020,100 @@
           "available": true,
           "state": 115
         }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:55:c3:5a:e0-2-1030-pir_o_to_u_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "PIROccupiedToUnoccupiedDelayConfigurationEntity",
+          "translation_key": "pir_o_to_u_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1030,
+                "name": "Occupancy Sensing",
+                "type": "server"
+              },
+              "id": "2:0x0406",
+              "unique_id": "ab:cd:ef:12:55:c3:5a:e0:2:0x0406",
+              "status": "INITIALIZED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:55:c3:5a:e0",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "PIROccupiedToUnoccupiedDelayConfigurationEntity",
+          "available": true,
+          "state": 150
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:55:c3:5a:e0-2-1030-pir_u_to_o_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "PIRUnoccupiedToOccupiedDelayConfigurationEntity",
+          "translation_key": "pir_u_to_o_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1030,
+                "name": "Occupancy Sensing",
+                "type": "server"
+              },
+              "id": "2:0x0406",
+              "unique_id": "ab:cd:ef:12:55:c3:5a:e0:2:0x0406",
+              "status": "INITIALIZED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:55:c3:5a:e0",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "PIRUnoccupiedToOccupiedDelayConfigurationEntity",
+          "available": true,
+          "state": 150
+        }
       }
     ],
     "select": [
