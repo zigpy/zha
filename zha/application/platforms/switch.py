@@ -14,7 +14,6 @@ from zigpy.quirks.v2 import SwitchMetadata
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
 from zigpy.zcl.clusters.general import Basic, BinaryOutput, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat
-from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -291,17 +290,13 @@ class SwitchGroup(GroupEntity, BaseSwitch):
 
     async def async_turn_on(self) -> None:
         """Turn the entity on."""
-        result = await self._on_off_cluster_handler.on()
-        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
-            return
+        await self._on_off_cluster_handler.on()
         self._state = True
         self.maybe_emit_state_changed_event()
 
     async def async_turn_off(self) -> None:
         """Turn the entity off."""
-        result = await self._on_off_cluster_handler.off()
-        if isinstance(result, Exception) or result[1] is not Status.SUCCESS:
-            return
+        await self._on_off_cluster_handler.off()
         self._state = False
         self.maybe_emit_state_changed_event()
 

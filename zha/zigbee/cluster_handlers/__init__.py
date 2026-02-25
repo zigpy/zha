@@ -466,24 +466,12 @@ class ClusterHandler(LogMixin, EventBase):
             event_data[self.cluster.find_attribute(record.attrid).name]["status"] = (
                 record.status.name
             )
-        failed = [
-            self.cluster.find_attribute(record.attrid).name
-            for record in res
-            if record.status != Status.SUCCESS
-        ]
-        self.debug(
-            "Failed to configure reporting for '%s' on '%s' cluster: %s",
-            failed,
-            self.name,
-            res,
-        )
-        success = attr_names - set(failed)
         self.debug(
             "Successfully configured reporting for '%s' on '%s' cluster",
-            success,
+            attr_names,
             self.name,
         )
-        for attr_name in success:
+        for attr_name in attr_names:
             event_data[attr_name]["status"] = Status.SUCCESS.name
 
     async def async_configure(self) -> None:
@@ -650,19 +638,7 @@ class ClusterHandler(LogMixin, EventBase):
     ) -> None:
         """Wrap `write_attributes` to throw an exception on attribute write failure."""
 
-        res = await self.write_attributes(attributes, manufacturer=manufacturer)
-        for record in res[0]:
-            if record.status != Status.SUCCESS:
-                try:
-                    name = self.cluster.attributes[record.attrid].name
-                    value = attributes.get(name, "unknown")
-                except KeyError:
-                    name = f"0x{record.attrid:04x}"
-                    value = "unknown"
-
-                raise ZHAException(
-                    f"Failed to write attribute {name}={value}: {record.status}",
-                )
+        await self.write_attributes(attributes, manufacturer=manufacturer)
 
     def log(self, level, msg, *args, **kwargs) -> None:
         """Log a message."""

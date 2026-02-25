@@ -47,9 +47,7 @@ from zigpy.zcl.clusters.general import (
     Time,
 )
 from zigpy.zcl.clusters.general_const import ApplicationType
-from zigpy.zcl.foundation import Status
 
-from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
@@ -635,16 +633,12 @@ class OnOffClusterHandler(ClusterHandler):
 
     async def turn_on(self) -> None:
         """Turn the on off cluster on."""
-        result = await self.on()
-        if result[1] is not Status.SUCCESS:
-            raise ZHAException(f"Failed to turn on: {result[1]}")
+        await self.on()
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.true)
 
     async def turn_off(self) -> None:
         """Turn the on off cluster off."""
-        result = await self.off()
-        if result[1] is not Status.SUCCESS:
-            raise ZHAException(f"Failed to turn off: {result[1]}")
+        await self.off()
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
 
     async def async_update(self):

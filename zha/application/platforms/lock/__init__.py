@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
-from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -104,20 +103,14 @@ class DoorLock(BaseLock):
 
     async def async_lock(self) -> None:
         """Lock the lock."""
-        result = await self._doorlock_cluster_handler.lock_door()
-        if result[0] is not Status.SUCCESS:
-            self.error("Error with lock_door: %s", result)
-            return
+        await self._doorlock_cluster_handler.lock_door()
 
         self._state = STATE_LOCKED
         self.maybe_emit_state_changed_event()
 
     async def async_unlock(self) -> None:
         """Unlock the lock."""
-        result = await self._doorlock_cluster_handler.unlock_door()
-        if result[0] is not Status.SUCCESS:
-            self.error("Error with unlock_door: %s", result)
-            return
+        await self._doorlock_cluster_handler.unlock_door()
 
         self._state = STATE_UNLOCKED
         self.maybe_emit_state_changed_event()

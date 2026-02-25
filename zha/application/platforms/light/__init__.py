@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
-from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -466,14 +465,6 @@ class BaseClusterHandlerLight(BaseLight):
                 transition_time=int(10 * self._DEFAULT_MIN_TRANSITION_TIME),
             )
             t_log["move_to_level_with_on_off"] = result
-            if result[1] is not Status.SUCCESS:
-                # First 'move to level' call failed, so if the transitioning delay
-                # isn't running from a previous call,
-                # the flag can be unset immediately
-                if set_transition_flag and not self._transition_listener:
-                    self.async_transition_complete()
-                self.debug("turned on: %s", t_log)
-                return
             # Currently only setting it to "on", as the correct level state will
             # be set at the second move_to_level call
             self._state = True
@@ -507,13 +498,6 @@ class BaseClusterHandlerLight(BaseLight):
                 transition_time=int(10 * duration),
             )
             t_log["move_to_level_with_on_off"] = result
-            if result[1] is not Status.SUCCESS:
-                # First 'move to level' call failed, so if the transitioning delay
-                # isn't running from a previous call, the flag can be unset immediately
-                if set_transition_flag and not self._transition_listener:
-                    self.async_transition_complete()
-                self.debug("turned on: %s", t_log)
-                return
             self._state = bool(level)
             if level:
                 self._brightness = level
@@ -530,13 +514,6 @@ class BaseClusterHandlerLight(BaseLight):
             # if brightness is not 0.
             result = await self._on_off_cluster_handler.on()
             t_log["on_off"] = result
-            if result[1] is not Status.SUCCESS:
-                # 'On' call failed, but as brightness may still transition
-                # (for FORCE_ON lights), we start the timer to unset the flag after
-                # the transition_time if necessary.
-                self.async_transition_start_timer(transition_time)
-                self.debug("turned on: %s", t_log)
-                return
             self._state = True
 
         if not execute_if_off_supported:
@@ -563,14 +540,6 @@ class BaseClusterHandlerLight(BaseLight):
                 level=level, transition_time=int(10 * duration)
             )
             t_log["move_to_level_if_color"] = result
-            if result[1] is not Status.SUCCESS:
-                # Second 'move to level' call failed; the light is on but at the
-                # wrong brightness. If no previous timer is running, unset the flag
-                # immediately so attribute reports are not ignored indefinitely.
-                if set_transition_flag and not self._transition_listener:
-                    self.async_transition_complete()
-                self.debug("turned on: %s", t_log)
-                return
             self._state = bool(level)
             if level:
                 self._brightness = level
@@ -656,8 +625,6 @@ class BaseClusterHandlerLight(BaseLight):
             if self._zha_config_enable_light_transitioning_flag:
                 self.async_transition_start_timer(transition_time)
             self.debug("turned off: %s", result)
-            if result[1] is not Status.SUCCESS:
-                return
             self._state = False
 
             if brightness_supported and not self._off_with_transition:
@@ -702,8 +669,6 @@ class BaseClusterHandlerLight(BaseLight):
                 transition_time=int(10 * transition_time),
             )
             t_log["move_to_color_temp"] = result
-            if result[1] is not Status.SUCCESS:
-                return False
             self._color_mode = ColorMode.COLOR_TEMP
             self._color_temp = color_temp
             self._xy_color = None
@@ -717,8 +682,6 @@ class BaseClusterHandlerLight(BaseLight):
                 transition_time=int(10 * transition_time),
             )
             t_log["move_to_color"] = result
-            if result[1] is not Status.SUCCESS:
-                return False
             self._color_mode = ColorMode.XY
             self._xy_color = xy_color
             self._color_temp = None

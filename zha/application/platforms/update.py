@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
 from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
-from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -253,7 +252,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
         self.maybe_emit_state_changed_event()
 
         try:
-            result = await self.device.device.update_firmware(
+            await self.device.device.update_firmware(
                 image=firmware,
                 progress_callback=self._update_progress,
             )
@@ -261,12 +260,6 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
             self._attr_in_progress = False
             self.maybe_emit_state_changed_event()
             raise ZHAException(f"Update was not successful: {ex}") from ex
-
-        # If the update finished but was not successful, we should also throw an error
-        if result != Status.SUCCESS:
-            self._attr_in_progress = False
-            self.maybe_emit_state_changed_event()
-            raise ZHAException(f"Update was not successful: {result}")
 
         # Clear the state
         self._attr_in_progress = False

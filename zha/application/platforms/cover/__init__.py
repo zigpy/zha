@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Any, cast
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import OnOff, OnOff as OnOffCluster
-from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -33,7 +32,6 @@ from zha.application.platforms.cover.const import (
     CoverState,
     WCAttrs,
 )
-from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import WindowCoveringClusterHandler
 from zha.zigbee.cluster_handlers.const import (
@@ -575,10 +573,7 @@ class Cover(BaseCover):
     async def async_open_cover(self) -> None:
         """Open the cover."""
         self._set_lift_transition_target(POSITION_OPEN)
-        res = await self._cover_cluster_handler.up_open()
-        if res[1] is not Status.SUCCESS:
-            self._clear_lift_transition()
-            raise ZHAException(f"Failed to open cover: {res[1]}")
+        await self._cover_cluster_handler.up_open()
 
         if self.current_cover_position != POSITION_OPEN:
             self.async_update_state(CoverState.OPENING)
@@ -587,12 +582,9 @@ class Cover(BaseCover):
     async def async_open_cover_tilt(self) -> None:
         """Open the cover tilt."""
         self._set_tilt_transition_target(POSITION_OPEN)
-        res = await self._cover_cluster_handler.go_to_tilt_percentage(
+        await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(POSITION_OPEN)
         )
-        if res[1] is not Status.SUCCESS:
-            self._clear_tilt_transition()
-            raise ZHAException(f"Failed to open cover tilt: {res[1]}")
 
         if self.current_cover_tilt_position != POSITION_OPEN:
             self.async_update_state(CoverState.OPENING)
@@ -601,10 +593,7 @@ class Cover(BaseCover):
     async def async_close_cover(self) -> None:
         """Close the cover."""
         self._set_lift_transition_target(POSITION_CLOSED)
-        res = await self._cover_cluster_handler.down_close()
-        if res[1] is not Status.SUCCESS:
-            self._clear_lift_transition()
-            raise ZHAException(f"Failed to close cover: {res[1]}")
+        await self._cover_cluster_handler.down_close()
 
         if self.current_cover_position != POSITION_CLOSED:
             self.async_update_state(CoverState.CLOSING)
@@ -613,12 +602,9 @@ class Cover(BaseCover):
     async def async_close_cover_tilt(self) -> None:
         """Close the cover tilt."""
         self._set_tilt_transition_target(POSITION_CLOSED)
-        res = await self._cover_cluster_handler.go_to_tilt_percentage(
+        await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(POSITION_CLOSED)
         )
-        if res[1] is not Status.SUCCESS:
-            self._clear_tilt_transition()
-            raise ZHAException(f"Failed to close cover tilt: {res[1]}")
 
         if self.current_cover_tilt_position != POSITION_CLOSED:
             self.async_update_state(CoverState.CLOSING)
@@ -630,12 +616,9 @@ class Cover(BaseCover):
         target_position = position
 
         self._set_lift_transition_target(target_position)
-        res = await self._cover_cluster_handler.go_to_lift_percentage(
+        await self._cover_cluster_handler.go_to_lift_percentage(
             self._ha_position_to_zcl(target_position)
         )
-        if res[1] is not Status.SUCCESS:
-            self._clear_lift_transition()
-            raise ZHAException(f"Failed to set cover position: {res[1]}")
 
         if target_position != self.current_cover_position:
             self.async_update_state(
@@ -651,12 +634,9 @@ class Cover(BaseCover):
         target_position = tilt_position
 
         self._set_tilt_transition_target(target_position)
-        res = await self._cover_cluster_handler.go_to_tilt_percentage(
+        await self._cover_cluster_handler.go_to_tilt_percentage(
             self._ha_position_to_zcl(target_position)
         )
-        if res[1] is not Status.SUCCESS:
-            self._clear_tilt_transition()
-            raise ZHAException(f"Failed to set cover tilt position: {res[1]}")
 
         if target_position != self.current_cover_tilt_position:
             self.async_update_state(
@@ -671,9 +651,7 @@ class Cover(BaseCover):
 
         Upon receipt of this command the cover stops both lift and tilt movement.
         """
-        res = await self._cover_cluster_handler.stop()
-        if res[1] is not Status.SUCCESS:
-            raise ZHAException(f"Failed to stop cover: {res[1]}")
+        await self._cover_cluster_handler.stop()
         self._clear_lift_transition()
         self._clear_tilt_transition()
         self._determine_cover_state(refresh=True)
@@ -834,18 +812,14 @@ class Shade(BaseCover):
 
     async def async_open_cover(self) -> None:
         """Open the window cover."""
-        res = await self._on_off_cluster_handler.on()
-        if res[1] != Status.SUCCESS:
-            raise ZHAException(f"Failed to open cover: {res[1]}")
+        await self._on_off_cluster_handler.on()
 
         self._is_open = True
         self.maybe_emit_state_changed_event()
 
     async def async_close_cover(self) -> None:
         """Close the window cover."""
-        res = await self._on_off_cluster_handler.off()
-        if res[1] != Status.SUCCESS:
-            raise ZHAException(f"Failed to close cover: {res[1]}")
+        await self._on_off_cluster_handler.off()
 
         self._is_open = False
         self.maybe_emit_state_changed_event()
@@ -856,12 +830,9 @@ class Shade(BaseCover):
             return
 
         new_pos = position
-        res = await self._level_cluster_handler.move_to_level_with_on_off(
+        await self._level_cluster_handler.move_to_level_with_on_off(
             self._ha_position_to_zcl_level(new_pos), 1
         )
-
-        if res[1] != Status.SUCCESS:
-            raise ZHAException(f"Failed to set cover position: {res[1]}")
 
         self._position = new_pos
         self.maybe_emit_state_changed_event()
@@ -871,9 +842,7 @@ class Shade(BaseCover):
         if not self._level_cluster_handler:
             return
 
-        res = await self._level_cluster_handler.stop()
-        if res[1] != Status.SUCCESS:
-            raise ZHAException(f"Failed to stop cover: {res[1]}")
+        await self._level_cluster_handler.stop()
 
     @staticmethod
     def _ha_position_to_zcl_level(position: int) -> int:
