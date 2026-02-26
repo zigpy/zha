@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 import functools
 import logging
 from typing import TYPE_CHECKING, Any

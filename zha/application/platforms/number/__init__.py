@@ -953,6 +953,7 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
         cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
     )
 
+
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names=CLUSTER_HANDLER_INOVELLI_MMWAVE, models={"VZM32-SN"}
 )
@@ -1068,7 +1069,6 @@ class InovelliMmwaveHoldTime(NumberConfigurationEntity):
 @CONFIG_DIAGNOSTIC_MATCH(
     cluster_handler_names="opple_cluster", models={"aqara.feeder.acn001"}
 )
-
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederServingSize(NumberConfigurationEntity):
     """Aqara pet feeder serving size configuration entity."""
