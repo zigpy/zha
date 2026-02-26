@@ -2,27 +2,36 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from asyncio import Task
 from dataclasses import dataclass
 import datetime as dt
 import functools
 from typing import TYPE_CHECKING, Any, cast
 
-from zigpy.zcl.clusters.hvac import FanMode, RunningState, SystemMode
+from zigpy.profiles import zha
+from zigpy.zcl.clusters.hvac import (
+    FanMode,
+    RunningState,
+    SystemMode,
+    Thermostat as ThermostatCluster,
+)
 
 from zha.application import Platform
-from zha.application.platforms import BaseEntityInfo, PlatformEntity
+from zha.application.platforms import (
+    BaseEntityInfo,
+    ClusterHandlerMatch,
+    PlatformEntity,
+    PlatformFeatureGroup,
+    register_entity,
+)
 from zha.application.platforms.climate.const import (
-    ATTR_HVAC_MODE,
     ATTR_OCCP_COOL_SETPT,
     ATTR_OCCP_HEAT_SETPT,
     ATTR_OCCUPANCY,
     ATTR_PI_COOLING_DEMAND,
     ATTR_PI_HEATING_DEMAND,
     ATTR_SYS_MODE,
-    ATTR_TARGET_TEMP_HIGH,
-    ATTR_TARGET_TEMP_LOW,
-    ATTR_TEMPERATURE,
     ATTR_UNOCCP_COOL_SETPT,
     ATTR_UNOCCP_HEAT_SETPT,
     FAN_AUTO,
@@ -37,7 +46,6 @@ from zha.application.platforms.climate.const import (
     HVACMode,
     Preset,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.decorators import periodic
 from zha.units import UnitOfTemperature
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
@@ -53,9 +61,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.CLIMATE)
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.CLIMATE)
-
 
 @dataclass(frozen=True, kw_only=True)
 class ThermostatEntityInfo(BaseEntityInfo):
@@ -69,18 +74,132 @@ class ThermostatEntityInfo(BaseEntityInfo):
     hvac_modes: list[HVACMode]
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    aux_cluster_handlers=CLUSTER_HANDLER_FAN,
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
-class Thermostat(PlatformEntity):
-    """Representation of a ZHA Thermostat device."""
+class BaseThermostat(PlatformEntity, ABC):
+    """Abstract base class for climate entities."""
 
     PLATFORM = Platform.CLIMATE
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Get the state of the climate entity."""
+        response = super().state
+        response["current_temperature"] = self.current_temperature
+        response["outdoor_temperature"] = self.outdoor_temperature
+        response["target_temperature"] = self.target_temperature
+        response["target_temperature_high"] = self.target_temperature_high
+        response["target_temperature_low"] = self.target_temperature_low
+        response["hvac_action"] = self.hvac_action
+        response["hvac_mode"] = self.hvac_mode
+        response["preset_mode"] = self.preset_mode
+        response["fan_mode"] = self.fan_mode
+        return response
+
+    @property
+    @abstractmethod
+    def current_temperature(self) -> float | None:
+        """Return the current temperature."""
+
+    @property
+    @abstractmethod
+    def outdoor_temperature(self) -> float | None:
+        """Return the outdoor temperature."""
+
+    @property
+    @abstractmethod
+    def target_temperature(self) -> float | None:
+        """Return the temperature we try to reach."""
+
+    @property
+    @abstractmethod
+    def target_temperature_high(self) -> float | None:
+        """Return the upper bound temperature we try to reach."""
+
+    @property
+    @abstractmethod
+    def target_temperature_low(self) -> float | None:
+        """Return the lower bound temperature we try to reach."""
+
+    @property
+    @abstractmethod
+    def hvac_action(self) -> HVACAction | None:
+        """Return the current HVAC action."""
+
+    @property
+    @abstractmethod
+    def hvac_mode(self) -> HVACMode | None:
+        """Return HVAC operation mode."""
+
+    @property
+    @abstractmethod
+    def hvac_modes(self) -> list[HVACMode]:
+        """Return the list of available HVAC operation modes."""
+
+    @property
+    @abstractmethod
+    def preset_mode(self) -> str | None:
+        """Return current preset mode."""
+
+    @property
+    @abstractmethod
+    def preset_modes(self) -> list[str] | None:
+        """Return supported preset modes."""
+
+    @property
+    @abstractmethod
+    def fan_mode(self) -> str | None:
+        """Return current FAN mode."""
+
+    @property
+    @abstractmethod
+    def fan_modes(self) -> list[str] | None:
+        """Return supported FAN modes."""
+
+    @property
+    @abstractmethod
+    def max_temp(self) -> float:
+        """Return the maximum temperature."""
+
+    @property
+    @abstractmethod
+    def min_temp(self) -> float:
+        """Return the minimum temperature."""
+
+    @property
+    @abstractmethod
+    def supported_features(self) -> ClimateEntityFeature:
+        """Return the list of supported features."""
+
+    @abstractmethod
+    async def async_set_fan_mode(self, fan_mode: str) -> None:
+        """Set fan mode."""
+
+    @abstractmethod
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        """Set new target operation mode."""
+
+    @abstractmethod
+    async def async_set_preset_mode(self, preset_mode: str) -> None:
+        """Set new preset mode."""
+
+    @abstractmethod
+    async def async_set_temperature(
+        self,
+        target_temp_low: float | None = None,
+        target_temp_high: float | None = None,
+        temperature: float | None = None,
+        hvac_mode: HVACMode | None = None,
+    ) -> None:
+        """Set new target temperature."""
+
+
+@register_entity(ThermostatCluster.cluster_id)
+class Thermostat(BaseThermostat):
+    """Representation of a ZHA Thermostat device."""
+
     DEFAULT_MAX_TEMP = 35
     DEFAULT_MIN_TEMP = 7
 
+    _attr_primary_weight = 10
     _attr_precision = PRECISION_TENTHS
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_translation_key: str = "thermostat"
@@ -95,7 +214,13 @@ class Thermostat(PlatformEntity):
         ATTR_UNOCCP_COOL_SETPT,
         ATTR_UNOCCP_HEAT_SETPT,
     }
-    _attr_primary_weight = 10
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        # We prefer Thermostat entities over Fan entities if possible
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
+    )
 
     def __init__(
         self,
@@ -105,7 +230,18 @@ class Thermostat(PlatformEntity):
         **kwargs,
     ):
         """Initialize ZHA Thermostat instance."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}"
+            if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
+            else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
+        )
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
         self._preset: Preset | str = Preset.NONE
         self._presets: list[Preset | str] = []
 
@@ -164,15 +300,6 @@ class Thermostat(PlatformEntity):
         system_mode = SYSTEM_MODE_2_HVAC.get(thermostat.system_mode, "unknown")
 
         response = super().state
-        response["current_temperature"] = self.current_temperature
-        response["outdoor_temperature"] = self.outdoor_temperature
-        response["target_temperature"] = self.target_temperature
-        response["target_temperature_high"] = self.target_temperature_high
-        response["target_temperature_low"] = self.target_temperature_low
-        response["hvac_action"] = self.hvac_action
-        response["hvac_mode"] = self.hvac_mode
-        response["preset_mode"] = self.preset_mode
-        response["fan_mode"] = self.fan_mode
 
         response[ATTR_SYS_MODE] = (
             f"[{thermostat.system_mode}]/{system_mode}"
@@ -448,45 +575,46 @@ class Thermostat(PlatformEntity):
         self._preset = preset_mode
         self.maybe_emit_state_changed_event()
 
-    async def async_set_temperature(self, **kwargs: Any) -> None:
+    async def async_set_temperature(
+        self,
+        target_temp_low: float | None = None,
+        target_temp_high: float | None = None,
+        temperature: float | None = None,
+        hvac_mode: HVACMode | None = None,
+    ) -> None:
         """Set new target temperature."""
-        low_temp = kwargs.get(ATTR_TARGET_TEMP_LOW)
-        high_temp = kwargs.get(ATTR_TARGET_TEMP_HIGH)
-        temp = kwargs.get(ATTR_TEMPERATURE)
-        hvac_mode = kwargs.get(ATTR_HVAC_MODE)
-
         if hvac_mode is not None:
             await self.async_set_hvac_mode(hvac_mode)
 
         is_away = self.preset_mode == Preset.AWAY
 
         if self.hvac_mode == HVACMode.HEAT_COOL:
-            if low_temp is not None:
+            if target_temp_low is not None:
                 await self._thermostat_cluster_handler.async_set_heating_setpoint(
-                    temperature=int(low_temp * ZCL_TEMP),
+                    temperature=int(target_temp_low * ZCL_TEMP),
                     is_away=is_away,
                 )
-            if high_temp is not None:
+            if target_temp_high is not None:
                 await self._thermostat_cluster_handler.async_set_cooling_setpoint(
-                    temperature=int(high_temp * ZCL_TEMP),
+                    temperature=int(target_temp_high * ZCL_TEMP),
                     is_away=is_away,
                 )
-        elif temp is not None:
+        elif temperature is not None:
             if self.hvac_mode == HVACMode.COOL:
                 await self._thermostat_cluster_handler.async_set_cooling_setpoint(
-                    temperature=int(temp * ZCL_TEMP),
+                    temperature=int(temperature * ZCL_TEMP),
                     is_away=is_away,
                 )
             elif self.hvac_mode == HVACMode.HEAT:
                 await self._thermostat_cluster_handler.async_set_heating_setpoint(
-                    temperature=int(temp * ZCL_TEMP),
+                    temperature=int(temperature * ZCL_TEMP),
                     is_away=is_away,
                 )
             else:
                 self.debug("Not setting temperature for '%s' mode", self.hvac_mode)
                 return
         else:
-            self.debug("incorrect %s setting for '%s' mode", kwargs, self.hvac_mode)
+            self.debug("incorrect temperature setting for '%s' mode", self.hvac_mode)
             return
 
         self.maybe_emit_state_changed_event()
@@ -498,16 +626,19 @@ class Thermostat(PlatformEntity):
         await handler(enable)
 
 
-@MULTI_MATCH(
-    cluster_handler_names={CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"},
-    manufacturers="Sinope Technologies",
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity(ThermostatCluster.cluster_id)
 class SinopeTechnologiesThermostat(Thermostat):
     """Sinope Technologies Thermostat."""
 
     manufacturer = 0x119C
     __polling_interval: int
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset(
+            {CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"}
+        ),
+        manufacturers=frozenset({"Sinope Technologies"}),
+    )
 
     def __init__(
         self,
@@ -605,23 +736,29 @@ class SinopeTechnologiesThermostat(Thermostat):
         )
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    aux_cluster_handlers=CLUSTER_HANDLER_FAN,
-    manufacturers={"Zen Within", "LUX"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity(ThermostatCluster.cluster_id)
 class ZenWithinThermostat(Thermostat):
     """Zen Within Thermostat implementation."""
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        manufacturers=frozenset({"Zen Within", "LUX"}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+
+@register_entity(ThermostatCluster.cluster_id)
 class ZehnderThermostat(Thermostat):
     """Zehnder thermostat to adapt AUTO mode behavior."""
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        manufacturers=frozenset(
+            {"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"}
+        ),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
 
     ZEHNDER_HVAC_MODE_2_SYSTEM = {
         HVACMode.OFF: SystemMode.Off,
@@ -681,20 +818,21 @@ class ZehnderThermostat(Thermostat):
         )
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    aux_cluster_handlers=CLUSTER_HANDLER_FAN,
-    manufacturers="Centralite",
-    models={"3157100", "3157100-E"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
-class CentralitePearl(ZenWithinThermostat):
+@register_entity(ThermostatCluster.cluster_id)
+class CentralitePearl(Thermostat):
     """Centralite Pearl Thermostat implementation."""
 
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        manufacturers=frozenset({"Centralite"}),
+        models=frozenset({"3157100", "3157100-E"}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={
+
+MOES_MANUFACTURERS = frozenset(
+    {
         "_TZE200_ckud7u2l",
         "_TZE200_ywdxldoj",
         "_TZE200_cwnjrr72",
@@ -708,10 +846,19 @@ class CentralitePearl(ZenWithinThermostat):
         "_TYST11_ywdxldoj",
         "_TYST11_cwnjrr72",
         "_TYST11_2atgpdho",
-    },
+    }
 )
+
+
+@register_entity(ThermostatCluster.cluster_id)
 class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        manufacturers=MOES_MANUFACTURERS,
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
@@ -786,14 +933,15 @@ class MoesThermostat(Thermostat):
             )
 
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={
-        "_TZE200_b6wax7g0",
-    },
-)
+@register_entity(ThermostatCluster.cluster_id)
 class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        manufacturers=frozenset({"_TZE200_b6wax7g0"}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
@@ -861,14 +1009,16 @@ class BecaThermostat(Thermostat):
             )
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers="Stelpro",
-    models={"SORB"},
-    stop_on_match_group=CLUSTER_HANDLER_THERMOSTAT,
-)
+@register_entity(ThermostatCluster.cluster_id)
 class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        manufacturers=frozenset({"Stelpro"}),
+        models=frozenset({"SORB"}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
 
     @functools.cached_property
     def hvac_modes(self) -> list[HVACMode]:
@@ -876,9 +1026,8 @@ class StelproFanHeater(Thermostat):
         return [HVACMode.HEAT]
 
 
-@STRICT_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_THERMOSTAT,
-    manufacturers={
+ZONNSMART_MANUFACTURERS = frozenset(
+    {
         "_TZE200_7yoranx2",
         "_TZE200_e9ba97vf",  # TV01-ZG
         "_TZE200_hue3yfsn",  # TV02-ZG
@@ -887,8 +1036,11 @@ class StelproFanHeater(Thermostat):
         "_TZE200_kly8gjlz",  # TV05-ZG
         "_TZE200_lnbfnyxd",
         "_TZE200_mudxchsu",
-    },
+    }
 )
+
+
+@register_entity(ThermostatCluster.cluster_id)
 class ZONNSMARTThermostat(Thermostat):
     """ZONNSMART Thermostat implementation.
 
@@ -898,6 +1050,12 @@ class ZONNSMARTThermostat(Thermostat):
 
     PRESET_HOLIDAY = "holiday"
     PRESET_FROST = "frost protect"
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+        manufacturers=ZONNSMART_MANUFACTURERS,
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
+    )
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""

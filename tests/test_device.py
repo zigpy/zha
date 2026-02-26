@@ -1,7 +1,6 @@
 """Test ZHA device switch."""
 
 import asyncio
-from datetime import UTC, datetime
 import logging
 import time
 from unittest import mock
@@ -20,10 +19,13 @@ from zigpy.quirks.v2 import (
 from zigpy.quirks.v2.homeassistant import EntityType
 from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 import zigpy.types
+from zigpy.typing import UNDEFINED
 from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import general
 from zigpy.zcl.clusters.general import Ota, PowerConfiguration
+from zigpy.zcl.clusters.measurement import CarbonDioxideConcentration
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
+from zigpy.zcl.helpers import ReportingConfig
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
@@ -555,7 +557,7 @@ async def test_write_zigbee_attribute(
         {
             general.OnOff.AttributeDefs.start_up_on_off.id: general.OnOff.StartUpOnOff.PreviousValue
         },
-        manufacturer=None,
+        manufacturer=UNDEFINED,
     )
 
     cluster.write_attributes.reset_mock()
@@ -824,19 +826,17 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
 
     # If we update the entity, the device updates as well
     update_entity = get_entity(zha_device, platform=Platform.UPDATE)
-    update_entity._ota_cluster_handler.attribute_updated(
-        attrid=Ota.AttributeDefs.current_file_version.id,
-        value=zigpy.types.uint32_t(0xABCD1234),
-        timestamp=datetime.now(UTC),
+    update_entity._ota_cluster_handler.cluster.update_attribute(
+        Ota.AttributeDefs.current_file_version.id,
+        zigpy.types.uint32_t(0xABCD1234),
     )
 
     assert zha_device.firmware_version == "0xabcd1234"
 
     # Duplicate updates are ignored
-    update_entity._ota_cluster_handler.attribute_updated(
-        attrid=Ota.AttributeDefs.current_file_version.id,
-        value=zigpy.types.uint32_t(0xABCD1234),
-        timestamp=datetime.now(UTC),
+    update_entity._ota_cluster_handler.cluster.update_attribute(
+        Ota.AttributeDefs.current_file_version.id,
+        zigpy.types.uint32_t(0xABCD1234),
     )
 
     assert zha_device.firmware_version == "0xabcd1234"
@@ -1024,7 +1024,7 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
             Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
         )
 
-    assert len(zha_device.platform_entities) == 8
+    assert len(zha_device.platform_entities) == 7
 
 
 async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
@@ -1178,7 +1178,13 @@ async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
 
     assert mock_bind.mock_calls == [call()]
     assert mock_reporting_config.mock_calls == [
-        call({"measured_value": (30, 900, 1e-6)})
+        call(
+            {
+                CarbonDioxideConcentration.AttributeDefs.measured_value: ReportingConfig(
+                    30, 900, 1e-6
+                )
+            }
+        )
     ]
 
 

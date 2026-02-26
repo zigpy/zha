@@ -4,15 +4,18 @@ from __future__ import annotations
 
 from abc import abstractmethod
 import asyncio
+from collections import defaultdict
 from collections.abc import Callable
 from contextlib import suppress
 import dataclasses
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, final
+from typing import TYPE_CHECKING, Any, Final, Literal, final
 
+from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import EntityMetadata, EntityType
+from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 
 from zha.application import Platform
@@ -33,6 +36,93 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY: float = 0.5
+
+ENTITY_REGISTRY: dict[ClusterId, list[type[PlatformEntity]]] = defaultdict(list)
+GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
+
+
+class PlatformFeatureGroup(StrEnum):
+    """Feature groups for platform entities."""
+
+    # OnOff server clusters can be turned into lights, shades, or switches (fallback)
+    LIGHT_OR_SWITCH_OR_SHADE = "light_or_switch_or_shade"
+
+    # OnOff client clusters can be turned into manufacturer-specific motion sensors or
+    # fall back to generic binary sensors
+    BINARY_SENSOR = "binary_sensor"
+
+    # Thermostat entities encompass the functionality of Fan entities
+    THERMOSTAT_FAN = "thermostat_fan"
+
+    # Model-specific overrides for HVAC action
+    HVAC_ACTION = "hvac_action"
+
+    # Model-specific overrides for VOC level
+    VOC_LEVEL = "voc_level"
+
+    # Manufacturer-specific overrides for EM active power polling
+    EM_ACTIVE_POWER = "em_active_power"
+
+    # Model-specific overrides for Smart Energy Summation
+    SMART_ENERGY_SUMMATION = "smart_energy_summation"
+
+    # Overrides for Smart Energy Summation Received
+    SMART_ENERGY_SUMMATION_RECEIVED = "smart_energy_summation_received"
+
+    # Model-specific overrides for local temperature calibration
+    LOCAL_TEMPERATURE_CALIBRATION = "local_temperature_calibration"
+
+
+@dataclasses.dataclass(frozen=True)
+class ClusterHandlerMatch:
+    """Declares cluster handler requirements for an entity class."""
+
+    cluster_handlers: frozenset[str] = frozenset()
+    client_cluster_handlers: frozenset[str] = frozenset()
+    optional_cluster_handlers: frozenset[str] = frozenset()
+
+    # Strict filters: if present, device info must match
+    manufacturers: frozenset[str] | None = None
+    models: frozenset[str] | None = None
+    exposed_features: frozenset[str] | None = None
+
+    # If present, device must match one of the given profile and device type combinations.
+    # This will be ignored if `platform_override` is used.
+    profile_device_types: (  # type:ignore[valid-type]
+        frozenset[
+            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
+            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
+            | tuple[int, int]
+        ]
+        | None
+    ) = None
+    not_profile_device_types: (  # type:ignore[valid-type]
+        frozenset[
+            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
+            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
+            | tuple[int, int]
+        ]
+        | None
+    ) = None
+
+    # For a given feature, only entities with the highest priority will be considered
+    feature_priority: tuple[PlatformFeatureGroup, int] | None = None
+
+
+def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
+    """Register an entity class for discovery."""
+
+    def inner(cls: T) -> T:
+        ENTITY_REGISTRY[cluster_id].append(cls)
+        return cls
+
+    return inner
+
+
+def register_group_entity(cls: type[GroupEntity]) -> type[GroupEntity]:
+    """Register a group entity class for discovery."""
+    GROUP_ENTITY_REGISTRY.append(cls)
+    return cls
 
 
 class EntityCategory(StrEnum):
@@ -354,6 +444,9 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
+    # Auto-discovery for the entity
+    _cluster_handler_match: ClusterHandlerMatch | None
+
     def __init__(
         self,
         cluster_handlers: list[ClusterHandler],
@@ -361,12 +454,17 @@ class PlatformEntity(BaseEntity):
         device: Device,
         *,
         entity_metadata: EntityMetadata | None = None,
-        legacy_discovery_unique_id: str,
+        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
+
+        if legacy_discovery_unique_id is None:
+            legacy_discovery_unique_id = (
+                f"{device.ieee}-{endpoint.id}-{cluster_handlers[0].cluster.cluster_id}"
+            )
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"

@@ -14,6 +14,7 @@ from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, get_device
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
+from zigpy.typing import UNDEFINED
 from zigpy.zcl import foundation
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
@@ -229,7 +230,8 @@ async def test_on_off_select_attribute_report_v2(
         assert entity.state["state"] == AqaraMotionSensitivities.Medium.name
         assert cluster.write_attributes.call_count == 1
         assert cluster.write_attributes.call_args == call(
-            {"motion_sensitivity": AqaraMotionSensitivities.Medium}, manufacturer=None
+            {"motion_sensitivity": AqaraMotionSensitivities.Medium},
+            manufacturer=UNDEFINED,
         )
 
 

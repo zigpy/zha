@@ -123,6 +123,21 @@
           "endpoint_attribute": "ias_zone",
           "attributes": [
             {
+              "id": "0x0010",
+              "name": "cie_addr",
+              "zcl_type": "EUI64",
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
+            },
+            {
               "id": "0x0000",
               "name": "zone_state",
               "zcl_type": "enum8",
@@ -179,53 +194,48 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "CentraLite",
+    "model": "3405-L",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4174,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0401",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0020",
+          "0x0402",
+          "0x0500",
+          "0x0501",
+          "0x0b05",
+          "0xfc04"
+        ],
+        "output_clusters": [
+          "0x0019",
+          "0x0501"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "alarm_control_panel": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:0d:6f:00:05:65:83:f2-1",
-          "migrate_unique_ids": [],
-          "platform": "alarm_control_panel",
-          "class_name": "AlarmControlPanel",
-          "translation_key": "alarm_control_panel",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": null,
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IasAceClusterHandler",
-              "generic_id": "cluster_handler_0x0501",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1281,
-                "name": "IAS Ancillary Control Equipment",
-                "type": "server"
-              },
-              "id": "1:0x0501",
-              "unique_id": "00:0d:6f:00:05:65:83:f2:1:0x0501",
-              "status": "CREATED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "00:0d:6f:00:05:65:83:f2",
-          "endpoint_id": 1,
-          "available": true,
-          "group_id": null,
-          "code_arm_required": false,
-          "code_format": "number",
-          "supported_features": 15
-        },
-        "state": {
-          "class_name": "AlarmControlPanel",
-          "available": true,
-          "state": "disarmed"
-        }
-      },
       {
         "info_object": {
           "fallback_name": null,
@@ -243,17 +253,17 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "IasAceClusterHandler",
-              "generic_id": "cluster_handler_0x0501",
+              "class_name": "IasAceClientClusterHandler",
+              "generic_id": "cluster_handler_0x0501_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 1281,
                 "name": "IAS Ancillary Control Equipment",
                 "type": "client"
               },
-              "id": "1:0x0501",
-              "unique_id": "00:0d:6f:00:05:65:83:f2:1:0x0501",
-              "status": "CONFIGURED",
+              "id": "1:0x0501_client",
+              "unique_id": "00:0d:6f:00:05:65:83:f2:1:0x0501_CLIENT",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],

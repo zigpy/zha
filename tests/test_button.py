@@ -18,6 +18,7 @@ from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, DeviceRegistry
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
+from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
@@ -155,7 +156,7 @@ async def test_frost_unlock(
     await entity.async_press()
     await zha_gateway.async_block_till_done()
     assert cluster.write_attributes.mock_calls == [
-        call({"frost_lock_reset": 0}, manufacturer=None)
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED)
     ]
 
     cluster.write_attributes.reset_mock()
@@ -167,9 +168,9 @@ async def test_frost_unlock(
 
     # There are three retries
     assert cluster.write_attributes.mock_calls == [
-        call({"frost_lock_reset": 0}, manufacturer=None),
-        call({"frost_lock_reset": 0}, manufacturer=None),
-        call({"frost_lock_reset": 0}, manufacturer=None),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
     ]
 
 
@@ -290,7 +291,7 @@ async def test_quirks_write_attr_button(
         await entity.async_press()
         await zha_gateway.async_block_till_done()
         assert cluster.write_attributes.mock_calls == [
-            call({cluster.AttributeDefs.feed.name: 2}, manufacturer=None)
+            call({cluster.AttributeDefs.feed.name: 2}, manufacturer=UNDEFINED)
         ]
 
     assert cluster.get(cluster.AttributeDefs.feed.name) == 2
@@ -415,8 +416,9 @@ async def test_cluster_handler_quirks_unnecessary_claiming(
     # Suppress normal endpoint probing, as this will claim the Opple cluster handler
     # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
     # We want to test the handler also gets claimed via quirks v2 attributes init.
-    with patch("zha.application.discovery.EndpointProbe.discover_entities"):
+    with patch("zha.application.discovery.discover_entities_for_endpoint"):
         zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
     assert isinstance(zha_device.device, CustomDeviceV2)
 
     # get cluster handler of OppleCluster

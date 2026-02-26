@@ -3,10 +3,11 @@
 from enum import IntFlag, StrEnum
 from typing import Final
 
+from zigpy.profiles import zha, zll
 from zigpy.zcl.clusters.general import Identify
 
 DEFAULT_ON_OFF_TRANSITION = 1  # most bulbs default to a 1-second turn on/off transition
-DEFAULT_EXTRA_TRANSITION_DELAY_SHORT = 0.25
+DEFAULT_EXTRA_TRANSITION_DELAY_SHORT = 0.5
 DEFAULT_EXTRA_TRANSITION_DELAY_LONG = 2.0
 DEFAULT_LONG_TRANSITION_TIME = 10
 DEFAULT_MIN_BRIGHTNESS = 2
@@ -52,8 +53,14 @@ ATTR_SUPPORTED_COLOR_MODES = "supported_color_modes"
 
 # If the light should flash, can be FLASH_SHORT or FLASH_LONG.
 ATTR_FLASH: Final[str] = "flash"
-FLASH_SHORT: Final[str] = "short"
-FLASH_LONG: Final[str] = "long"
+
+
+class FlashMode(StrEnum):
+    """Flash modes."""
+
+    SHORT = "short"
+    LONG = "long"
+
 
 # List of possible effects
 ATTR_EFFECT_LIST: Final[str] = "effect_list"
@@ -71,8 +78,8 @@ EFFECT_OKAY: Final[int] = 0x02
 EFFECT_DEFAULT_VARIANT: Final[int] = 0x00
 
 FLASH_EFFECTS: Final[dict[str, int]] = {
-    FLASH_SHORT: Identify.EffectIdentifier.Blink,
-    FLASH_LONG: Identify.EffectIdentifier.Breathe,
+    FlashMode.SHORT: Identify.EffectIdentifier.Blink,
+    FlashMode.LONG: Identify.EffectIdentifier.Breathe,
 }
 
 VALID_COLOR_MODES = {
@@ -83,3 +90,23 @@ VALID_COLOR_MODES = {
 }
 COLOR_MODES_BRIGHTNESS = VALID_COLOR_MODES - {ColorMode.ONOFF}
 COLOR_MODES_COLOR = {ColorMode.XY}
+
+LIGHT_PROFILE_DEVICE_TYPES = frozenset(
+    {
+        # ZHA
+        (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_BALLAST),
+        (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.DIMMABLE_PLUG_IN_UNIT),
+        (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.ON_OFF_LIGHT),
+        # ZLL
+        (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.DIMMABLE_PLUGIN_UNIT),
+        (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
+    }
+)

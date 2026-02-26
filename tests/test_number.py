@@ -7,6 +7,7 @@ from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 import zigpy.types
+from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, lighting
 import zigpy.zdo.types as zdo_t
 
@@ -154,7 +155,7 @@ async def test_number(
 
     assert len(cluster.write_attributes.mock_calls) == 1
     assert cluster.write_attributes.call_args == call(
-        {"present_value": 30.0}, manufacturer=None
+        {"present_value": 30.0}, manufacturer=UNDEFINED
     )
     assert entity.state["state"] == 30.0
 
@@ -166,7 +167,7 @@ async def test_number(
     await zha_gateway.async_block_till_done()
     assert cluster.read_attributes.await_count == 1
     assert cluster.read_attributes.await_args == call(
-        ["present_value"], allow_cache=False, only_cache=False, manufacturer=None
+        ["present_value"], allow_cache=False, only_cache=False, manufacturer=UNDEFINED
     )
     assert entity.state["state"] == 20.0
 
@@ -174,7 +175,7 @@ async def test_number(
     await zha_gateway.async_block_till_done()
     assert len(cluster.write_attributes.mock_calls) == 2
     assert cluster.write_attributes.call_args == call(
-        {"present_value": 30}, manufacturer=None
+        {"present_value": 30}, manufacturer=UNDEFINED
     )
     assert entity.state["state"] == 30.0
 
@@ -247,13 +248,13 @@ async def test_level_control_number(
             ],
             allow_cache=True,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         ),
         call(
             ["start_up_current_level"],
             allow_cache=True,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         ),
         call(
             [
@@ -261,7 +262,7 @@ async def test_level_control_number(
             ],
             allow_cache=False,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         ),
     ]
 
@@ -278,7 +279,7 @@ async def test_level_control_number(
 
     await entity.async_set_native_value(new_value)
     assert level_control_cluster.write_attributes.mock_calls == [
-        call({attr: new_value}, manufacturer=None)
+        call({attr: new_value}, manufacturer=UNDEFINED)
     ]
 
     assert entity.state["state"] == new_value
@@ -292,7 +293,7 @@ async def test_level_control_number(
             [attr],
             allow_cache=False,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         )
     ]
 
@@ -303,9 +304,9 @@ async def test_level_control_number(
         await entity.async_set_native_value(new_value)
 
     assert level_control_cluster.write_attributes.mock_calls == [
-        call({attr: new_value}, manufacturer=None),
-        call({attr: new_value}, manufacturer=None),
-        call({attr: new_value}, manufacturer=None),
+        call({attr: new_value}, manufacturer=UNDEFINED),
+        call({attr: new_value}, manufacturer=UNDEFINED),
+        call({attr: new_value}, manufacturer=UNDEFINED),
     ]
     assert entity.state["state"] == initial_value
 
@@ -323,7 +324,7 @@ async def test_level_control_number(
             ],
             allow_cache=False,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         ),
     ]
     assert entity.state["state"] == new_value
@@ -371,7 +372,7 @@ async def test_color_number(
             ],
             allow_cache=True,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         )
         in color_cluster.read_attributes.call_args_list
     )
@@ -397,7 +398,7 @@ async def test_color_number(
             [attr],
             allow_cache=False,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         )
         in color_cluster.read_attributes.call_args_list
     )
@@ -409,9 +410,9 @@ async def test_color_number(
         await entity.async_set_native_value(new_value)
 
     assert color_cluster.write_attributes.mock_calls == [
-        call({attr: new_value}, manufacturer=None),
-        call({attr: new_value}, manufacturer=None),
-        call({attr: new_value}, manufacturer=None),
+        call({attr: new_value}, manufacturer=UNDEFINED),
+        call({attr: new_value}, manufacturer=UNDEFINED),
+        call({attr: new_value}, manufacturer=UNDEFINED),
     ]
     assert entity.state["state"] == initial_value
 
@@ -429,7 +430,7 @@ async def test_color_number(
             ],
             allow_cache=False,
             only_cache=False,
-            manufacturer=None,
+            manufacturer=UNDEFINED,
         ),
     ]
     assert entity.state["state"] == new_value

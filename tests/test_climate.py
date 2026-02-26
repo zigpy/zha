@@ -1641,7 +1641,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
     zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = ZCL_ATTR_PLUG
 
     (
-        QuirkBuilder("unk_manufacturer", "FakeModel", zigpy.quirks._DEVICE_REGISTRY)
+        QuirkBuilder("unk_manufacturer", "FakeModel", zigpy.quirks.DEVICE_REGISTRY)
         # Local temperature calibration.
         .number(
             Thermostat.AttributeDefs.local_temperature_calibration.name,
@@ -1656,7 +1656,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
         .add_to_registry()
     )
 
-    zigpy_device = zigpy.quirks._DEVICE_REGISTRY.get_device(zigpy_device)
+    zigpy_device = zigpy.quirks.DEVICE_REGISTRY.get_device(zigpy_device)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert zha_device.model == "FakeModel"

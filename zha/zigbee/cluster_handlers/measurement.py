@@ -85,6 +85,10 @@ class OccupancySensingClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_IMMEDIATE,
         ),
     )
+    ZCL_INIT_ATTRS = {
+        "pir_o_to_u_delay": True,
+        "pir_u_to_o_delay": True,
+    }
 
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize Occupancy cluster handler."""

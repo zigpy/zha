@@ -5,13 +5,18 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Coroutine
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Final
 
 from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
 from zigpy.zcl.clusters.general import (
     Alarms,
     AnalogInput,
@@ -466,13 +471,23 @@ class LevelControlClusterHandler(ClusterHandler):
                 SIGNAL_MOVE_LEVEL, -args[1] if args[0] else args[1]
             )
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Handle attribute updates on this cluster."""
-        self.debug("received attribute: %s update with value: %s", attrid, value)
-        if attrid == self.CURRENT_LEVEL:
-            self.dispatch_level_change(SIGNAL_SET_LEVEL, value)
+        self.debug(
+            "received attribute: %s update with value: %s",
+            event.attribute_id,
+            event.value,
+        )
+        if event.attribute_id == self.CURRENT_LEVEL:
+            self.dispatch_level_change(SIGNAL_SET_LEVEL, event.value)
         else:
-            super().attribute_updated(attrid, value, timestamp)
+            super()._handle_attribute_updated_event(event)
 
     def dispatch_level_change(self, command, level):
         """Dispatch level change."""
@@ -525,6 +540,60 @@ class MultistateValueClusterHandler(ClusterHandler):
 class OnOffClientClusterHandler(ClientClusterHandler):
     """OnOff client cluster handler."""
 
+    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
+        """Initialize OnOffClientClusterHandler."""
+        super().__init__(cluster, endpoint)
+        self._off_listener: asyncio.TimerHandle | None = None
+
+    @property
+    def on_off(self) -> bool | None:
+        """Return cached value of on/off attribute."""
+        return self.cluster.get(OnOff.AttributeDefs.on_off.name)
+
+    def cluster_command(self, tsn, command_id, args):
+        """Handle commands received to this cluster."""
+        cmd = parse_and_log_command(self, tsn, command_id, args)
+
+        # Process cluster commands, so attribute_updated events fire first
+        if cmd in (
+            OnOff.ServerCommandDefs.off.name,
+            OnOff.ServerCommandDefs.off_with_effect.name,
+        ):
+            self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
+        elif cmd in (
+            OnOff.ServerCommandDefs.on.name,
+            OnOff.ServerCommandDefs.on_with_recall_global_scene.name,
+        ):
+            self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.true)
+        elif cmd == OnOff.ServerCommandDefs.on_with_timed_off.name:
+            should_accept = args[0]
+            on_time = args[1]
+            # 0 is always accept 1 is only accept when already on
+            if should_accept == 0 or (should_accept == 1 and bool(self.on_off)):
+                if self._off_listener is not None:
+                    self._off_listener.cancel()
+                    self._off_listener = None
+                self.cluster.update_attribute(
+                    OnOff.AttributeDefs.on_off.id, t.Bool.true
+                )
+                if on_time > 0:
+                    self._off_listener = asyncio.get_running_loop().call_later(
+                        (on_time / 10),  # value is in 10ths of a second
+                        self.set_to_off,
+                    )
+        elif cmd == "toggle":
+            self.cluster.update_attribute(
+                OnOff.AttributeDefs.on_off.id, not bool(self.on_off)
+            )
+
+        # Emit ZHA event with cluster command
+        super().cluster_command(tsn, command_id, args)
+
+    def set_to_off(self, *_):
+        """Set the state to off."""
+        self._off_listener = None
+        self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
+
 
 @registries.BINDABLE_CLUSTERS.register(OnOff.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(OnOff.cluster_id)
@@ -543,7 +612,6 @@ class OnOffClusterHandler(ClusterHandler):
     def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         """Initialize OnOffClusterHandler."""
         super().__init__(cluster, endpoint)
-        self._off_listener: asyncio.TimerHandle | None = None
 
         if TUYA_PLUG_ONOFF in endpoint.device.exposes_features:
             self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
@@ -577,46 +645,6 @@ class OnOffClusterHandler(ClusterHandler):
         result = await self.off()
         if result[1] is not Status.SUCCESS:
             raise ZHAException(f"Failed to turn off: {result[1]}")
-        self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
-
-    def cluster_command(self, tsn, command_id, args):
-        """Handle commands received to this cluster."""
-        cmd = parse_and_log_command(self, tsn, command_id, args)
-
-        if cmd in (
-            OnOff.ServerCommandDefs.off.name,
-            OnOff.ServerCommandDefs.off_with_effect.name,
-        ):
-            self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
-        elif cmd in (
-            OnOff.ServerCommandDefs.on.name,
-            OnOff.ServerCommandDefs.on_with_recall_global_scene.name,
-        ):
-            self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.true)
-        elif cmd == OnOff.ServerCommandDefs.on_with_timed_off.name:
-            should_accept = args[0]
-            on_time = args[1]
-            # 0 is always accept 1 is only accept when already on
-            if should_accept == 0 or (should_accept == 1 and bool(self.on_off)):
-                if self._off_listener is not None:
-                    self._off_listener.cancel()
-                    self._off_listener = None
-                self.cluster.update_attribute(
-                    OnOff.AttributeDefs.on_off.id, t.Bool.true
-                )
-                if on_time > 0:
-                    self._off_listener = asyncio.get_running_loop().call_later(
-                        (on_time / 10),  # value is in 10ths of a second
-                        self.set_to_off,
-                    )
-        elif cmd == "toggle":
-            self.cluster.update_attribute(
-                OnOff.AttributeDefs.on_off.id, not bool(self.on_off)
-            )
-
-    def set_to_off(self, *_):
-        """Set the state to off."""
-        self._off_listener = None
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
 
     async def async_update(self):
@@ -667,12 +695,17 @@ class OtaClientClusterHandler(ClientClusterHandler):
         """Return cached value of current_file_version attribute."""
         return self.cluster.get(Ota.AttributeDefs.current_file_version.name)
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Handle an attribute updated on this cluster."""
-
         # We intentionally avoid the `ClientClusterHandler` attribute update handler:
         # it emits a logbook event on every update, which pollutes the logbook
-        ClusterHandler.attribute_updated(self, attrid, value, timestamp)
+        ClusterHandler._handle_attribute_updated_event(self, event)
 
     def cluster_command(
         self, tsn: int, command_id: int, args: list[Any] | None

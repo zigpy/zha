@@ -193,36 +193,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "_TZ3000_4fjiwweb",
-        "TS004F"
-      ],
-      [
-        "_TZ3000_uri7ongn",
-        "TS004F"
-      ],
-      [
-        "_TZ3000_ixla93vd",
-        "TS004F"
-      ],
-      [
-        "_TZ3000_qja6nq5z",
-        "TS004F"
-      ],
-      [
-        "_TZ3000_csflgqj2",
-        "TS004F"
-      ],
-      [
-        "_TZ3000_abrsvsou",
-        "TS004F"
-      ],
-      [
-        "_TZ3000_gwkzibhs",
-        "TS004F"
-      ]
-    ],
+    "manufacturer": "_TZ3000_gwkzibhs",
+    "model": "TS004F",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4742,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

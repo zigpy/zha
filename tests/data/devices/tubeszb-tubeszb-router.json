@@ -125,6 +125,46 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "TubesZB",
+    "model": "tubeszb.router",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 0,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 160,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 160,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "8": {
+        "profile_id": "0x0104",
+        "device_type": "0x00ff",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {

@@ -163,7 +163,16 @@
               "id": "0x0010",
               "name": "cie_addr",
               "zcl_type": "EUI64",
-              "value": "bc:02:6e:ff:fe:24:db:90"
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
             },
             {
               "id": "0x0000",
@@ -250,7 +259,66 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "frient A/S",
+    "model": "SMSZB-120",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 0,
+      "manufacturer_code": 4117,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 80,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 80,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0xc0c9",
+        "device_type": "0x0001",
+        "input_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006"
+        ],
+        "output_clusters": []
+      },
+      "35": {
+        "profile_id": "0x0104",
+        "device_type": "0x0402",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x000f",
+          "0x0020",
+          "0x0500",
+          "0x0502"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "38": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0402"
+        ],
+        "output_clusters": [
+          "0x0003"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {

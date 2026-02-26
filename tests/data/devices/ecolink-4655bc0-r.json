@@ -159,6 +159,21 @@
           "endpoint_attribute": "ias_zone",
           "attributes": [
             {
+              "id": "0x0010",
+              "name": "cie_addr",
+              "zcl_type": "EUI64",
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
+            },
+            {
               "id": "0x0000",
               "name": "zone_state",
               "zcl_type": "enum8",
@@ -201,12 +216,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Ecolink",
-        "4655BC0-R"
-      ]
-    ],
+    "manufacturer": "Ecolink",
+    "model": "4655BC0-R",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4335,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

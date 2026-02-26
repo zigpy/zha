@@ -188,16 +188,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Signify Netherlands B.V.",
-        "SML003"
-      ],
-      [
-        "Signify Netherlands B.V.",
-        "SML004"
-      ]
-    ],
+    "manufacturer": "Signify Netherlands B.V.",
+    "model": "SML004",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 128,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "2": {
         "profile_id": "0x0104",
@@ -281,18 +288,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 2,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "2:0x0006",
-              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "2:0x0006_client",
+              "unique_id": "00:17:88:01:0c:dc:9d:61:2:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "00:17:88:01:0c:dc:9d:61",

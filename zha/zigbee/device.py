@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Callable, Iterable
 import copy
 import dataclasses
 from dataclasses import dataclass
@@ -20,9 +20,10 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 import zigpy.quirks
-from zigpy.quirks.v2 import CustomDeviceV2, DeviceAlertMetadata, QuirksV2RegistryEntry
+from zigpy.quirks.v2 import DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
+from zigpy.typing import UNDEFINED, UndefinedType
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Groups, Identify
 from zigpy.zcl.foundation import (
@@ -31,7 +32,13 @@ from zigpy.zcl.foundation import (
     ZCLCommandDef,
 )
 import zigpy.zdo.types as zdo_types
-from zigpy.zdo.types import RouteStatus, _NeighborEnums
+from zigpy.zdo.types import (
+    DeviceType,
+    PermitJoins,
+    Relationship,
+    RouteStatus,
+    RxOnWhenIdle,
+)
 
 from zha.application import Platform, discovery
 from zha.application.const import (
@@ -99,7 +106,7 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
                 attr_def.zcl_type.name if attr_def.zcl_type.name != "bool_" else "bool"
             ),
             "value": cluster.get(attr_def.name),
-            "unsupported": (attr_def.id in cluster.unsupported_attributes),
+            "unsupported": cluster.is_attribute_unsupported(attr_def),
         }
 
         # Don't unnecessarily list out attributes that are just unread
@@ -202,13 +209,13 @@ class DeviceInfo:
 class NeighborInfo:
     """Describes a neighbor."""
 
-    device_type: _NeighborEnums.DeviceType
-    rx_on_when_idle: _NeighborEnums.RxOnWhenIdle
-    relationship: _NeighborEnums.Relationship
+    device_type: DeviceType
+    rx_on_when_idle: RxOnWhenIdle
+    relationship: Relationship
     extended_pan_id: ExtendedPanId
     ieee: EUI64
     nwk: NWK
-    permit_joining: _NeighborEnums.PermitJoins
+    permit_joining: PermitJoins
     depth: uint8_t
     lqi: uint8_t
 
@@ -948,14 +955,15 @@ class Device(LogMixin, EventBase):
                 entity._attr_fallback_name = meta.new_fallback_name
 
     def _discover_new_entities(self) -> None:
-        new_entities: Iterator[BaseEntity]
+        new_entities: Iterable[BaseEntity]
 
         if self.is_active_coordinator:
-            new_entities = discovery.DEVICE_PROBE.discover_coordinator_device_entities(
-                self
-            )
+            new_entities = discovery.discover_coordinator_device_entities(self)
+        elif self.is_coordinator:
+            # TODO: purge old coordinator entities
+            new_entities = []
         else:
-            new_entities = discovery.DEVICE_PROBE.discover_device_entities(self)
+            new_entities = discovery.discover_device_entities(self)
 
         # Discover all applicable entities
         for entity in new_entities:
@@ -1136,7 +1144,7 @@ class Device(LogMixin, EventBase):
         attribute: int | str,
         value: Any,
         cluster_type: str = CLUSTER_TYPE_IN,
-        manufacturer: int | None = None,
+        manufacturer: int | UndefinedType | None = UNDEFINED,
     ) -> WriteAttributesResponse | None:
         """Write a value to a zigbee attribute for a cluster in this entity."""
         try:
@@ -1508,12 +1516,7 @@ class Device(LogMixin, EventBase):
                 ],
             }
 
-        if isinstance(self.device, CustomDeviceV2):
-            original_signature = copy.deepcopy(self.device.replacement)
-        elif isinstance(self.device, zigpy.quirks.CustomDevice):
-            original_signature = copy.deepcopy(self.device.signature)
-        else:
-            original_signature = None
+        original_signature = copy.deepcopy(self.device.original_signature)
 
         # if we have a quirked device we add the original signature to the output and
         # convert the profile_id, device_type, input_clusters and output_clusters to hex
@@ -1536,11 +1539,6 @@ class Device(LogMixin, EventBase):
                         ep["output_clusters"] = [
                             f"0x{c:04x}" for c in ep["output_clusters"]
                         ]
-
-            if "node_desc" in original_signature:
-                original_signature["node_desc"] = original_signature[
-                    "node_desc"
-                ].as_dict()
 
             info["original_signature"] = original_signature
 

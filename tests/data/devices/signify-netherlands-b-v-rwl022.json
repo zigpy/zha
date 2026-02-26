@@ -56,6 +56,12 @@
               "name": "model",
               "zcl_type": "string",
               "value": "RWL022"
+            },
+            {
+              "id": "0x0031",
+              "name": "philips",
+              "zcl_type": "map16",
+              "value": 11
             }
           ]
         },
@@ -157,12 +163,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Signify Netherlands B.V.",
-        "RWL022"
-      ]
-    ],
+    "manufacturer": "Signify Netherlands B.V.",
+    "model": "RWL022",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 128,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

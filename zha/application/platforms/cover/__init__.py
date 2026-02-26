@@ -9,16 +9,21 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from zigpy.zcl.clusters.general import OnOff
+from zigpy.profiles import zha
+from zigpy.zcl.clusters.closures import WindowCovering
+from zigpy.zcl.clusters.general import OnOff, OnOff as OnOffCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
-from zha.application.platforms import PlatformEntity
+from zha.application.platforms import (
+    ClusterHandlerMatch,
+    PlatformEntity,
+    PlatformFeatureGroup,
+    register_entity,
+)
 from zha.application.platforms.cover.const import (
     ATTR_CURRENT_POSITION,
     ATTR_CURRENT_TILT_POSITION,
-    ATTR_POSITION,
-    ATTR_TILT_POSITION,
     POSITION_CLOSED,
     POSITION_OPEN,
     WCT,
@@ -28,7 +33,6 @@ from zha.application.platforms.cover.const import (
     CoverState,
     WCAttrs,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.exceptions import ZHAException
 from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.closures import WindowCoveringClusterHandler
@@ -40,7 +44,11 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_SHADE,
 )
-from zha.zigbee.cluster_handlers.general import LevelChangeEvent
+from zha.zigbee.cluster_handlers.general import (
+    LevelChangeEvent,
+    LevelControlClusterHandler,
+    OnOffClusterHandler,
+)
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -48,8 +56,6 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
-
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.COVER)
 
 # Timeout for device transition state following a position attribute update
 DEFAULT_MOVEMENT_TIMEOUT: float = 5
@@ -65,11 +71,12 @@ class BaseCover(PlatformEntity, ABC):
     PLATFORM = Platform.COVER
 
     _attr_primary_weight = 10
+    _attr_supported_features: CoverEntityFeature
 
     @property
-    @abstractmethod
     def supported_features(self) -> CoverEntityFeature:
         """Return supported features."""
+        return self._attr_supported_features
 
     @property
     @abstractmethod
@@ -103,27 +110,31 @@ class BaseCover(PlatformEntity, ABC):
         """
 
     @abstractmethod
-    async def async_open_cover(self, **kwargs: Any) -> None:
+    async def async_open_cover(self) -> None:
         """Open the cover."""
 
     @abstractmethod
-    async def async_close_cover(self, **kwargs: Any) -> None:
+    async def async_close_cover(self) -> None:
         """Close the cover."""
 
     @abstractmethod
-    async def async_set_cover_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_position(self, position: int) -> None:
         """Move the cover to a specific position."""
 
     @abstractmethod
-    async def async_stop_cover(self, **kwargs: Any) -> None:
+    async def async_stop_cover(self) -> None:
         """Stop the cover."""
 
 
-@MULTI_MATCH(cluster_handler_names=CLUSTER_HANDLER_COVER)
+@register_entity(WindowCovering.cluster_id)
 class Cover(BaseCover):
     """Representation of a ZHA cover."""
 
     _attr_translation_key: str = "cover"
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
+    )
 
     def __init__(
         self,
@@ -133,7 +144,22 @@ class Cover(BaseCover):
         **kwargs,
     ) -> None:
         """Init this cover."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        legacy_discovery_unique_id = (
+            f"{endpoint.device.ieee}-{endpoint.id}"
+            if (
+                endpoint.zigpy_endpoint.device_type
+                == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
+            )
+            else f"{endpoint.device.ieee}-{endpoint.id}-{int(WindowCovering.cluster_id)}"
+        )
+
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+        )
         cluster_handler = self.cluster_handlers.get(CLUSTER_HANDLER_COVER)
         assert cluster_handler
 
@@ -240,11 +266,6 @@ class Cover(BaseCover):
                 functools.partial(self._determine_cover_state, refresh=True),
             )
         )
-
-    @property
-    def supported_features(self) -> CoverEntityFeature:
-        """Return supported features."""
-        return self._attr_supported_features
 
     @property
     def state(self) -> dict[str, Any]:
@@ -551,7 +572,7 @@ class Cover(BaseCover):
         self._tilt_state = None
         self.maybe_emit_state_changed_event()
 
-    async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_open_cover(self) -> None:
         """Open the cover."""
         self._set_lift_transition_target(POSITION_OPEN)
         res = await self._cover_cluster_handler.up_open()
@@ -563,7 +584,7 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.OPENING)
         self._start_lift_transition()
 
-    async def async_open_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_open_cover_tilt(self) -> None:
         """Open the cover tilt."""
         self._set_tilt_transition_target(POSITION_OPEN)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
@@ -577,7 +598,7 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.OPENING)
         self._start_tilt_transition()
 
-    async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_close_cover(self) -> None:
         """Close the cover."""
         self._set_lift_transition_target(POSITION_CLOSED)
         res = await self._cover_cluster_handler.down_close()
@@ -589,7 +610,7 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.CLOSING)
         self._start_lift_transition()
 
-    async def async_close_cover_tilt(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_close_cover_tilt(self) -> None:
         """Close the cover tilt."""
         self._set_tilt_transition_target(POSITION_CLOSED)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
@@ -603,11 +624,10 @@ class Cover(BaseCover):
             self.async_update_state(CoverState.CLOSING)
         self._start_tilt_transition()
 
-    async def async_set_cover_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_position(self, position: int) -> None:
         """Move the cover to a specific position."""
         assert self.current_cover_position is not None
-        target_position = kwargs[ATTR_POSITION]
-        assert target_position is not None
+        target_position = position
 
         self._set_lift_transition_target(target_position)
         res = await self._cover_cluster_handler.go_to_lift_percentage(
@@ -625,11 +645,10 @@ class Cover(BaseCover):
             )
         self._start_lift_transition()
 
-    async def async_set_cover_tilt_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_tilt_position(self, tilt_position: int) -> None:
         """Move the cover tilt to a specific position."""
         assert self.current_cover_tilt_position is not None
-        target_position = kwargs[ATTR_TILT_POSITION]
-        assert target_position is not None
+        target_position = tilt_position
 
         self._set_tilt_transition_target(target_position)
         res = await self._cover_cluster_handler.go_to_tilt_percentage(
@@ -647,7 +666,7 @@ class Cover(BaseCover):
             )
         self._start_tilt_transition()
 
-    async def async_stop_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_stop_cover(self) -> None:
         """Stop the cover.
 
         Upon receipt of this command the cover stops both lift and tilt movement.
@@ -659,12 +678,12 @@ class Cover(BaseCover):
         self._clear_tilt_transition()
         self._determine_cover_state(refresh=True)
 
-    async def async_stop_cover_tilt(self, **kwargs: Any) -> None:
+    async def async_stop_cover_tilt(self) -> None:
         """Stop the cover tilt.
 
         This is handled by async_stop_cover because there is no tilt specific command for Zigbee covers.
         """
-        await self.async_stop_cover(**kwargs)
+        await self.async_stop_cover()
 
     @staticmethod
     def _ha_position_to_zcl(position: int) -> int:
@@ -676,23 +695,25 @@ class Cover(BaseCover):
         return 100 - position
 
 
-@MULTI_MATCH(
-    cluster_handler_names={
-        CLUSTER_HANDLER_LEVEL,
-        CLUSTER_HANDLER_ON_OFF,
-        CLUSTER_HANDLER_SHADE,
-    }
-)
+@register_entity(OnOffCluster.cluster_id)
 class Shade(BaseCover):
     """ZHA Shade."""
 
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
-    _attr_supported_features: CoverEntityFeature = (
-        CoverEntityFeature.OPEN
-        | CoverEntityFeature.CLOSE
-        | CoverEntityFeature.STOP
-        | CoverEntityFeature.SET_POSITION
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+        optional_cluster_handlers=frozenset(
+            {CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_SHADE}
+        ),
+        profile_device_types=frozenset(
+            {
+                (zha.PROFILE_ID, zha.DeviceType.SHADE),
+                (512, zha.DeviceType.SHADE),  # TODO: remove this Tuya hack
+            }
+        ),
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
     )
 
     def __init__(
@@ -703,33 +724,55 @@ class Shade(BaseCover):
         **kwargs,
     ) -> None:
         """Initialize the ZHA shade."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._on_off_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_ON_OFF
-        ]
-        self._level_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_LEVEL
-        ]
-        self._is_open: bool | None = self._on_off_cluster_handler.on_off
-        self._position: int | None = self._zcl_level_to_ha_position(
-            self._level_cluster_handler.current_level
+        super().__init__(
+            cluster_handlers,
+            endpoint,
+            device,
+            **kwargs,
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
+        self._on_off_cluster_handler: OnOffClusterHandler = cast(
+            OnOffClusterHandler, self.cluster_handlers[CLUSTER_HANDLER_ON_OFF]
+        )
+        self._level_cluster_handler: LevelControlClusterHandler | None = cast(
+            LevelControlClusterHandler, self.cluster_handlers.get(CLUSTER_HANDLER_LEVEL)
+        )
+
+        self._is_open: bool | None = self._on_off_cluster_handler.on_off
+        self._position: int | None = None
+
+        if self._level_cluster_handler is not None:
+            self._position = self._zcl_level_to_ha_position(
+                self._level_cluster_handler.current_level
+            )
+
         self.recompute_capabilities()
+
+    def recompute_capabilities(self) -> None:
+        """Recompute capabilities."""
+        self._attr_supported_features = (
+            CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE
+        )
+
+        if self._level_cluster_handler is not None:
+            self._attr_supported_features |= (
+                CoverEntityFeature.STOP | CoverEntityFeature.SET_POSITION
+            )
 
     def on_add(self) -> None:
         """Run when entity is added."""
-        super().on_add()
         self._on_remove_callbacks.append(
             self._on_off_cluster_handler.on_event(
                 CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
                 self.handle_cluster_handler_attribute_updated,
             )
         )
-        self._on_remove_callbacks.append(
-            self._level_cluster_handler.on_event(
-                CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+        if self._level_cluster_handler is not None:
+            self._on_remove_callbacks.append(
+                self._level_cluster_handler.on_event(
+                    CLUSTER_HANDLER_LEVEL_CHANGED, self.handle_cluster_handler_set_level
+                )
             )
-        )
 
     @property
     def state(self) -> dict[str, Any]:
@@ -747,11 +790,6 @@ class Shade(BaseCover):
             }
         )
         return response
-
-    @functools.cached_property
-    def supported_features(self) -> CoverEntityFeature:
-        """Return supported features."""
-        return self._attr_supported_features
 
     @property
     def current_cover_position(self) -> int | None:
@@ -794,7 +832,7 @@ class Shade(BaseCover):
         self._position = self._zcl_level_to_ha_position(event.level)
         self.maybe_emit_state_changed_event()
 
-    async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_open_cover(self) -> None:
         """Open the window cover."""
         res = await self._on_off_cluster_handler.on()
         if res[1] != Status.SUCCESS:
@@ -803,7 +841,7 @@ class Shade(BaseCover):
         self._is_open = True
         self.maybe_emit_state_changed_event()
 
-    async def async_close_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_close_cover(self) -> None:
         """Close the window cover."""
         res = await self._on_off_cluster_handler.off()
         if res[1] != Status.SUCCESS:
@@ -812,9 +850,12 @@ class Shade(BaseCover):
         self._is_open = False
         self.maybe_emit_state_changed_event()
 
-    async def async_set_cover_position(self, **kwargs: Any) -> None:
+    async def async_set_cover_position(self, position: int) -> None:
         """Move the roller shutter to a specific position."""
-        new_pos = kwargs[ATTR_POSITION]
+        if not self._level_cluster_handler:
+            return
+
+        new_pos = position
         res = await self._level_cluster_handler.move_to_level_with_on_off(
             self._ha_position_to_zcl_level(new_pos), 1
         )
@@ -825,8 +866,11 @@ class Shade(BaseCover):
         self._position = new_pos
         self.maybe_emit_state_changed_event()
 
-    async def async_stop_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_stop_cover(self) -> None:
         """Stop the cover."""
+        if not self._level_cluster_handler:
+            return
+
         res = await self._level_cluster_handler.stop()
         if res[1] != Status.SUCCESS:
             raise ZHAException(f"Failed to stop cover: {res[1]}")
@@ -845,18 +889,23 @@ class Shade(BaseCover):
         return round(level * 100 / 255)
 
 
-@MULTI_MATCH(
-    cluster_handler_names={CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF},
-    manufacturers="Keen Home Inc",
-)
+@register_entity(OnOff.cluster_id)
 class KeenVent(Shade):
     """Keen vent cover."""
 
     _attr_device_class = CoverDeviceClass.DAMPER
     _attr_translation_key: str = "keen_vent"
 
-    async def async_open_cover(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
+        manufacturers=frozenset({"Keen Home Inc"}),
+        feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
+    )
+
+    async def async_open_cover(self) -> None:
         """Open the cover."""
+        assert self._level_cluster_handler is not None
+
         position = self._position or 100
         await asyncio.gather(
             self._level_cluster_handler.move_to_level_with_on_off(
