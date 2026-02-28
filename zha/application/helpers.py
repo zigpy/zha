@@ -19,8 +19,10 @@ from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 import voluptuous as vol
 import zigpy.exceptions
 import zigpy.types
+from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.util
 import zigpy.zcl
+from zigpy.zcl import foundation
 from zigpy.zcl.foundation import CommandSchema
 import zigpy.zdo.types as zdo_types
 
@@ -64,10 +66,10 @@ class BindingPair:
 
 async def safe_read(
     cluster: zigpy.zcl.Cluster,
-    attributes: list[int | str],
+    attributes: list[int | str | foundation.ZCLAttributeDef],
     allow_cache: bool = True,
     only_cache: bool = False,
-    manufacturer=None,
+    manufacturer: int | UndefinedType | None = UNDEFINED,
 ):
     """Swallow all exceptions from network read.
 
@@ -389,6 +391,7 @@ class ZHAData:
     )
     allow_polling: bool = dataclasses.field(default=False)
     local_timezone: datetime.tzinfo = dataclasses.field(default=datetime.UTC)
+    country_code: str | None = None
 
 
 class GlobalUpdater:

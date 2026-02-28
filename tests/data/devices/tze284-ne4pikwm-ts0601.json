@@ -9,7 +9,7 @@
   "name": "_TZE284_ne4pikwm TS0601",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -239,7 +239,43 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "_TZE284_ne4pikwm",
+    "model": "TS0601",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4417,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
+        "input_clusters": [
+          "0x0000",
+          "0x0004",
+          "0x0005",
+          "0x0201",
+          "0xed00",
+          "0xef00"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -250,6 +286,7 @@
           "platform": "binary_sensor",
           "class_name": "BinarySensor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -295,6 +332,7 @@
           "platform": "climate",
           "class_name": "Thermostat",
           "translation_key": "thermostat",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -374,6 +412,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "local_temperature_calibration",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -423,6 +462,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -467,6 +507,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -511,6 +552,7 @@
           "platform": "sensor",
           "class_name": "ThermostatHVACAction",
           "translation_key": "hvac_action",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -557,6 +599,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "away_mode",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -605,6 +648,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "child_lock",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -653,6 +697,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "frost_protection",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -701,6 +746,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "scale_protection",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -749,6 +795,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "schedule_mode",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -797,6 +844,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "window_detection",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -847,6 +895,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

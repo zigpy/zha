@@ -9,7 +9,7 @@
   "name": "SONOFF SNZB-02D",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
   "lqi": 204,
@@ -170,7 +170,44 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "SONOFF",
+    "model": "SNZB-02D",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4742,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 255,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 255,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0020",
+          "0x0402",
+          "0x0405",
+          "0xfc11",
+          "0xfc57"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -181,6 +218,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -229,6 +267,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "comfort_humidity_max",
+          "translation_placeholders": null,
           "device_class": "humidity",
           "state_class": null,
           "entity_category": "config",
@@ -276,6 +315,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "comfort_humidity_min",
+          "translation_placeholders": null,
           "device_class": "humidity",
           "state_class": null,
           "entity_category": "config",
@@ -323,6 +363,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "comfort_temperature_max",
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": null,
           "entity_category": "config",
@@ -370,6 +411,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "comfort_temperature_min",
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": null,
           "entity_category": "config",
@@ -417,6 +459,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "humidity_offset",
+          "translation_placeholders": null,
           "device_class": "humidity",
           "state_class": null,
           "entity_category": "config",
@@ -464,6 +507,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "temperature_offset",
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": null,
           "entity_category": "config",
@@ -513,6 +557,7 @@
           "platform": "select",
           "class_name": "ZCLEnumSelectEntity",
           "translation_key": "display_unit",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -562,6 +607,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -606,6 +652,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -650,6 +697,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -699,6 +747,7 @@
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": null,
@@ -743,6 +792,7 @@
           "platform": "sensor",
           "class_name": "Humidity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "humidity",
           "state_class": "measurement",
           "entity_category": null,
@@ -789,6 +839,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

@@ -19,6 +19,8 @@ from zigpy.config import (
     CONF_DEVICE_BAUDRATE,
     CONF_DEVICE_FLOW_CONTROL,
     CONF_DEVICE_PATH,
+    CONF_NWK,
+    CONF_NWK_COUNTRY_CODE,
     CONF_NWK_VALIDATE_SETTINGS,
 )
 import zigpy.device
@@ -31,7 +33,6 @@ from zigpy.types.named import EUI64
 
 from zha.application import discovery
 from zha.application.const import (
-    CONF_USE_THREAD,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
     ZHA_GW_MSG,
@@ -58,6 +59,7 @@ from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceIn
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
+SHUT_DOWN_DELAY_S: Final[float] = 0.1
 _R = TypeVar("_R")
 _LOGGER = logging.getLogger(__name__)
 
@@ -203,17 +205,15 @@ class Gateway(AsyncUtilMixin, EventBase):
             CONF_DEVICE_FLOW_CONTROL: self.config.config.coordinator_configuration.flow_control,
         }
 
+        if (
+            self.config.country_code is not None
+            and CONF_NWK_COUNTRY_CODE not in app_config.get(CONF_NWK, {})
+        ):
+            app_config.setdefault(CONF_NWK, {})
+            app_config[CONF_NWK][CONF_NWK_COUNTRY_CODE] = self.config.country_code
+
         if CONF_NWK_VALIDATE_SETTINGS not in app_config:
             app_config[CONF_NWK_VALIDATE_SETTINGS] = True
-
-        # The bellows UART thread sometimes propagates a cancellation into the main Core
-        # event loop, when a connection to a TCP coordinator fails in a specific way
-        if (
-            CONF_USE_THREAD not in app_config
-            and self.radio_type is RadioType.ezsp
-            and app_config[CONF_DEVICE][CONF_DEVICE_PATH].startswith("socket://")
-        ):
-            app_config[CONF_USE_THREAD] = False
 
         return self.radio_type.controller, app_config
 
@@ -332,13 +332,15 @@ class Gateway(AsyncUtilMixin, EventBase):
             # we can do this here because the entities are in the
             # entity registry tied to the devices
 
-            for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+            for entity in discovery.discover_group_entities(zha_group):
                 entity.on_add()
 
     @property
     def radio_concurrency(self) -> int:
         """Maximum configured radio concurrency."""
-        return self.application_controller._concurrent_requests_semaphore.max_value  # pylint: disable=protected-access
+        return (
+            self.application_controller._concurrent_requests_semaphore.max_concurrency
+        )  # pylint: disable=protected-access
 
     async def async_fetch_updated_state_mains(self) -> None:
         """Fetch updated state for mains powered devices."""
@@ -462,7 +464,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
 
-        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+        for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
 
         zha_group.info("group_member_removed - endpoint: %s", endpoint)
@@ -476,7 +478,7 @@ class Gateway(AsyncUtilMixin, EventBase):
         zha_group = self.get_or_create_group(zigpy_group)
         zha_group.clear_caches()
 
-        for entity in discovery.GROUP_PROBE.discover_group_entities(zha_group):
+        for entity in discovery.discover_group_entities(zha_group):
             entity.on_add()
 
         zha_group.info("group_member_added - endpoint: %s", endpoint)
@@ -764,7 +766,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         if self.application_controller is not None:
             await self.application_controller.shutdown()
             self.application_controller = None
-            await asyncio.sleep(0.1)  # give bellows thread callback a chance to run
+            # give bellows thread callback a chance to run
+            await asyncio.sleep(SHUT_DOWN_DELAY_S)
 
         await super().shutdown()
 

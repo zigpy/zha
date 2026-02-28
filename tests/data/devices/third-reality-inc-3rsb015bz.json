@@ -9,7 +9,7 @@
   "name": "Third Reality, Inc 3RSB015BZ",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -268,6 +268,42 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "Third Reality, Inc",
+    "model": "3RSB015BZ",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4659,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0202",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0006",
+          "0x0102"
+        ],
+        "output_clusters": [
+          "0x0006",
+          "0x0019",
+          "0x0102"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -278,6 +314,7 @@
           "platform": "binary_sensor",
           "class_name": "Opening",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "opening",
           "state_class": null,
           "entity_category": null,
@@ -287,18 +324,18 @@
           "postfix": null,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
@@ -323,6 +360,7 @@
           "platform": "cover",
           "class_name": "Cover",
           "translation_key": "cover",
+          "translation_placeholders": null,
           "device_class": "shade",
           "state_class": null,
           "entity_category": null,
@@ -372,6 +410,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -416,6 +455,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -460,6 +500,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -510,6 +551,7 @@
           "platform": "sensor",
           "class_name": "WindowCoveringTypeSensor",
           "translation_key": "window_covering_type",
+          "translation_placeholders": null,
           "device_class": "enum",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -556,6 +598,7 @@
           "platform": "switch",
           "class_name": "Switch",
           "translation_key": "switch",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -600,6 +643,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

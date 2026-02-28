@@ -9,7 +9,7 @@
   "name": "AduroSmart Eria VMS_ADUROLIGHT",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4653,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -108,7 +108,16 @@
               "id": "0x0010",
               "name": "cie_addr",
               "zcl_type": "EUI64",
-              "value": "00:12:4b:00:1c:a1:b8:46"
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
             },
             {
               "id": "0x0000",
@@ -139,6 +148,39 @@
       "out_clusters": []
     }
   },
+  "original_signature": {
+    "manufacturer": "AduroSmart Eria",
+    "model": "VMS_ADUROLIGHT",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4653,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0402",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0500",
+          "0xffff"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -149,6 +191,7 @@
           "platform": "binary_sensor",
           "class_name": "IASZone",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "motion",
           "state_class": null,
           "entity_category": null,
@@ -194,6 +237,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -242,6 +286,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -286,6 +331,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -330,6 +376,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",

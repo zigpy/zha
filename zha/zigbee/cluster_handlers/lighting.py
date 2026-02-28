@@ -17,6 +17,11 @@ from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_DEFAULT
 class BallastClusterHandler(ClusterHandler):
     """Ballast cluster handler."""
 
+    ZCL_INIT_ATTRS = {
+        Ballast.AttributeDefs.min_level.name: True,
+        Ballast.AttributeDefs.max_level.name: True,
+    }
+
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(Color.cluster_id)
 class ColorClientClusterHandler(ClientClusterHandler):

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import functools
 import math
@@ -14,8 +14,12 @@ from zha.application import Platform
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
+    ClusterHandlerMatch,
     GroupEntity,
     PlatformEntity,
+    PlatformFeatureGroup,
+    register_entity,
+    register_group_entity,
 )
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
@@ -38,7 +42,6 @@ from zha.application.platforms.fan.helpers import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
-from zha.application.registries import PLATFORM_ENTITIES
 from zha.zigbee.cluster_handlers import (
     ClusterAttributeUpdatedEvent,
     wrap_zigpy_exceptions,
@@ -46,6 +49,7 @@ from zha.zigbee.cluster_handlers import (
 from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
+    IKEA_AIR_PURIFIER_CLUSTER,
 )
 from zha.zigbee.cluster_handlers.hvac import FanClusterHandler
 from zha.zigbee.cluster_handlers.manufacturerspecific import (
@@ -58,10 +62,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
-STRICT_MATCH = functools.partial(PLATFORM_ENTITIES.strict_match, Platform.FAN)
-GROUP_MATCH = functools.partial(PLATFORM_ENTITIES.group_match, Platform.FAN)
-MULTI_MATCH = functools.partial(PLATFORM_ENTITIES.multipass_match, Platform.FAN)
-
 
 @dataclass(frozen=True, kw_only=True)
 class FanEntityInfo(BaseEntityInfo):
@@ -73,7 +73,7 @@ class FanEntityInfo(BaseEntityInfo):
     speed_list: list[str]
 
 
-class BaseFan(BaseEntity):
+class BaseFan(BaseEntity, ABC):
     """Base representation of a ZHA fan."""
 
     PLATFORM = Platform.FAN
@@ -183,12 +183,11 @@ class BaseFan(BaseEntity):
         )
         return response
 
-    async def async_turn_on(  # pylint: disable=unused-argument
+    async def async_turn_on(
         self,
         speed: str | None = None,
         percentage: int | None = None,
         preset_mode: str | None = None,
-        **kwargs: Any,
     ) -> None:
         """Turn the entity on."""
         if preset_mode is not None:
@@ -201,7 +200,7 @@ class BaseFan(BaseEntity):
             percentage = self.default_on_percentage
             await self.async_set_percentage(percentage)
 
-    async def async_turn_off(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    async def async_turn_off(self) -> None:
         """Turn the entity off."""
         await self.async_set_percentage(0)
 
@@ -246,9 +245,15 @@ class BaseFan(BaseEntity):
         return percentage_to_ordered_list_item(LEGACY_SPEED_LIST, percentage)
 
 
-@STRICT_MATCH(cluster_handler_names=CLUSTER_HANDLER_FAN)
+@register_entity(hvac.Fan.cluster_id)
 class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        # We prefer Thermostat entities if possible
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, -1),
+    )
 
     def __init__(
         self,
@@ -299,7 +304,7 @@ class Fan(BaseFan, PlatformEntity):
         self.maybe_emit_state_changed_event()
 
 
-@GROUP_MATCH()
+@register_group_entity
 class FanGroup(BaseFan, GroupEntity):
     """Representation of a fan group."""
 
@@ -362,10 +367,7 @@ class FanGroup(BaseFan, GroupEntity):
         self.maybe_emit_state_changed_event()
 
 
-@MULTI_MATCH(
-    cluster_handler_names="ikea_airpurifier",
-    models={"STARKVIND Air purifier", "STARKVIND Air purifier table"},
-)
+@register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class IkeaFan(BaseFan, PlatformEntity):
     """Representation of an Ikea fan."""
 
@@ -374,6 +376,11 @@ class IkeaFan(BaseFan, PlatformEntity):
         | FanEntityFeature.PRESET_MODE
         | FanEntityFeature.TURN_OFF
         | FanEntityFeature.TURN_ON
+    )
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({"ikea_airpurifier"}),
+        models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
     )
 
     def __init__(
@@ -435,7 +442,6 @@ class IkeaFan(BaseFan, PlatformEntity):
         speed: str | None = None,
         percentage: int | None = None,
         preset_mode: str | None = None,
-        **kwargs: Any,
     ) -> None:
         """Turn the entity on."""
         # Starkvind turns on in auto mode by default.
@@ -458,10 +464,7 @@ class IkeaFan(BaseFan, PlatformEntity):
         await self._async_set_fan_mode(fan_mode)
 
 
-@MULTI_MATCH(
-    cluster_handler_names=CLUSTER_HANDLER_FAN,
-    models={"HBUniversalCFRemote", "HDC52EastwindFan"},
-)
+@register_entity(hvac.Fan.cluster_id)
 class KofFan(Fan):
     """Representation of a fan made by King Of Fans."""
 
@@ -470,6 +473,12 @@ class KofFan(Fan):
         | FanEntityFeature.PRESET_MODE
         | FanEntityFeature.TURN_OFF
         | FanEntityFeature.TURN_ON
+    )
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+        models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),
+        feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
     )
 
     @functools.cached_property

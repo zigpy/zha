@@ -9,7 +9,7 @@
   "name": "AduroSmart Eria AD-RGBW3001",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4653,
   "power_source": "Mains",
   "lqi": null,
@@ -267,6 +267,52 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "AduroSmart Eria",
+    "model": "AD-RGBW3001",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4653,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 90,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 90,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x010d",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0300",
+          "0x1000"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -277,6 +323,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -325,6 +372,7 @@
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -390,6 +438,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": true,
           "brightness": 254,
           "xy_color": [
@@ -411,8 +460,7 @@
             "xy"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -429,6 +477,7 @@
           "platform": "number",
           "class_name": "StartUpColorTemperatureConfigurationEntity",
           "translation_key": "start_up_color_temperature",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -476,6 +525,7 @@
           "platform": "number",
           "class_name": "OffTransitionTimeConfigurationEntity",
           "translation_key": "off_transition_time",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -523,6 +573,7 @@
           "platform": "number",
           "class_name": "OnLevelConfigurationEntity",
           "translation_key": "on_level",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -570,6 +621,7 @@
           "platform": "number",
           "class_name": "OnOffTransitionTimeConfigurationEntity",
           "translation_key": "on_off_transition_time",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -617,6 +669,7 @@
           "platform": "number",
           "class_name": "OnTransitionTimeConfigurationEntity",
           "translation_key": "on_transition_time",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -664,6 +717,7 @@
           "platform": "number",
           "class_name": "StartUpCurrentLevelConfigurationEntity",
           "translation_key": "start_up_current_level",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -713,6 +767,7 @@
           "platform": "select",
           "class_name": "StartupOnOffSelectEntity",
           "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -764,6 +819,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -808,6 +864,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -854,6 +911,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

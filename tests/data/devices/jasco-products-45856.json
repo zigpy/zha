@@ -9,7 +9,7 @@
   "name": "Jasco Products 45856",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4388,
   "power_source": "Mains",
   "lqi": null,
@@ -270,6 +270,57 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "Jasco Products",
+    "model": "45856",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4388,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 255,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 255,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0100",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0702",
+          "0x0b05"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0103",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0b05"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0006"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -280,6 +331,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -328,6 +380,7 @@
           "platform": "light",
           "class_name": "ForceOnLight",
           "translation_key": "light",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -364,6 +417,7 @@
         },
         "state": {
           "class_name": "ForceOnLight",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -378,8 +432,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -396,6 +449,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -440,6 +494,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -484,6 +539,7 @@
           "platform": "sensor",
           "class_name": "SmartEnergyMetering",
           "translation_key": "instantaneous_demand",
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -511,7 +567,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": null,
+          "suggested_display_precision": 1,
           "unit": "W"
         },
         "state": {
@@ -536,6 +592,7 @@
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
           "translation_key": "summation_delivered",
+          "translation_placeholders": null,
           "device_class": "energy",
           "state_class": "total_increasing",
           "entity_category": null,
@@ -590,6 +647,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

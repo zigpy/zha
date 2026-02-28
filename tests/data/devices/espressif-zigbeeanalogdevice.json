@@ -9,7 +9,7 @@
   "name": "Espressif ZigbeeAnalogDevice",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Mains",
   "lqi": null,
@@ -188,6 +188,38 @@
       "out_clusters": []
     }
   },
+  "original_signature": {
+    "manufacturer": "Espressif",
+    "model": "ZigbeeAnalogDevice",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 140,
+      "manufacturer_code": 4660,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 1613,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 1613,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x000c",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x000c",
+          "0x000d"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -198,6 +230,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -246,6 +279,7 @@
           "platform": "number",
           "class_name": "AnalogOutputNumber",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -295,6 +329,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -339,6 +374,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -383,6 +419,7 @@
           "platform": "sensor",
           "class_name": "AnalogInputSensor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,

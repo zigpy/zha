@@ -127,30 +127,75 @@ def make_attribute(attrid: int, value: Any, status: int = 0) -> zcl_f.Attribute:
 
 
 async def send_attributes_report(
-    zha_gateway: Gateway, cluster: zigpy.zcl.Cluster, attributes: dict
+    zha_gateway: Gateway,
+    cluster: zigpy.zcl.Cluster,
+    attributes: dict[str | int | zcl_f.ZCLAttributeDef, Any],
+    *,
+    tsn: int | None = None,
 ) -> None:
-    """Cause the sensor to receive an attribute report from the network.
+    """Mock attribute reports on a cluster."""
+    reports = []
+    manufacturer_codes: set[int | None] = set()
 
-    This is to simulate the normal device communication that happens when a
-    device is paired to the zigbee network.
-    """
-    attrs = []
-
-    for attrid, value in attributes.items():
-        if isinstance(attrid, str):
-            attrid = cluster.attributes_by_name[attrid].id
+    for attr, value in attributes.items():
+        if isinstance(attr, int):
+            # Raw attribute ID for unknown attributes
+            manufacturer_codes.add(None)
+            reports.append(
+                zcl_f.Attribute(
+                    attrid=attr,
+                    value=zcl_f.TypeValue(
+                        type=zcl_f.DataType.from_python_type(type(value)).type_id,
+                        value=value,
+                    ),
+                )
+            )
         else:
-            attrid = zigpy.types.uint16_t(attrid)
+            attr_def = cluster.find_attribute(attr)
+            manufacturer_codes.add(cluster._get_effective_manufacturer_code(attr_def))
 
-        attrs.append(make_attribute(attrid, value))
+            reports.append(
+                zcl_f.Attribute(
+                    attrid=attr_def.id,
+                    value=zcl_f.TypeValue(type=attr_def.zcl_type, value=value),
+                )
+            )
 
-    msg = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Report_Attributes].schema(
-        attribute_reports=attrs
+    if len(manufacturer_codes) != 1:
+        raise ValueError(
+            f"All attributes must have the same manufacturer code, got {manufacturer_codes}"
+        )
+
+    if tsn is None:
+        tsn = cluster.endpoint.device.get_sequence()
+
+    manufacturer: int | None = manufacturer_codes.pop()
+
+    frame_control = zcl_f.FrameControl(
+        frame_type=zcl_f.FrameType.GLOBAL_COMMAND,
+        is_manufacturer_specific=(manufacturer is not None),
+        direction=(
+            zcl_f.Direction.Client_to_Server
+            if cluster.is_client
+            else zcl_f.Direction.Server_to_Client
+        ),
+        disable_default_response=False,
+        reserved=0b000,
     )
 
-    hdr = make_zcl_header(zcl_f.GeneralCommand.Report_Attributes)
-    hdr.frame_control = hdr.frame_control.replace(disable_default_response=True)
-    cluster.handle_message(hdr, msg)
+    hdr = zcl_f.ZCLHeader(
+        frame_control=frame_control,
+        manufacturer=manufacturer,
+        tsn=tsn,
+        command_id=zcl_f.GeneralCommand.Report_Attributes,
+    )
+
+    command = zcl_f.GENERAL_COMMANDS[zcl_f.GeneralCommand.Report_Attributes].schema(
+        attribute_reports=reports
+    )
+
+    cluster.handle_cluster_general_request(hdr, command)
+
     await zha_gateway.async_block_till_done()
 
 
@@ -375,36 +420,68 @@ def zigpy_device_from_device_data(
             for cluster in ep["out_clusters"]:
                 endpoint.add_output_cluster(int(cluster["cluster_id"], 16))
 
+    device.original_signature = device.get_signature()
+
     if quirk:
         device = quirk(app, device.ieee, device.nwk, device)
     else:
         device = quirks_get_device(device)
 
     for epid, ep in device_data["endpoints"].items():
-        endpoint = device.endpoints[int(epid)]
+        try:
+            endpoint = device.endpoints[int(epid)]
+        except KeyError:
+            _LOGGER.warning(
+                "Endpoint %d not found on device %s",
+                int(epid),
+                device,
+            )
+            continue
+
         endpoint.request = AsyncMock(return_value=[0])
 
         for cluster_type in ("in_clusters", "out_clusters"):
+            clusters = getattr(endpoint, cluster_type)
+
             for cluster in ep[cluster_type]:
-                real_cluster = getattr(endpoint, cluster_type)[
-                    int(cluster["cluster_id"], 16)
-                ]
+                cluster_id = int(cluster["cluster_id"], 16)
+
+                try:
+                    real_cluster = clusters[cluster_id]
+                except KeyError:
+                    _LOGGER.warning(
+                        "Cluster %0#04x not found on endpoint %r of device %s",
+                        cluster_id,
+                        endpoint,
+                        device,
+                    )
+                    continue
 
                 if patch_cluster:
                     patch_cluster_for_testing(real_cluster)
 
                 for attr in cluster["attributes"]:
                     attrid = int(attr["id"], 16)
+                    attr_name = attr.get("name")
+
+                    # Look up by name to avoid ambiguity with manufacturer-specific attrs
+                    if attr_name is not None:
+                        attr_def = real_cluster.find_attribute(attr_name)
+                        assert attr_def.id == attrid
+                    else:
+                        attr_def = real_cluster.find_attribute(attrid)
+
+                    # Quirks can mark attributes as unsupported during cluster init so
+                    # the attribute both has a cached value and is unsupported. We need
+                    # to preserve the "unsupported" state.
+                    was_unsupported = real_cluster.is_attribute_unsupported(attr_def)
 
                     if attr.get("value", None) is not None:
-                        real_cluster._attr_cache[attrid] = attr["value"]
+                        real_cluster._attr_cache.set_value(attr_def, attr["value"])
                         real_cluster.PLUGGED_ATTR_READS[attrid] = attr["value"]
 
-                    if attr.get("unsupported", False):
-                        real_cluster.unsupported_attributes.add(attrid)
-
-                        if attr["name"] is not None:
-                            real_cluster.unsupported_attributes.add(attr["name"])
+                    if attr.get("unsupported", False) or was_unsupported:
+                        real_cluster.add_unsupported_attribute(attr_def)
 
     for obj in device_data["neighbors"]:
         app.topology.neighbors[device.ieee].append(

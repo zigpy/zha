@@ -9,7 +9,7 @@
   "name": "_TZE200_9caxna4s TS0301",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4098,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -191,6 +191,44 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "_TZE200_9caxna4s",
+    "model": "TS0301",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4098,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0202",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0102",
+          "0xef00"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -201,6 +239,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -249,6 +288,7 @@
           "platform": "cover",
           "class_name": "Cover",
           "translation_key": "cover",
+          "translation_placeholders": null,
           "device_class": "shade",
           "state_class": null,
           "entity_category": null,
@@ -298,6 +338,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -342,6 +383,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -386,6 +428,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -436,6 +479,7 @@
           "platform": "sensor",
           "class_name": "WindowCoveringTypeSensor",
           "translation_key": "window_covering_type",
+          "translation_placeholders": null,
           "device_class": "enum",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -482,6 +526,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

@@ -9,7 +9,7 @@
   "name": "Konke 3AFE28010402000D",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.konke.motion.KonkeMotion",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4712,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -120,7 +120,16 @@
               "id": "0x0010",
               "name": "cie_addr",
               "zcl_type": "EUI64",
-              "value": "00:0d:6f:00:0b:12:ed:40"
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
             },
             {
               "id": "0x0000",
@@ -163,20 +172,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Konke",
-        "3AFE28010402000D"
-      ],
-      [
-        "Konke",
-        "3AFE14010402000D"
-      ],
-      [
-        "Konke",
-        "3AFE27010402000D"
-      ]
-    ],
+    "manufacturer": "Konke",
+    "model": "3AFE28010402000D",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4712,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
@@ -205,6 +217,7 @@
           "platform": "binary_sensor",
           "class_name": "Occupancy",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "occupancy",
           "state_class": null,
           "entity_category": null,
@@ -248,6 +261,7 @@
           "platform": "binary_sensor",
           "class_name": "IASZone",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "motion",
           "state_class": null,
           "entity_category": null,
@@ -293,6 +307,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -341,6 +356,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -385,6 +401,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -429,6 +446,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",

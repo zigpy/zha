@@ -9,7 +9,7 @@
   "name": "SOMFY Situo 4 Zigbee",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4640,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -337,6 +337,97 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "SOMFY",
+    "model": "Situo 4 Zigbee",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4640,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0102"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0102"
+        ]
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0102"
+        ]
+      },
+      "4": {
+        "profile_id": "0x0104",
+        "device_type": "0x0203",
+        "input_clusters": [
+          "0x0000",
+          "0x0003"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0005",
+          "0x0006",
+          "0x0102"
+        ]
+      },
+      "232": {
+        "profile_id": "0x0104",
+        "device_type": "0x0005",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0020"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -347,6 +438,7 @@
           "platform": "binary_sensor",
           "class_name": "Opening",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "opening",
           "state_class": null,
           "entity_category": null,
@@ -356,18 +448,18 @@
           "postfix": 1,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "ab:cd:ef:12:85:3b:98:5a:1:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "ab:cd:ef:12:85:3b:98:5a:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:85:3b:98:5a",
@@ -390,6 +482,7 @@
           "platform": "binary_sensor",
           "class_name": "Opening",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "opening",
           "state_class": null,
           "entity_category": null,
@@ -399,18 +492,18 @@
           "postfix": 2,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 2,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "2:0x0006",
-              "unique_id": "ab:cd:ef:12:85:3b:98:5a:2:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "2:0x0006_client",
+              "unique_id": "ab:cd:ef:12:85:3b:98:5a:2:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:85:3b:98:5a",
@@ -433,6 +526,7 @@
           "platform": "binary_sensor",
           "class_name": "Opening",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "opening",
           "state_class": null,
           "entity_category": null,
@@ -442,18 +536,18 @@
           "postfix": 3,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 3,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "3:0x0006",
-              "unique_id": "ab:cd:ef:12:85:3b:98:5a:3:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "3:0x0006_client",
+              "unique_id": "ab:cd:ef:12:85:3b:98:5a:3:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:85:3b:98:5a",
@@ -476,6 +570,7 @@
           "platform": "binary_sensor",
           "class_name": "Opening",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "opening",
           "state_class": null,
           "entity_category": null,
@@ -485,18 +580,18 @@
           "postfix": 4,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 4,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "4:0x0006",
-              "unique_id": "ab:cd:ef:12:85:3b:98:5a:4:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "4:0x0006_client",
+              "unique_id": "ab:cd:ef:12:85:3b:98:5a:4:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:85:3b:98:5a",
@@ -521,6 +616,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -569,6 +665,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -613,6 +710,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -657,6 +755,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -708,6 +807,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

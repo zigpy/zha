@@ -9,7 +9,7 @@
   "name": "_TZE204_qasjif9e TS0601",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
   "lqi": null,
@@ -154,7 +154,51 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "_TZE204_qasjif9e",
+    "model": "TS0601",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4417,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
+        "input_clusters": [
+          "0x0000",
+          "0x0004",
+          "0x0005",
+          "0x0400",
+          "0x0406",
+          "0xef00"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -165,6 +209,7 @@
           "platform": "binary_sensor",
           "class_name": "Occupancy",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "occupancy",
           "state_class": null,
           "entity_category": null,
@@ -210,6 +255,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "detection_delay",
+          "translation_placeholders": null,
           "device_class": "duration",
           "state_class": null,
           "entity_category": "config",
@@ -257,6 +303,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "detection_distance_max",
+          "translation_placeholders": null,
           "device_class": "distance",
           "state_class": null,
           "entity_category": "config",
@@ -304,6 +351,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "detection_distance_min",
+          "translation_placeholders": null,
           "device_class": "distance",
           "state_class": null,
           "entity_category": "config",
@@ -351,6 +399,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "fading_time",
+          "translation_placeholders": null,
           "device_class": "duration",
           "state_class": null,
           "entity_category": "config",
@@ -398,6 +447,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "move_sensitivity",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -447,6 +497,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -491,6 +542,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -535,6 +587,7 @@
           "platform": "sensor",
           "class_name": "Illuminance",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "illuminance",
           "state_class": "measurement",
           "entity_category": null,
@@ -579,6 +632,7 @@
           "platform": "sensor",
           "class_name": "Sensor",
           "translation_key": "distance",
+          "translation_placeholders": null,
           "device_class": "distance",
           "state_class": "measurement",
           "entity_category": null,
@@ -625,6 +679,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

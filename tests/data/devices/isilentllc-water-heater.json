@@ -9,7 +9,7 @@
   "name": "iSilentLLC Water Heater",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4126,
   "power_source": "Mains",
   "lqi": null,
@@ -267,6 +267,55 @@
       "out_clusters": []
     }
   },
+  "original_signature": {
+    "manufacturer": "iSilentLLC",
+    "model": "Water Heater",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4126,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 128,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0002",
+        "input_clusters": [
+          "0x0000",
+          "0x0006",
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0402"
+        ],
+        "output_clusters": []
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0402"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
   "zha_lib_entities": {
     "sensor": [
       {
@@ -277,6 +326,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -321,6 +371,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -365,6 +416,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -415,6 +467,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -442,7 +495,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -464,6 +517,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -514,6 +568,7 @@
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": null,
@@ -558,6 +613,7 @@
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": null,
@@ -604,6 +660,7 @@
           "platform": "switch",
           "class_name": "Switch",
           "translation_key": "switch",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,

@@ -9,7 +9,7 @@
   "name": "Third Reality, Inc 3RSP02028BZ",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Mains",
   "lqi": null,
@@ -350,7 +350,52 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "Third Reality, Inc",
+    "model": "3RSP02028BZ",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4659,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0051",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0b04",
+          "0x1000",
+          "0xff03"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -361,6 +406,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -407,6 +453,7 @@
           "platform": "button",
           "class_name": "WriteAttributeButton",
           "translation_key": "reset_summation_delivered",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -426,7 +473,7 @@
               },
               "id": "1:0xff03",
               "unique_id": "28:2c:02:bf:ff:eb:4f:2f:1:0xff03",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -443,6 +490,104 @@
         }
       }
     ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Turn on delay",
+          "unique_id": "28:2c:02:bf:ff:eb:4f:2f-1-off_to_on_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "turn_on_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "postfix": null,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff03",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65283,
+                "name": "ThirdRealityPlugCluster",
+                "type": "server"
+              },
+              "id": "1:0xff03",
+              "unique_id": "28:2c:02:bf:ff:eb:4f:2f:1:0xff03",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:eb:4f:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Turn off delay",
+          "unique_id": "28:2c:02:bf:ff:eb:4f:2f-1-on_to_off_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "turn_off_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "postfix": null,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff03",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65283,
+                "name": "ThirdRealityPlugCluster",
+                "type": "server"
+              },
+              "id": "1:0xff03",
+              "unique_id": "28:2c:02:bf:ff:eb:4f:2f:1:0xff03",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:eb:4f:2f",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "box",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
     "select": [
       {
         "info_object": {
@@ -452,6 +597,7 @@
           "platform": "select",
           "class_name": "StartupOnOffSelectEntity",
           "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -503,6 +649,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -547,6 +694,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -591,6 +739,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -639,6 +788,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -687,6 +837,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -734,6 +885,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -761,7 +913,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -782,6 +934,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -832,6 +985,7 @@
           "platform": "switch",
           "class_name": "Switch",
           "translation_key": "switch",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -876,6 +1030,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

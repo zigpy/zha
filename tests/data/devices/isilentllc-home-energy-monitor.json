@@ -9,7 +9,7 @@
   "name": "iSilentLLC Home Energy Monitor",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4126,
   "power_source": "Mains",
   "lqi": null,
@@ -3763,6 +3763,235 @@
       "out_clusters": []
     }
   },
+  "original_signature": {
+    "manufacturer": "iSilentLLC",
+    "model": "Home Energy Monitor",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4126,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 255,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 255,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0000"
+        ],
+        "output_clusters": []
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "4": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "5": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "6": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "7": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "8": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "9": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "10": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "11": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "12": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "13": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "14": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "15": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "16": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "17": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "18": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "19": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "20": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "21": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "22": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "23": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "24": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "25": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      },
+      "26": {
+        "profile_id": "0x0104",
+        "device_type": "0x0007",
+        "input_clusters": [
+          "0x0b04"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
   "zha_lib_entities": {
     "sensor": [
       {
@@ -3773,6 +4002,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -3817,6 +4047,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -3861,6 +4092,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -3910,6 +4142,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -3959,6 +4192,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -4007,6 +4241,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -4055,6 +4290,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -4082,7 +4318,7 @@
           "endpoint_id": 10,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -4104,6 +4340,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -4153,6 +4390,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -4202,6 +4440,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -4251,6 +4490,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -4299,6 +4539,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -4347,6 +4588,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -4374,7 +4616,7 @@
           "endpoint_id": 11,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -4396,6 +4638,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -4445,6 +4688,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -4494,6 +4738,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -4543,6 +4788,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -4591,6 +4837,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -4639,6 +4886,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -4666,7 +4914,7 @@
           "endpoint_id": 12,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -4688,6 +4936,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -4737,6 +4986,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -4786,6 +5036,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -4835,6 +5086,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -4883,6 +5135,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -4931,6 +5184,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -4958,7 +5212,7 @@
           "endpoint_id": 13,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -4980,6 +5234,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -5029,6 +5284,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -5078,6 +5334,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -5127,6 +5384,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -5175,6 +5433,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -5223,6 +5482,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -5250,7 +5510,7 @@
           "endpoint_id": 14,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -5272,6 +5532,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -5321,6 +5582,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -5370,6 +5632,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -5419,6 +5682,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -5467,6 +5731,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -5515,6 +5780,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -5542,7 +5808,7 @@
           "endpoint_id": 15,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -5564,6 +5830,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -5613,6 +5880,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -5662,6 +5930,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -5711,6 +5980,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -5759,6 +6029,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -5807,6 +6078,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -5834,7 +6106,7 @@
           "endpoint_id": 16,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -5856,6 +6128,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -5905,6 +6178,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -5954,6 +6228,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -6003,6 +6278,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -6051,6 +6327,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -6099,6 +6376,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -6126,7 +6404,7 @@
           "endpoint_id": 17,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -6148,6 +6426,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -6197,6 +6476,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -6246,6 +6526,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -6295,6 +6576,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -6343,6 +6625,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -6391,6 +6674,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -6418,7 +6702,7 @@
           "endpoint_id": 18,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -6440,6 +6724,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -6489,6 +6774,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -6538,6 +6824,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -6587,6 +6874,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -6635,6 +6923,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -6683,6 +6972,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -6710,7 +7000,7 @@
           "endpoint_id": 19,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -6732,6 +7022,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -6781,6 +7072,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -6830,6 +7122,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -6879,6 +7172,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -6927,6 +7221,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -6975,6 +7270,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -7002,7 +7298,7 @@
           "endpoint_id": 2,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -7024,6 +7320,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -7073,6 +7370,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -7122,6 +7420,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -7171,6 +7470,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -7219,6 +7519,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -7267,6 +7568,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -7294,7 +7596,7 @@
           "endpoint_id": 20,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -7316,6 +7618,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -7365,6 +7668,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -7414,6 +7718,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -7463,6 +7768,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -7511,6 +7817,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -7559,6 +7866,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -7586,7 +7894,7 @@
           "endpoint_id": 21,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -7608,6 +7916,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -7657,6 +7966,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -7706,6 +8016,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -7755,6 +8066,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -7803,6 +8115,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -7851,6 +8164,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -7878,7 +8192,7 @@
           "endpoint_id": 22,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -7900,6 +8214,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -7949,6 +8264,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -7998,6 +8314,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -8047,6 +8364,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -8095,6 +8413,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -8143,6 +8462,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -8170,7 +8490,7 @@
           "endpoint_id": 23,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -8192,6 +8512,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -8241,6 +8562,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -8290,6 +8612,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -8339,6 +8662,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -8387,6 +8711,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -8435,6 +8760,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -8462,7 +8788,7 @@
           "endpoint_id": 24,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -8484,6 +8810,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -8533,6 +8860,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -8582,6 +8910,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -8631,6 +8960,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -8679,6 +9009,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -8727,6 +9058,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -8754,7 +9086,7 @@
           "endpoint_id": 25,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -8776,6 +9108,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -8825,6 +9158,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -8874,6 +9208,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -8923,6 +9258,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -8971,6 +9307,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -9019,6 +9356,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -9046,7 +9384,7 @@
           "endpoint_id": 26,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -9068,6 +9406,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -9117,6 +9456,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -9166,6 +9506,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -9215,6 +9556,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -9263,6 +9605,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -9311,6 +9654,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -9338,7 +9682,7 @@
           "endpoint_id": 3,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -9360,6 +9704,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -9409,6 +9754,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -9458,6 +9804,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -9507,6 +9854,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -9555,6 +9903,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -9603,6 +9952,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -9630,7 +9980,7 @@
           "endpoint_id": 4,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -9652,6 +10002,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -9701,6 +10052,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -9750,6 +10102,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -9799,6 +10152,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -9847,6 +10201,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -9895,6 +10250,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -9922,7 +10278,7 @@
           "endpoint_id": 5,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -9944,6 +10300,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -9993,6 +10350,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -10042,6 +10400,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -10091,6 +10450,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -10139,6 +10499,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -10187,6 +10548,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -10214,7 +10576,7 @@
           "endpoint_id": 6,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -10236,6 +10598,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -10285,6 +10648,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -10334,6 +10698,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -10383,6 +10748,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -10431,6 +10797,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -10479,6 +10846,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -10506,7 +10874,7 @@
           "endpoint_id": 7,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -10528,6 +10896,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -10577,6 +10946,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -10626,6 +10996,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -10675,6 +11046,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -10723,6 +11095,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -10771,6 +11144,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -10798,7 +11172,7 @@
           "endpoint_id": 8,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -10820,6 +11194,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -10869,6 +11244,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -10918,6 +11294,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementFrequency",
           "translation_key": "ac_frequency",
+          "translation_placeholders": null,
           "device_class": "frequency",
           "state_class": "measurement",
           "entity_category": null,
@@ -10967,6 +11344,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementApparentPower",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "apparent_power",
           "state_class": "measurement",
           "entity_category": null,
@@ -11015,6 +11393,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -11063,6 +11442,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -11090,7 +11470,7 @@
           "endpoint_id": 9,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -11112,6 +11492,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,

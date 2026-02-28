@@ -9,7 +9,7 @@
   "name": "LUMI lumi.relay.c2acn01",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.relay_c2acn01.Relay",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Mains",
   "lqi": null,
@@ -348,12 +348,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.relay.c2acn01"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.relay.c2acn01",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4151,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
@@ -399,6 +410,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -447,6 +459,7 @@
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -483,6 +496,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -497,8 +511,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -513,6 +526,7 @@
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -549,6 +563,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -563,8 +578,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -581,6 +595,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -625,6 +640,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -669,6 +685,7 @@
           "platform": "sensor",
           "class_name": "SmartEnergyMetering",
           "translation_key": "instantaneous_demand",
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -696,7 +713,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": null,
+          "suggested_display_precision": 1,
           "unit": "W"
         },
         "state": {
@@ -720,6 +737,7 @@
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
           "translation_key": "summation_delivered",
+          "translation_placeholders": null,
           "device_class": "energy",
           "state_class": "total_increasing",
           "entity_category": null,
@@ -771,6 +789,7 @@
           "platform": "sensor",
           "class_name": "DeviceTemperature",
           "translation_key": "device_temperature",
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -815,6 +834,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -863,6 +883,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementPowerFactor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power_factor",
           "state_class": "measurement",
           "entity_category": null,
@@ -910,6 +931,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -958,6 +980,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementTotalActivePower",
           "translation_key": "total_active_power",
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -1008,6 +1031,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

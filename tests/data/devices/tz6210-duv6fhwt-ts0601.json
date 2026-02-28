@@ -9,7 +9,7 @@
   "name": "_TZ6210_duv6fhwt TS0601",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4619,
   "power_source": "Mains",
   "lqi": null,
@@ -118,7 +118,44 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "_TZ6210_duv6fhwt",
+    "model": "TS0601",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4619,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0000",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0400",
+          "0x0406",
+          "0x0b05",
+          "0xef00"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019",
+          "0xef00"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -129,6 +166,7 @@
           "platform": "binary_sensor",
           "class_name": "Occupancy",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "occupancy",
           "state_class": null,
           "entity_category": null,
@@ -172,6 +210,7 @@
           "platform": "binary_sensor",
           "class_name": "BinarySensor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "tamper",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -217,6 +256,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -265,6 +305,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "fading_time",
+          "translation_placeholders": null,
           "device_class": "duration",
           "state_class": null,
           "entity_category": "config",
@@ -312,6 +353,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "motionless_detection",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -361,6 +403,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -405,6 +448,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -449,6 +493,7 @@
           "platform": "sensor",
           "class_name": "Illuminance",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "illuminance",
           "state_class": "measurement",
           "entity_category": null,
@@ -495,6 +540,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "led_indicator",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -545,6 +591,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

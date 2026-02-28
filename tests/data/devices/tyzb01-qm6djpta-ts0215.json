@@ -9,7 +9,7 @@
   "name": "_TYZB01_qm6djpta TS0215",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4619,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -107,7 +107,16 @@
               "id": "0x0010",
               "name": "cie_addr",
               "zcl_type": "EUI64",
-              "value": "14:2d:41:ff:fe:fd:b9:e7"
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
             },
             {
               "id": "0x0000",
@@ -168,6 +177,44 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "_TYZB01_qm6djpta",
+    "model": "TS0215",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4619,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0401",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0020",
+          "0x0500",
+          "0x0b05"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0019",
+          "0x0501"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "alarm_control_panel": [
       {
@@ -178,6 +225,7 @@
           "platform": "alarm_control_panel",
           "class_name": "AlarmControlPanel",
           "translation_key": "alarm_control_panel",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -187,17 +235,17 @@
           "postfix": null,
           "cluster_handlers": [
             {
-              "class_name": "IasAceClusterHandler",
-              "generic_id": "cluster_handler_0x0501",
+              "class_name": "IasAceClientClusterHandler",
+              "generic_id": "cluster_handler_0x0501_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 1281,
                 "name": "IAS Ancillary Control Equipment",
                 "type": "client"
               },
-              "id": "1:0x0501",
-              "unique_id": "ab:cd:ef:12:09:4e:ff:d3:1:0x0501",
-              "status": "CONFIGURED",
+              "id": "1:0x0501_client",
+              "unique_id": "ab:cd:ef:12:09:4e:ff:d3:1:0x0501_CLIENT",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -225,6 +273,7 @@
           "platform": "binary_sensor",
           "class_name": "IASZone",
           "translation_key": "ias_zone",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -270,6 +319,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -318,6 +368,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -362,6 +413,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -406,6 +458,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -458,6 +511,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

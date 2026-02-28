@@ -9,7 +9,7 @@
   "name": "Bosch BMCT-SLZ",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4617,
   "power_source": "Mains",
   "lqi": null,
@@ -580,7 +580,70 @@
       "out_clusters": []
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "Bosch",
+    "model": "RBSH-MMS-ZB-EU",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4617,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0202",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0102",
+          "0x0702",
+          "0x0b04",
+          "0x0b05",
+          "0xfca0"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0100",
+        "input_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0xfca0"
+        ],
+        "output_clusters": []
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0x0100",
+        "input_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0xfca0"
+        ],
+        "output_clusters": []
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -591,6 +654,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -639,6 +703,7 @@
           "platform": "cover",
           "class_name": "Cover",
           "translation_key": "cover",
+          "translation_placeholders": null,
           "device_class": "blind",
           "state_class": null,
           "entity_category": null,
@@ -688,6 +753,7 @@
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -724,6 +790,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -738,8 +805,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -754,6 +820,7 @@
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -790,6 +857,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -804,8 +872,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -822,6 +889,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "long_press_duration",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -841,7 +909,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -869,6 +937,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "closing_duration",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -888,7 +957,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -916,6 +985,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "motor_start_delay",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -935,7 +1005,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -963,6 +1033,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "opening_duration",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -982,7 +1053,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1012,6 +1083,7 @@
           "platform": "select",
           "class_name": "ZCLEnumSelectEntity",
           "translation_key": "device_mode",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1031,7 +1103,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1060,6 +1132,7 @@
           "platform": "select",
           "class_name": "ZCLEnumSelectEntity",
           "translation_key": "switch_type",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1079,7 +1152,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1109,6 +1182,7 @@
           "platform": "select",
           "class_name": "StartupOnOffSelectEntity",
           "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1158,6 +1232,7 @@
           "platform": "select",
           "class_name": "StartupOnOffSelectEntity",
           "translation_key": "start_up_on_off",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1209,6 +1284,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -1253,6 +1329,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -1297,6 +1374,7 @@
           "platform": "sensor",
           "class_name": "SmartEnergyMetering",
           "translation_key": "instantaneous_demand",
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -1324,7 +1402,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": null,
+          "suggested_display_precision": 1,
           "unit": "W"
         },
         "state": {
@@ -1349,6 +1427,7 @@
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
           "translation_key": "summation_delivered",
+          "translation_placeholders": null,
           "device_class": "energy",
           "state_class": "total_increasing",
           "entity_category": null,
@@ -1401,6 +1480,7 @@
           "platform": "sensor",
           "class_name": "WindowCoveringTypeSensor",
           "translation_key": "window_covering_type",
+          "translation_placeholders": null,
           "device_class": "enum",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -1445,6 +1525,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -1494,6 +1575,7 @@
           "platform": "sensor",
           "class_name": "Sensor",
           "translation_key": "motor_state",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -1513,7 +1595,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1540,6 +1622,7 @@
           "platform": "switch",
           "class_name": "WindowCoveringInversionSwitch",
           "translation_key": "inverted",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1588,6 +1671,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "child_lock",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1607,7 +1691,7 @@
               },
               "id": "1:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:1:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1636,6 +1720,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "child_lock",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1655,7 +1740,7 @@
               },
               "id": "2:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:2:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1684,6 +1769,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "child_lock",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -1703,7 +1789,7 @@
               },
               "id": "3:0xfca0",
               "unique_id": "ab:cd:ef:12:75:e4:96:a5:3:0xfca0",
-              "status": "CREATED",
+              "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
@@ -1734,6 +1820,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

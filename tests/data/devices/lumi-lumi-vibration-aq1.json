@@ -9,7 +9,9 @@
   "name": "LUMI lumi.vibration.aq1",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.vibration_aq1.VibrationAQ1",
-  "quirk_id": "xiaomi.aqara_vibration_aq1",
+  "exposes_features": [
+    "xiaomi.aqara_vibration_aq1"
+  ],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -220,12 +222,8 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.vibration.aq1"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.vibration.aq1",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,
@@ -286,6 +284,7 @@
           "platform": "binary_sensor",
           "class_name": "IASZone",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "vibration",
           "state_class": null,
           "entity_category": null,
@@ -331,6 +330,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -379,6 +379,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -423,6 +424,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -467,6 +469,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -519,6 +522,7 @@
           "platform": "sensor",
           "class_name": "DeviceTemperature",
           "translation_key": "device_temperature",
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -565,6 +569,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",
@@ -573,20 +578,6 @@
           "primary": false,
           "postfix": null,
           "cluster_handlers": [
-            {
-              "class_name": "OtaClusterHandler",
-              "generic_id": "cluster_handler_0x0019",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "server"
-              },
-              "id": "1:0x0019",
-              "unique_id": "00:15:8d:00:02:af:97:27:1:0x0019",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            },
             {
               "class_name": "OtaClientClusterHandler",
               "generic_id": "cluster_handler_0x0019_client",

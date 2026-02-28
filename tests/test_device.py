@@ -1,7 +1,6 @@
 """Test ZHA device switch."""
 
 import asyncio
-from datetime import UTC, datetime
 import logging
 import time
 from unittest import mock
@@ -11,14 +10,22 @@ import pytest
 from zigpy.exceptions import ZigbeeException
 import zigpy.profiles.zha
 from zigpy.quirks.registry import DeviceRegistry
-from zigpy.quirks.v2 import DeviceAlertLevel, DeviceAlertMetadata, QuirkBuilder
+from zigpy.quirks.v2 import (
+    DeviceAlertLevel,
+    DeviceAlertMetadata,
+    ExposesFeatureMetadata,
+    QuirkBuilder,
+)
 from zigpy.quirks.v2.homeassistant import EntityType
 from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 import zigpy.types
+from zigpy.typing import UNDEFINED
 from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import general
 from zigpy.zcl.clusters.general import Ota, PowerConfiguration
+from zigpy.zcl.clusters.measurement import CarbonDioxideConcentration
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
+from zigpy.zcl.helpers import ReportingConfig
 import zigpy.zdo.types as zdo_t
 
 from tests.common import (
@@ -550,7 +557,7 @@ async def test_write_zigbee_attribute(
         {
             general.OnOff.AttributeDefs.start_up_on_off.id: general.OnOff.StartUpOnOff.PreviousValue
         },
-        manufacturer=None,
+        manufacturer=UNDEFINED,
     )
 
     cluster.write_attributes.reset_mock()
@@ -819,19 +826,17 @@ async def test_device_firmware_version_syncing(zha_gateway: Gateway) -> None:
 
     # If we update the entity, the device updates as well
     update_entity = get_entity(zha_device, platform=Platform.UPDATE)
-    update_entity._ota_cluster_handler.attribute_updated(
-        attrid=Ota.AttributeDefs.current_file_version.id,
-        value=zigpy.types.uint32_t(0xABCD1234),
-        timestamp=datetime.now(UTC),
+    update_entity._ota_cluster_handler.cluster.update_attribute(
+        Ota.AttributeDefs.current_file_version.id,
+        zigpy.types.uint32_t(0xABCD1234),
     )
 
     assert zha_device.firmware_version == "0xabcd1234"
 
     # Duplicate updates are ignored
-    update_entity._ota_cluster_handler.attribute_updated(
-        attrid=Ota.AttributeDefs.current_file_version.id,
-        value=zigpy.types.uint32_t(0xABCD1234),
-        timestamp=datetime.now(UTC),
+    update_entity._ota_cluster_handler.cluster.update_attribute(
+        Ota.AttributeDefs.current_file_version.id,
+        zigpy.types.uint32_t(0xABCD1234),
     )
 
     assert zha_device.firmware_version == "0xabcd1234"
@@ -1019,7 +1024,7 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
             Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
         )
 
-    assert len(zha_device.platform_entities) == 8
+    assert len(zha_device.platform_entities) == 7
 
 
 async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
@@ -1039,6 +1044,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
             new_entity_category=EntityType.CONFIG,
             new_entity_registry_enabled_default=False,
             new_translation_key="custom_lqi_key",
+            new_translation_placeholders={"placeholder": "123"},
             new_fallback_name="Custom LQI Name",
         )
         .change_entity_metadata(
@@ -1076,6 +1082,7 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     assert lqi_entity._attr_entity_category == EntityType.CONFIG
     assert lqi_entity._attr_entity_registry_enabled_default is False
     assert lqi_entity._attr_translation_key == "custom_lqi_key"
+    assert lqi_entity._attr_translation_placeholders == {"placeholder": "123"}
     assert lqi_entity._attr_fallback_name == "Custom LQI Name"
 
     # Verify metadata changes from second filter - function-based match
@@ -1083,6 +1090,72 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
 
     button_entity = get_entity(zha_device, platform=Platform.BUTTON)
     assert button_entity._attr_primary is True
+
+
+async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:
+    """Test quirks v2 translation_placeholders on entities."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .sensor(
+            PowerConfiguration.AttributeDefs.battery_voltage.name,
+            PowerConfiguration.cluster_id,
+            translation_key="some_battery_sensor",
+            translation_placeholders={"sensor_index": "1"},
+            fallback_name="Some battery sensor {sensor_index}",
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="battery_voltage"
+    )
+    assert entity is not None
+
+    assert (
+        entity.translation_placeholders
+        == entity.info_object.translation_placeholders
+        == {"sensor_index": "1"}
+    )
+
+
+async def test_quirks_v2_exposed_features(zha_gateway: Gateway) -> None:
+    """Test quirks v2 exposed features."""
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .exposes_feature("some_feature")
+        .exposes_feature("another_feature", config={"option": True})
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # can access the set of exposed features, similar to v1 quirks
+    assert zha_device.exposes_features == {"some_feature", "another_feature"}
+
+    # can access the quirk metadata for config features
+    assert zha_device.quirk_metadata.exposes_features == (
+        ExposesFeatureMetadata(feature="some_feature"),
+        ExposesFeatureMetadata(feature="another_feature", config={"option": True}),
+    )
 
 
 async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
@@ -1105,7 +1178,13 @@ async def test_join_binding_reporting(zha_gateway: Gateway) -> None:
 
     assert mock_bind.mock_calls == [call()]
     assert mock_reporting_config.mock_calls == [
-        call({"measured_value": (30, 900, 1e-6)})
+        call(
+            {
+                CarbonDioxideConcentration.AttributeDefs.measured_value: ReportingConfig(
+                    30, 900, 1e-6
+                )
+            }
+        )
     ]
 
 

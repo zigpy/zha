@@ -5,21 +5,28 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable, Coroutine, Iterator
 import contextlib
 from dataclasses import dataclass
-from datetime import datetime
 from enum import Enum
 import functools
 import logging
 from typing import TYPE_CHECKING, Any, Final, ParamSpec, TypedDict
 
 import zigpy.exceptions
+from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.util
 import zigpy.zcl
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
 from zigpy.zcl.foundation import (
     CommandSchema,
     ConfigureReportingResponseRecord,
     Status,
     ZCLAttributeDef,
 )
+from zigpy.zcl.helpers import ReportingConfig
 
 from zha.application.const import (
     ZHA_CLUSTER_HANDLER_MSG,
@@ -213,14 +220,55 @@ class ClusterHandler(LogMixin, EventBase):
             self.value_attribute = attr_def.name
         self._status: ClusterHandlerStatus = ClusterHandlerStatus.CREATED
         self.data_cache: dict[str, Any] = {}
+        self._unsubs: list[Callable[[], None]] = []
 
     def on_add(self) -> None:
         """Call when cluster handler is added."""
         self._cluster.add_listener(self)
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._unsubs.append(
+                self._cluster.on_event(
+                    event_type.event_type, self._handle_attribute_updated_event
+                )
+            )
 
     def on_remove(self) -> None:
         """Call when cluster handler will be removed."""
         self._cluster.remove_listener(self)
+        for unsub in self._unsubs:
+            unsub()
+        self._unsubs.clear()
+
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
+        """Handle attribute updated event from zigpy."""
+        self.debug(
+            "cluster_handler[%s] attribute_updated - cluster[%s] attr[%s] value[%s]",
+            self.name,
+            self.cluster.name,
+            event.attribute_name,
+            event.value,
+        )
+        self.emit(
+            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
+            ClusterAttributeUpdatedEvent(
+                attribute_id=event.attribute_id,
+                attribute_name=event.attribute_name,
+                attribute_value=event.value,
+                cluster_handler_unique_id=self.unique_id,
+                cluster_id=self.cluster.cluster_id,
+            ),
+        )
 
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:  # pylint: disable=unused-argument
@@ -322,12 +370,6 @@ class ClusterHandler(LogMixin, EventBase):
         devices are unreachable.
         """
         event_data = {}
-        kwargs = {}
-        if (
-            self.cluster.cluster_id >= 0xFC00
-            and self._endpoint.device.manufacturer_code
-        ):
-            kwargs["manufacturer"] = self._endpoint.device.manufacturer_code
 
         for attr_report in self.REPORT_CONFIG:
             attr, config = attr_report["attr"], attr_report["config"]
@@ -352,12 +394,17 @@ class ClusterHandler(LogMixin, EventBase):
             to_configure[REPORT_CONFIG_ATTR_PER_REQ:],
         )
         while chunk:
-            reports = {rec["attr"]: rec["config"] for rec in chunk}
+            reports = {
+                self.cluster.find_attribute(rec["attr"]): ReportingConfig(
+                    *rec["config"]
+                )
+                for rec in chunk
+            }
             try:
                 res = await RETRYABLE_REQUEST_DECORATOR(
                     self.cluster.configure_reporting_multiple
-                )(reports, **kwargs)
-                self._configure_reporting_status(reports, res[0], event_data)
+                )(reports)
+                self._configure_reporting_status(reports, res, event_data)
             except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
                 self.debug(
                     "failed to set reporting on '%s' cluster for: %s",
@@ -382,26 +429,26 @@ class ClusterHandler(LogMixin, EventBase):
 
     def _configure_reporting_status(
         self,
-        attrs: dict[str, tuple[int, int, float | int]],
-        res: list | tuple,
+        attrs: dict[ZCLAttributeDef, ReportingConfig],
+        res: list[ConfigureReportingResponseRecord],
         event_data: dict[str, dict[str, Any]],
     ) -> None:
         """Parse configure reporting result."""
-        if isinstance(res, (Exception, ConfigureReportingResponseRecord)):
-            # assume default response
+        attr_names = {attr_def.name for attr_def in attrs}
+        if not res:
             self.debug(
                 "attr reporting for '%s' on '%s': %s",
-                attrs,
+                attr_names,
                 self.name,
                 res,
             )
-            for attr in attrs:
-                event_data[attr]["status"] = Status.FAILURE.name
+            for attr_name in attr_names:
+                event_data[attr_name]["status"] = Status.FAILURE.name
             return
-        if res[0].status == Status.SUCCESS and len(res) == 1:
+        if len(res) == 1 and res[0].status == Status.SUCCESS:
             self.debug(
                 "Successfully configured reporting for '%s' on '%s' cluster: %s",
-                attrs,
+                attr_names,
                 self.name,
                 res,
             )
@@ -411,8 +458,8 @@ class ClusterHandler(LogMixin, EventBase):
             # attributes, in order to save bandwidth. In the case of successful configuration of all attributes,
             # only a single attribute status record SHALL be included in the command, with the status field set to
             # SUCCESS and the direction and attribute identifier fields omitted.
-            for attr in attrs:
-                event_data[attr]["status"] = Status.SUCCESS.name
+            for attr_name in attr_names:
+                event_data[attr_name]["status"] = Status.SUCCESS.name
             return
 
         for record in res:
@@ -430,14 +477,14 @@ class ClusterHandler(LogMixin, EventBase):
             self.name,
             res,
         )
-        success = set(attrs) - set(failed)
+        success = attr_names - set(failed)
         self.debug(
             "Successfully configured reporting for '%s' on '%s' cluster",
-            set(attrs) - set(failed),
+            success,
             self.name,
         )
-        for attr in success:
-            event_data[attr]["status"] = Status.SUCCESS.name
+        for attr_name in success:
+            event_data[attr_name]["status"] = Status.SUCCESS.name
 
     async def async_configure(self) -> None:
         """Set cluster binding and attribute reporting."""
@@ -499,27 +546,6 @@ class ClusterHandler(LogMixin, EventBase):
     def cluster_command(self, tsn, command_id, args) -> None:
         """Handle commands received to this cluster."""
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
-        """Handle attribute updates on this cluster."""
-        attr_name = self._get_attribute_name(attrid)
-        self.debug(
-            "cluster_handler[%s] attribute_updated - cluster[%s] attr[%s] value[%s]",
-            self.name,
-            self.cluster.name,
-            attr_name,
-            value,
-        )
-        self.emit(
-            CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-            ClusterAttributeUpdatedEvent(
-                attribute_id=attrid,
-                attribute_name=attr_name,
-                attribute_value=value,
-                cluster_handler_unique_id=self.unique_id,
-                cluster_id=self.cluster.cluster_id,
-            ),
-        )
-
     def zdo_command(self, *args, **kwargs) -> None:
         """Handle ZDO commands on this cluster."""
 
@@ -563,16 +589,11 @@ class ClusterHandler(LogMixin, EventBase):
 
     async def get_attribute_value(self, attribute, from_cache=True) -> Any:
         """Get the value for an attribute."""
-        manufacturer = None
-        manufacturer_code = self._endpoint.device.manufacturer_code
-        if self.cluster.cluster_id >= 0xFC00 and manufacturer_code:
-            manufacturer = manufacturer_code
         result = await safe_read(
             self._cluster,
             [attribute],
             allow_cache=from_cache,
             only_cache=from_cache,
-            manufacturer=manufacturer,
         )
         return result.get(attribute)
 
@@ -584,10 +605,6 @@ class ClusterHandler(LogMixin, EventBase):
         only_cache: bool = True,
     ) -> dict[int | str, Any]:
         """Get the values for a list of attributes."""
-        manufacturer = None
-        manufacturer_code = self._endpoint.device.manufacturer_code
-        if self.cluster.cluster_id >= 0xFC00 and manufacturer_code:
-            manufacturer = manufacturer_code
         chunk = attributes[:CLUSTER_READS_PER_REQ]
         rest = attributes[CLUSTER_READS_PER_REQ:]
         result = {}
@@ -600,7 +617,7 @@ class ClusterHandler(LogMixin, EventBase):
                     chunk,
                     allow_cache=from_cache,
                     only_cache=only_cache,
-                    manufacturer=manufacturer,
+                    manufacturer=UNDEFINED,  # some quirks override default with None
                 )
                 self.debug("Got attributes: %s", read)
                 result.update(read)
@@ -627,7 +644,9 @@ class ClusterHandler(LogMixin, EventBase):
         return await self._get_attributes(False, attributes, from_cache, only_cache)
 
     async def write_attributes_safe(
-        self, attributes: dict[str, Any], manufacturer: int | None = None
+        self,
+        attributes: dict[str, Any],
+        manufacturer: int | UndefinedType | None = UNDEFINED,
     ) -> None:
         """Wrap `write_attributes` to throw an exception on attribute write failure."""
 
@@ -731,22 +750,23 @@ class ClientClusterHandler(ClusterHandler):
         self._generic_id += "_client"
         self._id += "_client"
 
-    def attribute_updated(self, attrid: int, value: Any, timestamp: datetime) -> None:
+    def _handle_attribute_updated_event(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
         """Handle an attribute updated on this cluster."""
-        super().attribute_updated(attrid, value, timestamp)
-
-        try:
-            attr_name = self._cluster.attributes[attrid].name
-        except KeyError:
-            attr_name = "Unknown"
+        super()._handle_attribute_updated_event(event)
 
         self.emit_zha_event(
             SIGNAL_ATTR_UPDATED,
             {
-                ATTRIBUTE_ID: attrid,
-                ATTRIBUTE_NAME: attr_name,
-                ATTRIBUTE_VALUE: value,
-                VALUE: value,
+                ATTRIBUTE_ID: event.attribute_id,
+                ATTRIBUTE_NAME: event.attribute_name or "Unknown",
+                ATTRIBUTE_VALUE: event.value,
+                VALUE: event.value,
             },
         )
 

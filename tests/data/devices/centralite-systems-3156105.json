@@ -9,7 +9,7 @@
   "name": "CentraLite Systems 3156105",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 49887,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -354,6 +354,45 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "CentraLite Systems",
+    "model": "3156105",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 49887,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0301",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0004",
+          "0x0009",
+          "0x0201",
+          "0x0202",
+          "0x0204"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -364,6 +403,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -412,6 +452,7 @@
           "platform": "climate",
           "class_name": "Thermostat",
           "translation_key": "thermostat",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -509,6 +550,7 @@
           "platform": "number",
           "class_name": "ThermostatLocalTempCalibration",
           "translation_key": "local_temperature_calibration",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -556,6 +598,7 @@
           "platform": "number",
           "class_name": "MaxHeatSetpointLimit",
           "translation_key": "max_heat_setpoint_limit",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -603,6 +646,7 @@
           "platform": "number",
           "class_name": "MinHeatSetpointLimit",
           "translation_key": "min_heat_setpoint_limit",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -652,6 +696,7 @@
           "platform": "select",
           "class_name": "KeypadLockout",
           "translation_key": "keypad_lockout",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -704,6 +749,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -748,6 +794,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -792,6 +839,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -842,6 +890,7 @@
           "platform": "sensor",
           "class_name": "ThermostatHVACAction",
           "translation_key": "hvac_action",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -886,6 +935,7 @@
           "platform": "sensor",
           "class_name": "SetpointChangeSourceTimestamp",
           "translation_key": "setpoint_change_source_timestamp",
+          "translation_placeholders": null,
           "device_class": "timestamp",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -932,6 +982,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

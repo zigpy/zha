@@ -9,7 +9,7 @@
   "name": "Third Reality, Inc 3RSM0147Z",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 5127,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -141,6 +141,41 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "Third Reality, Inc",
+    "model": "3RSM0147Z",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 5127,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0402",
+          "0x0405",
+          "0xff01"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "sensor": [
       {
@@ -151,6 +186,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -195,6 +231,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -239,6 +276,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -289,6 +327,7 @@
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": null,
@@ -333,6 +372,7 @@
           "platform": "sensor",
           "class_name": "Humidity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "humidity",
           "state_class": "measurement",
           "entity_category": null,
@@ -379,6 +419,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

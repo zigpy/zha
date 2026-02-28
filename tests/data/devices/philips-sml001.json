@@ -9,7 +9,7 @@
   "name": "Philips SML001",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.philips.motion.PhilipsMotion",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -211,16 +211,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Philips",
-        "SML001"
-      ],
-      [
-        "Philips",
-        "SML002"
-      ]
-    ],
+    "manufacturer": "Philips",
+    "model": "SML001",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 89,
+      "maximum_incoming_transfer_size": 63,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 63,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0xc05e",
@@ -263,8 +270,9 @@
           "unique_id": "00:17:88:01:06:f5:ac:71-1-6",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
-          "class_name": "Motion",
+          "class_name": "PhilipsMotion",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "motion",
           "state_class": null,
           "entity_category": null,
@@ -274,18 +282,18 @@
           "postfix": null,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "00:17:88:01:06:f5:ac:71:1:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "00:17:88:01:06:f5:ac:71:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "00:17:88:01:06:f5:ac:71",
@@ -295,7 +303,7 @@
           "attribute_name": "on_off"
         },
         "state": {
-          "class_name": "Motion",
+          "class_name": "PhilipsMotion",
           "available": true,
           "state": false
         }
@@ -308,6 +316,7 @@
           "platform": "binary_sensor",
           "class_name": "HueOccupancy",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "occupancy",
           "state_class": null,
           "entity_category": null,
@@ -353,6 +362,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -401,6 +411,7 @@
           "platform": "select",
           "class_name": "HueV1MotionSensitivity",
           "translation_key": "motion_sensitivity",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -451,6 +462,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -495,6 +507,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -539,6 +552,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -589,6 +603,7 @@
           "platform": "sensor",
           "class_name": "Illuminance",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "illuminance",
           "state_class": "measurement",
           "entity_category": null,
@@ -633,6 +648,7 @@
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": null,
@@ -679,6 +695,7 @@
           "platform": "switch",
           "class_name": "HueMotionTriggerIndicatorSwitch",
           "translation_key": "trigger_indicator",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -729,6 +746,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

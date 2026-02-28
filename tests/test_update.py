@@ -30,6 +30,9 @@ from zha.application.platforms.update import (
     ATTR_IN_PROGRESS,
     ATTR_INSTALLED_VERSION,
     ATTR_LATEST_VERSION,
+    ATTR_RELEASE_NOTES,
+    ATTR_RELEASE_SUMMARY,
+    ATTR_RELEASE_URL,
     ATTR_UPDATE_PERCENTAGE,
 )
 from zha.exceptions import ZHAException
@@ -69,14 +72,21 @@ def zigpy_device_mock(zha_gateway: Gateway):
     )
 
 
-def create_fw_image(version: int) -> OtaImageWithMetadata:
+def create_fw_image(
+    version: int,
+    changelog: str | None = None,
+    release_notes: str | None = None,
+    release_url: str | None = None,
+) -> OtaImageWithMetadata:
     """Create an OTA image with a specific file version."""
     return OtaImageWithMetadata(
         metadata=BaseOtaImageMetadata(
             file_version=version,
             manufacturer_id=0x1234,
             image_type=0x90,
-            changelog="This is a test firmware image!",
+            changelog=changelog,
+            release_notes=release_notes,
+            release_url=release_url,
         ),
         firmware=firmware.OTAImage(
             header=firmware.OTAImageHeader(
@@ -605,3 +615,135 @@ async def test_firmware_update_latest_version_even_if_downgrade(
         entity.state[ATTR_LATEST_VERSION]
         == f"0x{fw_image_downgrade.firmware.header.file_version:08x}"
     )
+
+
+async def test_firmware_update_metadata(zha_gateway: Gateway) -> None:
+    """Test ZHA update platform - firmware metadata (changelog, release_notes, release_url)."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    zha_device, ota_cluster, _, installed_fw_version = await setup_test_data(
+        zha_gateway, zigpy_device
+    )
+
+    # firmware image with optional metadata
+    fw_image = create_fw_image(
+        installed_fw_version + 10,
+        changelog="This is a test changelog!",
+        release_notes="These are the full release notes.",
+        release_url="https://example.com/releases/v1.0",
+    )
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=(fw_image,),
+            downgrades=(),
+        )
+    )
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    # metadata should be None before notification
+    assert entity.state[ATTR_RELEASE_SUMMARY] is None
+    assert entity.state[ATTR_RELEASE_NOTES] is None
+    assert entity.state[ATTR_RELEASE_URL] is None
+
+    # simulate an image available notification
+    await ota_cluster._handle_query_next_image(
+        foundation.ZCLHeader.cluster(
+            tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
+        ),
+        general.QueryNextImageCommand(
+            field_control=fw_image.firmware.header.field_control,
+            manufacturer_code=zha_device.manufacturer_code,
+            image_type=fw_image.firmware.header.image_type,
+            current_file_version=installed_fw_version,
+            hardware_version=1,
+        ),
+    )
+
+    await zha_gateway.async_block_till_done()
+
+    # verify metadata is exposed in entity state now
+    assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
+    assert (
+        entity.state[ATTR_LATEST_VERSION]
+        == f"0x{fw_image.firmware.header.file_version:08x}"
+    )
+    assert entity.state[ATTR_RELEASE_URL] == "https://example.com/releases/v1.0"
+    assert entity.state[ATTR_RELEASE_SUMMARY] == "This is a test changelog!"
+
+    # release notes include version header
+    assert entity.state[ATTR_RELEASE_NOTES] == (
+        f"## 0x{fw_image.firmware.header.file_version:08x}\n"
+        "These are the full release notes."
+    )
+
+
+async def test_firmware_update_multiple_upgrades_combined_release_notes(
+    zha_gateway: Gateway,
+) -> None:
+    """Test ZHA update platform - multiple upgrades combine release notes with version headers."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    zha_device, ota_cluster, _, installed_fw_version = await setup_test_data(
+        zha_gateway, zigpy_device
+    )
+
+    # Create multiple firmware images (newest to oldest)
+    # Note: fw_image_v2 has no release notes and should be skipped
+    fw_image_v3 = create_fw_image(
+        installed_fw_version + 30,
+        changelog="Latest changelog",
+        release_notes="Release notes for v3.",
+        release_url="https://example.com/releases/v3",
+    )
+    fw_image_v2 = create_fw_image(
+        installed_fw_version + 20,
+        release_notes=None,  # No release notes for this version
+    )
+    fw_image_v1 = create_fw_image(
+        installed_fw_version + 10,
+        release_notes="Release notes for v1.",
+    )
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=(fw_image_v3, fw_image_v2, fw_image_v1),
+            downgrades=(),
+        )
+    )
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    # simulate an image available notification
+    await ota_cluster._handle_query_next_image(
+        foundation.ZCLHeader.cluster(
+            tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
+        ),
+        general.QueryNextImageCommand(
+            field_control=fw_image_v3.firmware.header.field_control,
+            manufacturer_code=zha_device.manufacturer_code,
+            image_type=fw_image_v3.firmware.header.image_type,
+            current_file_version=installed_fw_version,
+            hardware_version=1,
+        ),
+    )
+
+    await zha_gateway.async_block_till_done()
+
+    # Verify latest version is the newest firmware
+    assert (
+        entity.state[ATTR_LATEST_VERSION]
+        == f"0x{fw_image_v3.firmware.header.file_version:08x}"
+    )
+    # Only latest firmware provides URL and release summary
+    assert entity.state[ATTR_RELEASE_URL] == "https://example.com/releases/v3"
+    assert entity.state[ATTR_RELEASE_SUMMARY] == "Latest changelog"
+
+    # Release notes should be combined with version headers
+    # fw_image_v2 is skipped because it has no release notes
+    expected_release_notes = (
+        f"## 0x{fw_image_v3.firmware.header.file_version:08x}\n"
+        "Release notes for v3.\n\n"
+        f"## 0x{fw_image_v1.firmware.header.file_version:08x}\n"
+        "Release notes for v1."
+    )
+    assert entity.state[ATTR_RELEASE_NOTES] == expected_release_notes

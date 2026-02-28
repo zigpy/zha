@@ -9,7 +9,7 @@
   "name": "SONOFF SWV",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4742,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -383,7 +383,46 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "SONOFF",
+    "model": "SWV",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4742,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 255,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 255,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0002",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0006",
+          "0x0020",
+          "0x0404",
+          "0x0b05",
+          "0xfc11",
+          "0xfc57"
+        ],
+        "output_clusters": [
+          "0x000a",
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -394,6 +433,7 @@
           "platform": "binary_sensor",
           "class_name": "BinarySensor",
           "translation_key": "water_leak",
+          "translation_placeholders": null,
           "device_class": "moisture",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -437,6 +477,7 @@
           "platform": "binary_sensor",
           "class_name": "BinarySensor",
           "translation_key": "water_supply",
+          "translation_placeholders": null,
           "device_class": "problem",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -482,6 +523,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -530,6 +572,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -574,6 +617,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -618,6 +662,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -668,6 +713,7 @@
           "platform": "sensor",
           "class_name": "Flow",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "volume_flow_rate",
           "state_class": "measurement",
           "entity_category": null,
@@ -714,6 +760,7 @@
           "platform": "switch",
           "class_name": "Switch",
           "translation_key": "switch",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -756,6 +803,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "water_shortage_auto_close",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -806,6 +854,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

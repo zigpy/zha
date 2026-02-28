@@ -12,11 +12,13 @@ from zhaquirks.const import (
     PROFILE_ID,
 )
 from zhaquirks.tuya.tuya_valve import ParksideTuyaValveManufCluster
+import zigpy
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
 from zigpy.quirks import CustomCluster, CustomDevice, DeviceRegistry
 from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
 import zigpy.types as t
+from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, security
 from zigpy.zcl.clusters.manufacturer_specific import ManufacturerSpecificCluster
 import zigpy.zcl.foundation as zcl_f
@@ -34,6 +36,7 @@ from tests.common import (
     update_attribute_cache,
 )
 from zha.application import Platform
+from zha.application.const import ZCL_INIT_ATTRS
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.button import (
@@ -43,6 +46,7 @@ from zha.application.platforms.button import (
 )
 from zha.application.platforms.button.const import ButtonDeviceClass
 from zha.exceptions import ZHAException
+from zha.zigbee.cluster_handlers.manufacturerspecific import OppleRemoteClusterHandler
 from zha.zigbee.device import Device
 
 ZIGPY_DEVICE = {
@@ -152,7 +156,7 @@ async def test_frost_unlock(
     await entity.async_press()
     await zha_gateway.async_block_till_done()
     assert cluster.write_attributes.mock_calls == [
-        call({"frost_lock_reset": 0}, manufacturer=None)
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED)
     ]
 
     cluster.write_attributes.reset_mock()
@@ -164,9 +168,9 @@ async def test_frost_unlock(
 
     # There are three retries
     assert cluster.write_attributes.mock_calls == [
-        call({"frost_lock_reset": 0}, manufacturer=None),
-        call({"frost_lock_reset": 0}, manufacturer=None),
-        call({"frost_lock_reset": 0}, manufacturer=None),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
     ]
 
 
@@ -287,7 +291,7 @@ async def test_quirks_write_attr_button(
         await entity.async_press()
         await zha_gateway.async_block_till_done()
         assert cluster.write_attributes.mock_calls == [
-            call({cluster.AttributeDefs.feed.name: 2}, manufacturer=None)
+            call({cluster.AttributeDefs.feed.name: 2}, manufacturer=UNDEFINED)
         ]
 
     assert cluster.get(cluster.AttributeDefs.feed.name) == 2
@@ -354,3 +358,90 @@ async def test_quirks_write_attr_buttons_uid(zha_gateway: Gateway) -> None:
     assert entity_btn_2.translation_key == "btn_2"
     assert entity_btn_2._unique_id_suffix == "btn_2"
     assert entity_btn_2._attribute_value == 2
+
+
+class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
+    """Aqara manufacturer specific cluster."""
+
+    cluster_id = 0xFCC0
+    ep_attribute = "opple_cluster"
+
+    class ServerCommandDefs(zcl_f.BaseCommandDefs):
+        """Server command definitions."""
+
+        self_test: Final = zcl_f.ZCLCommandDef(
+            id=0x00, schema={"identify_time": t.uint16_t}
+        )
+
+
+async def test_cluster_handler_quirks_unnecessary_claiming(
+    zha_gateway: Gateway,
+) -> None:
+    """Test quirks button doesn't claim cluster handlers unnecessarily."""
+
+    registry = DeviceRegistry()
+    (
+        QuirkBuilder(
+            "Fake_Manufacturer_sensor_2", "Fake_Model_sensor_2", registry=registry
+        )
+        .replaces(OppleCluster)
+        .command_button(
+            OppleCluster.ServerCommandDefs.self_test.name,
+            OppleCluster.cluster_id,
+            command_kwargs={"identify_time": 5},
+            translation_key="self_test",
+            fallback_name="Self test",
+        )
+        .add_to_registry()
+    )
+
+    zigpy_device = create_mock_zigpy_device(
+        zha_gateway,
+        {
+            1: {
+                SIG_EP_INPUT: [
+                    general.Basic.cluster_id,
+                    OppleCluster.cluster_id,
+                ],
+                SIG_EP_OUTPUT: [],
+                SIG_EP_TYPE: zigpy.profiles.zha.DeviceType.OCCUPANCY_SENSOR,
+                SIG_EP_PROFILE: zigpy.profiles.zha.PROFILE_ID,
+            }
+        },
+        manufacturer="Fake_Manufacturer_sensor_2",
+        model="Fake_Model_sensor_2",
+    )
+    zigpy_device = registry.get_device(zigpy_device)
+
+    # Suppress normal endpoint probing, as this will claim the Opple cluster handler
+    # already due to it being in the "CLUSTER_HANDLER_ONLY_CLUSTERS" registry.
+    # We want to test the handler also gets claimed via quirks v2 attributes init.
+    with patch("zha.application.discovery.discover_entities_for_endpoint"):
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    assert isinstance(zha_device.device, CustomDeviceV2)
+
+    # get cluster handler of OppleCluster
+    opple_ch = zha_device.endpoints[1].all_cluster_handlers["1:0xfcc0"]
+    assert isinstance(opple_ch, OppleRemoteClusterHandler)
+
+    # make sure the cluster handler was not claimed,
+    # as no reporting is configured and no attributes are to be read
+    assert opple_ch not in zha_device.endpoints[1].claimed_cluster_handlers.values()
+
+    # check that BIND is left at default of True, though ZHA will ignore it
+    assert opple_ch.BIND is True
+
+    # check ZCL_INIT_ATTRS is empty
+    assert opple_ch.ZCL_INIT_ATTRS == {}
+
+    # check that no ZCL_INIT_ATTRS instance variable was created
+    assert opple_ch.__dict__.get(ZCL_INIT_ATTRS) is None
+    assert opple_ch.ZCL_INIT_ATTRS is OppleRemoteClusterHandler.ZCL_INIT_ATTRS
+
+    # double check we didn't modify the class variable
+    assert OppleRemoteClusterHandler.ZCL_INIT_ATTRS == {}
+
+    # check if REPORT_CONFIG is empty, both instance and class variable
+    assert opple_ch.REPORT_CONFIG == ()
+    assert OppleRemoteClusterHandler.REPORT_CONFIG == ()

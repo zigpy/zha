@@ -9,7 +9,7 @@
   "name": "frient A/S SIRZB-111",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4117,
   "power_source": "Mains",
   "lqi": null,
@@ -139,7 +139,16 @@
               "id": "0x0010",
               "name": "cie_addr",
               "zcl_type": "EUI64",
-              "value": "bc:02:6e:ff:fe:24:db:90"
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
             },
             {
               "id": "0x0000",
@@ -208,7 +217,61 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "frient A/S",
+    "model": "SIRZB-111",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4117,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 1500,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 1500,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0xc0c9",
+        "device_type": "0x0001",
+        "input_clusters": [
+          "0x0005",
+          "0x0006"
+        ],
+        "output_clusters": []
+      },
+      "43": {
+        "profile_id": "0x0104",
+        "device_type": "0x0403",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0004",
+          "0x0500",
+          "0x0502"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x000a",
+          "0x0019"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0061",
+        "input_clusters": [],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "button": [
       {
@@ -219,6 +282,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -267,6 +331,7 @@
           "platform": "select",
           "class_name": "DefaultSirenLevelSelectEntity",
           "translation_key": "default_siren_level",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -316,6 +381,7 @@
           "platform": "select",
           "class_name": "DefaultStrobeSelectEntity",
           "translation_key": "default_strobe",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -363,6 +429,7 @@
           "platform": "select",
           "class_name": "DefaultStrobeLevelSelectEntity",
           "translation_key": "default_strobe_level",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -412,6 +479,7 @@
           "platform": "select",
           "class_name": "DefaultToneSelectEntity",
           "translation_key": "default_siren_tone",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -466,6 +534,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -510,6 +579,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -554,6 +624,7 @@
           "platform": "sensor",
           "class_name": "Sensor",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -600,6 +671,7 @@
           "platform": "siren",
           "class_name": "Siren",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -653,6 +725,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

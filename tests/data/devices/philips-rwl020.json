@@ -9,7 +9,7 @@
   "name": "Philips RWL020",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.philips.rwlfirstgen.PhilipsRWLFirstGen",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -111,6 +111,12 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
+              "id": "0x0031",
+              "name": "philips",
+              "zcl_type": "map16",
+              "value": 11
+            },
+            {
               "id": "0x0007",
               "name": "power_source",
               "zcl_type": "enum8",
@@ -181,24 +187,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Philips",
-        "RWL020"
-      ],
-      [
-        "Signify Netherlands B.V.",
-        "RWL020"
-      ],
-      [
-        "Philips",
-        "RWL021"
-      ],
-      [
-        "Signify Netherlands B.V.",
-        "RWL021"
-      ]
-    ],
+    "manufacturer": "Philips",
+    "model": "RWL020",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 71,
+      "maximum_incoming_transfer_size": 45,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 45,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0xc05e",
@@ -241,6 +246,7 @@
           "platform": "binary_sensor",
           "class_name": "BinaryInput",
           "translation_key": "binary_input",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -286,6 +292,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -334,6 +341,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -378,6 +386,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -422,6 +431,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -474,6 +484,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

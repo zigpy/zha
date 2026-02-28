@@ -9,7 +9,7 @@
   "name": "LUMI lumi.sensor_switch",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.mija.sensor_switch.MijaButton",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -130,12 +130,8 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.sensor_switch"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.sensor_switch",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,
@@ -183,6 +179,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -231,6 +228,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -275,6 +273,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -319,6 +318,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -373,6 +373,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

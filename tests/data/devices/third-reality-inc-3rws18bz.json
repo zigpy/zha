@@ -9,7 +9,7 @@
   "name": "Third Reality, Inc 3RWS18BZ",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -121,7 +121,16 @@
               "id": "0x0010",
               "name": "cie_addr",
               "zcl_type": "EUI64",
-              "value": "00:12:4b:00:1c:a1:b8:46"
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
             },
             {
               "id": "0x0000",
@@ -183,7 +192,41 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "Third Reality, Inc",
+    "model": "3RWS18BZ",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4659,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0402",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0500",
+          "0xff01"
+        ],
+        "output_clusters": [
+          "0x0006",
+          "0x0019"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -194,6 +237,7 @@
           "platform": "binary_sensor",
           "class_name": "IASZone",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "moisture",
           "state_class": null,
           "entity_category": null,
@@ -237,6 +281,7 @@
           "platform": "binary_sensor",
           "class_name": "Opening",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "opening",
           "state_class": null,
           "entity_category": null,
@@ -246,18 +291,18 @@
           "postfix": null,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "28:2c:02:bf:ff:e7:c9:49:1:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "28:2c:02:bf:ff:e7:c9:49:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "28:2c:02:bf:ff:e7:c9:49",
@@ -282,6 +327,7 @@
           "platform": "number",
           "class_name": "NumberConfigurationEntity",
           "translation_key": "siren_time",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -331,6 +377,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -375,6 +422,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -419,6 +467,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -471,6 +520,7 @@
           "platform": "switch",
           "class_name": "ConfigurableAttributeSwitch",
           "translation_key": "enable_siren",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -521,6 +571,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

@@ -9,7 +9,7 @@
   "name": "TexasInstruments ti.router",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.texasinstruments.router.TiRouter",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 0,
   "power_source": "Mains",
   "lqi": null,
@@ -96,12 +96,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "TexasInstruments",
-        "ti.router"
-      ]
-    ],
+    "manufacturer": "TexasInstruments",
+    "model": "ti.router",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 0,
+      "maximum_buffer_size": 80,
+      "maximum_incoming_transfer_size": 160,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 160,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "8": {
         "profile_id": "0x0104",
@@ -134,6 +145,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -182,6 +194,7 @@
           "platform": "number",
           "class_name": "TiRouterTransmitPower",
           "translation_key": "transmit_power",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -231,6 +244,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -275,6 +289,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",

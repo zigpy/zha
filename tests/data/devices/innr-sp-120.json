@@ -9,7 +9,7 @@
   "name": "innr SP 120",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.innr.innr_sp120_plug.SP120",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4454,
   "power_source": "Mains",
   "lqi": null,
@@ -518,12 +518,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "innr",
-        "SP 120"
-      ]
-    ],
+    "manufacturer": "innr",
+    "model": "SP 120",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4454,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 80,
+      "server_mask": 0,
+      "maximum_outgoing_transfer_size": 80,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0xc05e",
@@ -565,6 +576,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -613,6 +625,7 @@
           "platform": "number",
           "class_name": "OnOffTransitionTimeConfigurationEntity",
           "translation_key": "on_off_transition_time",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -662,6 +675,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -706,6 +720,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -750,6 +765,7 @@
           "platform": "sensor",
           "class_name": "SmartEnergySummation",
           "translation_key": "summation_delivered",
+          "translation_placeholders": null,
           "device_class": "energy",
           "state_class": "total_increasing",
           "entity_category": null,
@@ -764,7 +780,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 1794,
-                "name": "MeteringClusterInnr",
+                "name": "MeteringClusterInnrOld",
                 "type": "server"
               },
               "id": "1:0x0702",
@@ -802,6 +818,7 @@
           "platform": "sensor",
           "class_name": "PolledElectricalMeasurement",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "power",
           "state_class": "measurement",
           "entity_category": null,
@@ -851,6 +868,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSCurrent",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "current",
           "state_class": "measurement",
           "entity_category": null,
@@ -878,7 +896,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {
@@ -900,6 +918,7 @@
           "platform": "sensor",
           "class_name": "ElectricalMeasurementRMSVoltage",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "voltage",
           "state_class": "measurement",
           "entity_category": null,
@@ -951,6 +970,7 @@
           "platform": "switch",
           "class_name": "Switch",
           "translation_key": "switch",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -995,6 +1015,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

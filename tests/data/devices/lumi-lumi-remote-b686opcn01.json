@@ -9,7 +9,7 @@
   "name": "LUMI lumi.remote.b686opcn01",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.opple_remote.RemoteB686OPCN01V3",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -79,7 +79,7 @@
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 7
+              "value": 10
             },
             {
               "id": "0x0020",
@@ -272,12 +272,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.remote.b686opcn01"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.remote.b686opcn01",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4447,
+      "maximum_buffer_size": 127,
+      "maximum_incoming_transfer_size": 100,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 100,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
@@ -361,6 +372,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -409,6 +421,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -453,6 +466,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -497,6 +511,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -531,7 +546,7 @@
           "class_name": "Battery",
           "available": true,
           "state": null,
-          "battery_size": "CR2",
+          "battery_size": "CR2032",
           "battery_quantity": 1,
           "battery_voltage": 3.0
         },

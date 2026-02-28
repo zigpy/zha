@@ -9,7 +9,7 @@
   "name": "LUMI lumi.weather",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.weather.Weather",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -162,12 +162,8 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.weather"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.weather",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,
@@ -213,6 +209,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -261,6 +258,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -305,6 +303,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -349,6 +348,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -401,6 +401,7 @@
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": null,
@@ -445,6 +446,7 @@
           "platform": "sensor",
           "class_name": "Pressure",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "pressure",
           "state_class": "measurement",
           "entity_category": null,
@@ -489,6 +491,7 @@
           "platform": "sensor",
           "class_name": "Humidity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "humidity",
           "state_class": "measurement",
           "entity_category": null,

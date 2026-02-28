@@ -96,6 +96,16 @@ class Endpoint:
         return self._zigpy_endpoint.endpoint_id
 
     @functools.cached_property
+    def cluster_handlers_by_name(self) -> dict[str, ClusterHandler]:
+        """Return cluster handlers indexed by name."""
+        return {ch.name: ch for ch in self._all_cluster_handlers.values()}
+
+    @functools.cached_property
+    def client_cluster_handlers_by_name(self) -> dict[str, ClientClusterHandler]:
+        """Return client cluster handlers indexed by name."""
+        return {ch.name: ch for ch in self._client_cluster_handlers.values()}
+
+    @functools.cached_property
     def unique_id(self) -> str:
         """Return the unique id for this endpoint."""
         return self._unique_id
@@ -149,13 +159,17 @@ class Endpoint:
             cluster_handler_classes = CLUSTER_HANDLER_REGISTRY.get(
                 cluster_id, {None: ClusterHandler}
             )
-            quirk_id = (
-                self.device.quirk_id
-                if self.device.quirk_id in cluster_handler_classes
-                else None
-            )
+
+            # get first exposed feature from device
+            # that matches a registered cluster handler
+            cluster_exposed_features: str | None = None
+            for exposed_features in self.device.exposes_features:
+                if exposed_features in cluster_handler_classes:
+                    cluster_exposed_features = exposed_features
+                    break
+
             cluster_handler_class = cluster_handler_classes.get(
-                quirk_id, ClusterHandler
+                cluster_exposed_features, ClusterHandler
             )
 
             # Allow cluster handler to filter out bad matches
@@ -256,12 +270,3 @@ class Endpoint:
     def claim_cluster_handlers(self, cluster_handlers: list[ClusterHandler]) -> None:
         """Claim cluster handlers."""
         self.claimed_cluster_handlers.update({ch.id: ch for ch in cluster_handlers})
-
-    def unclaimed_cluster_handlers(self) -> list[ClusterHandler]:
-        """Return a list of available (unclaimed) cluster handlers."""
-        claimed = set(self.claimed_cluster_handlers)
-        available = set(self.all_cluster_handlers)
-        return [
-            self.all_cluster_handlers[cluster_id]
-            for cluster_id in (available - claimed)
-        ]

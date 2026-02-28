@@ -9,7 +9,7 @@
   "name": "Homr HRMSN01",
   "quirk_applied": false,
   "quirk_class": "zigpy.device.Device",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4660,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -346,6 +346,70 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "Homr",
+    "model": "HRMSN01",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4660,
+      "maximum_buffer_size": 108,
+      "maximum_incoming_transfer_size": 1617,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 1617,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0302",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0400",
+          "0x0402",
+          "0x0403",
+          "0x0405",
+          "0x0406",
+          "0x0502"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      },
+      "5": {
+        "profile_id": "0x0104",
+        "device_type": "0xfff0",
+        "input_clusters": [
+          "0x0000"
+        ],
+        "output_clusters": [
+          "0x0019"
+        ]
+      },
+      "10": {
+        "profile_id": "0x0104",
+        "device_type": "0x0102",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x0008",
+          "0x0300"
+        ],
+        "output_clusters": [
+          "0x0000"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -356,6 +420,7 @@
           "platform": "binary_sensor",
           "class_name": "Occupancy",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "occupancy",
           "state_class": null,
           "entity_category": null,
@@ -401,6 +466,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -449,12 +515,13 @@
           "platform": "light",
           "class_name": "Light",
           "translation_key": "light",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": false,
+          "primary": true,
           "postfix": null,
           "cluster_handlers": [
             {
@@ -513,6 +580,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": true,
           "brightness": 255,
           "xy_color": [
@@ -533,8 +601,7 @@
             "xy"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -551,6 +618,7 @@
           "platform": "number",
           "class_name": "StartUpColorTemperatureConfigurationEntity",
           "translation_key": "start_up_color_temperature",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -600,6 +668,7 @@
           "platform": "select",
           "class_name": "DefaultSirenLevelSelectEntity",
           "translation_key": "default_siren_level",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -649,6 +718,7 @@
           "platform": "select",
           "class_name": "DefaultStrobeSelectEntity",
           "translation_key": "default_strobe",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -696,6 +766,7 @@
           "platform": "select",
           "class_name": "DefaultStrobeLevelSelectEntity",
           "translation_key": "default_strobe_level",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -745,6 +816,7 @@
           "platform": "select",
           "class_name": "DefaultToneSelectEntity",
           "translation_key": "default_siren_tone",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": "config",
@@ -799,6 +871,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -843,6 +916,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -887,6 +961,7 @@
           "platform": "sensor",
           "class_name": "Illuminance",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "illuminance",
           "state_class": "measurement",
           "entity_category": null,
@@ -931,6 +1006,7 @@
           "platform": "sensor",
           "class_name": "Temperature",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": null,
@@ -975,6 +1051,7 @@
           "platform": "sensor",
           "class_name": "Pressure",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "pressure",
           "state_class": "measurement",
           "entity_category": null,
@@ -1019,6 +1096,7 @@
           "platform": "sensor",
           "class_name": "Humidity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "humidity",
           "state_class": "measurement",
           "entity_category": null,
@@ -1065,6 +1143,7 @@
           "platform": "siren",
           "class_name": "Siren",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
           "entity_category": null,
@@ -1118,6 +1197,7 @@
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "firmware",
           "state_class": null,
           "entity_category": "config",

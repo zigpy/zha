@@ -9,7 +9,7 @@
   "name": "LUMI lumi.sensor_magnet.aq2",
   "quirk_applied": true,
   "quirk_class": "zhaquirks.xiaomi.aqara.magnet_aq2.MagnetAQ2",
-  "quirk_id": null,
+  "exposes_features": [],
   "manufacturer_code": 4151,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -144,12 +144,8 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.sensor_magnet.aq2"
-      ]
-    ],
+    "manufacturer": "LUMI",
+    "model": "lumi.sensor_magnet.aq2",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,
@@ -193,6 +189,7 @@
           "platform": "binary_sensor",
           "class_name": "Opening",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "opening",
           "state_class": null,
           "entity_category": null,
@@ -202,18 +199,18 @@
           "postfix": null,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "00:15:8d:00:01:ab:40:52:1:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "00:15:8d:00:01:ab:40:52:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "00:15:8d:00:01:ab:40:52",
@@ -238,6 +235,7 @@
           "platform": "button",
           "class_name": "IdentifyButton",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "identify",
           "state_class": null,
           "entity_category": "diagnostic",
@@ -286,6 +284,7 @@
           "platform": "sensor",
           "class_name": "LQISensor",
           "translation_key": "lqi",
+          "translation_placeholders": null,
           "device_class": null,
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -330,6 +329,7 @@
           "platform": "sensor",
           "class_name": "RSSISensor",
           "translation_key": "rssi",
+          "translation_placeholders": null,
           "device_class": "signal_strength",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -374,6 +374,7 @@
           "platform": "sensor",
           "class_name": "Battery",
           "translation_key": null,
+          "translation_placeholders": null,
           "device_class": "battery",
           "state_class": "measurement",
           "entity_category": "diagnostic",
@@ -426,6 +427,7 @@
           "platform": "sensor",
           "class_name": "DeviceTemperature",
           "translation_key": "device_temperature",
+          "translation_placeholders": null,
           "device_class": "temperature",
           "state_class": "measurement",
           "entity_category": "diagnostic",
