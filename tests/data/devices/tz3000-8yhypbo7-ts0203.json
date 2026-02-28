@@ -236,7 +236,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "postfix": null,
+          "postfix": 1,
           "cluster_handlers": [
             {
               "class_name": "IASZoneClusterHandler",
@@ -280,7 +280,7 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "postfix": null,
+          "postfix": 2,
           "cluster_handlers": [
             {
               "class_name": "OnOffClientClusterHandler",

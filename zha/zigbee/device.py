@@ -983,16 +983,16 @@ class Device(LogMixin, EventBase):
         The order of the entities determines the order of postfix numbers.
         """
         entity_type_name_dict: defaultdict[
-            tuple[type[BaseEntity], str | None], list[BaseEntity]
+            tuple[Platform, str | None], list[BaseEntity]
         ] = defaultdict(list)
-        # Group entities by type & name, pick groups that are greater than one entity,
+        # Group entities by platform & name, take groups that are greater than one entity,
         # and add postfix numbers to the entities of those groups.
         for entity in entities:
             # Pick the name key in the same priority order as which attribute affects the name.
             name_key = (
                 entity.translation_key or entity.device_class or entity.fallback_name
             )
-            entity_type_name_dict[(type(entity), name_key)].append(entity)
+            entity_type_name_dict[(entity.PLATFORM, name_key)].append(entity)
 
         for entities_same_name in entity_type_name_dict.values():
             if not len(entities_same_name) > 1:
