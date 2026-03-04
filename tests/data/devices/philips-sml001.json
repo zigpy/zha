@@ -177,7 +177,7 @@
         },
         {
           "cluster_id": "0x0406",
-          "endpoint_attribute": "philips_occupancy",
+          "endpoint_attribute": "occupancy",
           "attributes": [
             {
               "id": "0x0000",
@@ -313,7 +313,7 @@
           "unique_id": "00:17:88:01:06:f5:ac:71-2-1030",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
-          "class_name": "HueOccupancy",
+          "class_name": "Occupancy",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "occupancy",
@@ -329,7 +329,7 @@
               "endpoint_id": 2,
               "cluster": {
                 "id": 1030,
-                "name": "PhilipsOccupancySensing",
+                "name": "Occupancy Sensing",
                 "type": "server"
               },
               "id": "2:0x0406",
@@ -345,7 +345,7 @@
           "attribute_name": "occupancy"
         },
         "state": {
-          "class_name": "HueOccupancy",
+          "class_name": "Occupancy",
           "available": true,
           "state": false
         }
@@ -396,56 +396,6 @@
         "state": {
           "class_name": "IdentifyButton",
           "available": true
-        }
-      }
-    ],
-    "select": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:17:88:01:06:f5:ac:71-2-1030-motion_sensitivity",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "HueV1MotionSensitivity",
-          "translation_key": "motion_sensitivity",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OccupancySensingClusterHandler",
-              "generic_id": "cluster_handler_0x0406",
-              "endpoint_id": 2,
-              "cluster": {
-                "id": 1030,
-                "name": "PhilipsOccupancySensing",
-                "type": "server"
-              },
-              "id": "2:0x0406",
-              "unique_id": "00:17:88:01:06:f5:ac:71:2:0x0406",
-              "status": "INITIALIZED",
-              "value_attribute": "occupancy"
-            }
-          ],
-          "device_ieee": "00:17:88:01:06:f5:ac:71",
-          "endpoint_id": 2,
-          "available": true,
-          "group_id": null,
-          "enum": "HueV1MotionSensitivities",
-          "options": [
-            "Low",
-            "Medium",
-            "High"
-          ]
-        },
-        "state": {
-          "class_name": "HueV1MotionSensitivity",
-          "available": true,
-          "state": "High"
         }
       }
     ],
