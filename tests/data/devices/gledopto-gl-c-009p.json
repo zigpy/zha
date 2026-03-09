@@ -389,7 +389,7 @@
             "off"
           ],
           "supported_features": 40,
-          "min_mireds": 158,
+          "min_mireds": 153,
           "max_mireds": 500
         },
         "state": {
@@ -398,16 +398,15 @@
           "on": false,
           "brightness": 166,
           "xy_color": null,
-          "color_temp": 500,
+          "color_temp": null,
           "effect_list": [
             "off"
           ],
           "effect": "off",
           "supported_features": 40,
-          "color_mode": "color_temp",
+          "color_mode": "brightness",
           "supported_color_modes": [
             "brightness",
-            "color_temp",
             "onoff"
           ],
           "off_with_transition": false,
