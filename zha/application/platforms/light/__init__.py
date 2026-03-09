@@ -48,8 +48,8 @@ from zha.application.platforms.light.const import (
     ATTR_SUPPORTED_COLOR_MODES,
     ATTR_SUPPORTED_FEATURES,
     ATTR_XY_COLOR,
-    COLOR_DEVICE_TYPES,
-    COLOR_TEMP_ONLY_DEVICE_TYPES,
+    COLOR_PROFILE_DEVICE_TYPES,
+    COLOR_TEMP_ONLY_PROFILE_DEVICE_TYPES,
     DEFAULT_EXTRA_TRANSITION_DELAY_LONG,
     DEFAULT_EXTRA_TRANSITION_DELAY_SHORT,
     DEFAULT_LONG_TRANSITION_TIME,
@@ -894,29 +894,19 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         super().recompute_capabilities()
 
         effect_list = [EFFECT_OFF]
-
-        # Use the device type from the zigpy endpoint to constrain which color
-        # modes are allowed.  The device type is the most authoritative source
-        # for whether the Color Control cluster should be used at all.
-        #
-        # - Non-color device types (DIMMABLE_LIGHT, ON_OFF_LIGHT, etc.) should
-        #   not get color modes even if a Color Control cluster is present.
-        # - COLOR_TEMPERATURE_LIGHT: only color_temp, never XY (per ZCL spec,
-        #   ColorCapabilities SHALL be 0x0010).
-        # - COLOR_DIMMABLE_LIGHT / EXTENDED_COLOR_LIGHT: trust
-        #   ColorCapabilities for determining supported modes.
-        zigpy_ep = self.endpoint.zigpy_endpoint
-        device_type_key = (zigpy_ep.profile_id, zigpy_ep.device_type)
-        is_color_device = device_type_key in COLOR_DEVICE_TYPES
-        is_color_temp_only = device_type_key in COLOR_TEMP_ONLY_DEVICE_TYPES
+        device_type = (
+            self.endpoint.zigpy_endpoint.profile_id,
+            self.endpoint.zigpy_endpoint.device_type,
+        )
 
         self._internal_supported_color_modes = {ColorMode.ONOFF}
+
         if self._level_cluster_handler:
             self._internal_supported_color_modes.add(ColorMode.BRIGHTNESS)
             self._supported_features |= LightEntityFeature.TRANSITION
             self._brightness = self._level_cluster_handler.current_level
 
-        if self._color_cluster_handler and is_color_device:
+        if device_type in COLOR_PROFILE_DEVICE_TYPES and self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
 
@@ -924,23 +914,25 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
                 self._internal_supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._color_temp = self._color_cluster_handler.color_temperature
 
-            if not is_color_temp_only and self._color_cluster_handler.xy_supported:
-                self._internal_supported_color_modes.add(ColorMode.XY)
-                curr_x = self._color_cluster_handler.current_x
-                curr_y = self._color_cluster_handler.current_y
-                if curr_x is not None and curr_y is not None:
-                    self._xy_color = (curr_x / 65535, curr_y / 65535)
-                else:
-                    self._xy_color = (0, 0)
+            # Even if a device has a `Color` cluster with extra supported color modes,
+            # we should respect the endpoint device type
+            if device_type not in COLOR_TEMP_ONLY_PROFILE_DEVICE_TYPES:
+                if self._color_cluster_handler.xy_supported:
+                    self._internal_supported_color_modes.add(ColorMode.XY)
 
-            if (
-                not is_color_temp_only
-                and self._color_cluster_handler.color_loop_supported
-            ):
-                self._supported_features |= LightEntityFeature.EFFECT
-                effect_list.append(EFFECT_COLORLOOP)
-                if self._color_cluster_handler.color_loop_active == 1:
-                    self._effect = EFFECT_COLORLOOP
+                    curr_x = self._color_cluster_handler.current_x
+                    curr_y = self._color_cluster_handler.current_y
+
+                    if curr_x is not None and curr_y is not None:
+                        self._xy_color = (curr_x / 65535, curr_y / 65535)
+                    else:
+                        self._xy_color = (0, 0)
+
+                if self._color_cluster_handler.color_loop_supported:
+                    self._supported_features |= LightEntityFeature.EFFECT
+                    effect_list.append(EFFECT_COLORLOOP)
+                    if self._color_cluster_handler.color_loop_active == 1:
+                        self._effect = EFFECT_COLORLOOP
 
         self._supported_color_modes = supported_color_modes = (
             filter_supported_color_modes(self._internal_supported_color_modes)
