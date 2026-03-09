@@ -110,3 +110,28 @@ LIGHT_PROFILE_DEVICE_TYPES = frozenset(
         (zll.PROFILE_ID, zll.DeviceType.ON_OFF_LIGHT),
     }
 )
+
+# For device types not in this set, the Color Control cluster should be ignored even if
+# it is present on the endpoint (e.g. a DIMMABLE_LIGHT with a spurious Color Control
+# cluster should not gain color modes).
+COLOR_PROFILE_DEVICE_TYPES: frozenset[tuple[int, int]] = frozenset(
+    {
+        # ZHA
+        (zha.PROFILE_ID, zha.DeviceType.COLOR_DIMMABLE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
+        (zha.PROFILE_ID, zha.DeviceType.EXTENDED_COLOR_LIGHT),
+        # ZLL
+        (zll.PROFILE_ID, zll.DeviceType.COLOR_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.EXTENDED_COLOR_LIGHT),
+    }
+)
+
+# The spec mandates ColorCapabilities SHALL be 0x0010 (`Color_temperature`) for these.
+# XY and hue/saturation must not be exposed even if the device reports them.
+COLOR_TEMP_ONLY_PROFILE_DEVICE_TYPES: frozenset[tuple[int, int]] = frozenset(
+    {
+        (zha.PROFILE_ID, zha.DeviceType.COLOR_TEMPERATURE_LIGHT),
+        (zll.PROFILE_ID, zll.DeviceType.COLOR_TEMPERATURE_LIGHT),
+    }
+)

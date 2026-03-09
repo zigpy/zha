@@ -431,10 +431,7 @@
           "available": true,
           "on": false,
           "brightness": 254,
-          "xy_color": [
-            0.6999923704890516,
-            0.29999237048905164
-          ],
+          "xy_color": null,
           "color_temp": 193,
           "effect_list": [
             "off"
@@ -445,8 +442,7 @@
           "supported_color_modes": [
             "brightness",
             "color_temp",
-            "onoff",
-            "xy"
+            "onoff"
           ],
           "off_with_transition": false,
           "off_brightness": null

@@ -48,6 +48,8 @@ from zha.application.platforms.light.const import (
     ATTR_SUPPORTED_COLOR_MODES,
     ATTR_SUPPORTED_FEATURES,
     ATTR_XY_COLOR,
+    COLOR_PROFILE_DEVICE_TYPES,
+    COLOR_TEMP_ONLY_PROFILE_DEVICE_TYPES,
     DEFAULT_EXTRA_TRANSITION_DELAY_LONG,
     DEFAULT_EXTRA_TRANSITION_DELAY_SHORT,
     DEFAULT_LONG_TRANSITION_TIME,
@@ -892,14 +894,19 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         super().recompute_capabilities()
 
         effect_list = [EFFECT_OFF]
+        device_type = (
+            self.endpoint.zigpy_endpoint.profile_id,
+            self.endpoint.zigpy_endpoint.device_type,
+        )
 
         self._internal_supported_color_modes = {ColorMode.ONOFF}
+
         if self._level_cluster_handler:
             self._internal_supported_color_modes.add(ColorMode.BRIGHTNESS)
             self._supported_features |= LightEntityFeature.TRANSITION
             self._brightness = self._level_cluster_handler.current_level
 
-        if self._color_cluster_handler:
+        if device_type in COLOR_PROFILE_DEVICE_TYPES and self._color_cluster_handler:
             self._min_mireds: int = self._color_cluster_handler.min_mireds
             self._max_mireds: int = self._color_cluster_handler.max_mireds
 
@@ -907,20 +914,25 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
                 self._internal_supported_color_modes.add(ColorMode.COLOR_TEMP)
                 self._color_temp = self._color_cluster_handler.color_temperature
 
-            if self._color_cluster_handler.xy_supported:
-                self._internal_supported_color_modes.add(ColorMode.XY)
-                curr_x = self._color_cluster_handler.current_x
-                curr_y = self._color_cluster_handler.current_y
-                if curr_x is not None and curr_y is not None:
-                    self._xy_color = (curr_x / 65535, curr_y / 65535)
-                else:
-                    self._xy_color = (0, 0)
+            # Even if a device has a `Color` cluster with extra supported color modes,
+            # we should respect the endpoint device type
+            if device_type not in COLOR_TEMP_ONLY_PROFILE_DEVICE_TYPES:
+                if self._color_cluster_handler.xy_supported:
+                    self._internal_supported_color_modes.add(ColorMode.XY)
 
-            if self._color_cluster_handler.color_loop_supported:
-                self._supported_features |= LightEntityFeature.EFFECT
-                effect_list.append(EFFECT_COLORLOOP)
-                if self._color_cluster_handler.color_loop_active == 1:
-                    self._effect = EFFECT_COLORLOOP
+                    curr_x = self._color_cluster_handler.current_x
+                    curr_y = self._color_cluster_handler.current_y
+
+                    if curr_x is not None and curr_y is not None:
+                        self._xy_color = (curr_x / 65535, curr_y / 65535)
+                    else:
+                        self._xy_color = (0, 0)
+
+                if self._color_cluster_handler.color_loop_supported:
+                    self._supported_features |= LightEntityFeature.EFFECT
+                    effect_list.append(EFFECT_COLORLOOP)
+                    if self._color_cluster_handler.color_loop_active == 1:
+                        self._effect = EFFECT_COLORLOOP
 
         self._supported_color_modes = supported_color_modes = (
             filter_supported_color_modes(self._internal_supported_color_modes)
@@ -1086,13 +1098,23 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
 
             if (color_mode := results.get("color_mode")) is not None:
                 if color_mode == Color.ColorMode.Color_temperature:
-                    self._color_mode = ColorMode.COLOR_TEMP
+                    new_color_mode = ColorMode.COLOR_TEMP
+                else:
+                    new_color_mode = ColorMode.XY
+
+                # Only apply the reported color mode if it is actually
+                # supported.  Buggy firmware (e.g. Tuya CCT bulbs) can
+                # report a ZCL color_mode that doesn't match the device's
+                # capabilities—don't let that override the correct state.
+                if new_color_mode in self._supported_color_modes:
+                    self._color_mode = new_color_mode
+
+                if self._color_mode == ColorMode.COLOR_TEMP:
                     color_temp = results.get("color_temperature")
-                    if color_temp is not None and color_mode:
+                    if color_temp is not None:
                         self._color_temp = color_temp
                         self._xy_color = None
-                else:
-                    self._color_mode = ColorMode.XY
+                elif self._color_mode == ColorMode.XY:
                     color_x = results.get("current_x")
                     color_y = results.get("current_y")
                     if color_x is not None and color_y is not None:
