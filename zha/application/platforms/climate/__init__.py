@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.hvac import (
-    FanMode,
     RunningState,
     SystemMode,
     Thermostat as ThermostatCluster,
@@ -35,11 +34,14 @@ from zha.application.platforms.climate.const import (
     ATTR_UNOCCP_COOL_SETPT,
     ATTR_UNOCCP_HEAT_SETPT,
     FAN_AUTO,
+    FAN_MODE_TO_ZCL,
     FAN_ON,
     HVAC_MODE_2_SYSTEM,
     PRECISION_TENTHS,
+    SEQ_FAN_MODES,
     SEQ_OF_OPERATION,
     SYSTEM_MODE_2_HVAC,
+    ZCL_TO_FAN_MODE,
     ZCL_TEMP,
     ClimateEntityFeature,
     HVACAction,
@@ -332,9 +334,12 @@ class Thermostat(BaseThermostat):
     @property
     def fan_mode(self) -> str | None:
         """Return current FAN mode."""
+        if self._fan_cluster_handler is not None:
+            current = self._fan_cluster_handler.fan_mode
+            if current is not None:
+                return ZCL_TO_FAN_MODE.get(current, FAN_AUTO)
         if self._thermostat_cluster_handler.running_state is None:
             return FAN_AUTO
-
         if self._thermostat_cluster_handler.running_state & (
             RunningState.Fan_State_On
             | RunningState.Fan_2nd_Stage_On
@@ -348,7 +353,8 @@ class Thermostat(BaseThermostat):
         """Return supported FAN modes."""
         if not self._fan_cluster_handler:
             return None
-        return [FAN_AUTO, FAN_ON]
+        seq = self._fan_cluster_handler.fan_mode_sequence
+        return SEQ_FAN_MODES.get(seq, [FAN_ON, FAN_AUTO])
 
     @property
     def hvac_action(self) -> HVACAction | None:
@@ -409,9 +415,12 @@ class Thermostat(BaseThermostat):
     @property
     def hvac_modes(self) -> list[HVACMode]:
         """Return the list of available HVAC operation modes."""
-        return SEQ_OF_OPERATION.get(
+        modes = SEQ_OF_OPERATION.get(
             self._thermostat_cluster_handler.ctrl_sequence_of_oper, [HVACMode.OFF]
         )
+        if self._fan_cluster_handler is not None and HVACMode.FAN_ONLY not in modes:
+            modes = [*modes, HVACMode.FAN_ONLY]
+        return modes
 
     @property
     def preset_mode(self) -> str:
@@ -538,9 +547,12 @@ class Thermostat(BaseThermostat):
             self.warning("Unsupported '%s' fan mode", fan_mode)
             return
 
-        mode = FanMode.On if fan_mode == FAN_ON else FanMode.Auto
+        zcl_mode = FAN_MODE_TO_ZCL.get(fan_mode)
+        if zcl_mode is None:
+            self.warning("No ZCL mapping for fan mode '%s'", fan_mode)
+            return
 
-        await self._fan_cluster_handler.async_set_speed(mode)
+        await self._fan_cluster_handler.async_set_speed(zcl_mode)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set new target operation mode."""

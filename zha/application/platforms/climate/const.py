@@ -3,7 +3,12 @@
 from enum import IntFlag, StrEnum
 from typing import Final
 
-from zigpy.zcl.clusters.hvac import ControlSequenceOfOperation, RunningMode, SystemMode
+from zigpy.zcl.clusters.hvac import (
+    ControlSequenceOfOperation,
+    FanMode,
+    RunningMode,
+    SystemMode,
+)
 
 ATTR_SYS_MODE: Final[str] = "system_mode"
 ATTR_FAN_MODE: Final[str] = "fan_mode"
@@ -140,6 +145,24 @@ class HVACAction(StrEnum):
     OFF = "off"
     PREHEATING = "preheating"
 
+
+SEQ_FAN_MODES: dict[int, list[str]] = {
+    0x00: [FAN_LOW, FAN_MEDIUM, FAN_HIGH],
+    0x01: [FAN_LOW, FAN_HIGH],
+    0x02: [FAN_LOW, FAN_MEDIUM, FAN_HIGH, FAN_AUTO],
+    0x03: [FAN_LOW, FAN_HIGH, FAN_AUTO],
+    0x04: [FAN_ON, FAN_AUTO],
+}
+
+FAN_MODE_TO_ZCL: dict[str, FanMode] = {
+    FAN_LOW: FanMode.Low,
+    FAN_MEDIUM: FanMode.Medium,
+    FAN_HIGH: FanMode.High,
+    FAN_ON: FanMode.On,
+    FAN_AUTO: FanMode.Auto,
+}
+
+ZCL_TO_FAN_MODE: dict[int, str] = {v: k for k, v in FAN_MODE_TO_ZCL.items()}
 
 RUNNING_MODE = {
     RunningMode.Off: HVACMode.OFF,
