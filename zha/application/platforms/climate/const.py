@@ -6,6 +6,7 @@ from typing import Final
 from zigpy.zcl.clusters.hvac import (
     ControlSequenceOfOperation,
     FanMode,
+    FanModeSequence,
     RunningMode,
     SystemMode,
 )
@@ -147,11 +148,11 @@ class HVACAction(StrEnum):
 
 
 SEQ_FAN_MODES: dict[int, list[str]] = {
-    0x00: [FAN_LOW, FAN_MEDIUM, FAN_HIGH],
-    0x01: [FAN_LOW, FAN_HIGH],
-    0x02: [FAN_LOW, FAN_MEDIUM, FAN_HIGH, FAN_AUTO],
-    0x03: [FAN_LOW, FAN_HIGH, FAN_AUTO],
-    0x04: [FAN_ON, FAN_AUTO],
+    FanModeSequence.Low_Med_High: [FAN_LOW, FAN_MEDIUM, FAN_HIGH],
+    FanModeSequence.Low_High: [FAN_LOW, FAN_HIGH],
+    FanModeSequence.Low_Med_High_Auto: [FAN_LOW, FAN_MEDIUM, FAN_HIGH, FAN_AUTO],
+    FanModeSequence.Low_High_Auto: [FAN_LOW, FAN_HIGH, FAN_AUTO],
+    FanModeSequence.On_Auto: [FAN_ON, FAN_AUTO],
 }
 
 FAN_MODE_TO_ZCL: dict[str, FanMode] = {

@@ -435,15 +435,18 @@
           "min_temp": 16.0,
           "supported_features": 395,
           "fan_modes": [
-            "auto",
-            "on"
+            "low",
+            "medium",
+            "high",
+            "auto"
           ],
           "preset_modes": [],
           "hvac_modes": [
             "off",
             "heat_cool",
             "cool",
-            "heat"
+            "heat",
+            "fan_only"
           ]
         },
         "state": {
@@ -457,7 +460,7 @@
           "hvac_action": null,
           "hvac_mode": "off",
           "preset_mode": "none",
-          "fan_mode": "auto",
+          "fan_mode": "on",
           "system_mode": "[0]/off",
           "occupancy": null,
           "occupied_cooling_setpoint": 2600,
