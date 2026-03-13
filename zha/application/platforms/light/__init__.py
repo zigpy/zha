@@ -258,7 +258,8 @@ class BaseLight(BaseEntity, ABC):
             self._color_temp = color_temp
         if xy_color is not None:
             self._xy_color = xy_color
-        if color_mode is not None:
+        # Older persisted states may contain a color_mode not in supported modes
+        if color_mode is not None and color_mode in self._supported_color_modes:
             self._color_mode = color_mode
         if effect is not None:
             self._effect = effect
@@ -1085,14 +1086,22 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
                 return  # type: ignore[unreachable]
 
             if (color_mode := results.get("color_mode")) is not None:
-                if color_mode == Color.ColorMode.Color_temperature:
-                    self._color_mode = ColorMode.COLOR_TEMP
+                # Determine the effective color mode: if only one mode is
+                # supported, use it regardless of what the device reports
+                if len(self._supported_color_modes) == 1:
+                    effective_mode = next(iter(self._supported_color_modes))
+                elif color_mode == Color.ColorMode.Color_temperature:
+                    effective_mode = ColorMode.COLOR_TEMP
+                else:
+                    effective_mode = ColorMode.XY
+                self._color_mode = effective_mode
+
+                if effective_mode == ColorMode.COLOR_TEMP:
                     color_temp = results.get("color_temperature")
-                    if color_temp is not None and color_mode:
+                    if color_temp is not None:
                         self._color_temp = color_temp
                         self._xy_color = None
-                else:
-                    self._color_mode = ColorMode.XY
+                elif effective_mode == ColorMode.XY:
                     color_x = results.get("current_x")
                     color_y = results.get("current_y")
                     if color_x is not None and color_y is not None:

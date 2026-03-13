@@ -2110,6 +2110,144 @@ async def test_light_state_restoration(zha_gateway: Gateway) -> None:
     assert entity.state["effect"] == "colorloop"
 
 
+async def test_light_state_restoration_unsupported_color_mode(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that restoring an unsupported color_mode is ignored."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_COLOR)
+    color_cluster = zigpy_device.endpoints[1].light_color
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_temperature": 250,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    assert entity.supported_color_modes == {ColorMode.COLOR_TEMP}
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+
+    # Attempt to restore XY color_mode on a color_temp-only light
+    entity.restore_external_state_attributes(
+        state=True,
+        off_with_transition=False,
+        off_brightness=None,
+        brightness=100,
+        color_temp=300,
+        xy_color=None,
+        color_mode=ColorMode.XY,
+        effect=None,
+    )
+
+    # color_mode should remain COLOR_TEMP since XY is not supported
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 300
+
+
+async def test_color_temp_only_light_ignores_incorrect_color_mode(
+    zha_gateway: Gateway,
+) -> None:
+    """Test color_temp-only light ignores incorrect color_mode reads when polling."""
+    zigpy_device = create_mock_zigpy_device(zha_gateway, LIGHT_COLOR)
+    color_cluster = zigpy_device.endpoints[1].light_color
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_temperature": 250,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    entity = get_entity(zha_device, platform=Platform.LIGHT)
+
+    assert entity.supported_color_modes == {ColorMode.COLOR_TEMP}
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 250
+
+    # Simulate the device incorrectly reporting XY color mode during a poll
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_mode": lighting.Color.ColorMode.X_and_Y,
+        "color_temperature": 300,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+
+    # Trigger a poll
+    await entity.async_update()
+
+    # color_mode should remain COLOR_TEMP and color_temp should be updated
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 300
+    assert entity.state["xy_color"] is None
+
+    # Same test with Hue_and_saturation mode
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": lighting.Color.ColorCapabilities.Color_temperature,
+        "color_mode": lighting.Color.ColorMode.Hue_and_saturation,
+        "color_temperature": 400,
+        "color_temp_physical_min": 153,
+        "color_temp_physical_max": 500,
+    }
+    update_attribute_cache(color_cluster)
+
+    await entity.async_update()
+
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 400
+    assert entity.state["xy_color"] is None
+
+
+async def test_poll_updates_color_mode_on_dual_mode_light(
+    zha_gateway: Gateway,
+) -> None:
+    """Test polling XY + COLOR_TEMP light updates color_mode and attribute values."""
+    device = await device_light_1_mock(zha_gateway)
+    entity = get_entity(device, platform=Platform.LIGHT)
+    color_cluster = device.device.endpoints[1].light_color
+
+    assert entity.supported_color_modes == {ColorMode.COLOR_TEMP, ColorMode.XY}
+
+    # Poll with color_temp mode
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": (
+            lighting.Color.ColorCapabilities.Color_temperature
+            | lighting.Color.ColorCapabilities.XY_attributes
+        ),
+        "color_mode": lighting.Color.ColorMode.Color_temperature,
+        "color_temperature": 350,
+        "current_x": 20000,
+        "current_y": 20000,
+    }
+    update_attribute_cache(color_cluster)
+    await entity.async_update()
+
+    assert entity.state["color_mode"] == ColorMode.COLOR_TEMP
+    assert entity.state["color_temp"] == 350
+    assert entity.state["xy_color"] is None
+
+    # Poll with XY mode
+    color_cluster.PLUGGED_ATTR_READS = {
+        "color_capabilities": (
+            lighting.Color.ColorCapabilities.Color_temperature
+            | lighting.Color.ColorCapabilities.XY_attributes
+        ),
+        "color_mode": lighting.Color.ColorMode.X_and_Y,
+        "color_temperature": 350,
+        "current_x": 30000,
+        "current_y": 25000,
+    }
+    update_attribute_cache(color_cluster)
+    await entity.async_update()
+
+    assert entity.state["color_mode"] == ColorMode.XY
+    assert entity.state["xy_color"] == (30000 / 65535, 25000 / 65535)
+    assert entity.state["color_temp"] is None
+
+
 async def test_turn_on_cancellation_cleans_up_transition_flag(
     zha_gateway: Gateway,
 ) -> None:
