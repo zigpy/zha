@@ -1298,6 +1298,23 @@ async def test_set_fan_mode_not_supported(
     assert fan_cluster.write_attributes.await_count == 0
 
 
+async def test_set_fan_mode_no_zcl_mapping(
+    zha_gateway: Gateway,
+):
+    """Test fan mode with no ZCL mapping is rejected."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    fan_cluster = device_climate_fan.device.endpoints[1].fan
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    entity.__dict__["fan_modes"] = ["bogus"]
+
+    await entity.async_set_fan_mode("bogus")
+    await zha_gateway.async_block_till_done()
+    assert fan_cluster.write_attributes.await_count == 0
+
+
 async def test_set_fan_mode(
     zha_gateway: Gateway,
 ):
