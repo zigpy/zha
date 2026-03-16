@@ -183,6 +183,7 @@ class DeviceEntityAddedEvent:
     event: Final[str] = ZHA_DEVICE_ENTITY_ADDED_EVENT
 
     # TODO: allow all entity information to be serialized and include it here
+    platform: Platform
     unique_id: str
 
 
@@ -193,6 +194,7 @@ class DeviceEntityRemovedEvent:
     event_type: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
     event: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
 
+    platform: Platform
     unique_id: str
 
 
@@ -1015,6 +1017,7 @@ class Device(LogMixin, EventBase):
         self.emit(
             DeviceEntityAddedEvent.event_type,
             DeviceEntityAddedEvent(
+                platform=entity.PLATFORM,
                 unique_id=entity.unique_id,
             ),
         )
@@ -1035,6 +1038,7 @@ class Device(LogMixin, EventBase):
             self.emit(
                 DeviceEntityRemovedEvent.event_type,
                 DeviceEntityRemovedEvent(
+                    platform=entity.PLATFORM,
                     unique_id=entity.unique_id,
                 ),
             )
