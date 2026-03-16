@@ -1437,3 +1437,32 @@ async def test_entity_recomputation(zha_gateway: Gateway) -> None:
             )
         )
     ]
+
+
+async def test_add_entity_duplicate(zha_gateway: Gateway) -> None:
+    """Test that adding a duplicate entity raises an error."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    existing_entity = next(iter(zha_device.platform_entities.values()))
+
+    with pytest.raises(ValueError, match="unique ID already taken"):
+        zha_device._add_entity(existing_entity)
+
+
+async def test_remove_entity_nonexistent(zha_gateway: Gateway) -> None:
+    """Test that removing a nonexistent entity raises an error."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    existing_entity = next(iter(zha_device.platform_entities.values()))
+    await zha_device._remove_entity(existing_entity)
+
+    with pytest.raises(ValueError, match="unique ID not found"):
+        await zha_device._remove_entity(existing_entity)
