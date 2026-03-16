@@ -1417,9 +1417,9 @@ async def test_entity_recomputation(zha_gateway: Gateway) -> None:
 
     event_listener.reset_mock()
 
-    # We add it back
-    zha_device._zigpy_device.endpoints[1].light_color.remove_unsupported_attribute(
-        Color.AttributeDefs.start_up_color_temperature.id
+    # We add it back by writing a value, which clears the unsupported flag
+    zha_device._zigpy_device.endpoints[1].light_color.update_attribute(
+        Color.AttributeDefs.start_up_color_temperature.id, 250
     )
     await zha_device.recompute_entities()
 
