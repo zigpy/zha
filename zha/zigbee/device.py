@@ -188,7 +188,7 @@ class DeviceEntityAddedEvent:
 
 @dataclass(kw_only=True, frozen=True)
 class DeviceEntityRemovedEvent:
-    """Event generated when a new entity is added to a device."""
+    """Event generated when an entity is removed from a device."""
 
     event_type: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
     event: Final[str] = ZHA_DEVICE_ENTITY_REMOVED_EVENT
