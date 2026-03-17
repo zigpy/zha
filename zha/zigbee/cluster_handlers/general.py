@@ -304,7 +304,7 @@ class BinaryInputClusterHandler(ClusterHandler):
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=BinaryInput.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
+            config=REPORT_CONFIG_IMMEDIATE,
         ),
     )
 
@@ -325,7 +325,7 @@ class BinaryOutputClusterHandler(ClusterHandler):
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=BinaryOutput.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
+            config=REPORT_CONFIG_IMMEDIATE,
         ),
     )
 
@@ -363,7 +363,7 @@ class BinaryValueClusterHandler(ClusterHandler):
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=BinaryValue.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
+            config=REPORT_CONFIG_IMMEDIATE,
         ),
     )
 
