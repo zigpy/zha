@@ -332,6 +332,7 @@ class Device(LogMixin, EventBase):
 
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self._pending_entities: list[PlatformEntity] = []
+        self._initialized: bool = False
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
 
         self._on_remove_callbacks: list[Callable[[], None]] = []
@@ -1124,9 +1125,9 @@ class Device(LogMixin, EventBase):
             except Exception:  # pylint: disable=broad-exception-caught
                 self.debug("Failed to initialize endpoint", exc_info=True)
 
-        # And add them after. Emit events only if the device already has entities
-        # (i.e. this is a re-interview, not the first initialization).
-        await self._add_pending_entities(emit_events=bool(self._platform_entities))
+        # And add them after. Emit events only on re-initialization, not the first.
+        await self._add_pending_entities(emit_events=self._initialized)
+        self._initialized = True
 
         # Sync the device's firmware version with the first platform entity
         for (platform, _unique_id), entity in self.platform_entities.items():
