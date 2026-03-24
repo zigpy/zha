@@ -1052,7 +1052,7 @@ class Device(LogMixin, EventBase):
                 ),
             )
 
-    async def _add_pending_entities(self, *, emit_events: bool = True) -> None:
+    async def _add_pending_entities(self, *, emit_event: bool = True) -> None:
         """Add pending entities to the device."""
         all_entities = dict(self._platform_entities)
         new_entities: dict[tuple[Platform, str], PlatformEntity] = {}
@@ -1084,7 +1084,7 @@ class Device(LogMixin, EventBase):
 
         # Finally, add the new entities
         for entity in new_entities.values():
-            self._add_entity(entity, emit_event=emit_events)
+            self._add_entity(entity, emit_event=emit_event)
 
     async def recompute_entities(self) -> None:
         """Recompute all entities for this device."""
@@ -1126,7 +1126,7 @@ class Device(LogMixin, EventBase):
                 self.debug("Failed to initialize endpoint", exc_info=True)
 
         # And add them after. Emit events only on re-initialization, not the first.
-        await self._add_pending_entities(emit_events=self._initialized)
+        await self._add_pending_entities(emit_event=self._initialized)
         self._initialized = True
 
         # Sync the device's firmware version with the first platform entity
