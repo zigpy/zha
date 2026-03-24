@@ -814,4 +814,3 @@ async def test_cluster_handler_only_clusters_are_bound(zha_gateway: Gateway) -> 
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
     assert len(philips_cluster.bind.mock_calls) == 1
-
