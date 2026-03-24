@@ -1164,7 +1164,7 @@ class Device(LogMixin, EventBase):
 
         for platform_entity in list(self._platform_entities.values()):
             try:
-                # TODO: To avoid unnecessary traffic during shutdown, we don't
+                # XXX: To avoid unnecessary traffic during shutdown, we don't
                 # need to emit an event for every entity, just the device
                 await self._remove_entity(platform_entity, emit_event=False)
             except Exception:
