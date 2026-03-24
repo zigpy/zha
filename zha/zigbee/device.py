@@ -196,6 +196,7 @@ class DeviceEntityRemovedEvent:
 
     platform: Platform
     unique_id: str
+    remove: bool = False
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -1023,7 +1024,11 @@ class Device(LogMixin, EventBase):
         )
 
     async def _remove_entity(
-        self, entity: BaseEntity, *, emit_event: bool = True
+        self,
+        entity: BaseEntity,
+        *,
+        emit_event: bool = True,
+        remove: bool = False,
     ) -> None:
         """Remove an entity from the device."""
         key = (entity.PLATFORM, entity.unique_id)
@@ -1040,6 +1045,7 @@ class Device(LogMixin, EventBase):
                 DeviceEntityRemovedEvent(
                     platform=entity.PLATFORM,
                     unique_id=entity.unique_id,
+                    remove=remove,
                 ),
             )
 
@@ -1089,7 +1095,7 @@ class Device(LogMixin, EventBase):
 
             if not entity.is_supported() or not entity.is_supported_in_list(entities):
                 self.debug("Removing unsupported entity %s", entity)
-                await self._remove_entity(entity)
+                await self._remove_entity(entity, remove=True)
                 entities.remove(entity)
 
         # Discover new entities

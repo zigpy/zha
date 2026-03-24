@@ -1412,6 +1412,7 @@ async def test_entity_recomputation(zha_gateway: Gateway) -> None:
             DeviceEntityRemovedEvent(
                 platform=Platform.NUMBER,
                 unique_id="68:0a:e2:ff:fe:8f:fa:33-1-768-start_up_color_temperature",
+                remove=True,
             )
         )
     ]
