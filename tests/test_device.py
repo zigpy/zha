@@ -1426,7 +1426,7 @@ async def test_reinitialize_after_on_remove_emits_events(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
     entity_count = len(zha_device.platform_entities)
 
-    # Simulate a full removal, as would happen during a re-interview
+    # Simulate a full removal, clearing all entities
     await zha_device.on_remove()
     assert len(zha_device.platform_entities) == 0
 
