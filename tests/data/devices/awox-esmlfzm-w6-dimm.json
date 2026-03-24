@@ -224,7 +224,7 @@
         },
         {
           "cluster_id": "0xfc57",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "works_with_all_hubs",
           "attributes": []
         }
       ],
