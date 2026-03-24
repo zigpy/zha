@@ -1012,7 +1012,7 @@ class Device(LogMixin, EventBase):
                 f"Cannot add entity {entity!r}, unique ID already taken by {self._platform_entities[key]!r}"
             )
 
-        _LOGGER.debug("Discovered new entity %s", entity)
+        self.debug("Discovered new entity %s", entity)
 
         # `entity.on_add()` is assumed to have been called already
         self._platform_entities[key] = entity
@@ -1189,6 +1189,10 @@ class Device(LogMixin, EventBase):
                     self,
                     exc_info=True,
                 )
+
+        # Ensure stale pending entities aren't reprocessed if the device is
+        # re-initialized after removal (e.g. re-interview).
+        self._pending_entities.clear()
 
     def async_get_clusters(self) -> dict[int, dict[str, dict[int, Cluster]]]:
         """Get all clusters for this device."""
