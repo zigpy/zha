@@ -1363,6 +1363,76 @@ async def test_device_on_remove_pending_entity_failure(
     assert "Pending entity removal failed" in caplog.text
 
 
+async def test_initial_entity_discovery_does_not_emit_events(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that first device initialization does not emit entity events."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # Clear all entities to put the device back into a first-init state
+    for entity in list(zha_device.platform_entities.values()):
+        await zha_device._remove_entity(entity, emit_event=False)
+
+    assert len(zha_device.platform_entities) == 0
+
+    event_listener = mock.Mock()
+    zha_device.on_event(DeviceEntityAddedEvent.event_type, event_listener)
+
+    # Initialize with no existing entities: no events should fire
+    await zha_device.async_initialize(from_cache=True)
+
+    assert len(zha_device.platform_entities) > 0
+    assert event_listener.call_count == 0
+
+
+async def test_reinitialize_emits_events_for_new_entities(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that re-initializing a device emits events for new entities."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    unique_id = "68:0a:e2:ff:fe:8f:fa:33-1-768-start_up_color_temperature"
+    entity = zha_device.get_platform_entity(Platform.NUMBER, unique_id)
+    await zha_device._remove_entity(entity, emit_event=False)
+
+    event_listener = mock.Mock()
+    zha_device.on_event(DeviceEntityAddedEvent.event_type, event_listener)
+
+    # Re-initialize with existing entities: new entity should emit an event
+    await zha_device.async_initialize(from_cache=True)
+
+    assert event_listener.call_count == 1
+    assert event_listener.call_args[0][0] == DeviceEntityAddedEvent(
+        platform=Platform.NUMBER,
+        unique_id=unique_id,
+    )
+
+
+async def test_remove_entity_no_event(zha_gateway: Gateway) -> None:
+    """Test that _remove_entity with emit_event=False does not emit."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    event_listener = mock.Mock()
+    zha_device.on_event(DeviceEntityRemovedEvent.event_type, event_listener)
+
+    existing_entity = next(iter(zha_device.platform_entities.values()))
+    await zha_device._remove_entity(existing_entity, emit_event=False)
+
+    assert event_listener.call_count == 0
+
+
 async def test_initialize_endpoint_failure(zha_gateway: Gateway) -> None:
     """Test that a failing endpoint doesn't prevent device initialization."""
     zigpy_dev = await zigpy_device_from_json(
