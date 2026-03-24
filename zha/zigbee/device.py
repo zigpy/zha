@@ -1002,7 +1002,7 @@ class Device(LogMixin, EventBase):
             entity.on_add()
             self._pending_entities.append(entity)
 
-    def _add_entity(self, entity: PlatformEntity) -> None:
+    def _add_entity(self, entity: PlatformEntity, *, emit_event: bool = True) -> None:
         """Add an entity to the device."""
         key = (entity.PLATFORM, entity.unique_id)
 
@@ -1015,13 +1015,15 @@ class Device(LogMixin, EventBase):
 
         # `entity.on_add()` is assumed to have been called already
         self._platform_entities[key] = entity
-        self.emit(
-            DeviceEntityAddedEvent.event_type,
-            DeviceEntityAddedEvent(
-                platform=entity.PLATFORM,
-                unique_id=entity.unique_id,
-            ),
-        )
+
+        if emit_event:
+            self.emit(
+                DeviceEntityAddedEvent.event_type,
+                DeviceEntityAddedEvent(
+                    platform=entity.PLATFORM,
+                    unique_id=entity.unique_id,
+                ),
+            )
 
     async def _remove_entity(
         self,
@@ -1049,7 +1051,7 @@ class Device(LogMixin, EventBase):
                 ),
             )
 
-    async def _add_pending_entities(self) -> None:
+    async def _add_pending_entities(self, *, emit_events: bool = True) -> None:
         """Add pending entities to the device."""
         all_entities = dict(self._platform_entities)
         new_entities: dict[tuple[Platform, str], PlatformEntity] = {}
@@ -1081,7 +1083,7 @@ class Device(LogMixin, EventBase):
 
         # Finally, add the new entities
         for entity in new_entities.values():
-            self._add_entity(entity)
+            self._add_entity(entity, emit_event=emit_events)
 
     async def recompute_entities(self) -> None:
         """Recompute all entities for this device."""
@@ -1122,8 +1124,9 @@ class Device(LogMixin, EventBase):
             except Exception:  # pylint: disable=broad-exception-caught
                 self.debug("Failed to initialize endpoint", exc_info=True)
 
-        # And add them after
-        await self._add_pending_entities()
+        # And add them after. Emit events only if the device already has entities
+        # (i.e. this is a re-interview, not the first initialization).
+        await self._add_pending_entities(emit_events=bool(self._platform_entities))
 
         # Sync the device's firmware version with the first platform entity
         for (platform, _unique_id), entity in self.platform_entities.items():
