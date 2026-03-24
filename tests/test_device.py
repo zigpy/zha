@@ -1373,16 +1373,15 @@ async def test_initial_entity_discovery_does_not_emit_events(
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    # Clear all entities to put the device back into a first-init state
+    # Reset to pre-initialization state
     for entity in list(zha_device.platform_entities.values()):
         await zha_device._remove_entity(entity, emit_event=False)
-
-    assert len(zha_device.platform_entities) == 0
+    zha_device._initialized = False
 
     event_listener = mock.Mock()
     zha_device.on_event(DeviceEntityAddedEvent.event_type, event_listener)
 
-    # Initialize with no existing entities: no events should fire
+    # First initialization: entities are discovered but no events should fire
     await zha_device.async_initialize(from_cache=True)
 
     assert len(zha_device.platform_entities) > 0
@@ -1414,6 +1413,30 @@ async def test_reinitialize_emits_events_for_new_entities(
         platform=Platform.NUMBER,
         unique_id=unique_id,
     )
+
+
+async def test_reinitialize_after_on_remove_emits_events(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that re-init after on_remove (all entities cleared) still emits events."""
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    entity_count = len(zha_device.platform_entities)
+
+    # Simulate a full removal, as would happen during a re-interview
+    await zha_device.on_remove()
+    assert len(zha_device.platform_entities) == 0
+
+    event_listener = mock.Mock()
+    zha_device.on_event(DeviceEntityAddedEvent.event_type, event_listener)
+
+    await zha_device.async_initialize(from_cache=True)
+
+    assert len(zha_device.platform_entities) == entity_count
+    assert event_listener.call_count == entity_count
 
 
 async def test_remove_entity_no_event(zha_gateway: Gateway) -> None:
