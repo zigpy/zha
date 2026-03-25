@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Third Reality, Inc",
   "friendly_model": "3RSB015BZ",
   "name": "Third Reality, Inc 3RSB015BZ",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
@@ -208,6 +208,11 @@
               "value": 0
             }
           ]
+        },
+        {
+          "cluster_id": "0xfff1",
+          "endpoint_attribute": null,
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -347,6 +352,51 @@
           "class_name": "Opening",
           "available": true,
           "state": false
+        }
+      }
+    ],
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": "Allow remote binding",
+          "unique_id": "28:2c:02:bf:ff:ea:05:68-1-allow_bind",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "allow_remote_binding",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfff1",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65521,
+                "name": "ThirdRealityCurtainCluster",
+                "type": "server"
+              },
+              "id": "1:0xfff1",
+              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0xfff1",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:ea:05:68",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "allow_bind",
+          "attribute_value": 1
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
         }
       }
     ],
@@ -625,6 +675,54 @@
           "class_name": "Switch",
           "state": 0,
           "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Enable PIR remote",
+          "unique_id": "28:2c:02:bf:ff:ea:05:68-1-enable_disable_pir_remote",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "enable_pir_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfff1",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65521,
+                "name": "ThirdRealityCurtainCluster",
+                "type": "server"
+              },
+              "id": "1:0xfff1",
+              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0xfff1",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:ea:05:68",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "enable_disable_pir_remote",
+          "invert_attribute_name": null,
+          "force_inverted": true,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": true,
+          "inverted": true
         }
       }
     ],

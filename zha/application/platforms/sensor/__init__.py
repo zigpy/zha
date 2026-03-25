@@ -299,7 +299,7 @@ class Sensor(BaseSensor):
     ) -> SensorStateClass | None:
         """Validate and return a state class."""
         try:
-            return SensorStateClass(state_class_value.value)
+            return SensorStateClass(state_class_value)
         except ValueError as ex:
             _LOGGER.warning(
                 "Quirks provided an invalid state class: %s: %s",
@@ -2039,7 +2039,7 @@ class RSSISensor(Sensor):
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if the sensor is supported given the list of entities."""
         cls = type(self)
-        return not any(type(entity) is cls for entity in entities)
+        return not any(type(entity) is cls for entity in entities if entity is not self)
 
     @property
     def state(self) -> dict:

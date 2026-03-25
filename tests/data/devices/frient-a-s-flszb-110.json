@@ -9,7 +9,9 @@
   "name": "frient A/S FLSZB-110",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "exposes_features": [],
+  "exposes_features": [
+    "siren_basic"
+  ],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -100,12 +102,6 @@
               "name": "battery_alarm_state",
               "zcl_type": "map32",
               "value": 0
-            },
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "unsupported": true
             },
             {
               "id": "0x0020",
@@ -396,205 +392,6 @@
         }
       }
     ],
-    "select": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:33:00:76:9a-35-1282-SirenLevel",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "DefaultSirenLevelSelectEntity",
-          "translation_key": "default_siren_level",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IasWdClusterHandler",
-              "generic_id": "cluster_handler_0x0502",
-              "endpoint_id": 35,
-              "cluster": {
-                "id": 1282,
-                "name": "IAS Warning Device",
-                "type": "server"
-              },
-              "id": "35:0x0502",
-              "unique_id": "00:15:bc:00:33:00:76:9a:35:0x0502",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "00:15:bc:00:33:00:76:9a",
-          "endpoint_id": 35,
-          "available": true,
-          "group_id": null,
-          "enum": "SirenLevel",
-          "options": [
-            "Low level sound",
-            "Medium level sound",
-            "High level sound",
-            "Very high level sound"
-          ]
-        },
-        "state": {
-          "class_name": "DefaultSirenLevelSelectEntity",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:33:00:76:9a-35-1282-Strobe",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "DefaultStrobeSelectEntity",
-          "translation_key": "default_strobe",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IasWdClusterHandler",
-              "generic_id": "cluster_handler_0x0502",
-              "endpoint_id": 35,
-              "cluster": {
-                "id": 1282,
-                "name": "IAS Warning Device",
-                "type": "server"
-              },
-              "id": "35:0x0502",
-              "unique_id": "00:15:bc:00:33:00:76:9a:35:0x0502",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "00:15:bc:00:33:00:76:9a",
-          "endpoint_id": 35,
-          "available": true,
-          "group_id": null,
-          "enum": "Strobe",
-          "options": [
-            "No Strobe",
-            "Strobe"
-          ]
-        },
-        "state": {
-          "class_name": "DefaultStrobeSelectEntity",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:33:00:76:9a-35-1282-StrobeLevel",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "DefaultStrobeLevelSelectEntity",
-          "translation_key": "default_strobe_level",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IasWdClusterHandler",
-              "generic_id": "cluster_handler_0x0502",
-              "endpoint_id": 35,
-              "cluster": {
-                "id": 1282,
-                "name": "IAS Warning Device",
-                "type": "server"
-              },
-              "id": "35:0x0502",
-              "unique_id": "00:15:bc:00:33:00:76:9a:35:0x0502",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "00:15:bc:00:33:00:76:9a",
-          "endpoint_id": 35,
-          "available": true,
-          "group_id": null,
-          "enum": "StrobeLevel",
-          "options": [
-            "Low level strobe",
-            "Medium level strobe",
-            "High level strobe",
-            "Very high level strobe"
-          ]
-        },
-        "state": {
-          "class_name": "DefaultStrobeLevelSelectEntity",
-          "available": true,
-          "state": null
-        }
-      },
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "00:15:bc:00:33:00:76:9a-35-1282-WarningMode",
-          "migrate_unique_ids": [],
-          "platform": "select",
-          "class_name": "DefaultToneSelectEntity",
-          "translation_key": "default_siren_tone",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "diagnostic",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IasWdClusterHandler",
-              "generic_id": "cluster_handler_0x0502",
-              "endpoint_id": 35,
-              "cluster": {
-                "id": 1282,
-                "name": "IAS Warning Device",
-                "type": "server"
-              },
-              "id": "35:0x0502",
-              "unique_id": "00:15:bc:00:33:00:76:9a:35:0x0502",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
-          "device_ieee": "00:15:bc:00:33:00:76:9a",
-          "endpoint_id": 35,
-          "available": true,
-          "group_id": null,
-          "enum": "WarningMode",
-          "options": [
-            "Stop",
-            "Burglar",
-            "Fire",
-            "Emergency",
-            "Police Panic",
-            "Fire Panic",
-            "Emergency Panic"
-          ]
-        },
-        "state": {
-          "class_name": "DefaultToneSelectEntity",
-          "available": true,
-          "state": null
-        }
-      }
-    ],
     "sensor": [
       {
         "info_object": {
@@ -786,12 +583,12 @@
           "unique_id": "00:15:bc:00:33:00:76:9a-35-1282",
           "migrate_unique_ids": [],
           "platform": "siren",
-          "class_name": "Siren",
+          "class_name": "BasicSiren",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
-          "entity_category": "diagnostic",
+          "entity_category": "config",
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
@@ -815,18 +612,11 @@
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
-          "available_tones": {
-            "1": "Burglar",
-            "2": "Fire",
-            "3": "Emergency",
-            "4": "Police Panic",
-            "5": "Fire Panic",
-            "6": "Emergency Panic"
-          },
-          "supported_features": 31
+          "available_tones": {},
+          "supported_features": 19
         },
         "state": {
-          "class_name": "Siren",
+          "class_name": "BasicSiren",
           "available": true,
           "state": false
         }

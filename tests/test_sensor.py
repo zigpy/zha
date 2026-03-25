@@ -2157,7 +2157,7 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+        "tests/data/devices/centralite-3405-l.json",
     )
 
     zigpy_dev.endpoints[1].power.update_attribute(

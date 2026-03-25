@@ -148,7 +148,7 @@
         },
         {
           "cluster_id": "0xfc57",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "works_with_all_hubs",
           "attributes": []
         }
       ],
@@ -646,6 +646,54 @@
           "available": true,
           "group_id": null,
           "attribute_name": "detach_relay",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Network LED",
+          "unique_id": "ab:cd:ef:12:f5:dc:76:8d-1-network_led",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "network_led",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "SonoffPresenceSenorClusterHandler",
+              "generic_id": "cluster_handler_0xfc11",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64529,
+                "name": "SonoffCluster",
+                "type": "server"
+              },
+              "id": "1:0xfc11",
+              "unique_id": "ab:cd:ef:12:f5:dc:76:8d:1:0xfc11",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f5:dc:76:8d",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "network_led",
           "invert_attribute_name": null,
           "force_inverted": false,
           "off_value": 0,

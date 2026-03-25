@@ -5,10 +5,10 @@
   "manufacturer": "Aqara",
   "model": "lumi.light.acn132",
   "friendly_manufacturer": "Aqara",
-  "friendly_model": "lumi.light.acn132",
-  "name": "Aqara lumi.light.acn132",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "friendly_model": "Led strip T1",
+  "name": "Aqara Led strip T1",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4447,
   "power_source": "Mains",
@@ -208,7 +208,7 @@
         },
         {
           "cluster_id": "0xfcc0",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "opple_cluster",
           "attributes": []
         }
       ],
@@ -657,6 +657,442 @@
           "class_name": "OnTransitionTimeConfigurationEntity",
           "available": true,
           "state": 3
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Length",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-length",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "length",
+          "translation_placeholders": null,
+          "device_class": "distance",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 1,
+          "native_step": 0.2,
+          "native_unit_of_measurement": "m"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Maximum brightness",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-max_brightness",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "max_brightness",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 1,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Minimum brightness",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-min_brightness",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "min_brightness",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 99,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "%"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Speed",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-speed",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "speed",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 100,
+          "native_min_value": 1,
+          "native_step": 1,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": "Audio",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-audio",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "audio",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "LedStripT1Audio",
+          "options": [
+            "Off",
+            "On"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Audio effect",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-audio_effect",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "audio_effect",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "LedStripT1AudioEffect",
+          "options": [
+            "Random",
+            "Blink",
+            "Rainbow",
+            "Wave"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Audio sensitivity",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-audio_sensitivity",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "audio_sensitivity",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "LedStripT1AudioSensitivity",
+          "options": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Power on state",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-power_on_state",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "power_on_state",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "LedStripT1PowerOnStateMode",
+          "options": [
+            "On",
+            "Previous",
+            "Off",
+            "Toggle"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Preset",
+          "unique_id": "ab:cd:ef:12:f0:a0:54:37-1-preset",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "preset",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OppleRemoteClusterHandler",
+              "generic_id": "cluster_handler_0xfcc0",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64704,
+                "name": "AqaraLedStripT1",
+                "type": "server"
+              },
+              "id": "1:0xfcc0",
+              "unique_id": "ab:cd:ef:12:f0:a0:54:37:1:0xfcc0",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:f0:a0:54:37",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "LedStripT1Preset",
+          "options": [
+            "Breathe",
+            "Rainbow",
+            "Sweep",
+            "Flashing",
+            "Strobe",
+            "ReversedRainbow",
+            "Colorful",
+            "Scan"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
         }
       }
     ],

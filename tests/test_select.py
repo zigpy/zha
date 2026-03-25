@@ -2,6 +2,7 @@
 
 from unittest.mock import call, patch
 
+import pytest
 from zhaquirks import (
     DEVICE_TYPE,
     ENDPOINTS,
@@ -27,11 +28,15 @@ from tests.common import (
     get_entity,
     join_zigpy_device,
     send_attributes_report,
+    zigpy_device_from_json,
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory
-from zha.application.platforms.select import AqaraMotionSensitivities
+from zha.application.platforms.select import (
+    AqaraMotionSensitivities,
+    BegaColorTemperatureChannel,
+)
 
 
 async def test_select(zha_gateway: Gateway) -> None:
@@ -264,3 +269,85 @@ async def test_non_zcl_select_state_restoration(zha_gateway: Gateway) -> None:
         state=security.IasWd.Warning.WarningMode.Fire.name
     )
     assert entity.state["state"] == security.IasWd.Warning.WarningMode.Fire.name
+
+
+async def test_bega_color_temperature_channel_select(zha_gateway: Gateway) -> None:
+    """Test BEGA color temperature channel select entity."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/bega-gantenbrink-leuchten-kg-smart-dimmable-light.json",
+    )
+
+    cluster = zigpy_device.endpoints[1].in_clusters[general.LevelControl.cluster_id]
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SELECT,
+        qualifier="switchable_white",
+    )
+    assert entity.state["state"] == "Warm white"
+    assert entity.info_object.options == ["Warm white", "Cool white"]
+
+    # send attribute report from device
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {"switchable_white": BegaColorTemperatureChannel.Cool_white},
+    )
+    assert entity.state["state"] == "Cool white"
+
+    # test selecting an option
+    Write_Attributes_rsp = foundation.GENERAL_COMMANDS[
+        foundation.GeneralCommand.Write_Attributes_rsp
+    ].schema
+
+    with (
+        patch(
+            "zigpy.device.Device.request",
+            return_value=Write_Attributes_rsp(
+                status_records=[
+                    foundation.WriteAttributesStatusRecord(
+                        status=foundation.Status.SUCCESS
+                    )
+                ]
+            ),
+        ),
+        patch.object(cluster, "write_attributes", wraps=cluster.write_attributes),
+    ):
+        await entity.async_select_option("Warm white")
+        await zha_gateway.async_block_till_done()
+        assert entity.state["state"] == "Warm white"
+        assert cluster.write_attributes.call_count == 1
+        assert cluster.write_attributes.call_args == call(
+            {"switchable_white": BegaColorTemperatureChannel.Warm_white},
+            manufacturer=UNDEFINED,
+        )
+
+
+async def test_bega_color_temperature_channel_select_unsupported(
+    zha_gateway: Gateway,
+) -> None:
+    """Test BEGA select entity is not created when color temps are 0xFFFF."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/bega-gantenbrink-leuchten-kg-smart-dimmable-light.json",
+    )
+
+    cluster = zigpy_device.endpoints[1].in_clusters[general.LevelControl.cluster_id]
+    # Override color temperatures to 0xFFFF (unsupported)
+    cluster.update_attribute(
+        cluster.find_attribute("switchable_color_temperature_1").id, 0xFFFF
+    )
+    cluster.update_attribute(
+        cluster.find_attribute("switchable_color_temperature_2").id, 0xFFFF
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+
+    with pytest.raises(KeyError):
+        get_entity(
+            zha_device,
+            platform=Platform.SELECT,
+            qualifier="switchable_white",
+        )

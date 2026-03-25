@@ -542,7 +542,7 @@
           "unique_id": "00:12:4b:00:09:6e:5a:cf-1-1282",
           "migrate_unique_ids": [],
           "platform": "siren",
-          "class_name": "Siren",
+          "class_name": "AdvancedSiren",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": null,
@@ -582,7 +582,7 @@
           "supported_features": 31
         },
         "state": {
-          "class_name": "Siren",
+          "class_name": "AdvancedSiren",
           "available": true,
           "state": false
         }

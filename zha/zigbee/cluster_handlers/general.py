@@ -7,7 +7,7 @@ from collections.abc import Coroutine
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Final
 
-from zhaquirks.quirk_ids import TUYA_PLUG_ONOFF
+from zhaquirks.quirk_ids import BEGA_LIGHT_SWITCHABLE_WHITE, TUYA_PLUG_ONOFF
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
@@ -438,6 +438,16 @@ class LevelControlClusterHandler(ClusterHandler):
         LevelControl.AttributeDefs.default_move_rate.name: True,
         LevelControl.AttributeDefs.start_up_current_level.name: True,
     }
+
+    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
+        """Initialize LevelControlClusterHandler."""
+        super().__init__(cluster, endpoint)
+
+        if BEGA_LIGHT_SWITCHABLE_WHITE in endpoint.device.exposes_features:
+            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
+            self.ZCL_INIT_ATTRS["switchable_white"] = True
+            self.ZCL_INIT_ATTRS["switchable_color_temperature_1"] = True
+            self.ZCL_INIT_ATTRS["switchable_color_temperature_2"] = True
 
     @property
     def current_level(self) -> int | None:

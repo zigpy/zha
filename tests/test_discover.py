@@ -37,6 +37,7 @@ import zigpy.types
 from zigpy.zcl import ClusterType
 import zigpy.zcl.clusters.closures
 import zigpy.zcl.clusters.general
+from zigpy.zcl.clusters.general import Ota, QueryNextImageCommand
 import zigpy.zcl.clusters.security
 import zigpy.zcl.foundation as zcl_f
 
@@ -714,6 +715,9 @@ async def test_devices_from_files(
             await zha_gateway.async_block_till_done(wait_background_tasks=True)
             assert zha_device is not None
 
+        # Ensure entity recomputation is idempotent
+        await zha_device.recompute_entities()
+
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
             unique_id_collisions[entity.unique_id].append(entity)
@@ -748,8 +752,6 @@ async def test_devices_from_files(
 
                 unique_id_migrations[key] = entity
 
-        await zha_device.on_remove()
-
         # XXX: We re-serialize the JSON because integer enum types are converted when
         # serializing but will not compare properly otherwise
         loaded_device_data = json.loads(
@@ -778,6 +780,8 @@ async def test_devices_from_files(
                 )
             ]
 
+        await zha_device.on_remove()
+
 
 async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None:
     """Test that calling get_diagnostics_json twice produces the same result."""
@@ -794,6 +798,55 @@ async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None
         json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
     )
     assert first == second
+
+
+async def test_diagnostics_includes_ota_last_query_cmd(zha_gateway: Gateway) -> None:
+    """Test that diagnostics includes last_query_cmd for OTA clusters."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+
+    ota_cluster = zigpy_device.endpoints[1].out_clusters[Ota.cluster_id]
+    ota_cluster.last_query_cmd = QueryNextImageCommand(
+        field_control=0,
+        manufacturer_code=0x117C,
+        image_type=0x1234,
+        current_file_version=0x00AABBCC,
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    diag = json.loads(json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder))
+
+    ota_diag = next(
+        c for c in diag["endpoints"]["1"]["out_clusters"] if c["cluster_id"] == "0x0019"
+    )
+
+    assert ota_diag["last_query_cmd"] == {
+        "manufacturer_code": 0x117C,
+        "image_type": 0x1234,
+        "current_file_version": 0x00AABBCC,
+        "hardware_version": None,
+    }
+
+
+async def test_diagnostics_omits_ota_last_query_cmd_when_none(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that diagnostics omits last_query_cmd when it is None."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    diag = json.loads(json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder))
+
+    ota_diag = next(
+        c for c in diag["endpoints"]["1"]["out_clusters"] if c["cluster_id"] == "0x0019"
+    )
+
+    assert "last_query_cmd" not in ota_diag
 
 
 async def test_cluster_handler_only_clusters_are_bound(zha_gateway: Gateway) -> None:

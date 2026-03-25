@@ -938,13 +938,13 @@ async def test_configure_reporting(zha_gateway: Gateway) -> None:
         spec_set=cluster.bind,
         return_value=[zdo_t.Status.SUCCESS],  # ZDOCmd.Bind_rsp
     )
+
+    def mock_configure_reporting_multiple(config):
+        return dict.fromkeys(config, foundation.Status.SUCCESS)
+
     cluster.configure_reporting_multiple = AsyncMock(
         spec_set=cluster.configure_reporting_multiple,
-        return_value=[
-            foundation.ConfigureReportingResponseRecord(
-                status=foundation.Status.SUCCESS
-            )
-        ],
+        side_effect=mock_configure_reporting_multiple,
     )
 
     cluster_handler = TestZigbeeClusterHandler(cluster, endpoint)
@@ -971,38 +971,31 @@ async def test_configure_reporting(zha_gateway: Gateway) -> None:
 @pytest.mark.parametrize(
     ("response", "expected_statuses"),
     [
-        # Single SUCCESS in a list: all attributes marked as SUCCESS (ZCL 2.5.8.1.3)
+        # All attributes succeeded
         (
-            [
-                foundation.ConfigureReportingResponseRecord(
-                    status=foundation.Status.SUCCESS
-                )
-            ],
+            {
+                Color.AttributeDefs.current_x: foundation.Status.SUCCESS,
+                Color.AttributeDefs.current_y: foundation.Status.SUCCESS,
+            },
             {"current_x": "SUCCESS", "current_y": "SUCCESS"},
         ),
-        # Empty list: unexpected response, all attributes marked as FAILURE
+        # Empty dict: unexpected response, all attributes marked as FAILURE
         (
-            [],
+            {},
             {"current_x": "FAILURE", "current_y": "FAILURE"},
         ),
         # Per-attribute results: mixed success/failure
         (
-            [
-                foundation.ConfigureReportingResponseRecord(
-                    status=foundation.Status.SUCCESS,
-                    attrid=Color.AttributeDefs.current_x.id,
-                ),
-                foundation.ConfigureReportingResponseRecord(
-                    status=foundation.Status.UNSUPPORTED_ATTRIBUTE,
-                    attrid=Color.AttributeDefs.current_y.id,
-                ),
-            ],
+            {
+                Color.AttributeDefs.current_x: foundation.Status.SUCCESS,
+                Color.AttributeDefs.current_y: foundation.Status.UNSUPPORTED_ATTRIBUTE,
+            },
             {"current_x": "SUCCESS", "current_y": "UNSUPPORTED_ATTRIBUTE"},
         ),
     ],
     ids=[
-        "single_success_list",
-        "empty_list",
+        "all_success",
+        "empty_dict",
         "mixed_per_attribute",
     ],
 )
@@ -1075,6 +1068,95 @@ async def test_configure_reporting_status(
     ]
 
 
+async def test_configure_reporting_status_empty_second_chunk(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that an empty response for one chunk doesn't overwrite other chunks' statuses."""
+    zigpy_coordinator_device: ZigpyDevice = zigpy_coordinator_device_mock(zha_gateway)
+    endpoint: Endpoint = endpoint_mock(zigpy_coordinator_device)
+
+    class TestClusterHandler(ClusterHandler):
+        BIND = True
+        REPORT_CONFIG = (
+            AttrReportConfig(attr="current_x", config=(1, 60, 1)),
+            AttrReportConfig(attr="current_y", config=(1, 60, 2)),
+            AttrReportConfig(attr="current_hue", config=(1, 60, 3)),
+            # 4th attribute forces a second chunk (REPORT_CONFIG_ATTR_PER_REQ=3)
+            AttrReportConfig(attr="color_temperature", config=(1, 60, 4)),
+        )
+
+    mock_ep = mock.AsyncMock()
+    mock_ep.profile_id = zigpy.profiles.zha.PROFILE_ID
+    mock_ep.device.zdo = AsyncMock()
+
+    cluster = Color(mock_ep)
+    cluster.bind = AsyncMock(
+        spec_set=cluster.bind,
+        return_value=[zdo_t.Status.SUCCESS],
+    )
+
+    # Chunk 1 succeeds, chunk 2 returns empty dict
+    chunk_responses = [
+        {
+            Color.AttributeDefs.current_x: foundation.Status.SUCCESS,
+            Color.AttributeDefs.current_y: foundation.Status.SUCCESS,
+            Color.AttributeDefs.current_hue: foundation.Status.SUCCESS,
+        },
+        {},
+    ]
+    cluster.configure_reporting_multiple = AsyncMock(
+        spec_set=cluster.configure_reporting_multiple,
+        side_effect=chunk_responses,
+    )
+
+    cluster_handler = TestClusterHandler(cluster, endpoint)
+
+    mock_emit = MagicMock()
+    cluster_handler._endpoint.device.emit = mock_emit
+
+    await cluster_handler.async_configure()
+
+    expected_statuses = {
+        "current_x": "SUCCESS",
+        "current_y": "SUCCESS",
+        "current_hue": "SUCCESS",
+        "color_temperature": "FAILURE",
+    }
+
+    assert mock_emit.call_args_list == [
+        mock.call(
+            ZHA_CLUSTER_HANDLER_MSG_BIND,
+            ClusterBindEvent(
+                cluster_name=cluster.name,
+                cluster_id=cluster.cluster_id,
+                cluster_handler_unique_id=cluster_handler.unique_id,
+                success=True,
+            ),
+        ),
+        mock.call(
+            ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
+            ClusterConfigureReportingEvent(
+                cluster_name=cluster.name,
+                cluster_id=cluster.cluster_id,
+                cluster_handler_unique_id=cluster_handler.unique_id,
+                attributes={
+                    attr_name: {
+                        "min": 1,
+                        "max": 60,
+                        "id": attr_name,
+                        "name": attr_name,
+                        "change": idx + 1,
+                        "status": expected_status,
+                    }
+                    for idx, (attr_name, expected_status) in enumerate(
+                        expected_statuses.items()
+                    )
+                },
+            ),
+        ),
+    ]
+
+
 async def test_invalid_cluster_handler(zha_gateway: Gateway, caplog) -> None:  # pylint: disable=unused-argument
     """Test setting up a cluster handler that fails to match properly."""
 
@@ -1090,11 +1172,7 @@ async def test_invalid_cluster_handler(zha_gateway: Gateway, caplog) -> None:  #
     cluster = zigpy_ep.add_input_cluster(Color.cluster_id)
     cluster.configure_reporting_multiple = AsyncMock(
         spec_set=cluster.configure_reporting_multiple,
-        return_value=[
-            foundation.ConfigureReportingResponseRecord(
-                status=foundation.Status.SUCCESS
-            )
-        ],
+        side_effect=lambda config: dict.fromkeys(config, foundation.Status.SUCCESS),
     )
 
     mock_zha_device = mock.AsyncMock(spec=Device)
@@ -1135,11 +1213,7 @@ async def test_standard_cluster_handler(
     cluster = zigpy_ep.add_input_cluster(Color.cluster_id)
     cluster.configure_reporting_multiple = AsyncMock(
         spec_set=cluster.configure_reporting_multiple,
-        return_value=[
-            foundation.ConfigureReportingResponseRecord(
-                status=foundation.Status.SUCCESS
-            )
-        ],
+        side_effect=lambda config: dict.fromkeys(config, foundation.Status.SUCCESS),
     )
 
     mock_zha_device = mock.AsyncMock(spec=Device)
@@ -1175,11 +1249,7 @@ async def test_exposed_feature_cluster_handler(
     cluster = zigpy_ep.add_input_cluster(Color.cluster_id)
     cluster.configure_reporting_multiple = AsyncMock(
         spec_set=cluster.configure_reporting_multiple,
-        return_value=[
-            foundation.ConfigureReportingResponseRecord(
-                status=foundation.Status.SUCCESS
-            )
-        ],
+        side_effect=lambda config: dict.fromkeys(config, foundation.Status.SUCCESS),
     )
 
     mock_zha_device = mock.AsyncMock(spec=Device)

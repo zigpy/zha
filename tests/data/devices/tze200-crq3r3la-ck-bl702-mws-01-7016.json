@@ -7,8 +7,8 @@
   "friendly_manufacturer": "_TZE200_crq3r3la",
   "friendly_model": "CK-BL702-MWS-01(7016)",
   "name": "_TZE200_crq3r3la CK-BL702-MWS-01(7016)",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Mains",
@@ -78,6 +78,12 @@
           "cluster_id": "0x0400",
           "endpoint_attribute": "illuminance",
           "attributes": [
+            {
+              "id": "0x0004",
+              "name": "light_sensor_type",
+              "zcl_type": "enum8",
+              "value": 0
+            },
             {
               "id": "0x0000",
               "name": "measured_value",
@@ -159,7 +165,7 @@
         },
         {
           "cluster_id": "0xef00",
-          "endpoint_attribute": null,
+          "endpoint_attribute": "tuya_manufacturer",
           "attributes": []
         }
       ],
@@ -358,6 +364,390 @@
         }
       }
     ],
+    "number": [
+      {
+        "info_object": {
+          "fallback_name": "Motion detection distance",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-large_motion_detection_distance",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "large_motion_detection_distance",
+          "translation_placeholders": null,
+          "device_class": "distance",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "m"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Motion detection sensitivity",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-large_motion_detection_sensitivity",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "large_motion_detection_sensitivity",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Medium motion detection distance",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-medium_motion_detection_distance",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "medium_motion_detection_distance",
+          "translation_placeholders": null,
+          "device_class": "distance",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 6,
+          "native_min_value": 0,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "m"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Medium motion detection sensitivity",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-medium_motion_detection_sensitivity",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "medium_motion_detection_sensitivity",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Fading time",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-presence_timeout",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "fading_time",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 28800,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Small motion detection distance",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-small_motion_detection_distance",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "small_motion_detection_distance",
+          "translation_placeholders": null,
+          "device_class": "distance",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 6,
+          "native_min_value": 0,
+          "native_step": 0.01,
+          "native_unit_of_measurement": "m"
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Small motion detection sensitivity",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-small_motion_detection_sensitivity",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "NumberConfigurationEntity",
+          "translation_key": "small_motion_detection_sensitivity",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 10,
+          "native_min_value": 0,
+          "native_step": 1,
+          "native_unit_of_measurement": null
+        },
+        "state": {
+          "class_name": "NumberConfigurationEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
+    "select": [
+      {
+        "info_object": {
+          "fallback_name": "Motion state",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-motion_state",
+          "migrate_unique_ids": [],
+          "platform": "select",
+          "class_name": "ZCLEnumSelectEntity",
+          "translation_key": "motion_state",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "enum": "TuyaPresenceStateV02",
+          "options": [
+            "Unoccupied",
+            "Large",
+            "Medium",
+            "Small",
+            "Huge",
+            "Gigantic"
+          ]
+        },
+        "state": {
+          "class_name": "ZCLEnumSelectEntity",
+          "available": true,
+          "state": null
+        }
+      }
+    ],
     "sensor": [
       {
         "info_object": {
@@ -489,6 +879,56 @@
           "class_name": "Illuminance",
           "available": true,
           "state": 1255
+        }
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": "LED indicator",
+          "unique_id": "ab:cd:ef:12:36:6f:df:00-1-find_switch",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "led_indicator",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "TuyaClusterHandler",
+              "generic_id": "cluster_handler_0xef00",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 61184,
+                "name": "Tuya Manufacturer Specific",
+                "type": "server"
+              },
+              "id": "1:0xef00",
+              "unique_id": "ab:cd:ef:12:36:6f:df:00:1:0xef00",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:36:6f:df:00",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "find_switch",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
         }
       }
     ],
