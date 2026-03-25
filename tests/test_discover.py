@@ -714,6 +714,9 @@ async def test_devices_from_files(
             await zha_gateway.async_block_till_done(wait_background_tasks=True)
             assert zha_device is not None
 
+        # Ensure entity recomputation is idempotent
+        await zha_device.recompute_entities()
+
         unique_id_collisions = defaultdict(list)
         for entity in zha_device.platform_entities.values():
             unique_id_collisions[entity.unique_id].append(entity)
@@ -748,8 +751,6 @@ async def test_devices_from_files(
 
                 unique_id_migrations[key] = entity
 
-        await zha_device.on_remove()
-
         # XXX: We re-serialize the JSON because integer enum types are converted when
         # serializing but will not compare properly otherwise
         loaded_device_data = json.loads(
@@ -777,6 +778,8 @@ async def test_devices_from_files(
                     manufacturer=None,
                 )
             ]
+
+        await zha_device.on_remove()
 
 
 async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None:

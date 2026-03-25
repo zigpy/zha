@@ -91,15 +91,15 @@ class ThermostatClusterHandler(ClusterHandler):
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.running_mode.name,
-            config=REPORT_CONFIG_CLIMATE,
+            config=REPORT_CONFIG_CLIMATE_DISCRETE,
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.running_state.name,
-            config=REPORT_CONFIG_CLIMATE_DEMAND,
+            config=REPORT_CONFIG_CLIMATE_DISCRETE,
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.system_mode.name,
-            config=REPORT_CONFIG_CLIMATE,
+            config=REPORT_CONFIG_CLIMATE_DISCRETE,
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.occupancy.name,

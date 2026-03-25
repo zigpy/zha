@@ -72,12 +72,6 @@
           "endpoint_attribute": "power",
           "attributes": [
             {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "unsupported": true
-            },
-            {
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
