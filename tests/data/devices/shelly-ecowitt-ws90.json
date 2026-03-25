@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Shelly",
   "friendly_model": "Ecowitt WS90",
   "name": "Shelly Ecowitt WS90",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 5264,
   "power_source": "Battery or Unknown",
@@ -144,17 +144,17 @@
         },
         {
           "cluster_id": "0xfc01",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "shelly_wind_cluster",
           "attributes": []
         },
         {
           "cluster_id": "0xfc02",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "shelly_uv_cluster",
           "attributes": []
         },
         {
           "cluster_id": "0xfc03",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "shelly_rain_cluster",
           "attributes": []
         }
       ],
@@ -208,6 +208,51 @@
     }
   },
   "zha_lib_entities": {
+    "binary_sensor": [
+      {
+        "info_object": {
+          "fallback_name": "Rain detected",
+          "unique_id": "ab:cd:ef:12:a6:a9:96:8e-1-rain_status",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": "rain_detected",
+          "translation_placeholders": null,
+          "device_class": "moisture",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc03",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64515,
+                "name": "Shelly Rain Cluster",
+                "type": "server"
+              },
+              "id": "1:0xfc03",
+              "unique_id": "ab:cd:ef:12:a6:a9:96:8e:1:0xfc03",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:a6:a9:96:8e",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "rain_status"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      }
+    ],
     "button": [
       {
         "info_object": {
@@ -569,6 +614,226 @@
           "class_name": "Humidity",
           "available": true,
           "state": 60.0
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Gust speed",
+          "unique_id": "ab:cd:ef:12:a6:a9:96:8e-1-gust_speed",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "gust_speed",
+          "translation_placeholders": null,
+          "device_class": "wind_speed",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc01",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64513,
+                "name": "Shelly Wind Cluster",
+                "type": "server"
+              },
+              "id": "1:0xfc01",
+              "unique_id": "ab:cd:ef:12:a6:a9:96:8e:1:0xfc01",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:a6:a9:96:8e",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "m/s"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Precipitation",
+          "unique_id": "ab:cd:ef:12:a6:a9:96:8e-1-precipitation",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "precipitation",
+          "state_class": "total_increasing",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc03",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64515,
+                "name": "Shelly Rain Cluster",
+                "type": "server"
+              },
+              "id": "1:0xfc03",
+              "unique_id": "ab:cd:ef:12:a6:a9:96:8e:1:0xfc03",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:a6:a9:96:8e",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "mm"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "UV index",
+          "unique_id": "ab:cd:ef:12:a6:a9:96:8e-1-uv_index",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": "uv_index",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc02",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64514,
+                "name": "Shelly UV Cluster",
+                "type": "server"
+              },
+              "id": "1:0xfc02",
+              "unique_id": "ab:cd:ef:12:a6:a9:96:8e:1:0xfc02",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:a6:a9:96:8e",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Wind direction",
+          "unique_id": "ab:cd:ef:12:a6:a9:96:8e-1-wind_direction",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "wind_direction",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc01",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64513,
+                "name": "Shelly Wind Cluster",
+                "type": "server"
+              },
+              "id": "1:0xfc01",
+              "unique_id": "ab:cd:ef:12:a6:a9:96:8e:1:0xfc01",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:a6:a9:96:8e",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "\u00b0"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Wind speed",
+          "unique_id": "ab:cd:ef:12:a6:a9:96:8e-1-wind_speed",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "Sensor",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "wind_speed",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfc01",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 64513,
+                "name": "Shelly Wind Cluster",
+                "type": "server"
+              },
+              "id": "1:0xfc01",
+              "unique_id": "ab:cd:ef:12:a6:a9:96:8e:1:0xfc01",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:a6:a9:96:8e",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": "m/s"
+        },
+        "state": {
+          "class_name": "Sensor",
+          "available": true,
+          "state": null
         }
       }
     ]

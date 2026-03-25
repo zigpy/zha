@@ -502,7 +502,7 @@
           "class_name": "NumberConfigurationEntity",
           "translation_key": "temperature_offset",
           "translation_placeholders": null,
-          "device_class": "temperature",
+          "device_class": "temperature_delta",
           "state_class": null,
           "entity_category": "config",
           "entity_registry_enabled_default": true,

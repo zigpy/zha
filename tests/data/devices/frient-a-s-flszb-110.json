@@ -9,7 +9,9 @@
   "name": "frient A/S FLSZB-110",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
-  "exposes_features": [],
+  "exposes_features": [
+    "siren_basic"
+  ],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
   "lqi": null,
@@ -100,12 +102,6 @@
               "name": "battery_alarm_state",
               "zcl_type": "map32",
               "value": 0
-            },
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "unsupported": true
             },
             {
               "id": "0x0020",
@@ -408,7 +404,7 @@
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
-          "entity_category": "diagnostic",
+          "entity_category": "config",
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
@@ -457,7 +453,7 @@
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
-          "entity_category": "diagnostic",
+          "entity_category": "config",
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
@@ -504,7 +500,7 @@
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
-          "entity_category": "diagnostic",
+          "entity_category": "config",
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
@@ -553,7 +549,7 @@
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
-          "entity_category": "diagnostic",
+          "entity_category": "config",
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
@@ -791,7 +787,7 @@
           "translation_placeholders": null,
           "device_class": null,
           "state_class": null,
-          "entity_category": "diagnostic",
+          "entity_category": "config",
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
