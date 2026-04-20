@@ -2068,6 +2068,48 @@ async def test_ignore_non_value(zha_gateway: Gateway) -> None:
     assert entity.state["state"] is None
 
 
+async def test_ignore_nan_value(zha_gateway: Gateway) -> None:
+    """Test sensor updates ignoring NaN values (e.g. from CO concentration sensors)."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/frient-a-s-scazb-141.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+    cluster = zha_device.device.endpoints[46].carbon_monoxide_concentration
+    entity = get_entity(
+        zha_device,
+        platform=Platform.SENSOR,
+        entity_type=sensor.CarbonMonoxideConcentration,
+    )
+
+    # Initial value from the diagnostics file (0.0 * 1e6 = 0.0 ppm)
+    assert entity.state["state"] == 0.0
+
+    # Normal attribute report
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value.id: 0.001
+        },
+    )
+    assert entity.state["state"] == 1000.0
+
+    # NaN attribute value should result in None state
+    await send_attributes_report(
+        zha_gateway,
+        cluster,
+        {
+            measurement.CarbonMonoxideConcentration.AttributeDefs.measured_value.id: float(
+                "nan"
+            ),
+        },
+    )
+    assert entity.state["state"] is None
+
+
 @pytest.mark.parametrize(
     ("resolution", "precision"),
     [
@@ -2115,7 +2157,7 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     registry = DeviceRegistry()
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
-        "tests/data/devices/third-reality-inc-3rsm0147z.json",
+        "tests/data/devices/centralite-3405-l.json",
     )
 
     zigpy_dev.endpoints[1].power.update_attribute(

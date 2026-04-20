@@ -147,7 +147,7 @@ class IdentifyButton(Button):
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:
         """Check if this button is supported given the list of entities."""
         cls = type(self)
-        return not any(type(entity) is cls for entity in entities)
+        return not any(type(entity) is cls for entity in entities if entity is not self)
 
 
 class WriteAttributeButton(BaseButton):

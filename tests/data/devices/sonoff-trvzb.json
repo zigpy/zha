@@ -306,7 +306,7 @@
         },
         {
           "cluster_id": "0xfc57",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "works_with_all_hubs",
           "attributes": []
         }
       ],
@@ -829,7 +829,7 @@
           "class_name": "NumberConfigurationEntity",
           "translation_key": "temperature_control_accuracy",
           "translation_placeholders": null,
-          "device_class": "temperature",
+          "device_class": "temperature_delta",
           "state_class": null,
           "entity_category": "config",
           "entity_registry_enabled_default": true,

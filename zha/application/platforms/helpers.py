@@ -3,14 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator
-import enum
+from enum import StrEnum
 import logging
-from typing import TYPE_CHECKING, Any, overload
-
-if TYPE_CHECKING:
-    from zha.application.platforms.binary_sensor.const import BinarySensorDeviceClass
-    from zha.application.platforms.number.const import NumberDeviceClass
-    from zha.application.platforms.sensor.const import SensorDeviceClass
+from typing import Any
 
 
 def find_state_attributes(states: list[dict], key: str) -> Iterator[Any]:
@@ -51,46 +46,15 @@ def reduce_attribute(
     return reduce(*attrs)
 
 
-@overload
-def validate_device_class(
-    device_class_enum: type[BinarySensorDeviceClass],
-    metadata_value: enum.Enum,
+def validate_device_class[DeviceClassT: StrEnum](
+    device_class_enum: type[DeviceClassT],
+    metadata_value: StrEnum,
     platform: str,
     logger: logging.Logger,
-) -> BinarySensorDeviceClass | None: ...
-
-
-@overload
-def validate_device_class(
-    device_class_enum: type[SensorDeviceClass],
-    metadata_value: enum.Enum,
-    platform: str,
-    logger: logging.Logger,
-) -> SensorDeviceClass | None: ...
-
-
-@overload
-def validate_device_class(
-    device_class_enum: type[NumberDeviceClass],
-    metadata_value: enum.Enum,
-    platform: str,
-    logger: logging.Logger,
-) -> NumberDeviceClass | None: ...
-
-
-def validate_device_class(
-    device_class_enum: (
-        type[BinarySensorDeviceClass]
-        | type[SensorDeviceClass]
-        | type[NumberDeviceClass]
-    ),
-    metadata_value: enum.Enum,
-    platform: str,
-    logger: logging.Logger,
-) -> BinarySensorDeviceClass | SensorDeviceClass | NumberDeviceClass | None:
+) -> DeviceClassT | None:
     """Validate and return a device class."""
     try:
-        return device_class_enum(metadata_value.value)
+        return device_class_enum(metadata_value)
     except ValueError as ex:
         logger.warning(
             "Quirks provided an invalid device class: %s for platform %s: %s",

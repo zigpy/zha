@@ -7,8 +7,8 @@
   "friendly_manufacturer": "_TZ3040_bb6xaihh",
   "friendly_model": "TS0202",
   "name": "_TZ3040_bb6xaihh TS0202",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.tuya.builder.EnchantedDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4417,
   "power_source": "Battery or Unknown",
@@ -73,13 +73,19 @@
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
-              "unsupported": true
+              "value": 2
+            },
+            {
+              "id": "0x0034",
+              "name": "battery_rated_voltage",
+              "zcl_type": "uint8",
+              "value": 15
             },
             {
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "unsupported": true
+              "value": 4
             },
             {
               "id": "0x0020",
@@ -495,6 +501,8 @@
           "class_name": "Battery",
           "available": true,
           "state": 100.0,
+          "battery_size": "AAA",
+          "battery_quantity": 2,
           "battery_voltage": 3.0
         },
         "extra_state_attributes": [

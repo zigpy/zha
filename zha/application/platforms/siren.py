@@ -10,6 +10,7 @@ from enum import IntFlag
 import functools
 from typing import TYPE_CHECKING, Any, Final, cast
 
+from zhaquirks.quirk_ids import SIREN_BASIC
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.security import IasWd
 
@@ -31,6 +32,7 @@ from zha.application.platforms import (
     BaseEntityInfo,
     ClusterHandlerMatch,
     PlatformEntity,
+    PlatformFeatureGroup,
     register_entity,
 )
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
@@ -121,16 +123,11 @@ class BaseSiren(PlatformEntity, ABC):
         """Turn off siren."""
 
 
-@register_entity(IasWd.cluster_id)
-class Siren(BaseSiren):
-    """Representation of a ZHA siren."""
+class BaseZclSiren(BaseSiren, ABC):
+    """Base class for ZHA IAS WD siren entities with shared ZCL logic."""
 
-    _attr_fallback_name: str = "Siren"
-    _attr_primary_weight = 4
-
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
-    )
+    _cluster_handler: IasWdClusterHandler
+    _off_listener: asyncio.TimerHandle | None
 
     def __init__(
         self,
@@ -139,10 +136,9 @@ class Siren(BaseSiren):
         device: Device,
         **kwargs: Any,
     ) -> None:
-        """Init this siren."""
-        self._cluster_handler: IasWdClusterHandler = cast(
-            IasWdClusterHandler, cluster_handlers[0]
-        )
+        """Init ZCL siren base."""
+        self._cluster_handler = cast(IasWdClusterHandler, cluster_handlers[0])
+        self._off_listener = None
 
         legacy_discovery_unique_id = (
             f"{endpoint.device.ieee}-{endpoint.id}"
@@ -156,9 +152,57 @@ class Siren(BaseSiren):
             cluster_handlers,
             endpoint,
             device,
-            **kwargs,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
+            **kwargs,
         )
+
+    def _cancel_off_listener(self) -> None:
+        """Cancel and clean up the off listener."""
+        if self._off_listener:
+            self._off_listener.cancel()
+
+            with contextlib.suppress(ValueError):
+                self._tracked_handles.remove(self._off_listener)
+
+            self._off_listener = None
+
+    async def async_turn_off(self) -> None:
+        """Turn off siren."""
+        await self._cluster_handler.issue_start_warning(
+            mode=WARNING_DEVICE_MODE_STOP, strobe=WARNING_DEVICE_STROBE_NO
+        )
+        self._cancel_off_listener()
+        self._attr_is_on = False
+        self.maybe_emit_state_changed_event()
+
+    def _async_set_off(self) -> None:
+        """Set is_on to False and write HA state."""
+        self._attr_is_on = False
+        self._cancel_off_listener()
+        self.maybe_emit_state_changed_event()
+
+
+@register_entity(IasWd.cluster_id)
+class AdvancedSiren(BaseZclSiren):
+    """Representation of a ZHA siren with full tone, level, and strobe support."""
+
+    _attr_fallback_name: str = "Siren"
+    _attr_primary_weight = 4
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+        feature_priority=(PlatformFeatureGroup.SIREN, 0),
+    )
+
+    def __init__(
+        self,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this siren."""
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
         self._attr_supported_features = (
             SirenEntityFeature.TURN_ON
             | SirenEntityFeature.TURN_OFF
@@ -174,7 +218,6 @@ class Siren(BaseSiren):
             WARNING_DEVICE_MODE_FIRE_PANIC: "Fire Panic",
             WARNING_DEVICE_MODE_EMERGENCY_PANIC: "Emergency Panic",
         }
-        self._off_listener: asyncio.TimerHandle | None = None
 
     async def async_turn_on(
         self,
@@ -183,9 +226,7 @@ class Siren(BaseSiren):
         volume_level: int | None = None,
     ) -> None:
         """Turn on siren."""
-        if self._off_listener:
-            self._off_listener.cancel()
-            self._off_listener = None
+        self._cancel_off_listener()
         tone_cache = self._cluster_handler.data_cache.get(
             IasWd.Warning.WarningMode.__name__
         )
@@ -229,27 +270,62 @@ class Siren(BaseSiren):
         )
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
-            siren_duration, self.async_set_off
+            siren_duration, self._async_set_off
         )
         self._tracked_handles.append(self._off_listener)
         self.maybe_emit_state_changed_event()
 
-    async def async_turn_off(self) -> None:
-        """Turn off siren."""
-        await self._cluster_handler.issue_start_warning(
-            mode=WARNING_DEVICE_MODE_STOP, strobe=WARNING_DEVICE_STROBE_NO
+
+@register_entity(IasWd.cluster_id)
+class BasicSiren(BaseZclSiren):
+    """Representation of a basic ZHA siren with fixed tone, level, and strobe."""
+
+    _attr_fallback_name: str = "Siren"
+    _attr_primary_weight = 4
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+        exposed_features=frozenset({SIREN_BASIC}),
+        feature_priority=(PlatformFeatureGroup.SIREN, 1),
+    )
+
+    def __init__(
+        self,
+        cluster_handlers: list[ClusterHandler],
+        endpoint: Endpoint,
+        device: Device,
+        **kwargs: Any,
+    ) -> None:
+        """Init this basic siren."""
+        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        self._attr_supported_features = (
+            SirenEntityFeature.TURN_ON
+            | SirenEntityFeature.TURN_OFF
+            | SirenEntityFeature.DURATION
         )
-        self._attr_is_on = False
-        self.maybe_emit_state_changed_event()
+        self._attr_available_tones: dict[int, str] = {}
 
-    def async_set_off(self) -> None:
-        """Set is_on to False and write HA state."""
-        self._attr_is_on = False
-        if self._off_listener:
-            self._off_listener.cancel()
-
-            with contextlib.suppress(ValueError):
-                self._tracked_handles.remove(self._off_listener)
-
-            self._off_listener = None
+    async def async_turn_on(
+        self,
+        duration: int | None = None,
+        tone: int | None = None,
+        volume_level: int | None = None,
+    ) -> None:
+        """Turn on siren with fixed tone, level, and strobe."""
+        self._cancel_off_listener()
+        siren_duration = duration if duration is not None else DEFAULT_DURATION
+        await self._cluster_handler.issue_start_warning(
+            # some Frient sensors send INVALID_VALUE for EMERGENCY
+            mode=WARNING_DEVICE_MODE_BURGLAR,
+            warning_duration=siren_duration,
+            siren_level=WARNING_DEVICE_SOUND_HIGH,
+            strobe=WARNING_DEVICE_STROBE_NO,
+            strobe_duty_cycle=0,
+            strobe_intensity=WARNING_DEVICE_STROBE_HIGH,
+        )
+        self._attr_is_on = True
+        self._off_listener = asyncio.get_running_loop().call_later(
+            siren_duration, self._async_set_off
+        )
+        self._tracked_handles.append(self._off_listener)
         self.maybe_emit_state_changed_event()

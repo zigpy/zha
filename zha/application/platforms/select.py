@@ -11,7 +11,9 @@ from typing import TYPE_CHECKING, Any
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import (
+    BEGA_LIGHT_SWITCHABLE_WHITE,
     DANFOSS_ALLY_THERMOSTAT,
+    SIREN_BASIC,
     TUYA_PLUG_MANUFACTURER,
     TUYA_PLUG_ONOFF,
 )
@@ -19,7 +21,7 @@ from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCl
 from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata
-from zigpy.zcl.clusters.general import OnOff
+from zigpy.zcl.clusters.general import LevelControl, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
 from zigpy.zcl.clusters.measurement import OccupancySensing
 from zigpy.zcl.clusters.security import IasWd
@@ -39,6 +41,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_IAS_WD,
     CLUSTER_HANDLER_INOVELLI,
+    CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_OCCUPANCY,
     CLUSTER_HANDLER_ON_OFF,
     CLUSTER_HANDLER_THERMOSTAT,
@@ -164,7 +167,8 @@ class DefaultToneSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_siren_tone"
 
     _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD})
+        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+        not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
 
@@ -177,7 +181,8 @@ class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_siren_level"
 
     _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD})
+        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+        not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
 
@@ -190,7 +195,8 @@ class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_strobe_level"
 
     _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD})
+        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+        not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
 
@@ -203,7 +209,8 @@ class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     _attr_translation_key: str = "default_strobe"
 
     _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD})
+        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+        not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
 
@@ -1012,3 +1019,41 @@ class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
         cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
         models=SINOPE_MODELS,
     )
+
+
+class BegaColorTemperatureChannel(types.enum8):
+    """BEGA switchable white color temperature channel enum."""
+
+    Warm_white = 0x00
+    Cool_white = 0x01
+
+
+@register_entity(LevelControl.cluster_id)
+class BegaColorTemperatureChannelSelect(ZCLEnumSelectEntity):
+    """Select entity for switching BEGA light color temperature channel."""
+
+    _unique_id_suffix = "switchable_white"
+    _attribute_name = "switchable_white"
+    _enum = BegaColorTemperatureChannel
+    _attr_translation_key: str = "color_temperature_channel"
+
+    _cluster_handler_match = ClusterHandlerMatch(
+        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}),
+        exposed_features=frozenset({BEGA_LIGHT_SWITCHABLE_WHITE}),
+    )
+
+    def _is_supported(self) -> bool:
+        """Check if the light supports switchable color temperatures."""
+        cluster = self._cluster_handler.cluster
+        temp_1 = cluster.get("switchable_color_temperature_1")
+        temp_2 = cluster.get("switchable_color_temperature_2")
+
+        if temp_1 == 0xFFFF or temp_2 == 0xFFFF:
+            _LOGGER.debug(
+                "A color temperature is 0xFFFF (unsupported) - "
+                "skipping %s entity creation",
+                self.__class__.__name__,
+            )
+            return False
+
+        return super()._is_supported()

@@ -390,7 +390,7 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
                 cluster_handler.BIND = False
 
 
-def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:
+def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntity]:  # noqa: C901
     """Discover entities for an endpoint using the new registry-based discovery."""
     device = endpoint.device
 
@@ -437,6 +437,12 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
             if (
                 match.exposed_features is not None
                 and not match.exposed_features & device.exposes_features
+            ):
+                continue
+
+            if (
+                match.not_exposed_features is not None
+                and match.not_exposed_features & device.exposes_features
             ):
                 continue
 

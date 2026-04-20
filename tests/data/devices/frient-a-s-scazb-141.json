@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "ieee": "00:15:bc:00:31:01:f8:92",
-  "nwk": "0x614F",
+  "ieee": "ab:cd:ef:12:18:f2:e7:e6",
+  "nwk": "0xEA73",
   "manufacturer": "frient A/S",
-  "model": "SMSZB-120",
+  "model": "SCAZB-141",
   "friendly_manufacturer": "frient A/S",
-  "friendly_model": "SMSZB-120",
-  "name": "frient A/S SMSZB-120",
+  "friendly_model": "SCAZB-141",
+  "name": "frient A/S SCAZB-141",
   "quirk_applied": true,
   "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [
@@ -14,9 +14,9 @@
   ],
   "manufacturer_code": 4117,
   "power_source": "Battery or Unknown",
-  "lqi": null,
-  "rssi": null,
-  "last_seen": "2025-04-21T22:42:30.528067+00:00",
+  "lqi": 204,
+  "rssi": -49,
+  "last_seen": "2026-03-18T23:32:55.749336+00:00",
   "available": true,
   "device_type": "EndDevice",
   "active_coordinator": false,
@@ -27,12 +27,12 @@
     "reserved": 0,
     "aps_flags": 0,
     "frequency_band": 8,
-    "mac_capability_flags": 0,
+    "mac_capability_flags": 128,
     "manufacturer_code": 4117,
-    "maximum_buffer_size": 80,
-    "maximum_incoming_transfer_size": 80,
-    "server_mask": 10752,
-    "maximum_outgoing_transfer_size": 80,
+    "maximum_buffer_size": 82,
+    "maximum_incoming_transfer_size": 1500,
+    "server_mask": 11264,
+    "maximum_outgoing_transfer_size": 1500,
     "descriptor_capability_field": 0
   },
   "endpoints": {
@@ -43,11 +43,6 @@
         "id": 1
       },
       "in_clusters": [
-        {
-          "cluster_id": "0x0003",
-          "endpoint_attribute": "identify",
-          "attributes": []
-        },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
@@ -73,6 +68,12 @@
           "endpoint_attribute": "basic",
           "attributes": [
             {
+              "id": "0x0006",
+              "name": "date_code",
+              "zcl_type": "string",
+              "value": "2023-03-29 11:39"
+            },
+            {
               "id": "0x0004",
               "name": "manufacturer",
               "zcl_type": "string",
@@ -82,7 +83,19 @@
               "id": "0x0005",
               "name": "model",
               "zcl_type": "string",
-              "value": "SMSZB-120"
+              "value": "SCAZB-141"
+            },
+            {
+              "id": "0x4000",
+              "name": "sw_build_id",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x0000",
+              "name": "zcl_version",
+              "zcl_type": "uint8",
+              "value": 3
             }
           ]
         },
@@ -97,12 +110,6 @@
               "value": 0
             },
             {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "value": 150
-            },
-            {
               "id": "0x0033",
               "name": "battery_quantity",
               "zcl_type": "uint8",
@@ -112,7 +119,7 @@
               "id": "0x0031",
               "name": "battery_size",
               "zcl_type": "enum8",
-              "value": 8
+              "value": 2
             },
             {
               "id": "0x0020",
@@ -132,9 +139,27 @@
           "endpoint_attribute": "binary_input",
           "attributes": [
             {
+              "id": "0x0004",
+              "name": "active_text",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Smoke"
+            },
+            {
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0067",
+              "name": "reliability",
+              "zcl_type": "enum8",
               "value": 0
             },
             {
@@ -148,14 +173,7 @@
         {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "checkin_interval",
-              "zcl_type": "uint32",
-              "value": 13200
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0500",
@@ -204,6 +222,11 @@
       ],
       "out_clusters": [
         {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
           "attributes": []
@@ -216,7 +239,7 @@
               "id": "0x0002",
               "name": "current_file_version",
               "zcl_type": "uint32",
-              "value": 262152
+              "value": 67587
             }
           ]
         }
@@ -247,7 +270,114 @@
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2281
+              "value": 2037
+            }
+          ]
+        }
+      ],
+      "out_clusters": []
+    },
+    "46": {
+      "profile_id": 260,
+      "device_type": {
+        "name": "IAS_ZONE",
+        "id": 1026
+      },
+      "in_clusters": [
+        {
+          "cluster_id": "0x0000",
+          "endpoint_attribute": "basic",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x0003",
+          "endpoint_attribute": "identify",
+          "attributes": []
+        },
+        {
+          "cluster_id": "0x000f",
+          "endpoint_attribute": "binary_input",
+          "attributes": [
+            {
+              "id": "0x0004",
+              "name": "active_text",
+              "zcl_type": "string",
+              "unsupported": true
+            },
+            {
+              "id": "0x001c",
+              "name": "description",
+              "zcl_type": "string",
+              "value": "Carbon Monoxide"
+            },
+            {
+              "id": "0x0055",
+              "name": "present_value",
+              "zcl_type": "bool",
+              "value": 0
+            },
+            {
+              "id": "0x0067",
+              "name": "reliability",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x006f",
+              "name": "status_flags",
+              "zcl_type": "map8",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x040c",
+          "endpoint_attribute": "carbon_monoxide_concentration",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "single",
+              "value": 0.0
+            }
+          ]
+        },
+        {
+          "cluster_id": "0x0500",
+          "endpoint_attribute": "ias_zone",
+          "attributes": [
+            {
+              "id": "0x0010",
+              "name": "cie_addr",
+              "zcl_type": "EUI64",
+              "value": [
+                50,
+                79,
+                50,
+                2,
+                0,
+                141,
+                21,
+                0
+              ]
+            },
+            {
+              "id": "0x0000",
+              "name": "zone_state",
+              "zcl_type": "enum8",
+              "value": 0
+            },
+            {
+              "id": "0x0002",
+              "name": "zone_status",
+              "zcl_type": "map16",
+              "value": 48
+            },
+            {
+              "id": "0x0001",
+              "name": "zone_type",
+              "zcl_type": "enum16",
+              "value": 43
             }
           ]
         }
@@ -263,7 +393,7 @@
   },
   "original_signature": {
     "manufacturer": "frient A/S",
-    "model": "SMSZB-120",
+    "model": "SCAZB-141",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,
@@ -271,12 +401,12 @@
       "reserved": 0,
       "aps_flags": 0,
       "frequency_band": 8,
-      "mac_capability_flags": 0,
+      "mac_capability_flags": 128,
       "manufacturer_code": 4117,
-      "maximum_buffer_size": 80,
-      "maximum_incoming_transfer_size": 80,
-      "server_mask": 10752,
-      "maximum_outgoing_transfer_size": 80,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 1500,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 1500,
       "descriptor_capability_field": 0
     },
     "endpoints": {
@@ -284,7 +414,6 @@
         "profile_id": "0xc0c9",
         "device_type": "0x0001",
         "input_clusters": [
-          "0x0003",
           "0x0005",
           "0x0006"
         ],
@@ -303,6 +432,7 @@
           "0x0502"
         ],
         "output_clusters": [
+          "0x0003",
           "0x000a",
           "0x0019"
         ]
@@ -315,6 +445,18 @@
           "0x0003",
           "0x0402"
         ],
+        "output_clusters": []
+      },
+      "46": {
+        "profile_id": "0x0104",
+        "device_type": "0x0402",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x000f",
+          "0x0500",
+          "0x040c"
+        ],
         "output_clusters": [
           "0x0003"
         ]
@@ -326,7 +468,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-1280",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-1280",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
           "class_name": "IASZone",
@@ -337,7 +479,7 @@
           "entity_category": null,
           "entity_registry_enabled_default": true,
           "enabled": true,
-          "primary": true,
+          "primary": false,
           "cluster_handlers": [
             {
               "class_name": "IASZoneClusterHandler",
@@ -349,13 +491,142 @@
                 "type": "server"
               },
               "id": "35:0x0500",
-              "unique_id": "00:15:bc:00:31:01:f8:92:35:0x0500",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0500",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 35,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "zone_status"
+        },
+        "state": {
+          "class_name": "IASZone",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Tamper",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-tamper",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "tamper",
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IASZoneClusterHandler",
+              "generic_id": "cluster_handler_0x0500",
+              "endpoint_id": 35,
+              "cluster": {
+                "id": 1280,
+                "name": "IAS Zone",
+                "type": "server"
+              },
+              "id": "35:0x0500",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0500",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
+          "endpoint_id": 35,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "zone_status"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Test",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-test",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "BinarySensor",
+          "translation_key": "test",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "diagnostic",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IASZoneClusterHandler",
+              "generic_id": "cluster_handler_0x0500",
+              "endpoint_id": 35,
+              "cluster": {
+                "id": 1280,
+                "name": "IAS Zone",
+                "type": "server"
+              },
+              "id": "35:0x0500",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0500",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
+          "endpoint_id": 35,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "zone_status"
+        },
+        "state": {
+          "class_name": "BinarySensor",
+          "available": true,
+          "state": false
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-46-1280",
+          "migrate_unique_ids": [],
+          "platform": "binary_sensor",
+          "class_name": "IASZone",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "carbon_monoxide",
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "IASZoneClusterHandler",
+              "generic_id": "cluster_handler_0x0500",
+              "endpoint_id": 46,
+              "cluster": {
+                "id": 1280,
+                "name": "IAS Zone",
+                "type": "server"
+              },
+              "id": "46:0x0500",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:46:0x0500",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
+          "endpoint_id": 46,
           "available": true,
           "group_id": null,
           "attribute_name": "zone_status"
@@ -371,7 +642,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-3",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-3",
           "migrate_unique_ids": [],
           "platform": "button",
           "class_name": "IdentifyButton",
@@ -394,12 +665,12 @@
                 "type": "server"
               },
               "id": "35:0x0003",
-              "unique_id": "00:15:bc:00:31:01:f8:92:35:0x0003",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0003",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -419,7 +690,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-0-lqi",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-0-lqi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "LQISensor",
@@ -442,12 +713,12 @@
                 "type": "server"
               },
               "id": "35:0x0000",
-              "unique_id": "00:15:bc:00:31:01:f8:92:35:0x0000",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -457,13 +728,13 @@
         "state": {
           "class_name": "LQISensor",
           "available": true,
-          "state": null
+          "state": 204
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-0-rssi",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-0-rssi",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "RSSISensor",
@@ -486,12 +757,12 @@
                 "type": "server"
               },
               "id": "35:0x0000",
-              "unique_id": "00:15:bc:00:31:01:f8:92:35:0x0000",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0000",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -501,13 +772,13 @@
         "state": {
           "class_name": "RSSISensor",
           "available": true,
-          "state": null
+          "state": -49
         }
       },
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-1",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-1",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Battery",
@@ -530,12 +801,12 @@
                 "type": "server"
               },
               "id": "35:0x0001",
-              "unique_id": "00:15:bc:00:31:01:f8:92:35:0x0001",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0001",
               "status": "INITIALIZED",
               "value_attribute": "battery_voltage"
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -545,8 +816,8 @@
         "state": {
           "class_name": "Battery",
           "available": true,
-          "state": 75.0,
-          "battery_size": "CR123A",
+          "state": null,
+          "battery_size": "Other",
           "battery_quantity": 1,
           "battery_voltage": 2.9
         },
@@ -559,7 +830,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-38-1026",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-38-1026",
           "migrate_unique_ids": [],
           "platform": "sensor",
           "class_name": "Temperature",
@@ -582,12 +853,12 @@
                 "type": "server"
               },
               "id": "38:0x0402",
-              "unique_id": "00:15:bc:00:31:01:f8:92:38:0x0402",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:38:0x0402",
               "status": "INITIALIZED",
               "value_attribute": "measured_value"
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 38,
           "available": true,
           "group_id": null,
@@ -597,7 +868,51 @@
         "state": {
           "class_name": "Temperature",
           "available": true,
-          "state": 22.81
+          "state": 20.37
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-46-1036",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "CarbonMonoxideConcentration",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "carbon_monoxide",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "CarbonMonoxideConcentrationClusterHandler",
+              "generic_id": "cluster_handler_0x040c",
+              "endpoint_id": 46,
+              "cluster": {
+                "id": 1036,
+                "name": "Carbon Monoxide (CO) Concentration",
+                "type": "server"
+              },
+              "id": "46:0x040c",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:46:0x040c",
+              "status": "INITIALIZED",
+              "value_attribute": "measured_value"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
+          "endpoint_id": 46,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 0,
+          "unit": "ppm"
+        },
+        "state": {
+          "class_name": "CarbonMonoxideConcentration",
+          "available": true,
+          "state": 0.0
         }
       }
     ],
@@ -605,7 +920,7 @@
       {
         "info_object": {
           "fallback_name": "Siren",
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-1282",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-1282",
           "migrate_unique_ids": [],
           "platform": "siren",
           "class_name": "BasicSiren",
@@ -628,12 +943,12 @@
                 "type": "server"
               },
               "id": "35:0x0502",
-              "unique_id": "00:15:bc:00:31:01:f8:92:35:0x0502",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0502",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -651,7 +966,7 @@
       {
         "info_object": {
           "fallback_name": null,
-          "unique_id": "00:15:bc:00:31:01:f8:92-35-25-firmware_update",
+          "unique_id": "ab:cd:ef:12:18:f2:e7:e6-35-25-firmware_update",
           "migrate_unique_ids": [],
           "platform": "update",
           "class_name": "FirmwareUpdateEntity",
@@ -674,12 +989,12 @@
                 "type": "client"
               },
               "id": "35:0x0019_client",
-              "unique_id": "00:15:bc:00:31:01:f8:92:35:0x0019_CLIENT",
+              "unique_id": "ab:cd:ef:12:18:f2:e7:e6:35:0x0019_CLIENT",
               "status": "INITIALIZED",
               "value_attribute": null
             }
           ],
-          "device_ieee": "00:15:bc:00:31:01:f8:92",
+          "device_ieee": "ab:cd:ef:12:18:f2:e7:e6",
           "endpoint_id": 35,
           "available": true,
           "group_id": null,
@@ -688,7 +1003,7 @@
         "state": {
           "class_name": "FirmwareUpdateEntity",
           "available": true,
-          "installed_version": "0x00040008",
+          "installed_version": "0x00010803",
           "in_progress": false,
           "update_percentage": null,
           "latest_version": null,

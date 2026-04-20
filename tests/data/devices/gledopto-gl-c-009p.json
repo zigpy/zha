@@ -7,8 +7,8 @@
   "friendly_manufacturer": "GLEDOPTO",
   "friendly_model": "GL-C-009P",
   "name": "GLEDOPTO GL-C-009P",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4687,
   "power_source": "Mains",
@@ -137,78 +137,6 @@
               "name": "start_up_current_level",
               "zcl_type": "uint8",
               "value": 255
-            }
-          ]
-        },
-        {
-          "cluster_id": "0x0300",
-          "endpoint_attribute": "light_color",
-          "attributes": [
-            {
-              "id": "0xfffd",
-              "name": "cluster_revision",
-              "zcl_type": "uint16",
-              "value": 1
-            },
-            {
-              "id": "0x400a",
-              "name": "color_capabilities",
-              "zcl_type": "map16",
-              "value": 0
-            },
-            {
-              "id": "0x4002",
-              "name": "color_loop_active",
-              "zcl_type": "uint8",
-              "value": 0
-            },
-            {
-              "id": "0x0008",
-              "name": "color_mode",
-              "zcl_type": "enum8",
-              "value": 5
-            },
-            {
-              "id": "0x400c",
-              "name": "color_temp_physical_max",
-              "zcl_type": "uint16",
-              "value": 500
-            },
-            {
-              "id": "0x400b",
-              "name": "color_temp_physical_min",
-              "zcl_type": "uint16",
-              "value": 158
-            },
-            {
-              "id": "0x0007",
-              "name": "color_temperature",
-              "zcl_type": "uint16",
-              "value": 500
-            },
-            {
-              "id": "0x0003",
-              "name": "current_x",
-              "zcl_type": "uint16",
-              "value": 11653
-            },
-            {
-              "id": "0x0004",
-              "name": "current_y",
-              "zcl_type": "uint16",
-              "value": 46664
-            },
-            {
-              "id": "0x000f",
-              "name": "options",
-              "zcl_type": "map8",
-              "value": 0
-            },
-            {
-              "id": "0x4010",
-              "name": "start_up_color_temperature",
-              "zcl_type": "uint16",
-              "value": 65535
             }
           ]
         },
@@ -365,20 +293,6 @@
               "unique_id": "ab:cd:ef:12:8c:97:e8:62:11:0x0008",
               "status": "INITIALIZED",
               "value_attribute": "current_level"
-            },
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 11,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "11:0x0300",
-              "unique_id": "ab:cd:ef:12:8c:97:e8:62:11:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
             }
           ],
           "device_ieee": "ab:cd:ef:12:8c:97:e8:62",
@@ -389,7 +303,7 @@
             "off"
           ],
           "supported_features": 40,
-          "min_mireds": 158,
+          "min_mireds": 153,
           "max_mireds": 500
         },
         "state": {
@@ -398,16 +312,15 @@
           "on": false,
           "brightness": 166,
           "xy_color": null,
-          "color_temp": 500,
+          "color_temp": null,
           "effect_list": [
             "off"
           ],
           "effect": "off",
           "supported_features": 40,
-          "color_mode": "color_temp",
+          "color_mode": "brightness",
           "supported_color_modes": [
             "brightness",
-            "color_temp",
             "onoff"
           ],
           "off_with_transition": false,
@@ -420,53 +333,6 @@
       }
     ],
     "number": [
-      {
-        "info_object": {
-          "fallback_name": null,
-          "unique_id": "ab:cd:ef:12:8c:97:e8:62-11-768-start_up_color_temperature",
-          "migrate_unique_ids": [],
-          "platform": "number",
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "translation_key": "start_up_color_temperature",
-          "translation_placeholders": null,
-          "device_class": null,
-          "state_class": null,
-          "entity_category": "config",
-          "entity_registry_enabled_default": true,
-          "enabled": true,
-          "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 11,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "11:0x0300",
-              "unique_id": "ab:cd:ef:12:8c:97:e8:62:11:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
-            }
-          ],
-          "device_ieee": "ab:cd:ef:12:8c:97:e8:62",
-          "endpoint_id": 11,
-          "available": true,
-          "group_id": null,
-          "mode": "auto",
-          "native_max_value": 500,
-          "native_min_value": 158,
-          "native_step": 1.0,
-          "native_unit_of_measurement": null
-        },
-        "state": {
-          "class_name": "StartUpColorTemperatureConfigurationEntity",
-          "available": true,
-          "state": 65535
-        }
-      },
       {
         "info_object": {
           "fallback_name": null,

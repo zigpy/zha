@@ -8,7 +8,7 @@
   "friendly_model": "3RSB22BZ",
   "name": "Third Reality, Inc 3RSB22BZ",
   "quirk_applied": true,
-  "quirk_class": "zhaquirks.thirdreality.button.Button",
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
@@ -94,6 +94,11 @@
               "value": 1.0
             }
           ]
+        },
+        {
+          "cluster_id": "0xff01",
+          "endpoint_attribute": null,
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -289,6 +294,56 @@
           "battery_size",
           "battery_voltage"
         ]
+      }
+    ],
+    "switch": [
+      {
+        "info_object": {
+          "fallback_name": "Disable double click",
+          "unique_id": "28:2c:02:bf:ff:e3:74:f8-1-disable_double_click",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "disable_double_click",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xff01",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65281,
+                "name": "ThirdRealityButtonCluster",
+                "type": "server"
+              },
+              "id": "1:0xff01",
+              "unique_id": "28:2c:02:bf:ff:e3:74:f8:1:0xff01",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:e3:74:f8",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "disable_double_click",
+          "invert_attribute_name": null,
+          "force_inverted": false,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": false,
+          "inverted": false
+        }
       }
     ],
     "update": [

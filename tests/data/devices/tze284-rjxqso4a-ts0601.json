@@ -192,7 +192,7 @@
           "class_name": "IASZone",
           "translation_key": null,
           "translation_placeholders": null,
-          "device_class": "gas",
+          "device_class": "carbon_monoxide",
           "state_class": null,
           "entity_category": null,
           "entity_registry_enabled_default": true,

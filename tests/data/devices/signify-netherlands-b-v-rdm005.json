@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Signify Netherlands B.V.",
   "friendly_model": "RDM005",
   "name": "Signify Netherlands B.V. RDM005",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zhaquirks.philips.rom001.PhilipsROM001",
   "exposes_features": [],
   "manufacturer_code": 4107,
   "power_source": "Battery or Unknown",
@@ -56,6 +56,12 @@
               "name": "model",
               "zcl_type": "string",
               "value": "RDM005"
+            },
+            {
+              "id": "0x0031",
+              "name": "philips",
+              "zcl_type": "map16",
+              "value": 11
             }
           ]
         },
@@ -101,7 +107,7 @@
         },
         {
           "cluster_id": "0xfc00",
-          "endpoint_attribute": "manufacturer_specific",
+          "endpoint_attribute": "philips_remote_cluster",
           "attributes": []
         }
       ],
@@ -277,7 +283,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 0,
-                "name": "Basic",
+                "name": "PhilipsBasicCluster",
                 "type": "server"
               },
               "id": "1:0x0000",
@@ -321,7 +327,7 @@
               "endpoint_id": 1,
               "cluster": {
                 "id": 0,
-                "name": "Basic",
+                "name": "PhilipsBasicCluster",
                 "type": "server"
               },
               "id": "1:0x0000",

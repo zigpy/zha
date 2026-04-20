@@ -75,6 +75,9 @@ class PlatformFeatureGroup(StrEnum):
     # Prefer OTA client update entities over OTA server update entities
     OTA_UPDATE = "ota_update"
 
+    # IAS WD siren entity selection
+    SIREN = "siren"
+
 
 @dataclasses.dataclass(frozen=True)
 class ClusterHandlerMatch:
@@ -88,6 +91,7 @@ class ClusterHandlerMatch:
     manufacturers: frozenset[str] | None = None
     models: frozenset[str] | None = None
     exposed_features: frozenset[str] | None = None
+    not_exposed_features: frozenset[str] | None = None
 
     # If present, device must match one of the given profile and device type combinations.
     # This will be ignored if `platform_override` is used.
