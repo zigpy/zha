@@ -45,7 +45,11 @@ from zha.application.platforms.climate import (
     Thermostat as ThermostatEntity,
     ZehnderThermostat,
 )
-from zha.application.platforms.climate.const import FanState
+from zha.application.platforms.climate.const import (
+    THERMOSTAT_FAN_ONLY_HVAC,
+    FanState,
+    HVACMode,
+)
 from zha.application.platforms.number import NumberConfigurationEntity
 from zha.application.platforms.sensor import (
     Sensor,
@@ -1313,6 +1317,33 @@ async def test_set_fan_mode_no_zcl_mapping(
     await entity.async_set_fan_mode("bogus")
     await zha_gateway.async_block_till_done()
     assert fan_cluster.write_attributes.await_count == 0
+
+
+async def test_fan_only_hvac_mode_not_exposed_without_quirk_feature(
+    zha_gateway: Gateway,
+):
+    """Fan cluster alone must not expose HVACMode.FAN_ONLY."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    assert THERMOSTAT_FAN_ONLY_HVAC not in device_climate_fan.exposes_features
+    assert HVACMode.FAN_ONLY not in entity.hvac_modes
+
+
+async def test_fan_only_hvac_mode_exposed_with_quirk_feature(
+    zha_gateway: Gateway,
+):
+    """A quirk that opts in via exposes_features unlocks HVACMode.FAN_ONLY."""
+    device_climate_fan = await device_climate_mock(zha_gateway, CLIMATE_FAN)
+    device_climate_fan.exposes_features.add(THERMOSTAT_FAN_ONLY_HVAC)
+
+    entity: ThermostatEntity = get_entity(
+        device_climate_fan, platform=Platform.CLIMATE, entity_type=ThermostatEntity
+    )
+
+    assert HVACMode.FAN_ONLY in entity.hvac_modes
 
 
 async def test_set_fan_mode(

@@ -41,6 +41,7 @@ from zha.application.platforms.climate.const import (
     SEQ_FAN_MODES,
     SEQ_OF_OPERATION,
     SYSTEM_MODE_2_HVAC,
+    THERMOSTAT_FAN_ONLY_HVAC,
     ZCL_TEMP,
     ZCL_TO_FAN_MODE,
     ClimateEntityFeature,
@@ -418,7 +419,11 @@ class Thermostat(BaseThermostat):
         modes = SEQ_OF_OPERATION.get(
             self._thermostat_cluster_handler.ctrl_sequence_of_oper, [HVACMode.OFF]
         )
-        if self._fan_cluster_handler is not None and HVACMode.FAN_ONLY not in modes:
+        if (
+            self._fan_cluster_handler is not None
+            and THERMOSTAT_FAN_ONLY_HVAC in self._device.exposes_features
+            and HVACMode.FAN_ONLY not in modes
+        ):
             modes = [*modes, HVACMode.FAN_ONLY]
         return modes
 

@@ -377,8 +377,7 @@
             "off",
             "heat_cool",
             "cool",
-            "heat",
-            "fan_only"
+            "heat"
           ]
         },
         "state": {

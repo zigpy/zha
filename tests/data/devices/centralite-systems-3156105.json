@@ -503,8 +503,7 @@
           "hvac_modes": [
             "cool",
             "heat",
-            "off",
-            "fan_only"
+            "off"
           ]
         },
         "state": {

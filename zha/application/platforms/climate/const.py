@@ -28,6 +28,12 @@ ATTR_TARGET_TEMP_HIGH: Final[str] = "target_temp_high"
 ATTR_TARGET_TEMP_LOW: Final[str] = "target_temp_low"
 ATTR_TEMPERATURE: Final[str] = "temperature"
 
+# Opt-in quirk feature id: when present in ``device.exposes_features``, the
+# thermostat entity will expose ``HVACMode.FAN_ONLY``. The presence of the Fan
+# cluster (0x0202) alone is not sufficient, because many devices advertise the
+# cluster without actually implementing ``SystemMode.Fan_only`` (0x07).
+THERMOSTAT_FAN_ONLY_HVAC: Final[str] = "thermostat_fan_only_hvac"
+
 PRECISION_TENTHS: Final[float] = 0.1
 
 # Possible fan state
