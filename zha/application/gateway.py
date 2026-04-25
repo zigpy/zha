@@ -443,7 +443,14 @@ class Gateway(AsyncUtilMixin, EventBase):
             name=f"device_initialized_task_{str(device.ieee)}:0x{device.nwk:04x}",
             eager_start=True,
         )
-        init_task.add_done_callback(lambda _: self._device_init_tasks.pop(device.ieee))
+
+        def _remove_init_task(task: asyncio.Task, ieee: EUI64 = device.ieee) -> None:
+            # Only remove the entry if it still points at this task; a cancelled
+            # task's done-callback must not pop the replacement task's entry.
+            if self._device_init_tasks.get(ieee) is task:
+                del self._device_init_tasks[ieee]
+
+        init_task.add_done_callback(_remove_init_task)
 
     def device_left(self, device: zigpy.device.Device) -> None:
         """Handle device leaving the network."""

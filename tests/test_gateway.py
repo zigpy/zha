@@ -557,6 +557,46 @@ async def test_gateway_device_initialized(
     )
 
 
+async def test_gateway_device_initialized_no_keyerror_on_rapid_rejoin(
+    zha_gateway: Gateway,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Regression test for #748.
+
+    When a device sends a second join announcement before the first
+    initialization task completes, the cancelled task's done-callback
+    must not pop the dict entry that now belongs to the replacement
+    task — otherwise the replacement's own done-callback raises KeyError.
+    """
+    zigpy_dev_basic = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
+
+    loop = asyncio.get_running_loop()
+    captured_exceptions: list[BaseException] = []
+    original_handler = loop.get_exception_handler()
+
+    def capture_exception(loop_, context):
+        if (exc := context.get("exception")) is not None:
+            captured_exceptions.append(exc)
+        if original_handler is not None:
+            original_handler(loop_, context)
+
+    loop.set_exception_handler(capture_exception)
+    try:
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        zha_gateway.device_initialized(zigpy_dev_basic)
+        await zha_gateway.async_block_till_done()
+    finally:
+        loop.set_exception_handler(original_handler)
+
+    assert (
+        f"Cancelling previous initialization task for device {zigpy_dev_basic.ieee}"
+        in caplog.text
+    )
+    keyerrors = [e for e in captured_exceptions if isinstance(e, KeyError)]
+    assert not keyerrors, f"done-callback raised KeyError(s): {keyerrors}"
+    assert zigpy_dev_basic.ieee not in zha_gateway._device_init_tasks
+
+
 def test_gateway_raw_device_initialized(
     zha_gateway: Gateway,
 ) -> None:
