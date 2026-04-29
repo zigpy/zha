@@ -20,7 +20,7 @@ dependencies = [
     "zigpy-deconz==0.25.5",
     "zigpy-xbee==0.21.1",
     "zigpy-zigate==0.14.0",
-    "zha-quirks==1.1.1",
+    "zha-quirks==1.2.0",
 ]
 
 [tool.setuptools.packages.find]
