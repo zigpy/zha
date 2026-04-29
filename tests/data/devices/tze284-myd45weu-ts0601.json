@@ -398,7 +398,7 @@
           "class_name": "SoilMoisture",
           "translation_key": "soil_moisture",
           "translation_placeholders": null,
-          "device_class": "humidity",
+          "device_class": "moisture",
           "state_class": "measurement",
           "entity_category": null,
           "entity_registry_enabled_default": true,
