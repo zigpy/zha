@@ -314,7 +314,7 @@ class MeteringClusterHandler(ClusterHandler):
         attrs = [
             a["attr"]
             for a in self.REPORT_CONFIG
-            if a["attr"] not in self.cluster.unsupported_attributes
+            if not self.cluster.is_attribute_unsupported(a["attr"])
         ]
         await self.get_attributes(attrs, from_cache=False, only_cache=False)
 

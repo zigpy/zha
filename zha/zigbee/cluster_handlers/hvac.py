@@ -91,15 +91,15 @@ class ThermostatClusterHandler(ClusterHandler):
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.running_mode.name,
-            config=REPORT_CONFIG_CLIMATE,
+            config=REPORT_CONFIG_CLIMATE_DISCRETE,
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.running_state.name,
-            config=REPORT_CONFIG_CLIMATE_DEMAND,
+            config=REPORT_CONFIG_CLIMATE_DISCRETE,
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.system_mode.name,
-            config=REPORT_CONFIG_CLIMATE,
+            config=REPORT_CONFIG_CLIMATE_DISCRETE,
         ),
         AttrReportConfig(
             attr=Thermostat.AttributeDefs.occupancy.name,
@@ -126,6 +126,7 @@ class ThermostatClusterHandler(ClusterHandler):
         Thermostat.AttributeDefs.min_heat_setpoint_limit.name: True,
         Thermostat.AttributeDefs.local_temperature_calibration.name: True,
         Thermostat.AttributeDefs.setpoint_change_source.name: True,
+        Thermostat.AttributeDefs.setpoint_change_source_timestamp.name: True,
     }
 
     @property

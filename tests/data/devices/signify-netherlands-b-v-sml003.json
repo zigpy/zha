@@ -126,7 +126,7 @@
         },
         {
           "cluster_id": "0x0406",
-          "endpoint_attribute": "philips_occupancy",
+          "endpoint_attribute": "occupancy",
           "attributes": [
             {
               "id": "0x0000",
@@ -188,16 +188,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "Signify Netherlands B.V.",
-        "SML003"
-      ],
-      [
-        "Signify Netherlands B.V.",
-        "SML004"
-      ]
-    ],
+    "manufacturer": "Signify Netherlands B.V.",
+    "model": "SML003",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4107,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 128,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 128,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "2": {
         "profile_id": "0x0104",
@@ -227,7 +234,7 @@
           "unique_id": "ab:cd:ef:12:d5:c9:be:9b-2-1030",
           "migrate_unique_ids": [],
           "platform": "binary_sensor",
-          "class_name": "HueOccupancy",
+          "class_name": "Occupancy",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "occupancy",
@@ -243,7 +250,7 @@
               "endpoint_id": 2,
               "cluster": {
                 "id": 1030,
-                "name": "PhilipsOccupancySensing",
+                "name": "Occupancy Sensing",
                 "type": "server"
               },
               "id": "2:0x0406",
@@ -259,7 +266,7 @@
           "attribute_name": "occupancy"
         },
         "state": {
-          "class_name": "HueOccupancy",
+          "class_name": "Occupancy",
           "available": true,
           "state": false
         }
@@ -281,18 +288,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 2,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "2:0x0006",
-              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "2:0x0006_client",
+              "unique_id": "ab:cd:ef:12:d5:c9:be:9b:2:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:d5:c9:be:9b",
@@ -379,7 +386,7 @@
               "endpoint_id": 2,
               "cluster": {
                 "id": 1030,
-                "name": "PhilipsOccupancySensing",
+                "name": "Occupancy Sensing",
                 "type": "server"
               },
               "id": "2:0x0406",

@@ -222,12 +222,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "_TZE200_b6wax7g0",
-        "TS0601"
-      ]
-    ],
+    "manufacturer": "_TZE200_b6wax7g0",
+    "model": "TS0601",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4417,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
@@ -519,6 +530,50 @@
           "battery_size",
           "battery_voltage"
         ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:6b:27:4c:e0-1-513-hvac_action",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ThermostatHVACAction",
+          "translation_key": "hvac_action",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ThermostatClusterHandler",
+              "generic_id": "cluster_handler_0x0201",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 513,
+                "name": "MoesThermostatNew",
+                "type": "server"
+              },
+              "id": "1:0x0201",
+              "unique_id": "ab:cd:ef:12:6b:27:4c:e0:1:0x0201",
+              "status": "INITIALIZED",
+              "value_attribute": "local_temperature"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:6b:27:4c:e0",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": null,
+          "unit": null
+        },
+        "state": {
+          "class_name": "ThermostatHVACAction",
+          "available": true,
+          "state": "heating"
+        }
       },
       {
         "info_object": {

@@ -219,6 +219,8 @@
     }
   },
   "original_signature": {
+    "manufacturer": "LUMI",
+    "model": "lumi.sensor_smoke",
     "node_desc": {
       "logical_type": 2,
       "complex_descriptor_available": 0,
@@ -234,12 +236,6 @@
       "maximum_outgoing_transfer_size": 100,
       "descriptor_capability_field": 0
     },
-    "models_info": [
-      [
-        "LUMI",
-        "lumi.sensor_smoke"
-      ]
-    ],
     "endpoints": {
       "1": {
         "profile_id": "0x0104",

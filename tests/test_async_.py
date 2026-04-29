@@ -202,18 +202,21 @@ async def test_async_add_zha_job_schedule_coroutinefunction() -> None:
 
 async def test_async_add_zha_job_schedule_corofunction_eager_start() -> None:
     """Test that we schedule coroutines and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    zha_gateway = MagicMock(loop=(loop := asyncio.get_running_loop()))
 
     async def job():
         pass
 
-    with patch(
-        "zha.async_.create_eager_task", wraps=create_eager_task
-    ) as mock_create_eager_task:
+    with (
+        patch(
+            "zha.async_.create_eager_task", wraps=create_eager_task
+        ) as mock_create_eager_task,
+        patch.object(loop, "call_soon") as mock_loop_call_soon,
+    ):
         zha_job = ZHAJob(job)
         task = AsyncUtilMixin.async_add_zha_job(zha_gateway, zha_job, eager_start=True)
         assert task is not None
-        assert len(zha_gateway.loop.call_soon.mock_calls) == 0
+        assert mock_loop_call_soon.call_count == 0
         assert len(zha_gateway.add_job.mock_calls) == 0
         assert mock_create_eager_task.mock_calls
         await task
@@ -264,15 +267,17 @@ async def test_async_create_task_schedule_coroutine() -> None:
 
 async def test_async_create_task_eager_start_schedule_coroutine() -> None:
     """Test that we schedule coroutines and add jobs to the job pool."""
-    zha_gateway = MagicMock(loop=MagicMock(wraps=asyncio.get_running_loop()))
+    zha_gateway = MagicMock(loop=(loop := asyncio.get_running_loop()))
 
     async def job():
         pass
 
-    AsyncUtilMixin.async_create_task(zha_gateway, job(), eager_start=True)
-    # Should create the task directly since 3.12 supports eager_start
-    assert len(zha_gateway.loop.create_task.mock_calls) == 0
-    assert len(zha_gateway.add_job.mock_calls) == 0
+    with patch.object(loop, "create_task") as mock_loop_create_task:
+        task = AsyncUtilMixin.async_create_task(zha_gateway, job(), eager_start=True)
+        # Should create the task directly since 3.12 supports eager_start
+        assert mock_loop_create_task.call_count == 0
+        assert len(zha_gateway.add_job.mock_calls) == 0
+        await task
 
 
 async def test_async_create_task_schedule_coroutine_with_name() -> None:

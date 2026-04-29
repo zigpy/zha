@@ -19,8 +19,10 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
-from zha.application.platforms.device_tracker import SourceType
-from zha.application.registries import SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE
+from zha.application.platforms.device_tracker import (
+    SMARTTHINGS_ARRIVAL_SENSOR_DEVICE_TYPE,
+    SourceType,
+)
 
 
 async def test_device_tracker(

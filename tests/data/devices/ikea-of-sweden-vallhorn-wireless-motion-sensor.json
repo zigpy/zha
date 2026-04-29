@@ -301,7 +301,72 @@
       ]
     }
   },
-  "original_signature": {},
+  "original_signature": {
+    "manufacturer": "IKEA of Sweden",
+    "model": "VALLHORN Wireless Motion Sensor",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4476,
+      "maximum_buffer_size": 82,
+      "maximum_incoming_transfer_size": 82,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 82,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0850",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0003",
+          "0x0020",
+          "0x0b05",
+          "0x1000",
+          "0xfc7c",
+          "0xfc81"
+        ],
+        "output_clusters": [
+          "0x0003",
+          "0x0004",
+          "0x0006",
+          "0x0019",
+          "0x1000"
+        ]
+      },
+      "2": {
+        "profile_id": "0x0104",
+        "device_type": "0x0107",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0406"
+        ],
+        "output_clusters": [
+          "0x0003"
+        ]
+      },
+      "3": {
+        "profile_id": "0x0104",
+        "device_type": "0x0106",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0400"
+        ],
+        "output_clusters": [
+          "0x0003"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -321,18 +386,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0006",
-              "status": "CONFIGURED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
@@ -485,6 +550,100 @@
           "class_name": "NumberConfigurationEntity",
           "available": true,
           "state": null
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "8c:6f:b9:ff:fe:26:3b:4a-2-1030-pir_o_to_u_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "PIROccupiedToUnoccupiedDelayConfigurationEntity",
+          "translation_key": "pir_o_to_u_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1030,
+                "name": "Occupancy Sensing",
+                "type": "server"
+              },
+              "id": "2:0x0406",
+              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:2:0x0406",
+              "status": "INITIALIZED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "PIROccupiedToUnoccupiedDelayConfigurationEntity",
+          "available": true,
+          "state": 5
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
+          "unique_id": "8c:6f:b9:ff:fe:26:3b:4a-2-1030-pir_u_to_o_delay",
+          "migrate_unique_ids": [],
+          "platform": "number",
+          "class_name": "PIRUnoccupiedToOccupiedDelayConfigurationEntity",
+          "translation_key": "pir_u_to_o_delay",
+          "translation_placeholders": null,
+          "device_class": "duration",
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "OccupancySensingClusterHandler",
+              "generic_id": "cluster_handler_0x0406",
+              "endpoint_id": 2,
+              "cluster": {
+                "id": 1030,
+                "name": "Occupancy Sensing",
+                "type": "server"
+              },
+              "id": "2:0x0406",
+              "unique_id": "8c:6f:b9:ff:fe:26:3b:4a:2:0x0406",
+              "status": "INITIALIZED",
+              "value_attribute": "occupancy"
+            }
+          ],
+          "device_ieee": "8c:6f:b9:ff:fe:26:3b:4a",
+          "endpoint_id": 2,
+          "available": true,
+          "group_id": null,
+          "mode": "auto",
+          "native_max_value": 65535,
+          "native_min_value": 0,
+          "native_step": 1.0,
+          "native_unit_of_measurement": "s"
+        },
+        "state": {
+          "class_name": "PIRUnoccupiedToOccupiedDelayConfigurationEntity",
+          "available": true,
+          "state": 0
         }
       }
     ],

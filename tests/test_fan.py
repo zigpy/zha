@@ -11,6 +11,7 @@ import zhaquirks
 from zigpy.device import Device as ZigpyDevice
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
+from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import general, hvac
 import zigpy.zcl.foundation as zcl_f
 import zigpy.zdo.types as zdo_t
@@ -159,7 +160,7 @@ async def test_fan(
     await async_turn_on(zha_gateway, entity)
     assert len(cluster.write_attributes.mock_calls) == 1
     assert cluster.write_attributes.call_args == call(
-        {"fan_mode": 2}, manufacturer=None
+        {"fan_mode": 2}, manufacturer=UNDEFINED
     )
     assert entity.state["is_on"] is True
 
@@ -168,7 +169,7 @@ async def test_fan(
     await async_turn_off(zha_gateway, entity)
     assert len(cluster.write_attributes.mock_calls) == 1
     assert cluster.write_attributes.call_args == call(
-        {"fan_mode": 0}, manufacturer=None
+        {"fan_mode": 0}, manufacturer=UNDEFINED
     )
     assert entity.state["is_on"] is False
 
@@ -177,7 +178,7 @@ async def test_fan(
     await async_set_speed(zha_gateway, entity, speed=SPEED_HIGH)
     assert len(cluster.write_attributes.mock_calls) == 1
     assert cluster.write_attributes.call_args == call(
-        {"fan_mode": 3}, manufacturer=None
+        {"fan_mode": 3}, manufacturer=UNDEFINED
     )
     assert entity.state["is_on"] is True
     assert entity.state["speed"] == SPEED_HIGH
@@ -187,7 +188,7 @@ async def test_fan(
     await async_set_preset_mode(zha_gateway, entity, preset_mode=PRESET_MODE_ON)
     assert len(cluster.write_attributes.mock_calls) == 1
     assert cluster.write_attributes.call_args == call(
-        {"fan_mode": 4}, manufacturer=None
+        {"fan_mode": 4}, manufacturer=UNDEFINED
     )
     assert entity.state["is_on"] is True
     assert entity.state["preset_mode"] == PRESET_MODE_ON
@@ -198,7 +199,7 @@ async def test_fan(
     await zha_gateway.async_block_till_done()
     assert len(cluster.write_attributes.mock_calls) == 1
     assert cluster.write_attributes.call_args == call(
-        {"fan_mode": 2}, manufacturer=None
+        {"fan_mode": 2}, manufacturer=UNDEFINED
     )
     # this is converted to a ranged value
     assert entity.state["percentage"] == 66
@@ -555,53 +556,53 @@ async def test_fan_ikea(
     assert entity.state["is_on"] is False
 
     # turn on at fan
-    await send_attributes_report(zha_gateway, cluster, {6: 1})
+    await send_attributes_report(zha_gateway, cluster, {"fan_mode": 1})
     assert entity.state["is_on"] is True
 
     # turn off at fan
-    await send_attributes_report(zha_gateway, cluster, {6: 0})
+    await send_attributes_report(zha_gateway, cluster, {"fan_mode": 0})
     assert entity.state["is_on"] is False
 
     # turn on from HA
     cluster.write_attributes.reset_mock()
     await async_turn_on(zha_gateway, entity)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 1}, manufacturer=None)
+        call({"fan_mode": 1}, manufacturer=UNDEFINED)
     ]
 
     # turn on with set speed from HA
     cluster.write_attributes.reset_mock()
     await async_turn_on(zha_gateway, entity, speed="high")
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 10}, manufacturer=None)
+        call({"fan_mode": 10}, manufacturer=UNDEFINED)
     ]
 
     # turn off from HA
     cluster.write_attributes.reset_mock()
     await async_turn_off(zha_gateway, entity)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 0}, manufacturer=None)
+        call({"fan_mode": 0}, manufacturer=UNDEFINED)
     ]
 
     # change speed from HA
     cluster.write_attributes.reset_mock()
     await async_set_percentage(zha_gateway, entity, percentage=100)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 10}, manufacturer=None)
+        call({"fan_mode": 10}, manufacturer=UNDEFINED)
     ]
 
     # skip 10% when set from HA
     cluster.write_attributes.reset_mock()
     await async_set_percentage(zha_gateway, entity, percentage=10)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 2}, manufacturer=None)
+        call({"fan_mode": 2}, manufacturer=UNDEFINED)
     ]
 
     # change preset_mode from HA
     cluster.write_attributes.reset_mock()
     await async_set_preset_mode(zha_gateway, entity, preset_mode=PRESET_MODE_AUTO)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 1}, manufacturer=None)
+        call({"fan_mode": 1}, manufacturer=UNDEFINED)
     ]
 
     # set invalid preset_mode from HA
@@ -750,28 +751,28 @@ async def test_fan_kof(
     cluster.write_attributes.reset_mock()
     await async_turn_on(zha_gateway, entity)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 2}, manufacturer=None)
+        call({"fan_mode": 2}, manufacturer=UNDEFINED)
     ]
 
     # turn off from HA
     cluster.write_attributes.reset_mock()
     await async_turn_off(zha_gateway, entity)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 0}, manufacturer=None)
+        call({"fan_mode": 0}, manufacturer=UNDEFINED)
     ]
 
     # change speed from HA
     cluster.write_attributes.reset_mock()
     await async_set_percentage(zha_gateway, entity, percentage=100)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 4}, manufacturer=None)
+        call({"fan_mode": 4}, manufacturer=UNDEFINED)
     ]
 
     # change preset_mode from HA
     cluster.write_attributes.reset_mock()
     await async_set_preset_mode(zha_gateway, entity, preset_mode=PRESET_MODE_SMART)
     assert cluster.write_attributes.mock_calls == [
-        call({"fan_mode": 6}, manufacturer=None)
+        call({"fan_mode": 6}, manufacturer=UNDEFINED)
     ]
 
     # set invalid preset_mode from HA

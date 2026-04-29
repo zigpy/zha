@@ -30,6 +30,9 @@ from zha.application.platforms.update import (
     ATTR_IN_PROGRESS,
     ATTR_INSTALLED_VERSION,
     ATTR_LATEST_VERSION,
+    ATTR_RELEASE_NOTES,
+    ATTR_RELEASE_SUMMARY,
+    ATTR_RELEASE_URL,
     ATTR_UPDATE_PERCENTAGE,
 )
 from zha.exceptions import ZHAException
@@ -69,14 +72,21 @@ def zigpy_device_mock(zha_gateway: Gateway):
     )
 
 
-def create_fw_image(version: int) -> OtaImageWithMetadata:
+def create_fw_image(
+    version: int,
+    changelog: str | None = None,
+    release_notes: str | None = None,
+    release_url: str | None = None,
+) -> OtaImageWithMetadata:
     """Create an OTA image with a specific file version."""
     return OtaImageWithMetadata(
         metadata=BaseOtaImageMetadata(
             file_version=version,
             manufacturer_id=0x1234,
             image_type=0x90,
-            changelog="This is a test firmware image!",
+            changelog=changelog,
+            release_notes=release_notes,
+            release_url=release_url,
         ),
         firmware=firmware.OTAImage(
             header=firmware.OTAImageHeader(
@@ -224,10 +234,17 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
         == f"0x{fw_image.firmware.header.file_version:08x}"
     )
 
+    ota_completed = False
+
     async def endpoint_reply(cluster, sequence, data, **kwargs):
+        nonlocal ota_completed
         if cluster == general.Ota.cluster_id:
             hdr, cmd = ota_cluster.deserialize(data)
             if isinstance(cmd, general.Ota.ImageNotifyCommand):
+                if ota_completed:
+                    # Post-OTA image_notify: ignore or don't respond
+                    return
+
                 zigpy_device.packet_received(
                     make_packet(
                         zigpy_device,
@@ -243,6 +260,11 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
             elif isinstance(
                 cmd, general.Ota.ClientCommandDefs.query_next_image_response.schema
             ):
+                # After a successful OTA, zigpy sends a post-OTA image_notify
+                # which triggers a query_next_image -> NO_IMAGE_AVAILABLE exchange
+                if cmd.status == foundation.Status.NO_IMAGE_AVAILABLE:
+                    return
+
                 assert cmd.status == foundation.Status.SUCCESS
                 assert cmd.manufacturer_code == fw_image.firmware.header.manufacturer_id
                 assert cmd.image_type == fw_image.firmware.header.image_type
@@ -336,6 +358,8 @@ async def test_firmware_update_success(zha_gateway: Gateway) -> None:
                 assert cmd.current_time == 0
                 assert cmd.upgrade_time == 0
 
+                ota_completed = True
+
                 def read_new_fw_version(*args, **kwargs):
                     ota_cluster.update_attribute(
                         attrid=general.Ota.AttributeDefs.current_file_version.id,
@@ -419,6 +443,9 @@ async def test_firmware_update_raises(zha_gateway: Gateway) -> None:
             elif isinstance(
                 cmd, general.Ota.ClientCommandDefs.query_next_image_response.schema
             ):
+                if cmd.status == foundation.Status.NO_IMAGE_AVAILABLE:
+                    return
+
                 assert cmd.status == foundation.Status.SUCCESS
                 assert cmd.manufacturer_code == fw_image.firmware.header.manufacturer_id
                 assert cmd.image_type == fw_image.firmware.header.image_type
@@ -567,13 +594,15 @@ async def test_firmware_update_no_image(zha_gateway: Gateway) -> None:
 async def test_firmware_update_latest_version_even_if_downgrade(
     zha_gateway: Gateway,
 ) -> None:
-    """Test ZHA update platform - `latest_version` always reflects the latest."""
+    """Test ZHA update platform - latest downgrade sets version and release URL."""
     zigpy_device = zigpy_device_mock(zha_gateway)
     zha_device, ota_cluster, fw_image, installed_fw_version = await setup_test_data(
         zha_gateway, zigpy_device
     )
 
-    fw_image_downgrade = create_fw_image(installed_fw_version - 10)
+    fw_image_downgrade = create_fw_image(
+        installed_fw_version - 10, release_url="https://example.com/releases/v0.1"
+    )
 
     zigpy_device.application.ota.get_ota_images = AsyncMock(
         return_value=OtaImagesResult(
@@ -605,3 +634,207 @@ async def test_firmware_update_latest_version_even_if_downgrade(
         entity.state[ATTR_LATEST_VERSION]
         == f"0x{fw_image_downgrade.firmware.header.file_version:08x}"
     )
+    assert entity.state[ATTR_RELEASE_URL] == "https://example.com/releases/v0.1"
+
+
+async def test_firmware_update_metadata(zha_gateway: Gateway) -> None:
+    """Test ZHA update platform - firmware metadata (changelog, release_notes, release_url)."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    zha_device, ota_cluster, _, installed_fw_version = await setup_test_data(
+        zha_gateway, zigpy_device
+    )
+
+    # firmware image with optional metadata
+    fw_image = create_fw_image(
+        installed_fw_version + 10,
+        changelog="This is a test changelog!",
+        release_notes="These are the full release notes.",
+        release_url="https://example.com/releases/v1.0",
+    )
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=(fw_image,),
+            downgrades=(),
+        )
+    )
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    # metadata should be None before notification
+    assert entity.state[ATTR_RELEASE_SUMMARY] is None
+    assert entity.state[ATTR_RELEASE_NOTES] is None
+    assert entity.state[ATTR_RELEASE_URL] is None
+
+    # simulate an image available notification
+    await ota_cluster._handle_query_next_image(
+        foundation.ZCLHeader.cluster(
+            tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
+        ),
+        general.QueryNextImageCommand(
+            field_control=fw_image.firmware.header.field_control,
+            manufacturer_code=zha_device.manufacturer_code,
+            image_type=fw_image.firmware.header.image_type,
+            current_file_version=installed_fw_version,
+            hardware_version=1,
+        ),
+    )
+
+    await zha_gateway.async_block_till_done()
+
+    # verify metadata is exposed in entity state now
+    assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
+    assert (
+        entity.state[ATTR_LATEST_VERSION]
+        == f"0x{fw_image.firmware.header.file_version:08x}"
+    )
+    assert entity.state[ATTR_RELEASE_URL] == "https://example.com/releases/v1.0"
+    assert entity.state[ATTR_RELEASE_SUMMARY] == "This is a test changelog!"
+
+    # release notes include version header
+    assert entity.state[ATTR_RELEASE_NOTES] == (
+        f"## 0x{fw_image.firmware.header.file_version:08x}\n"
+        "These are the full release notes."
+    )
+
+
+async def test_firmware_update_multiple_upgrades_combined_release_notes(
+    zha_gateway: Gateway,
+) -> None:
+    """Test ZHA update platform - multiple upgrades combine release notes with version headers."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    zha_device, ota_cluster, _, installed_fw_version = await setup_test_data(
+        zha_gateway, zigpy_device
+    )
+
+    # Create multiple firmware images (newest to oldest)
+    # Note: fw_image_v2 has no release notes and should be skipped
+    fw_image_v3 = create_fw_image(
+        installed_fw_version + 30,
+        changelog="Latest changelog",
+        release_notes="Release notes for v3.",
+        release_url="https://example.com/releases/v3",
+    )
+    fw_image_v2 = create_fw_image(
+        installed_fw_version + 20,
+        release_notes=None,  # No release notes for this version
+    )
+    fw_image_v1 = create_fw_image(
+        installed_fw_version + 10,
+        release_notes="Release notes for v1.",
+    )
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=(fw_image_v3, fw_image_v2, fw_image_v1),
+            downgrades=(),
+        )
+    )
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+
+    # simulate an image available notification
+    await ota_cluster._handle_query_next_image(
+        foundation.ZCLHeader.cluster(
+            tsn=0x12, command_id=general.Ota.ServerCommandDefs.query_next_image.id
+        ),
+        general.QueryNextImageCommand(
+            field_control=fw_image_v3.firmware.header.field_control,
+            manufacturer_code=zha_device.manufacturer_code,
+            image_type=fw_image_v3.firmware.header.image_type,
+            current_file_version=installed_fw_version,
+            hardware_version=1,
+        ),
+    )
+
+    await zha_gateway.async_block_till_done()
+
+    # Verify latest version is the newest firmware
+    assert (
+        entity.state[ATTR_LATEST_VERSION]
+        == f"0x{fw_image_v3.firmware.header.file_version:08x}"
+    )
+    # Only latest firmware provides URL and release summary
+    assert entity.state[ATTR_RELEASE_URL] == "https://example.com/releases/v3"
+    assert entity.state[ATTR_RELEASE_SUMMARY] == "Latest changelog"
+
+    # Release notes should be combined with version headers
+    # fw_image_v2 is skipped because it has no release notes
+    expected_release_notes = (
+        f"## 0x{fw_image_v3.firmware.header.file_version:08x}\n"
+        "Release notes for v3.\n\n"
+        f"## 0x{fw_image_v1.firmware.header.file_version:08x}\n"
+        "Release notes for v1."
+    )
+    assert entity.state[ATTR_RELEASE_NOTES] == expected_release_notes
+
+
+async def test_firmware_update_cached_on_startup(zha_gateway: Gateway) -> None:
+    """Test that entities pick up cached OTA state from zigpy on startup."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    installed_fw_version = 0x12345678
+
+    ota_cluster = zigpy_device.endpoints[1].out_clusters[general.Ota.cluster_id]
+    ota_cluster.PLUGGED_ATTR_READS = {
+        general.Ota.AttributeDefs.current_file_version.name: installed_fw_version
+    }
+    update_attribute_cache(ota_cluster)
+
+    fw_image = create_fw_image(installed_fw_version + 10)
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(
+            upgrades=(fw_image,),
+            downgrades=(),
+        )
+    )
+
+    # Pre-populate the cluster's cached query command (as if the device had
+    # previously sent a query_next_image before ZHA restarted)
+    ota_cluster.last_query_cmd = general.QueryNextImageCommand(
+        field_control=fw_image.firmware.header.field_control,
+        manufacturer_code=zigpy_device.node_desc.manufacturer_code,
+        image_type=fw_image.firmware.header.image_type,
+        current_file_version=installed_fw_version,
+    )
+
+    # Join the device — on_add triggers check_cluster_for_ota
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    await zha_gateway.async_block_till_done()
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+    assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
+    assert (
+        entity.state[ATTR_LATEST_VERSION]
+        == f"0x{fw_image.firmware.header.file_version:08x}"
+    )
+
+
+async def test_firmware_update_no_cached_query_on_startup(
+    zha_gateway: Gateway,
+) -> None:
+    """Test that entities don't error when there's no cached query on startup."""
+    zigpy_device = zigpy_device_mock(zha_gateway)
+    installed_fw_version = 0x12345678
+
+    ota_cluster = zigpy_device.endpoints[1].out_clusters[general.Ota.cluster_id]
+    ota_cluster.PLUGGED_ATTR_READS = {
+        general.Ota.AttributeDefs.current_file_version.name: installed_fw_version
+    }
+    update_attribute_cache(ota_cluster)
+
+    zigpy_device.application.ota.get_ota_images = AsyncMock(
+        return_value=OtaImagesResult(upgrades=(), downgrades=())
+    )
+
+    # No last_query_cmd — check_cluster_for_ota should be a no-op
+    assert ota_cluster.last_query_cmd is None
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+    await zha_gateway.async_block_till_done()
+
+    entity = get_entity(zha_device, platform=Platform.UPDATE)
+    assert entity.state[ATTR_INSTALLED_VERSION] == f"0x{installed_fw_version:08x}"
+    assert entity.state[ATTR_LATEST_VERSION] is None
+    # get_ota_images should not have been called since there's no cached query
+    zigpy_device.application.ota.get_ota_images.assert_not_called()

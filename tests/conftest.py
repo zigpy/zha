@@ -10,6 +10,7 @@ import threading
 from types import TracebackType
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import looptime
 import pytest
 import zigpy
 from zigpy.application import ControllerApplication
@@ -300,6 +301,7 @@ class TestGateway:
         """Start the ZHA gateway."""
 
         with (
+            looptime.enabled(),
             patch(
                 "bellows.zigbee.application.ControllerApplication.new",
                 return_value=self.app,
@@ -322,8 +324,9 @@ class TestGateway:
     ) -> None:
         """Shutdown the ZHA gateway."""
         INSTANCES.remove(self.zha_gateway)
-        await self.zha_gateway.shutdown()
-        await asyncio.sleep(0)
+        with looptime.enabled():
+            await self.zha_gateway.shutdown()
+            await asyncio.sleep(0)
 
 
 @pytest.fixture

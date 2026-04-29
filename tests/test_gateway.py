@@ -25,12 +25,7 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.const import (
-    CONF_USE_THREAD,
-    ZHA_GW_MSG,
-    ZHA_GW_MSG_CONNECTION_LOST,
-    RadioType,
-)
+from zha.application.const import ZHA_GW_MSG, ZHA_GW_MSG_CONNECTION_LOST, RadioType
 from zha.application.gateway import (
     ConnectionLostEvent,
     DeviceJoinedDeviceInfo,
@@ -435,46 +430,6 @@ async def test_remove_device_cleans_up_group_membership(
     assert len(zha_group.members) == 1
     assert zha_group.members[0].device.ieee == device_light_2.ieee
     assert device_light_1.ieee not in zha_gateway.devices
-
-
-@patch(
-    "zha.application.gateway.Gateway.load_devices",
-    AsyncMock(),
-)
-@patch(
-    "zha.application.gateway.Gateway.load_groups",
-    MagicMock(),
-)
-@pytest.mark.parametrize(
-    ("device_path", "thread_state", "config_override"),
-    [
-        ("/dev/ttyUSB0", True, {}),
-        ("socket://192.168.1.123:9999", False, {}),
-        ("socket://192.168.1.123:9999", True, {"use_thread": True}),
-    ],
-)
-async def test_gateway_initialize_bellows_thread(
-    device_path: str,
-    thread_state: bool,
-    config_override: dict,
-    zigpy_app_controller: ControllerApplication,
-    zha_data: ZHAData,
-) -> None:
-    """Test ZHA disabling the UART thread when connecting to a TCP coordinator."""
-    zha_data.config.coordinator_configuration.path = device_path
-    zha_data.zigpy_config = config_override
-
-    with patch(
-        "bellows.zigbee.application.ControllerApplication.new",
-        return_value=zigpy_app_controller,
-    ) as mock_new:
-        zha_gw = Gateway(zha_data)
-        await zha_gw.async_initialize()
-        assert (
-            mock_new.mock_calls[-1].kwargs["config"].get(CONF_USE_THREAD, True)
-            is thread_state
-        )
-        await zha_gw.shutdown()
 
 
 @pytest.mark.parametrize("radio_concurrency", [1, 2, 8])

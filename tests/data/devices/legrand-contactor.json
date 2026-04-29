@@ -467,6 +467,59 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": " Legrand",
+    "model": " Contactor",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 1,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4129,
+      "maximum_buffer_size": 89,
+      "maximum_incoming_transfer_size": 63,
+      "server_mask": 11264,
+      "maximum_outgoing_transfer_size": 63,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x010a",
+        "input_clusters": [
+          "0x0000",
+          "0x0003",
+          "0x0004",
+          "0x0005",
+          "0x0006",
+          "0x000f",
+          "0x0b04",
+          "0xfc01",
+          "0xfc41"
+        ],
+        "output_clusters": [
+          "0x0000",
+          "0x0005",
+          "0x0006",
+          "0x0019",
+          "0xfc01"
+        ]
+      },
+      "242": {
+        "profile_id": "0xa1e0",
+        "device_type": "0x0066",
+        "input_clusters": [
+          "0x0021"
+        ],
+        "output_clusters": [
+          "0x0021"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -529,18 +582,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "ab:cd:ef:12:0d:ab:89:6b:1:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "ab:cd:ef:12:0d:ab:89:6b:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "ab:cd:ef:12:0d:ab:89:6b",
@@ -876,7 +929,7 @@
           "endpoint_id": 1,
           "available": true,
           "group_id": null,
-          "suggested_display_precision": 1,
+          "suggested_display_precision": 2,
           "unit": "A"
         },
         "state": {

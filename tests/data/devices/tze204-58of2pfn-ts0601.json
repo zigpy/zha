@@ -220,20 +220,23 @@
     }
   },
   "original_signature": {
-    "models_info": [
-      [
-        "_TZE200_1n2kyphz",
-        "TS0601"
-      ],
-      [
-        "_TZE200_mexisfik",
-        "TS0601"
-      ],
-      [
-        "_TZE204_58of2pfn",
-        "TS0601"
-      ]
-    ],
+    "manufacturer": "_TZE204_58of2pfn",
+    "model": "TS0601",
+    "node_desc": {
+      "logical_type": 1,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 142,
+      "manufacturer_code": 4417,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
     "endpoints": {
       "1": {
         "profile_id": "0x0104",
@@ -305,6 +308,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -319,8 +323,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -371,6 +374,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -385,8 +389,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -437,6 +440,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -451,8 +455,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",
@@ -503,6 +506,7 @@
         },
         "state": {
           "class_name": "Light",
+          "available": true,
           "on": false,
           "brightness": null,
           "xy_color": null,
@@ -517,8 +521,7 @@
             "onoff"
           ],
           "off_with_transition": false,
-          "off_brightness": null,
-          "available": true
+          "off_brightness": null
         },
         "extra_state_attributes": [
           "off_brightness",

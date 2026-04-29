@@ -7,8 +7,8 @@
   "friendly_manufacturer": "Third Reality, Inc",
   "friendly_model": "3RSB015BZ",
   "name": "Third Reality, Inc 3RSB015BZ",
-  "quirk_applied": false,
-  "quirk_class": "zigpy.device.Device",
+  "quirk_applied": true,
+  "quirk_class": "zigpy.quirks.v2.CustomDeviceV2",
   "exposes_features": [],
   "manufacturer_code": 4659,
   "power_source": "Battery or Unknown",
@@ -208,6 +208,11 @@
               "value": 0
             }
           ]
+        },
+        {
+          "cluster_id": "0xfff1",
+          "endpoint_attribute": null,
+          "attributes": []
         }
       ],
       "out_clusters": [
@@ -268,6 +273,42 @@
       ]
     }
   },
+  "original_signature": {
+    "manufacturer": "Third Reality, Inc",
+    "model": "3RSB015BZ",
+    "node_desc": {
+      "logical_type": 2,
+      "complex_descriptor_available": 0,
+      "user_descriptor_available": 0,
+      "reserved": 0,
+      "aps_flags": 0,
+      "frequency_band": 8,
+      "mac_capability_flags": 128,
+      "manufacturer_code": 4659,
+      "maximum_buffer_size": 66,
+      "maximum_incoming_transfer_size": 66,
+      "server_mask": 10752,
+      "maximum_outgoing_transfer_size": 66,
+      "descriptor_capability_field": 0
+    },
+    "endpoints": {
+      "1": {
+        "profile_id": "0x0104",
+        "device_type": "0x0202",
+        "input_clusters": [
+          "0x0000",
+          "0x0001",
+          "0x0006",
+          "0x0102"
+        ],
+        "output_clusters": [
+          "0x0006",
+          "0x0019",
+          "0x0102"
+        ]
+      }
+    }
+  },
   "zha_lib_entities": {
     "binary_sensor": [
       {
@@ -287,18 +328,18 @@
           "primary": false,
           "cluster_handlers": [
             {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
+              "class_name": "OnOffClientClusterHandler",
+              "generic_id": "cluster_handler_0x0006_client",
               "endpoint_id": 1,
               "cluster": {
                 "id": 6,
                 "name": "On/Off",
                 "type": "client"
               },
-              "id": "1:0x0006",
-              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0006",
-              "status": "CREATED",
-              "value_attribute": "on_off"
+              "id": "1:0x0006_client",
+              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0x0006_CLIENT",
+              "status": "INITIALIZED",
+              "value_attribute": null
             }
           ],
           "device_ieee": "28:2c:02:bf:ff:ea:05:68",
@@ -311,6 +352,51 @@
           "class_name": "Opening",
           "available": true,
           "state": false
+        }
+      }
+    ],
+    "button": [
+      {
+        "info_object": {
+          "fallback_name": "Allow remote binding",
+          "unique_id": "28:2c:02:bf:ff:ea:05:68-1-allow_bind",
+          "migrate_unique_ids": [],
+          "platform": "button",
+          "class_name": "WriteAttributeButton",
+          "translation_key": "allow_remote_binding",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfff1",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65521,
+                "name": "ThirdRealityCurtainCluster",
+                "type": "server"
+              },
+              "id": "1:0xfff1",
+              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0xfff1",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:ea:05:68",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "allow_bind",
+          "attribute_value": 1
+        },
+        "state": {
+          "class_name": "WriteAttributeButton",
+          "available": true
         }
       }
     ],
@@ -359,7 +445,8 @@
           "state": "open",
           "is_opening": false,
           "is_closing": false,
-          "is_closed": false
+          "is_closed": false,
+          "supported_features": 15
         }
       }
     ],
@@ -588,6 +675,54 @@
           "class_name": "Switch",
           "state": 0,
           "available": true
+        }
+      },
+      {
+        "info_object": {
+          "fallback_name": "Enable PIR remote",
+          "unique_id": "28:2c:02:bf:ff:ea:05:68-1-enable_disable_pir_remote",
+          "migrate_unique_ids": [],
+          "platform": "switch",
+          "class_name": "ConfigurableAttributeSwitch",
+          "translation_key": "enable_pir_mode",
+          "translation_placeholders": null,
+          "device_class": null,
+          "state_class": null,
+          "entity_category": "config",
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ClusterHandler",
+              "generic_id": "cluster_handler_0xfff1",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 65521,
+                "name": "ThirdRealityCurtainCluster",
+                "type": "server"
+              },
+              "id": "1:0xfff1",
+              "unique_id": "28:2c:02:bf:ff:ea:05:68:1:0xfff1",
+              "status": "INITIALIZED",
+              "value_attribute": null
+            }
+          ],
+          "device_ieee": "28:2c:02:bf:ff:ea:05:68",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "attribute_name": "enable_disable_pir_remote",
+          "invert_attribute_name": null,
+          "force_inverted": true,
+          "off_value": 0,
+          "on_value": 1
+        },
+        "state": {
+          "class_name": "ConfigurableAttributeSwitch",
+          "available": true,
+          "state": true,
+          "inverted": true
         }
       }
     ],
