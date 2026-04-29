@@ -444,11 +444,11 @@ class Gateway(AsyncUtilMixin, EventBase):
             eager_start=True,
         )
 
-        def _remove_init_task(task: asyncio.Task, ieee: EUI64 = device.ieee) -> None:
+        def _remove_init_task(task: asyncio.Task) -> None:
             # Only remove the entry if it still points at this task; a cancelled
             # task's done-callback must not pop the replacement task's entry.
-            if self._device_init_tasks.get(ieee) is task:
-                del self._device_init_tasks[ieee]
+            if self._device_init_tasks.get(device.ieee) is task:
+                del self._device_init_tasks[device.ieee]
 
         init_task.add_done_callback(_remove_init_task)
 
