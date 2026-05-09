@@ -31,6 +31,20 @@ class SensorDeviceClass(StrEnum):
     ISO8601 format: https://en.wikipedia.org/wiki/ISO_8601
     """
 
+    UPTIME = "uptime"
+    """Uptime.
+
+    Represents the point in time when a device or service last restarted.
+
+    Small drift between updates is automatically suppressed in
+    `SensorEntity.state` to avoid unnecessary state changes caused by clock
+    jitter.
+
+    Unit of measurement: `None`
+
+    ISO8601 format: https://en.wikipedia.org/wiki/ISO_8601
+    """
+
     # Numerical device classes, these should be aligned with NumberDeviceClass
     ABSOLUTE_HUMIDITY = "absolute_humidity"
     """Absolute humidity.

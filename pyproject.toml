@@ -30,7 +30,8 @@ exclude = ["tests", "tests.*"]
 testing = [
     "pytest",
     "coloredlogs",
-    "python-slugify"
+    "python-slugify",
+    "homeassistant",
 ]
 
 [dependency-groups]
@@ -461,6 +462,7 @@ split-on-trailing-comma = false
 
 # Allow for main entry & scripts to write to stdout
 "script/*" = ["T20"]
+"tools/*" = ["T20"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 25

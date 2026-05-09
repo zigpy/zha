@@ -18,7 +18,7 @@ class UnitOfMass(StrEnum):
     GRAMS = "g"
     KILOGRAMS = "kg"
     MILLIGRAMS = "mg"
-    MICROGRAMS = "µg"
+    MICROGRAMS = "μg"
     OUNCES = "oz"
     POUNDS = "lb"
     STONES = "st"
@@ -85,6 +85,7 @@ class UnitOfApparentPower(StrEnum):
 class UnitOfElectricCurrent(StrEnum):
     """Electric current units."""
 
+    MICROAMPERE = "μA"
     MILLIAMPERE = "mA"
     AMPERE = "A"
 
@@ -93,7 +94,7 @@ class UnitOfElectricCurrent(StrEnum):
 class UnitOfElectricPotential(StrEnum):
     """Electric potential units."""
 
-    MICROVOLT = "µV"
+    MICROVOLT = "μV"
     MILLIVOLT = "mV"
     VOLT = "V"
     KILOVOLT = "kV"
@@ -103,6 +104,7 @@ class UnitOfElectricPotential(StrEnum):
 class UnitOfFrequency(StrEnum):
     """Frequency units."""
 
+    MILLIHERTZ = "mHz"
     HERTZ = "Hz"
     KILOHERTZ = "kHz"
     MEGAHERTZ = "MHz"
@@ -219,7 +221,7 @@ class UnitOfConductivity(StrEnum):
     """Conductivity units."""
 
     SIEMENS_PER_CM = "S/cm"
-    MICROSIEMENS_PER_CM = "µS/cm"
+    MICROSIEMENS_PER_CM = "μS/cm"
     MILLISIEMENS_PER_CM = "mS/cm"
 
 
@@ -239,7 +241,7 @@ class UnitOfSpeed(StrEnum):
 
 # Concentration units
 CONCENTRATION_GRAMS_PER_CUBIC_METER: Final = "g/m³"
-CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "µg/m³"
+CONCENTRATION_MICROGRAMS_PER_CUBIC_METER: Final = "μg/m³"
 CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER: Final = "mg/m³"
 CONCENTRATION_MICROGRAMS_PER_CUBIC_FOOT: Final = "μg/ft³"
 CONCENTRATION_PARTS_PER_CUBIC_METER: Final = "p/m³"
