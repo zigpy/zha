@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 import contextlib
 import copy
 import dataclasses
@@ -15,7 +15,7 @@ from enum import Enum
 from functools import cached_property
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Final, Self
+from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
@@ -82,6 +82,7 @@ from zha.application.platforms import (
     BaseEntityInfo,
     EntityStateChangedEvent,
     PlatformEntity,
+    sensor,
 )
 from zha.application.platforms.update import BaseFirmwareUpdateEntity
 from zha.const import STATE_CHANGED
@@ -791,8 +792,10 @@ class Device(LogMixin, EventBase):
         cls,
         zigpy_dev: zigpy.device.Device,
         gateway: Gateway,
-    ) -> Self:
+    ) -> Device:
         """Create new device."""
+        if zigpy_dev.ieee == gateway.state.node_info.ieee:
+            return CoordinatorDevice(zigpy_dev, gateway)
         return cls(zigpy_dev, gateway)
 
     def async_update_firmware_version(self, firmware_version: str) -> None:
@@ -1143,22 +1146,42 @@ class Device(LogMixin, EventBase):
             if meta.new_fallback_name is not None:
                 entity._attr_fallback_name = meta.new_fallback_name
 
-    def _discover_new_entities(self) -> None:
-        new_entities: Iterable[BaseEntity]
+    def discover_entities(self) -> Iterator[BaseEntity]:
+        """Yield entities for this device."""
+        # TODO: purge old coordinator entities
+        if self.is_coordinator:
+            return
 
+        for ep_id, endpoint in self.endpoints.items():
+            if ep_id == 0:
+                continue
+
+            _LOGGER.debug(
+                "Discovering entities for endpoint: %s-%s",
+                str(endpoint.device.ieee),
+                endpoint.id,
+            )
+            yield from discovery.discover_entities_for_endpoint(endpoint)
+
+        yield from discovery.discover_quirks_v2_entities(self)
+
+    def _discover_new_entities(self) -> None:
         self._discovered_entities.clear()
 
-        if self.is_active_coordinator:
-            new_entities = discovery.discover_coordinator_device_entities(self)
-        elif self.is_coordinator:
-            # TODO: purge old coordinator entities
-            new_entities = []
-        else:
-            new_entities = discovery.discover_device_entities(self)
+        # Iterate defensively so a failure in any single entity construction
+        # does not abort discovery for the rest of the device.
+        iterator = iter(self.discover_entities())
+        while True:
+            try:
+                entity = next(iterator)
+            except StopIteration:
+                break
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Failed to create entity during discovery")
+                continue
 
-        # Discover all applicable entities
-        for entity in new_entities:
             self._discovered_entities.append(entity)
+
             if self._is_entity_removed_by_quirk(entity):
                 continue
 
@@ -1883,3 +1906,32 @@ class Device(LogMixin, EventBase):
         ]
 
         return info
+
+
+class CoordinatorDevice(Device):
+    """ZHA wrapper for the active coordinator device."""
+
+    def discover_entities(self) -> Iterator[BaseEntity]:
+        """Yield counter sensors for the active coordinator."""
+        state = self.gateway.application_controller.state
+        for counter_groups in (
+            "counters",
+            "broadcast_counters",
+            "device_counters",
+            "group_counters",
+        ):
+            for counter_group, counters in getattr(state, counter_groups).items():
+                for counter in counters:
+                    yield sensor.DeviceCounterSensor(
+                        zha_device=self,
+                        counter_groups=counter_groups,
+                        counter_group=counter_group,
+                        counter=counter,
+                    )
+
+                    _LOGGER.debug(
+                        "'%s' platform -> '%s' using %s",
+                        Platform.SENSOR,
+                        sensor.DeviceCounterSensor.__name__,
+                        f"counter groups[{counter_groups}] counter group[{counter_group}] counter[{counter}]",
+                    )

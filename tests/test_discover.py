@@ -56,7 +56,6 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.discovery import discover_device_entities
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
@@ -158,7 +157,7 @@ async def test_device_override_picks_highest_priority(
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     # Only one light entity will be discovered
-    entities = list(discover_device_entities(zha_device))
+    entities = list(zha_device.discover_entities())
     light_entities = [e for e in entities if e.PLATFORM == Platform.LIGHT]
     assert len(light_entities) == 1
     assert isinstance(light_entities[0], HueLight)
@@ -168,7 +167,7 @@ async def test_device_override_picks_highest_priority(
         f"{zigpy_device.ieee}-11": DeviceOverridesConfiguration(type=Platform.SWITCH)
     }
 
-    entities = list(discover_device_entities(zha_device))
+    entities = list(zha_device.discover_entities())
     switch_entities = [e for e in entities if e.PLATFORM == Platform.SWITCH]
     assert len(switch_entities) == 1
 

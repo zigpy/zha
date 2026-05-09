@@ -19,7 +19,6 @@ from zigpy.quirks.v2 import (
     ZCLEnumMetadata,
     ZCLSensorMetadata,
 )
-from zigpy.state import State
 from zigpy.zcl import Cluster, ClusterType, ReportingConfig
 
 from zha.application import Platform, const as zha_const
@@ -129,67 +128,6 @@ def ignore_exceptions_during_iteration[**P, T](
                 _LOGGER.exception("Failed to create entity during discovery")
 
     return inner
-
-
-@ignore_exceptions_during_iteration
-def discover_device_entities(device: Device) -> Iterator[BaseEntity]:
-    """Discover entities for a ZHA device."""
-    _LOGGER.debug(
-        "Discovering entities for device: %s-%s",
-        str(device.ieee),
-        device.name,
-    )
-
-    assert not device.is_active_coordinator
-
-    for ep_id, endpoint in device.endpoints.items():
-        if ep_id == 0:
-            continue
-
-        _LOGGER.debug(
-            "Discovering entities for endpoint: %s-%s",
-            str(endpoint.device.ieee),
-            endpoint.id,
-        )
-
-        yield from discover_entities_for_endpoint(endpoint)
-
-    yield from discover_quirks_v2_entities(device)
-
-
-@ignore_exceptions_during_iteration
-def discover_coordinator_device_entities(
-    device: Device,
-) -> Iterator[sensor.DeviceCounterSensor]:
-    """Discover entities for the coordinator device."""
-    _LOGGER.debug(
-        "Discovering entities for coordinator device: %s-%s",
-        str(device.ieee),
-        device.name,
-    )
-    state: State = device.gateway.application_controller.state
-
-    for counter_groups in (
-        "counters",
-        "broadcast_counters",
-        "device_counters",
-        "group_counters",
-    ):
-        for counter_group, counters in getattr(state, counter_groups).items():
-            for counter in counters:
-                yield sensor.DeviceCounterSensor(
-                    zha_device=device,
-                    counter_groups=counter_groups,
-                    counter_group=counter_group,
-                    counter=counter,
-                )
-
-                _LOGGER.debug(
-                    "'%s' platform -> '%s' using %s",
-                    Platform.SENSOR,
-                    sensor.DeviceCounterSensor.__name__,
-                    f"counter groups[{counter_groups}] counter group[{counter_group}] counter[{counter}]",
-                )
 
 
 @ignore_exceptions_during_iteration
