@@ -17,14 +17,14 @@ from typing import TYPE_CHECKING, Any, Final, final
 
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
-from zigpy.quirks.v2 import EntityMetadata, EntityType
+from zigpy.quirks.v2 import EntityMetadata
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 import zigpy.zcl
 from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import ZCLAttributeDef
 
-from zha.application import Platform
+from zha.application import EntityType, Platform
 from zha.application.const import UniqueIdMigration
 from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
@@ -552,9 +552,9 @@ class PlatformEntity(BaseEntity):
         elif has_command_name:
             self._unique_id_suffix = entity_metadata.command_name
 
-        if entity_metadata.entity_type is EntityType.CONFIG:
+        if entity_metadata.entity_type == EntityType.CONFIG:
             self._attr_entity_category = EntityCategory.CONFIG
-        elif entity_metadata.entity_type is EntityType.DIAGNOSTIC:
+        elif entity_metadata.entity_type == EntityType.DIAGNOSTIC:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
         else:
             self._attr_entity_category = None

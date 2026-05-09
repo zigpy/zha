@@ -3,11 +3,14 @@
 from datetime import UTC, datetime
 import enum
 
-from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 from zigpy.zcl.clusters.general_const import AnalogInputType
 from zigpy.zcl.clusters.homeautomation import MeasurementType
 from zigpy.zcl.clusters.smartenergy import MeteringDeviceType
 
+from zha.application.platforms.sensor.device_class import (
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from zha.units import (
     CONCENTRATION_PARTS_PER_MILLION,
     COUNT,
@@ -23,7 +26,6 @@ from zha.units import (
     UnitOfTime,
 )
 
-# Re-exported from zigpy for use throughout ZHA
 __all__ = [
     "SensorDeviceClass",
     "SensorStateClass",
