@@ -224,6 +224,47 @@ def register_device(cls: type[Device]) -> type[Device]:
     return cls
 
 
+@dataclass(frozen=True)
+class Replace:
+    """Replace a cluster on a device's endpoint with a CustomCluster subclass."""
+
+    endpoint_id: int
+    cluster_id: int
+    cluster_type: ClusterType
+    replacement: type[zigpy.quirks.CustomCluster]
+
+    def apply(self, device: zigpy.device.Device) -> None:
+        """Apply this operation to the given zigpy device."""
+        endpoint = device.endpoints[self.endpoint_id]
+        if self.cluster_type is ClusterType.Server:
+            endpoint.in_clusters.pop(self.cluster_id, None)
+            endpoint.add_input_cluster(
+                self.cluster_id, self.replacement(endpoint, is_server=True)
+            )
+        else:
+            endpoint.out_clusters.pop(self.cluster_id, None)
+            endpoint.add_output_cluster(
+                self.cluster_id, self.replacement(endpoint, is_server=False)
+            )
+
+
+def resolve_device(zigpy_device: zigpy.device.Device) -> zigpy.device.Device:
+    """Zigpy device resolver."""
+    for cls in DEVICE_QUIRKS:
+        if cls.matches(zigpy_device):
+            _LOGGER.warning(
+                "v3 resolver matched %s for %s/%s, applying %d ops",
+                cls.__name__,
+                zigpy_device.manufacturer,
+                zigpy_device.model,
+                len(cls._operations),
+            )
+            for op in cls._operations:
+                op.apply(zigpy_device)
+            return zigpy_device
+    return zigpy.quirks.get_device(zigpy_device)
+
+
 @dataclass(frozen=True, kw_only=True)
 class ClusterBinding:
     """Describes a cluster binding."""
@@ -405,6 +446,7 @@ class Device(LogMixin, EventBase):
     # The base `Device` is the universal fallback (matches anything) and is never
     # iterated through `DEVICE_QUIRKS`.
     _device_match: DeviceMatch = DeviceMatch()
+    _operations: tuple[Replace, ...] = ()
 
     # Cached properties that depend on the zigpy device and must be invalidated
     # when the underlying device is swapped (e.g. after a re-interview).

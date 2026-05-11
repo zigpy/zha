@@ -55,7 +55,13 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
+from zha.zigbee.device import (
+    Device,
+    DeviceInfo,
+    DeviceStatus,
+    ExtendedDeviceInfo,
+    resolve_device,
+)
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
@@ -251,6 +257,7 @@ class Gateway(AsyncUtilMixin, EventBase):
             config=app_config,
             auto_form=False,
             start_radio=False,
+            device_resolver=resolve_device,
         )
 
         await self.application_controller.startup(auto_form=True)

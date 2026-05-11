@@ -13,7 +13,6 @@ from unittest.mock import AsyncMock
 
 from zigpy.application import ControllerApplication
 from zigpy.const import SIG_EP_INPUT, SIG_EP_OUTPUT, SIG_EP_PROFILE, SIG_EP_TYPE
-from zigpy.quirks import get_device as quirks_get_device
 import zigpy.types as t
 import zigpy.zcl
 import zigpy.zcl.foundation as zcl_f
@@ -423,7 +422,7 @@ def zigpy_device_from_device_data(
     if quirk:
         device = quirk(app, device.ieee, device.nwk, device)
     else:
-        device = quirks_get_device(device)
+        device = app._device_resolver(device)
 
     for epid, ep in device_data["endpoints"].items():
         try:
@@ -601,7 +600,7 @@ def create_mock_zigpy_device(
     if quirk:
         device = quirk(zigpy_app_controller, device.ieee, device.nwk, device)
     else:
-        device = quirks_get_device(device)
+        device = zigpy_app_controller._device_resolver(device)
 
     if patch_cluster:
         for endpoint in (ep for epid, ep in device.endpoints.items() if epid):
