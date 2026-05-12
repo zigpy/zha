@@ -117,6 +117,8 @@ async def configure_cluster_configs(
 ) -> None:
     """Execute binding and reporting configuration from aggregated configs."""
     for agg in configs.values():
+        if agg.cluster.endpoint.device.skip_configuration:
+            continue
         if agg.bind:
             try:
                 res = await RETRYABLE_REQUEST_DECORATOR(agg.cluster.bind)()

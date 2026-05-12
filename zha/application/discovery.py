@@ -21,7 +21,7 @@ from zigpy.quirks.v2 import (
     ZCLSensorMetadata,
 )
 from zigpy.state import State
-from zigpy.zcl import ClusterType
+from zigpy.zcl import Cluster, ClusterType
 
 from zha.application import Platform, const as zha_const
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
@@ -391,21 +391,33 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
                 cluster_handler.BIND = False
 
 
+def _is_renamed_cluster(cluster: Cluster) -> bool:
+    """Return True if a quirk has renamed the cluster's ep_attribute.
+
+    Used to skip ClusterMatch entities for renamed clusters so the new
+    cluster-id based matching behaves the same as the legacy handler-name
+    matching (which never found a handler under the standard name).
+    """
+    standard = Cluster._registry.get(cluster.cluster_id)
+    if standard is None:
+        return False
+    return cluster.ep_attribute != standard.ep_attribute
+
+
 def _resolve_cluster_handlers_for_match(
     endpoint: Endpoint, match: ClusterMatch
 ) -> list[ClusterHandler]:
     """Resolve server cluster handlers from a ClusterMatch."""
     result: list[ClusterHandler] = []
 
-    for cluster_id in match.server_clusters:
+    for cluster_id in match.server_clusters | match.optional_server_clusters:
         key = f"{endpoint.id}:0x{cluster_id:04x}"
-        if key in endpoint.all_cluster_handlers:
-            result.append(endpoint.all_cluster_handlers[key])
-
-    for cluster_id in match.optional_server_clusters:
-        key = f"{endpoint.id}:0x{cluster_id:04x}"
-        if key in endpoint.all_cluster_handlers:
-            result.append(endpoint.all_cluster_handlers[key])
+        if key not in endpoint.all_cluster_handlers:
+            continue
+        handler = endpoint.all_cluster_handlers[key]
+        if _is_renamed_cluster(handler.cluster):
+            continue
+        result.append(handler)
 
     return result
 
@@ -416,15 +428,14 @@ def _resolve_client_cluster_handlers_for_match(
     """Resolve client cluster handlers from a ClusterMatch."""
     result: list[ClientClusterHandler] = []
 
-    for cluster_id in match.client_clusters:
+    for cluster_id in match.client_clusters | match.optional_client_clusters:
         key = f"{endpoint.id}:0x{cluster_id:04x}_client"
-        if key in endpoint.client_cluster_handlers:
-            result.append(endpoint.client_cluster_handlers[key])
-
-    for cluster_id in match.optional_client_clusters:
-        key = f"{endpoint.id}:0x{cluster_id:04x}_client"
-        if key in endpoint.client_cluster_handlers:
-            result.append(endpoint.client_cluster_handlers[key])
+        if key not in endpoint.client_cluster_handlers:
+            continue
+        handler = endpoint.client_cluster_handlers[key]
+        if _is_renamed_cluster(handler.cluster):
+            continue
+        result.append(handler)
 
     return result
 
@@ -452,8 +463,18 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         ],
     ] = defaultdict(lambda: defaultdict(list))
 
-    in_cluster_ids = set(endpoint.zigpy_endpoint.in_clusters)
-    out_cluster_ids = set(endpoint.zigpy_endpoint.out_clusters)
+    # Cluster IDs available to ClusterMatch (renamed quirked clusters excluded to
+    # mirror the legacy handler-name based matching).
+    in_cluster_ids = {
+        cid
+        for cid, cluster in endpoint.zigpy_endpoint.in_clusters.items()
+        if not _is_renamed_cluster(cluster)
+    }
+    out_cluster_ids = {
+        cid
+        for cid, cluster in endpoint.zigpy_endpoint.out_clusters.items()
+        if not _is_renamed_cluster(cluster)
+    }
 
     for cluster in itertools.chain(
         endpoint.zigpy_endpoint.in_clusters.values(),

@@ -359,6 +359,11 @@ class Device(LogMixin, EventBase):
 
         self._platform_entities: dict[tuple[Platform, str], PlatformEntity] = {}
         self._pending_entities: list[PlatformEntity] = []
+        # All entities discovered for this device, including ones removed by a quirk.
+        # Used for aggregating cluster configs so binding/reporting matches the
+        # legacy claim-during-discovery flow (which configured handlers even when
+        # the visible entity was filtered out later).
+        self._discovered_entities: list[PlatformEntity] = []
         self._initialized: bool = False
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(3)
         self._on_remove_callbacks: list[Callable[[], None]] = []
@@ -384,6 +389,7 @@ class Device(LogMixin, EventBase):
         self._on_remove_callbacks.clear()
         self._endpoints.clear()
         self._pending_entities.clear()
+        self._discovered_entities.clear()
 
         self._zigpy_device: ZigpyDevice = zigpy_device
 
@@ -960,12 +966,12 @@ class Device(LogMixin, EventBase):
         )
 
         # Configure binding and reporting from entity-level cluster configs
-        aggregated = aggregate_cluster_configs(self._pending_entities)
+        aggregated = aggregate_cluster_configs(self._discovered_entities)
         if aggregated:
             await configure_cluster_configs(aggregated, self.manufacturer_code)
 
         # Mark cluster handlers as CONFIGURED for ClusterMatch entities
-        for entity in self._pending_entities:
+        for entity in self._discovered_entities:
             if not hasattr(entity, "_cluster_match") or entity._cluster_match is None:
                 continue
             for ch in entity._cluster_handlers:
@@ -1107,6 +1113,8 @@ class Device(LogMixin, EventBase):
     def _discover_new_entities(self) -> None:
         new_entities: Iterable[BaseEntity]
 
+        self._discovered_entities.clear()
+
         if self.is_active_coordinator:
             new_entities = discovery.discover_coordinator_device_entities(self)
         elif self.is_coordinator:
@@ -1117,6 +1125,7 @@ class Device(LogMixin, EventBase):
 
         # Discover all applicable entities
         for entity in new_entities:
+            self._discovered_entities.append(entity)
             if self._is_entity_removed_by_quirk(entity):
                 continue
 
@@ -1253,16 +1262,21 @@ class Device(LogMixin, EventBase):
                 self.debug("Failed to initialize endpoint", exc_info=True)
 
         # Read initial attributes from entity-level cluster configs
-        aggregated = aggregate_cluster_configs(self._pending_entities)
+        aggregated = aggregate_cluster_configs(self._discovered_entities)
         if aggregated:
             await initialize_cluster_configs(aggregated, from_cache)
 
-        # Mark cluster handlers as INITIALIZED for ClusterMatch entities
-        for entity in self._pending_entities:
+        # Run the legacy handler initialization so status transitions to
+        # INITIALIZED (or stays at CONFIGURED if the read raises), matching what
+        # legacy ClusterHandlerMatch entities ended up with.
+        for entity in self._discovered_entities:
             if not hasattr(entity, "_cluster_match") or entity._cluster_match is None:
                 continue
             for ch in entity._cluster_handlers:
-                ch._status = ClusterHandlerStatus.INITIALIZED
+                try:
+                    await ch.async_initialize(from_cache)
+                except Exception:  # pylint: disable=broad-except
+                    ch.debug("async_initialize raised", exc_info=True)
 
         # And add them after. Emit events only on re-initialization, not the first.
         await self._add_pending_entities(emit_event=self._initialized)

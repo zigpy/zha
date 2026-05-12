@@ -800,6 +800,7 @@ class Shade(BaseCover):
                 ),
             },
         ),
+        ShadeCluster.cluster_id: ClusterConfig(bind=True),
     }
 
     def __init__(
