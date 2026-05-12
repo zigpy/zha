@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from zhaquirks.inovelli.types import AllLEDEffectType, SingleLEDEffectType
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, XIAOMI_AQARA_VIBRATION_AQ1
 import zigpy.zcl
 from zigpy.zcl import (
@@ -25,7 +23,6 @@ from zha.zigbee.cluster_handlers import (
     registries,
 )
 from zha.zigbee.cluster_handlers.const import (
-    AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     IKEA_SHORTCUT_V1_CLUSTER,
@@ -37,13 +34,7 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
-    REPORT_CONFIG_MAX_INT,
-    REPORT_CONFIG_MIN_INT,
-    SINOPE_MANUFACTURER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
-    SMARTTHINGS_HUMIDITY_CLUSTER,
-    SONOFF_CLUSTER,
-    TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
 
@@ -52,20 +43,6 @@ from .hvac import ThermostatClusterHandler, UserInterfaceClusterHandler
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
-
-_LOGGER = logging.getLogger(__name__)
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(SMARTTHINGS_HUMIDITY_CLUSTER)
-class SmartThingsHumidityClusterHandler(ClusterHandler):
-    """Smart Things Humidity cluster handler."""
-
-    REPORT_CONFIG = (
-        {
-            "attr": "measured_value",
-            "config": (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
-        },
-    )
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(OSRAM_BUTTON_CLUSTER)
@@ -93,31 +70,6 @@ class PhillipsRemoteClusterHandler(ClusterHandler):
     """Phillips remote cluster handler."""
 
     REPORT_CONFIG = ()
-
-
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(TUYA_MANUFACTURER_CLUSTER)
-@registries.CLUSTER_HANDLER_REGISTRY.register(TUYA_MANUFACTURER_CLUSTER)
-class TuyaClusterHandler(ClusterHandler):
-    """Cluster handler for the Tuya manufacturer Zigbee cluster.
-
-    Per-feature attribute init lives on the `TuyaPlugManufacturerInit` virtual
-    entity now.
-    """
-
-    REPORT_CONFIG = ()
-
-
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(AQARA_OPPLE_CLUSTER)
-@registries.CLUSTER_HANDLER_REGISTRY.register(AQARA_OPPLE_CLUSTER)
-class OppleRemoteClusterHandler(ClusterHandler):
-    """Opple cluster handler.
-
-    Per-model attribute init lives on the `Aqara*Init` virtual entities now.
-    The cross-cluster `detection_interval` -> `ias_zone.reset_s` write is
-    handled by `AqaraMotionDetectionIntervalSync`.
-    """
-
-    REPORT_CONFIG: tuple[AttrReportConfig, ...] = ()
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(SMARTTHINGS_ACCELERATION_CLUSTER)
@@ -160,50 +112,6 @@ class InovelliNotificationClientClusterHandler(ClientClusterHandler):
 
     def cluster_command(self, tsn, command_id, args):
         """Handle a cluster command received on this cluster."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(INOVELLI_CLUSTER)
-class InovelliConfigEntityClusterHandler(ClusterHandler):
-    """Inovelli Configuration Entity cluster handler.
-
-    Per-model attribute init lives on the `InovelliVzm30/31/35Init` virtual
-    entities now.
-    """
-
-    REPORT_CONFIG = ()
-
-    async def issue_all_led_effect(  # pylint: disable=unused-argument
-        self,
-        effect_type: AllLEDEffectType | int = AllLEDEffectType.Fast_Blink,
-        color: int = 200,
-        level: int = 100,
-        duration: int = 3,
-        **kwargs: Any,
-    ) -> None:
-        """Issue all LED effect command.
-
-        This command is used to issue an LED effect to all LEDs on the device.
-        """
-
-        await self.led_effect(effect_type, color, level, duration, expect_reply=False)
-
-    async def issue_individual_led_effect(  # pylint: disable=too-many-arguments,unused-argument
-        self,
-        led_number: int = 1,
-        effect_type: SingleLEDEffectType | int = SingleLEDEffectType.Fast_Blink,
-        color: int = 200,
-        level: int = 100,
-        duration: int = 3,
-        **kwargs: Any,
-    ) -> None:
-        """Issue individual LED effect command.
-
-        This command is used to issue an LED effect to the specified LED on the device.
-        """
-
-        await self.individual_led_effect(
-            led_number, effect_type, color, level, duration, expect_reply=False
-        )
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_AIR_PURIFIER_CLUSTER)
@@ -283,16 +191,6 @@ class XiaomiVibrationAQ1ClusterHandler(MultistateInputClusterHandler):
     """Xiaomi DoorLock Cluster is in fact a MultiStateInput Cluster."""
 
 
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SONOFF_CLUSTER)
-@registries.CLUSTER_HANDLER_REGISTRY.register(SONOFF_CLUSTER)
-class SonoffPresenceSenorClusterHandler(ClusterHandler):
-    """SonoffPresenceSensor cluster handler.
-
-    Per-model attribute init lives on the `SonoffPresenceSensorInit` virtual
-    entity now.
-    """
-
-
 @registries.CLUSTER_HANDLER_REGISTRY.register(
     Thermostat.cluster_id, DANFOSS_ALLY_THERMOSTAT
 )
@@ -353,35 +251,6 @@ class DanfossDiagnosticClusterHandler(DiagnosticClusterHandler):
         AttrReportConfig(attr="sw_error_code", config=REPORT_CONFIG_DEFAULT),
         AttrReportConfig(attr="motor_step_counter", config=REPORT_CONFIG_DEFAULT),
     )
-
-
-@registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SINOPE_MANUFACTURER_CLUSTER)
-@registries.CLUSTER_HANDLER_REGISTRY.register(SINOPE_MANUFACTURER_CLUSTER)
-class SinopeManufacturerClusterHandler(ClusterHandler):
-    """Sinope Manufacturer cluster handler."""
-
-    BIND = True
-
-    _value_attribute = "action_report"
-    REPORT_CONFIG = ()
-
-    @classmethod
-    def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:
-        """Filter the cluster match for specific devices."""
-        switches = (
-            "SW2500ZB",
-            "SW2500ZB-G2",
-            "DM2500ZB",
-            "DM2500ZB-G2",
-            "DM2550ZB",
-            "DM2550ZB-G2",
-        )
-
-        _LOGGER.debug(
-            "matching sinope device to cluster handler %s", cluster.endpoint.model
-        )
-
-        return cluster.endpoint.model in switches
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(LEGRAND_CABLE_OUTLET_CLUSTER)

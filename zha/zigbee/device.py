@@ -1026,6 +1026,9 @@ class Device(LogMixin, EventBase):
         if self.quirk_metadata is None:
             return False
 
+        if entity._virtual:
+            return False
+
         for meta in self.quirk_metadata.disabled_default_entities:
             _LOGGER.debug("Checking if entity %s is removed by %s", entity, meta)
 
@@ -1053,6 +1056,9 @@ class Device(LogMixin, EventBase):
     def _apply_entity_metadata_changes(self, entity: PlatformEntity) -> None:
         """Apply entity metadata changes from quirks v2."""
         if self.quirk_metadata is None:
+            return
+
+        if entity._virtual:
             return
 
         for meta in self.quirk_metadata.changed_entity_metadata:

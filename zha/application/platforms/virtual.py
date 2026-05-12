@@ -436,6 +436,20 @@ class _AqaraOppleInitBase(VirtualEntity):
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
+class AqaraOppleBind(VirtualEntity):
+    """Bind the Aqara Opple cluster on every device that exposes it."""
+
+    _unique_id_suffix = "aqara_opple_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
+    )
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraMotionAc02Init(_AqaraOppleInitBase):
     """Aqara P1 motion sensor attribute init."""
 
@@ -683,6 +697,20 @@ TUYA_PLUG_MANUFACTURER = "tuya.plug_manufacturer_attributes"
 
 
 @register_entity(SONOFF_CLUSTER)
+class SonoffManufacturerBind(VirtualEntity):
+    """Bind the Sonoff manufacturer cluster on every device that exposes it."""
+
+    _unique_id_suffix = "sonoff_manufacturer_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SONOFF_CLUSTER}),
+    )
+    _server_cluster_config = {
+        SONOFF_CLUSTER: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(SONOFF_CLUSTER)
 class SonoffPresenceSensorInit(VirtualEntity):
     """Sonoff SNZB-06P presence sensor attribute init."""
 
@@ -698,6 +726,20 @@ class SonoffPresenceSensorInit(VirtualEntity):
                 "last_illumination_state": AttrConfig(read_on_startup=False),
             },
         ),
+    }
+
+
+@register_entity(TUYA_MANUFACTURER_CLUSTER)
+class TuyaManufacturerBind(VirtualEntity):
+    """Bind the Tuya manufacturer cluster on every device that exposes it."""
+
+    _unique_id_suffix = "tuya_manufacturer_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
+    )
+    _server_cluster_config = {
+        TUYA_MANUFACTURER_CLUSTER: ClusterConfig(bind=True),
     }
 
 
@@ -722,6 +764,20 @@ class TuyaPlugManufacturerInit(VirtualEntity):
 
 
 SINOPE_MANUFACTURER_CLUSTER = 0xFF01
+
+
+@register_entity(SINOPE_MANUFACTURER_CLUSTER)
+class SinopeManufacturerBind(VirtualEntity):
+    """Bind the Sinope manufacturer cluster on every device that exposes it."""
+
+    _unique_id_suffix = "sinope_manufacturer_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
+    )
+    _server_cluster_config = {
+        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(bind=True),
+    }
 
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
