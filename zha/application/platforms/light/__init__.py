@@ -22,9 +22,11 @@ from zigpy.zcl.foundation import Status
 from zha.application import Platform
 from zha.application.platforms import (
     DEFAULT_UPDATE_GROUP_FROM_CHILD_DELAY,
+    AttrConfig,
     BaseEntity,
     BaseEntityInfo,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     GroupEntity,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -75,6 +77,9 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
+    REPORT_CONFIG_ASAP,
+    REPORT_CONFIG_DEFAULT,
+    REPORT_CONFIG_IMMEDIATE,
 )
 from zha.zigbee.cluster_handlers.general import (
     IdentifyClusterHandler,
@@ -822,14 +827,92 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
     _REFRESH_INTERVAL = (2700, 4500)
     __polling_interval: int
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
     )
+
+    _server_cluster_config = {
+        OnOff.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                OnOff.AttributeDefs.on_off: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                OnOff.AttributeDefs.start_up_on_off: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+        LevelControl.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                LevelControl.AttributeDefs.current_level: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_ASAP,
+                ),
+                LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+        Color.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Color.AttributeDefs.current_x: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Color.AttributeDefs.current_y: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Color.AttributeDefs.color_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Color.AttributeDefs.color_mode: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Color.AttributeDefs.color_temp_physical_min: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_temp_physical_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_capabilities: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_loop_active: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Color.AttributeDefs.start_up_color_temperature: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.options: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -1123,11 +1206,9 @@ class HueLight(Light):
 
     _REFRESH_INTERVAL = (180, 300)
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         # We want this entity to be preferred over the base light
@@ -1141,11 +1222,9 @@ class ForceOnLight(Light):
 
     _FORCE_ON = True
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         manufacturers=frozenset(
             {
                 "Jasco",
@@ -1168,11 +1247,9 @@ class MinTransitionLight(Light):
     # Transitions are counted in 1/10th of a second increments, so this is the smallest
     _DEFAULT_MIN_TRANSITION_TIME = 0.1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_COLOR, CLUSTER_HANDLER_LEVEL}
-        ),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset({Color.cluster_id, LevelControl.cluster_id}),
         manufacturers=DEFAULT_MIN_TRANSITION_MANUFACTURERS,
         profile_device_types=LIGHT_PROFILE_DEVICE_TYPES,
         # We want this entity to be preferred over the base light

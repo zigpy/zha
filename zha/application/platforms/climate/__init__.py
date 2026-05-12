@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.hvac import (
+    Fan as FanCluster,
     FanMode,
     RunningState,
     SystemMode,
@@ -19,8 +20,11 @@ from zigpy.zcl.clusters.hvac import (
 
 from zha.application import Platform
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntityInfo,
+    ClusterConfig,
     ClusterHandlerMatch,
+    ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
     register_entity,
@@ -53,8 +57,15 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
     CLUSTER_HANDLER_THERMOSTAT,
+    REPORT_CONFIG_OP,
 )
-from zha.zigbee.cluster_handlers.hvac import FanClusterHandler, ThermostatClusterHandler
+from zha.zigbee.cluster_handlers.hvac import (
+    REPORT_CONFIG_CLIMATE,
+    REPORT_CONFIG_CLIMATE_DEMAND,
+    REPORT_CONFIG_CLIMATE_DISCRETE,
+    FanClusterHandler,
+    ThermostatClusterHandler,
+)
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -215,12 +226,110 @@ class Thermostat(BaseThermostat):
         ATTR_UNOCCP_HEAT_SETPT,
     }
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-        optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
+        optional_server_clusters=frozenset({FanCluster.cluster_id}),
         # We prefer Thermostat entities over Fan entities if possible
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
     )
+
+    _server_cluster_config = {
+        ThermostatCluster.cluster_id: ClusterConfig(
+            attributes={
+                ThermostatCluster.AttributeDefs.local_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                ThermostatCluster.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                ThermostatCluster.AttributeDefs.occupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                ThermostatCluster.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                ThermostatCluster.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                ThermostatCluster.AttributeDefs.running_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                ThermostatCluster.AttributeDefs.running_state: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                ThermostatCluster.AttributeDefs.system_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                ThermostatCluster.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                ThermostatCluster.AttributeDefs.pi_cooling_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                ThermostatCluster.AttributeDefs.pi_heating_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                ThermostatCluster.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
+                    read_on_startup=True,
+                ),
+                ThermostatCluster.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.local_temperature_calibration: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.setpoint_change_source: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ThermostatCluster.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+        FanCluster.cluster_id: ClusterConfig(
+            attributes={
+                FanCluster.AttributeDefs.fan_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                FanCluster.AttributeDefs.fan_mode_sequence: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -740,9 +849,9 @@ class SinopeTechnologiesThermostat(Thermostat):
 class ZenWithinThermostat(Thermostat):
     """Zen Within Thermostat implementation."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-        optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
+        optional_server_clusters=frozenset({FanCluster.cluster_id}),
         manufacturers=frozenset({"Zen Within", "LUX"}),
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
     )
@@ -752,8 +861,8 @@ class ZenWithinThermostat(Thermostat):
 class ZehnderThermostat(Thermostat):
     """Zehnder thermostat to adapt AUTO mode behavior."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
         manufacturers=frozenset(
             {"ZEHNDER GROUP VAUX ANDIGNY      ", "ZEHNDER GROUP VAUX ANDIGNY"}
         ),
@@ -822,9 +931,9 @@ class ZehnderThermostat(Thermostat):
 class CentralitePearl(Thermostat):
     """Centralite Pearl Thermostat implementation."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
-        optional_cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
+        optional_server_clusters=frozenset({FanCluster.cluster_id}),
         manufacturers=frozenset({"Centralite"}),
         models=frozenset({"3157100", "3157100-E"}),
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
@@ -854,8 +963,8 @@ MOES_MANUFACTURERS = frozenset(
 class MoesThermostat(Thermostat):
     """Moes Thermostat implementation."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
         manufacturers=MOES_MANUFACTURERS,
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
     )
@@ -937,8 +1046,8 @@ class MoesThermostat(Thermostat):
 class BecaThermostat(Thermostat):
     """Beca Thermostat implementation."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
         manufacturers=frozenset({"_TZE200_b6wax7g0"}),
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
     )
@@ -1013,8 +1122,8 @@ class BecaThermostat(Thermostat):
 class StelproFanHeater(Thermostat):
     """Stelpro Fan Heater implementation."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
         manufacturers=frozenset({"Stelpro"}),
         models=frozenset({"SORB"}),
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
@@ -1051,8 +1160,8 @@ class ZONNSMARTThermostat(Thermostat):
     PRESET_HOLIDAY = "holiday"
     PRESET_FROST = "frost protect"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ThermostatCluster.cluster_id}),
         manufacturers=ZONNSMART_MANUFACTURERS,
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 2),
     )

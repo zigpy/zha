@@ -10,13 +10,15 @@ import logging
 from typing import TYPE_CHECKING, Any, cast
 
 from zigpy.profiles import zha
-from zigpy.zcl.clusters.closures import WindowCovering
-from zigpy.zcl.clusters.general import OnOff, OnOff as OnOffCluster
+from zigpy.zcl.clusters.closures import Shade as ShadeCluster, WindowCovering
+from zigpy.zcl.clusters.general import LevelControl, OnOff, OnOff as OnOffCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
-    ClusterHandlerMatch,
+    AttrConfig,
+    ClusterConfig,
+    ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
     register_entity,
@@ -42,7 +44,8 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_LEVEL,
     CLUSTER_HANDLER_LEVEL_CHANGED,
     CLUSTER_HANDLER_ON_OFF,
-    CLUSTER_HANDLER_SHADE,
+    REPORT_CONFIG_ASAP,
+    REPORT_CONFIG_IMMEDIATE,
 )
 from zha.zigbee.cluster_handlers.general import (
     LevelChangeEvent,
@@ -132,9 +135,46 @@ class Cover(BaseCover):
 
     _attr_translation_key: str = "cover"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_COVER}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({WindowCovering.cluster_id}),
     )
+
+    _server_cluster_config = {
+        WindowCovering.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                WindowCovering.AttributeDefs.current_position_lift_percentage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                WindowCovering.AttributeDefs.current_position_tilt_percentage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.window_covering_mode: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.config_status: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_closed_limit_lift: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_closed_limit_tilt: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_open_limit_lift: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_open_limit_tilt: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -706,10 +746,10 @@ class Shade(BaseCover):
     _attr_device_class = CoverDeviceClass.SHADE
     _attr_translation_key: str = "shade"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
-        optional_cluster_handlers=frozenset(
-            {CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_SHADE}
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
+        optional_server_clusters=frozenset(
+            {LevelControl.cluster_id, ShadeCluster.cluster_id}
         ),
         profile_device_types=frozenset(
             {
@@ -719,6 +759,48 @@ class Shade(BaseCover):
         ),
         feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 0),
     )
+
+    _server_cluster_config = {
+        OnOff.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                OnOff.AttributeDefs.on_off: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                OnOff.AttributeDefs.start_up_on_off: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+        LevelControl.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                LevelControl.AttributeDefs.current_level: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_ASAP,
+                ),
+                LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -900,8 +982,8 @@ class KeenVent(Shade):
     _attr_device_class = CoverDeviceClass.DAMPER
     _attr_translation_key: str = "keen_vent"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL, CLUSTER_HANDLER_ON_OFF}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id, OnOff.cluster_id}),
         manufacturers=frozenset({"Keen Home Inc"}),
         feature_priority=(PlatformFeatureGroup.LIGHT_OR_SWITCH_OR_SHADE, 1),
     )

@@ -17,6 +17,7 @@ from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
     ClusterHandlerMatch,
+    ClusterMatch,
     EntityCategory,
     PlatformEntity,
     register_entity,
@@ -24,7 +25,6 @@ from zha.application.platforms import (
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
 from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
-    CLUSTER_HANDLER_IDENTIFY,
     TUYA_MANUFACTURER_CLUSTER,
 )
 
@@ -140,8 +140,8 @@ class IdentifyButton(Button):
     _kwargs = {}
     _args = [DEFAULT_DURATION]
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IDENTIFY})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Identify.cluster_id}),
     )
 
     def is_supported_in_list(self, entities: list[BaseEntity]) -> bool:

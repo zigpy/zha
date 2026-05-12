@@ -17,8 +17,10 @@ from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntityInfo,
-    ClusterHandlerMatch,
+    ClusterConfig,
+    ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -288,10 +290,20 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
 
     _unique_id_suffix = "firmware_update"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        client_cluster_handlers=frozenset({CLUSTER_HANDLER_OTA}),
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({Ota.cluster_id}),
         feature_priority=(PlatformFeatureGroup.OTA_UPDATE, 1),
     )
+
+    _client_cluster_config = {
+        Ota.cluster_id: ClusterConfig(
+            attributes={
+                Ota.AttributeDefs.current_file_version: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -347,10 +359,20 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
     """Representation of a ZHA firmware update entity."""
 
     _unique_id_suffix = "firmware_update"
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OTA}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Ota.cluster_id}),
         feature_priority=(PlatformFeatureGroup.OTA_UPDATE, 0),
     )
+
+    _server_cluster_config = {
+        Ota.cluster_id: ClusterConfig(
+            attributes={
+                Ota.AttributeDefs.current_file_version: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,

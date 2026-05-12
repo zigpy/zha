@@ -12,9 +12,12 @@ from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntity,
     BaseEntityInfo,
+    ClusterConfig,
     ClusterHandlerMatch,
+    ClusterMatch,
     GroupEntity,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -50,6 +53,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_FAN,
     IKEA_AIR_PURIFIER_CLUSTER,
+    REPORT_CONFIG_OP,
 )
 from zha.zigbee.cluster_handlers.hvac import FanClusterHandler
 from zha.zigbee.cluster_handlers.manufacturerspecific import (
@@ -249,11 +253,25 @@ class BaseFan(BaseEntity, ABC):
 class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({hvac.Fan.cluster_id}),
         # We prefer Thermostat entities if possible
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, -1),
     )
+
+    _server_cluster_config = {
+        hvac.Fan.cluster_id: ClusterConfig(
+            attributes={
+                hvac.Fan.AttributeDefs.fan_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                hvac.Fan.AttributeDefs.fan_mode_sequence: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -475,8 +493,8 @@ class KofFan(Fan):
         | FanEntityFeature.TURN_ON
     )
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_FAN}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({hvac.Fan.cluster_id}),
         models=frozenset({"HBUniversalCFRemote", "HDC52EastwindFan"}),
         feature_priority=(PlatformFeatureGroup.THERMOSTAT_FAN, 1),
     )

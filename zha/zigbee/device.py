@@ -964,15 +964,12 @@ class Device(LogMixin, EventBase):
         if aggregated:
             await configure_cluster_configs(aggregated, self.manufacturer_code)
 
-            # Mark cluster handlers as CONFIGURED for ClusterMatch entities
-            for entity in self._pending_entities:
-                if (
-                    not hasattr(entity, "_cluster_match")
-                    or entity._cluster_match is None
-                ):
-                    continue
-                for ch in entity._cluster_handlers:
-                    ch._status = ClusterHandlerStatus.CONFIGURED
+        # Mark cluster handlers as CONFIGURED for ClusterMatch entities
+        for entity in self._pending_entities:
+            if not hasattr(entity, "_cluster_match") or entity._cluster_match is None:
+                continue
+            for ch in entity._cluster_handlers:
+                ch._status = ClusterHandlerStatus.CONFIGURED
 
         self.emit_reconfigure_done()
 
@@ -1260,15 +1257,12 @@ class Device(LogMixin, EventBase):
         if aggregated:
             await initialize_cluster_configs(aggregated, from_cache)
 
-            # Mark cluster handlers as INITIALIZED for ClusterMatch entities
-            for entity in self._pending_entities:
-                if (
-                    not hasattr(entity, "_cluster_match")
-                    or entity._cluster_match is None
-                ):
-                    continue
-                for ch in entity._cluster_handlers:
-                    ch._status = ClusterHandlerStatus.INITIALIZED
+        # Mark cluster handlers as INITIALIZED for ClusterMatch entities
+        for entity in self._pending_entities:
+            if not hasattr(entity, "_cluster_match") or entity._cluster_match is None:
+                continue
+            for ch in entity._cluster_handlers:
+                ch._status = ClusterHandlerStatus.INITIALIZED
 
         # And add them after. Emit events only on re-initialization, not the first.
         await self._add_pending_entities(emit_event=self._initialized)
