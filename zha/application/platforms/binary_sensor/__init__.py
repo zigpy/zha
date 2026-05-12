@@ -18,6 +18,7 @@ from zigpy.zcl.clusters.measurement import OccupancySensing
 from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
     BaseEntityInfo,
@@ -154,10 +155,15 @@ class BinarySensor(BaseBinarySensor):
 
     async def async_update(self) -> None:
         """Attempt to retrieve on off state from the binary sensor."""
-        await super().async_update()
-        attribute = getattr(self._cluster_handler, "value_attribute", "on_off")
-        # this is a cached read to get the value for state mgt so there is no double read
-        attr_value = await self._cluster_handler.get_attribute_value(attribute)
+        self.debug("polling current state")
+        attribute = self._attribute_name or "on_off"
+        result = await safe_read(
+            self._cluster_handler.cluster,
+            [attribute],
+            allow_cache=False,
+            only_cache=False,
+        )
+        attr_value = result.get(attribute)
         if attr_value is not None:
             self._state = attr_value
             self.maybe_emit_state_changed_event()
@@ -402,7 +408,14 @@ class IASZone(BinarySensor):
 
     async def async_update(self) -> None:
         """Attempt to retrieve on off state from the IAS Zone sensor."""
-        await PlatformEntity.async_update(self)
+        self.debug("polling current state")
+        await safe_read(
+            self._cluster_handler.cluster,
+            [self._attribute_name],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
 
 
 @register_entity(IasZone.cluster_id)

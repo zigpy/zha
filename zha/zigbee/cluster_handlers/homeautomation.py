@@ -178,36 +178,6 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_OP,
         ),
     )
-    ZCL_POLLING_ATTRS = [
-        ElectricalMeasurement.AttributeDefs.ac_frequency.name,
-        ElectricalMeasurement.AttributeDefs.ac_frequency_max.name,
-        ElectricalMeasurement.AttributeDefs.active_power.name,
-        ElectricalMeasurement.AttributeDefs.active_power_ph_b.name,
-        ElectricalMeasurement.AttributeDefs.active_power_ph_c.name,
-        ElectricalMeasurement.AttributeDefs.active_power_max.name,
-        ElectricalMeasurement.AttributeDefs.active_power_max_ph_b.name,
-        ElectricalMeasurement.AttributeDefs.active_power_max_ph_c.name,
-        ElectricalMeasurement.AttributeDefs.total_active_power.name,
-        ElectricalMeasurement.AttributeDefs.apparent_power.name,
-        ElectricalMeasurement.AttributeDefs.power_factor.name,
-        ElectricalMeasurement.AttributeDefs.power_factor_ph_b.name,
-        ElectricalMeasurement.AttributeDefs.power_factor_ph_c.name,
-        ElectricalMeasurement.AttributeDefs.rms_current.name,
-        ElectricalMeasurement.AttributeDefs.rms_current_ph_b.name,
-        ElectricalMeasurement.AttributeDefs.rms_current_ph_c.name,
-        ElectricalMeasurement.AttributeDefs.rms_current_max.name,
-        ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b.name,
-        ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c.name,
-        ElectricalMeasurement.AttributeDefs.rms_voltage.name,
-        ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b.name,
-        ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c.name,
-        ElectricalMeasurement.AttributeDefs.rms_voltage_max.name,
-        ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name,
-        ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name,
-        ElectricalMeasurement.AttributeDefs.dc_voltage.name,
-        ElectricalMeasurement.AttributeDefs.dc_current.name,
-        ElectricalMeasurement.AttributeDefs.dc_power.name,
-    ]
     ZCL_INIT_ATTRS = {
         ElectricalMeasurement.AttributeDefs.ac_frequency_divisor.name: True,
         ElectricalMeasurement.AttributeDefs.ac_frequency_max.name: True,
@@ -232,18 +202,6 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
         ElectricalMeasurement.AttributeDefs.dc_power_divisor.name: True,
         ElectricalMeasurement.AttributeDefs.dc_power_multiplier.name: True,
     }
-
-    async def async_update(self):
-        """Retrieve latest state."""
-        self.debug("async_update")
-
-        # This is a polling cluster handler. Don't allow cache.
-        attrs = [
-            attr
-            for attr in self.ZCL_POLLING_ATTRS
-            if not self.cluster.is_attribute_unsupported(attr)
-        ]
-        await self.get_attributes(attrs, from_cache=False, only_cache=False)
 
     @property
     def ac_current_divisor(self) -> int:

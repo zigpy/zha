@@ -557,9 +557,6 @@ class ClusterHandler(LogMixin, EventBase):
             }
         )
 
-    async def async_update(self) -> None:
-        """Retrieve latest state from cluster."""
-
     def _get_attribute_name(self, attrid: int) -> str | int:
         if attrid not in self.cluster.attributes:
             return attrid

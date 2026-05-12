@@ -641,16 +641,11 @@ class PlatformEntity(BaseEntity):
         return state
 
     async def async_update(self) -> None:
-        """Retrieve latest state."""
-        self.debug("polling current state")
-        tasks = [
-            cluster_handler.async_update()
-            for cluster_handler in self.cluster_handlers.values()
-            if hasattr(cluster_handler, "async_update")
-        ]
-        if tasks:
-            await asyncio.gather(*tasks)
-            self.maybe_emit_state_changed_event()
+        """Retrieve latest state.
+
+        Default no-op: subclasses that need polling override this to read their
+        own attributes directly from the relevant cluster(s).
+        """
 
 
 class GroupEntity(BaseEntity):

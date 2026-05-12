@@ -172,6 +172,15 @@ class DoorLock(BaseLock):
         self._state = VALUE_TO_STATE.get(event.attribute_value, self._state)
         self.maybe_emit_state_changed_event()
 
+    async def async_update(self) -> None:
+        """Refresh state from the cluster cache."""
+        value = self._doorlock_cluster_handler.cluster.get(
+            DoorLockCluster.AttributeDefs.lock_state.name
+        )
+        if value is not None:
+            self._state = VALUE_TO_STATE.get(value, self._state)
+            self.maybe_emit_state_changed_event()
+
     def restore_external_state_attributes(
         self,
         *,

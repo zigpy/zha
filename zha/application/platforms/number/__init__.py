@@ -340,7 +340,6 @@ class NumberConfigurationEntity(BaseNumber):
 
     async def async_update(self) -> None:
         """Attempt to retrieve the state of the entity."""
-        await super().async_update()
         _LOGGER.debug("polling current state")
         if self._cluster_handler:
             value = await self._cluster_handler.get_attribute_value(
@@ -348,6 +347,7 @@ class NumberConfigurationEntity(BaseNumber):
             )
             _LOGGER.debug("read value=%s", value)
             # The attribute update handler below takes care of the rest
+            self.maybe_emit_state_changed_event()
 
     def handle_cluster_handler_attribute_updated(
         self,

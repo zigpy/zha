@@ -17,6 +17,7 @@ from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
     BaseEntity,
@@ -221,6 +222,17 @@ class Switch(PlatformEntity, BaseSwitch):
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
 
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await safe_read(
+            self._on_off_cluster_handler.cluster,
+            [self._attribute_name],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
+
 
 @register_entity(BinaryOutput.cluster_id)
 class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
@@ -305,6 +317,17 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
         """Handle state update from cluster handler."""
         if event.attribute_name == BinaryOutput.AttributeDefs.present_value.name:
             self.maybe_emit_state_changed_event()
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await safe_read(
+            self._binary_output_cluster_handler.cluster,
+            [BinaryOutput.AttributeDefs.present_value.name],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
 
 
 @register_group_entity

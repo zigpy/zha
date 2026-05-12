@@ -8,14 +8,10 @@ from zigpy.zcl.clusters.closures import ConfigStatus, DoorLock, Shade, WindowCov
 from zha.zigbee.cluster_handlers import (
     AttrReportConfig,
     ClientClusterHandler,
-    ClusterAttributeUpdatedEvent,
     ClusterHandler,
     registries,
 )
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    REPORT_CONFIG_IMMEDIATE,
-)
+from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_IMMEDIATE
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(DoorLock.cluster_id)
@@ -29,23 +25,6 @@ class DoorLockClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_IMMEDIATE,
         ),
     )
-
-    async def async_update(self):
-        """Retrieve latest state."""
-        result = await self.get_attribute_value(
-            DoorLock.AttributeDefs.lock_state.name, from_cache=True
-        )
-        if result is not None:
-            self.emit(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                ClusterAttributeUpdatedEvent(
-                    attribute_id=DoorLock.AttributeDefs.lock_state.id,
-                    attribute_name=DoorLock.AttributeDefs.lock_state.name,
-                    attribute_value=result,
-                    cluster_handler_unique_id=self.unique_id,
-                    cluster_id=self.cluster.cluster_id,
-                ),
-            )
 
     async def async_set_user_code(self, code_slot: int, user_code: str) -> None:
         """Set the user code for the code slot."""
@@ -130,17 +109,6 @@ class WindowCoveringClusterHandler(ClusterHandler):
         WindowCovering.AttributeDefs.installed_open_limit_lift.name: True,
         WindowCovering.AttributeDefs.installed_open_limit_tilt.name: True,
     }
-
-    async def async_update(self):
-        """Retrieve latest state."""
-        await self.get_attributes(
-            [
-                WindowCovering.AttributeDefs.current_position_lift_percentage.name,
-                WindowCovering.AttributeDefs.current_position_tilt_percentage.name,
-            ],
-            from_cache=False,
-            only_cache=False,
-        )
 
     @property
     def inverted(self):

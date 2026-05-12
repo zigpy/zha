@@ -52,6 +52,7 @@ from zigpy.zcl.clusters.smartenergy import (
 )
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
     BaseEntity,
@@ -382,6 +383,19 @@ class Sensor(BaseSensor):
             value /= self._divisor
 
         return value
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        if self._attribute_name is None:
+            return
+        self.debug("polling current state")
+        await safe_read(
+            self._cluster_handler.cluster,
+            [self._attribute_name],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
 
 
 class TimestampSensor(Sensor):
@@ -1077,6 +1091,38 @@ class ReportingElectricalMeasurement(ElectricalMeasurementActivePower):
     )
 
 
+_ELECTRICAL_MEASUREMENT_POLLING_ATTRS = [
+    ElectricalMeasurement.AttributeDefs.ac_frequency.name,
+    ElectricalMeasurement.AttributeDefs.ac_frequency_max.name,
+    ElectricalMeasurement.AttributeDefs.active_power.name,
+    ElectricalMeasurement.AttributeDefs.active_power_ph_b.name,
+    ElectricalMeasurement.AttributeDefs.active_power_ph_c.name,
+    ElectricalMeasurement.AttributeDefs.active_power_max.name,
+    ElectricalMeasurement.AttributeDefs.active_power_max_ph_b.name,
+    ElectricalMeasurement.AttributeDefs.active_power_max_ph_c.name,
+    ElectricalMeasurement.AttributeDefs.total_active_power.name,
+    ElectricalMeasurement.AttributeDefs.apparent_power.name,
+    ElectricalMeasurement.AttributeDefs.power_factor.name,
+    ElectricalMeasurement.AttributeDefs.power_factor_ph_b.name,
+    ElectricalMeasurement.AttributeDefs.power_factor_ph_c.name,
+    ElectricalMeasurement.AttributeDefs.rms_current.name,
+    ElectricalMeasurement.AttributeDefs.rms_current_ph_b.name,
+    ElectricalMeasurement.AttributeDefs.rms_current_ph_c.name,
+    ElectricalMeasurement.AttributeDefs.rms_current_max.name,
+    ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b.name,
+    ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c.name,
+    ElectricalMeasurement.AttributeDefs.rms_voltage.name,
+    ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b.name,
+    ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c.name,
+    ElectricalMeasurement.AttributeDefs.rms_voltage_max.name,
+    ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name,
+    ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name,
+    ElectricalMeasurement.AttributeDefs.dc_voltage.name,
+    ElectricalMeasurement.AttributeDefs.dc_current.name,
+    ElectricalMeasurement.AttributeDefs.dc_power.name,
+]
+
+
 @register_entity(ElectricalMeasurement.cluster_id)
 class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
     """Polled active power measurement that polls all relevant EM attributes."""
@@ -1087,6 +1133,18 @@ class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
         feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 0),
     )
+
+    async def async_update(self) -> None:
+        """Poll the full EM attribute list so sibling EM entities update too."""
+        self.debug("polling current state")
+        cluster = self._cluster_handler.cluster
+        attrs = [
+            attr
+            for attr in _ELECTRICAL_MEASUREMENT_POLLING_ATTRS
+            if not cluster.is_attribute_unsupported(attr)
+        ]
+        await safe_read(cluster, attrs, allow_cache=False, only_cache=False)
+        self.maybe_emit_state_changed_event()
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1871,6 +1929,20 @@ class PolledSmartEnergySummation(SmartEnergySummation):
         models=frozenset({"TS011F", "ZLinky_TIC", "TICMeter"}),
         feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
+
+    async def async_update(self) -> None:
+        """Poll every reported Metering attribute so sibling entities update too."""
+        self.debug("polling current state")
+        cluster = self._cluster_handler.cluster
+        config = self._server_cluster_config[Metering.cluster_id]
+        attrs = [
+            attr_def.name
+            for attr_def, attr_cfg in config.attributes.items()
+            if attr_cfg.reporting is not None
+            and not cluster.is_attribute_unsupported(attr_def.name)
+        ]
+        await safe_read(cluster, attrs, allow_cache=False, only_cache=False)
+        self.maybe_emit_state_changed_event()
 
 
 @register_entity(Metering.cluster_id)

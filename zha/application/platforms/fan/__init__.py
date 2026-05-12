@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 from zigpy.zcl.clusters import hvac
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
     BaseEntity,
@@ -322,6 +323,17 @@ class Fan(BaseFan, PlatformEntity):
         await self._fan_cluster_handler.async_set_speed(fan_mode)
         self.maybe_emit_state_changed_event()
 
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await safe_read(
+            self._fan_cluster_handler.cluster,
+            [hvac.Fan.AttributeDefs.fan_mode.name],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
+
 
 @register_group_entity
 class FanGroup(BaseFan, GroupEntity):
@@ -481,6 +493,17 @@ class IkeaFan(BaseFan, PlatformEntity):
         if fan_mode == 1:
             fan_mode = 2
         await self._async_set_fan_mode(fan_mode)
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await safe_read(
+            self._fan_cluster_handler.cluster,
+            ["fan_mode", "fan_speed"],
+            allow_cache=False,
+            only_cache=False,
+        )
+        self.maybe_emit_state_changed_event()
 
 
 @register_entity(hvac.Fan.cluster_id)

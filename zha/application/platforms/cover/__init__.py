@@ -15,6 +15,7 @@ from zigpy.zcl.clusters.general import LevelControl, OnOff, OnOff as OnOffCluste
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
     ClusterConfig,
@@ -614,6 +615,20 @@ class Cover(BaseCover):
         self._state = state
         self._lift_state = None
         self._tilt_state = None
+        self.maybe_emit_state_changed_event()
+
+    async def async_update(self) -> None:
+        """Retrieve latest state."""
+        self.debug("polling current state")
+        await safe_read(
+            self._cover_cluster_handler.cluster,
+            [
+                WCAttrs.current_position_lift_percentage.name,
+                WCAttrs.current_position_tilt_percentage.name,
+            ],
+            allow_cache=False,
+            only_cache=False,
+        )
         self.maybe_emit_state_changed_event()
 
     async def async_open_cover(self) -> None:

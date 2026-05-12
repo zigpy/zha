@@ -150,11 +150,6 @@ class IkeaAirPurifierClusterHandler(ClusterHandler):
         """Set the speed of the fan."""
         await self.write_attributes_safe({"fan_mode": value})
 
-    async def async_update(self) -> None:
-        """Retrieve latest state."""
-        await self.get_attribute_value("fan_mode", from_cache=False)
-        await self.get_attribute_value("fan_speed", from_cache=False)
-
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(IKEA_REMOTE_CLUSTER)
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(IKEA_REMOTE_CLUSTER)

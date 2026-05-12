@@ -338,9 +338,3 @@ class IASZoneClusterHandler(ClusterHandler):
         IasZone.AttributeDefs.zone_state.name: True,
         IasZone.AttributeDefs.zone_type.name: True,
     }
-
-    async def async_update(self) -> None:
-        """Retrieve latest state."""
-        await self.get_attribute_value(
-            IasZone.AttributeDefs.zone_status.name, from_cache=False
-        )

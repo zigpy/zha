@@ -307,17 +307,6 @@ class MeteringClusterHandler(ClusterHandler):
         """Return summation formatting."""
         return self.cluster.get(Metering.AttributeDefs.summation_formatting.name)
 
-    async def async_update(self) -> None:
-        """Retrieve latest state."""
-        self.debug("async_update")
-
-        attrs = [
-            a["attr"]
-            for a in self.REPORT_CONFIG
-            if not self.cluster.is_attribute_unsupported(a["attr"])
-        ]
-        await self.get_attributes(attrs, from_cache=False, only_cache=False)
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Prepayment.cluster_id)
 class PrepaymentClusterHandler(ClusterHandler):

@@ -52,12 +52,6 @@ class FanClusterHandler(ClusterHandler):
         """Set the speed of the fan."""
         await self.write_attributes_safe({Fan.AttributeDefs.fan_mode.name: value})
 
-    async def async_update(self) -> None:
-        """Retrieve latest state."""
-        await self.get_attribute_value(
-            Fan.AttributeDefs.fan_mode.name, from_cache=False
-        )
-
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Pump.cluster_id)
 class PumpClusterHandler(ClusterHandler):

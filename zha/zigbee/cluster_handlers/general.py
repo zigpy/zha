@@ -159,12 +159,6 @@ class AnalogInputClusterHandler(ClusterHandler):
             return None
         return ApplicationType(result)
 
-    async def async_update(self):
-        """Update cluster value attribute."""
-        await self.get_attribute_value(
-            AnalogInput.AttributeDefs.present_value.name, from_cache=False
-        )
-
 
 @registries.BINDABLE_CLUSTERS.register(AnalogOutput.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(AnalogOutput.cluster_id)
@@ -231,12 +225,6 @@ class AnalogOutputClusterHandler(ClusterHandler):
         """Update present_value."""
         await self.write_attributes_safe(
             {AnalogOutput.AttributeDefs.present_value.name: value}
-        )
-
-    async def async_update(self):
-        """Update cluster value attribute."""
-        await self.get_attribute_value(
-            AnalogOutput.AttributeDefs.present_value.name, from_cache=False
         )
 
 
@@ -332,12 +320,6 @@ class BinaryOutputClusterHandler(ClusterHandler):
         """Update present_value."""
         await self.write_attributes_safe(
             {BinaryOutput.AttributeDefs.present_value.name: value}
-        )
-
-    async def async_update(self):
-        """Update cluster value attribute."""
-        await self.get_attribute_value(
-            BinaryOutput.AttributeDefs.present_value.name, from_cache=False
         )
 
 
@@ -568,16 +550,6 @@ class OnOffClusterHandler(ClusterHandler):
         if result[1] is not Status.SUCCESS:
             raise ZHAException(f"Failed to turn off: {result[1]}")
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
-
-    async def async_update(self):
-        """Initialize cluster handler."""
-        if self.cluster.is_client:
-            return
-        from_cache = not self._endpoint.device.is_mains_powered
-        self.debug("attempting to update onoff state - from cache: %s", from_cache)
-        await self.get_attribute_value(
-            OnOff.AttributeDefs.on_off.name, from_cache=from_cache
-        )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(OnOffConfiguration.cluster_id)
