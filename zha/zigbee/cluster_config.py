@@ -16,7 +16,7 @@ from zha.application.platforms import AttrConfig
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from zha.application.platforms import BaseEntity
+    from zha.application.platforms import PlatformEntity
 
 _LOGGER = logging.getLogger(__name__)
 RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
@@ -54,7 +54,7 @@ class AggregatedClusterConfig:
 
 
 def aggregate_cluster_configs(
-    entities: Iterable[BaseEntity],
+    entities: Iterable[PlatformEntity],
 ) -> dict[tuple[int, int], AggregatedClusterConfig]:
     """Aggregate cluster configurations from entities.
 
@@ -63,9 +63,6 @@ def aggregate_cluster_configs(
     result: dict[tuple[int, int], AggregatedClusterConfig] = {}
 
     for entity in entities:
-        if not hasattr(entity, "_server_cluster_config"):
-            continue
-
         if not entity._server_cluster_config and not entity._client_cluster_config:
             continue
 

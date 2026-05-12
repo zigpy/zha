@@ -19,8 +19,11 @@ from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntityInfo,
+    ClusterConfig,
     ClusterHandlerMatch,
+    ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -36,12 +39,8 @@ from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
     CLUSTER_HANDLER_ACCELEROMETER,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_BINARY_INPUT,
-    CLUSTER_HANDLER_OCCUPANCY,
-    CLUSTER_HANDLER_ON_OFF,
-    CLUSTER_HANDLER_THERMOSTAT,
-    CLUSTER_HANDLER_ZONE,
     IKEA_AIR_PURIFIER_CLUSTER,
+    REPORT_CONFIG_IMMEDIATE,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
@@ -190,9 +189,26 @@ class Occupancy(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
     _attr_primary_weight = 2
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OccupancySensing.cluster_id}),
     )
+
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            attributes={
+                OccupancySensing.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+                OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(OnOff.cluster_id)
@@ -203,8 +219,8 @@ class Opening(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_primary_weight = 1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({OnOff.cluster_id}),
         not_profile_device_types=frozenset(
             {
                 (zha.PROFILE_ID, zha.DeviceType.COLOR_CONTROLLER),
@@ -235,9 +251,23 @@ class BinaryInputWithDescription(BinarySensor):
 
     _attribute_name = "present_value"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({BinaryInputCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        BinaryInputCluster.cluster_id: ClusterConfig(
+            attributes={
+                BinaryInputCluster.AttributeDefs.present_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                BinaryInputCluster.AttributeDefs.description: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -258,9 +288,23 @@ class BinaryInput(BinarySensor):
     _attribute_name = "present_value"
     _attr_translation_key: str = "binary_input"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BINARY_INPUT})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({BinaryInputCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        BinaryInputCluster.cluster_id: ClusterConfig(
+            attributes={
+                BinaryInputCluster.AttributeDefs.present_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                BinaryInputCluster.AttributeDefs.description: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def _is_supported(self) -> bool:
         # Prefer to use the "WithDescription" variant above
@@ -278,8 +322,8 @@ class IkeaMotion(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({OnOff.cluster_id}),
         manufacturers=frozenset({"IKEA of Sweden"}),
         models=frozenset({"TRADFRI motion sensor"}),
         feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
@@ -294,8 +338,8 @@ class PhilipsMotion(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        client_cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({OnOff.cluster_id}),
         manufacturers=frozenset({"Philips"}),
         models=frozenset({"SML001", "SML002"}),
         feature_priority=(PlatformFeatureGroup.BINARY_SENSOR, 1),
@@ -311,9 +355,25 @@ class IASZone(BinarySensor):
 
     # TODO: split this sensor off into individual sensor classes per IASZone type
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ZONE})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasZone.cluster_id}),
     )
+
+    _server_cluster_config = {
+        IasZone.cluster_id: ClusterConfig(
+            attributes={
+                IasZone.AttributeDefs.zone_status: AttrConfig(
+                    read_on_startup=True,
+                ),
+                IasZone.AttributeDefs.zone_state: AttrConfig(
+                    read_on_startup=False,
+                ),
+                IasZone.AttributeDefs.zone_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -349,8 +409,8 @@ class SinopeLeakStatus(BinarySensor):
     _attr_device_class = BinarySensorDeviceClass.MOISTURE
     _attr_primary_weight = 1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ZONE}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasZone.cluster_id}),
         models=frozenset({"WL4200", "WL4200S"}),
     )
 
@@ -513,8 +573,8 @@ class DanfossMountingModeActive(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -527,8 +587,8 @@ class DanfossHeatRequired(BinarySensor):
     _attribute_name = "heat_required"
     _attr_translation_key: str = "heat_required"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -543,7 +603,7 @@ class DanfossPreheatStatus(BinarySensor):
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )

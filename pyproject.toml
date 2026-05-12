@@ -99,6 +99,7 @@ asyncio_default_fixture_loop_scope = "function"
 target-version = "py312"
 
 [tool.ruff.lint]
+ignore-init-module-imports = false
 select = [
     "B002", # Python does not support the unary prefix increment
     "B007", # Loop control variable {name} not used within loop body

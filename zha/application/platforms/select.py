@@ -31,6 +31,7 @@ from zha.application.const import Strobe
 from zha.application.platforms import (
     BaseEntityInfo,
     ClusterHandlerMatch,
+    ClusterMatch,
     EntityCategory,
     PlatformEntity,
     register_entity,
@@ -39,12 +40,7 @@ from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_IAS_WD,
     CLUSTER_HANDLER_INOVELLI,
-    CLUSTER_HANDLER_LEVEL,
-    CLUSTER_HANDLER_OCCUPANCY,
-    CLUSTER_HANDLER_ON_OFF,
-    CLUSTER_HANDLER_THERMOSTAT,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
@@ -166,8 +162,8 @@ class DefaultToneSelectEntity(NonZCLSelectEntity):
     _enum = IasWd.Warning.WarningMode
     _attr_translation_key: str = "default_siren_tone"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasWd.cluster_id}),
         not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
@@ -180,8 +176,8 @@ class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
     _enum = IasWd.Warning.SirenLevel
     _attr_translation_key: str = "default_siren_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasWd.cluster_id}),
         not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
@@ -194,8 +190,8 @@ class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
     _enum = IasWd.StrobeLevel
     _attr_translation_key: str = "default_strobe_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasWd.cluster_id}),
         not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
@@ -208,8 +204,8 @@ class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     _enum = Strobe
     _attr_translation_key: str = "default_strobe"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasWd.cluster_id}),
         not_exposed_features=frozenset({SIREN_BASIC}),
     )
 
@@ -317,8 +313,8 @@ class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
     _enum = OnOff.StartUpOnOff
     _attr_translation_key: str = "start_up_on_off"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
     )
 
 
@@ -339,8 +335,8 @@ class TuyaPowerOnStateSelectEntity(ZCLEnumSelectEntity):
     _enum = TuyaPowerOnState
     _attr_translation_key: str = "power_on_state"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
         exposed_features=frozenset({TUYA_PLUG_ONOFF}),
     )
 
@@ -377,8 +373,8 @@ class TuyaBacklightModeSelectEntity(ZCLEnumSelectEntity):
     _enum = TuyaBacklightMode
     _attr_translation_key: str = "backlight_mode"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ON_OFF}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OnOff.cluster_id}),
         exposed_features=frozenset({TUYA_PLUG_ONOFF}),
     )
 
@@ -447,8 +443,8 @@ class HueV1MotionSensitivity(ZCLEnumSelectEntity):
     _enum = HueV1MotionSensitivities
     _attr_translation_key: str = "motion_sensitivity"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OccupancySensing.cluster_id}),
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         models=frozenset({"SML001"}),
     )
@@ -473,8 +469,8 @@ class HueV2MotionSensitivity(ZCLEnumSelectEntity):
     _enum = HueV2MotionSensitivities
     _attr_translation_key: str = "motion_sensitivity"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OccupancySensing.cluster_id}),
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         models=frozenset({"SML002", "SML003", "SML004"}),
     )
@@ -824,8 +820,8 @@ class SonoffPresenceDetectionSensitivity(ZCLEnumSelectEntity):
     _enum = SonoffPresenceDetectionSensitivityEnum
     _attr_translation_key: str = "detection_sensitivity"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OccupancySensing.cluster_id}),
         models=frozenset({"SNZB-06P", "SNZB-03P"}),
     )
 
@@ -867,8 +863,8 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
     _attr_translation_key: str = "exercise_day_of_week"
     _enum = danfoss_thermostat.DanfossExerciseDayOfTheWeekEnum
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -893,8 +889,8 @@ class DanfossOrientation(ZCLEnumSelectEntity):
     _attr_translation_key: str = "valve_orientation"
     _enum = DanfossOrientationEnum
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -908,8 +904,8 @@ class DanfossAdaptationRunControl(ZCLEnumSelectEntity):
     _attr_translation_key: str = "adaptation_run_command"
     _enum = danfoss_thermostat.DanfossAdaptationRunControlEnum
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -948,8 +944,8 @@ class DanfossControlAlgorithmScaleFactor(ZCLEnumSelectEntity):
     _attr_translation_key: str = "setpoint_response_time"
     _enum = DanfossControlAlgorithmScaleFactorEnum
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -1037,8 +1033,8 @@ class BegaColorTemperatureChannelSelect(ZCLEnumSelectEntity):
     _enum = BegaColorTemperatureChannel
     _attr_translation_key: str = "color_temperature_channel"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id}),
         exposed_features=frozenset({BEGA_LIGHT_SWITCHABLE_WHITE}),
     )
 

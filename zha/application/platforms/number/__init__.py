@@ -19,6 +19,7 @@ from zha.application import Platform
 from zha.application.platforms import (
     BaseEntityInfo,
     ClusterHandlerMatch,
+    ClusterMatch,
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -33,13 +34,7 @@ from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
     CLUSTER_HANDLER_ANALOG_OUTPUT,
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_BALLAST,
-    CLUSTER_HANDLER_BASIC,
-    CLUSTER_HANDLER_COLOR,
     CLUSTER_HANDLER_INOVELLI,
-    CLUSTER_HANDLER_LEVEL,
-    CLUSTER_HANDLER_OCCUPANCY,
-    CLUSTER_HANDLER_THERMOSTAT,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
@@ -137,8 +132,8 @@ class BaseNumber(PlatformEntity, ABC):
 class AnalogOutputNumber(BaseNumber):
     """Representation of a ZHA Number entity."""
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ANALOG_OUTPUT})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AnalogOutput.cluster_id}),
     )
 
     def __init__(
@@ -346,8 +341,8 @@ class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "on_off_transition_time"
     _attr_translation_key: str = "on_off_transition_time"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
 
@@ -361,8 +356,8 @@ class OnLevelConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "on_level"
     _attr_translation_key: str = "on_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
 
@@ -376,8 +371,8 @@ class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "on_transition_time"
     _attr_translation_key: str = "on_transition_time"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
 
@@ -391,8 +386,8 @@ class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "off_transition_time"
     _attr_translation_key: str = "off_transition_time"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
 
@@ -407,8 +402,8 @@ class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "default_move_rate"
     _attr_translation_key: str = "default_move_rate"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
 
@@ -422,8 +417,8 @@ class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "start_up_current_level"
     _attr_translation_key: str = "start_up_current_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_LEVEL})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
 
@@ -437,8 +432,8 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     _attribute_name = "start_up_color_temperature"
     _attr_translation_key: str = "start_up_color_temperature"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_COLOR})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Color.cluster_id}),
     )
 
     def recompute_capabilities(self) -> None:
@@ -459,8 +454,8 @@ class BallastMinLevel(NumberConfigurationEntity):
     _attribute_name = "min_level"
     _attr_translation_key: str = "minimum_dimming_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BALLAST})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Ballast.cluster_id}),
     )
 
 
@@ -475,8 +470,8 @@ class BallastMaxLevel(NumberConfigurationEntity):
     _attribute_name = "max_level"
     _attr_translation_key: str = "maximum_dimming_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BALLAST})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Ballast.cluster_id}),
     )
 
 
@@ -492,8 +487,8 @@ class PIROccupiedToUnoccupiedDelayConfigurationEntity(NumberConfigurationEntity)
     _attribute_name = "pir_o_to_u_delay"
     _attr_translation_key: str = "pir_o_to_u_delay"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OccupancySensing.cluster_id}),
     )
 
 
@@ -509,8 +504,8 @@ class PIRUnoccupiedToOccupiedDelayConfigurationEntity(NumberConfigurationEntity)
     _attribute_name = "pir_u_to_o_delay"
     _attr_translation_key: str = "pir_u_to_o_delay"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OccupancySensing.cluster_id}),
     )
 
 
@@ -527,8 +522,8 @@ class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
 
     _attr_mode: NumberMode = NumberMode.BOX
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_OCCUPANCY}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OccupancySensing.cluster_id}),
         models=frozenset({"SNZB-06P", "SNZB-03P"}),
     )
 
@@ -578,8 +573,8 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
     _attribute_name = "transmit_power"
     _attr_translation_key: str = "transmit_power"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_BASIC}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Basic.cluster_id}),
         manufacturers=frozenset({"TexasInstruments"}),
         models=frozenset({"ti.router"}),
     )
@@ -1029,8 +1024,8 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         feature_priority=(PlatformFeatureGroup.LOCAL_TEMPERATURE_CALIBRATION, 0),
     )
 
@@ -1043,8 +1038,8 @@ class SonoffThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
     _attr_native_max_value: float = 12.7
     _attr_native_step: float = 0.1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         models=frozenset({"TRVZB"}),
         feature_priority=(PlatformFeatureGroup.LOCAL_TEMPERATURE_CALIBRATION, 1),
     )
@@ -1058,8 +1053,8 @@ class BoschThermostatLocalTempCalibration(ThermostatLocalTempCalibration):
     _attr_native_max_value: float = 5.0
     _attr_native_step: float = 0.1
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         models=frozenset(
             {
                 "RBSH-RTH0-ZB-EU",
@@ -1115,8 +1110,8 @@ class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     _attr_translation_key: str = "max_heat_setpoint_limit"
     _attr_entity_category = EntityCategory.CONFIG
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
     )
 
     def recompute_capabilities(self) -> None:
@@ -1142,8 +1137,8 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     _attr_translation_key: str = "min_heat_setpoint_limit"
     _attr_entity_category = EntityCategory.CONFIG
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
     )
 
     def recompute_capabilities(self) -> None:
@@ -1169,8 +1164,8 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -1185,8 +1180,8 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
     _attr_native_min_value: float = -80
     _attr_native_max_value: float = 35
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -1202,8 +1197,8 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
     _attr_native_max_value: int = 2000
     _attr_mode: NumberMode = NumberMode.BOX
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
@@ -1222,8 +1217,8 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     _attr_native_step: float = 0.1
     _multiplier = 1 / 10
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_THERMOSTAT}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
