@@ -29,7 +29,9 @@ from zigpy.zcl.clusters.security import IasWd
 from zha.application import Platform
 from zha.application.const import Strobe
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntityInfo,
+    ClusterConfig,
     ClusterHandlerMatch,
     ClusterMatch,
     EntityCategory,
@@ -42,8 +44,15 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     CLUSTER_HANDLER_INOVELLI,
     INOVELLI_CLUSTER,
+    REPORT_CONFIG_ASAP,
+    REPORT_CONFIG_IMMEDIATE,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
+)
+from zha.zigbee.cluster_handlers.hvac import (
+    REPORT_CONFIG_CLIMATE,
+    REPORT_CONFIG_CLIMATE_DEMAND,
+    REPORT_CONFIG_CLIMATE_DISCRETE,
 )
 
 if TYPE_CHECKING:
@@ -147,6 +156,12 @@ class EnumSelectEntity(BaseSelectEntity):
 
 class NonZCLSelectEntity(EnumSelectEntity):
     """Representation of a ZHA select entity with no ZCL interaction."""
+
+    _server_cluster_config = {
+        IasWd.cluster_id: ClusterConfig(
+            bind=True,
+        ),
+    }
 
     @property
     def available(self) -> bool:
@@ -317,6 +332,21 @@ class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
         server_clusters=frozenset({OnOff.cluster_id}),
     )
 
+    _server_cluster_config = {
+        OnOff.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                OnOff.AttributeDefs.on_off: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                OnOff.AttributeDefs.start_up_on_off: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 class TuyaPowerOnState(types.enum8):
     """Tuya power on state enum."""
@@ -448,6 +478,24 @@ class HueV1MotionSensitivity(ZCLEnumSelectEntity):
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         models=frozenset({"SML001"}),
     )
+
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                OccupancySensing.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+                OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 class HueV2MotionSensitivities(types.enum8):
@@ -868,6 +916,94 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Thermostat.AttributeDefs.local_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.running_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.running_state: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.system_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 class DanfossOrientationEnum(types.enum8):
     """Vertical or Horizontal."""
@@ -1037,6 +1173,36 @@ class BegaColorTemperatureChannelSelect(ZCLEnumSelectEntity):
         server_clusters=frozenset({LevelControl.cluster_id}),
         exposed_features=frozenset({BEGA_LIGHT_SWITCHABLE_WHITE}),
     )
+
+    _server_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                LevelControl.AttributeDefs.current_level: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_ASAP,
+                ),
+                LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def _is_supported(self) -> bool:
         """Check if the light supports switchable color temperatures."""

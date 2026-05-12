@@ -742,6 +742,7 @@ class SinopeTechnologiesThermostat(Thermostat):
     manufacturer = 0x119C
     __polling_interval: int
 
+    _cluster_match = None
     _cluster_handler_match = ClusterHandlerMatch(
         cluster_handlers=frozenset(
             {CLUSTER_HANDLER_THERMOSTAT, "sinope_manufacturer_specific"}

@@ -109,10 +109,21 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_INOVELLI,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
+    REPORT_CONFIG_ASAP,
+    REPORT_CONFIG_BATTERY_SAVE,
     REPORT_CONFIG_DEFAULT,
+    REPORT_CONFIG_IMMEDIATE,
+    REPORT_CONFIG_MAX_INT,
+    REPORT_CONFIG_MIN_INT,
+    REPORT_CONFIG_OP,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
+)
+from zha.zigbee.cluster_handlers.hvac import (
+    REPORT_CONFIG_CLIMATE,
+    REPORT_CONFIG_CLIMATE_DEMAND,
+    REPORT_CONFIG_CLIMATE_DISCRETE,
 )
 
 if TYPE_CHECKING:
@@ -607,6 +618,45 @@ class DigiAnalogInput(Sensor):
         manufacturers=frozenset({"Digi"}),
     )
 
+    _server_cluster_config = {
+        AnalogInput.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                AnalogInput.AttributeDefs.present_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                AnalogInput.AttributeDefs.description: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.max_present_value: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.min_present_value: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.out_of_service: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.reliability: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.resolution: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.status_flags: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.engineering_units: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogInput.AttributeDefs.application_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(AnalogInput.cluster_id)
 class AnalogInputSensor(Sensor):
@@ -719,6 +769,28 @@ class Battery(Sensor):
         server_clusters=frozenset({PowerConfiguration.cluster_id}),
     )
 
+    _server_cluster_config = {
+        PowerConfiguration.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                ),
+                PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                ),
+                PowerConfiguration.AttributeDefs.battery_size: AttrConfig(
+                    read_on_startup=False,
+                ),
+                PowerConfiguration.AttributeDefs.battery_quantity: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
     def _is_supported(self) -> bool:
         # XXX: We intentionally ignore the presence of this attribute
         return PlatformEntity._is_supported(self) and not self.device.is_mains_powered
@@ -756,6 +828,178 @@ class BaseElectricalMeasurement(PollableSensor):
     _divisor_attribute_name: str | None = None
     _multiplier_attribute_name: str | None = None
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.total_active_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.apparent_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_divisor: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_multiplier: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_factor: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_factor_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.power_factor_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -1153,6 +1397,18 @@ class Humidity(Sensor):
         server_clusters=frozenset({RelativeHumidity.cluster_id}),
     )
 
+    _server_cluster_config = {
+        RelativeHumidity.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                RelativeHumidity.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(SMARTTHINGS_HUMIDITY_CLUSTER)
 class SmartThingsHumidity(Sensor):
@@ -1186,6 +1442,18 @@ class SoilMoisture(Sensor):
         server_clusters=frozenset({SoilMoistureCluster.cluster_id}),
     )
 
+    _server_cluster_config = {
+        SoilMoistureCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                SoilMoistureCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(LeafWetnessCluster.cluster_id)
 class LeafWetness(Sensor):
@@ -1203,6 +1471,18 @@ class LeafWetness(Sensor):
         server_clusters=frozenset({LeafWetnessCluster.cluster_id}),
     )
 
+    _server_cluster_config = {
+        LeafWetnessCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                LeafWetnessCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(IlluminanceMeasurement.cluster_id)
 class Illuminance(Sensor):
@@ -1217,6 +1497,18 @@ class Illuminance(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IlluminanceMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        IlluminanceMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                IlluminanceMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+            },
+        ),
+    }
 
     def formatter(self, value: int) -> int | None:
         """Convert illumination data."""
@@ -1257,6 +1549,72 @@ class SmartEnergyMetering(PollableSensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
     )
+
+    _server_cluster_config = {
+        Metering.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Metering.AttributeDefs.instantaneous_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_OP,
+                ),
+                Metering.AttributeDefs.current_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.current_tier1_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.current_tier2_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.current_tier3_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.current_tier4_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.current_tier5_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.current_tier6_summ_delivered: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.current_summ_received: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Metering.AttributeDefs.status: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_ASAP,
+                ),
+                Metering.AttributeDefs.demand_formatting: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.divisor: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.metering_device_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.multiplier: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.summation_formatting: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Metering.AttributeDefs.unit_of_measure: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(
@@ -1662,6 +2020,18 @@ class Pressure(Sensor):
         server_clusters=frozenset({PressureMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        PressureMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PressureMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(FlowMeasurement.cluster_id)
 class Flow(Sensor):
@@ -1678,6 +2048,18 @@ class Flow(Sensor):
         server_clusters=frozenset({FlowMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        FlowMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                FlowMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(TemperatureMeasurement.cluster_id)
 class Temperature(Sensor):
@@ -1693,6 +2075,18 @@ class Temperature(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TemperatureMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        TemperatureMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                TemperatureMeasurement.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(DeviceTemperatureCluster.cluster_id)
@@ -1711,6 +2105,18 @@ class DeviceTemperature(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({DeviceTemperatureCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        DeviceTemperatureCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                DeviceTemperatureCluster.AttributeDefs.current_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1767,6 +2173,18 @@ class CarbonDioxideConcentration(Sensor):
         server_clusters=frozenset({CarbonDioxideConcentrationCluster.cluster_id}),
     )
 
+    _server_cluster_config = {
+        CarbonDioxideConcentrationCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                CarbonDioxideConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(CarbonMonoxideConcentrationCluster.cluster_id)
 class CarbonMonoxideConcentration(Sensor):
@@ -1783,6 +2201,18 @@ class CarbonMonoxideConcentration(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({CarbonMonoxideConcentrationCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        CarbonMonoxideConcentrationCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                CarbonMonoxideConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(0x042E)
@@ -1856,6 +2286,18 @@ class PM25(Sensor):
         server_clusters=frozenset({PM25Cluster.cluster_id}),
     )
 
+    _server_cluster_config = {
+        PM25Cluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                PM25Cluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.1),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalConductivityCluster.cluster_id)
 class ElectricalConductivity(Sensor):
@@ -1869,6 +2311,18 @@ class ElectricalConductivity(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalConductivityCluster.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalConductivityCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalConductivityCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(FormaldehydeConcentrationCluster.cluster_id)
@@ -1887,6 +2341,18 @@ class FormaldehydeConcentration(Sensor):
         server_clusters=frozenset({FormaldehydeConcentrationCluster.cluster_id}),
     )
 
+    _server_cluster_config = {
+        FormaldehydeConcentrationCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                FormaldehydeConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(Thermostat.cluster_id)
 class ThermostatHVACAction(Sensor):
@@ -1899,6 +2365,94 @@ class ThermostatHVACAction(Sensor):
         server_clusters=frozenset({Thermostat.cluster_id}),
         feature_priority=(PlatformFeatureGroup.HVAC_ACTION, 0),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Thermostat.AttributeDefs.local_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.running_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.running_state: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.system_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def _is_supported(self) -> bool:
         return PlatformEntity._is_supported(self)
@@ -2360,6 +2914,43 @@ class WindowCoveringTypeSensor(EnumSensor):
         server_clusters=frozenset({WindowCovering.cluster_id}),
     )
 
+    _server_cluster_config = {
+        WindowCovering.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                WindowCovering.AttributeDefs.current_position_lift_percentage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                WindowCovering.AttributeDefs.current_position_tilt_percentage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.window_covering_mode: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.config_status: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_closed_limit_lift: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_closed_limit_tilt: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_open_limit_lift: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_open_limit_tilt: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(Basic.cluster_id)
 class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
@@ -2375,6 +2966,16 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
         server_clusters=frozenset({Basic.cluster_id}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
+
+    _server_cluster_config = {
+        Basic.cluster_id: ClusterConfig(
+            attributes={
+                Basic.AttributeDefs.power_source: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 class AqaraE1HookState(types.enum8):
@@ -2559,6 +3160,18 @@ class WindSpeed(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfSpeed.METERS_PER_SECOND
     _attr_primary_weight = 2
+
+    _server_cluster_config = {
+        WindSpeedCluster.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                WindSpeedCluster.AttributeDefs.measured_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.01),
+                ),
+            },
+        ),
+    }
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({WindSpeedCluster.cluster_id}),

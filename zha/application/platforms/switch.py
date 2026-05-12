@@ -49,6 +49,11 @@ from zha.zigbee.cluster_handlers.general import (
     BinaryOutputClusterHandler,
     OnOffClusterHandler,
 )
+from zha.zigbee.cluster_handlers.hvac import (
+    REPORT_CONFIG_CLIMATE,
+    REPORT_CONFIG_CLIMATE_DEMAND,
+    REPORT_CONFIG_CLIMATE_DISCRETE,
+)
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -800,6 +805,21 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
         exposed_features=frozenset({TUYA_PLUG_ONOFF}),
     )
 
+    _server_cluster_config = {
+        OnOff.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                OnOff.AttributeDefs.on_off: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                OnOff.AttributeDefs.start_up_on_off: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
@@ -914,6 +934,43 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
         server_clusters=frozenset({WindowCovering.cluster_id}),
     )
 
+    _server_cluster_config = {
+        WindowCovering.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                WindowCovering.AttributeDefs.current_position_lift_percentage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                WindowCovering.AttributeDefs.current_position_tilt_percentage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.window_covering_mode: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.config_status: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_closed_limit_lift: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_closed_limit_tilt: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_open_limit_lift: AttrConfig(
+                    read_on_startup=False,
+                ),
+                WindowCovering.AttributeDefs.installed_open_limit_tilt: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
     def _is_supported(self) -> bool:
         window_covering_mode_attr = (
             WindowCovering.AttributeDefs.window_covering_mode.name
@@ -1002,6 +1059,95 @@ class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
     )
 
 
+_DANFOSS_THERMOSTAT_CLUSTER_CONFIG = {
+    Thermostat.cluster_id: ClusterConfig(
+        bind=True,
+        attributes={
+            Thermostat.AttributeDefs.local_temperature: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE,
+            ),
+            Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE,
+            ),
+            Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE,
+            ),
+            Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE,
+            ),
+            Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE,
+            ),
+            Thermostat.AttributeDefs.running_mode: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+            ),
+            Thermostat.AttributeDefs.running_state: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+            ),
+            Thermostat.AttributeDefs.system_mode: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+            ),
+            Thermostat.AttributeDefs.occupancy: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+            ),
+            Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+            ),
+            Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
+                read_on_startup=True,
+                reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+            ),
+            Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
+                read_on_startup=True,
+            ),
+            Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
+                read_on_startup=False,
+            ),
+            Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
+                read_on_startup=False,
+            ),
+        },
+    ),
+}
+
+
 @register_entity(Thermostat.cluster_id)
 class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating an open window."""
@@ -1014,6 +1160,8 @@ class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1029,6 +1177,8 @@ class DanfossWindowOpenFeature(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossMountingModeControl(ConfigurableAttributeSwitch):
@@ -1042,6 +1192,8 @@ class DanfossMountingModeControl(ConfigurableAttributeSwitch):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1057,6 +1209,8 @@ class DanfossRadiatorCovered(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossHeatAvailable(ConfigurableAttributeSwitch):
@@ -1071,6 +1225,8 @@ class DanfossHeatAvailable(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
@@ -1084,6 +1240,8 @@ class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1101,6 +1259,8 @@ class DanfossAdaptationRunSettings(ConfigurableAttributeSwitch):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
 
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)

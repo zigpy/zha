@@ -17,7 +17,9 @@ from zigpy.zcl.clusters.measurement import OccupancySensing
 
 from zha.application import Platform
 from zha.application.platforms import (
+    AttrConfig,
     BaseEntityInfo,
+    ClusterConfig,
     ClusterHandlerMatch,
     ClusterMatch,
     EntityCategory,
@@ -37,8 +39,16 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_INOVELLI,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
+    REPORT_CONFIG_ASAP,
+    REPORT_CONFIG_DEFAULT,
+    REPORT_CONFIG_IMMEDIATE,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
+)
+from zha.zigbee.cluster_handlers.hvac import (
+    REPORT_CONFIG_CLIMATE,
+    REPORT_CONFIG_CLIMATE_DEMAND,
+    REPORT_CONFIG_CLIMATE_DISCRETE,
 )
 
 if TYPE_CHECKING:
@@ -135,6 +145,39 @@ class AnalogOutputNumber(BaseNumber):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({AnalogOutput.cluster_id}),
     )
+
+    _server_cluster_config = {
+        AnalogOutput.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                AnalogOutput.AttributeDefs.present_value: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                AnalogOutput.AttributeDefs.min_present_value: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogOutput.AttributeDefs.max_present_value: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogOutput.AttributeDefs.resolution: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogOutput.AttributeDefs.relinquish_default: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogOutput.AttributeDefs.description: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogOutput.AttributeDefs.engineering_units: AttrConfig(
+                    read_on_startup=False,
+                ),
+                AnalogOutput.AttributeDefs.application_type: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,
@@ -345,6 +388,36 @@ class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
         server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
+    _server_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                LevelControl.AttributeDefs.current_level: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_ASAP,
+                ),
+                LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
+                    read_on_startup=False,
+                ),
+                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(LevelControl.cluster_id)
 class OnLevelConfigurationEntity(NumberConfigurationEntity):
@@ -436,6 +509,47 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
         server_clusters=frozenset({Color.cluster_id}),
     )
 
+    _server_cluster_config = {
+        Color.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Color.AttributeDefs.current_x: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Color.AttributeDefs.current_y: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Color.AttributeDefs.color_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+                Color.AttributeDefs.color_mode: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Color.AttributeDefs.color_temp_physical_min: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_temp_physical_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_capabilities: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.color_loop_active: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Color.AttributeDefs.start_up_color_temperature: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Color.AttributeDefs.options: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
@@ -457,6 +571,20 @@ class BallastMinLevel(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Ballast.cluster_id}),
     )
+
+    _server_cluster_config = {
+        Ballast.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Ballast.AttributeDefs.min_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Ballast.AttributeDefs.max_level: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Ballast.cluster_id)
@@ -490,6 +618,24 @@ class PIROccupiedToUnoccupiedDelayConfigurationEntity(NumberConfigurationEntity)
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({OccupancySensing.cluster_id}),
     )
+
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                OccupancySensing.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_IMMEDIATE,
+                ),
+                OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+                OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(OccupancySensing.cluster_id)
@@ -578,6 +724,12 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
         manufacturers=frozenset({"TexasInstruments"}),
         models=frozenset({"ti.router"}),
     )
+
+    _server_cluster_config = {
+        Basic.cluster_id: ClusterConfig(
+            bind=False,
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1028,6 +1180,94 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         feature_priority=(PlatformFeatureGroup.LOCAL_TEMPERATURE_CALIBRATION, 0),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                Thermostat.AttributeDefs.local_temperature: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE,
+                ),
+                Thermostat.AttributeDefs.running_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.running_state: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.system_mode: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.occupancy: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                ),
+                Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
+                    read_on_startup=True,
+                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                ),
+                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
+                    read_on_startup=True,
+                ),
+                Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
+                    read_on_startup=False,
+                ),
+                Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)

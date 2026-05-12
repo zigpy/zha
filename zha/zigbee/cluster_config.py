@@ -9,14 +9,16 @@ from typing import TYPE_CHECKING
 import zigpy.exceptions
 import zigpy.util
 import zigpy.zcl
+from zigpy.typing import UNDEFINED
 from zigpy.zcl import ReportingConfig
 
 from zha.application.platforms import AttrConfig
+from zha.zigbee.cluster_handlers.const import CLUSTER_READS_PER_REQ
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from zha.application.platforms import PlatformEntity
+    from zha.application.platforms import BaseEntity
 
 _LOGGER = logging.getLogger(__name__)
 RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
@@ -54,7 +56,7 @@ class AggregatedClusterConfig:
 
 
 def aggregate_cluster_configs(
-    entities: Iterable[PlatformEntity],
+    entities: Iterable[BaseEntity],
 ) -> dict[tuple[int, int], AggregatedClusterConfig]:
     """Aggregate cluster configurations from entities.
 
@@ -63,6 +65,9 @@ def aggregate_cluster_configs(
     result: dict[tuple[int, int], AggregatedClusterConfig] = {}
 
     for entity in entities:
+        if not hasattr(entity, "_server_cluster_config"):
+            continue
+
         if not entity._server_cluster_config and not entity._client_cluster_config:
             continue
 
@@ -160,6 +165,36 @@ async def configure_cluster_configs(
             )
 
 
+async def _read_attributes_chunked(
+    cluster: zigpy.zcl.Cluster,
+    attrs: list[str],
+    *,
+    allow_cache: bool,
+    only_cache: bool,
+) -> None:
+    """Read attributes in chunks, matching legacy cluster handler behavior."""
+    chunk = attrs[:CLUSTER_READS_PER_REQ]
+    rest = attrs[CLUSTER_READS_PER_REQ:]
+    while chunk:
+        try:
+            await cluster.read_attributes(
+                chunk,
+                allow_cache=allow_cache,
+                only_cache=only_cache,
+                manufacturer=UNDEFINED,
+            )
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.debug(
+                "[%s] Failed to read attributes %s from cluster %s: %s",
+                cluster.endpoint.device.ieee,
+                chunk,
+                cluster.ep_attribute,
+                ex,
+            )
+        chunk = rest[:CLUSTER_READS_PER_REQ]
+        rest = rest[CLUSTER_READS_PER_REQ:]
+
+
 async def initialize_cluster_configs(
     configs: dict[tuple[int, int], AggregatedClusterConfig],
     from_cache: bool,
@@ -178,33 +213,17 @@ async def initialize_cluster_configs(
         ]
 
         if cached_attrs:
-            try:
-                await agg.cluster.read_attributes(
-                    cached_attrs,
-                    allow_cache=True,
-                    only_cache=from_cache,
-                )
-            except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
-                _LOGGER.debug(
-                    "[%s] Failed to read cached attributes %s from cluster %s: %s",
-                    agg.cluster.endpoint.device.ieee,
-                    cached_attrs,
-                    agg.cluster.ep_attribute,
-                    ex,
-                )
+            await _read_attributes_chunked(
+                agg.cluster,
+                cached_attrs,
+                allow_cache=True,
+                only_cache=from_cache,
+            )
 
         if fresh_attrs:
-            try:
-                await agg.cluster.read_attributes(
-                    fresh_attrs,
-                    allow_cache=from_cache,
-                    only_cache=from_cache,
-                )
-            except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
-                _LOGGER.debug(
-                    "[%s] Failed to read fresh attributes %s from cluster %s: %s",
-                    agg.cluster.endpoint.device.ieee,
-                    fresh_attrs,
-                    agg.cluster.ep_attribute,
-                    ex,
-                )
+            await _read_attributes_chunked(
+                agg.cluster,
+                fresh_attrs,
+                allow_cache=from_cache,
+                only_cache=from_cache,
+            )
