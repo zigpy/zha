@@ -32,7 +32,6 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
-    _virtual,
     alarm_control_panel,
     binary_sensor,
     button,
@@ -48,6 +47,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     siren,
     switch,
     update,
+    virtual,
 )
 
 # importing cluster handlers updates registries
