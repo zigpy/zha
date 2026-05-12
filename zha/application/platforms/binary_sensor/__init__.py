@@ -195,6 +195,7 @@ class Occupancy(BinarySensor):
 
     _server_cluster_config = {
         OccupancySensing.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 OccupancySensing.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
@@ -257,6 +258,7 @@ class BinaryInputWithDescription(BinarySensor):
 
     _server_cluster_config = {
         BinaryInputCluster.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 BinaryInputCluster.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
@@ -294,6 +296,7 @@ class BinaryInput(BinarySensor):
 
     _server_cluster_config = {
         BinaryInputCluster.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 BinaryInputCluster.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
@@ -361,6 +364,7 @@ class IASZone(BinarySensor):
 
     _server_cluster_config = {
         IasZone.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 IasZone.AttributeDefs.zone_status: AttrConfig(
                     read_on_startup=True,

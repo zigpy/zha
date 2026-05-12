@@ -235,6 +235,7 @@ class Thermostat(BaseThermostat):
 
     _server_cluster_config = {
         ThermostatCluster.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 ThermostatCluster.AttributeDefs.local_temperature: AttrConfig(
                     read_on_startup=True,
@@ -319,6 +320,7 @@ class Thermostat(BaseThermostat):
             },
         ),
         FanCluster.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 FanCluster.AttributeDefs.fan_mode: AttrConfig(
                     read_on_startup=True,

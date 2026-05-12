@@ -261,6 +261,7 @@ class Fan(BaseFan, PlatformEntity):
 
     _server_cluster_config = {
         hvac.Fan.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 hvac.Fan.AttributeDefs.fan_mode: AttrConfig(
                     read_on_startup=True,

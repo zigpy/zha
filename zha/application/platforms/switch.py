@@ -41,6 +41,8 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_ON_OFF,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
+    REPORT_CONFIG_ASAP,
+    REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
@@ -231,6 +233,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
 
     _server_cluster_config = {
         BinaryOutput.cluster_id: ClusterConfig(
+            bind=True,
             attributes={
                 BinaryOutput.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
@@ -1142,6 +1145,34 @@ _DANFOSS_THERMOSTAT_CLUSTER_CONFIG = {
             ),
             Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
                 read_on_startup=False,
+            ),
+            "open_window_detection": AttrConfig(
+                read_on_startup=False,
+                reporting=REPORT_CONFIG_DEFAULT,
+            ),
+            "heat_required": AttrConfig(
+                read_on_startup=False,
+                reporting=REPORT_CONFIG_ASAP,
+            ),
+            "mounting_mode_active": AttrConfig(
+                read_on_startup=False,
+                reporting=REPORT_CONFIG_DEFAULT,
+            ),
+            "load_estimate": AttrConfig(
+                read_on_startup=False,
+                reporting=REPORT_CONFIG_DEFAULT,
+            ),
+            "adaptation_run_status": AttrConfig(
+                read_on_startup=False,
+                reporting=REPORT_CONFIG_DEFAULT,
+            ),
+            "preheat_status": AttrConfig(
+                read_on_startup=False,
+                reporting=REPORT_CONFIG_DEFAULT,
+            ),
+            "preheat_time": AttrConfig(
+                read_on_startup=False,
+                reporting=REPORT_CONFIG_DEFAULT,
             ),
         },
     ),

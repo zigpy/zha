@@ -7,10 +7,11 @@ import logging
 from typing import TYPE_CHECKING
 
 import zigpy.exceptions
+from zigpy.typing import UNDEFINED
 import zigpy.util
 import zigpy.zcl
-from zigpy.typing import UNDEFINED
 from zigpy.zcl import ReportingConfig
+from zigpy.zcl.foundation import Status
 
 from zha.application.platforms import AttrConfig
 from zha.zigbee.cluster_handlers.const import CLUSTER_READS_PER_REQ
@@ -84,9 +85,10 @@ def aggregate_cluster_configs(
             agg.bind = agg.bind or config.bind
 
             for attr_def, attr_config in config.attributes.items():
-                if attr_def.name not in agg.attributes:
-                    agg.attributes[attr_def.name] = AggregatedAttrConfig()
-                agg.attributes[attr_def.name].merge(attr_config)
+                attr_name = attr_def.name if hasattr(attr_def, "name") else attr_def
+                if attr_name not in agg.attributes:
+                    agg.attributes[attr_name] = AggregatedAttrConfig()
+                agg.attributes[attr_name].merge(attr_config)
 
         for cluster_id, config in entity._client_cluster_config.items():
             cluster = entity.endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
@@ -101,9 +103,10 @@ def aggregate_cluster_configs(
             agg.bind = agg.bind or config.bind
 
             for attr_def, attr_config in config.attributes.items():
-                if attr_def.name not in agg.attributes:
-                    agg.attributes[attr_def.name] = AggregatedAttrConfig()
-                agg.attributes[attr_def.name].merge(attr_config)
+                attr_name = attr_def.name if hasattr(attr_def, "name") else attr_def
+                if attr_name not in agg.attributes:
+                    agg.attributes[attr_name] = AggregatedAttrConfig()
+                agg.attributes[attr_name].merge(attr_config)
 
     return result
 
@@ -123,6 +126,7 @@ async def configure_cluster_configs(
                     agg.cluster.ep_attribute,
                     res[0],
                 )
+                agg.cluster._zha_last_bind_success = res[0] == 0
             except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
                 _LOGGER.debug(
                     "[%s] Failed to bind cluster %s: %s",
@@ -130,6 +134,7 @@ async def configure_cluster_configs(
                     agg.cluster.ep_attribute,
                     ex,
                 )
+                agg.cluster._zha_last_bind_success = False
 
         reporting_attrs = {}
         for attr_name, attr_config in agg.attributes.items():
@@ -145,6 +150,18 @@ async def configure_cluster_configs(
         if not reporting_attrs:
             continue
 
+        event_data = {
+            attr_def.name: {
+                "min": cfg.min_interval,
+                "max": cfg.max_interval,
+                "id": attr_def.id,
+                "name": attr_def.name,
+                "change": cfg.reportable_change,
+                "status": None,
+            }
+            for attr_def, cfg in reporting_attrs.items()
+        }
+
         try:
             res = await RETRYABLE_REQUEST_DECORATOR(
                 agg.cluster.configure_reporting_multiple
@@ -156,6 +173,12 @@ async def configure_cluster_configs(
                 agg.cluster.ep_attribute,
                 res,
             )
+            if not res:
+                for attr_def in reporting_attrs:
+                    event_data[attr_def.name]["status"] = Status.FAILURE.name
+            else:
+                for attr_def, status in res.items():
+                    event_data[attr_def.name]["status"] = status.name
         except Exception as ex:
             _LOGGER.debug(
                 "[%s] Failed to configure reporting on cluster %s: %s",
@@ -163,6 +186,15 @@ async def configure_cluster_configs(
                 agg.cluster.ep_attribute,
                 ex,
             )
+            for attr_def in reporting_attrs:
+                event_data[attr_def.name]["status"] = Status.FAILURE.name
+
+        existing = getattr(agg.cluster, "_zha_last_reporting_config", None)
+        if existing is not None:
+            merged = {**existing, **event_data}
+        else:
+            merged = event_data
+        agg.cluster._zha_last_reporting_config = merged
 
 
 async def _read_attributes_chunked(

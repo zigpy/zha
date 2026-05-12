@@ -1425,6 +1425,18 @@ class SmartThingsHumidity(Sensor):
         server_clusters=frozenset({SMARTTHINGS_HUMIDITY_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        SMARTTHINGS_HUMIDITY_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "measured_value": AttrConfig(
+                    read_on_startup=True,
+                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(SoilMoistureCluster.cluster_id)
 class SoilMoisture(Sensor):
@@ -3134,6 +3146,18 @@ class DanfossSoftwareErrorCode(BitMapSensor):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Diagnostic.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "sw_error_code": AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(Diagnostic.cluster_id)
 class DanfossMotorStepCounter(Sensor):
@@ -3148,6 +3172,18 @@ class DanfossMotorStepCounter(Sensor):
         server_clusters=frozenset({Diagnostic.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Diagnostic.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "motor_step_counter": AttrConfig(
+                    read_on_startup=False,
+                    reporting=REPORT_CONFIG_DEFAULT,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(WindSpeedCluster.cluster_id)
