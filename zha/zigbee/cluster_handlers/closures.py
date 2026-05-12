@@ -47,27 +47,6 @@ class DoorLockClusterHandler(ClusterHandler):
                 ),
             )
 
-    def cluster_command(self, tsn, command_id, args):
-        """Handle a cluster command received on this cluster."""
-
-        if (
-            self._cluster.client_commands is None
-            or self._cluster.client_commands.get(command_id) is None
-        ):
-            return
-
-        command_name = self._cluster.client_commands[command_id].name
-
-        if command_name == DoorLock.ClientCommandDefs.operation_event_notification.name:
-            self.emit_zha_event(
-                command_name,
-                {
-                    "source": args[0].name,
-                    "operation": args[1].name,
-                    "code_slot": (args[2] + 1),  # start code slots at 1
-                },
-            )
-
     async def async_set_user_code(self, code_slot: int, user_code: str) -> None:
         """Set the user code for the code slot."""
 

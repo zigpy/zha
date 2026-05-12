@@ -728,6 +728,9 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
     _server_cluster_config = {
         Basic.cluster_id: ClusterConfig(
             bind=False,
+            attributes={
+                "transmit_power": AttrConfig(read_on_startup=False),
+            },
         ),
     }
 

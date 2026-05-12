@@ -6,11 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from zhaquirks.inovelli.types import AllLEDEffectType, SingleLEDEffectType
-from zhaquirks.quirk_ids import (
-    DANFOSS_ALLY_THERMOSTAT,
-    TUYA_PLUG_MANUFACTURER,
-    XIAOMI_AQARA_VIBRATION_AQ1,
-)
+from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, XIAOMI_AQARA_VIBRATION_AQ1
 import zigpy.zcl
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -30,9 +26,6 @@ from zha.zigbee.cluster_handlers import (
 )
 from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
-    ATTRIBUTE_ID,
-    ATTRIBUTE_NAME,
-    ATTRIBUTE_VALUE,
     IKEA_AIR_PURIFIER_CLUSTER,
     IKEA_REMOTE_CLUSTER,
     IKEA_SHORTCUT_V1_CLUSTER,
@@ -46,15 +39,11 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
-    REPORT_CONFIG_MIN_INT_IMMEDIATE,
-    REPORT_CONFIG_RPT_CHANGE,
-    SIGNAL_ATTR_UPDATED,
     SINOPE_MANUFACTURER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     SMARTTHINGS_HUMIDITY_CLUSTER,
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
-    UNKNOWN,
 )
 from zha.zigbee.cluster_handlers.general import MultistateInputClusterHandler
 
@@ -109,119 +98,35 @@ class PhillipsRemoteClusterHandler(ClusterHandler):
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(TUYA_MANUFACTURER_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(TUYA_MANUFACTURER_CLUSTER)
 class TuyaClusterHandler(ClusterHandler):
-    """Cluster handler for the Tuya manufacturer Zigbee cluster."""
+    """Cluster handler for the Tuya manufacturer Zigbee cluster.
+
+    Per-feature attribute init lives on the `TuyaPlugManufacturerInit` virtual
+    entity now.
+    """
 
     REPORT_CONFIG = ()
-
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize TuyaClusterHandler."""
-        super().__init__(cluster, endpoint)
-        if TUYA_PLUG_MANUFACTURER in endpoint.device.exposes_features:
-            self.ZCL_INIT_ATTRS = {
-                "backlight_mode": True,
-                "power_on_state": True,
-            }
 
 
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(AQARA_OPPLE_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(AQARA_OPPLE_CLUSTER)
 class OppleRemoteClusterHandler(ClusterHandler):
-    """Opple cluster handler."""
+    """Opple cluster handler.
+
+    Per-model attribute init lives on the `Aqara*Init` virtual entities now.
+    The cross-cluster `detection_interval` -> `ias_zone.reset_s` write is
+    handled by `AqaraMotionDetectionIntervalSync`.
+    """
 
     REPORT_CONFIG: tuple[AttrReportConfig, ...] = ()
-
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize Opple cluster handler."""
-        super().__init__(cluster, endpoint)
-        if self.cluster.endpoint.model == "lumi.motion.ac02":
-            self.ZCL_INIT_ATTRS = {
-                "detection_interval": True,
-                "motion_sensitivity": True,
-                "trigger_indicator": True,
-            }
-        elif self.cluster.endpoint.model == "lumi.motion.agl04":
-            self.ZCL_INIT_ATTRS = {
-                "detection_interval": True,
-                "motion_sensitivity": True,
-            }
-        elif self.cluster.endpoint.model == "lumi.motion.ac01":
-            self.ZCL_INIT_ATTRS = {
-                "presence": True,
-                "monitoring_mode": True,
-                "motion_sensitivity": True,
-                "approach_distance": True,
-            }
-        elif self.cluster.endpoint.model in ("lumi.plug.mmeu01", "lumi.plug.maeu01"):
-            self.ZCL_INIT_ATTRS = {
-                "power_outage_memory": True,
-                "consumer_connected": True,
-            }
-        elif self.cluster.endpoint.model == "aqara.feeder.acn001":
-            self.ZCL_INIT_ATTRS = {
-                "portions_dispensed": True,
-                "weight_dispensed": True,
-                "error_detected": True,
-                "disable_led_indicator": True,
-                "child_lock": True,
-                "feeding_mode": True,
-                "serving_size": True,
-                "portion_weight": True,
-            }
-        elif self.cluster.endpoint.model == "lumi.airrtc.agl001":
-            self.ZCL_INIT_ATTRS = {
-                "system_mode": True,
-                "preset": True,
-                "window_detection": True,
-                "valve_detection": True,
-                "valve_alarm": True,
-                "child_lock": True,
-                "away_preset_temperature": True,
-                "window_open": True,
-                "calibrated": True,
-                "schedule": True,
-                "sensor": True,
-            }
-        elif self.cluster.endpoint.model == "lumi.sensor_smoke.acn03":
-            self.ZCL_INIT_ATTRS = {
-                "buzzer_manual_mute": True,
-                "smoke_density": True,
-                "heartbeat_indicator": True,
-                "buzzer_manual_alarm": True,
-                "buzzer": True,
-                "linkage_alarm": True,
-            }
-        elif self.cluster.endpoint.model == "lumi.magnet.ac01":
-            self.ZCL_INIT_ATTRS = {
-                "detection_distance": True,
-            }
-        elif self.cluster.endpoint.model == "lumi.switch.acn047":
-            self.ZCL_INIT_ATTRS = {
-                "switch_mode": True,
-                "switch_type": True,
-                "startup_on_off": True,
-                "decoupled_mode": True,
-            }
-        elif self.cluster.endpoint.model == "lumi.curtain.agl001":
-            self.ZCL_INIT_ATTRS = {
-                "hooks_state": True,
-                "hooks_lock": True,
-                "positions_stored": True,
-                "light_level": True,
-                "hand_open": True,
-            }
-
-    async def async_initialize_cluster_handler_specific(self, from_cache: bool) -> None:  # pylint: disable=unused-argument
-        """Initialize cluster handler specific."""
-        if self.cluster.endpoint.model in ("lumi.motion.ac02", "lumi.motion.agl04"):
-            interval = self.cluster.get("detection_interval", self.cluster.get(0x0102))
-            if interval is not None:
-                self.debug("Loaded detection interval at startup: %s", interval)
-                self.cluster.endpoint.ias_zone.reset_s = int(interval)
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(SMARTTHINGS_ACCELERATION_CLUSTER)
 class SmartThingsAccelerationClusterHandler(ClusterHandler):
-    """Smart Things Acceleration cluster handler."""
+    """Smart Things Acceleration cluster handler.
+
+    `zha_event` emission per attribute update lives on the
+    `SmartThingsAccelerationEvent` virtual entity now.
+    """
 
     REPORT_CONFIG = (
         AttrReportConfig(attr="acceleration", config=REPORT_CONFIG_ASAP),
@@ -237,24 +142,6 @@ class SmartThingsAccelerationClusterHandler(ClusterHandler):
             "CentraLite",
             "Samjin",
             "SmartThings",
-        )
-
-    def _handle_attribute_updated_event(
-        self,
-        event: AttributeReadEvent
-        | AttributeReportedEvent
-        | AttributeUpdatedEvent
-        | AttributeWrittenEvent,
-    ) -> None:
-        """Handle attribute updates on this cluster."""
-        super()._handle_attribute_updated_event(event)
-        self.emit_zha_event(
-            SIGNAL_ATTR_UPDATED,
-            {
-                ATTRIBUTE_ID: event.attribute_id,
-                ATTRIBUTE_NAME: event.attribute_name or UNKNOWN,
-                ATTRIBUTE_VALUE: event.value,
-            },
         )
 
 
@@ -277,52 +164,14 @@ class InovelliNotificationClientClusterHandler(ClientClusterHandler):
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(INOVELLI_CLUSTER)
 class InovelliConfigEntityClusterHandler(ClusterHandler):
-    """Inovelli Configuration Entity cluster handler."""
+    """Inovelli Configuration Entity cluster handler.
+
+    Per-model attribute init lives on the `InovelliVzm30/31/35Init` virtual
+    entities now.
+    """
 
     REPORT_CONFIG = ()
 
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize Inovelli cluster handler."""
-        super().__init__(cluster, endpoint)
-        if self.cluster.endpoint.model == "VZM30-SN":
-            self.ZCL_INIT_ATTRS = {
-                "dimming_speed_up_remote": True,
-                "dimming_speed_up_local": True,
-                "ramp_rate_off_to_on_remote": True,
-                "ramp_rate_off_to_on_local": True,
-                "dimming_speed_down_remote": True,
-                "dimming_speed_down_local": True,
-                "ramp_rate_on_to_off_remote": True,
-                "ramp_rate_on_to_off_local": True,
-                "minimum_level": True,
-                "maximum_level": True,
-                "invert_switch": True,
-                "auto_off_timer": True,
-                "default_level_local": True,
-                "default_level_remote": True,
-                "state_after_power_restored": True,
-                "load_level_indicator_timeout": True,
-                "active_power_reports": True,
-                "periodic_power_and_energy_reports": True,
-                "active_energy_reports": True,
-                "power_type": False,
-                "switch_type": False,
-                "internal_temp_monitor": True,
-                "overheated": True,
-                "button_delay": False,
-                "smart_bulb_mode": False,
-                "led_color_when_on": True,
-                "led_color_when_off": True,
-                "led_intensity_when_on": True,
-                "led_intensity_when_off": True,
-                "led_scaling_mode": True,
-                "aux_switch_scenes": True,
-                "binding_off_to_on_sync_level": True,
-                "local_protection": False,
-                "output_mode": False,
-                "firmware_progress_led": True,
-                "disable_clear_notifications_double_tap": True,
-            }
         elif self.cluster.endpoint.model == "VZM31-SN":
             self.ZCL_INIT_ATTRS = {
                 "dimming_speed_up_remote": True,
@@ -527,13 +376,11 @@ class XiaomiVibrationAQ1ClusterHandler(MultistateInputClusterHandler):
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(SONOFF_CLUSTER)
 @registries.CLUSTER_HANDLER_REGISTRY.register(SONOFF_CLUSTER)
 class SonoffPresenceSenorClusterHandler(ClusterHandler):
-    """SonoffPresenceSensor cluster handler."""
+    """SonoffPresenceSensor cluster handler.
 
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize SonoffPresenceSensor cluster handler."""
-        super().__init__(cluster, endpoint)
-        if self.cluster.endpoint.model == "SNZB-06P":
-            self.ZCL_INIT_ATTRS = {"last_illumination_state": True}
+    Per-model attribute init lives on the `SonoffPresenceSensorInit` virtual
+    entity now.
+    """
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(
@@ -605,36 +452,8 @@ class SinopeManufacturerClusterHandler(ClusterHandler):
 
     BIND = True
 
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize Sinope cluster handler."""
-        super().__init__(cluster, endpoint)
-        self.ZCL_INIT_ATTRS = {
-            "double_up_full": True,
-            "on_led_color": True,
-            "off_led_color": True,
-            "off_led_intensity": True,
-            "on_led_intensity": True,
-        }
-
-        if self.cluster.endpoint.model in [
-            "DM2550ZB",
-            "DM2550ZB-G2",
-            "DM2500ZB-G2",
-            "DM2500ZB",
-        ]:
-            self.ZCL_INIT_ATTRS["on_intensity"] = True
-
     _value_attribute = "action_report"
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr="action_report",
-            config=(
-                REPORT_CONFIG_MIN_INT_IMMEDIATE,
-                REPORT_CONFIG_MIN_INT_IMMEDIATE,
-                REPORT_CONFIG_RPT_CHANGE,
-            ),
-        ),
-    )
+    REPORT_CONFIG = ()
 
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:

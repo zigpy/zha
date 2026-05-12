@@ -580,6 +580,14 @@ class HueMotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
         models=frozenset({"SML001", "SML002", "SML003", "SML004"}),
     )
 
+    _server_cluster_config = {
+        Basic.cluster_id: ClusterConfig(
+            attributes={
+                "trigger_indicator": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class ChildLock(ConfigurableAttributeSwitch):
@@ -819,6 +827,7 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
                 OnOff.AttributeDefs.start_up_on_off: AttrConfig(
                     read_on_startup=False,
                 ),
+                "child_lock": AttrConfig(read_on_startup=False),
             },
         ),
     }

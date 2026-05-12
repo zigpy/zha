@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Coroutine
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final
 
-from zhaquirks.quirk_ids import BEGA_LIGHT_SWITCHABLE_WHITE, TUYA_PLUG_ONOFF
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
@@ -67,7 +65,6 @@ from zha.zigbee.cluster_handlers.const import (
     SIGNAL_MOVE_LEVEL,
     SIGNAL_SET_LEVEL,
 )
-from zha.zigbee.cluster_handlers.helpers import is_hue_motion_sensor
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
@@ -263,7 +260,12 @@ class ApplianceControlClusterHandler(ClusterHandler):
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(Basic.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(Basic.cluster_id)
 class BasicClusterHandler(ClusterHandler):
-    """Cluster handler to interact with the basic cluster."""
+    """Cluster handler to interact with the basic cluster.
+
+    Per-model attribute initialization (Hue `trigger_indicator`, TI router
+    `transmit_power`, Aqara curtain `power_source`) lives on the corresponding
+    entities' `_server_cluster_config` now.
+    """
 
     UNKNOWN = 0
     BATTERY = 3
@@ -278,22 +280,6 @@ class BasicClusterHandler(ClusterHandler):
         5: "Emergency mains constantly powered",
         6: "Emergency mains and transfer switch",
     }
-
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize Basic cluster handler."""
-        super().__init__(cluster, endpoint)
-        if is_hue_motion_sensor(self) and self.cluster.endpoint.endpoint_id == 2:
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["trigger_indicator"] = True
-        elif (
-            self.cluster.endpoint.manufacturer == "TexasInstruments"
-            and self.cluster.endpoint.model == "ti.router"
-        ):
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["transmit_power"] = True
-        elif self.cluster.endpoint.model == "lumi.curtain.agl001":
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["power_source"] = True
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(BinaryInput.cluster_id)
@@ -400,16 +386,13 @@ class GroupsClusterHandler(ClusterHandler):
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Identify.cluster_id)
 class IdentifyClusterHandler(ClusterHandler):
-    """Identify cluster handler."""
+    """Identify cluster handler.
+
+    `trigger_effect` → zha_event dispatch lives on the
+    `IdentifyTriggerEffectEvent` virtual entity now.
+    """
 
     BIND: bool = False
-
-    def cluster_command(self, tsn, command_id, args):
-        """Handle commands received to this cluster."""
-        cmd = parse_and_log_command(self, tsn, command_id, args)
-
-        if cmd == Identify.ServerCommandDefs.trigger_effect.name:
-            self.emit_zha_event(f"{self.unique_id}_{cmd}", args[0])
 
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(LevelControl.cluster_id)
@@ -437,16 +420,6 @@ class LevelControlClusterHandler(ClusterHandler):
         LevelControl.AttributeDefs.default_move_rate.name: True,
         LevelControl.AttributeDefs.start_up_current_level.name: True,
     }
-
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize LevelControlClusterHandler."""
-        super().__init__(cluster, endpoint)
-
-        if BEGA_LIGHT_SWITCHABLE_WHITE in endpoint.device.exposes_features:
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["switchable_white"] = True
-            self.ZCL_INIT_ATTRS["switchable_color_temperature_1"] = True
-            self.ZCL_INIT_ATTRS["switchable_color_temperature_2"] = True
 
     @property
     def current_level(self) -> int | None:
@@ -568,16 +541,6 @@ class OnOffClusterHandler(ClusterHandler):
         OnOff.AttributeDefs.start_up_on_off.name: True,
     }
 
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize OnOffClusterHandler."""
-        super().__init__(cluster, endpoint)
-
-        if TUYA_PLUG_ONOFF in endpoint.device.exposes_features:
-            self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
-            self.ZCL_INIT_ATTRS["backlight_mode"] = True
-            self.ZCL_INIT_ATTRS["power_on_state"] = True
-            self.ZCL_INIT_ATTRS["child_lock"] = True
-
     @classmethod
     def matches(cls, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> bool:
         """Filter the cluster match for specific devices."""
@@ -678,7 +641,11 @@ class PartitionClusterHandler(ClusterHandler):
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(PowerConfiguration.cluster_id)
 class PowerConfigurationClusterHandler(ClusterHandler):
-    """Cluster handler for the zigbee power configuration cluster."""
+    """Cluster handler for the zigbee power configuration cluster.
+
+    `battery_size` / `battery_quantity` reads are declared on the `Battery`
+    sensor entity now.
+    """
 
     REPORT_CONFIG = (
         AttrReportConfig(
@@ -690,16 +657,6 @@ class PowerConfigurationClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_BATTERY_SAVE,
         ),
     )
-
-    def async_initialize_cluster_handler_specific(self, from_cache: bool) -> Coroutine:
-        """Initialize cluster handler specific attrs."""
-        attributes = [
-            PowerConfiguration.AttributeDefs.battery_size.name,
-            PowerConfiguration.AttributeDefs.battery_quantity.name,
-        ]
-        return self.get_attributes(
-            attributes, from_cache=from_cache, only_cache=from_cache
-        )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(PowerProfile.cluster_id)

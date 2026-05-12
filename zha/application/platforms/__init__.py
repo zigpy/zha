@@ -246,10 +246,27 @@ class BaseEntity(LogMixin, EventBase):
 
     # Virtual entities participate in discovery and cluster-config aggregation
     # (so they bind, configure reporting, and run cluster-level setup work like
-    # IAS Zone enrollment) but are filtered out before being added to the
-    # device's visible platform_entities. They have no state, no HA registration,
-    # and exist purely to drive cluster-level background work.
+    # IAS Zone enrollment) but the wrapping integration is expected to skip
+    # registering them with Home Assistant. They have no state surface and
+    # exist purely to drive cluster-level background work.
     _virtual: bool = False
+
+    async def async_configure_cluster(self, cluster: Any) -> None:
+        """Optional post-bind cluster-level setup hook.
+
+        Called after bind/configure_reporting for each cluster declared in
+        `_server_cluster_config`/`_client_cluster_config`. Override to perform
+        cluster-level setup beyond binding (e.g. IAS Zone CIE write, LightLink
+        coordinator group join).
+        """
+
+    async def async_initialize_cluster(self, cluster: Any) -> None:
+        """Optional post-initialize cluster-level hook.
+
+        Called after the attribute cache has been populated. Override to act on
+        freshly-read attribute values (e.g. propagate one cluster's setting to a
+        sibling cluster's state).
+        """
 
     _attr_fallback_name: str | None = None
     _attr_icon: str | None = None

@@ -370,6 +370,14 @@ class TuyaPowerOnStateSelectEntity(ZCLEnumSelectEntity):
         exposed_features=frozenset({TUYA_PLUG_ONOFF}),
     )
 
+    _server_cluster_config = {
+        OnOff.cluster_id: ClusterConfig(
+            attributes={
+                "power_on_state": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(TUYA_MANUFACTURER_CLUSTER)
 class TuyaManufacturerPowerOnStateSelectEntity(ZCLEnumSelectEntity):
@@ -407,6 +415,14 @@ class TuyaBacklightModeSelectEntity(ZCLEnumSelectEntity):
         server_clusters=frozenset({OnOff.cluster_id}),
         exposed_features=frozenset({TUYA_PLUG_ONOFF}),
     )
+
+    _server_cluster_config = {
+        OnOff.cluster_id: ClusterConfig(
+            attributes={
+                "backlight_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class MoesBacklightMode(types.enum8):
@@ -1200,6 +1216,9 @@ class BegaColorTemperatureChannelSelect(ZCLEnumSelectEntity):
                 LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
                     read_on_startup=False,
                 ),
+                "switchable_white": AttrConfig(read_on_startup=False),
+                "switchable_color_temperature_1": AttrConfig(read_on_startup=False),
+                "switchable_color_temperature_2": AttrConfig(read_on_startup=False),
             },
         ),
     }

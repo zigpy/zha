@@ -118,7 +118,7 @@ async def configure_cluster_configs(
     configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
     manufacturer_code: int | None,
 ) -> None:
-    """Execute binding and reporting configuration from aggregated configs."""
+    """Execute binding, reporting, and post-bind hooks from aggregated configs."""
     for agg in configs.values():
         if agg.cluster.endpoint.device.skip_configuration:
             continue
@@ -152,81 +152,59 @@ async def configure_cluster_configs(
                 reportable_change=attr_config.reporting[2],
             )
 
-        if not reporting_attrs:
-            continue
-
-        event_data = {
-            attr_def.name: {
-                "min": cfg.min_interval,
-                "max": cfg.max_interval,
-                "id": attr_def.id,
-                "name": attr_def.name,
-                "change": cfg.reportable_change,
-                "status": None,
+        if reporting_attrs:
+            event_data = {
+                attr_def.name: {
+                    "min": cfg.min_interval,
+                    "max": cfg.max_interval,
+                    "id": attr_def.id,
+                    "name": attr_def.name,
+                    "change": cfg.reportable_change,
+                    "status": None,
+                }
+                for attr_def, cfg in reporting_attrs.items()
             }
-            for attr_def, cfg in reporting_attrs.items()
-        }
 
-        try:
-            res = await RETRYABLE_REQUEST_DECORATOR(
-                agg.cluster.configure_reporting_multiple
-            )(reporting_attrs)
-            _LOGGER.debug(
-                "[%s] Configured reporting for %s on cluster %s: %s",
-                agg.cluster.endpoint.device.ieee,
-                list(reporting_attrs.keys()),
-                agg.cluster.ep_attribute,
-                res,
-            )
-            if not res:
+            try:
+                res = await RETRYABLE_REQUEST_DECORATOR(
+                    agg.cluster.configure_reporting_multiple
+                )(reporting_attrs)
+                _LOGGER.debug(
+                    "[%s] Configured reporting for %s on cluster %s: %s",
+                    agg.cluster.endpoint.device.ieee,
+                    list(reporting_attrs.keys()),
+                    agg.cluster.ep_attribute,
+                    res,
+                )
+                if not res:
+                    for attr_def in reporting_attrs:
+                        event_data[attr_def.name]["status"] = Status.FAILURE.name
+                else:
+                    for attr_def, status in res.items():
+                        event_data[attr_def.name]["status"] = status.name
+            except Exception as ex:
+                _LOGGER.debug(
+                    "[%s] Failed to configure reporting on cluster %s: %s",
+                    agg.cluster.endpoint.device.ieee,
+                    agg.cluster.ep_attribute,
+                    ex,
+                )
                 for attr_def in reporting_attrs:
                     event_data[attr_def.name]["status"] = Status.FAILURE.name
+
+            existing = getattr(agg.cluster, "_zha_last_reporting_config", None)
+            if existing is not None:
+                merged = {**existing, **event_data}
             else:
-                for attr_def, status in res.items():
-                    event_data[attr_def.name]["status"] = status.name
-        except Exception as ex:
-            _LOGGER.debug(
-                "[%s] Failed to configure reporting on cluster %s: %s",
-                agg.cluster.endpoint.device.ieee,
-                agg.cluster.ep_attribute,
-                ex,
-            )
-            for attr_def in reporting_attrs:
-                event_data[attr_def.name]["status"] = Status.FAILURE.name
+                merged = event_data
+            agg.cluster._zha_last_reporting_config = merged
 
-        existing = getattr(agg.cluster, "_zha_last_reporting_config", None)
-        if existing is not None:
-            merged = {**existing, **event_data}
-        else:
-            merged = event_data
-        agg.cluster._zha_last_reporting_config = merged
-
-
-async def run_entity_cluster_configure_hooks(
-    configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
-) -> None:
-    """Run any per-entity cluster-level configure hooks.
-
-    Used by virtual entities to perform cluster-level setup beyond bind+report
-    (e.g. IAS Zone CIE write, LightLink coordinator group join).
-    """
-    seen: set[tuple[int, int]] = set()
-    for key, agg in configs.items():
-        if agg.cluster.endpoint.device.skip_configuration:
-            continue
         for entity in agg.entities:
-            hook = getattr(entity, "async_configure_cluster", None)
-            if hook is None:
-                continue
-            run_key = (id(entity), agg.cluster.cluster_id)
-            if run_key in seen:
-                continue
-            seen.add(run_key)
             try:
-                await hook(agg.cluster)
+                await entity.async_configure_cluster(agg.cluster)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.debug(
-                    "[%s] cluster configure hook on %s raised",
+                    "[%s] async_configure_cluster on %s raised",
                     agg.cluster.endpoint.device.ieee,
                     type(entity).__name__,
                     exc_info=True,
@@ -295,3 +273,14 @@ async def initialize_cluster_configs(
                 allow_cache=from_cache,
                 only_cache=from_cache,
             )
+
+        for entity in agg.entities:
+            try:
+                await entity.async_initialize_cluster(agg.cluster)
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.debug(
+                    "[%s] async_initialize_cluster on %s raised",
+                    agg.cluster.endpoint.device.ieee,
+                    type(entity).__name__,
+                    exc_info=True,
+                )
