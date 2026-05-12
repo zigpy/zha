@@ -31,13 +31,11 @@ from zha.application.const import (
 from zha.application.platforms import (
     BaseEntityInfo,
     ClusterConfig,
-    ClusterHandlerMatch,
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
     register_entity,
 )
-from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_IAS_WD
 from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
 
 if TYPE_CHECKING:
@@ -199,8 +197,8 @@ class AdvancedSiren(BaseZclSiren):
     _attr_fallback_name: str = "Siren"
     _attr_primary_weight = 4
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasWd.cluster_id}),
         feature_priority=(PlatformFeatureGroup.SIREN, 0),
     )
 
@@ -293,8 +291,8 @@ class BasicSiren(BaseZclSiren):
     _attr_fallback_name: str = "Siren"
     _attr_primary_weight = 4
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_IAS_WD}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IasWd.cluster_id}),
         exposed_features=frozenset({SIREN_BASIC}),
         feature_priority=(PlatformFeatureGroup.SIREN, 1),
     )

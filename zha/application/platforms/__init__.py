@@ -12,9 +12,8 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cached_property
 import logging
-from typing import TYPE_CHECKING, Any, Final, Literal, final
+from typing import TYPE_CHECKING, Any, Final, final
 
-from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
@@ -116,24 +115,11 @@ class ClusterMatch:
     manufacturers: frozenset[str] | None = None
     models: frozenset[str] | None = None
     exposed_features: frozenset[str] | None = None
+    not_exposed_features: frozenset[str] | None = None
 
     # Profile and device type filters
-    profile_device_types: (
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
-    not_profile_device_types: (
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
+    profile_device_types: frozenset[tuple[int, int]] | None = None
+    not_profile_device_types: frozenset[tuple[int, int]] | None = None
 
     # For a given feature, only entities with the highest priority will be considered
     feature_priority: tuple[PlatformFeatureGroup, int] | None = None
@@ -155,22 +141,8 @@ class ClusterHandlerMatch:
 
     # If present, device must match one of the given profile and device type combinations.
     # This will be ignored if `platform_override` is used.
-    profile_device_types: (  # type:ignore[valid-type]
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
-    not_profile_device_types: (  # type:ignore[valid-type]
-        frozenset[
-            tuple[Literal[zha.PROFILE_ID], zha.DeviceType]
-            | tuple[Literal[zll.PROFILE_ID], zll.DeviceType]
-            | tuple[int, int]
-        ]
-        | None
-    ) = None
+    profile_device_types: frozenset[tuple[int, int]] | None = None
+    not_profile_device_types: frozenset[tuple[int, int]] | None = None
 
     # For a given feature, only entities with the highest priority will be considered
     feature_priority: tuple[PlatformFeatureGroup, int] | None = None

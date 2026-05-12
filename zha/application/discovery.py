@@ -513,23 +513,22 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 endpoint.zigpy_endpoint.profile_id,
                 endpoint.zigpy_endpoint.device_type,
             )
-            if platform_override is None and (
+            override_bypass = (
+                platform_override is not None
+                and platform_override == entity_class.PLATFORM
+            )
+
+            if (
                 match.profile_device_types is not None
                 and profile_device_type not in match.profile_device_types
-                and not (
-                    platform_override is not None
-                    and platform_override == entity_class.PLATFORM
-                )
+                and not override_bypass
             ):
                 continue
 
-            if platform_override is None and (
+            if (
                 match.not_profile_device_types is not None
                 and profile_device_type in match.not_profile_device_types
-                and not (
-                    platform_override is not None
-                    and platform_override == entity_class.PLATFORM
-                )
+                and not override_bypass
             ):
                 continue
 
@@ -550,7 +549,8 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         # system when competing entities are part of the same feature group
         if platform_override is not None and feature is not None:
             override_by_priority: defaultdict[
-                int, list[tuple[ClusterHandlerMatch, type[PlatformEntity]]]
+                int,
+                list[tuple[ClusterHandlerMatch | ClusterMatch, type[PlatformEntity]]],
             ] = defaultdict(list)
 
             for priority, priority_matches in matches_by_priority.items():
@@ -643,11 +643,16 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
             )
 
-            yield entity_class(
-                cluster_handlers=cluster_handlers,
-                endpoint=endpoint,
-                device=device,
-            )
+            try:
+                entity = entity_class(
+                    cluster_handlers=cluster_handlers,
+                    endpoint=endpoint,
+                    device=device,
+                )
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Failed to create %s entity", entity_class.__name__)
+                continue
+            yield entity
 
     # Claim any remaining unclaimed cluster handlers that don't produce entities but
     # still need to be configured for bare events (bound, reporting set up, etc.)
