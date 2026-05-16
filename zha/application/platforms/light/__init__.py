@@ -81,8 +81,8 @@ from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
 )
+from zha.zigbee.cluster_handlers import ClusterHandler
 from zha.zigbee.cluster_handlers.general import (
-    IdentifyClusterHandler,
     LevelChangeEvent,
     LevelControlClusterHandler,
     OnOffClusterHandler,
@@ -285,7 +285,7 @@ class BaseClusterHandlerLight(BaseLight):
         self._on_off_cluster_handler: OnOffClusterHandler | None = None
         self._level_cluster_handler: LevelControlClusterHandler | None = None
         self._color_cluster_handler: ColorClusterHandler | None = None
-        self._identify_cluster_handler: IdentifyClusterHandler | None = None
+        self._identify_cluster_handler: ClusterHandler | None = None
         self._transitioning_individual: bool = False
         self._transitioning_group: bool = False
         self._transition_listener: asyncio.TimerHandle | None = None
@@ -940,9 +940,7 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         self._color_cluster_handler: ColorClusterHandler | None = cast(
             ColorClusterHandler | None, self.cluster_handlers.get(CLUSTER_HANDLER_COLOR)
         )
-        self._identify_cluster_handler: IdentifyClusterHandler | None = cast(
-            IdentifyClusterHandler | None, device.identify_ch
-        )
+        self._identify_cluster_handler: ClusterHandler | None = device.identify_ch
 
         self._refresh_task: asyncio.Task | None = None
 
@@ -1279,9 +1277,8 @@ class LightGroup(BaseClusterHandlerLight, GroupEntity):
         self._color_cluster_handler: ColorClusterHandler | None = cast(
             ColorClusterHandler | None, group.zigpy_group.endpoint[Color.cluster_id]
         )
-        self._identify_cluster_handler: IdentifyClusterHandler | None = cast(
-            IdentifyClusterHandler | None,
-            group.zigpy_group.endpoint[Identify.cluster_id],
+        self._identify_cluster_handler: ClusterHandler | None = (
+            group.zigpy_group.endpoint[Identify.cluster_id]
         )
 
         self._debounced_member_refresh: Debouncer | None = Debouncer(

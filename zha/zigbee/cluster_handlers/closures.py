@@ -74,16 +74,6 @@ class DoorLockClusterHandler(ClusterHandler):
         return result
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(Shade.cluster_id)
-class ShadeClusterHandler(ClusterHandler):
-    """Shade cluster handler."""
-
-
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(WindowCovering.cluster_id)
-class WindowCoveringClientClusterHandler(ClientClusterHandler):
-    """Window client cluster handler."""
-
-
 @registries.BINDABLE_CLUSTERS.register(WindowCovering.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(WindowCovering.cluster_id)
 class WindowCoveringClusterHandler(ClusterHandler):

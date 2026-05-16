@@ -6,29 +6,14 @@ from typing import TYPE_CHECKING
 
 import zigpy.zcl
 from zigpy.zcl.clusters.measurement import (
-    PM25,
-    CarbonDioxideConcentration,
-    CarbonMonoxideConcentration,
-    ElectricalConductivity,
-    FlowMeasurement,
-    FormaldehydeConcentration,
     IlluminanceLevelSensing,
-    IlluminanceMeasurement,
-    LeafWetness,
     OccupancySensing,
-    PressureMeasurement,
-    RelativeHumidity,
-    SoilMoisture,
-    TemperatureMeasurement,
-    WindSpeed,
 )
 
 from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
 from zha.zigbee.cluster_handlers.const import (
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
-    REPORT_CONFIG_MAX_INT,
-    REPORT_CONFIG_MIN_INT,
 )
 from zha.zigbee.cluster_handlers.helpers import (
     is_hue_motion_sensor,
@@ -39,18 +24,6 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(FlowMeasurement.cluster_id)
-class FlowMeasurementClusterHandler(ClusterHandler):
-    """Flow Measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=FlowMeasurement.AttributeDefs.measured_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
 @registries.CLUSTER_HANDLER_REGISTRY.register(IlluminanceLevelSensing.cluster_id)
 class IlluminanceLevelSensingClusterHandler(ClusterHandler):
     """Illuminance Level Sensing cluster handler."""
@@ -58,18 +31,6 @@ class IlluminanceLevelSensingClusterHandler(ClusterHandler):
     REPORT_CONFIG = (
         AttrReportConfig(
             attr=IlluminanceLevelSensing.AttributeDefs.level_status.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(IlluminanceMeasurement.cluster_id)
-class IlluminanceMeasurementClusterHandler(ClusterHandler):
-    """Illuminance Measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=IlluminanceMeasurement.AttributeDefs.measured_value.name,
             config=REPORT_CONFIG_DEFAULT,
         ),
     )
@@ -100,135 +61,3 @@ class OccupancySensingClusterHandler(ClusterHandler):
             self.ZCL_INIT_ATTRS = self.ZCL_INIT_ATTRS.copy()
             self.ZCL_INIT_ATTRS["ultrasonic_o_to_u_delay"] = True
             self.ZCL_INIT_ATTRS["ultrasonic_u_to_o_threshold"] = True
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(PressureMeasurement.cluster_id)
-class PressureMeasurementClusterHandler(ClusterHandler):
-    """Pressure measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=PressureMeasurement.AttributeDefs.measured_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(RelativeHumidity.cluster_id)
-class RelativeHumidityClusterHandler(ClusterHandler):
-    """Relative Humidity measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=RelativeHumidity.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(SoilMoisture.cluster_id)
-class SoilMoistureClusterHandler(ClusterHandler):
-    """Soil Moisture measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=SoilMoisture.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(LeafWetness.cluster_id)
-class LeafWetnessClusterHandler(ClusterHandler):
-    """Leaf Wetness measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=LeafWetness.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(TemperatureMeasurement.cluster_id)
-class TemperatureMeasurementClusterHandler(ClusterHandler):
-    """Temperature measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=TemperatureMeasurement.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(CarbonMonoxideConcentration.cluster_id)
-class CarbonMonoxideConcentrationClusterHandler(ClusterHandler):
-    """Carbon Monoxide measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=CarbonMonoxideConcentration.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(CarbonDioxideConcentration.cluster_id)
-class CarbonDioxideConcentrationClusterHandler(ClusterHandler):
-    """Carbon Dioxide measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=CarbonDioxideConcentration.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(PM25.cluster_id)
-class PM25ClusterHandler(ClusterHandler):
-    """Particulate Matter 2.5 microns or less measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=PM25.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.1),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(FormaldehydeConcentration.cluster_id)
-class FormaldehydeConcentrationClusterHandler(ClusterHandler):
-    """Formaldehyde measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=FormaldehydeConcentration.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(ElectricalConductivity.cluster_id)
-class ElectricalConductivityClusterHandler(ClusterHandler):
-    """Electrical Conductivity cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=ElectricalConductivity.AttributeDefs.measured_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(WindSpeed.cluster_id)
-class WindSpeedClusterHandler(ClusterHandler):
-    """Wind Speed measurement cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=WindSpeed.AttributeDefs.measured_value.name,
-            config=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.01),
-        ),
-    )

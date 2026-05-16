@@ -21,21 +21,6 @@ from zha.zigbee.cluster_handlers.const import (
 )
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceEventAlerts.cluster_id)
-class ApplianceEventAlertsClusterHandler(ClusterHandler):
-    """Appliance Event Alerts cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceIdentification.cluster_id)
-class ApplianceIdentificationClusterHandler(ClusterHandler):
-    """Appliance Identification cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceStatistics.cluster_id)
-class ApplianceStatisticsClusterHandler(ClusterHandler):
-    """Appliance Statistics cluster handler."""
-
-
 @registries.CLUSTER_HANDLER_REGISTRY.register(Diagnostic.cluster_id)
 class DiagnosticClusterHandler(ClusterHandler):
     """Diagnostic cluster handler."""
@@ -355,8 +340,3 @@ class ElectricalMeasurementClusterHandler(ClusterHandler):
             for m in self.MeasurementType
             if m in meas_type and m.name is not None
         )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(MeterIdentification.cluster_id)
-class MeterIdentificationClusterHandler(ClusterHandler):
-    """Metering Identification cluster handler."""

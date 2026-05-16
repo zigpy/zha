@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 import functools
 import time
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from zigpy.profiles import zha
 from zigpy.zcl.clusters.general import PowerConfiguration
@@ -27,7 +27,7 @@ from zha.zigbee.cluster_handlers.const import (
     CLUSTER_HANDLER_POWER_CONFIGURATION,
     REPORT_CONFIG_BATTERY_SAVE,
 )
-from zha.zigbee.cluster_handlers.general import PowerConfigurationClusterHandler
+from zha.zigbee.cluster_handlers import ClusterHandler
 
 if TYPE_CHECKING:
     from zha.zigbee.cluster_handlers import ClusterHandler
@@ -134,10 +134,9 @@ class DeviceScannerEntity(BaseDeviceTracker):
             **kwargs,
             legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
         )
-        self._battery_cluster_handler: PowerConfigurationClusterHandler = cast(
-            PowerConfigurationClusterHandler,
-            self.cluster_handlers[CLUSTER_HANDLER_POWER_CONFIGURATION],
-        )
+        self._battery_cluster_handler: ClusterHandler = self.cluster_handlers[
+            CLUSTER_HANDLER_POWER_CONFIGURATION
+        ]
         self._connected: bool = False
         self._keepalive_interval: int = 60
         self._should_poll: bool = True

@@ -577,10 +577,10 @@ class BallastMinLevel(NumberConfigurationEntity):
             bind=True,
             attributes={
                 Ballast.AttributeDefs.min_level: AttrConfig(
-                    read_on_startup=False,
+                    read_on_startup=True,
                 ),
                 Ballast.AttributeDefs.max_level: AttrConfig(
-                    read_on_startup=False,
+                    read_on_startup=True,
                 ),
             },
         ),

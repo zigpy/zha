@@ -79,11 +79,6 @@ class LevelChangeEvent:
     event_type: Final[str] = "cluster_handler_event"
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(Alarms.cluster_id)
-class AlarmsClusterHandler(ClusterHandler):
-    """Alarms cluster handler."""
-
-
 @registries.CLUSTER_HANDLER_REGISTRY.register(AnalogInput.cluster_id)
 class AnalogInputClusterHandler(ClusterHandler):
     """Analog Input cluster handler."""
@@ -240,11 +235,6 @@ class AnalogValueClusterHandler(ClusterHandler):
     )
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(ApplianceControl.cluster_id)
-class ApplianceControlClusterHandler(ClusterHandler):
-    """Appliance Control cluster handler."""
-
-
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(Basic.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(Basic.cluster_id)
 class BasicClusterHandler(ClusterHandler):
@@ -333,53 +323,6 @@ class BinaryValueClusterHandler(ClusterHandler):
             config=REPORT_CONFIG_IMMEDIATE,
         ),
     )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(Commissioning.cluster_id)
-class CommissioningClusterHandler(ClusterHandler):
-    """Commissioning cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(DeviceTemperature.cluster_id)
-class DeviceTemperatureClusterHandler(ClusterHandler):
-    """Device Temperature cluster handler."""
-
-    REPORT_CONFIG = (
-        {
-            "attr": DeviceTemperature.AttributeDefs.current_temperature.name,
-            "config": (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
-        },
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(GreenPowerProxy.cluster_id)
-class GreenPowerProxyClusterHandler(ClusterHandler):
-    """Green Power Proxy cluster handler."""
-
-    BIND: bool = False
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(Groups.cluster_id)
-class GroupsClusterHandler(ClusterHandler):
-    """Groups cluster handler."""
-
-    BIND: bool = False
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(Identify.cluster_id)
-class IdentifyClusterHandler(ClusterHandler):
-    """Identify cluster handler.
-
-    `trigger_effect` → zha_event dispatch lives on the
-    `IdentifyTriggerEffectEvent` virtual entity now.
-    """
-
-    BIND: bool = False
-
-
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(LevelControl.cluster_id)
-class LevelControlClientClusterHandler(ClientClusterHandler):
-    """LevelControl client cluster."""
 
 
 @registries.BINDABLE_CLUSTERS.register(LevelControl.cluster_id)
@@ -500,15 +443,6 @@ class MultistateValueClusterHandler(ClusterHandler):
     )
 
 
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(OnOff.cluster_id)
-class OnOffClientClusterHandler(ClientClusterHandler):
-    """OnOff client cluster handler.
-
-    Server attribute cache sync from incoming commands lives on the
-    `OnOffClientCacheSync` virtual entity now.
-    """
-
-
 @registries.BINDABLE_CLUSTERS.register(OnOff.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(OnOff.cluster_id)
 class OnOffClusterHandler(ClusterHandler):
@@ -550,11 +484,6 @@ class OnOffClusterHandler(ClusterHandler):
         if result[1] is not Status.SUCCESS:
             raise ZHAException(f"Failed to turn off: {result[1]}")
         self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(OnOffConfiguration.cluster_id)
-class OnOffConfigurationClusterHandler(ClusterHandler):
-    """OnOff Configuration cluster handler."""
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Ota.cluster_id)
@@ -606,51 +535,3 @@ class OtaClientClusterHandler(ClientClusterHandler):
         ClusterHandler._handle_attribute_updated_event(self, event)
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(Partition.cluster_id)
-class PartitionClusterHandler(ClusterHandler):
-    """Partition cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(PowerConfiguration.cluster_id)
-class PowerConfigurationClusterHandler(ClusterHandler):
-    """Cluster handler for the zigbee power configuration cluster.
-
-    `battery_size` / `battery_quantity` reads are declared on the `Battery`
-    sensor entity now.
-    """
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=PowerConfiguration.AttributeDefs.battery_voltage.name,
-            config=REPORT_CONFIG_BATTERY_SAVE,
-        ),
-        AttrReportConfig(
-            attr=PowerConfiguration.AttributeDefs.battery_percentage_remaining.name,
-            config=REPORT_CONFIG_BATTERY_SAVE,
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(PowerProfile.cluster_id)
-class PowerProfileClusterHandler(ClusterHandler):
-    """Power Profile cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(RSSILocation.cluster_id)
-class RSSILocationClusterHandler(ClusterHandler):
-    """RSSI Location cluster handler."""
-
-
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(Scenes.cluster_id)
-class ScenesClientClusterHandler(ClientClusterHandler):
-    """Scenes cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(Scenes.cluster_id)
-class ScenesClusterHandler(ClusterHandler):
-    """Scenes cluster handler."""
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(Time.cluster_id)
-class TimeClusterHandler(ClusterHandler):
-    """Time cluster handler."""

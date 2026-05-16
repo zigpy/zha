@@ -2,30 +2,10 @@
 
 from __future__ import annotations
 
-from zigpy.zcl.clusters.lighting import Ballast, Color
+from zigpy.zcl.clusters.lighting import Color
 
-from zha.zigbee.cluster_handlers import (
-    AttrReportConfig,
-    ClientClusterHandler,
-    ClusterHandler,
-    registries,
-)
+from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
 from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_DEFAULT
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(Ballast.cluster_id)
-class BallastClusterHandler(ClusterHandler):
-    """Ballast cluster handler."""
-
-    ZCL_INIT_ATTRS = {
-        Ballast.AttributeDefs.min_level.name: True,
-        Ballast.AttributeDefs.max_level.name: True,
-    }
-
-
-@registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(Color.cluster_id)
-class ColorClientClusterHandler(ClientClusterHandler):
-    """Color client cluster handler."""
 
 
 @registries.BINDABLE_CLUSTERS.register(Color.cluster_id)

@@ -63,7 +63,6 @@ from zha.zigbee.cluster_handlers import (  # noqa: F401 pylint: disable=unused-i
     lightlink,
     manufacturerspecific,
     measurement,
-    protocol,
     security,
     smartenergy,
 )

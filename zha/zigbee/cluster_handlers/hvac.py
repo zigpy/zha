@@ -22,11 +22,6 @@ REPORT_CONFIG_CLIMATE_DEMAND = (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 5)
 REPORT_CONFIG_CLIMATE_DISCRETE = (REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 1)
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(Dehumidification.cluster_id)
-class DehumidificationClusterHandler(ClusterHandler):
-    """Dehumidification cluster handler."""
-
-
 @registries.CLUSTER_HANDLER_REGISTRY.register(Fan.cluster_id)
 class FanClusterHandler(ClusterHandler):
     """Fan cluster handler."""
@@ -51,11 +46,6 @@ class FanClusterHandler(ClusterHandler):
     async def async_set_speed(self, value) -> None:
         """Set the speed of the fan."""
         await self.write_attributes_safe({Fan.AttributeDefs.fan_mode.name: value})
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(Pump.cluster_id)
-class PumpClusterHandler(ClusterHandler):
-    """Pump cluster handler."""
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Thermostat.cluster_id)
