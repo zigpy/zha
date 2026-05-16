@@ -421,8 +421,6 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
-
         if legacy_discovery_unique_id is None:
             legacy_discovery_unique_id = (
                 f"{endpoint.device.ieee}-{endpoint.id}"
@@ -446,6 +444,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
             **kwargs,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
         )
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
 
     def on_add(self) -> None:
         """Run when entity is added."""

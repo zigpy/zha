@@ -87,10 +87,10 @@ class Button(BaseButton):
         **kwargs: Any,
     ):
         """Initialize button."""
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
 
     def _init_from_quirks_metadata(
         self, entity_metadata: ZCLCommandButtonMetadata
@@ -164,10 +164,10 @@ class WriteAttributeButton(BaseButton):
         **kwargs: Any,
     ) -> None:
         """Init this button."""
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         if ENTITY_METADATA in kwargs:
             self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         self.recompute_capabilities()
 
     def _init_from_quirks_metadata(

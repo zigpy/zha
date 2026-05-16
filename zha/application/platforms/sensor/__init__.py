@@ -13,7 +13,7 @@ import logging
 import math
 import numbers
 import typing
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
@@ -250,13 +250,14 @@ class Sensor(BaseSensor):
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
+        self._attr_def: foundation.ZCLAttributeDef | None = None
+
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+
         if self._is_client_cluster:
             self._cluster = endpoint.zigpy_endpoint.out_clusters[self._cluster_id]
         else:
             self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
-        self._attr_def: foundation.ZCLAttributeDef | None = None
-
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
 
         # After super() for quirks v2 entities
         if self._attribute_name is not None:
@@ -1095,7 +1096,7 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._divisor_attribute_name:
             return super()._divisor
 
-        return self._cluster.get(self._divisor_attribute_name)
+        return self._cluster.get(self._divisor_attribute_name) or 1
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:

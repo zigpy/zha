@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, Final, final
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
+from zigpy.zcl import ClusterType
 from zigpy.zcl.foundation import ZCLAttributeDef
 
 from zha.application import Platform
@@ -559,6 +560,12 @@ class PlatformEntity(BaseEntity):
 
         if entity_metadata.primary is not None:
             self._attr_primary = entity_metadata.primary
+
+        # Quirks v2 metadata supplies the target cluster; entity subclasses can
+        # then read `self._cluster_id` / `self._is_client_cluster` before doing
+        # their cluster lookup.
+        self._cluster_id = entity_metadata.cluster_id
+        self._is_client_cluster = entity_metadata.cluster_type == ClusterType.Client
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:

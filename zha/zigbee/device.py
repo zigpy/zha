@@ -91,11 +91,7 @@ from zha.zigbee.cluster_config import (
     configure_cluster_configs,
     initialize_cluster_configs,
 )
-from zha.zigbee.cluster_handlers import (
-    ClusterHandler,
-    ClusterHandlerStatus,
-    ZDOClusterHandler,
-)
+from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
@@ -104,6 +100,27 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
 DIAGNOSTICS_JSON_VERSION = 2
+
+
+def _entity_targets_cluster(
+    entity: PlatformEntity,
+    cluster_id: int,
+    cluster_type: zigpy.zcl.ClusterType | None = None,
+) -> bool:
+    """Return True if `entity` declares the given cluster in its `_cluster_match`."""
+    match = entity._cluster_match
+    if match is None:
+        return False
+
+    if cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Server:
+        if cluster_id in (match.server_clusters | match.optional_server_clusters):
+            return True
+        if cluster_type is not None:
+            return False
+    if cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Client:
+        if cluster_id in (match.client_clusters | match.optional_client_clusters):
+            return True
+    return False
 
 
 def get_cluster_attr_data(
@@ -970,13 +987,6 @@ class Device(LogMixin, EventBase):
         if aggregated:
             await configure_cluster_configs(aggregated, self.manufacturer_code)
 
-        # Mark cluster handlers as CONFIGURED for ClusterMatch entities
-        for entity in self._discovered_entities:
-            if not hasattr(entity, "_cluster_match") or entity._cluster_match is None:
-                continue
-            for ch in entity._cluster_handlers:
-                ch._status = ClusterHandlerStatus.CONFIGURED
-
         self.emit_reconfigure_done()
 
         self.debug("completed configuration")
@@ -1040,9 +1050,8 @@ class Device(LogMixin, EventBase):
             if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
                 continue
 
-            if meta.cluster_id is not None and not any(
-                cluster_handler.cluster.cluster_id == meta.cluster_id
-                for cluster_handler in entity.cluster_handlers.values()
+            if meta.cluster_id is not None and not _entity_targets_cluster(
+                entity, meta.cluster_id
             ):
                 continue
 
@@ -1070,10 +1079,8 @@ class Device(LogMixin, EventBase):
             if meta.endpoint_id is not None and entity.endpoint.id != meta.endpoint_id:
                 continue
 
-            if meta.cluster_id is not None and not any(
-                cluster_handler.cluster.cluster_id == meta.cluster_id
-                and cluster_handler.cluster.cluster_type == meta.cluster_type
-                for cluster_handler in entity.cluster_handlers.values()
+            if meta.cluster_id is not None and not _entity_targets_cluster(
+                entity, meta.cluster_id, cluster_type=meta.cluster_type
             ):
                 continue
 
@@ -1271,18 +1278,6 @@ class Device(LogMixin, EventBase):
         aggregated = aggregate_cluster_configs(self._discovered_entities)
         if aggregated:
             await initialize_cluster_configs(aggregated, from_cache)
-
-        # Run the legacy handler initialization so status transitions to
-        # INITIALIZED (or stays at CONFIGURED if the read raises), matching what
-        # legacy ClusterHandlerMatch entities ended up with.
-        for entity in self._discovered_entities:
-            if not hasattr(entity, "_cluster_match") or entity._cluster_match is None:
-                continue
-            for ch in entity._cluster_handlers:
-                try:
-                    await ch.async_initialize(from_cache)
-                except Exception:  # pylint: disable=broad-except
-                    ch.debug("async_initialize raised", exc_info=True)
 
         # And add them after. Emit events only on re-initialization, not the first.
         await self._add_pending_entities(emit_event=self._initialized)

@@ -98,11 +98,11 @@ class BinarySensor(BaseBinarySensor):
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         if self._is_client_cluster:
             self._cluster = endpoint.zigpy_endpoint.out_clusters[self._cluster_id]
         else:
             self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._state: bool = self.is_on
         self.recompute_capabilities()
 
@@ -146,6 +146,8 @@ class BinarySensor(BaseBinarySensor):
     @property
     def is_on(self) -> bool:
         """Return True if the switch is on based on the state machine."""
+        if self._attribute_name not in self._cluster.attributes_by_name:
+            return False
         self._state = raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return False
@@ -198,6 +200,7 @@ class Accelerometer(BinarySensor):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({SMARTTHINGS_ACCELERATION_CLUSTER}),
+        manufacturers=frozenset({"CentraLite", "Samjin", "SmartThings"}),
     )
 
 

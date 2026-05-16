@@ -275,8 +275,8 @@ class NumberConfigurationEntity(BaseNumber):
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""

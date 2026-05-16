@@ -402,15 +402,11 @@ class Thermostat(BaseThermostat):
 
     @property
     def _pi_cooling_demand(self) -> int | None:
-        return self._cluster.get(
-            ThermostatCluster.AttributeDefs.pi_cooling_demand.name
-        )
+        return self._cluster.get(ThermostatCluster.AttributeDefs.pi_cooling_demand.name)
 
     @property
     def _pi_heating_demand(self) -> int | None:
-        return self._cluster.get(
-            ThermostatCluster.AttributeDefs.pi_heating_demand.name
-        )
+        return self._cluster.get(ThermostatCluster.AttributeDefs.pi_heating_demand.name)
 
     @property
     def _running_mode(self) -> int | None:
@@ -754,9 +750,7 @@ class Thermostat(BaseThermostat):
         | AttributeWrittenEvent,
     ) -> None:
         """Handle attribute update from device."""
-        self.device.gateway.async_create_task(
-            self._handle_attribute_updated(event)
-        )
+        self.device.gateway.async_create_task(self._handle_attribute_updated(event))
 
     async def _handle_attribute_updated(
         self,
@@ -776,9 +770,7 @@ class Thermostat(BaseThermostat):
             # occupancy has changed
             self._preset = Preset.NONE
 
-        self.debug(
-            "Attribute '%s' = %s update", event.attribute_name, event.value
-        )
+        self.debug("Attribute '%s' = %s update", event.attribute_name, event.value)
         self.maybe_emit_state_changed_event()
 
     async def async_set_fan_mode(self, fan_mode: str) -> None:
@@ -982,13 +974,13 @@ class SinopeTechnologiesThermostat(Thermostat):
     def _rm_rs_action(self) -> HVACAction:
         """Return the current HVAC action based on running mode and running state."""
 
-        running_mode = self._thermostat_cluster_handler.running_mode
+        running_mode = self._running_mode
         if running_mode == SystemMode.Heat:
             return HVACAction.HEATING
         if running_mode == SystemMode.Cool:
             return HVACAction.COOLING
 
-        running_state = self._thermostat_cluster_handler.running_state
+        running_state = self._running_state
         if running_state and running_state & (
             RunningState.Fan_State_On
             | RunningState.Fan_2nd_Stage_On
