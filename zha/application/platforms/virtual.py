@@ -21,8 +21,9 @@ from zigpy.zcl import (
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
 )
-from zigpy.zcl.clusters.closures import DoorLock
-from zigpy.zcl.clusters.general import Identify, OnOff, Ota
+from zigpy.zcl.clusters.closures import DoorLock, WindowCovering
+from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff, Ota, Scenes
+from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.clusters.lightlink import LightLink
 from zigpy.zcl.clusters.security import IasZone
 from zigpy.zcl.foundation import GENERAL_COMMANDS, GeneralCommand
@@ -41,6 +42,7 @@ from zha.zigbee.cluster_handlers.const import (
     ATTRIBUTE_NAME,
     ATTRIBUTE_VALUE,
     SIGNAL_ATTR_UPDATED,
+    VALUE,
 )
 
 SMARTTHINGS_ACCELERATION_CLUSTER = 0xFC02
@@ -70,9 +72,25 @@ class VirtualEntity(PlatformEntity):
         super().__init__(cluster_handlers, endpoint, device, **kwargs)
         # Cache the (single) cluster this virtual entity drives, for the
         # cluster_command listener hook.
-        self._cluster: zigpy.zcl.Cluster | None = (
-            cluster_handlers[0].cluster if cluster_handlers else None
-        )
+        if cluster_handlers:
+            self._cluster: zigpy.zcl.Cluster | None = cluster_handlers[0].cluster
+        else:
+            # No cluster handler was resolved (e.g. virtual entity matches a
+            # client cluster with no registered ClientClusterHandler). Look up
+            # the cluster directly from the endpoint via this entity's declared
+            # cluster config.
+            self._cluster = None
+            for cluster_id in self._server_cluster_config:
+                cluster = endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
+                if cluster is not None:
+                    self._cluster = cluster
+                    break
+            if self._cluster is None:
+                for cluster_id in self._client_cluster_config:
+                    cluster = endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
+                    if cluster is not None:
+                        self._cluster = cluster
+                        break
 
     def on_add(self) -> None:
         """Subscribe to incoming cluster commands and attribute events."""
@@ -236,10 +254,11 @@ class OnOffClientCacheSync(VirtualEntity):
 
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
+        match_renamed_clusters=True,
     )
 
     _client_cluster_config = {
-        OnOff.cluster_id: ClusterConfig(bind=False),
+        OnOff.cluster_id: ClusterConfig(bind=True),
     }
 
     def __init__(
@@ -259,11 +278,15 @@ class OnOffClientCacheSync(VirtualEntity):
         return self._cluster.get(OnOff.AttributeDefs.on_off.name)
 
     def cluster_command(self, tsn: int, command_id: int, args: list[Any]) -> None:
-        """Mirror commands from the device into the server cache."""
+        """Mirror commands from the device into the server cache + emit zha_event."""
         try:
             cmd = self._cluster.server_commands[command_id].name
         except KeyError:
             return
+
+        # Legacy ClientClusterHandler.cluster_command emitted a zha_event for
+        # every incoming server command; preserve that.
+        self.emit_cluster_zha_event(cmd, args)
 
         if cmd in (
             OnOff.ServerCommandDefs.off.name,
@@ -294,10 +317,157 @@ class OnOffClientCacheSync(VirtualEntity):
                 OnOff.AttributeDefs.on_off.id, not bool(self.on_off)
             )
 
+    def attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
+        """Relay attribute updates on this client cluster as zha_events."""
+        self.emit_cluster_zha_event(
+            SIGNAL_ATTR_UPDATED,
+            {
+                ATTRIBUTE_ID: event.attribute_id,
+                ATTRIBUTE_NAME: event.attribute_name or UNKNOWN,
+                ATTRIBUTE_VALUE: event.value,
+                VALUE: event.value,
+            },
+        )
+
     def _set_to_off(self) -> None:
         """Clear the on_off cache when the timed_off duration elapses."""
         self._off_listener = None
         self._cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
+
+
+class _ClientClusterZhaEventEmitter(VirtualEntity):
+    """Bind a client cluster and emit zha_events for incoming commands/updates.
+
+    Replaces the legacy `ClientClusterHandler` auto-emit behavior (which fired
+    on every cluster_command from the device and every attribute update).
+    """
+
+    def cluster_command(self, tsn: int, command_id: int, args: list[Any]) -> None:
+        """Relay incoming client cluster commands as zha_events."""
+        if (
+            self._cluster.server_commands is not None
+            and self._cluster.server_commands.get(command_id) is not None
+        ):
+            self.emit_cluster_zha_event(
+                self._cluster.server_commands[command_id].name, args
+            )
+
+    def attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
+    ) -> None:
+        """Relay client cluster attribute updates as zha_events."""
+        self.emit_cluster_zha_event(
+            SIGNAL_ATTR_UPDATED,
+            {
+                ATTRIBUTE_ID: event.attribute_id,
+                ATTRIBUTE_NAME: event.attribute_name or UNKNOWN,
+                ATTRIBUTE_VALUE: event.value,
+                VALUE: event.value,
+            },
+        )
+
+
+@register_entity(Scenes.cluster_id)
+class ScenesClientBind(_ClientClusterZhaEventEmitter):
+    """Bind the Scenes client cluster and emit zha_events for its commands."""
+
+    _unique_id_suffix = "scenes_client_bind"
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({Scenes.cluster_id}),
+        match_renamed_clusters=True,
+    )
+    _client_cluster_config = {
+        Scenes.cluster_id: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(LevelControl.cluster_id)
+class LevelControlClientBind(_ClientClusterZhaEventEmitter):
+    """Bind LevelControl client cluster and emit zha_events for its commands."""
+
+    _unique_id_suffix = "level_control_client_bind"
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({LevelControl.cluster_id}),
+        match_renamed_clusters=True,
+    )
+    _client_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(Color.cluster_id)
+class ColorClientBind(_ClientClusterZhaEventEmitter):
+    """Bind the Color client cluster and emit zha_events for its commands."""
+
+    _unique_id_suffix = "color_client_bind"
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({Color.cluster_id}),
+        match_renamed_clusters=True,
+    )
+    _client_cluster_config = {
+        Color.cluster_id: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(WindowCovering.cluster_id)
+class WindowCoveringClientBind(_ClientClusterZhaEventEmitter):
+    """Bind WindowCovering client cluster and emit zha_events for its commands."""
+
+    _unique_id_suffix = "window_covering_client_bind"
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({WindowCovering.cluster_id}),
+        match_renamed_clusters=True,
+    )
+    _client_cluster_config = {
+        WindowCovering.cluster_id: ClusterConfig(bind=True),
+    }
+
+
+PHILIPS_REMOTE_CLUSTER = 0xFC00
+OSRAM_BUTTON_CLUSTER = 0xFD51
+OSRAM_CLUSTER = 0xFD00
+
+
+@register_entity(PHILIPS_REMOTE_CLUSTER)
+class PhilipsRemoteBind(VirtualEntity):
+    """Bind the Philips remote cluster on every device that exposes it."""
+
+    _unique_id_suffix = "philips_remote_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({PHILIPS_REMOTE_CLUSTER}),
+    )
+    _server_cluster_config = {
+        PHILIPS_REMOTE_CLUSTER: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(OSRAM_CLUSTER)
+class OsramClusterBind(VirtualEntity):
+    """Bind the Osram manufacturer cluster on every device that exposes it."""
+
+    _unique_id_suffix = "osram_cluster_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({OSRAM_CLUSTER}),
+    )
+    _server_cluster_config = {
+        OSRAM_CLUSTER: ClusterConfig(bind=True),
+    }
 
 
 @register_entity(Ota.cluster_id)

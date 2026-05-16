@@ -124,6 +124,13 @@ class ClusterMatch:
     # For a given feature, only entities with the highest priority will be considered
     feature_priority: tuple[PlatformFeatureGroup, int] | None = None
 
+    # By default ClusterMatch skips clusters whose ep_attribute was renamed by
+    # a quirk (so a Switch entity doesn't auto-attach to a Tuya-renamed OnOff
+    # cluster). Bind-only virtual entities can opt back in via this flag, since
+    # they don't care about cluster semantics — only that the cluster_id is
+    # what they target.
+    match_renamed_clusters: bool = False
+
 
 @dataclasses.dataclass(frozen=True)
 class ClusterHandlerMatch:

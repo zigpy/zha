@@ -414,7 +414,7 @@ def _resolve_cluster_handlers_for_match(
         if key not in endpoint.all_cluster_handlers:
             continue
         handler = endpoint.all_cluster_handlers[key]
-        if _is_renamed_cluster(handler.cluster):
+        if not match.match_renamed_clusters and _is_renamed_cluster(handler.cluster):
             continue
         result.append(handler)
 
@@ -432,7 +432,7 @@ def _resolve_client_cluster_handlers_for_match(
         if key not in endpoint.client_cluster_handlers:
             continue
         handler = endpoint.client_cluster_handlers[key]
-        if _is_renamed_cluster(handler.cluster):
+        if not match.match_renamed_clusters and _is_renamed_cluster(handler.cluster):
             continue
         result.append(handler)
 
@@ -463,7 +463,8 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
     ] = defaultdict(lambda: defaultdict(list))
 
     # Cluster IDs available to ClusterMatch (renamed quirked clusters excluded to
-    # mirror the legacy handler-name based matching).
+    # mirror the legacy handler-name based matching). Entities that opt into
+    # `match_renamed_clusters=True` get the inclusive sets instead.
     in_cluster_ids = {
         cid
         for cid, cluster in endpoint.zigpy_endpoint.in_clusters.items()
@@ -474,6 +475,8 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
         for cid, cluster in endpoint.zigpy_endpoint.out_clusters.items()
         if not _is_renamed_cluster(cluster)
     }
+    in_cluster_ids_with_renamed = set(endpoint.zigpy_endpoint.in_clusters)
+    out_cluster_ids_with_renamed = set(endpoint.zigpy_endpoint.out_clusters)
 
     for cluster in itertools.chain(
         endpoint.zigpy_endpoint.in_clusters.values(),
@@ -492,10 +495,17 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 continue
 
             if isinstance(match, ClusterMatch):
-                if not match.server_clusters.issubset(in_cluster_ids):
+                if match.match_renamed_clusters:
+                    available_in = in_cluster_ids_with_renamed
+                    available_out = out_cluster_ids_with_renamed
+                else:
+                    available_in = in_cluster_ids
+                    available_out = out_cluster_ids
+
+                if not match.server_clusters.issubset(available_in):
                     continue
 
-                if not match.client_clusters.issubset(out_cluster_ids):
+                if not match.client_clusters.issubset(available_out):
                     continue
             else:
                 if not match.cluster_handlers.issubset(
@@ -663,11 +673,33 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
             )
 
+            init_kwargs: dict[str, Any] = {}
+            if isinstance(match, ClusterMatch) and not cluster_handlers:
+                # ClusterMatch entity with no resolved handler instance — derive
+                # the legacy unique_id from the match's primary cluster id so the
+                # entity can be constructed without going through a cluster
+                # handler. Needed for virtual entities that match clusters with
+                # no registered ClientClusterHandler.
+                primary_cluster_id = next(
+                    iter(
+                        match.server_clusters
+                        | match.client_clusters
+                        | match.optional_server_clusters
+                        | match.optional_client_clusters
+                    ),
+                    None,
+                )
+                if primary_cluster_id is not None:
+                    init_kwargs["legacy_discovery_unique_id"] = (
+                        f"{device.ieee}-{endpoint.id}-{primary_cluster_id}"
+                    )
+
             try:
                 entity = entity_class(
                     cluster_handlers=cluster_handlers,
                     endpoint=endpoint,
                     device=device,
+                    **init_kwargs,
                 )
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Failed to create %s entity", entity_class.__name__)
