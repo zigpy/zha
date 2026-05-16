@@ -296,6 +296,7 @@ class ThermostatClusterHandler(ClusterHandler):
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(UserInterface.cluster_id)
 class UserInterfaceClusterHandler(ClusterHandler):
-    """User interface (thermostat) cluster handler."""
+    """User interface (thermostat) cluster handler.
 
-    ZCL_INIT_ATTRS = {UserInterface.AttributeDefs.keypad_lockout.name: True}
+    Kept for `DanfossUserInterfaceClusterHandler` to subclass.
+    """

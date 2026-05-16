@@ -913,9 +913,20 @@ class KeypadLockout(ZCLEnumSelectEntity):
     _enum = KeypadLockoutEnum
     _attr_translation_key: str = "keypad_lockout"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"thermostat_ui"})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({UserInterface.cluster_id}),
     )
+
+    _server_cluster_config = {
+        UserInterface.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                UserInterface.AttributeDefs.keypad_lockout: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1111,10 +1122,19 @@ class DanfossViewingDirection(ZCLEnumSelectEntity):
     _attr_translation_key: str = "viewing_direction"
     _enum = danfoss_thermostat.DanfossViewingDirectionEnum
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"thermostat_ui"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({UserInterface.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        UserInterface.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "viewing_direction": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
 
 
 class SinopeLightLedColors(types.enum32):

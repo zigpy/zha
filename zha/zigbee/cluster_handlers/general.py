@@ -15,33 +15,15 @@ from zigpy.zcl import (
     AttributeWrittenEvent,
 )
 from zigpy.zcl.clusters.general import (
-    Alarms,
     AnalogInput,
     AnalogOutput,
-    AnalogValue,
-    ApplianceControl,
     Basic,
     BinaryInput,
     BinaryOutput,
-    BinaryValue,
-    Commissioning,
-    DeviceTemperature,
-    GreenPowerProxy,
-    Groups,
-    Identify,
     LevelControl,
     MultistateInput,
-    MultistateOutput,
-    MultistateValue,
     OnOff,
-    OnOffConfiguration,
     Ota,
-    Partition,
-    PowerConfiguration,
-    PowerProfile,
-    RSSILocation,
-    Scenes,
-    Time,
 )
 from zigpy.zcl.clusters.general_const import ApplicationType
 from zigpy.zcl.foundation import Status
@@ -223,18 +205,6 @@ class AnalogOutputClusterHandler(ClusterHandler):
         )
 
 
-@registries.CLUSTER_HANDLER_REGISTRY.register(AnalogValue.cluster_id)
-class AnalogValueClusterHandler(ClusterHandler):
-    """Analog Value cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=AnalogValue.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
 @registries.CLUSTER_HANDLER_ONLY_CLUSTERS.register(Basic.cluster_id)
 @registries.CLUSTER_HANDLER_REGISTRY.register(Basic.cluster_id)
 class BasicClusterHandler(ClusterHandler):
@@ -311,18 +281,6 @@ class BinaryOutputClusterHandler(ClusterHandler):
         await self.write_attributes_safe(
             {BinaryOutput.AttributeDefs.present_value.name: value}
         )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(BinaryValue.cluster_id)
-class BinaryValueClusterHandler(ClusterHandler):
-    """Binary Value cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=BinaryValue.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_IMMEDIATE,
-        ),
-    )
 
 
 @registries.BINDABLE_CLUSTERS.register(LevelControl.cluster_id)
@@ -409,38 +367,10 @@ class LevelControlClusterHandler(ClusterHandler):
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(MultistateInput.cluster_id)
 class MultistateInputClusterHandler(ClusterHandler):
-    """Multistate Input cluster handler."""
+    """Multistate Input cluster handler.
 
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=MultistateInput.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(MultistateOutput.cluster_id)
-class MultistateOutputClusterHandler(ClusterHandler):
-    """Multistate Output cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=MultistateOutput.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(MultistateValue.cluster_id)
-class MultistateValueClusterHandler(ClusterHandler):
-    """Multistate Value cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=MultistateValue.AttributeDefs.present_value.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
+    Kept for `XiaomiVibrationAQ1ClusterHandler` to subclass.
+    """
 
 
 @registries.BINDABLE_CLUSTERS.register(OnOff.cluster_id)

@@ -5,16 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import zigpy.zcl
-from zigpy.zcl.clusters.measurement import (
-    IlluminanceLevelSensing,
-    OccupancySensing,
-)
+from zigpy.zcl.clusters.measurement import OccupancySensing
 
 from zha.zigbee.cluster_handlers import AttrReportConfig, ClusterHandler, registries
-from zha.zigbee.cluster_handlers.const import (
-    REPORT_CONFIG_DEFAULT,
-    REPORT_CONFIG_IMMEDIATE,
-)
+from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_IMMEDIATE
 from zha.zigbee.cluster_handlers.helpers import (
     is_hue_motion_sensor,
     is_sonoff_presence_sensor,
@@ -22,18 +16,6 @@ from zha.zigbee.cluster_handlers.helpers import (
 
 if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
-
-
-@registries.CLUSTER_HANDLER_REGISTRY.register(IlluminanceLevelSensing.cluster_id)
-class IlluminanceLevelSensingClusterHandler(ClusterHandler):
-    """Illuminance Level Sensing cluster handler."""
-
-    REPORT_CONFIG = (
-        AttrReportConfig(
-            attr=IlluminanceLevelSensing.AttributeDefs.level_status.name,
-            config=REPORT_CONFIG_DEFAULT,
-        ),
-    )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(OccupancySensing.cluster_id)
