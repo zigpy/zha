@@ -922,6 +922,7 @@ class Light(BaseClusterHandlerLight, PlatformEntity):
         **kwargs,
     ) -> None:
         """Initialize the light."""
+        kwargs.pop("legacy_discovery_unique_id", None)
         super().__init__(
             cluster_handlers,
             endpoint,

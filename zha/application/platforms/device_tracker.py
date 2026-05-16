@@ -9,6 +9,12 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from zigpy.profiles import zha
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
 from zigpy.zcl.clusters.general import PowerConfiguration
 
 from zha.application import Platform
@@ -21,16 +27,9 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.sensor import Battery
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_POWER_CONFIGURATION,
-    REPORT_CONFIG_BATTERY_SAVE,
-)
-from zha.zigbee.cluster_handlers import ClusterHandler
+from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_BATTERY_SAVE
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -121,21 +120,14 @@ class DeviceScannerEntity(BaseDeviceTracker):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ):
         """Initialize the ZHA device tracker."""
-        super().__init__(
-            cluster_handlers,
-            endpoint,
-            device,
-            **kwargs,
-            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
-        )
-        self._battery_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_POWER_CONFIGURATION
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[
+            PowerConfiguration.cluster_id
         ]
         self._connected: bool = False
         self._keepalive_interval: int = 60
@@ -145,12 +137,17 @@ class DeviceScannerEntity(BaseDeviceTracker):
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._battery_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
 
         self._tracked_tasks.append(
             self.device.gateway.async_create_background_task(
@@ -200,8 +197,12 @@ class DeviceScannerEntity(BaseDeviceTracker):
                 self._connected = True
         self.maybe_emit_state_changed_event()
 
-    def handle_cluster_handler_attribute_updated(
-        self, event: ClusterAttributeUpdatedEvent
+    def handle_attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle tracking."""
         if (
@@ -209,7 +210,7 @@ class DeviceScannerEntity(BaseDeviceTracker):
             != PowerConfiguration.AttributeDefs.battery_percentage_remaining.name
         ):
             return
-        self.debug("battery_percentage_remaining updated: %s", event.attribute_value)
+        self.debug("battery_percentage_remaining updated: %s", event.value)
         self._connected = True
-        self._battery_level = Battery.formatter(event.attribute_value)
+        self._battery_level = Battery.formatter(event.value)
         self.maybe_emit_state_changed_event()

@@ -526,22 +526,24 @@ class PlatformEntity(BaseEntity):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
+        cluster_handlers: list[ClusterHandler] | None = None,
+        endpoint: Endpoint | None = None,
+        device: Device | None = None,
         *,
         entity_metadata: EntityMetadata | None = None,
-        legacy_discovery_unique_id: str | None = None,
+        legacy_discovery_unique_id: str,
         **kwargs: Any,
     ):
-        """Initialize the platform entity."""
+        """Initialize the platform entity.
+
+        `cluster_handlers` is kept for legacy entity classes that haven't been
+        migrated to direct-cluster access. New entity classes should access
+        clusters directly via `endpoint.zigpy_endpoint.<attr>` and ignore the
+        param. TODO: remove `cluster_handlers` entirely once all entities are
+        migrated.
+        """
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
-
-        if legacy_discovery_unique_id is None:
-            legacy_discovery_unique_id = (
-                f"{device.ieee}-{endpoint.id}-{cluster_handlers[0].cluster.cluster_id}"
-            )
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
@@ -550,14 +552,19 @@ class PlatformEntity(BaseEntity):
 
         super().__init__(unique_id=unique_id, **kwargs)
 
-        self._cluster_handlers: list[ClusterHandler] = cluster_handlers
-        self.cluster_handlers: dict[str, ClusterHandler] = {}
-
-        for cluster_handler in cluster_handlers:
-            self.cluster_handlers[cluster_handler.name] = cluster_handler
-
+        assert endpoint is not None
+        assert device is not None
         self._device: Device = device
         self._endpoint = endpoint
+        self._cluster_handlers: list[ClusterHandler] = list(cluster_handlers or [])
+
+    @property
+    def cluster_handlers(self) -> dict[str, ClusterHandler]:
+        """Legacy: cluster handlers dict keyed by ep_attribute.
+
+        TODO: remove once all entity classes access clusters directly.
+        """
+        return {ch.name: ch for ch in self._cluster_handlers}
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""

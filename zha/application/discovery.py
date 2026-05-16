@@ -627,16 +627,33 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 selected_matches = override_matches
 
         for match, entity_class in selected_matches:
+            cluster_handlers: list[ClusterHandler | ClientClusterHandler] = []
+
             if isinstance(match, ClusterMatch):
-                # New cluster-based discovery: resolve cluster handlers from
-                # cluster IDs for backward compatibility during migration.
-                # Handlers are NOT claimed: configuration is handled by
-                # configure_cluster_configs/initialize_cluster_configs.
-                server_cluster_handlers = _resolve_cluster_handlers_for_match(
-                    endpoint, match
+                cluster_handlers.extend(
+                    _resolve_cluster_handlers_for_match(endpoint, match)
                 )
-                client_cluster_handlers = _resolve_client_cluster_handlers_for_match(
-                    endpoint, match
+                cluster_handlers.extend(
+                    _resolve_client_cluster_handlers_for_match(endpoint, match)
+                )
+
+                primary_cluster_id = next(
+                    iter(
+                        match.server_clusters
+                        | match.client_clusters
+                        | match.optional_server_clusters
+                        | match.optional_client_clusters
+                    ),
+                    None,
+                )
+                if primary_cluster_id is None:
+                    _LOGGER.error(
+                        "ClusterMatch entity %s has no cluster ids declared",
+                        entity_class.__name__,
+                    )
+                    continue
+                legacy_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{primary_cluster_id}"
                 )
             else:
                 server_handlers = set(match.cluster_handlers)
@@ -655,51 +672,31 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                     for name in client_handlers
                 ]
 
-            # Claim on endpoint (only for legacy ClusterHandlerMatch entities)
-            if not isinstance(match, ClusterMatch):
+                # Legacy ClusterHandlerMatch entities still claim handlers
                 endpoint.claim_cluster_handlers(server_cluster_handlers)
                 endpoint.claim_cluster_handlers(client_cluster_handlers)
 
+                cluster_handlers = (
+                    server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
+                )
+
+                primary_handler = cluster_handlers[0]
+                legacy_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{primary_handler.cluster.cluster_id}"
+                )
+
             _LOGGER.debug(
-                "'%s' platform -> '%s' using %s + %s",
+                "'%s' platform -> '%s'",
                 entity_class.PLATFORM,
                 entity_class.__name__,
-                [ch.name for ch in server_cluster_handlers],
-                [ch.name for ch in client_cluster_handlers],
             )
-
-            # XXX: Combining server and client cluster handlers should not be done
-            cluster_handlers: list[ClusterHandler | ClientClusterHandler] = (
-                server_cluster_handlers + client_cluster_handlers  # type: ignore[operator]
-            )
-
-            init_kwargs: dict[str, Any] = {}
-            if isinstance(match, ClusterMatch) and not cluster_handlers:
-                # ClusterMatch entity with no resolved handler instance — derive
-                # the legacy unique_id from the match's primary cluster id so the
-                # entity can be constructed without going through a cluster
-                # handler. Needed for virtual entities that match clusters with
-                # no registered ClientClusterHandler.
-                primary_cluster_id = next(
-                    iter(
-                        match.server_clusters
-                        | match.client_clusters
-                        | match.optional_server_clusters
-                        | match.optional_client_clusters
-                    ),
-                    None,
-                )
-                if primary_cluster_id is not None:
-                    init_kwargs["legacy_discovery_unique_id"] = (
-                        f"{device.ieee}-{endpoint.id}-{primary_cluster_id}"
-                    )
 
             try:
                 entity = entity_class(
                     cluster_handlers=cluster_handlers,
                     endpoint=endpoint,
                     device=device,
-                    **init_kwargs,
+                    legacy_discovery_unique_id=legacy_unique_id,
                 )
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Failed to create %s entity", entity_class.__name__)

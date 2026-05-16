@@ -162,6 +162,7 @@ class Switch(PlatformEntity, BaseSwitch):
             )
             else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}"
         )
+        kwargs.pop("legacy_discovery_unique_id", None)
 
         super().__init__(
             cluster_handlers,
@@ -420,6 +421,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
                 }
                 else f"{endpoint.device.ieee}-{endpoint.id}-{int(cluster_handlers[0].cluster.cluster_id)}"
             )
+        kwargs.pop("legacy_discovery_unique_id", None)
 
         super().__init__(
             cluster_handlers,

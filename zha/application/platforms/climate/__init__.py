@@ -346,6 +346,7 @@ class Thermostat(BaseThermostat):
             if endpoint.zigpy_endpoint.device_type == zha.DeviceType.THERMOSTAT
             else f"{endpoint.device.ieee}-{endpoint.id}-{int(ThermostatCluster.cluster_id)}"
         )
+        kwargs.pop("legacy_discovery_unique_id", None)
         super().__init__(
             cluster_handlers,
             endpoint,

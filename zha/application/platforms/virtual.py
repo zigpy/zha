@@ -63,34 +63,26 @@ class VirtualEntity(PlatformEntity):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Initialize the virtual entity."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         # Cache the (single) cluster this virtual entity drives, for the
         # cluster_command listener hook.
-        if cluster_handlers:
-            self._cluster: zigpy.zcl.Cluster | None = cluster_handlers[0].cluster
-        else:
-            # No cluster handler was resolved (e.g. virtual entity matches a
-            # client cluster with no registered ClientClusterHandler). Look up
-            # the cluster directly from the endpoint via this entity's declared
-            # cluster config.
-            self._cluster = None
-            for cluster_id in self._server_cluster_config:
-                cluster = endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
+        self._cluster: zigpy.zcl.Cluster | None = None
+        for cluster_id in self._server_cluster_config:
+            cluster = endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
+            if cluster is not None:
+                self._cluster = cluster
+                break
+        if self._cluster is None:
+            for cluster_id in self._client_cluster_config:
+                cluster = endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
                 if cluster is not None:
                     self._cluster = cluster
                     break
-            if self._cluster is None:
-                for cluster_id in self._client_cluster_config:
-                    cluster = endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
-                    if cluster is not None:
-                        self._cluster = cluster
-                        break
 
     def on_add(self) -> None:
         """Subscribe to incoming cluster commands and attribute events."""
@@ -263,13 +255,12 @@ class OnOffClientCacheSync(VirtualEntity):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Initialize the OnOff client cache sync."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._off_listener: asyncio.TimerHandle | None = None
 
     @property

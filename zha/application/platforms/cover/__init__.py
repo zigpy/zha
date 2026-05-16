@@ -185,6 +185,7 @@ class Cover(BaseCover):
         **kwargs,
     ) -> None:
         """Init this cover."""
+        kwargs.pop("legacy_discovery_unique_id", None)
         legacy_discovery_unique_id = (
             f"{endpoint.device.ieee}-{endpoint.id}"
             if (
@@ -826,6 +827,7 @@ class Shade(BaseCover):
         **kwargs,
     ) -> None:
         """Initialize the ZHA shade."""
+        kwargs.pop("legacy_discovery_unique_id", None)
         super().__init__(
             cluster_handlers,
             endpoint,

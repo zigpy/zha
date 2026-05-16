@@ -35,6 +35,7 @@ from zha.application.const import (
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
+from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
@@ -87,6 +88,26 @@ async def safe_read(
         return result
     except Exception:  # pylint: disable=broad-except
         return {}
+
+
+async def write_attributes_safe(
+    cluster: zigpy.zcl.Cluster,
+    attributes: dict[str, Any],
+    manufacturer: int | UndefinedType | None = UNDEFINED,
+) -> None:
+    """Write attributes and raise on any per-attribute failure."""
+    res = await cluster.write_attributes(attributes, manufacturer=manufacturer)
+    for record in res[0]:
+        if record.status != foundation.Status.SUCCESS:
+            try:
+                name = cluster.attributes[record.attrid].name
+                value = attributes.get(name, "unknown")
+            except KeyError:
+                name = f"0x{record.attrid:04x}"
+                value = "unknown"
+            raise ZHAException(
+                f"Failed to write attribute {name}={value}: {record.status}",
+            )
 
 
 async def get_matched_clusters(

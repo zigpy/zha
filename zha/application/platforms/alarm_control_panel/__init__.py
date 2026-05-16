@@ -157,6 +157,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
             )
             else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasAce.cluster_id)}"
         )
+        kwargs.pop("legacy_discovery_unique_id", None)
         super().__init__(
             cluster_handlers,
             endpoint,
