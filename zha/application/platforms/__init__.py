@@ -28,7 +28,6 @@ from zha.mixins import LogMixin
 from zha.zigbee.cluster_handlers import ClusterHandlerInfo
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group
@@ -130,29 +129,6 @@ class ClusterMatch:
     # they don't care about cluster semantics — only that the cluster_id is
     # what they target.
     match_renamed_clusters: bool = False
-
-
-@dataclasses.dataclass(frozen=True)
-class ClusterHandlerMatch:
-    """Declares cluster handler requirements for an entity class."""
-
-    cluster_handlers: frozenset[str] = frozenset()
-    client_cluster_handlers: frozenset[str] = frozenset()
-    optional_cluster_handlers: frozenset[str] = frozenset()
-
-    # Strict filters: if present, device info must match
-    manufacturers: frozenset[str] | None = None
-    models: frozenset[str] | None = None
-    exposed_features: frozenset[str] | None = None
-    not_exposed_features: frozenset[str] | None = None
-
-    # If present, device must match one of the given profile and device type combinations.
-    # This will be ignored if `platform_override` is used.
-    profile_device_types: frozenset[tuple[int, int]] | None = None
-    not_profile_device_types: frozenset[tuple[int, int]] | None = None
-
-    # For a given feature, only entities with the highest priority will be considered
-    feature_priority: tuple[PlatformFeatureGroup, int] | None = None
 
 
 def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
@@ -514,34 +490,23 @@ class PlatformEntity(BaseEntity):
 
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
-    # Legacy: Auto-discovery for the entity (being phased out)
-    _cluster_handler_match: ClusterHandlerMatch | None = None
-
-    # New: Direct cluster matching for discovery
+    # Direct cluster matching for discovery
     _cluster_match: ClusterMatch | None = None
 
-    # New: Per-cluster configuration (keyed by cluster ID)
+    # Per-cluster configuration (keyed by cluster ID)
     _server_cluster_config: dict[int, ClusterConfig] = {}
     _client_cluster_config: dict[int, ClusterConfig] = {}
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler] | None = None,
-        endpoint: Endpoint | None = None,
-        device: Device | None = None,
+        endpoint: Endpoint,
+        device: Device,
         *,
         entity_metadata: EntityMetadata | None = None,
         legacy_discovery_unique_id: str,
         **kwargs: Any,
     ):
-        """Initialize the platform entity.
-
-        `cluster_handlers` is kept for legacy entity classes that haven't been
-        migrated to direct-cluster access. New entity classes should access
-        clusters directly via `endpoint.zigpy_endpoint.<attr>` and ignore the
-        param. TODO: remove `cluster_handlers` entirely once all entities are
-        migrated.
-        """
+        """Initialize the platform entity."""
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
 
@@ -552,19 +517,8 @@ class PlatformEntity(BaseEntity):
 
         super().__init__(unique_id=unique_id, **kwargs)
 
-        assert endpoint is not None
-        assert device is not None
         self._device: Device = device
         self._endpoint = endpoint
-        self._cluster_handlers: list[ClusterHandler] = list(cluster_handlers or [])
-
-    @property
-    def cluster_handlers(self) -> dict[str, ClusterHandler]:
-        """Legacy: cluster handlers dict keyed by ep_attribute.
-
-        TODO: remove once all entity classes access clusters directly.
-        """
-        return {ch.name: ch for ch in self._cluster_handlers}
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -621,7 +575,7 @@ class PlatformEntity(BaseEntity):
         """Return a representation of the platform entity."""
         return dataclasses.replace(
             super().info_object,
-            cluster_handlers=[ch.info_object for ch in self._cluster_handlers],
+            cluster_handlers=[],
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
             available=self.available,

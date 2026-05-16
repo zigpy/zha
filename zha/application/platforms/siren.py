@@ -8,7 +8,7 @@ import contextlib
 from dataclasses import dataclass
 from enum import IntFlag
 import functools
-from typing import TYPE_CHECKING, Any, Final, cast
+from typing import TYPE_CHECKING, Any, Final
 
 from zhaquirks.quirk_ids import SIREN_BASIC
 from zigpy.profiles import zha
@@ -28,6 +28,7 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
+from zha.application.helpers import cluster_runtime_state
 from zha.application.platforms import (
     BaseEntityInfo,
     ClusterConfig,
@@ -36,12 +37,42 @@ from zha.application.platforms import (
     PlatformFeatureGroup,
     register_entity,
 )
-from zha.zigbee.cluster_handlers.security import IasWdClusterHandler
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
+
+
+def _set_bit(destination_value, destination_bit, source_value, source_bit):
+    """Set the specified bit in the value."""
+    if (source_value & (1 << source_bit)) != 0:
+        return destination_value | (1 << destination_bit)
+    return destination_value
+
+
+async def _issue_start_warning(
+    cluster,
+    *,
+    mode,
+    strobe,
+    siren_level,
+    warning_duration,
+    strobe_duty_cycle,
+    strobe_intensity,
+) -> None:
+    """Issue an IAS WD start_warning command with packed warning byte."""
+    value = 0
+    value = _set_bit(value, 0, siren_level, 0)
+    value = _set_bit(value, 1, siren_level, 1)
+    value = _set_bit(value, 2, strobe, 0)
+    value = _set_bit(value, 4, mode, 0)
+    value = _set_bit(value, 5, mode, 1)
+    value = _set_bit(value, 6, mode, 2)
+    value = _set_bit(value, 7, mode, 3)
+
+    await cluster.start_warning(
+        value, warning_duration, strobe_duty_cycle, strobe_intensity
+    )
 
 DEFAULT_DURATION = 5  # seconds
 
@@ -126,7 +157,6 @@ class BaseSiren(PlatformEntity, ABC):
 class BaseZclSiren(BaseSiren, ABC):
     """Base class for ZHA IAS WD siren entities with shared ZCL logic."""
 
-    _cluster_handler: IasWdClusterHandler
     _off_listener: asyncio.TimerHandle | None
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IasWd.cluster_id}),
@@ -139,13 +169,12 @@ class BaseZclSiren(BaseSiren, ABC):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init ZCL siren base."""
-        self._cluster_handler = cast(IasWdClusterHandler, cluster_handlers[0])
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[IasWd.cluster_id]
         self._off_listener = None
 
         legacy_discovery_unique_id = (
@@ -158,9 +187,8 @@ class BaseZclSiren(BaseSiren, ABC):
         kwargs.pop("legacy_discovery_unique_id", None)
 
         super().__init__(
-            cluster_handlers,
-            endpoint,
-            device,
+            endpoint=endpoint,
+            device=device,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
             **kwargs,
         )
@@ -177,8 +205,14 @@ class BaseZclSiren(BaseSiren, ABC):
 
     async def async_turn_off(self) -> None:
         """Turn off siren."""
-        await self._cluster_handler.issue_start_warning(
-            mode=WARNING_DEVICE_MODE_STOP, strobe=WARNING_DEVICE_STROBE_NO
+        await _issue_start_warning(
+            self._cluster,
+            mode=WARNING_DEVICE_MODE_STOP,
+            strobe=WARNING_DEVICE_STROBE_NO,
+            siren_level=IasWd.Warning.SirenLevel.High_level_sound,
+            warning_duration=5,
+            strobe_duty_cycle=0,
+            strobe_intensity=IasWd.StrobeLevel.High_level_strobe,
         )
         self._cancel_off_listener()
         self._attr_is_on = False
@@ -205,13 +239,12 @@ class AdvancedSiren(BaseZclSiren):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this siren."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_supported_features = (
             SirenEntityFeature.TURN_ON
             | SirenEntityFeature.TURN_OFF
@@ -236,28 +269,23 @@ class AdvancedSiren(BaseZclSiren):
     ) -> None:
         """Turn on siren."""
         self._cancel_off_listener()
-        tone_cache = self._cluster_handler.data_cache.get(
-            IasWd.Warning.WarningMode.__name__
-        )
+        cache = cluster_runtime_state(self._cluster)
+        tone_cache = cache.get(IasWd.Warning.WarningMode.__name__)
         siren_tone = (
             tone_cache.value
             if tone_cache is not None
             else WARNING_DEVICE_MODE_EMERGENCY
         )
         siren_duration = DEFAULT_DURATION
-        level_cache = self._cluster_handler.data_cache.get(
-            IasWd.Warning.SirenLevel.__name__
-        )
+        level_cache = cache.get(IasWd.Warning.SirenLevel.__name__)
         siren_level = (
             level_cache.value if level_cache is not None else WARNING_DEVICE_SOUND_HIGH
         )
-        strobe_cache = self._cluster_handler.data_cache.get(Strobe.__name__)
+        strobe_cache = cache.get(Strobe.__name__)
         should_strobe = (
             strobe_cache.value if strobe_cache is not None else Strobe.No_Strobe
         )
-        strobe_level_cache = self._cluster_handler.data_cache.get(
-            IasWd.StrobeLevel.__name__
-        )
+        strobe_level_cache = cache.get(IasWd.StrobeLevel.__name__)
         strobe_level = (
             strobe_level_cache.value
             if strobe_level_cache is not None
@@ -269,7 +297,8 @@ class AdvancedSiren(BaseZclSiren):
             siren_tone = tone
         if volume_level is not None:
             siren_level = int(volume_level)
-        await self._cluster_handler.issue_start_warning(
+        await _issue_start_warning(
+            self._cluster,
             mode=siren_tone,
             warning_duration=siren_duration,
             siren_level=siren_level,
@@ -300,13 +329,12 @@ class BasicSiren(BaseZclSiren):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this basic siren."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_supported_features = (
             SirenEntityFeature.TURN_ON
             | SirenEntityFeature.TURN_OFF
@@ -323,7 +351,8 @@ class BasicSiren(BaseZclSiren):
         """Turn on siren with fixed tone, level, and strobe."""
         self._cancel_off_listener()
         siren_duration = duration if duration is not None else DEFAULT_DURATION
-        await self._cluster_handler.issue_start_warning(
+        await _issue_start_warning(
+            self._cluster,
             # some Frient sensors send INVALID_VALUE for EMERGENCY
             mode=WARNING_DEVICE_MODE_BURGLAR,
             warning_duration=siren_duration,

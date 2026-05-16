@@ -17,13 +17,19 @@ from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.clusters.measurement import OccupancySensing
 from zigpy.zcl.clusters.security import IasZone
 
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
+
 from zha.application import Platform
 from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
     BaseEntityInfo,
     ClusterConfig,
-    ClusterHandlerMatch,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
@@ -35,11 +41,8 @@ from zha.application.platforms.binary_sensor.const import (
     BinarySensorDeviceClass,
 )
 from zha.application.platforms.helpers import validate_device_class
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
-    CLUSTER_HANDLER_ACCELEROMETER,
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
     IKEA_AIR_PURIFIER_CLUSTER,
     REPORT_CONFIG_IMMEDIATE,
     SMARTTHINGS_ACCELERATION_CLUSTER,
@@ -47,7 +50,6 @@ from zha.zigbee.cluster_handlers.const import (
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -86,29 +88,38 @@ class BinarySensor(BaseBinarySensor):
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
     _attribute_converter: Callable[[Any], Any] | None = None
+    _cluster_id: int
+    _is_client_cluster: bool = False
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs,
     ) -> None:
         """Initialize the ZHA binary sensor."""
-        self._cluster_handler = cluster_handlers[0]
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        if self._is_client_cluster:
+            self._cluster = endpoint.zigpy_endpoint.out_clusters[self._cluster_id]
+        else:
+            self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._state: bool = self.is_on
         self.recompute_capabilities()
 
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
 
     def _init_from_quirks_metadata(self, entity_metadata: BinarySensorMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -135,22 +146,24 @@ class BinarySensor(BaseBinarySensor):
     @property
     def is_on(self) -> bool:
         """Return True if the switch is on based on the state machine."""
-        self._state = raw_state = self._cluster_handler.cluster.get(
-            self._attribute_name
-        )
+        self._state = raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return False
         if self._attribute_converter:
             return self._attribute_converter(raw_state)
         return self.parse(raw_state)
 
-    def handle_cluster_handler_attribute_updated(
-        self, event: ClusterAttributeUpdatedEvent
+    def handle_attribute_updated(
+        self,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
     ) -> None:
-        """Handle attribute updates from the cluster handler."""
+        """Handle attribute updates from the cluster."""
         if self._attribute_name is None or self._attribute_name != event.attribute_name:
             return
-        self._state = bool(event.attribute_value)
+        self._state = bool(event.value)
         self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
@@ -158,7 +171,7 @@ class BinarySensor(BaseBinarySensor):
         self.debug("polling current state")
         attribute = self._attribute_name or "on_off"
         result = await safe_read(
-            self._cluster_handler.cluster,
+            self._cluster,
             [attribute],
             allow_cache=False,
             only_cache=False,
@@ -181,9 +194,10 @@ class Accelerometer(BinarySensor):
     _attribute_name = "acceleration"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOVING
     _attr_translation_key: str = "accelerometer"
+    _cluster_id = SMARTTHINGS_ACCELERATION_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_ACCELEROMETER})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SMARTTHINGS_ACCELERATION_CLUSTER}),
     )
 
 
@@ -194,6 +208,7 @@ class Occupancy(BinarySensor):
     _attribute_name = "occupancy"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OCCUPANCY
     _attr_primary_weight = 2
+    _cluster_id = OccupancySensing.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({OccupancySensing.cluster_id}),
@@ -225,6 +240,8 @@ class Opening(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_primary_weight = 1
+    _cluster_id = OnOff.cluster_id
+    _is_client_cluster = True
 
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
@@ -257,6 +274,7 @@ class BinaryInputWithDescription(BinarySensor):
     """ZHA BinarySensor."""
 
     _attribute_name = "present_value"
+    _cluster_id = BinaryInputCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({BinaryInputCluster.cluster_id}),
@@ -280,10 +298,15 @@ class BinaryInputWithDescription(BinarySensor):
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
-        self._attr_fallback_name = self._cluster_handler.description
+        self._attr_fallback_name = self._cluster.get(
+            BinaryInputCluster.AttributeDefs.description.name
+        )
 
     def _is_supported(self) -> bool:
-        if self._cluster_handler.description is None:
+        if (
+            self._cluster.get(BinaryInputCluster.AttributeDefs.description.name)
+            is None
+        ):
             return False
 
         return super()._is_supported()
@@ -295,6 +318,7 @@ class BinaryInput(BinarySensor):
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "binary_input"
+    _cluster_id = BinaryInputCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({BinaryInputCluster.cluster_id}),
@@ -317,7 +341,10 @@ class BinaryInput(BinarySensor):
 
     def _is_supported(self) -> bool:
         # Prefer to use the "WithDescription" variant above
-        if self._cluster_handler.description is not None:
+        if (
+            self._cluster.get(BinaryInputCluster.AttributeDefs.description.name)
+            is not None
+        ):
             return False
 
         return super()._is_supported()
@@ -330,6 +357,8 @@ class IkeaMotion(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
+    _cluster_id = OnOff.cluster_id
+    _is_client_cluster = True
 
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
@@ -346,6 +375,8 @@ class PhilipsMotion(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
+    _cluster_id = OnOff.cluster_id
+    _is_client_cluster = True
 
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
@@ -361,6 +392,7 @@ class IASZone(BinarySensor):
 
     _attribute_name = "zone_status"
     _attr_primary_weight = 3
+    _cluster_id = IasZone.cluster_id
 
     # TODO: split this sensor off into individual sensor classes per IASZone type
 
@@ -388,7 +420,7 @@ class IASZone(BinarySensor):
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
-        zone_type = self._cluster_handler.cluster.get("zone_type")
+        zone_type = self._cluster.get(IasZone.AttributeDefs.zone_type.name)
 
         if zone_type is None:
             self._attr_translation_key = "ias_zone"
@@ -410,7 +442,7 @@ class IASZone(BinarySensor):
         """Attempt to retrieve on off state from the IAS Zone sensor."""
         self.debug("polling current state")
         await safe_read(
-            self._cluster_handler.cluster,
+            self._cluster,
             [self._attribute_name],
             allow_cache=False,
             only_cache=False,
@@ -425,6 +457,7 @@ class SinopeLeakStatus(BinarySensor):
     _attribute_name = "leak_status"
     _attr_device_class = BinarySensorDeviceClass.MOISTURE
     _attr_primary_weight = 1
+    _cluster_id = IasZone.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IasZone.cluster_id}),
@@ -440,9 +473,10 @@ class FrostLock(BinarySensor):
     _unique_id_suffix = "frost_lock"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.LOCK
     _attr_translation_key: str = "frost_lock"
+    _cluster_id = TUYA_MANUFACTURER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"tuya_manufacturer"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
     )
 
@@ -456,9 +490,10 @@ class ReplaceFilter(BinarySensor):
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
     _attr_translation_key: str = "replace_filter"
+    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"ikea_airpurifier"})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
@@ -469,9 +504,10 @@ class AqaraPetFeederErrorDetected(BinarySensor):
     _attribute_name = "error_detected"
     _unique_id_suffix = "error_detected"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -484,9 +520,10 @@ class XiaomiPlugConsumerConnected(BinarySensor):
     _unique_id_suffix = "consumer_connected"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PLUG
     _attr_translation_key: str = "consumer_connected"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
     )
 
@@ -498,9 +535,10 @@ class AqaraThermostatWindowOpen(BinarySensor):
     _attribute_name = "window_open"
     _unique_id_suffix = "window_open"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.WINDOW
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
@@ -513,9 +551,10 @@ class AqaraThermostatValveAlarm(BinarySensor):
     _unique_id_suffix = "valve_alarm"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.PROBLEM
     _attr_translation_key: str = "valve_alarm"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
@@ -528,9 +567,10 @@ class AqaraThermostatCalibrated(BinarySensor):
     _unique_id_suffix = "calibrated"
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
     _attr_translation_key: str = "calibrated"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
@@ -543,9 +583,10 @@ class AqaraThermostatExternalSensor(BinarySensor):
     _unique_id_suffix = "sensor"
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
     _attr_translation_key: str = "external_sensor"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
@@ -558,9 +599,10 @@ class AqaraLinkageAlarmState(BinarySensor):
     _unique_id_suffix = "linkage_alarm_state"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.SMOKE
     _attr_translation_key: str = "linkage_alarm_state"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.sensor_smoke.acn03"}),
     )
 
@@ -573,9 +615,10 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
     _attribute_name = "hand_open"
     _attr_translation_key = "hand_open"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
 
@@ -589,6 +632,7 @@ class DanfossMountingModeActive(BinarySensor):
     _attr_translation_key: str = "mounting_mode_active"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -603,6 +647,7 @@ class DanfossHeatRequired(BinarySensor):
     _unique_id_suffix = "heat_required"
     _attribute_name = "heat_required"
     _attr_translation_key: str = "heat_required"
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -619,6 +664,7 @@ class DanfossPreheatStatus(BinarySensor):
     _attr_translation_key: str = "preheat_status"
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),

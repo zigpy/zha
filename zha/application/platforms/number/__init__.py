@@ -15,12 +15,19 @@ from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.clusters.lighting import Ballast, Color
 from zigpy.zcl.clusters.measurement import OccupancySensing
 
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+)
+
 from zha.application import Platform
+from zha.application.helpers import safe_read, write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
     BaseEntityInfo,
     ClusterConfig,
-    ClusterHandlerMatch,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
@@ -31,12 +38,8 @@ from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
-    CLUSTER_HANDLER_ANALOG_OUTPUT,
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_INOVELLI,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     REPORT_CONFIG_ASAP,
@@ -52,7 +55,6 @@ from zha.zigbee.cluster_handlers.hvac import (
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -181,61 +183,77 @@ class AnalogOutputNumber(BaseNumber):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ):
         """Initialize the number."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-        self._analog_output_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_ANALOG_OUTPUT
-        ]
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[AnalogOutput.cluster_id]
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
 
-        analog_output = self._analog_output_cluster_handler
-        self._attr_native_min_value = analog_output.min_present_value or 0
-        self._attr_native_max_value = analog_output.max_present_value or 1023
-        self._attr_native_step = analog_output.resolution
+        min_val = self._cluster.get(AnalogOutput.AttributeDefs.min_present_value.name)
+        max_val = self._cluster.get(AnalogOutput.AttributeDefs.max_present_value.name)
+        self._attr_native_min_value = min_val or 0
+        self._attr_native_max_value = max_val or 1023
+        self._attr_native_step = self._cluster.get(
+            AnalogOutput.AttributeDefs.resolution.name
+        )
         self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
-            analog_output.engineering_units
+            self._cluster.get(AnalogOutput.AttributeDefs.engineering_units.name)
         )
 
-        if analog_output.application_type is not None:
-            self._attr_icon = ICONS.get(analog_output.application_type >> 16)
+        application_type = self._cluster.get(
+            AnalogOutput.AttributeDefs.application_type.name
+        )
+        if application_type is not None:
+            self._attr_icon = ICONS.get(application_type >> 16)
         else:
             self._attr_icon = None
 
-        self._attr_fallback_name = analog_output.description
+        self._attr_fallback_name = self._cluster.get(
+            AnalogOutput.AttributeDefs.description.name
+        )
 
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._analog_output_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
 
     @property
     def native_value(self) -> float | None:
         """Return the current value."""
-        return self._analog_output_cluster_handler.present_value
+        return self._cluster.get(AnalogOutput.AttributeDefs.present_value.name)
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
-        await self._analog_output_cluster_handler.async_set_present_value(float(value))
+        await write_attributes_safe(
+            self._cluster,
+            {AnalogOutput.AttributeDefs.present_value.name: float(value)},
+        )
         self.maybe_emit_state_changed_event()
 
-    def handle_cluster_handler_attribute_updated(
+    def handle_attribute_updated(
         self,
-        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,  # pylint: disable=unused-argument
     ) -> None:
-        """Handle value update from cluster handler."""
+        """Handle value update from cluster."""
         self.maybe_emit_state_changed_event()
 
 
@@ -248,29 +266,24 @@ class NumberConfigurationEntity(BaseNumber):
     _attr_native_step: float = 1.0
     _multiplier: float = 1
     _attribute_name: str
+    _cluster_id: int
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
-        self._cluster_handler: ClusterHandler = cluster_handlers[0]
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""
         if (
-            (
-                self._attribute_name
-                not in self._cluster_handler.cluster.attributes_by_name
-            )
-            or self._cluster_handler.cluster.is_attribute_unsupported(
-                self._attribute_name
-            )
-            or self._cluster_handler.cluster.get(self._attribute_name) is None
+            self._attribute_name not in self._cluster.attributes_by_name
+            or self._cluster.is_attribute_unsupported(self._attribute_name)
+            or self._cluster.get(self._attribute_name) is None
         ):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
@@ -284,12 +297,17 @@ class NumberConfigurationEntity(BaseNumber):
     def on_add(self) -> None:
         """Initialize entity."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
 
     def _init_from_quirks_metadata(self, entity_metadata: NumberMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -326,34 +344,38 @@ class NumberConfigurationEntity(BaseNumber):
     @property
     def native_value(self) -> float | None:
         """Return the current value."""
-        value = self._cluster_handler.cluster.get(self._attribute_name)
+        value = self._cluster.get(self._attribute_name)
         if value is None:
             return None
         return value * self._multiplier
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value from HA."""
-        await self._cluster_handler.write_attributes_safe(
-            {self._attribute_name: int(value / self._multiplier)}
+        await write_attributes_safe(
+            self._cluster, {self._attribute_name: int(value / self._multiplier)}
         )
         self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
         """Attempt to retrieve the state of the entity."""
         _LOGGER.debug("polling current state")
-        if self._cluster_handler:
-            value = await self._cluster_handler.get_attribute_value(
-                self._attribute_name, from_cache=False
-            )
-            _LOGGER.debug("read value=%s", value)
-            # The attribute update handler below takes care of the rest
-            self.maybe_emit_state_changed_event()
+        result = await safe_read(
+            self._cluster,
+            [self._attribute_name],
+            allow_cache=False,
+            only_cache=False,
+        )
+        _LOGGER.debug("read value=%s", result.get(self._attribute_name))
+        self.maybe_emit_state_changed_event()
 
-    def handle_cluster_handler_attribute_updated(
+    def handle_attribute_updated(
         self,
-        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,  # pylint: disable=unused-argument
     ) -> None:
-        """Handle value update from cluster handler."""
+        """Handle value update from cluster."""
         if event.attribute_name == self._attribute_name:
             self.maybe_emit_state_changed_event()
 
@@ -367,9 +389,10 @@ class AqaraMotionDetectionInterval(NumberConfigurationEntity):
     _attr_native_max_value: float = 65535
     _attribute_name = "detection_interval"
     _attr_translation_key: str = "detection_interval"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.motion.ac02", "lumi.motion.agl04"}),
     )
 
@@ -383,6 +406,7 @@ class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFFFF
     _attribute_name = "on_off_transition_time"
     _attr_translation_key: str = "on_off_transition_time"
+    _cluster_id = LevelControl.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
@@ -428,6 +452,7 @@ class OnLevelConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFF
     _attribute_name = "on_level"
     _attr_translation_key: str = "on_level"
+    _cluster_id = LevelControl.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
@@ -443,6 +468,7 @@ class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFFFE
     _attribute_name = "on_transition_time"
     _attr_translation_key: str = "on_transition_time"
+    _cluster_id = LevelControl.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
@@ -458,6 +484,7 @@ class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFFFE
     _attribute_name = "off_transition_time"
     _attr_translation_key: str = "off_transition_time"
+    _cluster_id = LevelControl.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
@@ -474,6 +501,7 @@ class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFE
     _attribute_name = "default_move_rate"
     _attr_translation_key: str = "default_move_rate"
+    _cluster_id = LevelControl.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
@@ -489,6 +517,7 @@ class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFF
     _attribute_name = "start_up_current_level"
     _attr_translation_key: str = "start_up_current_level"
+    _cluster_id = LevelControl.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
@@ -504,6 +533,7 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 500
     _attribute_name = "start_up_color_temperature"
     _attr_translation_key: str = "start_up_color_temperature"
+    _cluster_id = Color.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Color.cluster_id}),
@@ -553,8 +583,18 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
-        self._attr_native_min_value = self._cluster_handler.min_mireds
-        self._attr_native_max_value = self._cluster_handler.max_mireds
+        min_mireds = self._cluster.get(
+            Color.AttributeDefs.color_temp_physical_min.name, 153
+        )
+        if min_mireds == 0:
+            min_mireds = 153
+        max_mireds = self._cluster.get(
+            Color.AttributeDefs.color_temp_physical_max.name, 500
+        )
+        if max_mireds == 0:
+            max_mireds = 500
+        self._attr_native_min_value = min_mireds
+        self._attr_native_max_value = max_mireds
 
 
 @register_entity(Ballast.cluster_id)
@@ -567,6 +607,7 @@ class BallastMinLevel(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFE
     _attribute_name = "min_level"
     _attr_translation_key: str = "minimum_dimming_level"
+    _cluster_id = Ballast.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Ballast.cluster_id}),
@@ -597,6 +638,7 @@ class BallastMaxLevel(NumberConfigurationEntity):
     _attr_native_max_value: float = 0xFE
     _attribute_name = "max_level"
     _attr_translation_key: str = "maximum_dimming_level"
+    _cluster_id = Ballast.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Ballast.cluster_id}),
@@ -614,6 +656,7 @@ class PIROccupiedToUnoccupiedDelayConfigurationEntity(NumberConfigurationEntity)
     _attr_native_unit_of_measurement: str = UnitOfTime.SECONDS
     _attribute_name = "pir_o_to_u_delay"
     _attr_translation_key: str = "pir_o_to_u_delay"
+    _cluster_id = OccupancySensing.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({OccupancySensing.cluster_id}),
@@ -649,6 +692,7 @@ class PIRUnoccupiedToOccupiedDelayConfigurationEntity(NumberConfigurationEntity)
     _attr_native_unit_of_measurement: str = UnitOfTime.SECONDS
     _attribute_name = "pir_u_to_o_delay"
     _attr_translation_key: str = "pir_u_to_o_delay"
+    _cluster_id = OccupancySensing.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({OccupancySensing.cluster_id}),
@@ -665,6 +709,7 @@ class SonoffPresenceSenorTimeout(NumberConfigurationEntity):
     _attr_native_max_value: int = 60
     _attribute_name = "ultrasonic_o_to_u_delay"
     _attr_translation_key: str = "presence_detection_timeout"
+    _cluster_id = OccupancySensing.cluster_id
 
     _attr_mode: NumberMode = NumberMode.BOX
 
@@ -685,9 +730,10 @@ class TimerDurationMinutes(NumberConfigurationEntity):
     _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
     _attribute_name = "timer_duration"
     _attr_translation_key: str = "timer_duration"
+    _cluster_id = TUYA_MANUFACTURER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"tuya_manufacturer"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
     )
 
@@ -703,9 +749,10 @@ class FilterLifeTime(NumberConfigurationEntity):
     _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
     _attribute_name = "filter_life_time"
     _attr_translation_key: str = "filter_life_time"
+    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"ikea_airpurifier"})
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
@@ -718,6 +765,7 @@ class TiRouterTransmitPower(NumberConfigurationEntity):
     _attr_native_max_value: float = 20
     _attribute_name = "transmit_power"
     _attr_translation_key: str = "transmit_power"
+    _cluster_id = Basic.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Basic.cluster_id}),
@@ -746,8 +794,10 @@ class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
     _attribute_name = "dimming_speed_up_remote"
     _attr_translation_key: str = "dimming_speed_up_remote"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -762,8 +812,10 @@ class InovelliButtonDelay(NumberConfigurationEntity):
     _attribute_name = "button_delay"
     _attr_translation_key: str = "button_delay"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -778,8 +830,10 @@ class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
     _attribute_name = "dimming_speed_up_local"
     _attr_translation_key: str = "dimming_speed_up_local"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -794,8 +848,10 @@ class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
     _attribute_name = "ramp_rate_off_to_on_local"
     _attr_translation_key: str = "ramp_rate_off_to_on_local"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -810,8 +866,10 @@ class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
     _attribute_name = "ramp_rate_off_to_on_remote"
     _attr_translation_key: str = "ramp_rate_off_to_on_remote"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -826,8 +884,10 @@ class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
     _attribute_name = "dimming_speed_down_remote"
     _attr_translation_key: str = "dimming_speed_down_remote"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -842,8 +902,10 @@ class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
     _attribute_name = "dimming_speed_down_local"
     _attr_translation_key: str = "dimming_speed_down_local"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -858,8 +920,10 @@ class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
     _attribute_name = "ramp_rate_on_to_off_local"
     _attr_translation_key: str = "ramp_rate_on_to_off_local"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -874,8 +938,10 @@ class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
     _attribute_name = "ramp_rate_on_to_off_remote"
     _attr_translation_key: str = "ramp_rate_on_to_off_remote"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -890,8 +956,10 @@ class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
     _attribute_name = "minimum_level"
     _attr_translation_key: str = "minimum_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -906,8 +974,10 @@ class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
     _attribute_name = "maximum_level"
     _attr_translation_key: str = "maximum_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -922,8 +992,10 @@ class InovelliAutoShutoffTimer(NumberConfigurationEntity):
     _attribute_name = "auto_off_timer"
     _attr_translation_key: str = "auto_off_timer"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -938,8 +1010,10 @@ class InovelliLocalDefaultLevel(NumberConfigurationEntity):
     _attribute_name = "default_level_local"
     _attr_translation_key: str = "default_level_local"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -954,8 +1028,10 @@ class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
     _attribute_name = "default_level_remote"
     _attr_translation_key: str = "default_level_remote"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -970,8 +1046,10 @@ class InovelliStartupDefaultLevel(NumberConfigurationEntity):
     _attribute_name = "state_after_power_restored"
     _attr_translation_key: str = "state_after_power_restored"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -986,8 +1064,10 @@ class InovelliQuickStartTime(NumberConfigurationEntity):
     _attribute_name = "quick_start_time"
     _attr_translation_key: str = "quick_start_time"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
         models=frozenset({"VZM35-SN"}),
     )
 
@@ -1003,8 +1083,10 @@ class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
     _attribute_name = "load_level_indicator_timeout"
     _attr_translation_key: str = "load_level_indicator_timeout"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1019,8 +1101,10 @@ class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
     _attribute_name = "led_color_when_on"
     _attr_translation_key: str = "led_color_when_on"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1035,8 +1119,10 @@ class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
     _attribute_name = "led_color_when_off"
     _attr_translation_key: str = "led_color_when_off"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1051,8 +1137,10 @@ class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
     _attribute_name = "led_intensity_when_on"
     _attr_translation_key: str = "led_intensity_when_on"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1067,8 +1155,10 @@ class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
     _attribute_name = "led_intensity_when_off"
     _attr_translation_key: str = "led_intensity_when_off"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1083,8 +1173,10 @@ class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
     _attribute_name = "double_tap_up_level"
     _attr_translation_key: str = "double_tap_up_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1099,8 +1191,10 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     _attribute_name = "double_tap_down_level"
     _attr_translation_key: str = "double_tap_down_level"
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI})
+    _cluster_id = INOVELLI_CLUSTER
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -1114,11 +1208,12 @@ class AqaraPetFeederServingSize(NumberConfigurationEntity):
     _attr_native_max_value: float = 10
     _attribute_name = "serving_size"
     _attr_translation_key: str = "serving_size"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
     _attr_mode: NumberMode = NumberMode.BOX
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -1133,12 +1228,13 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
     _attr_native_max_value: float = 100
     _attribute_name = "portion_weight"
     _attr_translation_key: str = "portion_weight"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfMass.GRAMS
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -1154,12 +1250,13 @@ class AqaraThermostatAwayTemp(NumberConfigurationEntity):
     _multiplier: float = 0.01
     _attribute_name = "away_preset_temperature"
     _attr_translation_key: str = "away_preset_temperature"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
     _attr_mode: NumberMode = NumberMode.SLIDER
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
@@ -1175,6 +1272,7 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
     _multiplier: float = 0.1
     _attribute_name = "local_temperature_calibration"
     _attr_translation_key: str = "local_temperature_calibration"
+    _cluster_id = Thermostat.cluster_id
 
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTemperature.CELSIUS
@@ -1328,13 +1426,13 @@ class ZCLHeatSetpointLimitEntity(ZCLTemperatureEntity):
         """Recompute capabilities."""
         super().recompute_capabilities()
         self._attr_native_min_value = (
-            self._cluster_handler.cluster.get(
+            self._cluster.get(
                 Thermostat.AttributeDefs.abs_min_heat_setpoint_limit.name, -27315
             )
             * self._multiplier
         )
         self._attr_native_max_value = (
-            self._cluster_handler.cluster.get(
+            self._cluster.get(
                 Thermostat.AttributeDefs.abs_max_heat_setpoint_limit.name, 0x7FFF
             )
             * self._multiplier
@@ -1352,6 +1450,7 @@ class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     _attribute_name: str = "max_heat_setpoint_limit"
     _attr_translation_key: str = "max_heat_setpoint_limit"
     _attr_entity_category = EntityCategory.CONFIG
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -1361,7 +1460,7 @@ class MaxHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
         """Recompute capabilities."""
         super().recompute_capabilities()
         self._attr_native_min_value = (
-            self._cluster_handler.cluster.get(
+            self._cluster.get(
                 Thermostat.AttributeDefs.min_heat_setpoint_limit.name, -27315
             )
             * self._multiplier
@@ -1379,6 +1478,7 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
     _attribute_name: str = "min_heat_setpoint_limit"
     _attr_translation_key: str = "min_heat_setpoint_limit"
     _attr_entity_category = EntityCategory.CONFIG
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -1388,7 +1488,7 @@ class MinHeatSetpointLimit(ZCLHeatSetpointLimitEntity):
         """Recompute capabilities."""
         super().recompute_capabilities()
         self._attr_native_max_value = (
-            self._cluster_handler.cluster.get(
+            self._cluster.get(
                 Thermostat.AttributeDefs.max_heat_setpoint_limit.name, 0x7FFF
             )
             * self._multiplier
@@ -1406,6 +1506,7 @@ class DanfossExerciseTriggerTime(NumberConfigurationEntity):
     _attr_native_max_value: int = 1439
     _attr_mode: NumberMode = NumberMode.BOX
     _attr_native_unit_of_measurement: str = UnitOfTime.MINUTES
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -1422,6 +1523,7 @@ class DanfossExternalMeasuredRoomSensor(ZCLTemperatureEntity):
     _attr_translation_key: str = "external_temperature_sensor"
     _attr_native_min_value: float = -80
     _attr_native_max_value: float = 35
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -1439,6 +1541,7 @@ class DanfossLoadRoomMean(NumberConfigurationEntity):
     _attr_native_min_value: int = -8000
     _attr_native_max_value: int = 2000
     _attr_mode: NumberMode = NumberMode.BOX
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -1459,6 +1562,7 @@ class DanfossRegulationSetpointOffset(NumberConfigurationEntity):
     _attr_native_max_value: float = 2.5
     _attr_native_step: float = 0.1
     _multiplier = 1 / 10
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -1476,9 +1580,10 @@ class SinopeDimmerOnLevelConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 255
     _attribute_name = "on_intensity"
     _attr_translation_key: str = "on_level"
+    _cluster_id = SINOPE_MANUFACTURER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
         models=frozenset({"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"}),
     )
 
@@ -1493,9 +1598,10 @@ class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 100
     _attribute_name = "on_led_intensity"
     _attr_translation_key: str = "on_led_intensity"
+    _cluster_id = SINOPE_MANUFACTURER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
         models=frozenset(
             {
                 "DM2500ZB",
@@ -1519,9 +1625,10 @@ class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
     _attr_native_max_value: float = 100
     _attribute_name = "off_led_intensity"
     _attr_translation_key: str = "off_led_intensity"
+    _cluster_id = SINOPE_MANUFACTURER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"sinope_manufacturer_specific"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
         models=frozenset(
             {
                 "DM2500ZB",

@@ -13,14 +13,20 @@ import logging
 import math
 import numbers
 import typing
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
-from zigpy.zcl import foundation
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    foundation,
+)
 from zigpy.zcl.clusters.closures import WindowCovering
 from zigpy.zcl.clusters.general import (
     AnalogInput,
@@ -59,7 +65,6 @@ from zha.application.platforms import (
     BaseEntityInfo,
     BaseIdentifiers,
     ClusterConfig,
-    ClusterHandlerMatch,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
@@ -103,11 +108,8 @@ from zha.units import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
 from zha.zigbee.cluster_handlers.const import (
     AQARA_OPPLE_CLUSTER,
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_INOVELLI,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     REPORT_CONFIG_ASAP,
@@ -121,14 +123,15 @@ from zha.zigbee.cluster_handlers.const import (
     SONOFF_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.zigbee.cluster_handlers.general import ApplicationType
 from zha.zigbee.cluster_handlers.hvac import (
     REPORT_CONFIG_CLIMATE,
     REPORT_CONFIG_CLIMATE_DEMAND,
     REPORT_CONFIG_CLIMATE_DISCRETE,
 )
+from zha.zigbee.cluster_handlers.smartenergy import MeteringClusterHandler
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 
@@ -237,46 +240,51 @@ class Sensor(BaseSensor):
     _divisor: int | float | None = None
     _multiplier: int | float | None = None
     _skip_creation_if_no_attr_cache: bool = False
+    _cluster_id: int
+    _is_client_cluster: bool = False
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        self._cluster_handler: ClusterHandler = cluster_handlers[0]
+        if self._is_client_cluster:
+            self._cluster = endpoint.zigpy_endpoint.out_clusters[self._cluster_id]
+        else:
+            self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         self._attr_def: foundation.ZCLAttributeDef | None = None
 
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
 
         # After super() for quirks v2 entities
         if self._attribute_name is not None:
             # Invalid attribute names filtered by is_supported
             with contextlib.suppress(KeyError):
-                self._attr_def = self._cluster_handler.cluster.find_attribute(
-                    self._attribute_name
-                )
+                self._attr_def = self._cluster.find_attribute(self._attribute_name)
 
         self.recompute_capabilities()
 
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
-        self._on_remove_callbacks.append(
-            self._cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
 
     def _is_supported(self) -> bool:
         if (
-            self._attribute_name not in self._cluster_handler.cluster.attributes_by_name
-        ) or self._cluster_handler.cluster.is_attribute_unsupported(
-            self._attribute_name
-        ):
+            self._attribute_name not in self._cluster.attributes_by_name
+        ) or self._cluster.is_attribute_unsupported(self._attribute_name):
             _LOGGER.debug(
                 "%s is not supported - skipping %s entity creation",
                 self._attribute_name,
@@ -286,7 +294,7 @@ class Sensor(BaseSensor):
 
         if (
             self._skip_creation_if_no_attr_cache
-            and self._cluster_handler.cluster.get(self._attribute_name) is None
+            and self._cluster.get(self._attribute_name) is None
         ):
             return False
 
@@ -335,7 +343,7 @@ class Sensor(BaseSensor):
     def native_value(self) -> date | datetime | str | int | float | None:
         """Return the state of the entity."""
         assert self._attribute_name is not None
-        raw_state = self._cluster_handler.cluster.get(self._attribute_name)
+        raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return None
         if self._is_non_value(raw_state):
@@ -344,11 +352,14 @@ class Sensor(BaseSensor):
             return self._attribute_converter(raw_state)
         return self.formatter(raw_state)
 
-    def handle_cluster_handler_attribute_updated(
+    def handle_attribute_updated(
         self,
-        event: ClusterAttributeUpdatedEvent,  # pylint: disable=unused-argument
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,  # pylint: disable=unused-argument
     ) -> None:
-        """Handle attribute updates from the cluster handler."""
+        """Handle attribute updates from the cluster."""
         if (
             event.attribute_name == self._attribute_name
             or (
@@ -390,7 +401,7 @@ class Sensor(BaseSensor):
             return
         self.debug("polling current state")
         await safe_read(
-            self._cluster_handler.cluster,
+            self._cluster,
             [self._attribute_name],
             allow_cache=False,
             only_cache=False,
@@ -411,13 +422,12 @@ class PollableSensor(Sensor):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._polling_task: Task | None = None
 
     def on_add(self) -> None:
@@ -595,13 +605,12 @@ class EnumSensor(Sensor):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_options = [e.name for e in self._enum]
 
         # XXX: This class is not meant to be initialized directly, as `unique_id`
@@ -626,6 +635,7 @@ class DigiAnalogInput(Sensor):
 
     _attribute_name = "present_value"
     _attr_translation_key: str = "analog_input"
+    _cluster_id = AnalogInput.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({AnalogInput.cluster_id}),
@@ -679,6 +689,7 @@ class AnalogInputSensor(Sensor):
     _attribute_name = "present_value"
     _unique_id_suffix = "analog_input"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _cluster_id = AnalogInput.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({AnalogInput.cluster_id}),
@@ -721,16 +732,26 @@ class AnalogInputSensor(Sensor):
         ),
     }
 
+    def _application_type(self):
+        """Return the AnalogInput application_type as an ApplicationType type."""
+        result = self._cluster.get(AnalogInput.AttributeDefs.application_type.name)
+        if result is None:
+            return None
+        return ApplicationType.deserialize(types.uint32_t(result).serialize())[0]
+
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
         super().recompute_capabilities()
 
-        self._attr_fallback_name = self._cluster_handler.description
+        self._attr_fallback_name = self._cluster.get(
+            AnalogInput.AttributeDefs.description.name
+        )
 
-        if self._cluster_handler.application_type is not None:
+        application_type = self._application_type()
+        if application_type is not None:
             # The application type encodes a tiny bit more info but it's mostly
             # irrelevant, just use the `type` sub-field
-            app_type = self._cluster_handler.application_type.type
+            app_type = application_type.type
             self._attr_device_class = ANALOG_INPUT_APPTYPE_DEV_CLASS.get(app_type)
 
             # Application type units take precedence
@@ -739,24 +760,26 @@ class AnalogInputSensor(Sensor):
             )
         else:
             self._attr_native_unit_of_measurement = BACNET_UNITS_TO_HA_UNITS.get(
-                self._cluster_handler.engineering_units
+                self._cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
             )
 
         # Resolution indicates the minimum change in value that can be detected
-        if self._cluster_handler.resolution is not None:
+        resolution = self._cluster.get(AnalogInput.AttributeDefs.resolution.name)
+        if resolution is not None:
             self._attr_suggested_display_precision = resolution_to_decimal_precision(
-                self._cluster_handler.resolution
+                resolution
             )
 
     def _is_supported(self) -> bool:
         """Return True if this sensor is supported."""
-        if self._cluster_handler.description is None:
+        if self._cluster.get(AnalogInput.AttributeDefs.description.name) is None:
             return False
 
         # The units are determined by one of these
         if (
-            self._cluster_handler.application_type is None
-            and self._cluster_handler.engineering_units is None
+            self._application_type() is None
+            and self._cluster.get(AnalogInput.AttributeDefs.engineering_units.name)
+            is None
         ):
             return False
 
@@ -778,6 +801,7 @@ class Battery(Sensor):
         "battery_quantity",
         "battery_voltage",
     }
+    _cluster_id = PowerConfiguration.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({PowerConfiguration.cluster_id}),
@@ -821,13 +845,13 @@ class Battery(Sensor):
     def state(self) -> dict[str, Any]:
         """Return the state for battery sensors."""
         response = super().state
-        battery_size = self._cluster_handler.cluster.get("battery_size")
+        battery_size = self._cluster.get("battery_size")
         if battery_size is not None:
             response["battery_size"] = BATTERY_SIZES.get(battery_size, "Unknown")
-        battery_quantity = self._cluster_handler.cluster.get("battery_quantity")
+        battery_quantity = self._cluster.get("battery_quantity")
         if battery_quantity is not None:
             response["battery_quantity"] = battery_quantity
-        battery_voltage = self._cluster_handler.cluster.get("battery_voltage")
+        battery_voltage = self._cluster.get("battery_voltage")
         if battery_voltage is not None:
             response["battery_voltage"] = round(battery_voltage / 10, 2)
         return response
@@ -842,6 +866,7 @@ class BaseElectricalMeasurement(PollableSensor):
     _divisor_attribute_name: str | None = None
     _multiplier_attribute_name: str | None = None
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _server_cluster_config = {
         ElectricalMeasurement.cluster_id: ClusterConfig(
@@ -1017,28 +1042,39 @@ class BaseElectricalMeasurement(PollableSensor):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {"measurement_type"}
         if self._attr_max_attribute_name is not None:
             self._attr_extra_state_attribute_names.add(self._attr_max_attribute_name)
 
     @property
+    def _measurement_type(self) -> str | None:
+        """Decode the measurement_type bitmap into a human-readable string."""
+        meas_type = self._cluster.get(
+            ElectricalMeasurement.AttributeDefs.measurement_type.name
+        )
+        if meas_type is None:
+            return None
+        meas_type = ElectricalMeasurement.MeasurementType(meas_type)
+        return ", ".join(m.name for m in meas_type)
+
+    @property
     def state(self) -> dict[str, Any]:
         """Return the state for this sensor."""
         response = super().state
-        if self._cluster_handler.measurement_type is not None:
-            response["measurement_type"] = self._cluster_handler.measurement_type
+        meas_type = self._measurement_type
+        if meas_type is not None:
+            response["measurement_type"] = meas_type
 
         if (max_attr_name := self._attr_max_attribute_name) is None:
             return response
 
-        if (max_v := self._cluster_handler.cluster.get(max_attr_name)) is not None:
+        if (max_v := self._cluster.get(max_attr_name)) is not None:
             response[max_attr_name] = self.formatter(max_v)
 
         return response
@@ -1048,7 +1084,7 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._multiplier_attribute_name:
             return super()._multiplier
 
-        return getattr(self._cluster_handler, self._multiplier_attribute_name)
+        return self._cluster.get(self._multiplier_attribute_name)
 
     @_multiplier.setter
     def _multiplier(self, value: int | float | None) -> None:
@@ -1059,7 +1095,7 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._divisor_attribute_name:
             return super()._divisor
 
-        return getattr(self._cluster_handler, self._divisor_attribute_name)
+        return self._cluster.get(self._divisor_attribute_name)
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
@@ -1137,13 +1173,12 @@ class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
     async def async_update(self) -> None:
         """Poll the full EM attribute list so sibling EM entities update too."""
         self.debug("polling current state")
-        cluster = self._cluster_handler.cluster
         attrs = [
             attr
             for attr in _ELECTRICAL_MEASUREMENT_POLLING_ATTRS
-            if not cluster.is_attribute_unsupported(attr)
+            if not self._cluster.is_attribute_unsupported(attr)
         ]
-        await safe_read(cluster, attrs, allow_cache=False, only_cache=False)
+        await safe_read(self._cluster, attrs, allow_cache=False, only_cache=False)
         self.maybe_emit_state_changed_event()
 
 
@@ -1450,6 +1485,7 @@ class Humidity(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = RelativeHumidity.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({RelativeHumidity.cluster_id}),
@@ -1478,6 +1514,7 @@ class SmartThingsHumidity(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = SMARTTHINGS_HUMIDITY_CLUSTER
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({SMARTTHINGS_HUMIDITY_CLUSTER}),
@@ -1507,6 +1544,7 @@ class SoilMoisture(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = SoilMoistureCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({SoilMoistureCluster.cluster_id}),
@@ -1536,6 +1574,7 @@ class LeafWetness(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_primary_weight = 1
+    _cluster_id = LeafWetnessCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LeafWetnessCluster.cluster_id}),
@@ -1563,6 +1602,7 @@ class Illuminance(Sensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = LIGHT_LUX
     _attr_primary_weight = 1
+    _cluster_id = IlluminanceMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IlluminanceMeasurement.cluster_id}),
@@ -1615,6 +1655,7 @@ class SmartEnergyMetering(PollableSensor):
         "zcl_unit_of_measurement",
     }
     _attr_primary_weight = 1
+    _cluster_id = Metering.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
@@ -1743,8 +1784,34 @@ class SmartEnergyMetering(PollableSensor):
         ),
     }
 
+    @property
+    def _unit_of_measurement(self) -> int | None:
+        return self._cluster.get(Metering.AttributeDefs.unit_of_measure.name)
+
+    @property
+    def _device_type(self) -> str | int | None:
+        dev_type = self._cluster.get(Metering.AttributeDefs.metering_device_type.name)
+        if dev_type is None:
+            return None
+        return MeteringClusterHandler.metering_device_type.get(dev_type, dev_type)
+
+    @property
+    def _metering_status(self) -> int | None:
+        if (status := self._cluster.get(Metering.AttributeDefs.status.name)) is None:
+            return None
+        dev_type = self._cluster.get(Metering.AttributeDefs.metering_device_type.name)
+        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_ELECTRIC:
+            return MeteringClusterHandler.DeviceStatusElectric(status)
+        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_GAS:
+            return MeteringClusterHandler.DeviceStatusGas(status)
+        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_WATER:
+            return MeteringClusterHandler.DeviceStatusWater(status)
+        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_HEATING_COOLING:
+            return MeteringClusterHandler.DeviceStatusHeatingCooling(status)
+        return MeteringClusterHandler.DeviceStatusDefault(status)
+
     def _is_supported(self) -> bool:
-        unit = self._cluster_handler.unit_of_measurement
+        unit = self._unit_of_measurement
         if self._is_non_value(unit, attr_def=Metering.AttributeDefs.unit_of_measure):
             return False
 
@@ -1753,9 +1820,7 @@ class SmartEnergyMetering(PollableSensor):
     def recompute_capabilities(self) -> None:
         """Recompute capabilities and feature flags."""
         super().recompute_capabilities()
-        entity_description = self._ENTITY_DESCRIPTION_MAP.get(
-            self._cluster_handler.unit_of_measurement
-        )
+        entity_description = self._ENTITY_DESCRIPTION_MAP.get(self._unit_of_measurement)
         if entity_description is not None:
             self.entity_description = entity_description
             self._attr_device_class = entity_description.device_class
@@ -1768,21 +1833,21 @@ class SmartEnergyMetering(PollableSensor):
     def state(self) -> dict[str, Any]:
         """Return state for this sensor."""
         response = super().state
-        if self._cluster_handler.device_type is not None:
-            response["device_type"] = self._cluster_handler.device_type
-        if (status := self._cluster_handler.metering_status) is not None:
+        if self._device_type is not None:
+            response["device_type"] = self._device_type
+        if (status := self._metering_status) is not None:
             if isinstance(status, enum.IntFlag):
                 response["status"] = str(
                     status.name if status.name is not None else status.value
                 )
             else:
                 response["status"] = str(status)[len(status.__class__.__name__) + 1 :]
-        response["zcl_unit_of_measurement"] = self._cluster_handler.unit_of_measurement
+        response["zcl_unit_of_measurement"] = self._unit_of_measurement
         return response
 
     @property
     def _multiplier(self) -> int | float | None:
-        return self._cluster_handler.multiplier
+        return self._cluster.get(Metering.AttributeDefs.multiplier.name) or 1
 
     @_multiplier.setter
     def _multiplier(self, value: int | float | None) -> None:
@@ -1790,7 +1855,7 @@ class SmartEnergyMetering(PollableSensor):
 
     @property
     def _divisor(self) -> int | float | None:
-        return self._cluster_handler.divisor
+        return self._cluster.get(Metering.AttributeDefs.divisor.name) or 1
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
@@ -1801,20 +1866,18 @@ class SmartEnergyMetering(PollableSensor):
         # TODO: improve typing for base class
         scaled_value = cast(float, super().formatter(value))
 
-        if (
-            self._cluster_handler.unit_of_measurement
-            == MeteringUnitofMeasure.Kwh_and_Kwh_binary
-        ):
+        if self._unit_of_measurement == MeteringUnitofMeasure.Kwh_and_Kwh_binary:
             # Zigbee spec power unit is kW, but we show the value in W
             value_watt = scaled_value * 1000
             if value_watt < 100:
                 return round(value_watt, 1)
             return round(value_watt)
 
+        demand_formatting = self._cluster.get(
+            Metering.AttributeDefs.demand_formatting.name
+        )
         demand_formater = create_number_formatter(
-            self._cluster_handler.demand_formatting
-            if self._cluster_handler.demand_formatting is not None
-            else DEFAULT_FORMATTING
+            demand_formatting if demand_formatting is not None else DEFAULT_FORMATTING
         )
         return float(demand_formater.format(scaled_value))
 
@@ -1904,15 +1967,15 @@ class SmartEnergySummation(SmartEnergyMetering):
         # TODO: improve typing for base class
         scaled_value = cast(float, Sensor.formatter(self, value))
 
-        if (
-            self._cluster_handler.unit_of_measurement
-            == MeteringUnitofMeasure.Kwh_and_Kwh_binary
-        ):
+        if self._unit_of_measurement == MeteringUnitofMeasure.Kwh_and_Kwh_binary:
             return scaled_value
 
+        summation_formatting = self._cluster.get(
+            Metering.AttributeDefs.summation_formatting.name
+        )
         summation_formater = create_number_formatter(
-            self._cluster_handler.summation_formatting
-            if self._cluster_handler.summation_formatting is not None
+            summation_formatting
+            if summation_formatting is not None
             else DEFAULT_FORMATTING
         )
         return float(summation_formater.format(scaled_value))
@@ -1933,15 +1996,14 @@ class PolledSmartEnergySummation(SmartEnergySummation):
     async def async_update(self) -> None:
         """Poll every reported Metering attribute so sibling entities update too."""
         self.debug("polling current state")
-        cluster = self._cluster_handler.cluster
         config = self._server_cluster_config[Metering.cluster_id]
         attrs = [
             attr_def.name
             for attr_def, attr_cfg in config.attributes.items()
             if attr_cfg.reporting is not None
-            and not cluster.is_attribute_unsupported(attr_def.name)
+            and not self._cluster.is_attribute_unsupported(attr_def.name)
         ]
-        await safe_read(cluster, attrs, allow_cache=False, only_cache=False)
+        await safe_read(self._cluster, attrs, allow_cache=False, only_cache=False)
         self.maybe_emit_state_changed_event()
 
 
@@ -2099,6 +2161,7 @@ class Pressure(Sensor):
     _attr_suggested_display_precision: int = 0
     _attr_native_unit_of_measurement = UnitOfPressure.HPA
     _attr_primary_weight = 1
+    _cluster_id = PressureMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({PressureMeasurement.cluster_id}),
@@ -2127,6 +2190,7 @@ class Flow(Sensor):
     _divisor = 10
     _attr_native_unit_of_measurement = UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR
     _attr_primary_weight = 1
+    _cluster_id = FlowMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({FlowMeasurement.cluster_id}),
@@ -2155,6 +2219,7 @@ class Temperature(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_primary_weight = 1
+    _cluster_id = TemperatureMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({TemperatureMeasurement.cluster_id}),
@@ -2185,6 +2250,7 @@ class DeviceTemperature(Sensor):
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_primary_weight = 1
+    _cluster_id = DeviceTemperatureCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({DeviceTemperatureCluster.cluster_id}),
@@ -2213,9 +2279,10 @@ class InovelliInternalTemperature(Sensor):
     _attr_translation_key: str = "internal_temp_monitor"
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = INOVELLI_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -2235,9 +2302,10 @@ class InovelliOverheated(EnumSensor):
     _attr_translation_key: str = "overheated"
     _enum = InovelliOverheatedState
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = INOVELLI_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({CLUSTER_HANDLER_INOVELLI}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
 
@@ -2252,6 +2320,7 @@ class CarbonDioxideConcentration(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
+    _cluster_id = CarbonDioxideConcentrationCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({CarbonDioxideConcentrationCluster.cluster_id}),
@@ -2281,6 +2350,7 @@ class CarbonMonoxideConcentration(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
+    _cluster_id = CarbonMonoxideConcentrationCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({CarbonMonoxideConcentrationCluster.cluster_id}),
@@ -2310,9 +2380,10 @@ class VOCLevel(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
+    _cluster_id = 0x042E
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"voc_level"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({0x042E}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 0),
     )
 
@@ -2328,9 +2399,10 @@ class GenericVOCLevel(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
+    _cluster_id = 0x042E
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"cluster_handler_0x042e"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({0x042E}),
     )
 
 
@@ -2347,9 +2419,10 @@ class PPBVOCLevel(Sensor):
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_BILLION
     _attr_primary_weight = 1
+    _cluster_id = 0x042E
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"voc_level"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({0x042E}),
         models=frozenset({"lumi.airmonitor.acn01"}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 1),
     )
@@ -2365,6 +2438,7 @@ class PM25(Sensor):
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
+    _cluster_id = PM25Cluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({PM25Cluster.cluster_id}),
@@ -2391,6 +2465,7 @@ class ElectricalConductivity(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CONDUCTIVITY
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_native_unit_of_measurement = UnitOfConductivity.MICROSIEMENS_PER_CM
+    _cluster_id = ElectricalConductivityCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalConductivityCluster.cluster_id}),
@@ -2420,6 +2495,7 @@ class FormaldehydeConcentration(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_MILLION
     _attr_primary_weight = 1
+    _cluster_id = FormaldehydeConcentrationCluster.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({FormaldehydeConcentrationCluster.cluster_id}),
@@ -2444,6 +2520,7 @@ class ThermostatHVACAction(Sensor):
 
     _unique_id_suffix = "hvac_action"
     _attr_translation_key: str = "hvac_action"
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -2542,13 +2619,30 @@ class ThermostatHVACAction(Sensor):
         return PlatformEntity._is_supported(self)
 
     @property
+    def _pi_heating_demand(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.pi_heating_demand.name)
+
+    @property
+    def _pi_cooling_demand(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.pi_cooling_demand.name)
+
+    @property
+    def _running_state(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.running_state.name)
+
+    @property
+    def _running_mode(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.running_mode.name)
+
+    @property
+    def _system_mode(self) -> int | None:
+        return self._cluster.get(Thermostat.AttributeDefs.system_mode.name)
+
+    @property
     def state(self) -> dict:
         """Return the current HVAC action."""
         response = super().state
-        if (
-            self._cluster_handler.pi_heating_demand is None
-            and self._cluster_handler.pi_cooling_demand is None
-        ):
+        if self._pi_heating_demand is None and self._pi_cooling_demand is None:
             response["state"] = self._rm_rs_action
         else:
             response["state"] = self._pi_demand_action
@@ -2557,10 +2651,7 @@ class ThermostatHVACAction(Sensor):
     @property
     def native_value(self) -> str | None:
         """Return the current HVAC action."""
-        if (
-            self._cluster_handler.pi_heating_demand is None
-            and self._cluster_handler.pi_cooling_demand is None
-        ):
+        if self._pi_heating_demand is None and self._pi_cooling_demand is None:
             return self._rm_rs_action
         return self._pi_demand_action
 
@@ -2568,36 +2659,34 @@ class ThermostatHVACAction(Sensor):
     def _rm_rs_action(self) -> HVACAction | None:
         """Return the current HVAC action based on running mode and running state."""
 
-        if (running_state := self._cluster_handler.running_state) is None:
+        if (running_state := self._running_state) is None:
             return None
 
         rs_heat = (
-            self._cluster_handler.RunningState.Heat_State_On
-            | self._cluster_handler.RunningState.Heat_2nd_Stage_On
+            Thermostat.RunningState.Heat_State_On
+            | Thermostat.RunningState.Heat_2nd_Stage_On
         )
         if running_state & rs_heat:
             return HVACAction.HEATING
 
         rs_cool = (
-            self._cluster_handler.RunningState.Cool_State_On
-            | self._cluster_handler.RunningState.Cool_2nd_Stage_On
+            Thermostat.RunningState.Cool_State_On
+            | Thermostat.RunningState.Cool_2nd_Stage_On
         )
         if running_state & rs_cool:
             return HVACAction.COOLING
 
-        running_state = self._cluster_handler.running_state
         if running_state and running_state & (
-            self._cluster_handler.RunningState.Fan_State_On
-            | self._cluster_handler.RunningState.Fan_2nd_Stage_On
-            | self._cluster_handler.RunningState.Fan_3rd_Stage_On
+            Thermostat.RunningState.Fan_State_On
+            | Thermostat.RunningState.Fan_2nd_Stage_On
+            | Thermostat.RunningState.Fan_3rd_Stage_On
         ):
             return HVACAction.FAN
 
-        running_state = self._cluster_handler.running_state
-        if running_state and running_state & self._cluster_handler.RunningState.Idle:
+        if running_state and running_state & Thermostat.RunningState.Idle:
             return HVACAction.IDLE
 
-        if self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off:
+        if self._system_mode != Thermostat.SystemMode.Off:
             return HVACAction.IDLE
         return HVACAction.OFF
 
@@ -2605,14 +2694,14 @@ class ThermostatHVACAction(Sensor):
     def _pi_demand_action(self) -> HVACAction:
         """Return the current HVAC action based on pi_demands."""
 
-        heating_demand = self._cluster_handler.pi_heating_demand
+        heating_demand = self._pi_heating_demand
         if heating_demand is not None and heating_demand > 0:
             return HVACAction.HEATING
-        cooling_demand = self._cluster_handler.pi_cooling_demand
+        cooling_demand = self._pi_cooling_demand
         if cooling_demand is not None and cooling_demand > 0:
             return HVACAction.COOLING
 
-        if self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off:
+        if self._system_mode != Thermostat.SystemMode.Off:
             return HVACAction.IDLE
         return HVACAction.OFF
 
@@ -2631,22 +2720,22 @@ class SinopeHVACAction(ThermostatHVACAction):
     def _rm_rs_action(self) -> HVACAction:
         """Return the current HVAC action based on running mode and running state."""
 
-        running_mode = self._cluster_handler.running_mode
-        if running_mode == self._cluster_handler.RunningMode.Heat:
+        running_mode = self._running_mode
+        if running_mode == Thermostat.RunningMode.Heat:
             return HVACAction.HEATING
-        if running_mode == self._cluster_handler.RunningMode.Cool:
+        if running_mode == Thermostat.RunningMode.Cool:
             return HVACAction.COOLING
 
-        running_state = self._cluster_handler.running_state
+        running_state = self._running_state
         if running_state and running_state & (
-            self._cluster_handler.RunningState.Fan_State_On
-            | self._cluster_handler.RunningState.Fan_2nd_Stage_On
-            | self._cluster_handler.RunningState.Fan_3rd_Stage_On
+            Thermostat.RunningState.Fan_State_On
+            | Thermostat.RunningState.Fan_2nd_Stage_On
+            | Thermostat.RunningState.Fan_3rd_Stage_On
         ):
             return HVACAction.FAN
         if (
-            self._cluster_handler.system_mode != self._cluster_handler.SystemMode.Off
-            and running_mode == self._cluster_handler.SystemMode.Off
+            self._system_mode != Thermostat.SystemMode.Off
+            and running_mode == Thermostat.SystemMode.Off
         ):
             return HVACAction.IDLE
         return HVACAction.OFF
@@ -2664,6 +2753,7 @@ class RSSISensor(Sensor):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
     _attr_translation_key: str = "rssi"
+    _cluster_id = Basic.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Basic.cluster_id}),
@@ -2671,13 +2761,12 @@ class RSSISensor(Sensor):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -2743,6 +2832,7 @@ class LQISensor(RSSISensor):
     _attr_device_class = None
     _attr_native_unit_of_measurement = None
     _attr_translation_key = "lqi"
+    _cluster_id = Basic.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Basic.cluster_id}),
@@ -2770,9 +2860,10 @@ class TimeLeft(Sensor):
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.DURATION
     _attr_translation_key: str = "timer_time_left"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
+    _cluster_id = TUYA_MANUFACTURER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"tuya_manufacturer"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         manufacturers=frozenset({"_TZE200_htnnfasr"}),
     )
 
@@ -2787,9 +2878,10 @@ class IkeaDeviceRunTime(Sensor):
     _attr_translation_key: str = "device_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"ikea_airpurifier"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
@@ -2803,9 +2895,10 @@ class IkeaFilterRunTime(Sensor):
     _attr_translation_key: str = "filter_run_time"
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
     _attr_entity_category: EntityCategory = EntityCategory.DIAGNOSTIC
+    _cluster_id = IKEA_AIR_PURIFIER_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"ikea_airpurifier"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
 
@@ -2824,9 +2917,10 @@ class AqaraPetFeederLastFeedingSource(EnumSensor):
     _unique_id_suffix = "last_feeding_source"
     _attr_translation_key: str = "last_feeding_source"
     _enum = AqaraFeedingSource
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2838,9 +2932,10 @@ class AqaraPetFeederLastFeedingSize(Sensor):
     _attribute_name = "last_feeding_size"
     _unique_id_suffix = "last_feeding_size"
     _attr_translation_key: str = "last_feeding_size"
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2853,9 +2948,10 @@ class AqaraPetFeederPortionsDispensed(Sensor):
     _unique_id_suffix = "portions_dispensed"
     _attr_translation_key: str = "portions_dispensed_today"
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2869,9 +2965,10 @@ class AqaraPetFeederWeightDispensed(Sensor):
     _attr_translation_key: str = "weight_dispensed_today"
     _attr_native_unit_of_measurement = UnitOfMass.GRAMS
     _attr_state_class: SensorStateClass = SensorStateClass.TOTAL_INCREASING
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
@@ -2886,9 +2983,10 @@ class AqaraSmokeDensityDbm(Sensor):
     _attr_native_unit_of_measurement = "dB/m"
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _attr_suggested_display_precision = 3
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.sensor_smoke.acn03"}),
     )
 
@@ -2908,9 +3006,10 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
     _unique_id_suffix = "last_illumination"
     _attr_translation_key: str = "last_illumination_state"
     _enum = SonoffIlluminationStates
+    _cluster_id = SONOFF_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"sonoff_manufacturer"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({SONOFF_CLUSTER}),
         models=frozenset({"SNZB-06P"}),
     )
 
@@ -2930,6 +3029,7 @@ class PiHeatingDemand(Sensor):
 
     _attr_suggested_display_precision = 0
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -2956,6 +3056,7 @@ class SetpointChangeSource(EnumSensor):
     _attr_translation_key: str = "setpoint_change_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _enum = SetpointChangeSourceEnum
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -2974,6 +3075,7 @@ class SetpointChangeSourceTimestamp(TimestampSensor):
     _attr_translation_key: str = "setpoint_change_source_timestamp"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -2993,6 +3095,7 @@ class WindowCoveringTypeSensor(EnumSensor):
     _unique_id_suffix: str = "window_covering_type"
     _attr_translation_key: str = "window_covering_type"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = WindowCovering.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({WindowCovering.cluster_id}),
@@ -3045,6 +3148,7 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
     _unique_id_suffix: str = "power_source"
     _attr_translation_key: str = "power_source"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Basic.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Basic.cluster_id}),
@@ -3080,9 +3184,10 @@ class AqaraCurtainHookStateSensor(EnumSensor):
     _unique_id_suffix = "hooks_state"
     _attr_translation_key: str = "hooks_state"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = AQARA_OPPLE_CLUSTER
 
-    _cluster_handler_match = ClusterHandlerMatch(
-        cluster_handlers=frozenset({"opple_cluster"}),
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
 
@@ -3097,13 +3202,12 @@ class BitMapSensor(Sensor):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Init this sensor."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._attr_extra_state_attribute_names: set[str] = {
             bit.name for bit in list(self._bitmap)
         }
@@ -3113,7 +3217,7 @@ class BitMapSensor(Sensor):
         """Return the state for this sensor."""
         response = super().state
         response["state"] = self.native_value
-        value = self._cluster_handler.cluster.get(self._attribute_name)
+        value = self._cluster.get(self._attribute_name)
         for bit in list(self._bitmap):
             if value is None:
                 response[bit.name] = False
@@ -3124,7 +3228,7 @@ class BitMapSensor(Sensor):
     def formatter(self, _value: int) -> str:
         """Summary of all attributes."""
 
-        value = self._cluster_handler.cluster.get(self._attribute_name)
+        value = self._cluster.get(self._attribute_name)
         state_attr = {}
 
         for bit in list(self._bitmap):
@@ -3149,6 +3253,7 @@ class DanfossOpenWindowDetection(EnumSensor):
     _attribute_name = "open_window_detection"
     _attr_translation_key: str = "open_window_detected"
     _enum = danfoss_thermostat.DanfossOpenWindowDetectionEnum
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -3164,6 +3269,7 @@ class DanfossLoadEstimate(Sensor):
     _attribute_name = "load_estimate"
     _attr_translation_key: str = "load_estimate"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -3180,6 +3286,7 @@ class DanfossAdaptationRunStatus(BitMapSensor):
     _attr_translation_key: str = "adaptation_run_status"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _bitmap = danfoss_thermostat.DanfossAdaptationRunStatusBitmap
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -3196,6 +3303,7 @@ class DanfossPreheatTime(Sensor):
     _attr_translation_key: str = "preheat_time"
     _attr_entity_registry_enabled_default = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Thermostat.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Thermostat.cluster_id}),
@@ -3212,6 +3320,7 @@ class DanfossSoftwareErrorCode(BitMapSensor):
     _attr_translation_key: str = "software_error"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _bitmap = danfoss_thermostat.DanfossSoftwareErrorCodeBitmap
+    _cluster_id = Diagnostic.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Diagnostic.cluster_id}),
@@ -3239,6 +3348,7 @@ class DanfossMotorStepCounter(Sensor):
     _attribute_name = "motor_step_counter"
     _attr_translation_key: str = "motor_stepcount"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _cluster_id = Diagnostic.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Diagnostic.cluster_id}),
@@ -3268,6 +3378,7 @@ class WindSpeed(Sensor):
     _divisor = 100
     _attr_native_unit_of_measurement = UnitOfSpeed.METERS_PER_SECOND
     _attr_primary_weight = 2
+    _cluster_id = WindSpeedCluster.cluster_id
 
     _server_cluster_config = {
         WindSpeedCluster.cluster_id: ClusterConfig(

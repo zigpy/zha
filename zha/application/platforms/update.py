@@ -11,7 +11,13 @@ import logging
 from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.ota import OtaImagesResult, OtaImageWithMetadata
-from zigpy.zcl import OtaImageAvailableEvent
+from zigpy.zcl import (
+    AttributeReadEvent,
+    AttributeReportedEvent,
+    AttributeUpdatedEvent,
+    AttributeWrittenEvent,
+    OtaImageAvailableEvent,
+)
 from zigpy.zcl.clusters.general import Ota
 from zigpy.zcl.foundation import Status
 
@@ -27,16 +33,10 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import ClusterAttributeUpdatedEvent
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-    CLUSTER_HANDLER_OTA,
-)
-from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
+    from zha.zigbee.endpoint import Endpoint
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -172,13 +172,16 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
         """Flag supported features."""
         return self._attr_supported_features
 
-    def handle_cluster_handler_attribute_updated(
+    def handle_attribute_updated(
         self,
-        event: ClusterAttributeUpdatedEvent,
+        event: AttributeReadEvent
+        | AttributeReportedEvent
+        | AttributeUpdatedEvent
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle attribute updates on the OTA cluster."""
         if event.attribute_id == Ota.AttributeDefs.current_file_version.id:
-            self._attr_installed_version = f"0x{event.attribute_value:08x}"
+            self._attr_installed_version = f"0x{event.value:08x}"
             self.maybe_emit_state_changed_event()
 
     def _handle_ota_image_available(
@@ -307,58 +310,62 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
 
     def __init__(
         self,
-        cluster_handlers: list[ClusterHandler],
         endpoint: Endpoint,
         device: Device,
         **kwargs: Any,
     ) -> None:
         """Initialize the ZHA update entity."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-
-        self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_OTA
-        ]
+        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        self._cluster = self._get_ota_cluster()
         self._attr_installed_version: str | None = self._get_cluster_version()
         self._compatible_images: OtaImagesResult = OtaImagesResult(
             upgrades=(), downgrades=()
         )
 
+    def _get_ota_cluster(self):
+        """Return the OTA cluster to use."""
+        return self._endpoint.zigpy_endpoint.out_clusters[Ota.cluster_id]
+
     def on_add(self) -> None:
         """Call when entity is added."""
         super().on_add()
 
-        ota_cluster = self._ota_cluster_handler.cluster
-        self._on_remove_callbacks.append(
-            self._ota_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
+        for event_type in (
+            AttributeReadEvent,
+            AttributeReportedEvent,
+            AttributeUpdatedEvent,
+            AttributeWrittenEvent,
+        ):
+            self._on_remove_callbacks.append(
+                self._cluster.on_event(
+                    event_type.event_type, self.handle_attribute_updated
+                )
             )
-        )
         self._on_remove_callbacks.append(
-            ota_cluster.on_event(
+            self._cluster.on_event(
                 OtaImageAvailableEvent.event_type,
                 self._handle_ota_image_available,
             )
         )
 
         # Check for cached OTA image availability from zigpy
-        ota_cluster.create_catching_task(
-            self.device.device.application.ota.check_cluster_for_ota(ota_cluster)
+        self._cluster.create_catching_task(
+            self.device.device.application.ota.check_cluster_for_ota(self._cluster)
         )
 
     def _get_cluster_version(self) -> str | None:
         """Synchronize current file version with the cluster."""
-        if self._ota_cluster_handler.current_file_version is not None:
-            return f"0x{self._ota_cluster_handler.current_file_version:08x}"
+        value = self._cluster.get(Ota.AttributeDefs.current_file_version.name)
+        if value is not None:
+            return f"0x{value:08x}"
 
         return None
 
 
 @register_entity(Ota.cluster_id)
-class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
-    """Representation of a ZHA firmware update entity."""
+class FirmwareUpdateServerEntity(FirmwareUpdateEntity):
+    """Representation of a ZHA firmware update entity for devices exposing OTA as a server cluster."""
 
-    _unique_id_suffix = "firmware_update"
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Ota.cluster_id}),
         feature_priority=(PlatformFeatureGroup.OTA_UPDATE, 0),
@@ -373,52 +380,8 @@ class FirmwareUpdateServerEntity(BaseFirmwareUpdateEntity):
             },
         ),
     }
+    _client_cluster_config = {}
 
-    def __init__(
-        self,
-        cluster_handlers: list[ClusterHandler],
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Initialize the ZHA update entity."""
-        super().__init__(cluster_handlers, endpoint, device, **kwargs)
-
-        # Some devices make it a server cluster, not a client cluster...
-        self._ota_cluster_handler: ClusterHandler = self.cluster_handlers[
-            CLUSTER_HANDLER_OTA
-        ]
-        self._attr_installed_version: str | None = self._get_cluster_version()
-        self._compatible_images: OtaImagesResult = OtaImagesResult(
-            upgrades=(), downgrades=()
-        )
-
-    def on_add(self) -> None:
-        """Call when entity is added."""
-        super().on_add()
-
-        ota_cluster = self._ota_cluster_handler.cluster
-        self._on_remove_callbacks.append(
-            self._ota_cluster_handler.on_event(
-                CLUSTER_HANDLER_ATTRIBUTE_UPDATED,
-                self.handle_cluster_handler_attribute_updated,
-            )
-        )
-        self._on_remove_callbacks.append(
-            ota_cluster.on_event(
-                OtaImageAvailableEvent.event_type,
-                self._handle_ota_image_available,
-            )
-        )
-
-        # Check for cached OTA image availability from zigpy
-        ota_cluster.create_catching_task(
-            self.device.device.application.ota.check_cluster_for_ota(ota_cluster)
-        )
-
-    def _get_cluster_version(self) -> str | None:
-        """Synchronize current file version with the cluster."""
-        if self._ota_cluster_handler.current_file_version is not None:
-            return f"0x{self._ota_cluster_handler.current_file_version:08x}"
-
-        return None
+    def _get_ota_cluster(self):
+        """Return the OTA cluster to use."""
+        return self._endpoint.zigpy_endpoint.in_clusters[Ota.cluster_id]
