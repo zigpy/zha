@@ -26,7 +26,6 @@ from zha.const import STATE_CHANGED
 from zha.debounce import Debouncer
 from zha.event import EventBase
 from zha.mixins import LogMixin
-from zha.zigbee.cluster_handlers import ClusterHandlerInfo
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -178,7 +177,6 @@ class BaseEntityInfo:
     primary: bool
 
     # For platform entities
-    cluster_handlers: list[ClusterHandlerInfo]
     device_ieee: EUI64 | None
     endpoint_id: int | None
     available: bool | None
@@ -410,7 +408,6 @@ class BaseEntity(LogMixin, EventBase):
             enabled=self.enabled,
             primary=self.primary,
             # Set by platform entities
-            cluster_handlers=[],
             device_ieee=None,
             endpoint_id=None,
             available=None,
@@ -582,7 +579,6 @@ class PlatformEntity(BaseEntity):
         """Return a representation of the platform entity."""
         return dataclasses.replace(
             super().info_object,
-            cluster_handlers=[],
             device_ieee=self._device.ieee,
             endpoint_id=self._endpoint.id,
             available=self.available,

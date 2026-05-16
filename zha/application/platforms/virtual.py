@@ -37,19 +37,17 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers.const import (
-    ATTRIBUTE_ID,
-    ATTRIBUTE_NAME,
-    ATTRIBUTE_VALUE,
-    SIGNAL_ATTR_UPDATED,
-    VALUE,
-)
+
+ATTRIBUTE_ID = "attribute_id"
+ATTRIBUTE_NAME = "attribute_name"
+ATTRIBUTE_VALUE = "attribute_value"
+SIGNAL_ATTR_UPDATED = "attribute_updated"
+VALUE = "value"
 
 SMARTTHINGS_ACCELERATION_CLUSTER = 0xFC02
 UNKNOWN = "Unknown"
 
 if TYPE_CHECKING:
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 

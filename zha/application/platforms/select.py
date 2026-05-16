@@ -45,18 +45,18 @@ from zha.application.platforms import (
     PlatformEntity,
     register_entity,
 )
-from zha.zigbee.cluster_handlers.const import (
+from zha.zigbee.cluster_ids import (
     AQARA_OPPLE_CLUSTER,
     INOVELLI_CLUSTER,
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_IMMEDIATE,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
-from zha.zigbee.cluster_handlers.hvac import (
+from zha.zigbee.reporting import (
+    REPORT_CONFIG_ASAP,
     REPORT_CONFIG_CLIMATE,
     REPORT_CONFIG_CLIMATE_DEMAND,
     REPORT_CONFIG_CLIMATE_DISCRETE,
+    REPORT_CONFIG_IMMEDIATE,
 )
 
 if TYPE_CHECKING:

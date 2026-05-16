@@ -27,7 +27,7 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.sensor import Battery
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_BATTERY_SAVE
+from zha.zigbee.reporting import REPORT_CONFIG_BATTERY_SAVE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device

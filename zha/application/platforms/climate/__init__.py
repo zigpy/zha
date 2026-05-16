@@ -58,11 +58,11 @@ from zha.application.platforms.climate.const import (
 )
 from zha.decorators import periodic
 from zha.units import UnitOfTemperature
-from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_OP
-from zha.zigbee.cluster_handlers.hvac import (
+from zha.zigbee.reporting import (
     REPORT_CONFIG_CLIMATE,
     REPORT_CONFIG_CLIMATE_DEMAND,
     REPORT_CONFIG_CLIMATE_DISCRETE,
+    REPORT_CONFIG_OP,
 )
 
 if TYPE_CHECKING:

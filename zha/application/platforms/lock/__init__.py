@@ -27,7 +27,7 @@ from zha.application.platforms.lock.const import (
     STATE_UNLOCKED,
     VALUE_TO_STATE,
 )
-from zha.zigbee.cluster_handlers.const import REPORT_CONFIG_IMMEDIATE
+from zha.zigbee.reporting import REPORT_CONFIG_IMMEDIATE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device

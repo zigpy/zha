@@ -34,6 +34,7 @@ from zigpy.zcl.clusters.general import (
     DeviceTemperature as DeviceTemperatureCluster,
     PowerConfiguration,
 )
+from zigpy.zcl.clusters.general_const import ApplicationType
 from zigpy.zcl.clusters.homeautomation import Diagnostic, ElectricalMeasurement
 from zigpy.zcl.clusters.hvac import Thermostat
 from zigpy.zcl.clusters.measurement import (
@@ -108,28 +109,38 @@ from zha.units import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
-from zha.zigbee.cluster_handlers.const import (
+from zha.zigbee.cluster_ids import (
     AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
+    SMARTTHINGS_HUMIDITY_CLUSTER,
+    SONOFF_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
+)
+from zha.zigbee.metering import (
+    METERING_DEVICE_TYPES_ELECTRIC,
+    METERING_DEVICE_TYPES_GAS,
+    METERING_DEVICE_TYPES_HEATING_COOLING,
+    METERING_DEVICE_TYPES_WATER,
+    DeviceStatusDefault,
+    DeviceStatusElectric,
+    DeviceStatusGas,
+    DeviceStatusHeatingCooling,
+    DeviceStatusWater,
+    metering_device_type,
+)
+from zha.zigbee.reporting import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_BATTERY_SAVE,
+    REPORT_CONFIG_CLIMATE,
+    REPORT_CONFIG_CLIMATE_DEMAND,
+    REPORT_CONFIG_CLIMATE_DISCRETE,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_MAX_INT,
     REPORT_CONFIG_MIN_INT,
     REPORT_CONFIG_OP,
-    SMARTTHINGS_HUMIDITY_CLUSTER,
-    SONOFF_CLUSTER,
-    TUYA_MANUFACTURER_CLUSTER,
 )
-from zha.zigbee.cluster_handlers.general import ApplicationType
-from zha.zigbee.cluster_handlers.hvac import (
-    REPORT_CONFIG_CLIMATE,
-    REPORT_CONFIG_CLIMATE_DEMAND,
-    REPORT_CONFIG_CLIMATE_DISCRETE,
-)
-from zha.zigbee.cluster_handlers.smartenergy import MeteringClusterHandler
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -1794,22 +1805,22 @@ class SmartEnergyMetering(PollableSensor):
         dev_type = self._cluster.get(Metering.AttributeDefs.metering_device_type.name)
         if dev_type is None:
             return None
-        return MeteringClusterHandler.metering_device_type.get(dev_type, dev_type)
+        return metering_device_type.get(dev_type, dev_type)
 
     @property
     def _metering_status(self) -> int | None:
         if (status := self._cluster.get(Metering.AttributeDefs.status.name)) is None:
             return None
         dev_type = self._cluster.get(Metering.AttributeDefs.metering_device_type.name)
-        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_ELECTRIC:
-            return MeteringClusterHandler.DeviceStatusElectric(status)
-        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_GAS:
-            return MeteringClusterHandler.DeviceStatusGas(status)
-        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_WATER:
-            return MeteringClusterHandler.DeviceStatusWater(status)
-        if dev_type in MeteringClusterHandler.METERING_DEVICE_TYPES_HEATING_COOLING:
-            return MeteringClusterHandler.DeviceStatusHeatingCooling(status)
-        return MeteringClusterHandler.DeviceStatusDefault(status)
+        if dev_type in METERING_DEVICE_TYPES_ELECTRIC:
+            return DeviceStatusElectric(status)
+        if dev_type in METERING_DEVICE_TYPES_GAS:
+            return DeviceStatusGas(status)
+        if dev_type in METERING_DEVICE_TYPES_WATER:
+            return DeviceStatusWater(status)
+        if dev_type in METERING_DEVICE_TYPES_HEATING_COOLING:
+            return DeviceStatusHeatingCooling(status)
+        return DeviceStatusDefault(status)
 
     def _is_supported(self) -> bool:
         unit = self._unit_of_measurement

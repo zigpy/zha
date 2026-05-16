@@ -1832,7 +1832,6 @@ class Device(LogMixin, EventBase):
                 continue
 
             info_object = dataclasses.asdict(platform_entity.info_object)
-            del info_object["cluster_handlers"]
             info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
             info_object["device_ieee"] = str(info_object["device_ieee"])
 

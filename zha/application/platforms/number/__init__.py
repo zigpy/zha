@@ -38,20 +38,20 @@ from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
-from zha.zigbee.cluster_handlers.const import (
+from zha.zigbee.cluster_ids import (
     AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_DEFAULT,
-    REPORT_CONFIG_IMMEDIATE,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
-from zha.zigbee.cluster_handlers.hvac import (
+from zha.zigbee.reporting import (
+    REPORT_CONFIG_ASAP,
     REPORT_CONFIG_CLIMATE,
     REPORT_CONFIG_CLIMATE_DEMAND,
     REPORT_CONFIG_CLIMATE_DISCRETE,
+    REPORT_CONFIG_DEFAULT,
+    REPORT_CONFIG_IMMEDIATE,
 )
 
 if TYPE_CHECKING:

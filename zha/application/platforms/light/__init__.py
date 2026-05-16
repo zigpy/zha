@@ -77,7 +77,7 @@ from zha.application.platforms.light.helpers import (
 )
 from zha.debounce import Debouncer
 from zha.decorators import periodic
-from zha.zigbee.cluster_handlers.const import (
+from zha.zigbee.reporting import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,

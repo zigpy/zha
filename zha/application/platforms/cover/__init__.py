@@ -43,10 +43,7 @@ from zha.application.platforms.cover.const import (
     WCAttrs,
 )
 from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers.const import (
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_IMMEDIATE,
-)
+from zha.zigbee.reporting import REPORT_CONFIG_ASAP, REPORT_CONFIG_IMMEDIATE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device

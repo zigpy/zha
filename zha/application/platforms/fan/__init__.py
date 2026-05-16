@@ -51,11 +51,9 @@ from zha.application.platforms.fan.helpers import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
-from zha.zigbee.cluster_handlers import wrap_zigpy_exceptions
-from zha.zigbee.cluster_handlers.const import (
-    IKEA_AIR_PURIFIER_CLUSTER,
-    REPORT_CONFIG_OP,
-)
+from zha.exceptions import wrap_zigpy_exceptions
+from zha.zigbee.cluster_ids import IKEA_AIR_PURIFIER_CLUSTER
+from zha.zigbee.reporting import REPORT_CONFIG_OP
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
