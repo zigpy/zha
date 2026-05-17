@@ -2421,24 +2421,6 @@ class VOCLevel(Sensor):
 
 
 @register_entity(0x042E)
-class GenericVOCLevel(Sensor):
-    """VOC Level sensor."""
-
-    _attribute_name = "measured_value"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
-    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _attr_suggested_display_precision = 0
-    _multiplier = 1e6
-    _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
-    _attr_primary_weight = 1
-    _cluster_id = 0x042E
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({0x042E}),
-    )
-
-
-@register_entity(0x042E)
 class PPBVOCLevel(Sensor):
     """VOC Level sensor."""
 
