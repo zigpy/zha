@@ -47,7 +47,7 @@ from zha.zigbee.cluster_ids import (
     SMARTTHINGS_ACCELERATION_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
-from zha.zigbee.reporting import REPORT_CONFIG_IMMEDIATE
+from zha.zigbee.reporting import REPORT_CONFIG_ASAP, REPORT_CONFIG_IMMEDIATE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -99,6 +99,11 @@ class BinarySensor(BaseBinarySensor, ZCLClusterEntity):
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._state: bool = self.is_on
         self.recompute_capabilities()
+
+    def _is_supported(self) -> bool:
+        if self._attribute_name not in self._cluster.attributes_by_name:
+            return False
+        return super()._is_supported()
 
     def on_add(self) -> None:
         """Run when entity is added."""
@@ -190,12 +195,31 @@ class Accelerometer(BinarySensor):
     _attribute_name = "acceleration"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOVING
     _attr_translation_key: str = "accelerometer"
-    _cluster_id = SMARTTHINGS_ACCELERATION_CLUSTER
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({SMARTTHINGS_ACCELERATION_CLUSTER}),
         manufacturers=frozenset({"CentraLite", "Samjin", "SmartThings"}),
     )
+
+    _server_cluster_config = {
+        SMARTTHINGS_ACCELERATION_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "acceleration": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                ),
+                "x_axis": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                ),
+                "y_axis": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                ),
+                "z_axis": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(OccupancySensing.cluster_id)

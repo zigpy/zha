@@ -14,6 +14,8 @@ from functools import cached_property
 import logging
 from typing import TYPE_CHECKING, Any, Final, final
 
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
@@ -115,6 +117,13 @@ class ClusterMatch:
     models: frozenset[str] | None = None
     exposed_features: frozenset[str] | None = None
     not_exposed_features: frozenset[str] | None = None
+
+    # Endpoint profile filter. Defaults to ZHA + ZLL — the only profiles whose
+    # standard device types/clusters this entity layer understands. Bind-only
+    # entities that target manufacturer-specific clusters on proprietary
+    # profiles (e.g. Digi XBee's `0xC105` serial-data endpoints) override this
+    # with `None` to match any profile.
+    profile_ids: frozenset[int] | None = frozenset({ZHA_PROFILE_ID, ZLL_PROFILE_ID})
 
     # Profile and device type filters
     profile_device_types: frozenset[tuple[int, int]] | None = None

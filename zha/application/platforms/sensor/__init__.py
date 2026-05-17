@@ -2406,12 +2406,15 @@ class VOCLevel(Sensor):
     _multiplier = 1e6
     _attr_native_unit_of_measurement = CONCENTRATION_MICROGRAMS_PER_CUBIC_METER
     _attr_primary_weight = 1
-    _cluster_id = 0x042E
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({0x042E}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 0),
     )
+
+    _server_cluster_config = {
+        0x042E: ClusterConfig(bind=True),
+    }
 
 
 @register_entity(0x042E)
@@ -2427,13 +2430,16 @@ class PPBVOCLevel(Sensor):
     _multiplier = 1
     _attr_native_unit_of_measurement = CONCENTRATION_PARTS_PER_BILLION
     _attr_primary_weight = 1
-    _cluster_id = 0x042E
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({0x042E}),
         models=frozenset({"lumi.airmonitor.acn01"}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 1),
     )
+
+    _server_cluster_config = {
+        0x042E: ClusterConfig(bind=True),
+    }
 
 
 @register_entity(PM25Cluster.cluster_id)

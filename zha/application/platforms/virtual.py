@@ -357,6 +357,9 @@ class LevelControlClientBind(_ClientClusterZhaEventEmitter):
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({LevelControl.cluster_id}),
         match_renamed_clusters=True,
+        # Match on proprietary profiles too (e.g. Digi XBee's serial profile)
+        # so the level cluster gets bound on those endpoints.
+        profile_ids=None,
     )
     _client_cluster_config = {
         LevelControl.cluster_id: ClusterConfig(bind=True),
@@ -985,6 +988,21 @@ class IkeaRemoteClientBind(VirtualEntity):
     }
 
 
+@register_entity(IKEA_REMOTE_CLUSTER)
+class IkeaRemoteServerBind(VirtualEntity):
+    """Bind the IKEA remote server cluster on every device that exposes it."""
+
+    _unique_id_suffix = "ikea_remote_server_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({IKEA_REMOTE_CLUSTER}),
+        match_renamed_clusters=True,
+    )
+    _server_cluster_config = {
+        IKEA_REMOTE_CLUSTER: ClusterConfig(bind=True),
+    }
+
+
 @register_entity(IKEA_SHORTCUT_V1_CLUSTER)
 class IkeaSymfoniskRemoteClientBind(VirtualEntity):
     """Bind the IKEA Symfonisk shortcut v1 client cluster."""
@@ -1010,6 +1028,20 @@ class InovelliBind(VirtualEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
     _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(INOVELLI_CLUSTER)
+class InovelliClientBind(VirtualEntity):
+    """Bind the Inovelli manufacturer client cluster on every device that exposes it."""
+
+    _unique_id_suffix = "inovelli_client_bind"
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({INOVELLI_CLUSTER}),
+    )
+    _client_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(bind=True),
     }
 
