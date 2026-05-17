@@ -78,6 +78,7 @@ from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
     ANALOG_INPUT_APPTYPE_UNITS,
+    LEGACY_MEASUREMENT_TYPE_REMAPPING,
     ZCL_EPOCH,
     SensorDeviceClass,
     SensorStateClass,
@@ -1072,8 +1073,14 @@ class BaseElectricalMeasurement(PollableSensor):
         )
         if meas_type is None:
             return None
+
+        # Iterating over the bits only yields named bits so the earlier version of this
+        # code omitted any measurement types that were not explicitly in the bitmap type.
+        # TODO: deprecate this
         return ", ".join(
-            m.name for m in ElectricalMeasurement.MeasurementType(meas_type)
+            LEGACY_MEASUREMENT_TYPE_REMAPPING[m]
+            for m in ElectricalMeasurement.MeasurementType(meas_type)
+            if m in LEGACY_MEASUREMENT_TYPE_REMAPPING
         )
 
     @property

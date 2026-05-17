@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 
 from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 from zigpy.zcl.clusters.general_const import AnalogInputType
+from zigpy.zcl.clusters.homeautomation import MeasurementType
 
 from zha.units import (
     CONCENTRATION_PARTS_PER_MILLION,
@@ -69,3 +70,17 @@ ANALOG_INPUT_APPTYPE_UNITS = {
 }
 
 ZCL_EPOCH = datetime(2000, 1, 1, tzinfo=UTC)
+
+# Remapping of `MeasurementType` members to legacy names, for extra state attributes.
+# TODO: deprecate this.
+LEGACY_MEASUREMENT_TYPE_REMAPPING = {
+    MeasurementType.Active_measurement_AC: "ACTIVE_MEASUREMENT",
+    MeasurementType.Reactive_measurement_AC: "REACTIVE_MEASUREMENT",
+    MeasurementType.Apparent_measurement_AC: "APPARENT_MEASUREMENT",
+    MeasurementType.Phase_A_measurement: "PHASE_A_MEASUREMENT",
+    MeasurementType.Phase_B_measurement: "PHASE_B_MEASUREMENT",
+    MeasurementType.Phase_C_measurement: "PHASE_C_MEASUREMENT",
+    MeasurementType.DC_measurement: "DC_MEASUREMENT",
+    MeasurementType.Harmonics_measurement: "HARMONICS_MEASUREMENT",
+    MeasurementType.Power_quality_measurement: "POWER_QUALITY_MEASUREMENT",
+}
