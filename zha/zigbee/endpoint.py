@@ -2,32 +2,20 @@
 
 from __future__ import annotations
 
-import asyncio
-from collections.abc import Awaitable, Callable
 import functools
 import logging
-from typing import TYPE_CHECKING, Any, Final, TypeVar
+from typing import TYPE_CHECKING, Any, Final
 
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
+import zigpy.zcl
+from zigpy.zcl.foundation import CommandSchema
 
 from zha.application import const
-from zha.async_ import gather_with_limited_concurrency
-from zha.zigbee.cluster_handlers import ClusterHandler
-from zha.zigbee.cluster_handlers.const import (
-    CLUSTER_HANDLER_BASIC,
-    CLUSTER_HANDLER_IDENTIFY,
-    CLUSTER_HANDLER_POWER_CONFIGURATION,
-)
-from zha.zigbee.cluster_handlers.registries import (
-    CLIENT_CLUSTER_HANDLER_REGISTRY,
-    CLUSTER_HANDLER_REGISTRY,
-)
 
 if TYPE_CHECKING:
     from zigpy import Endpoint as ZigpyEndpoint
 
-    from zha.zigbee.cluster_handlers import ClientClusterHandler
     from zha.zigbee.device import Device
 
 ATTR_DEVICE_TYPE: Final[str] = "device_type"
@@ -36,7 +24,51 @@ ATTR_IN_CLUSTERS: Final[str] = "input_clusters"
 ATTR_OUT_CLUSTERS: Final[str] = "output_clusters"
 
 _LOGGER = logging.getLogger(__name__)
-CALLABLE_T = TypeVar("CALLABLE_T", bound=Callable)
+
+
+class _ClusterEventForwarder:
+    """Forwards quirk `zha_send_event` listener calls into device `zha_event`s.
+
+    Replaces the runtime forwarding that ClusterHandler used to do. The
+    `unique_id` published on the event matches the legacy format
+    (`ieee:endpoint_id:0xCLUSTER` with `_CLIENT` suffix for client clusters) so
+    Home Assistant automations filtering on it keep working.
+    """
+
+    def __init__(
+        self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint, is_client: bool
+    ) -> None:
+        self._cluster = cluster
+        self._endpoint = endpoint
+        ieee_with_colons = endpoint.unique_id.replace("-", ":")
+        suffix = "_CLIENT" if is_client else ""
+        self._unique_id = f"{ieee_with_colons}:0x{cluster.cluster_id:04x}{suffix}"
+        self._unsub = cluster.add_listener(self)
+
+    def remove(self) -> None:
+        """Detach from the cluster."""
+        self._cluster.remove_listener(self)
+
+    def zha_send_event(self, command: str, arg: list | dict | CommandSchema) -> None:
+        """Relay events to listeners."""
+        if isinstance(arg, CommandSchema):
+            args = [a for a in arg if a is not None]
+            params = arg.as_dict()
+        elif isinstance(arg, (list, dict)):
+            args = arg
+            params = {}
+        else:
+            raise TypeError(f"Unexpected zha_send_event {command!r} argument: {arg!r}")
+
+        self._endpoint.emit_zha_event(
+            {
+                const.ATTR_UNIQUE_ID: self._unique_id,
+                const.ATTR_CLUSTER_ID: self._cluster.cluster_id,
+                const.ATTR_COMMAND: command,
+                const.ATTR_ARGS: args,
+                const.ATTR_PARAMS: params,
+            }
+        )
 
 
 class Endpoint:
@@ -48,42 +80,19 @@ class Endpoint:
         assert device is not None
         self._zigpy_endpoint: ZigpyEndpoint = zigpy_endpoint
         self._device: Device = device
-        self._all_cluster_handlers: dict[str, ClusterHandler] = {}
-        self._claimed_cluster_handlers: dict[str, ClusterHandler] = {}
-        self._client_cluster_handlers: dict[str, ClientClusterHandler] = {}
         self._unique_id: str = f"{device.unique_id}-{zigpy_endpoint.endpoint_id}"
+        self._forwarders: list[_ClusterEventForwarder] = []
 
     def on_remove(self) -> None:
         """Run when endpoint is removed."""
-        for handler in self.all_cluster_handlers.values():
-            handler.on_remove()
-
-        self.all_cluster_handlers.clear()
-
-        for handler in self.client_cluster_handlers.values():
-            handler.on_remove()
-
-        self.client_cluster_handlers.clear()
+        for forwarder in self._forwarders:
+            forwarder.remove()
+        self._forwarders.clear()
 
     @functools.cached_property
     def device(self) -> Device:
         """Return the device this endpoint belongs to."""
         return self._device
-
-    @property
-    def all_cluster_handlers(self) -> dict[str, ClusterHandler]:
-        """All server cluster handlers of an endpoint."""
-        return self._all_cluster_handlers
-
-    @property
-    def claimed_cluster_handlers(self) -> dict[str, ClusterHandler]:
-        """Cluster handlers in use."""
-        return self._claimed_cluster_handlers
-
-    @property
-    def client_cluster_handlers(self) -> dict[str, ClientClusterHandler]:
-        """Return a dict of client cluster handlers."""
-        return self._client_cluster_handlers
 
     @functools.cached_property
     def zigpy_endpoint(self) -> ZigpyEndpoint:
@@ -94,16 +103,6 @@ class Endpoint:
     def id(self) -> int:
         """Return endpoint id."""
         return self._zigpy_endpoint.endpoint_id
-
-    @functools.cached_property
-    def cluster_handlers_by_name(self) -> dict[str, ClusterHandler]:
-        """Return cluster handlers indexed by name."""
-        return {ch.name: ch for ch in self._all_cluster_handlers.values()}
-
-    @functools.cached_property
-    def client_cluster_handlers_by_name(self) -> dict[str, ClientClusterHandler]:
-        """Return client cluster handlers indexed by name."""
-        return {ch.name: ch for ch in self._client_cluster_handlers.values()}
 
     @functools.cached_property
     def unique_id(self) -> str:
@@ -135,127 +134,31 @@ class Endpoint:
 
     @classmethod
     def new(cls, zigpy_endpoint: ZigpyEndpoint, device: Device) -> Endpoint:
-        """Create new endpoint and populate cluster handlers."""
+        """Create new endpoint and attach quirk-event forwarders to each cluster."""
         endpoint = cls(zigpy_endpoint, device)
-        endpoint.add_all_cluster_handlers()
-        endpoint.add_client_cluster_handlers()
-
+        endpoint._attach_forwarders()
         return endpoint
 
-    def add_all_cluster_handlers(self) -> None:
-        """Create and add cluster handlers for all input clusters."""
+    def _attach_forwarders(self) -> None:
+        """Attach a quirk-event forwarder to every server and client cluster."""
         profile_id = self._zigpy_endpoint.profile_id
         if profile_id is None:
             _LOGGER.debug("Skipping endpoint, profile is None")
             return
-        elif profile_id not in (ZLL_PROFILE_ID, ZHA_PROFILE_ID):
+        if profile_id not in (ZLL_PROFILE_ID, ZHA_PROFILE_ID):
             _LOGGER.debug(
-                "Skipping endpoint, profile is not ZLL or ZHA: 0x%04X",
-                profile_id,
+                "Skipping endpoint, profile is not ZLL or ZHA: 0x%04X", profile_id
             )
             return
 
-        for cluster_id, cluster in self.zigpy_endpoint.in_clusters.items():
-            cluster_handler_classes = CLUSTER_HANDLER_REGISTRY.get(
-                cluster_id, {None: ClusterHandler}
+        for cluster in self._zigpy_endpoint.in_clusters.values():
+            self._forwarders.append(
+                _ClusterEventForwarder(cluster, self, is_client=False)
             )
-
-            # get first exposed feature from device
-            # that matches a registered cluster handler
-            cluster_exposed_features: str | None = None
-            for exposed_features in self.device.exposes_features:
-                if exposed_features in cluster_handler_classes:
-                    cluster_exposed_features = exposed_features
-                    break
-
-            cluster_handler_class = cluster_handler_classes.get(
-                cluster_exposed_features, ClusterHandler
+        for cluster in self._zigpy_endpoint.out_clusters.values():
+            self._forwarders.append(
+                _ClusterEventForwarder(cluster, self, is_client=True)
             )
-
-            # Allow cluster handler to filter out bad matches
-            if not cluster_handler_class.matches(cluster, self):
-                cluster_handler_class = ClusterHandler
-
-            _LOGGER.debug(
-                "Creating cluster handler for cluster id: %s class: %s",
-                cluster_id,
-                cluster_handler_class,
-            )
-
-            try:
-                cluster_handler = cluster_handler_class(cluster, self)
-            except KeyError as err:
-                _LOGGER.warning(
-                    "Cluster handler %s for cluster %s on endpoint %s is invalid: %s",
-                    cluster_handler_class,
-                    cluster,
-                    self,
-                    err,
-                )
-                continue
-
-            if cluster_handler.name == CLUSTER_HANDLER_POWER_CONFIGURATION:
-                self._device.power_configuration_ch = cluster_handler
-            elif cluster_handler.name == CLUSTER_HANDLER_IDENTIFY:
-                self._device.identify_ch = cluster_handler
-            elif cluster_handler.name == CLUSTER_HANDLER_BASIC:
-                self._device.basic_ch = cluster_handler
-
-            self._all_cluster_handlers[cluster_handler.id] = cluster_handler
-            cluster_handler.on_add()
-
-    def add_client_cluster_handlers(self) -> None:
-        """Create client cluster handlers for all output clusters if in the registry."""
-        for (
-            cluster_id,
-            cluster_handler_class,
-        ) in CLIENT_CLUSTER_HANDLER_REGISTRY.items():
-            cluster = self.zigpy_endpoint.out_clusters.get(cluster_id)
-            if cluster is not None:
-                _LOGGER.debug(
-                    "Creating client cluster handler for cluster id: %s class: %s",
-                    cluster_id,
-                    cluster_handler_class,
-                )
-                cluster_handler = cluster_handler_class(cluster, self)
-                self.client_cluster_handlers[cluster_handler.id] = cluster_handler
-                cluster_handler.on_add()
-
-    async def async_initialize(self, from_cache: bool = False) -> None:
-        """Initialize claimed cluster handlers."""
-        await self._execute_handler_tasks(
-            "async_initialize", from_cache, max_concurrency=1
-        )
-
-    async def async_configure(self) -> None:
-        """Configure claimed cluster handlers."""
-        await self._execute_handler_tasks("async_configure")
-
-    async def _execute_handler_tasks(
-        self, func_name: str, *args: Any, max_concurrency: int | None = None
-    ) -> None:
-        """Add a throttled cluster handler task and swallow exceptions."""
-        cluster_handlers = [
-            *self.claimed_cluster_handlers.values(),
-            *self.client_cluster_handlers.values(),
-        ]
-        tasks = [getattr(ch, func_name)(*args) for ch in cluster_handlers]
-
-        gather: Callable[..., Awaitable]
-
-        if max_concurrency is None:
-            gather = asyncio.gather
-        else:
-            gather = functools.partial(gather_with_limited_concurrency, max_concurrency)
-
-        results = await gather(*tasks, return_exceptions=True)
-        for cluster_handler, outcome in zip(cluster_handlers, results):
-            if isinstance(outcome, Exception):
-                cluster_handler.debug(
-                    "'%s' stage failed: %s", func_name, str(outcome), exc_info=outcome
-                )
-            else:
-                cluster_handler.debug("'%s' stage succeeded", func_name)
 
     def emit_zha_event(self, event_data: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""
@@ -266,7 +169,3 @@ class Endpoint:
                 **event_data,
             }
         )
-
-    def claim_cluster_handlers(self, cluster_handlers: list[ClusterHandler]) -> None:
-        """Claim cluster handlers."""
-        self.claimed_cluster_handlers.update({ch.id: ch for ch in cluster_handlers})

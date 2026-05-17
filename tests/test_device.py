@@ -130,10 +130,6 @@ async def _send_time_changed(zha_gateway: Gateway, seconds: int):
     await zha_gateway.async_block_till_done(wait_background_tasks=True)
 
 
-@patch(
-    "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
-    new=mock.AsyncMock(),
-)
 async def test_check_available_success(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
@@ -226,10 +222,6 @@ async def test_check_available_success(
         entity.emit.reset_mock()
 
 
-@patch(
-    "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
-    new=mock.AsyncMock(),
-)
 async def test_check_available_unsuccessful(
     zha_gateway: Gateway,
 ) -> None:
@@ -297,10 +289,6 @@ async def test_check_available_unsuccessful(
         entity.emit.reset_mock()
 
 
-@patch(
-    "zha.zigbee.cluster_handlers.general.BasicClusterHandler.async_initialize",
-    new=mock.AsyncMock(),
-)
 async def test_check_available_no_basic_cluster_handler(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
@@ -771,8 +759,7 @@ async def test_device_properties(
     assert zha_device.model == "FakeModel"
     assert zha_device.is_groupable is False
 
-    assert zha_device.power_configuration_ch is None
-    assert zha_device.basic_ch is not None
+    assert zha_device.basic_cluster is not None
     assert zha_device.firmware_version is None
 
     assert len(zha_device.platform_entities) == 3
@@ -1458,24 +1445,6 @@ async def test_remove_entity_no_event(zha_gateway: Gateway) -> None:
     assert event_listener.call_count == 0
 
 
-async def test_initialize_endpoint_failure(zha_gateway: Gateway) -> None:
-    """Test that a failing endpoint doesn't prevent device initialization."""
-    zigpy_dev = await zigpy_device_from_json(
-        zha_gateway.application_controller,
-        "tests/data/devices/ikea-of-sweden-tradfri-bulb-gu10-ws-400lm.json",
-    )
-    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
-
-    with patch.object(
-        zha_device.endpoints[1],
-        "async_initialize",
-        side_effect=Exception("endpoint init failed"),
-    ) as mock_async_initialize:
-        await zha_device.async_initialize(from_cache=True)
-
-    assert mock_async_initialize.call_count == 1
-
-
 async def test_entity_recomputation(zha_gateway: Gateway) -> None:
     """Test entity recomputation."""
     zigpy_dev = await zigpy_device_from_json(
@@ -1622,9 +1591,10 @@ async def test_gateway_reconfigure_with_swap(
         patch.object(zha_device, "emit_reconfigure_done") as mock_emit,
     ):
         await zha_gateway.async_reinterview_device(zigpy_dev.ieee)
-        # On swap, async_reinterview_device must not emit reconfigure_done
-        # itself — the rebuild path emits via async_configure().
-        assert mock_emit.call_count == 0
+        await zha_gateway.async_block_till_done()
+        # On swap, the rebuild path emits reconfigure_done exactly once via
+        # async_configure() — async_reinterview_device does not emit itself.
+        assert mock_emit.call_count == 1
 
     await zha_gateway.async_block_till_done()
 

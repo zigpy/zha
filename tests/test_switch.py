@@ -744,11 +744,8 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
     }
     update_attribute_cache(cluster)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_cover_device)
-    assert (
-        not zha_device.endpoints[1]
-        .all_cluster_handlers[f"1:0x{cluster.cluster_id:04x}"]
-        .inverted
-    )
+    entity = get_entity(zha_device, platform=Platform.SWITCH)
+    assert not entity.is_on
     assert cluster.read_attributes.call_count == 3
     assert (
         WCAttrs.current_position_lift_percentage.name
@@ -758,8 +755,6 @@ async def test_cover_inversion_switch(zha_gateway: Gateway) -> None:
         WCAttrs.current_position_tilt_percentage.name
         in cluster.read_attributes.call_args[0][0]
     )
-
-    entity = get_entity(zha_device, platform=Platform.SWITCH)
 
     # test update
     prev_call_count = cluster.read_attributes.call_count

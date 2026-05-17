@@ -610,23 +610,36 @@ async def test_gateway_device_reinterviewed_no_bookkeeping_loss_on_rapid_event(
     in-flight task.
     """
     zigpy_dev = create_mock_zigpy_device(zha_gateway, ZIGPY_DEVICE_BASIC)
-    await join_zigpy_device(zha_gateway, zigpy_dev)
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    zha_gateway.device_reinterviewed(zigpy_dev)
-    task_1 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+    # Keep the replacement task in-flight by stalling configure on an event
+    # we control. Without this, the reinterview task completes synchronously
+    # under eager_start and exits the dict before we get to assert.
+    proceed = asyncio.Event()
+    original_configure = zha_device.async_configure
 
-    zha_gateway.device_reinterviewed(zigpy_dev)
-    task_2 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
-    assert task_2 is not task_1
+    async def stalled_configure() -> None:
+        await proceed.wait()
+        await original_configure()
 
-    # Let task_1's cancellation propagate and its done-callback run.
-    with suppress(asyncio.CancelledError):
-        await task_1
-    await asyncio.sleep(0)
+    with patch.object(zha_device, "async_configure", side_effect=stalled_configure):
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_1 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
 
-    # The cancelled task's done-callback must not have cleared the dict;
-    # the replacement task is still in flight.
-    assert zha_gateway._device_init_tasks.get(zigpy_dev.ieee) is task_2
+        zha_gateway.device_reinterviewed(zigpy_dev)
+        task_2 = zha_gateway._device_init_tasks[zigpy_dev.ieee]
+        assert task_2 is not task_1
+
+        # Let task_1's cancellation propagate and its done-callback run.
+        with suppress(asyncio.CancelledError):
+            await task_1
+        await asyncio.sleep(0)
+
+        # The cancelled task's done-callback must not have cleared the dict;
+        # the replacement task is still in flight.
+        assert zha_gateway._device_init_tasks.get(zigpy_dev.ieee) is task_2
+
+        proceed.set()
 
     await zha_gateway.async_block_till_done()
     assert zigpy_dev.ieee not in zha_gateway._device_init_tasks

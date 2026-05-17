@@ -996,6 +996,56 @@ class SinopeDimmerInit(VirtualEntity):
 
 
 INOVELLI_CLUSTER = 0xFC31
+IKEA_REMOTE_CLUSTER = 0xFC80
+IKEA_SHORTCUT_V1_CLUSTER = 0xFC7F
+
+
+@register_entity(IKEA_REMOTE_CLUSTER)
+class IkeaRemoteClientBind(VirtualEntity):
+    """Bind the IKEA remote client cluster on every device that exposes it.
+
+    The accompanying quirk (`EventableCluster`) emits its own zha_events for
+    received commands, so the only thing we still need is the bind.
+    """
+
+    _unique_id_suffix = "ikea_remote_client_bind"
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({IKEA_REMOTE_CLUSTER}),
+        match_renamed_clusters=True,
+    )
+    _client_cluster_config = {
+        IKEA_REMOTE_CLUSTER: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(IKEA_SHORTCUT_V1_CLUSTER)
+class IkeaSymfoniskRemoteClientBind(VirtualEntity):
+    """Bind the IKEA Symfonisk shortcut v1 client cluster."""
+
+    _unique_id_suffix = "ikea_shortcut_v1_client_bind"
+
+    _cluster_match = ClusterMatch(
+        client_clusters=frozenset({IKEA_SHORTCUT_V1_CLUSTER}),
+        match_renamed_clusters=True,
+    )
+    _client_cluster_config = {
+        IKEA_SHORTCUT_V1_CLUSTER: ClusterConfig(bind=True),
+    }
+
+
+@register_entity(INOVELLI_CLUSTER)
+class InovelliBind(VirtualEntity):
+    """Bind the Inovelli manufacturer cluster on every device that exposes it."""
+
+    _unique_id_suffix = "inovelli_bind"
+
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({INOVELLI_CLUSTER}),
+    )
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(bind=True),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)

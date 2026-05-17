@@ -25,8 +25,9 @@ from zigpy.quirks.v2 import DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.typing import UNDEFINED, UndefinedType
+import zigpy.zcl
 from zigpy.zcl.clusters import Cluster
-from zigpy.zcl.clusters.general import Groups, Identify, Ota
+from zigpy.zcl.clusters.general import Basic, Groups, Identify, Ota
 from zigpy.zcl.foundation import (
     Status as ZclStatus,
     WriteAttributesResponse,
@@ -74,7 +75,7 @@ from zha.application.const import (
     ZHA_DEVICE_UPDATED_EVENT,
     ZHA_EVENT,
 )
-from zha.application.helpers import convert_to_zcl_values, convert_zcl_value
+from zha.application.helpers import convert_to_zcl_values, convert_zcl_value, safe_read
 from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
@@ -91,7 +92,6 @@ from zha.zigbee.cluster_config import (
     configure_cluster_configs,
     initialize_cluster_configs,
 )
-from zha.zigbee.cluster_handlers import ClusterHandler, ZDOClusterHandler
 from zha.zigbee.endpoint import Endpoint
 
 if TYPE_CHECKING:
@@ -434,9 +434,6 @@ class Device(LogMixin, EventBase):
                 f.feature for f in self.quirk_metadata.exposes_features
             )
 
-        self._power_config_ch: ClusterHandler | None = None
-        self._identify_ch: ClusterHandler | None = None
-        self._basic_ch: ClusterHandler | None = None
         self._firmware_version: str | None = None
 
         device_options = self._gateway.config.config.device_options
@@ -452,10 +449,6 @@ class Device(LogMixin, EventBase):
         )
 
         self.status: DeviceStatus = DeviceStatus.CREATED
-
-        self._zdo_handler: ZDOClusterHandler = ZDOClusterHandler(self)
-        self._zdo_handler.on_add()
-        self._on_remove_callbacks.append(self._zdo_handler.on_remove)
 
         for ep_id, endpoint in zigpy_device.endpoints.items():
             if ep_id != 0:
@@ -682,43 +675,25 @@ class Device(LogMixin, EventBase):
         if not new_on_network:
             self.debug("Device is not on the network, marking unavailable")
 
-    @property
-    def power_configuration_ch(self) -> ClusterHandler | None:
-        """Return power configuration cluster handler."""
-        return self._power_config_ch
-
-    @power_configuration_ch.setter
-    def power_configuration_ch(self, cluster_handler: ClusterHandler) -> None:
-        """Power configuration cluster handler setter."""
-        if self._power_config_ch is None:
-            self._power_config_ch = cluster_handler
-
-    @property
-    def basic_ch(self) -> ClusterHandler | None:
-        """Return basic cluster handler."""
-        return self._basic_ch
-
-    @basic_ch.setter
-    def basic_ch(self, cluster_handler: ClusterHandler) -> None:
-        """Set the basic cluster handler."""
-        if self._basic_ch is None:
-            self._basic_ch = cluster_handler
+    def _first_in_cluster(self, cluster_id: int) -> zigpy.zcl.Cluster | None:
+        """Return the first in_cluster with the given cluster_id across endpoints."""
+        for ep_id, ep in self._zigpy_device.endpoints.items():
+            if ep_id == 0:
+                continue
+            cluster = ep.in_clusters.get(cluster_id)
+            if cluster is not None:
+                return cluster
+        return None
 
     @property
-    def identify_ch(self) -> ClusterHandler | None:
-        """Return power configuration cluster handler."""
-        return self._identify_ch
-
-    @identify_ch.setter
-    def identify_ch(self, cluster_handler: ClusterHandler) -> None:
-        """Power configuration cluster handler setter."""
-        if self._identify_ch is None:
-            self._identify_ch = cluster_handler
+    def basic_cluster(self) -> zigpy.zcl.Cluster | None:
+        """Return the first Basic cluster across endpoints, if present."""
+        return self._first_in_cluster(Basic.cluster_id)
 
     @property
-    def zdo_cluster_handler(self) -> ZDOClusterHandler:
-        """Return ZDO cluster handler."""
-        return self._zdo_handler
+    def identify_cluster(self) -> zigpy.zcl.Cluster | None:
+        """Return the first Identify cluster across endpoints, if present."""
+        return self._first_in_cluster(Identify.cluster_id)
 
     @property
     def endpoints(self) -> dict[int, Endpoint]:
@@ -821,14 +796,15 @@ class Device(LogMixin, EventBase):
                 "Attempting to checkin with device - missed checkins: %s",
                 self._checkins_missed_count,
             )
-            if not self.basic_ch:
+            basic = self.basic_cluster
+            if basic is None:
                 self.debug("does not have a mandatory basic cluster")
                 self.update_available(False)
                 return
-            res = await self.basic_ch.get_attribute_value(
-                ATTR_MANUFACTURER, from_cache=False
+            res = await safe_read(
+                basic, [ATTR_MANUFACTURER], allow_cache=False, only_cache=False
             )
-            if res is not None:
+            if res.get(ATTR_MANUFACTURER) is not None:
                 self._checkins_missed_count = 0
 
     def update_available(self, available: bool) -> None:
@@ -968,19 +944,12 @@ class Device(LogMixin, EventBase):
     async def async_configure(self) -> None:
         """Configure the device."""
         self.debug("started configuration")
-        await self._zdo_handler.async_configure()
-        self._zdo_handler.debug("'async_configure' stage succeeded")
 
         if isinstance(self._zigpy_device, zigpy.quirks.BaseCustomDevice):
             self.debug("applying quirks custom device configuration")
             await self._zigpy_device.apply_custom_configuration()
 
-        # Try to add entities to claim the cluster handlers
         self._discover_new_entities()
-
-        await asyncio.gather(
-            *(endpoint.async_configure() for endpoint in self._endpoints.values())
-        )
 
         # Configure binding and reporting from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)
@@ -991,13 +960,14 @@ class Device(LogMixin, EventBase):
 
         self.debug("completed configuration")
 
+        identify_cluster = self.identify_cluster
         if (
             self.gateway.config.config.device_options.enable_identify_on_join
-            and self.identify_ch is not None
+            and identify_cluster is not None
             and not self.skip_configuration
         ):
             self._gateway.async_create_task(
-                self.identify_ch.trigger_effect(
+                identify_cluster.trigger_effect(
                     effect_id=Identify.EffectIdentifier.Okay,
                     effect_variant=Identify.EffectVariant.Default,
                 ),
@@ -1260,19 +1230,6 @@ class Device(LogMixin, EventBase):
 
         # We discover prospective entities before initialization
         self._discover_new_entities()
-
-        await self._zdo_handler.async_initialize(from_cache)
-        self._zdo_handler.debug("'async_initialize' stage succeeded")
-
-        # We intentionally do not use `gather` here! This is so that if, for example,
-        # three `device.async_initialize()`s are spawned, only three concurrent requests
-        # will ever be in flight at once. Startup concurrency is managed at the device
-        # level.
-        for endpoint in self._endpoints.values():
-            try:
-                await endpoint.async_initialize(from_cache)
-            except Exception:  # pylint: disable=broad-exception-caught
-                self.debug("Failed to initialize endpoint", exc_info=True)
 
         # Read initial attributes from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)

@@ -401,9 +401,7 @@ class BaseSharedLight(BaseLight):
         execute_if_off_supported = (
             self._GROUP_SUPPORTS_EXECUTE_IF_OFF
             if isinstance(self, LightGroup)
-            else (
-                self._color_cluster is not None and self._execute_if_off_supported
-            )
+            else (self._color_cluster is not None and self._execute_if_off_supported)
         )
 
         # A device theoretically could lie about having brightness support and omit the
@@ -999,9 +997,7 @@ class Light(BaseSharedLight, PlatformEntity):
             LevelControl.cluster_id
         )
         self._color_cluster = endpoint.zigpy_endpoint.in_clusters.get(Color.cluster_id)
-        self._identify_cluster = (
-            device.identify_ch.cluster if device.identify_ch is not None else None
-        )
+        self._identify_cluster = device.identify_cluster
 
         self._refresh_task: asyncio.Task | None = None
 

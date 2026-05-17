@@ -36,7 +36,7 @@ from zha.application.platforms.binary_sensor import (
     IASZone,
     Occupancy,
 )
-from zha.zigbee.cluster_handlers.const import SMARTTHINGS_ACCELERATION_CLUSTER
+from zha.zigbee.cluster_ids import SMARTTHINGS_ACCELERATION_CLUSTER
 
 DEVICE_IAS = {
     1: {

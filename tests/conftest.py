@@ -344,9 +344,15 @@ async def zha_gateway(
 def disable_request_retry_delay():
     """Disable ZHA request retrying delay to speed up failures."""
 
-    with patch(
-        "zha.zigbee.cluster_handlers.RETRYABLE_REQUEST_DECORATOR",
-        zigpy.util.retryable_request(tries=3, delay=0),
+    with (
+        patch(
+            "zha.application.helpers.RETRYABLE_REQUEST_DECORATOR",
+            zigpy.util.retryable_request(tries=3, delay=0),
+        ),
+        patch(
+            "zha.zigbee.cluster_config.RETRYABLE_REQUEST_DECORATOR",
+            zigpy.util.retryable_request(tries=3, delay=0),
+        ),
     ):
         yield
 

@@ -23,16 +23,19 @@ from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.util
 import zigpy.zcl
 from zigpy.zcl import foundation
+from zigpy.zcl.clusters.closures import WindowCovering
+from zigpy.zcl.clusters.general import AnalogOutput, LevelControl, OnOff
+from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.foundation import CommandSchema
 import zigpy.zdo.types as zdo_types
 
 from zha.application import Platform
 from zha.application.const import (
+    CLUSTER_READS_PER_REQ,
     CLUSTER_TYPE_IN,
     CLUSTER_TYPE_OUT,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
-    CLUSTER_READS_PER_REQ,
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
@@ -40,16 +43,27 @@ from zha.exceptions import ZHAException, wrap_zigpy_exceptions
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
-    from zha.zigbee.cluster_handlers import ClusterHandler
     from zha.zigbee.device import Device
 
-_ClusterHandlerT = TypeVar("_ClusterHandlerT", bound="ClusterHandler")
 _T = TypeVar("_T")
 _R = TypeVar("_R")
 _P = ParamSpec("_P")
 _LOGGER = logging.getLogger(__name__)
 
 RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
+
+# Clusters that make sense as direct device-to-device binding pairs (e.g. a
+# remote's out_cluster bound to a light's in_cluster). Consulted by HA's "bind
+# device" UI via `async_is_bindable_target`.
+BINDABLE_CLUSTERS: frozenset[int] = frozenset(
+    {
+        AnalogOutput.cluster_id,
+        OnOff.cluster_id,
+        LevelControl.cluster_id,
+        WindowCovering.cluster_id,
+        Color.cluster_id,
+    }
+)
 
 
 @dataclass
@@ -141,10 +155,6 @@ async def get_matched_clusters(
     source_zha_device: Device, target_zha_device: Device
 ) -> list[BindingPair]:
     """Get matched input/output cluster pairs for 2 devices."""
-    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
-        BINDABLE_CLUSTERS,
-    )
-
     source_clusters = source_zha_device.async_get_std_clusters()
     target_clusters = target_zha_device.async_get_std_clusters()
     clusters_to_bind = []
@@ -249,10 +259,6 @@ def convert_to_zcl_values(
 
 def async_is_bindable_target(source_zha_device: Device, target_zha_device: Device):
     """Determine if target is bindable to source."""
-    from zha.zigbee.cluster_handlers.registries import (  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
-        BINDABLE_CLUSTERS,
-    )
-
     if target_zha_device.nwk == 0x0000:
         return True
 

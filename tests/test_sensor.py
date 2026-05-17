@@ -926,20 +926,12 @@ async def test_electrical_measurement_init(
     )
     assert entity.state["state"] == 100
 
-    cluster_handler = list(zha_device._endpoints.values())[0].all_cluster_handlers[
-        "1:0x0b04"
-    ]
-    assert cluster_handler.ac_power_divisor == 1
-    assert cluster_handler.ac_power_multiplier == 1
-
     # update power divisor
     await send_attributes_report(
         zha_gateway,
         cluster,
         {EMAttrs.active_power.id: 20, EMAttrs.power_divisor.id: 5},
     )
-    assert cluster_handler.ac_power_divisor == 5
-    assert cluster_handler.ac_power_multiplier == 1
     assert entity.state["state"] == 4.0
 
     zha_device.on_network = False
@@ -958,8 +950,6 @@ async def test_electrical_measurement_init(
         cluster,
         {EMAttrs.active_power.id: 30, EMAttrs.ac_power_divisor.id: 10},
     )
-    assert cluster_handler.ac_power_divisor == 10
-    assert cluster_handler.ac_power_multiplier == 1
     assert entity.state["state"] == 3.0
 
     # update power multiplier
@@ -968,8 +958,6 @@ async def test_electrical_measurement_init(
         cluster,
         {EMAttrs.active_power.id: 20, EMAttrs.power_multiplier.id: 6},
     )
-    assert cluster_handler.ac_power_divisor == 10
-    assert cluster_handler.ac_power_multiplier == 6
     assert entity.state["state"] == 12.0
 
     await send_attributes_report(
@@ -977,8 +965,6 @@ async def test_electrical_measurement_init(
         cluster,
         {EMAttrs.active_power.id: 30, EMAttrs.ac_power_multiplier.id: 20},
     )
-    assert cluster_handler.ac_power_divisor == 10
-    assert cluster_handler.ac_power_multiplier == 20
     assert entity.state["state"] == 60.0
 
     entity._refresh = AsyncMock(wraps=entity._refresh)
