@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Any
 
+from zhaquirks.quirk_ids import TUYA_PLUG_MANUFACTURER
 import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
@@ -37,6 +38,18 @@ from zha.application.platforms import (
     ZCLClusterEntity,
     register_entity,
 )
+from zha.application.platforms.const import (
+    AQARA_OPPLE_CLUSTER,
+    IKEA_REMOTE_CLUSTER,
+    IKEA_SHORTCUT_V1_CLUSTER,
+    INOVELLI_CLUSTER,
+    OSRAM_CLUSTER,
+    PHILIPS_REMOTE_CLUSTER,
+    SINOPE_MANUFACTURER_CLUSTER,
+    SMARTTHINGS_ACCELERATION_CLUSTER,
+    SONOFF_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
+)
 from zha.exceptions import ZHAException
 
 ATTRIBUTE_ID = "attribute_id"
@@ -45,7 +58,6 @@ ATTRIBUTE_VALUE = "attribute_value"
 SIGNAL_ATTR_UPDATED = "attribute_updated"
 VALUE = "value"
 
-SMARTTHINGS_ACCELERATION_CLUSTER = 0xFC02
 UNKNOWN = "Unknown"
 
 if TYPE_CHECKING:
@@ -394,11 +406,6 @@ class WindowCoveringClientBind(_ClientClusterZhaEventEmitter):
     }
 
 
-PHILIPS_REMOTE_CLUSTER = 0xFC00
-OSRAM_BUTTON_CLUSTER = 0xFD51
-OSRAM_CLUSTER = 0xFD00
-
-
 @register_entity(PHILIPS_REMOTE_CLUSTER)
 class PhilipsRemoteBind(VirtualEntity):
     """Bind the Philips remote cluster on every device that exposes it."""
@@ -551,8 +558,6 @@ class IdentifyTriggerEffectEvent(VirtualEntity):
 # Opple attributes that should be populated in the attribute cache on startup
 # so the regular entities (select/switch/sensor/number) reading them have a
 # value to display.
-
-AQARA_OPPLE_CLUSTER = 0xFCC0
 
 
 class _AqaraOppleInitBase(VirtualEntity):
@@ -817,10 +822,6 @@ class AqaraMotionDetectionIntervalSync(_AqaraOppleInitBase):
 
 # === Other manufacturer-specific clusters ===
 
-SONOFF_CLUSTER = 0xFC11
-TUYA_MANUFACTURER_CLUSTER = 0xEF00
-TUYA_PLUG_MANUFACTURER = "tuya.plug_manufacturer_attributes"
-
 
 @register_entity(SONOFF_CLUSTER)
 class SonoffManufacturerBind(VirtualEntity):
@@ -887,9 +888,6 @@ class TuyaPlugManufacturerInit(VirtualEntity):
             },
         ),
     }
-
-
-SINOPE_MANUFACTURER_CLUSTER = 0xFF01
 
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
@@ -962,11 +960,6 @@ class SinopeDimmerInit(VirtualEntity):
             },
         ),
     }
-
-
-INOVELLI_CLUSTER = 0xFC31
-IKEA_REMOTE_CLUSTER = 0xFC80
-IKEA_SHORTCUT_V1_CLUSTER = 0xFC7F
 
 
 @register_entity(IKEA_REMOTE_CLUSTER)

@@ -31,6 +31,7 @@ from zha.application.platforms import (
     register_entity,
     register_group_entity,
 )
+from zha.application.platforms.const import IKEA_AIR_PURIFIER_CLUSTER
 from zha.application.platforms.fan.const import (
     ATTR_PERCENTAGE,
     ATTR_PRESET_MODE,
@@ -53,7 +54,6 @@ from zha.application.platforms.fan.helpers import (
     ranged_value_to_percentage,
 )
 from zha.exceptions import wrap_zigpy_exceptions
-from zha.zigbee.cluster_ids import IKEA_AIR_PURIFIER_CLUSTER
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:

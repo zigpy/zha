@@ -59,9 +59,9 @@ from zha.application.discovery import discover_device_entities
 from zha.application.gateway import Gateway
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
+from zha.application.platforms.const import PHILIPS_REMOTE_CLUSTER
 from zha.application.platforms.light import HueLight
 from zha.application.platforms.number import BaseNumber, NumberMode
-from zha.zigbee.cluster_ids import PHILLIPS_REMOTE_CLUSTER
 
 
 def _get_identify_cluster(zigpy_device):
@@ -846,7 +846,7 @@ async def test_entityless_cluster_binds_via_virtual_entity(
 
     # The Philips remote cluster (0xFC00) has no HA entity but `PhilipsRemoteBind`
     # virtual entity binds it so the device can send commands to the coordinator.
-    philips_cluster = zigpy_device.endpoints[1].in_clusters[PHILLIPS_REMOTE_CLUSTER]
+    philips_cluster = zigpy_device.endpoints[1].in_clusters[PHILIPS_REMOTE_CLUSTER]
 
     await join_zigpy_device(zha_gateway, zigpy_device)
     await zha_gateway.async_block_till_done(wait_background_tasks=True)

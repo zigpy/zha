@@ -35,17 +35,17 @@ from zha.application.platforms import (
     ZCLClusterEntity,
     register_entity,
 )
-from zha.application.platforms.helpers import validate_device_class
-from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
-from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
-from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
-from zha.zigbee.cluster_ids import (
+from zha.application.platforms.const import (
     AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.helpers import validate_device_class
+from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
+from zha.application.platforms.number.const import ICONS, NumberDeviceClass, NumberMode
+from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:
     pass

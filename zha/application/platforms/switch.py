@@ -41,15 +41,15 @@ from zha.application.platforms import (
     register_entity,
     register_group_entity,
 )
-from zha.application.platforms.light.const import LIGHT_PROFILE_DEVICE_TYPES
-from zha.exceptions import ZHAException
-from zha.zigbee.cluster_ids import (
+from zha.application.platforms.const import (
     AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.light.const import LIGHT_PROFILE_DEVICE_TYPES
+from zha.exceptions import ZHAException
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:

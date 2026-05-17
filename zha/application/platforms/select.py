@@ -46,7 +46,7 @@ from zha.application.platforms import (
     ZCLClusterEntity,
     register_entity,
 )
-from zha.zigbee.cluster_ids import (
+from zha.application.platforms.const import (
     AQARA_OPPLE_CLUSTER,
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,

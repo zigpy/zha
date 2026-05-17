@@ -41,13 +41,13 @@ from zha.application.platforms.binary_sensor.const import (
     IAS_ZONE_CLASS_MAPPING,
     BinarySensorDeviceClass,
 )
-from zha.application.platforms.helpers import validate_device_class
-from zha.zigbee.cluster_ids import (
+from zha.application.platforms.const import (
     AQARA_OPPLE_CLUSTER,
     IKEA_AIR_PURIFIER_CLUSTER,
     SMARTTHINGS_ACCELERATION_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.helpers import validate_device_class
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device

@@ -75,15 +75,34 @@ from zha.application.platforms import (
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
+from zha.application.platforms.const import (
+    AQARA_OPPLE_CLUSTER,
+    IKEA_AIR_PURIFIER_CLUSTER,
+    INOVELLI_CLUSTER,
+    SMARTTHINGS_HUMIDITY_CLUSTER,
+    SONOFF_CLUSTER,
+    TUYA_MANUFACTURER_CLUSTER,
+    VOC_LEVEL_CLUSTER,
+)
 from zha.application.platforms.helpers import validate_device_class
 from zha.application.platforms.number.bacnet import BACNET_UNITS_TO_HA_UNITS
 from zha.application.platforms.sensor.const import (
     ANALOG_INPUT_APPTYPE_DEV_CLASS,
     ANALOG_INPUT_APPTYPE_UNITS,
     LEGACY_MEASUREMENT_TYPE_REMAPPING,
+    METERING_DEVICE_TYPES_ELECTRIC,
+    METERING_DEVICE_TYPES_GAS,
+    METERING_DEVICE_TYPES_HEATING_COOLING,
+    METERING_DEVICE_TYPES_WATER,
     ZCL_EPOCH,
+    DeviceStatusDefault,
+    DeviceStatusElectric,
+    DeviceStatusGas,
+    DeviceStatusHeatingCooling,
+    DeviceStatusWater,
     SensorDeviceClass,
     SensorStateClass,
+    metering_device_type_name,
 )
 from zha.application.platforms.sensor.helpers import (
     create_number_formatter,
@@ -111,26 +130,6 @@ from zha.units import (
     UnitOfTime,
     UnitOfVolume,
     UnitOfVolumeFlowRate,
-)
-from zha.zigbee.cluster_ids import (
-    AQARA_OPPLE_CLUSTER,
-    IKEA_AIR_PURIFIER_CLUSTER,
-    INOVELLI_CLUSTER,
-    SMARTTHINGS_HUMIDITY_CLUSTER,
-    SONOFF_CLUSTER,
-    TUYA_MANUFACTURER_CLUSTER,
-)
-from zha.zigbee.metering import (
-    METERING_DEVICE_TYPES_ELECTRIC,
-    METERING_DEVICE_TYPES_GAS,
-    METERING_DEVICE_TYPES_HEATING_COOLING,
-    METERING_DEVICE_TYPES_WATER,
-    DeviceStatusDefault,
-    DeviceStatusElectric,
-    DeviceStatusGas,
-    DeviceStatusHeatingCooling,
-    DeviceStatusWater,
-    metering_device_type,
 )
 
 if TYPE_CHECKING:
@@ -1904,7 +1903,7 @@ class SmartEnergyMetering(PollableSensor):
         dev_type = self._cluster.get(Metering.AttributeDefs.metering_device_type.name)
         if dev_type is None:
             return None
-        return metering_device_type.get(dev_type, dev_type)
+        return metering_device_type_name(dev_type)
 
     @property
     def _metering_status(self) -> int | None:
@@ -2492,7 +2491,7 @@ class CarbonMonoxideConcentration(Sensor):
     }
 
 
-@register_entity(0x042E)
+@register_entity(VOC_LEVEL_CLUSTER)
 class VOCLevel(Sensor):
     """VOC Level sensor."""
 
@@ -2505,16 +2504,16 @@ class VOCLevel(Sensor):
     _attr_primary_weight = 1
 
     _cluster_match = ClusterMatch(
-        server_clusters=frozenset({0x042E}),
+        server_clusters=frozenset({VOC_LEVEL_CLUSTER}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 0),
     )
 
     _server_cluster_config = {
-        0x042E: ClusterConfig(bind=True),
+        VOC_LEVEL_CLUSTER: ClusterConfig(bind=True),
     }
 
 
-@register_entity(0x042E)
+@register_entity(VOC_LEVEL_CLUSTER)
 class PPBVOCLevel(Sensor):
     """VOC Level sensor."""
 
@@ -2529,13 +2528,13 @@ class PPBVOCLevel(Sensor):
     _attr_primary_weight = 1
 
     _cluster_match = ClusterMatch(
-        server_clusters=frozenset({0x042E}),
+        server_clusters=frozenset({VOC_LEVEL_CLUSTER}),
         models=frozenset({"lumi.airmonitor.acn01"}),
         feature_priority=(PlatformFeatureGroup.VOC_LEVEL, 1),
     )
 
     _server_cluster_config = {
-        0x042E: ClusterConfig(bind=True),
+        VOC_LEVEL_CLUSTER: ClusterConfig(bind=True),
     }
 
 
