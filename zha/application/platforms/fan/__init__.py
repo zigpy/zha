@@ -53,7 +53,11 @@ from zha.application.platforms.fan.helpers import (
 )
 from zha.exceptions import wrap_zigpy_exceptions
 from zha.zigbee.cluster_ids import IKEA_AIR_PURIFIER_CLUSTER
-from zha.zigbee.reporting import REPORT_CONFIG_OP
+from zha.zigbee.reporting import (
+    REPORT_CONFIG_DEFAULT,
+    REPORT_CONFIG_IMMEDIATE,
+    REPORT_CONFIG_OP,
+)
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -412,6 +416,43 @@ class IkeaFan(BaseFan, PlatformEntity):
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
     )
+
+    # Aggregated reporting/bind config for the whole STARKVIND manufacturer
+    # cluster; sibling ChildLock/DisableLed switches don't need their own.
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "filter_run_time": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_DEFAULT
+                ),
+                "replace_filter": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                ),
+                "filter_life_time": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_DEFAULT
+                ),
+                "disable_led": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                ),
+                "air_quality_25pm": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                ),
+                "child_lock": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                ),
+                "fan_mode": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                ),
+                "fan_speed": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                ),
+                "device_run_time": AttrConfig(
+                    read_on_startup=False, reporting=REPORT_CONFIG_DEFAULT
+                ),
+            },
+        ),
+    }
 
     def __init__(
         self,

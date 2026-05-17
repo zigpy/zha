@@ -32,7 +32,7 @@ from zha.application.const import (
     CLUSTER_TYPE_OUT,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
-    ZHA_CLUSTER_HANDLER_READS_PER_REQ,
+    CLUSTER_READS_PER_REQ,
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
@@ -77,16 +77,16 @@ async def safe_read(
 ):
     """Swallow all exceptions from network read.
 
-    Reads are chunked into batches of ZHA_CLUSTER_HANDLER_READS_PER_REQ since
-    devices commonly cap how many attributes can be read in one request.
+    Reads are chunked into batches of CLUSTER_READS_PER_REQ since devices
+    commonly cap how many attributes can be read in one request.
 
     If we throw during initialization, setup fails. Rather have an entity that
     exists, but is in a maybe wrong state, than no entity. This method should
     probably only be used during initialization.
     """
     result: dict = {}
-    for i in range(0, len(attributes), ZHA_CLUSTER_HANDLER_READS_PER_REQ):
-        chunk = attributes[i : i + ZHA_CLUSTER_HANDLER_READS_PER_REQ]
+    for i in range(0, len(attributes), CLUSTER_READS_PER_REQ):
+        chunk = attributes[i : i + CLUSTER_READS_PER_REQ]
         try:
             chunk_result, _ = await cluster.read_attributes(
                 chunk,

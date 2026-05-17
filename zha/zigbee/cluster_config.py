@@ -14,7 +14,7 @@ from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import Status
 
 from zha.application.platforms import AttrConfig
-from zha.zigbee.cluster_handlers.const import CLUSTER_READS_PER_REQ
+from zha.application.const import CLUSTER_READS_PER_REQ
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

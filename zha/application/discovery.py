@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from collections.abc import Callable, Iterator
-from dataclasses import astuple
 import functools
 import itertools
 import logging
@@ -27,7 +26,9 @@ from zha.application import Platform, const as zha_const
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
     ENTITY_REGISTRY,
     GROUP_ENTITY_REGISTRY,
+    AttrConfig,
     BaseEntity,
+    ClusterConfig,
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -291,21 +292,6 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
             )
             continue
 
-        if cluster_type is ClusterType.Server:
-            cluster_handler = endpoint.all_cluster_handlers.get(
-                f"{endpoint.id}:0x{cluster.cluster_id:04x}"
-            )
-        else:
-            cluster_handler = endpoint.client_cluster_handlers.get(
-                f"{endpoint.id}:0x{cluster.cluster_id:04x}_client"
-            )
-
-        assert cluster_handler
-
-        # flags to determine if we need to claim/bind the cluster handler
-        attribute_initialization_found: bool = False
-        reporting_found: bool = False
-
         for entity_metadata in entity_metadata_list:
             platform = Platform(entity_metadata.entity_platform.value)
             metadata_type = type(entity_metadata)
@@ -326,67 +312,64 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
                 )
                 continue
 
-            # process the entity metadata for ZCL_INIT_ATTRS and REPORT_CONFIG
-            if attr_name := getattr(entity_metadata, "attribute_name", None):
-                # TODO: ignore "attribute write buttons"? currently, we claim ch
-                # if the entity has a reporting config, add it to the cluster handler
-                if rep_conf := getattr(entity_metadata, "reporting_config", None):
-                    # if attr is already in REPORT_CONFIG, remove it first
-                    cluster_handler.REPORT_CONFIG = tuple(
-                        filter(
-                            lambda cfg: cfg["attr"] != attr_name,
-                            cluster_handler.REPORT_CONFIG,
-                        )
-                    )
-                    # tuples are immutable and we re-set the REPORT_CONFIG here,
-                    # so no need to check for an instance variable
-                    cluster_handler.REPORT_CONFIG += (
-                        AttrReportConfig(attr=attr_name, config=astuple(rep_conf)),
-                    )
-                    # mark cluster handler for claiming and binding later
-                    reporting_found = True
-
-                # not in REPORT_CONFIG, add to ZCL_INIT_ATTRS if it not already in
-                elif attr_name not in cluster_handler.ZCL_INIT_ATTRS:
-                    # copy existing ZCL_INIT_ATTRS into instance variable once,
-                    # so we don't modify other instances of the same cluster handler
-                    if zha_const.ZCL_INIT_ATTRS not in cluster_handler.__dict__:
-                        cluster_handler.ZCL_INIT_ATTRS = (
-                            cluster_handler.ZCL_INIT_ATTRS.copy()
-                        )
-                    # add the attribute to the guaranteed instance variable
-                    cluster_handler.ZCL_INIT_ATTRS[attr_name] = (
-                        entity_metadata.attribute_initialized_from_cache
-                    )
-                    # mark cluster handler for claiming later, but not binding
-                    attribute_initialization_found = True
-
-            yield entity_class(
+            entity = entity_class(
                 endpoint=endpoint,
                 device=device,
                 entity_metadata=entity_metadata,
                 legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
             )
 
+            # Translate quirks v2 reporting/attribute-init metadata into a
+            # per-instance cluster config that the cluster_config aggregator
+            # picks up alongside the entity's normal (class-level) declarations.
+            if attr_name := getattr(entity_metadata, "attribute_name", None):
+                rep_conf = getattr(entity_metadata, "reporting_config", None)
+                if rep_conf is not None:
+                    attr_config = AttrConfig(
+                        read_on_startup=False,
+                        reporting=(
+                            rep_conf.min_interval,
+                            rep_conf.max_interval,
+                            rep_conf.reportable_change,
+                        ),
+                    )
+                    bind = True
+                else:
+                    attr_config = AttrConfig(
+                        read_on_startup=(
+                            not entity_metadata.attribute_initialized_from_cache
+                        ),
+                    )
+                    bind = False
+
+                cluster_config_map = (
+                    "_server_cluster_config"
+                    if cluster_type is ClusterType.Server
+                    else "_client_cluster_config"
+                )
+                # Keep attr_name as a string here — quirks v2 entities can
+                # reference attribute names that aren't part of the cluster's
+                # attribute schema (e.g. manufacturer-specific extensions);
+                # aggregation/configure handle both name and ZCLAttributeDef.
+                setattr(
+                    entity,
+                    cluster_config_map,
+                    {
+                        cluster.cluster_id: ClusterConfig(
+                            bind=bind,
+                            attributes={attr_name: attr_config},
+                        ),
+                    },
+                )
+
+            yield entity
+
             _LOGGER.debug(
-                "'%s' platform -> '%s' using %s",
+                "'%s' platform -> '%s' using cluster 0x%04x",
                 platform,
                 entity_class.__name__,
-                [cluster_handler.name],
+                cluster.cluster_id,
             )
-
-        # if the cluster handler is unclaimed, claim it and set BIND accordingly,
-        # so ZHA configures the cluster handler: reporting + reads attributes
-        if (attribute_initialization_found or reporting_found) and (
-            cluster_handler not in endpoint.claimed_cluster_handlers.values()
-        ):
-            endpoint.claim_cluster_handlers([cluster_handler])
-            # BIND is True by default, so only set to False if no reporting found.
-            # We can safely do this, since quirks v2 entities are initialized last,
-            # so if the cluster handler wasn't claimed by endpoint probing so far,
-            # only v2 entities need it.
-            if not reporting_found:
-                cluster_handler.BIND = False
 
 
 def _is_renamed_cluster(cluster: Cluster) -> bool:

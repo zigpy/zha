@@ -263,7 +263,7 @@ class BaseLight(BaseEntity, ABC):
             self._effect = effect
 
 
-class BaseClusterHandlerLight(BaseLight):
+class BaseSharedLight(BaseLight):
     """Operations common to all light entities."""
 
     _FORCE_ON = False
@@ -883,7 +883,7 @@ class BaseClusterHandlerLight(BaseLight):
 
 
 @register_entity(OnOff.cluster_id)
-class Light(BaseClusterHandlerLight, PlatformEntity):
+class Light(BaseSharedLight, PlatformEntity):
     """Representation of a ZHA or ZLL light."""
 
     _attr_translation_key: str = "light"
@@ -1353,7 +1353,7 @@ class MinTransitionLight(Light):
 
 
 @register_group_entity
-class LightGroup(BaseClusterHandlerLight, GroupEntity):
+class LightGroup(BaseSharedLight, GroupEntity):
     """Representation of a light group."""
 
     _attr_always_supported = True
