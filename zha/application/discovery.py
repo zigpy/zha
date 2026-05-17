@@ -32,6 +32,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    _virtual,
     alarm_control_panel,
     binary_sensor,
     button,
@@ -392,15 +393,14 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
 
 
 def _is_renamed_cluster(cluster: Cluster) -> bool:
-    """Return True if a quirk has renamed the cluster's ep_attribute.
-
-    Used to skip ClusterMatch entities for renamed clusters so the new
-    cluster-id based matching behaves the same as the legacy handler-name
-    matching (which never found a handler under the standard name).
-    """
+    """Return True if a quirk has renamed the cluster's ep_attribute."""
     standard = Cluster._registry.get(cluster.cluster_id)
     if standard is None:
         return False
+
+    # Used to skip ClusterMatch entities for renamed clusters so the new cluster id
+    # based matching behaves the same as the legacy handler-name matching (which never
+    # found a handler under the standard name).
     return cluster.ep_attribute != standard.ep_attribute
 
 

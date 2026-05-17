@@ -54,16 +54,17 @@ class AggregatedClusterConfig:
     cluster: zigpy.zcl.Cluster
     bind: bool = False
     attributes: dict[str, AggregatedAttrConfig] = field(default_factory=dict)
+    entities: list[BaseEntity] = field(default_factory=list)
 
 
 def aggregate_cluster_configs(
     entities: Iterable[BaseEntity],
-) -> dict[tuple[int, int], AggregatedClusterConfig]:
+) -> dict[tuple[int, int, bool], AggregatedClusterConfig]:
     """Aggregate cluster configurations from entities.
 
     Returns a dict keyed by (endpoint_id, cluster_id) with merged configs.
     """
-    result: dict[tuple[int, int], AggregatedClusterConfig] = {}
+    result: dict[tuple[int, int, bool], AggregatedClusterConfig] = {}
 
     for entity in entities:
         if not hasattr(entity, "_server_cluster_config"):
@@ -77,12 +78,13 @@ def aggregate_cluster_configs(
             if cluster is None:
                 continue
 
-            key = (entity.endpoint.id, cluster_id)
+            key = (entity.endpoint.id, cluster_id, True)
             if key not in result:
                 result[key] = AggregatedClusterConfig(cluster=cluster)
 
             agg = result[key]
             agg.bind = agg.bind or config.bind
+            agg.entities.append(entity)
 
             for attr_def, attr_config in config.attributes.items():
                 attr_name = attr_def.name if hasattr(attr_def, "name") else attr_def
@@ -95,12 +97,13 @@ def aggregate_cluster_configs(
             if cluster is None:
                 continue
 
-            key = (entity.endpoint.id, cluster_id)
+            key = (entity.endpoint.id, cluster_id, False)
             if key not in result:
                 result[key] = AggregatedClusterConfig(cluster=cluster)
 
             agg = result[key]
             agg.bind = agg.bind or config.bind
+            agg.entities.append(entity)
 
             for attr_def, attr_config in config.attributes.items():
                 attr_name = attr_def.name if hasattr(attr_def, "name") else attr_def
@@ -112,7 +115,7 @@ def aggregate_cluster_configs(
 
 
 async def configure_cluster_configs(
-    configs: dict[tuple[int, int], AggregatedClusterConfig],
+    configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
     manufacturer_code: int | None,
 ) -> None:
     """Execute binding and reporting configuration from aggregated configs."""
@@ -199,6 +202,37 @@ async def configure_cluster_configs(
         agg.cluster._zha_last_reporting_config = merged
 
 
+async def run_entity_cluster_configure_hooks(
+    configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
+) -> None:
+    """Run any per-entity cluster-level configure hooks.
+
+    Used by virtual entities to perform cluster-level setup beyond bind+report
+    (e.g. IAS Zone CIE write, LightLink coordinator group join).
+    """
+    seen: set[tuple[int, int]] = set()
+    for key, agg in configs.items():
+        if agg.cluster.endpoint.device.skip_configuration:
+            continue
+        for entity in agg.entities:
+            hook = getattr(entity, "async_configure_cluster", None)
+            if hook is None:
+                continue
+            run_key = (id(entity), agg.cluster.cluster_id)
+            if run_key in seen:
+                continue
+            seen.add(run_key)
+            try:
+                await hook(agg.cluster)
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.debug(
+                    "[%s] cluster configure hook on %s raised",
+                    agg.cluster.endpoint.device.ieee,
+                    type(entity).__name__,
+                    exc_info=True,
+                )
+
+
 async def _read_attributes_chunked(
     cluster: zigpy.zcl.Cluster,
     attrs: list[str],
@@ -230,7 +264,7 @@ async def _read_attributes_chunked(
 
 
 async def initialize_cluster_configs(
-    configs: dict[tuple[int, int], AggregatedClusterConfig],
+    configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
     from_cache: bool,
 ) -> None:
     """Read initial attribute values from aggregated configs."""

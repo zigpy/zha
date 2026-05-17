@@ -17,13 +17,7 @@ from zigpy.zcl.clusters.security import (
     WarningType,
 )
 
-from zha.exceptions import ZHAException
-from zha.zigbee.cluster_handlers import (
-    ClientClusterHandler,
-    ClusterHandler,
-    ClusterHandlerStatus,
-    registries,
-)
+from zha.zigbee.cluster_handlers import ClientClusterHandler, ClusterHandler, registries
 from zha.zigbee.cluster_handlers.const import CLUSTER_HANDLER_STATE_CHANGED
 
 if TYPE_CHECKING:
@@ -331,7 +325,11 @@ class IasWdClusterHandler(ClusterHandler):
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(IasZone.cluster_id)
 class IASZoneClusterHandler(ClusterHandler):
-    """Cluster handler for the IASZone Zigbee cluster."""
+    """Cluster handler for the IASZone Zigbee cluster.
+
+    Cluster-level work (CIE write, enroll handshake, status_change_notification
+    cache sync) lives on the `IasZoneEnrollment` virtual entity now.
+    """
 
     _value_attribute: str = IasZone.AttributeDefs.zone_status.name
 
@@ -340,64 +338,6 @@ class IASZoneClusterHandler(ClusterHandler):
         IasZone.AttributeDefs.zone_state.name: True,
         IasZone.AttributeDefs.zone_type.name: True,
     }
-
-    def cluster_command(self, tsn, command_id, args):
-        """Handle commands received to this cluster."""
-        if command_id == IasZone.ClientCommandDefs.status_change_notification.id:
-            zone_status = args[0]
-            # update attribute cache with new zone status
-            self.cluster.update_attribute(
-                IasZone.AttributeDefs.zone_status.id, zone_status
-            )
-            self.debug("Updated alarm state: %s", zone_status)
-        elif command_id == IasZone.ClientCommandDefs.enroll.id:
-            self.debug("Enroll requested")
-            self._cluster.create_catching_task(
-                self.enroll_response(
-                    enroll_response_code=IasZone.EnrollResponse.Success, zone_id=0
-                )
-            )
-
-    async def async_configure(self):
-        """Configure IAS device."""
-        await self.get_attribute_value(
-            IasZone.AttributeDefs.zone_type.name, from_cache=False
-        )
-        if self._endpoint.device.skip_configuration:
-            self.debug("skipping IASZoneClusterHandler configuration")
-            return
-
-        self.debug("started IASZoneClusterHandler configuration")
-
-        await self.bind()
-        ieee = self.cluster.endpoint.device.application.state.node_info.ieee
-
-        try:
-            await self.write_attributes_safe(
-                {IasZone.AttributeDefs.cie_addr.name: ieee}
-            )
-            self.debug(
-                "wrote cie_addr: %s to '%s' cluster",
-                str(ieee),
-                self._cluster.ep_attribute,
-            )
-        except ZHAException as ex:
-            self.debug(
-                "Failed to write cie_addr: %s to '%s' cluster: %s",
-                str(ieee),
-                self._cluster.ep_attribute,
-                str(ex),
-            )
-
-        self.debug("Sending pro-active IAS enroll response")
-        self._cluster.create_catching_task(
-            self.enroll_response(
-                enroll_response_code=IasZone.EnrollResponse.Success, zone_id=0
-            )
-        )
-
-        self._status = ClusterHandlerStatus.CONFIGURED
-        self.debug("finished IASZoneClusterHandler configuration")
 
     async def async_update(self) -> None:
         """Retrieve latest state."""

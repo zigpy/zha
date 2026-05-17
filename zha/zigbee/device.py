@@ -90,6 +90,7 @@ from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
     configure_cluster_configs,
     initialize_cluster_configs,
+    run_entity_cluster_configure_hooks,
 )
 from zha.zigbee.cluster_handlers import (
     ClusterHandler,
@@ -969,6 +970,7 @@ class Device(LogMixin, EventBase):
         aggregated = aggregate_cluster_configs(self._discovered_entities)
         if aggregated:
             await configure_cluster_configs(aggregated, self.manufacturer_code)
+            await run_entity_cluster_configure_hooks(aggregated)
 
         # Mark cluster handlers as CONFIGURED for ClusterMatch entities
         for entity in self._discovered_entities:
@@ -1827,6 +1829,9 @@ class Device(LogMixin, EventBase):
         for (platform, _unique_id), platform_entity in sorted(
             self.platform_entities.items()
         ):
+            if platform is Platform.UNKNOWN:
+                continue
+
             info_object = dataclasses.asdict(platform_entity.info_object)
             del info_object["cluster_handlers"]
             info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])

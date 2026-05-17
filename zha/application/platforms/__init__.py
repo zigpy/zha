@@ -244,6 +244,13 @@ class BaseEntity(LogMixin, EventBase):
 
     PLATFORM: Platform = Platform.UNKNOWN
 
+    # Virtual entities participate in discovery and cluster-config aggregation
+    # (so they bind, configure reporting, and run cluster-level setup work like
+    # IAS Zone enrollment) but are filtered out before being added to the
+    # device's visible platform_entities. They have no state, no HA registration,
+    # and exist purely to drive cluster-level background work.
+    _virtual: bool = False
+
     _attr_fallback_name: str | None = None
     _attr_icon: str | None = None
     _attr_translation_key: str | None = None

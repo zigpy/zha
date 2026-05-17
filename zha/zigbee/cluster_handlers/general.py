@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Coroutine
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Final
 
 from zhaquirks.quirk_ids import BEGA_LIGHT_SWITCHABLE_WHITE, TUYA_PLUG_ONOFF
 import zigpy.exceptions
@@ -548,61 +547,11 @@ class MultistateValueClusterHandler(ClusterHandler):
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(OnOff.cluster_id)
 class OnOffClientClusterHandler(ClientClusterHandler):
-    """OnOff client cluster handler."""
+    """OnOff client cluster handler.
 
-    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
-        """Initialize OnOffClientClusterHandler."""
-        super().__init__(cluster, endpoint)
-        self._off_listener: asyncio.TimerHandle | None = None
-
-    @property
-    def on_off(self) -> bool | None:
-        """Return cached value of on/off attribute."""
-        return self.cluster.get(OnOff.AttributeDefs.on_off.name)
-
-    def cluster_command(self, tsn, command_id, args):
-        """Handle commands received to this cluster."""
-        cmd = parse_and_log_command(self, tsn, command_id, args)
-
-        # Process cluster commands, so attribute_updated events fire first
-        if cmd in (
-            OnOff.ServerCommandDefs.off.name,
-            OnOff.ServerCommandDefs.off_with_effect.name,
-        ):
-            self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
-        elif cmd in (
-            OnOff.ServerCommandDefs.on.name,
-            OnOff.ServerCommandDefs.on_with_recall_global_scene.name,
-        ):
-            self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.true)
-        elif cmd == OnOff.ServerCommandDefs.on_with_timed_off.name:
-            should_accept = args[0]
-            on_time = args[1]
-            # 0 is always accept 1 is only accept when already on
-            if should_accept == 0 or (should_accept == 1 and bool(self.on_off)):
-                if self._off_listener is not None:
-                    self._off_listener.cancel()
-                    self._off_listener = None
-                self.cluster.update_attribute(
-                    OnOff.AttributeDefs.on_off.id, t.Bool.true
-                )
-                if on_time > 0:
-                    self._off_listener = asyncio.get_running_loop().call_later(
-                        (on_time / 10),  # value is in 10ths of a second
-                        self.set_to_off,
-                    )
-        elif cmd == "toggle":
-            self.cluster.update_attribute(
-                OnOff.AttributeDefs.on_off.id, not bool(self.on_off)
-            )
-
-        # Emit ZHA event with cluster command
-        super().cluster_command(tsn, command_id, args)
-
-    def set_to_off(self, *_):
-        """Set the state to off."""
-        self._off_listener = None
-        self.cluster.update_attribute(OnOff.AttributeDefs.on_off.id, t.Bool.false)
+    Server attribute cache sync from incoming commands lives on the
+    `OnOffClientCacheSync` virtual entity now.
+    """
 
 
 @registries.BINDABLE_CLUSTERS.register(OnOff.cluster_id)
@@ -692,7 +641,11 @@ class OtaClusterHandler(ClusterHandler):
 
 @registries.CLIENT_CLUSTER_HANDLER_REGISTRY.register(Ota.cluster_id)
 class OtaClientClusterHandler(ClientClusterHandler):
-    """OTA client cluster handler."""
+    """OTA client cluster handler.
+
+    The `current_file_version` cache update on `query_next_image` lives on the
+    `OtaCurrentFileVersionCache` virtual entity now.
+    """
 
     BIND: bool = False
 
@@ -716,23 +669,6 @@ class OtaClientClusterHandler(ClientClusterHandler):
         # We intentionally avoid the `ClientClusterHandler` attribute update handler:
         # it emits a logbook event on every update, which pollutes the logbook
         ClusterHandler._handle_attribute_updated_event(self, event)
-
-    def cluster_command(
-        self, tsn: int, command_id: int, args: list[Any] | None
-    ) -> None:
-        """Handle OTA commands."""
-        if command_id not in self.cluster.server_commands:
-            return
-
-        cmd_name = self.cluster.server_commands[command_id].name
-
-        if cmd_name == Ota.ServerCommandDefs.query_next_image.name:
-            assert args
-
-            current_file_version = args[3]
-            self.cluster.update_attribute(
-                Ota.AttributeDefs.current_file_version.id, current_file_version
-            )
 
 
 @registries.CLUSTER_HANDLER_REGISTRY.register(Partition.cluster_id)
