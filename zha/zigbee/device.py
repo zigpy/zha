@@ -68,8 +68,9 @@ from zha.application.const import (
     UNKNOWN,
     UNKNOWN_MANUFACTURER,
     UNKNOWN_MODEL,
-    ZHA_CLUSTER_HANDLER_CFG_DONE,
-    ZHA_CLUSTER_HANDLER_MSG,
+    ZHA_CLUSTER_BIND_EVENT,
+    ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
+    ZHA_DEVICE_CONFIGURED_EVENT,
     ZHA_DEVICE_ENTITY_ADDED_EVENT,
     ZHA_DEVICE_ENTITY_REMOVED_EVENT,
     ZHA_DEVICE_UPDATED_EVENT,
@@ -263,13 +264,46 @@ class DeviceEntityRemovedEvent:
 
 
 @dataclass(kw_only=True, frozen=True)
-class ClusterHandlerConfigurationComplete:
-    """Event generated when all cluster handlers are configured."""
+class DeviceConfiguredEvent:
+    """Emitted when `device.async_configure()` completes."""
+
+    event_type: Final[str] = ZHA_DEVICE_CONFIGURED_EVENT
+    event: Final[str] = ZHA_DEVICE_CONFIGURED_EVENT
 
     device_ieee: EUI64
-    unique_id: str
-    event_type: Final[str] = ZHA_CLUSTER_HANDLER_MSG
-    event: Final[str] = ZHA_CLUSTER_HANDLER_CFG_DONE
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterBindEvent:
+    """Emitted after attempting to bind a cluster to the coordinator."""
+
+    event_type: Final[str] = ZHA_CLUSTER_BIND_EVENT
+    event: Final[str] = ZHA_CLUSTER_BIND_EVENT
+
+    device_ieee: EUI64
+    endpoint_id: int
+    cluster_id: int
+    cluster_name: str
+    success: bool
+
+
+@dataclass(kw_only=True, frozen=True)
+class ClusterConfigureReportingEvent:
+    """Emitted after configuring attribute reporting on a cluster.
+
+    ``attributes`` is keyed by attribute name; each value is
+    ``{"id", "name", "min", "max", "change", "status"}`` where ``status`` is
+    the per-attribute ZCL status name or ``"FAILURE"`` on transport error.
+    """
+
+    event_type: Final[str] = ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT
+    event: Final[str] = ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT
+
+    device_ieee: EUI64
+    endpoint_id: int
+    cluster_id: int
+    cluster_name: str
+    attributes: dict[str, dict[str, Any]]
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -954,7 +988,7 @@ class Device(LogMixin, EventBase):
         # Configure binding and reporting from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)
         if aggregated:
-            await configure_cluster_configs(aggregated, self.manufacturer_code)
+            await configure_cluster_configs(self, aggregated, self.manufacturer_code)
 
         self.emit_reconfigure_done()
 
@@ -988,18 +1022,14 @@ class Device(LogMixin, EventBase):
         self._init_from_zigpy_device(zigpy_device)
 
     def emit_reconfigure_done(self) -> None:
-        """Emit configuration-complete event.
+        """Emit `DeviceConfiguredEvent`.
 
-        Called by the gateway after a reconfigure (successful or not) so that
-        frontends listening for cluster handler messages know the operation
-        has finished.
+        Called by the gateway after a reconfigure (successful or not) so the
+        HA frontend's reconfigure dialog unsticks.
         """
         self.emit(
-            ZHA_CLUSTER_HANDLER_CFG_DONE,
-            ClusterHandlerConfigurationComplete(
-                device_ieee=self.ieee,
-                unique_id=self.ieee,
-            ),
+            ZHA_DEVICE_CONFIGURED_EVENT,
+            DeviceConfiguredEvent(device_ieee=self.ieee),
         )
 
     def _is_entity_removed_by_quirk(self, entity: PlatformEntity) -> bool:

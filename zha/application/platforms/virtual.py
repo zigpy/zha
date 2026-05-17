@@ -3,9 +3,8 @@
 Virtual entities participate in cluster discovery and the cluster-config
 aggregation flow (so they drive bind, attribute reporting, and cluster-level
 setup work) but are filtered out before being registered as HA entities. They
-exist to host per-cluster background work that used to live on ClusterHandler:
-IAS Zone enrollment, LightLink coordinator group joining, client-cluster
-attribute cache synchronization, etc.
+host per-cluster background work like IAS Zone enrollment, LightLink
+coordinator group joining, and client-cluster attribute cache synchronization.
 """
 
 from __future__ import annotations
@@ -273,8 +272,8 @@ class OnOffClientCacheSync(VirtualEntity):
         except KeyError:
             return
 
-        # Legacy ClientClusterHandler.cluster_command emitted a zha_event for
-        # every incoming server command; preserve that.
+        # Re-emit every incoming server command as a zha_event so HA
+        # automations can react to remote button presses.
         self.emit_cluster_zha_event(cmd, args)
 
         if cmd in (
@@ -331,11 +330,7 @@ class OnOffClientCacheSync(VirtualEntity):
 
 
 class _ClientClusterZhaEventEmitter(VirtualEntity):
-    """Bind a client cluster and emit zha_events for incoming commands/updates.
-
-    Replaces the legacy `ClientClusterHandler` auto-emit behavior (which fired
-    on every cluster_command from the device and every attribute update).
-    """
+    """Bind a client cluster and emit zha_events for incoming commands/updates."""
 
     def cluster_command(self, tsn: int, command_id: int, args: list[Any]) -> None:
         """Relay incoming client cluster commands as zha_events."""
@@ -579,11 +574,10 @@ class IdentifyTriggerEffectEvent(VirtualEntity):
 
 # === Aqara Opple cluster per-model attribute initialization ===
 #
-# These virtual entities replace the per-model `ZCL_INIT_ATTRS` swaps that
-# previously lived in `OppleRemoteClusterHandler.__init__`. Each virtual entity
-# claims the Aqara Opple cluster and declares the attributes it expects to be
-# read on startup so they're populated in the attribute cache for the regular
-# entities (select/switch/sensor/number) that read them.
+# Each virtual entity below targets a specific Aqara model and declares the
+# Opple attributes that should be populated in the attribute cache on startup
+# so the regular entities (select/switch/sensor/number) reading them have a
+# value to display.
 
 AQARA_OPPLE_CLUSTER = 0xFCC0
 

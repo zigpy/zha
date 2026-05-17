@@ -29,10 +29,8 @@ _LOGGER = logging.getLogger(__name__)
 class _ClusterEventForwarder:
     """Forwards quirk `zha_send_event` listener calls into device `zha_event`s.
 
-    Replaces the runtime forwarding that ClusterHandler used to do. The
-    `unique_id` published on the event matches the legacy format
-    (`ieee:endpoint_id:0xCLUSTER` with `_CLIENT` suffix for client clusters) so
-    Home Assistant automations filtering on it keep working.
+    The `unique_id` published on the event is `ieee:endpoint_id:0xCLUSTER` with
+    a `_CLIENT` suffix for client clusters; HA automations filter on it.
     """
 
     def __init__(

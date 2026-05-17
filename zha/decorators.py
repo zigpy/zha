@@ -16,12 +16,11 @@ class DictRegistry(dict[int | str, _TypeT]):
     """Dict Registry of items."""
 
     def register(self, name: int | str) -> Callable[[_TypeT], _TypeT]:
-        """Return decorator to register item with a specific name."""
+        """Return decorator to register an item with a specific name."""
 
-        def decorator(cluster_handler: _TypeT) -> _TypeT:
-            """Register decorated cluster handler or item."""
-            self[name] = cluster_handler
-            return cluster_handler
+        def decorator(cls: _TypeT) -> _TypeT:
+            self[name] = cls
+            return cls
 
         return decorator
 
@@ -32,14 +31,13 @@ class NestedDictRegistry(dict[int | str, dict[int | str | None, _TypeT]]):
     def register(
         self, name: int | str, sub_name: int | str | None = None
     ) -> Callable[[_TypeT], _TypeT]:
-        """Return decorator to register item with a specific and a quirk name."""
+        """Return decorator to register an item under (name, sub_name)."""
 
-        def decorator(cluster_handler: _TypeT) -> _TypeT:
-            """Register decorated cluster handler or item."""
+        def decorator(cls: _TypeT) -> _TypeT:
             if name not in self:
                 self[name] = {}
-            self[name][sub_name] = cluster_handler
-            return cluster_handler
+            self[name][sub_name] = cls
+            return cls
 
         return decorator
 
@@ -48,12 +46,11 @@ class SetRegistry(set[int | str]):
     """Set Registry of items."""
 
     def register(self, name: int | str) -> Callable[[_TypeT], _TypeT]:
-        """Return decorator to register item with a specific name."""
+        """Return decorator to add a name to the set."""
 
-        def decorator(cluster_handler: _TypeT) -> _TypeT:
-            """Register decorated cluster handler or item."""
+        def decorator(cls: _TypeT) -> _TypeT:
             self.add(name)
-            return cluster_handler
+            return cls
 
         return decorator
 

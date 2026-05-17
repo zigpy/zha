@@ -93,9 +93,6 @@ PRESET_NONE = "none"
 
 ENTITY_METADATA = "entity_metadata"
 
-ZCL_INIT_ATTRS = "ZCL_INIT_ATTRS"
-REPORT_CONFIG = "REPORT_CONFIG"
-
 _ControllerClsType = type[zigpy.application.ControllerApplication]
 
 
@@ -185,11 +182,9 @@ WARNING_DEVICE_STROBE_VERY_HIGH = 0x03
 WARNING_DEVICE_SQUAWK_MODE_ARMED = 0
 WARNING_DEVICE_SQUAWK_MODE_DISARMED = 1
 
-ZHA_CLUSTER_HANDLER_MSG = "zha_channel_message"
-ZHA_CLUSTER_HANDLER_MSG_BIND = "zha_channel_bind"
-ZHA_CLUSTER_HANDLER_MSG_CFG_RPT = "zha_channel_configure_reporting"
-ZHA_CLUSTER_HANDLER_MSG_DATA = "zha_channel_msg_data"
-ZHA_CLUSTER_HANDLER_CFG_DONE = "zha_channel_cfg_done"
+ZHA_CLUSTER_BIND_EVENT = "zha_cluster_bind"
+ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT = "zha_cluster_configure_reporting"
+ZHA_DEVICE_CONFIGURED_EVENT = "zha_device_configured"
 CLUSTER_READS_PER_REQ = 5
 ZHA_EVENT = "zha_event"
 ZHA_DEVICE_UPDATED_EVENT = "zha_device_updated_event"

@@ -13,13 +13,18 @@ import zigpy.zcl
 from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import Status
 
+from zha.application.const import (
+    CLUSTER_READS_PER_REQ,
+    ZHA_CLUSTER_BIND_EVENT,
+    ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
+)
 from zha.application.platforms import AttrConfig
-from zha.application.const import CLUSTER_READS_PER_REQ
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from zha.application.platforms import BaseEntity
+    from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
 RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
@@ -115,23 +120,35 @@ def aggregate_cluster_configs(
 
 
 async def configure_cluster_configs(
+    device: Device,
     configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
     manufacturer_code: int | None,
 ) -> None:
-    """Execute binding, reporting, and post-bind hooks from aggregated configs."""
-    for agg in configs.values():
+    """Execute binding, reporting, and post-bind hooks from aggregated configs.
+
+    Emits `ClusterBindEvent` and `ClusterConfigureReportingEvent` on `device`
+    so listeners (HA Core diagnostics, reconfigure dialog) can observe the
+    per-cluster outcomes.
+    """
+    # Imported lazily to avoid a circular import.
+    from zha.zigbee.device import (  # noqa: PLC0415
+        ClusterBindEvent,
+        ClusterConfigureReportingEvent,
+    )
+
+    for (endpoint_id, _cluster_id, _is_server), agg in configs.items():
         if agg.cluster.endpoint.device.skip_configuration:
             continue
         if agg.bind:
             try:
                 res = await RETRYABLE_REQUEST_DECORATOR(agg.cluster.bind)()
+                success = res[0] == 0
                 _LOGGER.debug(
                     "[%s] Bound cluster %s: %s",
                     agg.cluster.endpoint.device.ieee,
                     agg.cluster.ep_attribute,
                     res[0],
                 )
-                agg.cluster._zha_last_bind_success = res[0] == 0
             except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
                 _LOGGER.debug(
                     "[%s] Failed to bind cluster %s: %s",
@@ -139,7 +156,19 @@ async def configure_cluster_configs(
                     agg.cluster.ep_attribute,
                     ex,
                 )
-                agg.cluster._zha_last_bind_success = False
+                success = False
+
+            agg.cluster._zha_last_bind_success = success
+            device.emit(
+                ZHA_CLUSTER_BIND_EVENT,
+                ClusterBindEvent(
+                    device_ieee=device.ieee,
+                    endpoint_id=endpoint_id,
+                    cluster_id=agg.cluster.cluster_id,
+                    cluster_name=agg.cluster.name,
+                    success=success,
+                ),
+            )
 
         reporting_attrs = {}
         for attr_name, attr_config in agg.attributes.items():
@@ -198,6 +227,16 @@ async def configure_cluster_configs(
             else:
                 merged = event_data
             agg.cluster._zha_last_reporting_config = merged
+            device.emit(
+                ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
+                ClusterConfigureReportingEvent(
+                    device_ieee=device.ieee,
+                    endpoint_id=endpoint_id,
+                    cluster_id=agg.cluster.cluster_id,
+                    cluster_name=agg.cluster.name,
+                    attributes=event_data,
+                ),
+            )
 
         for entity in agg.entities:
             try:

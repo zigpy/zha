@@ -67,12 +67,10 @@ from zha.zigbee.device import (
 from zha.zigbee.group import Group, GroupMemberReference
 
 
-def zigpy_device(
-    zha_gateway: Gateway, with_basic_cluster_handler: bool = True, **kwargs
-):
+def zigpy_device(zha_gateway: Gateway, with_basic_cluster: bool = True, **kwargs):
     """Return a ZigpyDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
-    if with_basic_cluster_handler:
+    if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
 
     endpoints = {
@@ -86,10 +84,10 @@ def zigpy_device(
     return create_mock_zigpy_device(zha_gateway, endpoints, **kwargs)
 
 
-def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster_handler: bool = True):
+def zigpy_device_mains(zha_gateway: Gateway, with_basic_cluster: bool = True):
     """Return a ZigpyDevice with a switch cluster."""
     in_clusters = [general.OnOff.cluster_id]
-    if with_basic_cluster_handler:
+    if with_basic_cluster:
         in_clusters.append(general.Basic.cluster_id)
 
     endpoints = {
@@ -135,32 +133,30 @@ async def test_check_available_success(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability success on 1st try."""
-    device_with_basic_cluster_handler = zigpy_device_mains(
-        zha_gateway, with_basic_cluster_handler=True
-    )
-    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster_handler)
-    basic_ch = device_with_basic_cluster_handler.endpoints[3].basic
+    device_with_basic_cluster = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster)
+    basic_cluster = device_with_basic_cluster.endpoints[3].basic
 
     assert not zha_device.is_coordinator
     assert not zha_device.is_active_coordinator
 
-    basic_ch.read_attributes.reset_mock()
-    device_with_basic_cluster_handler.last_seen = None
+    basic_cluster.read_attributes.reset_mock()
+    device_with_basic_cluster.last_seen = None
     assert zha_device.available is True
     await _send_time_changed(zha_gateway, zha_device.consider_unavailable_time + 2)
     assert zha_device.available is False
-    assert basic_ch.read_attributes.await_count == 0
+    assert basic_cluster.read_attributes.await_count == 0
 
-    device_with_basic_cluster_handler.last_seen = (
+    device_with_basic_cluster.last_seen = (
         time.time() - zha_device.consider_unavailable_time - 100
     )
-    _seens = [time.time(), device_with_basic_cluster_handler.last_seen]
+    _seens = [time.time(), device_with_basic_cluster.last_seen]
 
     def _update_last_seen(*args, **kwargs):  # pylint: disable=unused-argument
         new_last_seen = _seens.pop()
-        device_with_basic_cluster_handler.last_seen = new_last_seen
+        device_with_basic_cluster.last_seen = new_last_seen
 
-    basic_ch.read_attributes.side_effect = _update_last_seen
+    basic_cluster.read_attributes.side_effect = _update_last_seen
 
     for entity in zha_device.platform_entities.values():
         entity.emit = mock.MagicMock(wraps=entity.emit)
@@ -172,8 +168,8 @@ async def test_check_available_success(
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
-    assert basic_ch.read_attributes.await_count == 1
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 1
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
@@ -185,8 +181,8 @@ async def test_check_available_success(
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
@@ -198,8 +194,8 @@ async def test_check_available_success(
     await _send_time_changed(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
     assert zha_device.on_network is True
 
@@ -227,16 +223,14 @@ async def test_check_available_unsuccessful(
 ) -> None:
     """Check device availability all tries fail."""
 
-    device_with_basic_cluster_handler = zigpy_device_mains(
-        zha_gateway, with_basic_cluster_handler=True
-    )
-    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster_handler)
-    basic_ch = device_with_basic_cluster_handler.endpoints[3].basic
+    device_with_basic_cluster = zigpy_device_mains(zha_gateway, with_basic_cluster=True)
+    zha_device = await join_zigpy_device(zha_gateway, device_with_basic_cluster)
+    basic_cluster = device_with_basic_cluster.endpoints[3].basic
 
     assert zha_device.available is True
-    assert basic_ch.read_attributes.await_count == 0
+    assert basic_cluster.read_attributes.await_count == 0
 
-    device_with_basic_cluster_handler.last_seen = (
+    device_with_basic_cluster.last_seen = (
         time.time() - zha_device.consider_unavailable_time - 2
     )
 
@@ -251,8 +245,8 @@ async def test_check_available_unsuccessful(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
 
-    assert basic_ch.read_attributes.await_count == 1
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 1
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
 
     for entity in zha_device.platform_entities.values():
@@ -265,8 +259,8 @@ async def test_check_available_unsuccessful(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
 
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is True
 
     for entity in zha_device.platform_entities.values():
@@ -279,8 +273,8 @@ async def test_check_available_unsuccessful(
         zha_gateway, zha_gateway._device_availability_checker.__polling_interval + 1
     )
 
-    assert basic_ch.read_attributes.await_count == 2
-    assert basic_ch.read_attributes.await_args[0][0] == ["manufacturer"]
+    assert basic_cluster.read_attributes.await_count == 2
+    assert basic_cluster.read_attributes.await_args[0][0] == ["manufacturer"]
     assert zha_device.available is False
 
     for entity in zha_device.platform_entities.values():
@@ -289,23 +283,19 @@ async def test_check_available_unsuccessful(
         entity.emit.reset_mock()
 
 
-async def test_check_available_no_basic_cluster_handler(
+async def test_check_available_no_basic_cluster(
     zha_gateway: Gateway,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Check device availability for a device without basic cluster."""
-    device_without_basic_cluster_handler = zigpy_device(
-        zha_gateway, with_basic_cluster_handler=False
-    )
+    device_without_basic = zigpy_device(zha_gateway, with_basic_cluster=False)
     caplog.set_level(logging.DEBUG, logger="homeassistant.components.zha")
 
-    zha_device = await join_zigpy_device(
-        zha_gateway, device_without_basic_cluster_handler
-    )
+    zha_device = await join_zigpy_device(zha_gateway, device_without_basic)
 
     assert zha_device.available is True
 
-    device_without_basic_cluster_handler.last_seen = (
+    device_without_basic.last_seen = (
         time.time() - zha_device.consider_unavailable_time - 2
     )
 
@@ -415,7 +405,7 @@ async def test_async_get_clusters(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_clusters method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_clusters() == {
@@ -437,7 +427,7 @@ async def test_async_get_groupable_endpoints(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_groupable_endpoints method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -448,7 +438,7 @@ async def test_async_get_std_clusters(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_std_clusters method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].profile_id = zigpy.profiles.zha.PROFILE_ID
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -471,7 +461,7 @@ async def test_async_get_cluster(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_cluster(3, general.OnOff.cluster_id) == (
@@ -483,7 +473,7 @@ async def test_async_get_cluster_attributes(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster_attributes method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert (
@@ -502,7 +492,7 @@ async def test_async_get_cluster_commands(
     zha_gateway: Gateway,
 ) -> None:
     """Test async_get_cluster_commands method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.async_get_cluster_commands(3, general.OnOff.cluster_id) == {
@@ -515,7 +505,7 @@ async def test_write_zigbee_attribute(
     zha_gateway: Gateway,
 ) -> None:
     """Test write_zigbee_attribute method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with pytest.raises(
@@ -575,7 +565,7 @@ async def test_issue_cluster_command(
     zha_gateway: Gateway,
 ) -> None:
     """Test issue_cluster_command method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with pytest.raises(
@@ -611,7 +601,7 @@ async def test_async_add_to_group_remove_from_group(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test async_add_to_group and async_remove_from_group methods."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -680,11 +670,11 @@ async def test_async_bind_to_group(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test async_bind_to_group method."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].add_input_cluster(general.Groups.cluster_id)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    zigpy_dev_remote = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev_remote = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev_remote._ieee = zigpy.types.EUI64.convert("00:0d:7f:00:0a:90:69:e8")
     zigpy_dev_remote.endpoints[3].add_output_cluster(general.OnOff.cluster_id)
     zha_device_remote = await join_zigpy_device(zha_gateway, zigpy_dev_remote)
@@ -719,7 +709,7 @@ async def test_device_automation_triggers(
     zha_gateway: Gateway,
 ) -> None:
     """Test device automation triggers."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert get_device_automation_triggers(zha_device) == {
@@ -736,7 +726,7 @@ async def test_device_properties(
     zha_gateway: Gateway,
 ) -> None:
     """Test device properties."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.is_mains_powered is False
@@ -1185,7 +1175,7 @@ async def test_endpoint_none_profile(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test endpoint with None profile id being skipped."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zigpy_dev.endpoints[3].profile_id = None
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
@@ -1539,7 +1529,7 @@ async def test_gateway_reconfigure_with_swap(
     zha_gateway: Gateway,
 ) -> None:
     """Test gateway.async_reinterview_device rebuilds when reinterview swaps."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.status.name == "INITIALIZED"
@@ -1617,7 +1607,7 @@ async def test_gateway_reconfigure_no_swap(
     zha_gateway: Gateway,
 ) -> None:
     """Test gateway.async_reinterview_device does normal configure when no swap."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     old_zigpy_dev = zha_device.device
@@ -1645,7 +1635,7 @@ async def test_remove_entity_drops_mapping_on_on_remove_failure(
     would silently drop the replacement and the stale entity would shadow
     it indefinitely.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     entity = next(iter(zha_device.platform_entities.values()))
@@ -1672,7 +1662,7 @@ async def test_gateway_reconfigure_with_swap_rebuild_failure(
     is suppressed because entities are partial — reporting CONFIGURED would
     mislead the frontend's pairing-status display.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     new_zigpy_dev = create_mock_zigpy_device(
@@ -1719,7 +1709,7 @@ async def test_gateway_reconfigure_with_swap_initialize_failure(
     `async_initialize()` then raises, the gateway must NOT emit a second
     `reconfigure_done`.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     new_zigpy_dev = create_mock_zigpy_device(
@@ -1768,7 +1758,7 @@ async def test_gateway_reconfigure_reinterview_raises_still_emits(
     Without the `finally`, an exception left the HA frontend stuck on
     "reconfiguring" indefinitely.
     """
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with (
@@ -1789,7 +1779,7 @@ async def test_gateway_device_reinterviewed_ota_path(
     zha_gateway: Gateway,
 ) -> None:
     """Test that the gateway handles device_reinterviewed from OTA/zigpy."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     assert zha_device.status.name == "INITIALIZED"
@@ -1827,7 +1817,7 @@ async def test_device_reinterviewed_cancels_pending_init_task(
     zha_gateway: Gateway,
 ) -> None:
     """Test that device_reinterviewed cancels an in-flight init task for the device."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     pending_task = mock.MagicMock()
@@ -1870,7 +1860,7 @@ async def test_device_reinterviewed_configure_failure(
     zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test that a configure failure during reinterview is logged but not raised."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     new_zigpy_dev = create_mock_zigpy_device(
@@ -1918,7 +1908,7 @@ async def test_async_reinterview_device_active_coordinator(
     zha_gateway: Gateway, caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test that async_reinterview_device skips the active coordinator."""
-    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster_handler=True)
+    zigpy_dev = zigpy_device(zha_gateway, with_basic_cluster=True)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
     with (

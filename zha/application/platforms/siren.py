@@ -50,7 +50,7 @@ def _set_bit(destination_value, destination_bit, source_value, source_bit):
     return destination_value
 
 
-async def _issue_start_warning(
+async def issue_start_warning(
     cluster,
     *,
     mode,
@@ -73,6 +73,21 @@ async def _issue_start_warning(
     await cluster.start_warning(
         value, warning_duration, strobe_duty_cycle, strobe_intensity
     )
+
+
+async def issue_squawk(cluster, *, mode, strobe, squawk_level) -> None:
+    """Issue an IAS WD squawk command with packed squawk byte."""
+    value = 0
+    value = _set_bit(value, 0, squawk_level, 0)
+    value = _set_bit(value, 1, squawk_level, 1)
+    value = _set_bit(value, 3, strobe, 0)
+    value = _set_bit(value, 4, mode, 0)
+    value = _set_bit(value, 5, mode, 1)
+    value = _set_bit(value, 6, mode, 2)
+    value = _set_bit(value, 7, mode, 3)
+
+    await cluster.squawk(value)
+
 
 DEFAULT_DURATION = 5  # seconds
 
@@ -205,7 +220,7 @@ class BaseZclSiren(BaseSiren, ABC):
 
     async def async_turn_off(self) -> None:
         """Turn off siren."""
-        await _issue_start_warning(
+        await issue_start_warning(
             self._cluster,
             mode=WARNING_DEVICE_MODE_STOP,
             strobe=WARNING_DEVICE_STROBE_NO,
@@ -297,7 +312,7 @@ class AdvancedSiren(BaseZclSiren):
             siren_tone = tone
         if volume_level is not None:
             siren_level = int(volume_level)
-        await _issue_start_warning(
+        await issue_start_warning(
             self._cluster,
             mode=siren_tone,
             warning_duration=siren_duration,
@@ -351,7 +366,7 @@ class BasicSiren(BaseZclSiren):
         """Turn on siren with fixed tone, level, and strobe."""
         self._cancel_off_listener()
         siren_duration = duration if duration is not None else DEFAULT_DURATION
-        await _issue_start_warning(
+        await issue_start_warning(
             self._cluster,
             # some Frient sensors send INVALID_VALUE for EMERGENCY
             mode=WARNING_DEVICE_MODE_BURGLAR,
