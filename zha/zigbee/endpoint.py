@@ -140,6 +140,9 @@ class Endpoint:
     def _attach_legacy_event_forwarders(self) -> None:
         """Attach legacy quirk-event forwarders to every server and client cluster."""
         profile_id = self._zigpy_endpoint.profile_id
+        if profile_id is None:
+            _LOGGER.debug("Skipping endpoint, profile is None")
+            return
         if profile_id not in (ZLL_PROFILE_ID, ZHA_PROFILE_ID):
             _LOGGER.debug(
                 "Skipping endpoint, profile is not ZLL or ZHA: 0x%04X", profile_id

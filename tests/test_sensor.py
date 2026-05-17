@@ -1262,12 +1262,12 @@ async def test_se_summation_uom(
 @pytest.mark.parametrize(
     "raw_measurement_type, expected_type",
     (
-        (1, "Active_measurement_AC"),
-        (8, "Phase_A_measurement"),
-        (9, "Active_measurement_AC, Phase_A_measurement"),
+        (1, "ACTIVE_MEASUREMENT"),
+        (8, "PHASE_A_MEASUREMENT"),
+        (9, "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT"),
         (
             15,
-            "Active_measurement_AC, Reactive_measurement_AC, Apparent_measurement_AC, Phase_A_measurement",
+            "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT",
         ),
     ),
 )
