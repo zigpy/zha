@@ -1009,6 +1009,7 @@ class Light(BaseSharedLight, PlatformEntity):
     def on_add(self) -> None:
         """Run when entity is added."""
         super().on_add()
+        assert self._on_off_cluster is not None
         for event_type in (
             AttributeReadEvent,
             AttributeReportedEvent,

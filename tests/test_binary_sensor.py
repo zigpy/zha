@@ -2,6 +2,7 @@
 
 import asyncio
 from collections.abc import Awaitable, Callable
+from typing import Any
 from unittest.mock import call
 
 import pytest
@@ -235,7 +236,7 @@ async def test_smarttthings_multi(
     accel_cluster = zigpy_device.endpoints[1].in_clusters[
         SMARTTHINGS_ACCELERATION_CLUSTER
     ]
-    events = []
+    events: list[Any] = []
     zha_device.on_event("zha_event", events.append)
 
     await send_attributes_report(zha_gateway, accel_cluster, {"x_axis": 120})

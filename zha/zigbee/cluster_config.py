@@ -23,7 +23,7 @@ from zha.application.platforms import AttrConfig
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from zha.application.platforms import BaseEntity
+    from zha.application.platforms import BaseEntity, PlatformEntity
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class AggregatedClusterConfig:
 
 
 def aggregate_cluster_configs(
-    entities: Iterable[BaseEntity],
+    entities: Iterable[PlatformEntity],
 ) -> dict[tuple[int, int, bool], AggregatedClusterConfig]:
     """Aggregate cluster configurations from entities.
 
@@ -72,9 +72,6 @@ def aggregate_cluster_configs(
     result: dict[tuple[int, int, bool], AggregatedClusterConfig] = {}
 
     for entity in entities:
-        if not hasattr(entity, "_server_cluster_config"):
-            continue
-
         if not entity._server_cluster_config and not entity._client_cluster_config:
             continue
 
@@ -222,10 +219,7 @@ async def configure_cluster_configs(
                     event_data[attr_def.name]["status"] = Status.FAILURE.name
 
             existing = getattr(agg.cluster, "_zha_last_reporting_config", None)
-            if existing is not None:
-                merged = {**existing, **event_data}
-            else:
-                merged = event_data
+            merged = {**existing, **event_data} if existing is not None else event_data
             agg.cluster._zha_last_reporting_config = merged
             device.emit(
                 ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,

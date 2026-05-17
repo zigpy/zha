@@ -114,13 +114,18 @@ def _entity_targets_cluster(
         return False
 
     if cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Server:
-        if cluster_id in (match.server_clusters | match.optional_server_clusters):
+        if (
+            cluster_id in match.server_clusters
+            or cluster_id in match.optional_server_clusters
+        ):
             return True
         if cluster_type is not None:
             return False
-    if cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Client:
-        if cluster_id in (match.client_clusters | match.optional_client_clusters):
-            return True
+    if (cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Client) and (
+        cluster_id in match.client_clusters
+        or cluster_id in match.optional_client_clusters
+    ):
+        return True
     return False
 
 

@@ -243,7 +243,7 @@ class BaseEntity(LogMixin, EventBase):
     _virtual: bool = False
 
     async def async_configure_cluster(self, cluster: Any) -> None:
-        """Optional post-bind cluster-level setup hook.
+        """Run optional post-bind cluster-level setup.
 
         Called after bind/configure_reporting for each cluster declared in
         `_server_cluster_config`/`_client_cluster_config`. Override to perform
@@ -252,7 +252,7 @@ class BaseEntity(LogMixin, EventBase):
         """
 
     async def async_initialize_cluster(self, cluster: Any) -> None:
-        """Optional post-initialize cluster-level hook.
+        """Run optional post-initialize cluster-level work.
 
         Called after the attribute cache has been populated. Override to act on
         freshly-read attribute values (e.g. propagate one cluster's setting to a
@@ -519,6 +519,8 @@ class PlatformEntity(BaseEntity):
 
         if legacy_discovery_unique_id is None and entity_metadata is not None:
             legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
+
+        assert legacy_discovery_unique_id is not None
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"

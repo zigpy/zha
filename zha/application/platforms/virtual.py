@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Any
 
+import zigpy.exceptions
 import zigpy.types as t
 import zigpy.zcl
 from zigpy.zcl import (
@@ -174,8 +175,6 @@ class LightLinkGroupJoin(VirtualEntity):
 
     async def async_configure_cluster(self, cluster: zigpy.zcl.Cluster) -> None:
         """Query the device's groups and add the coordinator to each."""
-        import zigpy.exceptions
-
         application = cluster.endpoint.device.application
         try:
             coordinator = application.get_device(application.state.node_info.ieee)

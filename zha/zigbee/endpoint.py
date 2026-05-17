@@ -49,12 +49,17 @@ class _ClusterEventForwarder:
 
     def zha_send_event(self, command: str, arg: list | dict | CommandSchema) -> None:
         """Relay events to listeners."""
+        args: list[Any]
+        params: dict[Any, Any]
         if isinstance(arg, CommandSchema):
             args = [a for a in arg if a is not None]
             params = arg.as_dict()
-        elif isinstance(arg, (list, dict)):
+        elif isinstance(arg, list):
             args = arg
             params = {}
+        elif isinstance(arg, dict):
+            args = []
+            params = arg
         else:
             raise TypeError(f"Unexpected zha_send_event {command!r} argument: {arg!r}")
 
