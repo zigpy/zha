@@ -9,6 +9,8 @@ import itertools
 import logging
 from typing import TYPE_CHECKING
 
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
     CustomDeviceV2,
@@ -133,6 +135,10 @@ def discover_device_entities(device: Device) -> Iterator[BaseEntity]:
             str(endpoint.device.ieee),
             endpoint.id,
         )
+
+        if endpoint.zigpy_endpoint.profile_id not in (ZLL_PROFILE_ID, ZHA_PROFILE_ID):
+            _LOGGER.debug("Endpoint: %s-%s has unsupported profile id: 0x%04x")
+            continue
 
         yield from discover_entities_for_endpoint(endpoint)
 
