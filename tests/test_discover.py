@@ -87,33 +87,19 @@ async def test_device_override(
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
-    # The overridden entity exists
-    entity = get_entity(
-        zha_device,
-        platform=override_platform,
-        qualifier_func=(
-            lambda entity: (
-                entity.cluster_handlers["on_off"].cluster
-                == zigpy_device.endpoints[1].on_off
-            )
-        ),
+    # The overridden entity exists at the endpoint-level unique_id
+    entity = zha_device.get_platform_entity(
+        override_platform, unique_id=f"{zigpy_device.ieee}-1"
     )
     assert entity is not None
-    assert entity.unique_id == f"{zigpy_device.ieee}-1"
 
-    # The original one does not
+    # The non-overridden platform has no such entity
+    other_platform = (
+        Platform.LIGHT if override_platform == Platform.SWITCH else Platform.SWITCH
+    )
     with pytest.raises(KeyError):
-        get_entity(
-            zha_device,
-            platform=(
-                Platform.LIGHT
-                if override_platform == Platform.SWITCH
-                else Platform.SWITCH
-            ),
-            qualifier_func=lambda entity: (
-                entity.cluster_handlers["on_off"].cluster
-                == zigpy_device.endpoints[1].on_off
-            ),
+        zha_device.get_platform_entity(
+            other_platform, unique_id=f"{zigpy_device.ieee}-1"
         )
 
 

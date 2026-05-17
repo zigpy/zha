@@ -15,6 +15,7 @@ from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
+from zha.application.helpers import safe_read
 from zha.application.platforms import (
     AttrConfig,
     ClusterConfig,
@@ -181,7 +182,13 @@ class DoorLock(BaseLock):
         self.maybe_emit_state_changed_event()
 
     async def async_update(self) -> None:
-        """Refresh state from the cluster cache."""
+        """Poll lock_state from the cluster."""
+        await safe_read(
+            self._cluster,
+            [DoorLockCluster.AttributeDefs.lock_state.name],
+            allow_cache=False,
+            only_cache=False,
+        )
         value = self._cluster.get(DoorLockCluster.AttributeDefs.lock_state.name)
         if value is not None:
             self._state = VALUE_TO_STATE.get(value, self._state)

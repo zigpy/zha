@@ -32,10 +32,11 @@ from zha.application.const import (
     CLUSTER_TYPE_OUT,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_BATTERY,
     CONF_DEFAULT_CONSIDER_UNAVAILABLE_MAINS,
+    ZHA_CLUSTER_HANDLER_READS_PER_REQ,
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
-from zha.exceptions import ZHAException
+from zha.exceptions import ZHAException, wrap_zigpy_exceptions
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
@@ -47,6 +48,8 @@ _T = TypeVar("_T")
 _R = TypeVar("_R")
 _P = ParamSpec("_P")
 _LOGGER = logging.getLogger(__name__)
+
+RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
 
 
 @dataclass
@@ -74,20 +77,27 @@ async def safe_read(
 ):
     """Swallow all exceptions from network read.
 
+    Reads are chunked into batches of ZHA_CLUSTER_HANDLER_READS_PER_REQ since
+    devices commonly cap how many attributes can be read in one request.
+
     If we throw during initialization, setup fails. Rather have an entity that
     exists, but is in a maybe wrong state, than no entity. This method should
     probably only be used during initialization.
     """
-    try:
-        result, _ = await cluster.read_attributes(
-            attributes,
-            allow_cache=allow_cache,
-            only_cache=only_cache,
-            manufacturer=manufacturer,
-        )
-        return result
-    except Exception:  # pylint: disable=broad-except
-        return {}
+    result: dict = {}
+    for i in range(0, len(attributes), ZHA_CLUSTER_HANDLER_READS_PER_REQ):
+        chunk = attributes[i : i + ZHA_CLUSTER_HANDLER_READS_PER_REQ]
+        try:
+            chunk_result, _ = await cluster.read_attributes(
+                chunk,
+                allow_cache=allow_cache,
+                only_cache=only_cache,
+                manufacturer=manufacturer,
+            )
+            result.update(chunk_result)
+        except Exception:  # pylint: disable=broad-except
+            continue
+    return result
 
 
 def cluster_runtime_state(cluster: zigpy.zcl.Cluster) -> dict[str, Any]:
@@ -110,7 +120,10 @@ async def write_attributes_safe(
     manufacturer: int | UndefinedType | None = UNDEFINED,
 ) -> None:
     """Write attributes and raise on any per-attribute failure."""
-    res = await cluster.write_attributes(attributes, manufacturer=manufacturer)
+    with wrap_zigpy_exceptions():
+        res = await RETRYABLE_REQUEST_DECORATOR(cluster.write_attributes)(
+            attributes, manufacturer=manufacturer
+        )
     for record in res[0]:
         if record.status != foundation.Status.SUCCESS:
             try:

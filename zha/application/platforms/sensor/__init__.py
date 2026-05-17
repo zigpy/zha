@@ -1072,8 +1072,9 @@ class BaseElectricalMeasurement(PollableSensor):
         )
         if meas_type is None:
             return None
-        meas_type = ElectricalMeasurement.MeasurementType(meas_type)
-        return ", ".join(m.name for m in meas_type)
+        return ", ".join(
+            m.name for m in ElectricalMeasurement.MeasurementType(meas_type)
+        )
 
     @property
     def state(self) -> dict[str, Any]:
@@ -1096,7 +1097,13 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._multiplier_attribute_name:
             return super()._multiplier
 
-        return self._cluster.get(self._multiplier_attribute_name)
+        return (
+            self._cluster.get(self._multiplier_attribute_name)
+            or self._cluster.get(
+                ElectricalMeasurement.AttributeDefs.power_multiplier.name
+            )
+            or 1
+        )
 
     @_multiplier.setter
     def _multiplier(self, value: int | float | None) -> None:
@@ -1107,7 +1114,11 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._divisor_attribute_name:
             return super()._divisor
 
-        return self._cluster.get(self._divisor_attribute_name) or 1
+        return (
+            self._cluster.get(self._divisor_attribute_name)
+            or self._cluster.get(ElectricalMeasurement.AttributeDefs.power_divisor.name)
+            or 1
+        )
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
@@ -1190,6 +1201,8 @@ class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
             for attr in _ELECTRICAL_MEASUREMENT_POLLING_ATTRS
             if not self._cluster.is_attribute_unsupported(attr)
         ]
+        if not attrs:
+            return
         await safe_read(self._cluster, attrs, allow_cache=False, only_cache=False)
         self.maybe_emit_state_changed_event()
 

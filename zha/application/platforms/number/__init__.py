@@ -10,17 +10,16 @@ from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.quirks.v2 import NumberMetadata
-from zigpy.zcl.clusters.general import AnalogOutput, Basic, LevelControl
-from zigpy.zcl.clusters.hvac import Thermostat
-from zigpy.zcl.clusters.lighting import Ballast, Color
-from zigpy.zcl.clusters.measurement import OccupancySensing
-
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
 )
+from zigpy.zcl.clusters.general import AnalogOutput, Basic, LevelControl
+from zigpy.zcl.clusters.hvac import Thermostat
+from zigpy.zcl.clusters.lighting import Ballast, Color
+from zigpy.zcl.clusters.measurement import OccupancySensing
 
 from zha.application import Platform
 from zha.application.helpers import safe_read, write_attributes_safe
@@ -243,6 +242,16 @@ class AnalogOutputNumber(BaseNumber):
         await write_attributes_safe(
             self._cluster,
             {AnalogOutput.AttributeDefs.present_value.name: float(value)},
+        )
+        self.maybe_emit_state_changed_event()
+
+    async def async_update(self) -> None:
+        """Poll present_value from the cluster."""
+        await safe_read(
+            self._cluster,
+            [AnalogOutput.AttributeDefs.present_value.name],
+            allow_cache=False,
+            only_cache=False,
         )
         self.maybe_emit_state_changed_event()
 
