@@ -332,13 +332,15 @@ class ClusterHandler(LogMixin, EventBase):
         try:
             res = await RETRYABLE_REQUEST_DECORATOR(self.cluster.bind)()
             self.debug("bound '%s' cluster: %s", self.cluster.ep_attribute, res[0])
+            success = res[0] == 0
+            self.cluster._zha_last_bind_success = success
             self._endpoint.device.emit(
                 ZHA_CLUSTER_HANDLER_MSG_BIND,
                 ClusterBindEvent(
                     cluster_name=self.cluster.name,
                     cluster_id=self.cluster.cluster_id,
                     cluster_handler_unique_id=self.unique_id,
-                    success=res[0] == 0,
+                    success=success,
                 ),
             )
         except (zigpy.exceptions.ZigbeeException, TimeoutError) as ex:
@@ -348,6 +350,7 @@ class ClusterHandler(LogMixin, EventBase):
                 str(ex),
                 exc_info=ex,
             )
+            self.cluster._zha_last_bind_success = False
             self._endpoint.device.emit(
                 ZHA_CLUSTER_HANDLER_MSG_BIND,
                 ClusterBindEvent(
@@ -412,6 +415,7 @@ class ClusterHandler(LogMixin, EventBase):
                 rest[REPORT_CONFIG_ATTR_PER_REQ:],
             )
 
+        self.cluster._zha_last_reporting_config = event_data
         self._endpoint.device.emit(
             ZHA_CLUSTER_HANDLER_MSG_CFG_RPT,
             ClusterConfigureReportingEvent(

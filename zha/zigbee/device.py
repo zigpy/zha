@@ -94,10 +94,13 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 _CHECKIN_GRACE_PERIODS = 2
-DIAGNOSTICS_JSON_VERSION = 1
+DIAGNOSTICS_JSON_VERSION = 2
 
 
-def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
+def get_cluster_attr_data(
+    cluster: Cluster,
+    reporting_config: dict[str, dict[str, Any]] | None = None,
+) -> list[dict]:
     """Return cluster attribute data."""
     attributes_info = []
 
@@ -112,8 +115,14 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
             "unsupported": cluster.is_attribute_unsupported(attr_def),
         }
 
+        attr_reporting = (
+            reporting_config[attr_def.name]
+            if reporting_config is not None and attr_def.name in reporting_config
+            else None
+        )
+
         # Don't unnecessarily list out attributes that are just unread
-        if info["value"] is None and not info["unsupported"]:
+        if info["value"] is None and not info["unsupported"] and attr_reporting is None:
             continue
 
         # Delete unused keys
@@ -122,9 +131,36 @@ def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
         else:
             del info["value"]
 
+        if attr_reporting is not None:
+            info["reporting"] = {
+                "min": attr_reporting["min"],
+                "max": attr_reporting["max"],
+                "change": attr_reporting["change"],
+                "status": attr_reporting["status"],
+            }
+
         attributes_info.append(info)
 
     return attributes_info
+
+
+def _cluster_entry(cluster_id: int, cluster: Cluster) -> dict[str, Any]:
+    """Build the per-cluster diagnostics entry, including bind and reporting state."""
+    if not hasattr(cluster, "_zha_last_bind_success"):
+        bind_status = "NOT_ATTEMPTED"
+    elif cluster._zha_last_bind_success:
+        bind_status = "SUCCESS"
+    else:
+        bind_status = "FAILURE"
+
+    reporting_config = getattr(cluster, "_zha_last_reporting_config", None)
+
+    return {
+        "cluster_id": f"0x{cluster_id:04x}",
+        "endpoint_attribute": cluster.ep_attribute,
+        "bind": bind_status,
+        "attributes": get_cluster_attr_data(cluster, reporting_config=reporting_config),
+    }
 
 
 def get_device_automation_triggers(
@@ -1689,18 +1725,12 @@ class Device(LogMixin, EventBase):
                     "id": endpoint.device_type,
                 },
                 "in_clusters": [
-                    {
-                        "cluster_id": f"0x{cluster_id:04x}",
-                        "endpoint_attribute": cluster.ep_attribute,
-                        "attributes": get_cluster_attr_data(cluster),
-                    }
+                    _cluster_entry(cluster_id, cluster)
                     for cluster_id, cluster in sorted(endpoint.in_clusters.items())
                 ],
                 "out_clusters": [
                     {
-                        "cluster_id": f"0x{cluster_id:04x}",
-                        "endpoint_attribute": cluster.ep_attribute,
-                        "attributes": get_cluster_attr_data(cluster),
+                        **_cluster_entry(cluster_id, cluster),
                         **(
                             {
                                 "last_query_cmd": {
