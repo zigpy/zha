@@ -1820,7 +1820,7 @@ class Device(LogMixin, EventBase):
         for (platform, _unique_id), platform_entity in sorted(
             self.platform_entities.items()
         ):
-            if platform is Platform.UNKNOWN:
+            if platform is Platform.VIRTUAL:
                 continue
 
             info_object = dataclasses.asdict(platform_entity.info_object)

@@ -227,7 +227,7 @@ class EntityStateChangedEvent:
 class BaseEntity(LogMixin, EventBase):
     """Base class for entities."""
 
-    PLATFORM: Platform = Platform.UNKNOWN
+    PLATFORM: Platform = Platform.VIRTUAL
 
     # Virtual entities participate in discovery and cluster-config aggregation
     # (so they bind, configure reporting, and run cluster-level setup work like

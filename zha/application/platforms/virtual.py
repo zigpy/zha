@@ -57,7 +57,7 @@ class VirtualEntity(ZCLClusterEntity):
     """Cluster-level background driver that isn't registered as a HA entity."""
 
     _virtual = True
-    PLATFORM = Platform.UNKNOWN
+    PLATFORM = Platform.VIRTUAL
     _attr_always_supported = True
 
     def on_add(self) -> None:
