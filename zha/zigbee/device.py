@@ -1781,15 +1781,9 @@ class Device(LogMixin, EventBase):
             self.platform_entities.items()
         ):
             info_object = dataclasses.asdict(platform_entity.info_object)
-            info_object["cluster_handlers"].sort(key=lambda i: i["unique_id"])
+            del info_object["cluster_handlers"]
             info_object["migrate_unique_ids"] = list(info_object["migrate_unique_ids"])
             info_object["device_ieee"] = str(info_object["device_ieee"])
-
-            for cluster_handler_info in info_object["cluster_handlers"]:
-                cluster_info = cluster_handler_info["cluster"]
-
-                if cluster_info is not None:
-                    cluster_info.pop("commands", None)
 
             obj: dict[str, Any] = {
                 "info_object": info_object,
