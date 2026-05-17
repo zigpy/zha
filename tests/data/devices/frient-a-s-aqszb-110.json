@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "00:15:bc:00:36:00:1f:ee",
   "nwk": "0xCA04",
   "manufacturer": "frient A/S",
@@ -44,16 +44,19 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -69,6 +72,7 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -87,6 +91,7 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
+          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x003e",
@@ -98,7 +103,13 @@
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 150
+              "value": 150,
+              "reporting": {
+                "min": 3600,
+                "max": 10800,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x0033",
@@ -116,18 +127,26 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 29
+              "value": 29,
+              "reporting": {
+                "min": 3600,
+                "max": 10800,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -140,12 +159,19 @@
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
+          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2060
+              "value": 2060,
+              "reporting": {
+                "min": 30,
+                "max": 900,
+                "change": 50,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x0003",
@@ -158,12 +184,19 @@
         {
           "cluster_id": "0x0405",
           "endpoint_attribute": "humidity",
+          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 4180
+              "value": 4180,
+              "reporting": {
+                "min": 30,
+                "max": 900,
+                "change": 100,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x0003",
@@ -176,28 +209,46 @@
         {
           "cluster_id": "0x042e",
           "endpoint_attribute": null,
+          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0xfc03",
           "endpoint_attribute": "develco_voc_level",
-          "attributes": []
+          "bind": "SUCCESS",
+          "attributes": [
+            {
+              "id": "0x0000",
+              "name": "measured_value",
+              "zcl_type": "uint16",
+              "unsupported": false,
+              "reporting": {
+                "min": 30,
+                "max": 900,
+                "change": 10,
+                "status": "SUCCESS"
+              }
+            }
+          ]
         }
       ],
       "out_clusters": [
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -277,22 +328,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "38:0x0003",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,
@@ -325,22 +360,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "38:0x0000",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,
@@ -369,22 +388,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "38:0x0000",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,
@@ -413,22 +416,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "38:0x0001",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,
@@ -465,22 +452,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "TemperatureMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0402",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 1026,
-                "name": "Temperature Measurement",
-                "type": "server"
-              },
-              "id": "38:0x0402",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0402",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,
@@ -509,22 +480,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "RelativeHumidityClusterHandler",
-              "generic_id": "cluster_handler_0x0405",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 1029,
-                "name": "Relative Humidity Measurement",
-                "type": "server"
-              },
-              "id": "38:0x0405",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0405",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,
@@ -553,22 +508,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0xfc03",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 64515,
-                "name": "VOC Level",
-                "type": "server"
-              },
-              "id": "38:0xfc03",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0xfc03",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,
@@ -599,22 +538,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 38,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "38:0x0019_client",
-              "unique_id": "00:15:bc:00:36:00:1f:ee:38:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "00:15:bc:00:36:00:1f:ee",
           "endpoint_id": 38,
           "available": true,

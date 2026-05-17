@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:97:db:33:21",
   "nwk": "0x71F3",
   "manufacturer": "Busch-Jaeger",
@@ -44,6 +44,7 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -62,6 +63,7 @@
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -69,31 +71,37 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
+          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
+          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
+          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -106,11 +114,13 @@
         {
           "cluster_id": "0x0300",
           "endpoint_attribute": "light_color",
+          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -172,22 +182,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 10,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "10:0x0000",
-              "unique_id": "ab:cd:ef:12:97:db:33:21:10:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:97:db:33:21",
           "endpoint_id": 10,
           "available": true,
@@ -216,22 +210,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 10,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "10:0x0000",
-              "unique_id": "ab:cd:ef:12:97:db:33:21:10:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:97:db:33:21",
           "endpoint_id": 10,
           "available": true,
@@ -262,22 +240,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 10,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "10:0x0019_client",
-              "unique_id": "ab:cd:ef:12:97:db:33:21:10:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:97:db:33:21",
           "endpoint_id": 10,
           "available": true,

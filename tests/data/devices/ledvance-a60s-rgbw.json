@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:43:dd:e3:9b",
   "nwk": "0xF4D9",
   "manufacturer": "LEDVANCE",
@@ -44,6 +44,7 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -116,6 +117,7 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xfffd",
@@ -134,6 +136,7 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xfffd",
@@ -152,6 +155,7 @@
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xfffd",
@@ -194,6 +198,7 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
+          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0xfffd",
@@ -217,7 +222,13 @@
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0
+              "value": 0,
+              "reporting": {
+                "min": 0,
+                "max": 900,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x4001",
@@ -236,6 +247,7 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
+          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0xfffd",
@@ -253,7 +265,13 @@
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 254
+              "value": 254,
+              "reporting": {
+                "min": 1,
+                "max": 900,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x0014",
@@ -326,6 +344,7 @@
         {
           "cluster_id": "0x0300",
           "endpoint_attribute": "light_color",
+          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0xfffd",
@@ -409,7 +428,13 @@
               "id": "0x0007",
               "name": "color_temperature",
               "zcl_type": "uint16",
-              "value": 153
+              "value": 153,
+              "reporting": {
+                "min": 30,
+                "max": 900,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x0006",
@@ -439,13 +464,25 @@
               "id": "0x0003",
               "name": "current_x",
               "zcl_type": "uint16",
-              "value": 2399
+              "value": 2399,
+              "reporting": {
+                "min": 30,
+                "max": 900,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x0004",
               "name": "current_y",
               "zcl_type": "uint16",
-              "value": 2409
+              "value": 2409,
+              "reporting": {
+                "min": 30,
+                "max": 900,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x4001",
@@ -512,6 +549,7 @@
         {
           "cluster_id": "0x0b05",
           "endpoint_attribute": "diagnostic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x011b",
@@ -542,6 +580,7 @@
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -549,6 +588,7 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xfffd",
@@ -625,6 +665,7 @@
         {
           "cluster_id": "0x0021",
           "endpoint_attribute": "green_power",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -694,22 +735,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,
@@ -742,50 +767,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "OnOffClusterHandler",
-              "generic_id": "cluster_handler_0x0006",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 6,
-                "name": "On/Off",
-                "type": "server"
-              },
-              "id": "1:0x0006",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0006",
-              "status": "INITIALIZED",
-              "value_attribute": "on_off"
-            },
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            },
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "1:0x0300",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,
@@ -846,22 +827,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ColorClusterHandler",
-              "generic_id": "cluster_handler_0x0300",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 768,
-                "name": "Color Control",
-                "type": "server"
-              },
-              "id": "1:0x0300",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0300",
-              "status": "INITIALIZED",
-              "value_attribute": "current_x"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,
@@ -893,22 +858,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,
@@ -940,22 +889,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "LevelControlClusterHandler",
-              "generic_id": "cluster_handler_0x0008",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 8,
-                "name": "Level control",
-                "type": "server"
-              },
-              "id": "1:0x0008",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0008",
-              "status": "INITIALIZED",
-              "value_attribute": "current_level"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,
@@ -989,22 +922,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,
@@ -1033,22 +950,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,
@@ -1079,22 +980,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:43:dd:e3:9b:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:43:dd:e3:9b",
           "endpoint_id": 1,
           "available": true,

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "38:5b:44:ff:fe:e6:8a:85",
   "nwk": "0x20A9",
   "manufacturer": "IKEA of Sweden",
@@ -44,6 +44,7 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -68,12 +69,19 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
+          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 174
+              "value": 174,
+              "reporting": {
+                "min": 3600,
+                "max": 10800,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             },
             {
               "id": "0x0033",
@@ -97,23 +105,32 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 31
+              "value": 31,
+              "reporting": {
+                "min": 3600,
+                "max": 10800,
+                "change": 1,
+                "status": "SUCCESS"
+              }
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0009",
           "endpoint_attribute": "alarms",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -126,11 +143,13 @@
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xfc7c",
           "endpoint_attribute": "manufacturer_specific",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -138,21 +157,25 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
+          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -165,11 +188,13 @@
         {
           "cluster_id": "0x0102",
           "endpoint_attribute": "window_covering",
+          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -235,22 +260,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "IdentifyClusterHandler",
-              "generic_id": "cluster_handler_0x0003",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 3,
-                "name": "Identify",
-                "type": "server"
-              },
-              "id": "1:0x0003",
-              "unique_id": "38:5b:44:ff:fe:e6:8a:85:1:0x0003",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "38:5b:44:ff:fe:e6:8a:85",
           "endpoint_id": 1,
           "available": true,
@@ -283,22 +292,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "38:5b:44:ff:fe:e6:8a:85:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "38:5b:44:ff:fe:e6:8a:85",
           "endpoint_id": 1,
           "available": true,
@@ -327,22 +320,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "38:5b:44:ff:fe:e6:8a:85:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "38:5b:44:ff:fe:e6:8a:85",
           "endpoint_id": 1,
           "available": true,
@@ -371,22 +348,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "38:5b:44:ff:fe:e6:8a:85:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "38:5b:44:ff:fe:e6:8a:85",
           "endpoint_id": 1,
           "available": true,
@@ -425,22 +386,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "38:5b:44:ff:fe:e6:8a:85:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "38:5b:44:ff:fe:e6:8a:85",
           "endpoint_id": 1,
           "available": true,

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "ab:cd:ef:12:59:63:f5:06",
   "nwk": "0x7803",
   "manufacturer": "_TZE200_mja3fuja",
@@ -44,6 +44,7 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -68,41 +69,49 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0405",
           "endpoint_attribute": "humidity",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x040d",
           "endpoint_attribute": "carbon_dioxide_concentration",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x042b",
           "endpoint_attribute": "formaldehyde_concentration",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x042e",
           "endpoint_attribute": "voc_level",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -110,11 +119,13 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -130,6 +141,7 @@
         {
           "cluster_id": "0x0021",
           "endpoint_attribute": "green_power",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -200,22 +212,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,
@@ -244,22 +240,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "Basic",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,
@@ -288,22 +268,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "TemperatureMeasurementClusterHandler",
-              "generic_id": "cluster_handler_0x0402",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1026,
-                "name": "Temperature Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0402",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x0402",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,
@@ -332,22 +296,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "RelativeHumidityClusterHandler",
-              "generic_id": "cluster_handler_0x0405",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1029,
-                "name": "Relative Humidity Measurement",
-                "type": "server"
-              },
-              "id": "1:0x0405",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x0405",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,
@@ -376,22 +324,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "CarbonDioxideConcentrationClusterHandler",
-              "generic_id": "cluster_handler_0x040d",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1037,
-                "name": "Carbon Dioxide (CO\u2082) Concentration",
-                "type": "server"
-              },
-              "id": "1:0x040d",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x040d",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,
@@ -420,22 +352,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "FormaldehydeConcentrationClusterHandler",
-              "generic_id": "cluster_handler_0x042b",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1067,
-                "name": "Formaldehyde Concentration",
-                "type": "server"
-              },
-              "id": "1:0x042b",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x042b",
-              "status": "INITIALIZED",
-              "value_attribute": "measured_value"
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,
@@ -464,22 +380,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "ClusterHandler",
-              "generic_id": "cluster_handler_0x042e",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1070,
-                "name": "VOC Level",
-                "type": "server"
-              },
-              "id": "1:0x042e",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x042e",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,
@@ -510,22 +410,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "OtaClientClusterHandler",
-              "generic_id": "cluster_handler_0x0019_client",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 25,
-                "name": "Ota",
-                "type": "client"
-              },
-              "id": "1:0x0019_client",
-              "unique_id": "ab:cd:ef:12:59:63:f5:06:1:0x0019_CLIENT",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "ab:cd:ef:12:59:63:f5:06",
           "endpoint_id": 1,
           "available": true,

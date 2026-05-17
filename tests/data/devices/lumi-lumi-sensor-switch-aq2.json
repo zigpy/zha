@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "ieee": "00:15:8d:00:02:13:91:38",
   "nwk": "0xE14A",
   "manufacturer": "LUMI",
@@ -44,6 +44,7 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -68,6 +69,7 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0021",
@@ -98,6 +100,7 @@
         {
           "cluster_id": "0x0002",
           "endpoint_attribute": "device_temperature",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -110,6 +113,7 @@
         {
           "cluster_id": "0xffff",
           "endpoint_attribute": "manufacturer_specific",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -117,16 +121,19 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
+          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -139,6 +146,7 @@
         {
           "cluster_id": "0xffff",
           "endpoint_attribute": "manufacturer_specific",
+          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -196,22 +204,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "00:15:8d:00:02:13:91:38",
           "endpoint_id": 1,
           "available": true,
@@ -240,22 +232,6 @@
           "entity_registry_enabled_default": false,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "BasicClusterHandler",
-              "generic_id": "cluster_handler_0x0000",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 0,
-                "name": "BasicCluster",
-                "type": "server"
-              },
-              "id": "1:0x0000",
-              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0000",
-              "status": "INITIALIZED",
-              "value_attribute": null
-            }
-          ],
           "device_ieee": "00:15:8d:00:02:13:91:38",
           "endpoint_id": 1,
           "available": true,
@@ -284,22 +260,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": false,
-          "cluster_handlers": [
-            {
-              "class_name": "PowerConfigurationClusterHandler",
-              "generic_id": "cluster_handler_0x0001",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 1,
-                "name": "Power Configuration",
-                "type": "server"
-              },
-              "id": "1:0x0001",
-              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0001",
-              "status": "INITIALIZED",
-              "value_attribute": "battery_voltage"
-            }
-          ],
           "device_ieee": "00:15:8d:00:02:13:91:38",
           "endpoint_id": 1,
           "available": true,
@@ -336,22 +296,6 @@
           "entity_registry_enabled_default": true,
           "enabled": true,
           "primary": true,
-          "cluster_handlers": [
-            {
-              "class_name": "DeviceTemperatureClusterHandler",
-              "generic_id": "cluster_handler_0x0002",
-              "endpoint_id": 1,
-              "cluster": {
-                "id": 2,
-                "name": "Device Temperature",
-                "type": "server"
-              },
-              "id": "1:0x0002",
-              "unique_id": "00:15:8d:00:02:13:91:38:1:0x0002",
-              "status": "INITIALIZED",
-              "value_attribute": "current_temperature"
-            }
-          ],
           "device_ieee": "00:15:8d:00:02:13:91:38",
           "endpoint_id": 1,
           "available": true,
