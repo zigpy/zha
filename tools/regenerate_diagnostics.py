@@ -11,7 +11,11 @@ import logging
 import pathlib
 from unittest.mock import patch
 
-from tests.common import ZhaJsonEncoder, join_zigpy_device, zigpy_device_from_json
+from tests.common import (
+    ZhaJsonEncoder,
+    join_zigpy_device,
+    zigpy_device_from_device_data,
+)
 from tests.conftest import TestGateway, make_zha_data, make_zigpy_app_controller
 
 REPO_ROOT = pathlib.Path(__file__).parent.parent
@@ -40,9 +44,12 @@ async def main(files: list[str] | None = None) -> None:
     async with create_zha_gateway() as zha_gateway:
         for device_json in paths:
             _LOGGER.info("Migrating %s", device_json)
-            zigpy_device = await zigpy_device_from_json(
+            device_data_text = device_json.read_text()
+            device_data = json.loads(device_data_text)
+
+            zigpy_device = zigpy_device_from_device_data(
                 zha_gateway.application_controller,
-                device_json,
+                device_data,
             )
 
             with patch("zigpy.zcl.Cluster._update_attribute"):
@@ -51,7 +58,9 @@ async def main(files: list[str] | None = None) -> None:
             new_json = json.dumps(
                 zha_device.get_diagnostics_json(), indent=2, cls=ZhaJsonEncoder
             )
-            device_json.write_text(new_json)
+
+            if new_json != device_data_text:
+                device_json.write_text(new_json)
 
             await zha_device.on_remove()
 
