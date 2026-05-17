@@ -9,7 +9,6 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zigpy.profiles import zha
 from zigpy.zcl.clusters.security import IasAce as AceCluster
 
 from zha.application import Platform
@@ -149,7 +148,6 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         legacy_discovery_unique_id = (
             f"{endpoint.device.ieee}-{endpoint.id}-{int(AceCluster.cluster_id)}"
         )
-        kwargs.pop("legacy_discovery_unique_id", None)
         super().__init__(
             endpoint=endpoint,
             device=device,
@@ -164,9 +162,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         self.code_required_arm_actions: bool = alarm_options.arm_requires_code
         self.max_invalid_tries: int = alarm_options.failed_tries
 
-        self.armed_state: AceCluster.PanelStatus = (
-            AceCluster.PanelStatus.Panel_Disarmed
-        )
+        self.armed_state: AceCluster.PanelStatus = AceCluster.PanelStatus.Panel_Disarmed
         self.alarm_status: AceCluster.AlarmStatus = AceCluster.AlarmStatus.No_Alarm
         self.invalid_tries: int = 0
 
@@ -193,9 +189,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         """Run when entity is added."""
         super().on_add()
         self._cluster.add_listener(self)
-        self._on_remove_callbacks.append(
-            lambda: self._cluster.remove_listener(self)
-        )
+        self._on_remove_callbacks.append(lambda: self._cluster.remove_listener(self))
 
     def cluster_command(self, tsn: int, command_id: int, args: list[Any]) -> None:
         """Handle commands received on the IAS ACE cluster."""

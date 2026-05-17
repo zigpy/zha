@@ -21,17 +21,16 @@ from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCl
 from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata
-from zigpy.zcl.clusters.general import LevelControl, OnOff
-from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
-from zigpy.zcl.clusters.measurement import OccupancySensing
-from zigpy.zcl.clusters.security import IasWd
-
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
 )
+from zigpy.zcl.clusters.general import LevelControl, OnOff
+from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
+from zigpy.zcl.clusters.measurement import OccupancySensing
+from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import Strobe
@@ -43,6 +42,7 @@ from zha.application.platforms import (
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.zigbee.cluster_ids import (
@@ -103,13 +103,12 @@ class BaseSelectEntity(PlatformEntity, ABC):
         """Change the selected option."""
 
 
-class EnumSelectEntity(BaseSelectEntity):
+class EnumSelectEntity(BaseSelectEntity, ZCLClusterEntity):
     """Representation of a ZHA select entity."""
 
     _attr_entity_category = EntityCategory.CONFIG
     _attribute_name: str
     _enum: type[Enum]
-    _cluster_id: int
 
     def __init__(
         self,
@@ -118,7 +117,6 @@ class EnumSelectEntity(BaseSelectEntity):
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         self._attribute_name = self._enum.__name__
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(endpoint=endpoint, device=device, **kwargs)
@@ -229,13 +227,12 @@ class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     )
 
 
-class ZCLEnumSelectEntity(BaseSelectEntity):
+class ZCLEnumSelectEntity(BaseSelectEntity, ZCLClusterEntity):
     """Representation of a ZHA ZCL enum select entity."""
 
     _attribute_name: str
     _attr_entity_category = EntityCategory.CONFIG
     _enum: type[Enum]
-    _cluster_id: int
 
     def __init__(
         self,
@@ -245,7 +242,6 @@ class ZCLEnumSelectEntity(BaseSelectEntity):
     ) -> None:
         """Init this select entity."""
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
 
     def on_add(self) -> None:

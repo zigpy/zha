@@ -31,6 +31,7 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.helpers import validate_device_class
@@ -54,8 +55,7 @@ from zha.zigbee.reporting import (
 )
 
 if TYPE_CHECKING:
-    from zha.zigbee.device import Device
-    from zha.zigbee.endpoint import Endpoint
+    pass
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ class BaseNumber(PlatformEntity, ABC):
 
 
 @register_entity(AnalogOutput.cluster_id)
-class AnalogOutputNumber(BaseNumber):
+class AnalogOutputNumber(BaseNumber, ZCLClusterEntity):
     """Representation of a ZHA Number entity."""
 
     _cluster_match = ClusterMatch(
@@ -179,16 +179,6 @@ class AnalogOutputNumber(BaseNumber):
             },
         ),
     }
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ):
-        """Initialize the number."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[AnalogOutput.cluster_id]
 
     def recompute_capabilities(self) -> None:
         """Recompute capabilities."""
@@ -266,7 +256,7 @@ class AnalogOutputNumber(BaseNumber):
         self.maybe_emit_state_changed_event()
 
 
-class NumberConfigurationEntity(BaseNumber):
+class NumberConfigurationEntity(BaseNumber, ZCLClusterEntity):
     """Representation of a ZHA number configuration entity."""
 
     _attr_entity_category = EntityCategory.CONFIG
@@ -275,17 +265,6 @@ class NumberConfigurationEntity(BaseNumber):
     _attr_native_step: float = 1.0
     _multiplier: float = 1
     _attribute_name: str
-    _cluster_id: int
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init this number configuration entity."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
 
     def _is_supported(self) -> bool:
         """Return if the entity is supported for the device, internal."""

@@ -21,6 +21,7 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.lock.const import (
@@ -62,7 +63,7 @@ class BaseLock(PlatformEntity, ABC):
 
 
 @register_entity(DoorLockCluster.cluster_id)
-class DoorLock(BaseLock):
+class DoorLock(BaseLock, ZCLClusterEntity):
     """Representation of a ZHA lock."""
 
     _attr_translation_key: str = "door_lock"
@@ -92,7 +93,6 @@ class DoorLock(BaseLock):
     ) -> None:
         """Initialize the lock."""
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[DoorLockCluster.cluster_id]
         self._state: str | None = VALUE_TO_STATE.get(
             self._cluster.get(DoorLockCluster.AttributeDefs.lock_state.name), None
         )

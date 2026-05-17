@@ -32,7 +32,7 @@ from zha.application.platforms import (
     AttrConfig,
     ClusterConfig,
     ClusterMatch,
-    PlatformEntity,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.exceptions import ZHAException
@@ -51,42 +51,16 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
-class VirtualEntity(PlatformEntity):
+class VirtualEntity(ZCLClusterEntity):
     """Cluster-level background driver that isn't registered as a HA entity."""
 
     _virtual = True
     PLATFORM = Platform.UNKNOWN
     _attr_always_supported = True
 
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Initialize the virtual entity."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        # Cache the (single) cluster this virtual entity drives, for the
-        # cluster_command listener hook.
-        self._cluster: zigpy.zcl.Cluster | None = None
-        for cluster_id in self._server_cluster_config:
-            cluster = endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
-            if cluster is not None:
-                self._cluster = cluster
-                break
-        if self._cluster is None:
-            for cluster_id in self._client_cluster_config:
-                cluster = endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
-                if cluster is not None:
-                    self._cluster = cluster
-                    break
-
     def on_add(self) -> None:
         """Subscribe to incoming cluster commands and attribute events."""
         super().on_add()
-        if self._cluster is None:
-            return
-
         if hasattr(self, "cluster_command"):
             self._cluster.add_listener(self)
             self._on_remove_callbacks.append(
@@ -109,8 +83,6 @@ class VirtualEntity(PlatformEntity):
         self, command: str, args: list | dict | None = None
     ) -> None:
         """Relay a cluster-level zha_event via the endpoint."""
-        if self._cluster is None:
-            return
         self._endpoint.emit_zha_event(
             {
                 "unique_id": self.unique_id,

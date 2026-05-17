@@ -199,7 +199,6 @@ class BaseZclSiren(BaseSiren, ABC):
             )
             else f"{endpoint.device.ieee}-{endpoint.id}-{int(IasWd.cluster_id)}"
         )
-        kwargs.pop("legacy_discovery_unique_id", None)
 
         super().__init__(
             endpoint=endpoint,

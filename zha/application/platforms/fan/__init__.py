@@ -25,8 +25,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
-    PlatformEntity,
     PlatformFeatureGroup,
+    ZCLClusterEntity,
     register_entity,
     register_group_entity,
 )
@@ -53,12 +53,12 @@ from zha.application.platforms.fan.helpers import (
 )
 from zha.exceptions import wrap_zigpy_exceptions
 from zha.zigbee.cluster_ids import IKEA_AIR_PURIFIER_CLUSTER
+from zha.zigbee.group import Group
 from zha.zigbee.reporting import (
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
     REPORT_CONFIG_OP,
 )
-from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -251,7 +251,7 @@ class BaseFan(BaseEntity, ABC):
 
 
 @register_entity(hvac.Fan.cluster_id)
-class Fan(BaseFan, PlatformEntity):
+class Fan(BaseFan, ZCLClusterEntity):
     """Representation of a ZHA fan."""
 
     _cluster_match = ClusterMatch(
@@ -283,7 +283,6 @@ class Fan(BaseFan, PlatformEntity):
     ) -> None:
         """Initialize the fan."""
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[hvac.Fan.cluster_id]
         self.recompute_capabilities()
 
     def on_add(self) -> None:
@@ -402,7 +401,7 @@ class FanGroup(BaseFan, GroupEntity):
 
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaFan(BaseFan, PlatformEntity):
+class IkeaFan(BaseFan, ZCLClusterEntity):
     """Representation of an Ikea fan."""
 
     _attr_supported_features: FanEntityFeature = (
@@ -453,16 +452,6 @@ class IkeaFan(BaseFan, PlatformEntity):
             },
         ),
     }
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs,
-    ):
-        """Initialize the fan."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[IKEA_AIR_PURIFIER_CLUSTER]
 
     def on_add(self) -> None:
         """Run when entity is added."""

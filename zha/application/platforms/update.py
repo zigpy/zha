@@ -30,6 +30,7 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.exceptions import ZHAException
@@ -288,7 +289,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
 
 
 @register_entity(Ota.cluster_id)
-class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
+class FirmwareUpdateEntity(BaseFirmwareUpdateEntity, ZCLClusterEntity):
     """Representation of a ZHA firmware update entity."""
 
     _unique_id_suffix = "firmware_update"
@@ -316,15 +317,10 @@ class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
     ) -> None:
         """Initialize the ZHA update entity."""
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = self._get_ota_cluster()
         self._attr_installed_version: str | None = self._get_cluster_version()
         self._compatible_images: OtaImagesResult = OtaImagesResult(
             upgrades=(), downgrades=()
         )
-
-    def _get_ota_cluster(self):
-        """Return the OTA cluster to use."""
-        return self._endpoint.zigpy_endpoint.out_clusters[Ota.cluster_id]
 
     def on_add(self) -> None:
         """Call when entity is added."""
@@ -381,7 +377,3 @@ class FirmwareUpdateServerEntity(FirmwareUpdateEntity):
         ),
     }
     _client_cluster_config = {}
-
-    def _get_ota_cluster(self):
-        """Return the OTA cluster to use."""
-        return self._endpoint.zigpy_endpoint.in_clusters[Ota.cluster_id]

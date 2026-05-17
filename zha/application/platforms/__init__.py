@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Final, final
 from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
-from zigpy.zcl import ClusterType
+import zigpy.zcl
 from zigpy.zcl.foundation import ZCLAttributeDef
 
 from zha.application import Platform
@@ -501,12 +501,15 @@ class PlatformEntity(BaseEntity):
         device: Device,
         *,
         entity_metadata: EntityMetadata | None = None,
-        legacy_discovery_unique_id: str,
+        legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize the platform entity."""
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
+
+        if legacy_discovery_unique_id is None and entity_metadata is not None:
+            legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
@@ -557,12 +560,6 @@ class PlatformEntity(BaseEntity):
 
         if entity_metadata.primary is not None:
             self._attr_primary = entity_metadata.primary
-
-        # Quirks v2 metadata supplies the target cluster; entity subclasses can
-        # then read `self._cluster_id` / `self._is_client_cluster` before doing
-        # their cluster lookup.
-        self._cluster_id = entity_metadata.cluster_id
-        self._is_client_cluster = entity_metadata.cluster_type == ClusterType.Client
 
     @cached_property
     def identifiers(self) -> PlatformEntityIdentifiers:
@@ -617,6 +614,38 @@ class PlatformEntity(BaseEntity):
         Default no-op: subclasses that need polling override this to read their
         own attributes directly from the relevant cluster(s).
         """
+
+
+class ZCLClusterEntity(PlatformEntity):
+    """A platform entity scoped to a specific ZCL cluster on an endpoint.
+
+    Multi-cluster entities (e.g. lights, covers, climate) extend `PlatformEntity`
+    directly and manage their cluster references themselves.
+    """
+
+    def __init__(
+        self,
+        endpoint: Endpoint,
+        device: Device,
+        *,
+        cluster: zigpy.zcl.Cluster,
+        entity_metadata: EntityMetadata | None = None,
+        legacy_discovery_unique_id: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize the ZCL cluster entity."""
+        self._cluster = cluster
+        if legacy_discovery_unique_id is None and entity_metadata is None:
+            legacy_discovery_unique_id = (
+                f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+            )
+        super().__init__(
+            endpoint=endpoint,
+            device=device,
+            entity_metadata=entity_metadata,
+            legacy_discovery_unique_id=legacy_discovery_unique_id,
+            **kwargs,
+        )
 
 
 class GroupEntity(BaseEntity):

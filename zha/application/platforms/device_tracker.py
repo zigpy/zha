@@ -125,7 +125,12 @@ class DeviceScannerEntity(BaseDeviceTracker):
         **kwargs,
     ):
         """Initialize the ZHA device tracker."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
+        super().__init__(
+            endpoint=endpoint,
+            device=device,
+            legacy_discovery_unique_id=f"{endpoint.device.ieee}-{endpoint.id}",
+            **kwargs,
+        )
         self._cluster = endpoint.zigpy_endpoint.in_clusters[
             PowerConfiguration.cluster_id
         ]

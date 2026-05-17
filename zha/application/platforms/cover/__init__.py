@@ -174,21 +174,18 @@ class Cover(BaseCover):
         **kwargs,
     ) -> None:
         """Init this cover."""
-        kwargs.pop("legacy_discovery_unique_id", None)
-        legacy_discovery_unique_id = (
-            f"{endpoint.device.ieee}-{endpoint.id}"
-            if (
-                endpoint.zigpy_endpoint.device_type
-                == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
-            )
-            else f"{endpoint.device.ieee}-{endpoint.id}-{int(WindowCovering.cluster_id)}"
-        )
-
         super().__init__(
             endpoint=endpoint,
             device=device,
             **kwargs,
-            legacy_discovery_unique_id=legacy_discovery_unique_id,
+            legacy_discovery_unique_id=(
+                f"{endpoint.device.ieee}-{endpoint.id}"
+                if (
+                    endpoint.zigpy_endpoint.device_type
+                    == zha.DeviceType.LEVEL_CONTROLLABLE_OUTPUT
+                )
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(WindowCovering.cluster_id)}"
+            ),
         )
         self._cluster = endpoint.zigpy_endpoint.in_clusters[WindowCovering.cluster_id]
         if self._window_covering_type is not None:
@@ -828,7 +825,6 @@ class Shade(BaseCover):
         **kwargs,
     ) -> None:
         """Initialize the ZHA shade."""
-        kwargs.pop("legacy_discovery_unique_id", None)
         super().__init__(
             endpoint=endpoint,
             device=device,

@@ -11,7 +11,8 @@ from typing import TYPE_CHECKING, Any
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy import types as t
 from zigpy.profiles import zha, zll
-from zigpy.quirks.v2 import SwitchMetadata
+from zigpy.quirks.v2 import EntityMetadata, SwitchMetadata
+import zigpy.zcl
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -35,6 +36,7 @@ from zha.application.platforms import (
     GroupEntity,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZCLClusterEntity,
     register_entity,
     register_group_entity,
 )
@@ -47,6 +49,7 @@ from zha.zigbee.cluster_ids import (
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.zigbee.group import Group
 from zha.zigbee.reporting import (
     REPORT_CONFIG_ASAP,
     REPORT_CONFIG_CLIMATE,
@@ -55,7 +58,6 @@ from zha.zigbee.reporting import (
     REPORT_CONFIG_DEFAULT,
     REPORT_CONFIG_IMMEDIATE,
 )
-from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -158,7 +160,6 @@ class Switch(PlatformEntity, BaseSwitch):
             )
             else f"{endpoint.device.ieee}-{endpoint.id}-{int(OnOff.cluster_id)}"
         )
-        kwargs.pop("legacy_discovery_unique_id", None)
 
         super().__init__(
             endpoint=endpoint,
@@ -242,7 +243,7 @@ class Switch(PlatformEntity, BaseSwitch):
 
 
 @register_entity(BinaryOutput.cluster_id)
-class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
+class BinaryOutputSwitch(ZCLClusterEntity, BaseSwitch):
     """BinaryOutputCluster switch."""
 
     _attr_primary_weight = 10
@@ -264,16 +265,6 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
             },
         ),
     }
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Initialize the switch."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[BinaryOutput.cluster_id]
 
     def _is_supported(self) -> bool:
         if self._cluster.get(BinaryOutput.AttributeDefs.description.name) is None:
@@ -399,7 +390,7 @@ class SwitchGroup(GroupEntity, BaseSwitch):
         self.maybe_emit_state_changed_event()
 
 
-class ConfigurableAttributeSwitch(PlatformEntity):
+class ConfigurableAttributeSwitch(ZCLClusterEntity):
     """Representation of a ZHA switch configuration entity."""
 
     PLATFORM = Platform.SWITCH
@@ -410,18 +401,19 @@ class ConfigurableAttributeSwitch(PlatformEntity):
     _force_inverted: bool = False
     _off_value: int = 0
     _on_value: int = 1
-    _cluster_id: int
 
     def __init__(
         self,
         endpoint: Endpoint,
         device: Device,
         *,
+        cluster: zigpy.zcl.Cluster,
+        entity_metadata: EntityMetadata | None = None,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
     ) -> None:
         """Init this number configuration entity."""
-        if legacy_discovery_unique_id is None:
+        if legacy_discovery_unique_id is None and entity_metadata is None:
             legacy_discovery_unique_id = (
                 f"{endpoint.device.ieee}-{endpoint.id}"
                 if (
@@ -434,17 +426,17 @@ class ConfigurableAttributeSwitch(PlatformEntity):
                     (zha.PROFILE_ID, zha.DeviceType.SMART_PLUG),
                     (zll.PROFILE_ID, zll.DeviceType.ON_OFF_PLUGIN_UNIT),
                 }
-                else f"{endpoint.device.ieee}-{endpoint.id}-{int(self._cluster_id)}"
+                else f"{endpoint.device.ieee}-{endpoint.id}-{int(cluster.cluster_id)}"
             )
-        kwargs.pop("legacy_discovery_unique_id", None)
 
         super().__init__(
             endpoint=endpoint,
             device=device,
-            **kwargs,
+            cluster=cluster,
+            entity_metadata=entity_metadata,
             legacy_discovery_unique_id=legacy_discovery_unique_id,
+            **kwargs,
         )
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
 
     def on_add(self) -> None:
         """Run when entity is added."""

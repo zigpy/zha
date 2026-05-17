@@ -70,6 +70,7 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
@@ -244,7 +245,7 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the current sensor value."""
 
 
-class Sensor(BaseSensor):
+class Sensor(BaseSensor, ZCLClusterEntity):
     """Base ZHA sensor."""
 
     _attribute_name: int | str | None = None
@@ -252,8 +253,6 @@ class Sensor(BaseSensor):
     _divisor: int | float | None = None
     _multiplier: int | float | None = None
     _skip_creation_if_no_attr_cache: bool = False
-    _cluster_id: int
-    _is_client_cluster: bool = False
 
     def __init__(
         self,
@@ -265,11 +264,6 @@ class Sensor(BaseSensor):
         self._attr_def: foundation.ZCLAttributeDef | None = None
 
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-
-        if self._is_client_cluster:
-            self._cluster = endpoint.zigpy_endpoint.out_clusters[self._cluster_id]
-        else:
-            self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
 
         # After super() for quirks v2 entities
         if self._attribute_name is not None:

@@ -7,7 +7,7 @@ from collections.abc import Callable, Iterator
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
@@ -34,6 +34,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZCLClusterEntity,
     alarm_control_panel,
     binary_sensor,
     button,
@@ -83,6 +84,30 @@ GROUP_PLATFORMS = (
     Platform.LIGHT,
     Platform.SWITCH,
 )
+
+
+def _pick_primary_cluster(endpoint: Endpoint, match: ClusterMatch) -> Cluster | None:
+    """Pick the primary cluster for a ZCLClusterEntity from a ClusterMatch.
+
+    Required server/client clusters win over optional. The "first" cluster id
+    from a frozenset is non-deterministic, but each entity that subclasses
+    `ZCLClusterEntity` is expected to declare exactly one required cluster, so
+    in practice the result is stable.
+    """
+    if match.server_clusters:
+        cluster_id = next(iter(match.server_clusters))
+        return endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
+    if match.client_clusters:
+        cluster_id = next(iter(match.client_clusters))
+        return endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
+    for cluster_id in match.optional_server_clusters:
+        if cluster_id in endpoint.zigpy_endpoint.in_clusters:
+            return endpoint.zigpy_endpoint.in_clusters[cluster_id]
+    for cluster_id in match.optional_client_clusters:
+        if cluster_id in endpoint.zigpy_endpoint.out_clusters:
+            return endpoint.zigpy_endpoint.out_clusters[cluster_id]
+    return None
+
 
 QUIRKS_ENTITY_META_TO_ENTITY_CLASS = {
     (Platform.BUTTON, WriteAttributeButtonMetadata): button.WriteAttributeButton,
@@ -303,8 +328,8 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
             entity = entity_class(
                 endpoint=endpoint,
                 device=device,
+                cluster=cluster,
                 entity_metadata=entity_metadata,
-                legacy_discovery_unique_id=f"{device.ieee}-{endpoint.id}",
             )
 
             # Translate quirks v2 reporting/attribute-init metadata into a
@@ -544,34 +569,28 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
                 selected_matches = override_matches
 
         for match, entity_class in selected_matches:
-            primary_cluster_id = next(
-                iter(
-                    match.server_clusters
-                    | match.client_clusters
-                    | match.optional_server_clusters
-                    | match.optional_client_clusters
-                ),
-                None,
-            )
-            if primary_cluster_id is None:
-                _LOGGER.error(
-                    "ClusterMatch entity %s has no cluster ids declared",
-                    entity_class.__name__,
-                )
-                continue
-            legacy_unique_id = f"{device.ieee}-{endpoint.id}-{primary_cluster_id}"
-
             _LOGGER.debug(
                 "'%s' platform -> '%s'",
                 entity_class.PLATFORM,
                 entity_class.__name__,
             )
 
+            kwargs: dict[str, Any] = {}
+            if issubclass(entity_class, ZCLClusterEntity):
+                cluster = _pick_primary_cluster(endpoint, match)
+                if cluster is None:
+                    _LOGGER.error(
+                        "ZCLClusterEntity %s could not resolve a primary cluster",
+                        entity_class.__name__,
+                    )
+                    continue
+                kwargs["cluster"] = cluster
+
             try:
                 entity = entity_class(
                     endpoint=endpoint,
                     device=device,
-                    legacy_discovery_unique_id=legacy_unique_id,
+                    **kwargs,
                 )
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Failed to create %s entity", entity_class.__name__)

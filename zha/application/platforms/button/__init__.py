@@ -12,7 +12,6 @@ from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetada
 from zigpy.zcl.clusters.general import Identify
 
 from zha.application import Platform
-from zha.application.const import ENTITY_METADATA
 from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     BaseEntity,
@@ -20,6 +19,7 @@ from zha.application.platforms import (
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
@@ -69,25 +69,12 @@ class BaseButton(PlatformEntity, ABC):
         """Send out a press command."""
 
 
-class Button(BaseButton):
+class Button(BaseButton, ZCLClusterEntity):
     """Defines a ZHA button."""
 
     _command_name: str
     _args: list[Any]
     _kwargs: dict[str, Any]
-    _cluster_id: int
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ):
-        """Initialize button."""
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
 
     def _init_from_quirks_metadata(
         self, entity_metadata: ZCLCommandButtonMetadata
@@ -147,12 +134,11 @@ class IdentifyButton(Button):
         return not any(type(entity) is cls for entity in entities if entity is not self)
 
 
-class WriteAttributeButton(BaseButton):
+class WriteAttributeButton(BaseButton, ZCLClusterEntity):
     """Defines a ZHA button, which writes a value to an attribute."""
 
     _attribute_name: str
     _attribute_value: Any = None
-    _cluster_id: int
 
     def __init__(
         self,
@@ -161,10 +147,7 @@ class WriteAttributeButton(BaseButton):
         **kwargs: Any,
     ) -> None:
         """Init this button."""
-        if ENTITY_METADATA in kwargs:
-            self._init_from_quirks_metadata(kwargs[ENTITY_METADATA])
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         self.recompute_capabilities()
 
     def _init_from_quirks_metadata(

@@ -12,17 +12,16 @@ from typing import TYPE_CHECKING, Any
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.profiles import zha, zll
 from zigpy.quirks.v2 import BinarySensorMetadata
-from zigpy.zcl.clusters.general import BinaryInput as BinaryInputCluster, OnOff
-from zigpy.zcl.clusters.hvac import Thermostat
-from zigpy.zcl.clusters.measurement import OccupancySensing
-from zigpy.zcl.clusters.security import IasZone
-
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
 )
+from zigpy.zcl.clusters.general import BinaryInput as BinaryInputCluster, OnOff
+from zigpy.zcl.clusters.hvac import Thermostat
+from zigpy.zcl.clusters.measurement import OccupancySensing
+from zigpy.zcl.clusters.security import IasZone
 
 from zha.application import Platform
 from zha.application.helpers import safe_read
@@ -34,6 +33,7 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
+    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.binary_sensor.const import (
@@ -82,14 +82,12 @@ class BaseBinarySensor(PlatformEntity, ABC):
         """Return True if the binary sensor is on."""
 
 
-class BinarySensor(BaseBinarySensor):
+class BinarySensor(BaseBinarySensor, ZCLClusterEntity):
     """ZHA BinarySensor."""
 
     _attr_device_class: BinarySensorDeviceClass | None
     _attribute_name: str
     _attribute_converter: Callable[[Any], Any] | None = None
-    _cluster_id: int
-    _is_client_cluster: bool = False
 
     def __init__(
         self,
@@ -99,10 +97,6 @@ class BinarySensor(BaseBinarySensor):
     ) -> None:
         """Initialize the ZHA binary sensor."""
         super().__init__(endpoint=endpoint, device=device, **kwargs)
-        if self._is_client_cluster:
-            self._cluster = endpoint.zigpy_endpoint.out_clusters[self._cluster_id]
-        else:
-            self._cluster = endpoint.zigpy_endpoint.in_clusters[self._cluster_id]
         self._state: bool = self.is_on
         self.recompute_capabilities()
 
@@ -243,8 +237,6 @@ class Opening(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.OPENING
     _attr_primary_weight = 1
-    _cluster_id = OnOff.cluster_id
-    _is_client_cluster = True
 
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
@@ -306,10 +298,7 @@ class BinaryInputWithDescription(BinarySensor):
         )
 
     def _is_supported(self) -> bool:
-        if (
-            self._cluster.get(BinaryInputCluster.AttributeDefs.description.name)
-            is None
-        ):
+        if self._cluster.get(BinaryInputCluster.AttributeDefs.description.name) is None:
             return False
 
         return super()._is_supported()
@@ -360,8 +349,6 @@ class IkeaMotion(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
-    _cluster_id = OnOff.cluster_id
-    _is_client_cluster = True
 
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
@@ -378,8 +365,6 @@ class PhilipsMotion(BinarySensor):
     _attribute_name = "on_off"
     _attr_device_class: BinarySensorDeviceClass = BinarySensorDeviceClass.MOTION
     _attr_primary_weight = 1
-    _cluster_id = OnOff.cluster_id
-    _is_client_cluster = True
 
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({OnOff.cluster_id}),
