@@ -15,6 +15,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.general import AnalogOutput, Basic, LevelControl
 from zigpy.zcl.clusters.hvac import Thermostat
@@ -44,14 +45,6 @@ from zha.zigbee.cluster_ids import (
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
-)
-from zha.zigbee.reporting import (
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_CLIMATE,
-    REPORT_CONFIG_CLIMATE_DEMAND,
-    REPORT_CONFIG_CLIMATE_DISCRETE,
-    REPORT_CONFIG_DEFAULT,
-    REPORT_CONFIG_IMMEDIATE,
 )
 
 if TYPE_CHECKING:
@@ -153,7 +146,9 @@ class AnalogOutputNumber(BaseNumber, ZCLClusterEntity):
             attributes={
                 AnalogOutput.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 AnalogOutput.AttributeDefs.min_present_value: AttrConfig(
                     read_on_startup=False,
@@ -406,7 +401,9 @@ class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
             attributes={
                 LevelControl.AttributeDefs.current_level: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_ASAP,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
                     read_on_startup=False,
@@ -533,15 +530,21 @@ class StartUpColorTemperatureConfigurationEntity(NumberConfigurationEntity):
             attributes={
                 Color.AttributeDefs.current_x: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Color.AttributeDefs.current_y: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Color.AttributeDefs.color_temperature: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Color.AttributeDefs.color_mode: AttrConfig(
                     read_on_startup=True,
@@ -656,7 +659,9 @@ class PIROccupiedToUnoccupiedDelayConfigurationEntity(NumberConfigurationEntity)
             attributes={
                 OccupancySensing.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
                     read_on_startup=False,
@@ -1276,47 +1281,69 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
             attributes={
                 Thermostat.AttributeDefs.local_temperature: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.running_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.running_state: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.system_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
                     read_on_startup=False,

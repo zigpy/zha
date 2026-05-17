@@ -26,6 +26,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.general import LevelControl, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
@@ -50,13 +51,6 @@ from zha.zigbee.cluster_ids import (
     INOVELLI_CLUSTER,
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
-)
-from zha.zigbee.reporting import (
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_CLIMATE,
-    REPORT_CONFIG_CLIMATE_DEMAND,
-    REPORT_CONFIG_CLIMATE_DISCRETE,
-    REPORT_CONFIG_IMMEDIATE,
 )
 
 if TYPE_CHECKING:
@@ -346,7 +340,9 @@ class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
             attributes={
                 OnOff.AttributeDefs.on_off: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OnOff.AttributeDefs.start_up_on_off: AttrConfig(
                     read_on_startup=False,
@@ -515,7 +511,9 @@ class HueV1MotionSensitivity(ZCLEnumSelectEntity):
             attributes={
                 OccupancySensing.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
                     read_on_startup=False,
@@ -983,47 +981,69 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
             attributes={
                 Thermostat.AttributeDefs.local_temperature: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.running_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.running_state: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.system_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
                     read_on_startup=False,
@@ -1257,7 +1277,9 @@ class BegaColorTemperatureChannelSelect(ZCLEnumSelectEntity):
             attributes={
                 LevelControl.AttributeDefs.current_level: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_ASAP,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
                     read_on_startup=False,

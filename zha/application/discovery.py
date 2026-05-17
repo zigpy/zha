@@ -20,7 +20,7 @@ from zigpy.quirks.v2 import (
     ZCLSensorMetadata,
 )
 from zigpy.state import State
-from zigpy.zcl import Cluster, ClusterType
+from zigpy.zcl import Cluster, ClusterType, ReportingConfig
 
 from zha.application import Platform, const as zha_const
 from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-import
@@ -85,13 +85,7 @@ GROUP_PLATFORMS = (
 
 
 def _pick_primary_cluster(endpoint: Endpoint, match: ClusterMatch) -> Cluster | None:
-    """Pick the primary cluster for a ZCLClusterEntity from a ClusterMatch.
-
-    Required server/client clusters win over optional. The "first" cluster id
-    from a frozenset is non-deterministic, but each entity that subclasses
-    `ZCLClusterEntity` is expected to declare exactly one required cluster, so
-    in practice the result is stable.
-    """
+    """Pick the primary cluster for a ZCLClusterEntity from a ClusterMatch."""
     if match.server_clusters:
         cluster_id = next(iter(match.server_clusters))
         return endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
@@ -334,10 +328,10 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
                 if rep_conf is not None:
                     attr_config = AttrConfig(
                         read_on_startup=False,
-                        reporting=(
-                            rep_conf.min_interval,
-                            rep_conf.max_interval,
-                            rep_conf.reportable_change,
+                        reporting=ReportingConfig(
+                            min_interval=rep_conf.min_interval,
+                            max_interval=rep_conf.max_interval,
+                            reportable_change=rep_conf.reportable_change,
                         ),
                     )
                     bind = True

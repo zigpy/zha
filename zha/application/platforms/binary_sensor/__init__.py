@@ -17,6 +17,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.general import BinaryInput as BinaryInputCluster, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat
@@ -47,7 +48,6 @@ from zha.zigbee.cluster_ids import (
     SMARTTHINGS_ACCELERATION_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
-from zha.zigbee.reporting import REPORT_CONFIG_ASAP, REPORT_CONFIG_IMMEDIATE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -206,16 +206,28 @@ class Accelerometer(BinarySensor):
             bind=True,
             attributes={
                 "acceleration": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "x_axis": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "y_axis": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "z_axis": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_ASAP
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),
@@ -241,7 +253,9 @@ class Occupancy(BinarySensor):
             attributes={
                 OccupancySensing.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
                     read_on_startup=False,
@@ -305,7 +319,9 @@ class BinaryInputWithDescription(BinarySensor):
             attributes={
                 BinaryInputCluster.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 BinaryInputCluster.AttributeDefs.description: AttrConfig(
                     read_on_startup=False,
@@ -346,7 +362,9 @@ class BinaryInput(BinarySensor):
             attributes={
                 BinaryInputCluster.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 BinaryInputCluster.AttributeDefs.description: AttrConfig(
                     read_on_startup=False,

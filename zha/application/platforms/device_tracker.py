@@ -14,6 +14,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.general import PowerConfiguration
 
@@ -27,7 +28,6 @@ from zha.application.platforms import (
 )
 from zha.application.platforms.sensor import Battery
 from zha.decorators import periodic
-from zha.zigbee.reporting import REPORT_CONFIG_BATTERY_SAVE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -102,11 +102,15 @@ class DeviceScannerEntity(BaseDeviceTracker):
             attributes={
                 PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
                 ),
                 PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
                 ),
                 PowerConfiguration.AttributeDefs.battery_size: AttrConfig(
                     read_on_startup=True,

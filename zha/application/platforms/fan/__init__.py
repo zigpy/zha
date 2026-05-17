@@ -13,6 +13,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters import hvac
 
@@ -54,11 +55,6 @@ from zha.application.platforms.fan.helpers import (
 from zha.exceptions import wrap_zigpy_exceptions
 from zha.zigbee.cluster_ids import IKEA_AIR_PURIFIER_CLUSTER
 from zha.zigbee.group import Group
-from zha.zigbee.reporting import (
-    REPORT_CONFIG_DEFAULT,
-    REPORT_CONFIG_IMMEDIATE,
-    REPORT_CONFIG_OP,
-)
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -266,7 +262,9 @@ class Fan(BaseFan, ZCLClusterEntity):
             attributes={
                 hvac.Fan.AttributeDefs.fan_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 hvac.Fan.AttributeDefs.fan_mode_sequence: AttrConfig(
                     read_on_startup=False,
@@ -423,31 +421,58 @@ class IkeaFan(BaseFan, ZCLClusterEntity):
             bind=True,
             attributes={
                 "filter_run_time": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_DEFAULT
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "replace_filter": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "filter_life_time": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_DEFAULT
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "disable_led": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "air_quality_25pm": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "child_lock": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "fan_mode": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "fan_speed": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_IMMEDIATE
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 "device_run_time": AttrConfig(
-                    read_on_startup=False, reporting=REPORT_CONFIG_DEFAULT
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),

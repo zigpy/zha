@@ -15,6 +15,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.hvac import (
     Fan as FanCluster,
@@ -58,12 +59,6 @@ from zha.application.platforms.climate.const import (
 )
 from zha.decorators import periodic
 from zha.units import UnitOfTemperature
-from zha.zigbee.reporting import (
-    REPORT_CONFIG_CLIMATE,
-    REPORT_CONFIG_CLIMATE_DEMAND,
-    REPORT_CONFIG_CLIMATE_DISCRETE,
-    REPORT_CONFIG_OP,
-)
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -236,47 +231,69 @@ class Thermostat(BaseThermostat):
             attributes={
                 ThermostatCluster.AttributeDefs.local_temperature: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.occupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.running_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.running_state: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.system_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.pi_cooling_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.pi_heating_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 ThermostatCluster.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
                     read_on_startup=False,
@@ -321,7 +338,9 @@ class Thermostat(BaseThermostat):
             attributes={
                 FanCluster.AttributeDefs.fan_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 FanCluster.AttributeDefs.fan_mode_sequence: AttrConfig(
                     read_on_startup=False,

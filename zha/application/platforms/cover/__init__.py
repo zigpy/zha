@@ -15,6 +15,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.closures import Shade as ShadeCluster, WindowCovering
 from zigpy.zcl.clusters.general import LevelControl, OnOff, OnOff as OnOffCluster
@@ -43,7 +44,6 @@ from zha.application.platforms.cover.const import (
     WCAttrs,
 )
 from zha.exceptions import ZHAException, wrap_zigpy_exceptions
-from zha.zigbee.reporting import REPORT_CONFIG_ASAP, REPORT_CONFIG_IMMEDIATE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -136,11 +136,15 @@ class Cover(BaseCover):
             attributes={
                 WindowCovering.AttributeDefs.current_position_lift_percentage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 WindowCovering.AttributeDefs.current_position_tilt_percentage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
                     read_on_startup=False,
@@ -781,7 +785,9 @@ class Shade(BaseCover):
             attributes={
                 OnOff.AttributeDefs.on_off: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OnOff.AttributeDefs.start_up_on_off: AttrConfig(
                     read_on_startup=False,
@@ -793,7 +799,9 @@ class Shade(BaseCover):
             attributes={
                 LevelControl.AttributeDefs.current_level: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_ASAP,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
                     read_on_startup=False,

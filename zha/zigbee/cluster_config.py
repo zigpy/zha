@@ -18,12 +18,12 @@ from zha.application.const import (
     ZHA_CLUSTER_BIND_EVENT,
     ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
 )
-from zha.application.platforms import AttrConfig
+from zha.application.platforms import AttrConfig, PlatformEntity
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from zha.application.platforms import BaseEntity, PlatformEntity
+    from zha.application.platforms import BaseEntity
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class AggregatedAttrConfig:
     """Aggregated attribute configuration from multiple entities."""
 
     read_on_startup: bool = False
-    reporting: tuple[int, int, int | float] | None = None
+    reporting: ReportingConfig | None = None
 
     def merge(self, config: AttrConfig) -> None:
         """Merge another attribute config (fresh read and tightest reporting win)."""
@@ -45,10 +45,17 @@ class AggregatedAttrConfig:
             if self.reporting is None:
                 self.reporting = config.reporting
             else:
-                self.reporting = (
-                    min(self.reporting[0], config.reporting[0]),
-                    min(self.reporting[1], config.reporting[1]),
-                    min(self.reporting[2], config.reporting[2]),
+                self.reporting = ReportingConfig(
+                    min_interval=min(
+                        self.reporting.min_interval, config.reporting.min_interval
+                    ),
+                    max_interval=min(
+                        self.reporting.max_interval, config.reporting.max_interval
+                    ),
+                    reportable_change=min(
+                        self.reporting.reportable_change,
+                        config.reporting.reportable_change,
+                    ),
                 )
 
 
@@ -63,7 +70,7 @@ class AggregatedClusterConfig:
 
 
 def aggregate_cluster_configs(
-    entities: Iterable[PlatformEntity],
+    entities: Iterable[BaseEntity],
 ) -> dict[tuple[int, int, bool], AggregatedClusterConfig]:
     """Aggregate cluster configurations from entities.
 
@@ -72,6 +79,9 @@ def aggregate_cluster_configs(
     result: dict[tuple[int, int, bool], AggregatedClusterConfig] = {}
 
     for entity in entities:
+        if not isinstance(entity, PlatformEntity):
+            continue
+
         if not entity._server_cluster_config and not entity._client_cluster_config:
             continue
 
@@ -172,11 +182,7 @@ async def configure_cluster_configs(
             if attr_config.reporting is None:
                 continue
             attr_def = agg.cluster.find_attribute(attr_name)
-            reporting_attrs[attr_def] = ReportingConfig(
-                min_interval=attr_config.reporting[0],
-                max_interval=attr_config.reporting[1],
-                reportable_change=attr_config.reporting[2],
-            )
+            reporting_attrs[attr_def] = attr_config.reporting
 
         if reporting_attrs:
             event_data = {

@@ -25,6 +25,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
     foundation,
 )
 from zigpy.zcl.clusters.closures import WindowCovering
@@ -130,18 +131,6 @@ from zha.zigbee.metering import (
     DeviceStatusHeatingCooling,
     DeviceStatusWater,
     metering_device_type,
-)
-from zha.zigbee.reporting import (
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_BATTERY_SAVE,
-    REPORT_CONFIG_CLIMATE,
-    REPORT_CONFIG_CLIMATE_DEMAND,
-    REPORT_CONFIG_CLIMATE_DISCRETE,
-    REPORT_CONFIG_DEFAULT,
-    REPORT_CONFIG_IMMEDIATE,
-    REPORT_CONFIG_MAX_INT,
-    REPORT_CONFIG_MIN_INT,
-    REPORT_CONFIG_OP,
 )
 
 if TYPE_CHECKING:
@@ -655,7 +644,9 @@ class DigiAnalogInput(Sensor):
             attributes={
                 AnalogInput.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 AnalogInput.AttributeDefs.description: AttrConfig(
                     read_on_startup=False,
@@ -708,7 +699,9 @@ class AnalogInputSensor(Sensor):
             attributes={
                 AnalogInput.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 AnalogInput.AttributeDefs.description: AttrConfig(
                     read_on_startup=False
@@ -820,11 +813,15 @@ class Battery(Sensor):
             attributes={
                 PowerConfiguration.AttributeDefs.battery_voltage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
                 ),
                 PowerConfiguration.AttributeDefs.battery_percentage_remaining: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_BATTERY_SAVE,
+                    reporting=ReportingConfig(
+                        min_interval=3600, max_interval=10800, reportable_change=1
+                    ),
                 ),
                 PowerConfiguration.AttributeDefs.battery_size: AttrConfig(
                     read_on_startup=False,
@@ -881,119 +878,177 @@ class BaseElectricalMeasurement(PollableSensor):
             attributes={
                 ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.active_power_ph_b: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.active_power_ph_c: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.total_active_power: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.apparent_power: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.rms_current: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.rms_current_ph_b: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.rms_current_ph_c: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.rms_voltage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_frequency: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_voltage_divisor: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_current_multiplier: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_current_divisor: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_power_multiplier: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_power_divisor: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_voltage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_current: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_power: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_frequency_divisor: AttrConfig(
                     read_on_startup=False,
@@ -1523,7 +1578,9 @@ class Humidity(Sensor):
             attributes={
                 RelativeHumidity.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=100
+                    ),
                 ),
             },
         ),
@@ -1552,7 +1609,9 @@ class SmartThingsHumidity(Sensor):
             attributes={
                 "measured_value": AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=50
+                    ),
                 ),
             },
         ),
@@ -1582,7 +1641,9 @@ class SoilMoisture(Sensor):
             attributes={
                 SoilMoistureCluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=100
+                    ),
                 ),
             },
         ),
@@ -1612,7 +1673,9 @@ class LeafWetness(Sensor):
             attributes={
                 LeafWetnessCluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 100),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=100
+                    ),
                 ),
             },
         ),
@@ -1640,7 +1703,9 @@ class Illuminance(Sensor):
             attributes={
                 IlluminanceMeasurement.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),
@@ -1693,43 +1758,63 @@ class SmartEnergyMetering(PollableSensor):
             attributes={
                 Metering.AttributeDefs.instantaneous_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_OP,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_summ_delivered: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_tier1_summ_delivered: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_tier2_summ_delivered: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_tier3_summ_delivered: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_tier4_summ_delivered: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_tier5_summ_delivered: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_tier6_summ_delivered: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.current_summ_received: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.status: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_ASAP,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Metering.AttributeDefs.demand_formatting: AttrConfig(
                     read_on_startup=False,
@@ -2199,7 +2284,9 @@ class Pressure(Sensor):
             attributes={
                 PressureMeasurement.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),
@@ -2228,7 +2315,9 @@ class Flow(Sensor):
             attributes={
                 FlowMeasurement.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),
@@ -2257,7 +2346,9 @@ class Temperature(Sensor):
             attributes={
                 TemperatureMeasurement.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=50
+                    ),
                 ),
             },
         ),
@@ -2288,7 +2379,9 @@ class DeviceTemperature(Sensor):
             attributes={
                 DeviceTemperatureCluster.AttributeDefs.current_temperature: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 50),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=50
+                    ),
                 ),
             },
         ),
@@ -2358,7 +2451,9 @@ class CarbonDioxideConcentration(Sensor):
             attributes={
                 CarbonDioxideConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.000001
+                    ),
                 ),
             },
         ),
@@ -2388,7 +2483,9 @@ class CarbonMonoxideConcentration(Sensor):
             attributes={
                 CarbonMonoxideConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.000001
+                    ),
                 ),
             },
         ),
@@ -2464,7 +2561,9 @@ class PM25(Sensor):
             attributes={
                 PM25Cluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.1),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.1
+                    ),
                 ),
             },
         ),
@@ -2491,7 +2590,9 @@ class ElectricalConductivity(Sensor):
             attributes={
                 ElectricalConductivityCluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),
@@ -2521,7 +2622,9 @@ class FormaldehydeConcentration(Sensor):
             attributes={
                 FormaldehydeConcentrationCluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.000001),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.000001
+                    ),
                 ),
             },
         ),
@@ -2547,47 +2650,69 @@ class ThermostatHVACAction(Sensor):
             attributes={
                 Thermostat.AttributeDefs.local_temperature: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=25
+                    ),
                 ),
                 Thermostat.AttributeDefs.running_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.running_state: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.system_mode: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.occupancy: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=5
+                    ),
                 ),
                 Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
                     read_on_startup=False,
@@ -3121,11 +3246,15 @@ class WindowCoveringTypeSensor(EnumSensor):
             attributes={
                 WindowCovering.AttributeDefs.current_position_lift_percentage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 WindowCovering.AttributeDefs.current_position_tilt_percentage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
                     read_on_startup=False,
@@ -3347,7 +3476,9 @@ class DanfossSoftwareErrorCode(BitMapSensor):
             attributes={
                 "sw_error_code": AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),
@@ -3375,7 +3506,9 @@ class DanfossMotorStepCounter(Sensor):
             attributes={
                 "motor_step_counter": AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),
@@ -3400,7 +3533,9 @@ class WindSpeed(Sensor):
             attributes={
                 WindSpeedCluster.AttributeDefs.measured_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=(REPORT_CONFIG_MIN_INT, REPORT_CONFIG_MAX_INT, 0.01),
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=0.01
+                    ),
                 ),
             },
         ),

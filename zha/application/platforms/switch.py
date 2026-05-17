@@ -18,6 +18,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.closures import ConfigStatus, WindowCovering, WindowCoveringMode
 from zigpy.zcl.clusters.general import Basic, BinaryOutput, OnOff
@@ -50,14 +51,6 @@ from zha.zigbee.cluster_ids import (
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.zigbee.group import Group
-from zha.zigbee.reporting import (
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_CLIMATE,
-    REPORT_CONFIG_CLIMATE_DEMAND,
-    REPORT_CONFIG_CLIMATE_DISCRETE,
-    REPORT_CONFIG_DEFAULT,
-    REPORT_CONFIG_IMMEDIATE,
-)
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -123,7 +116,9 @@ class Switch(PlatformEntity, BaseSwitch):
             attributes={
                 OnOff.AttributeDefs.on_off: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OnOff.AttributeDefs.start_up_on_off: AttrConfig(
                     read_on_startup=False,
@@ -257,7 +252,9 @@ class BinaryOutputSwitch(ZCLClusterEntity, BaseSwitch):
             attributes={
                 BinaryOutput.AttributeDefs.present_value: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 BinaryOutput.AttributeDefs.description: AttrConfig(
                     read_on_startup=False,
@@ -897,7 +894,9 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
             attributes={
                 OnOff.AttributeDefs.on_off: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OnOff.AttributeDefs.start_up_on_off: AttrConfig(
                     read_on_startup=False,
@@ -1035,11 +1034,15 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
             attributes={
                 WindowCovering.AttributeDefs.current_position_lift_percentage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 WindowCovering.AttributeDefs.current_position_tilt_percentage: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
                     read_on_startup=False,
@@ -1151,47 +1154,69 @@ _DANFOSS_THERMOSTAT_CLUSTER_CONFIG = {
         attributes={
             Thermostat.AttributeDefs.local_temperature: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=25
+                ),
             ),
             Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=25
+                ),
             ),
             Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=25
+                ),
             ),
             Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=25
+                ),
             ),
             Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=25
+                ),
             ),
             Thermostat.AttributeDefs.running_mode: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             Thermostat.AttributeDefs.running_state: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             Thermostat.AttributeDefs.system_mode: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             Thermostat.AttributeDefs.occupancy: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE_DISCRETE,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=5
+                ),
             ),
             Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
                 read_on_startup=True,
-                reporting=REPORT_CONFIG_CLIMATE_DEMAND,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=5
+                ),
             ),
             Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
                 read_on_startup=False,
@@ -1231,31 +1256,45 @@ _DANFOSS_THERMOSTAT_CLUSTER_CONFIG = {
             ),
             "open_window_detection": AttrConfig(
                 read_on_startup=False,
-                reporting=REPORT_CONFIG_DEFAULT,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             "heat_required": AttrConfig(
                 read_on_startup=False,
-                reporting=REPORT_CONFIG_ASAP,
+                reporting=ReportingConfig(
+                    min_interval=1, max_interval=900, reportable_change=1
+                ),
             ),
             "mounting_mode_active": AttrConfig(
                 read_on_startup=False,
-                reporting=REPORT_CONFIG_DEFAULT,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             "load_estimate": AttrConfig(
                 read_on_startup=False,
-                reporting=REPORT_CONFIG_DEFAULT,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             "adaptation_run_status": AttrConfig(
                 read_on_startup=False,
-                reporting=REPORT_CONFIG_DEFAULT,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             "preheat_status": AttrConfig(
                 read_on_startup=False,
-                reporting=REPORT_CONFIG_DEFAULT,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
             "preheat_time": AttrConfig(
                 read_on_startup=False,
-                reporting=REPORT_CONFIG_DEFAULT,
+                reporting=ReportingConfig(
+                    min_interval=30, max_interval=900, reportable_change=1
+                ),
             ),
         },
     ),

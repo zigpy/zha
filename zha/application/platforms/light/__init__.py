@@ -20,6 +20,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
 from zigpy.zcl.clusters.lighting import Color
@@ -77,11 +78,6 @@ from zha.application.platforms.light.helpers import (
 )
 from zha.debounce import Debouncer
 from zha.decorators import periodic
-from zha.zigbee.reporting import (
-    REPORT_CONFIG_ASAP,
-    REPORT_CONFIG_DEFAULT,
-    REPORT_CONFIG_IMMEDIATE,
-)
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
@@ -901,7 +897,9 @@ class Light(BaseSharedLight, PlatformEntity):
             attributes={
                 OnOff.AttributeDefs.on_off: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
                 OnOff.AttributeDefs.start_up_on_off: AttrConfig(
                     read_on_startup=False,
@@ -913,7 +911,9 @@ class Light(BaseSharedLight, PlatformEntity):
             attributes={
                 LevelControl.AttributeDefs.current_level: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_ASAP,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
                 ),
                 LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
                     read_on_startup=False,
@@ -940,15 +940,21 @@ class Light(BaseSharedLight, PlatformEntity):
             attributes={
                 Color.AttributeDefs.current_x: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Color.AttributeDefs.current_y: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Color.AttributeDefs.color_temperature: AttrConfig(
                     read_on_startup=True,
-                    reporting=REPORT_CONFIG_DEFAULT,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
                 ),
                 Color.AttributeDefs.color_mode: AttrConfig(
                     read_on_startup=True,

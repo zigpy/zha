@@ -20,6 +20,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.closures import DoorLock, WindowCovering
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff, Ota, Scenes
@@ -356,8 +357,6 @@ class LevelControlClientBind(_ClientClusterZhaEventEmitter):
     _cluster_match = ClusterMatch(
         client_clusters=frozenset({LevelControl.cluster_id}),
         match_renamed_clusters=True,
-        # Match on proprietary profiles too (e.g. Digi XBee's serial profile)
-        # so the level cluster gets bound on those endpoints.
         profile_ids=None,
     )
     _client_cluster_config = {
@@ -937,7 +936,9 @@ class SinopeSwitchInit(VirtualEntity):
                 "on_led_intensity": AttrConfig(read_on_startup=False),
                 "action_report": AttrConfig(
                     read_on_startup=False,
-                    reporting=(0, 0, 1),
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=0, reportable_change=1
+                    ),
                 ),
             },
         ),

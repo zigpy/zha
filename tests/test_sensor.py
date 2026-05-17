@@ -14,13 +14,17 @@ from zigpy.device import Device as ZigpyDevice
 from zigpy.profiles import zha
 import zigpy.profiles.zha
 from zigpy.quirks import CustomCluster, DeviceRegistry, get_device
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder, ReportingConfig
+from zigpy.quirks.v2 import (
+    CustomDeviceV2,
+    QuirkBuilder,
+    ReportingConfig as QuirksReportingConfig,
+)
 from zigpy.quirks.v2.homeassistant import EntityPlatform, EntityType, UnitOfMass
 from zigpy.quirks.v2.homeassistant.sensor import (
     SensorDeviceClass as SensorDeviceClassV2,
 )
 import zigpy.types as t
-from zigpy.zcl import Cluster
+from zigpy.zcl import Cluster, ReportingConfig
 from zigpy.zcl.clusters import general, homeautomation, hvac, measurement, smartenergy
 from zigpy.zcl.clusters.general import AnalogInput, PowerConfiguration
 from zigpy.zcl.clusters.general_const import AnalogInputType, ApplicationType
@@ -1562,7 +1566,7 @@ class OppleCluster(CustomCluster, ManufacturerSpecificCluster):
         unit=UnitOfMass.GRAMS,
         translation_key="last_feeding_size",
         fallback_name="Last feeding size",
-        reporting_config=ReportingConfig(
+        reporting_config=QuirksReportingConfig(
             min_interval=0, max_interval=60, reportable_change=1
         ),
     )

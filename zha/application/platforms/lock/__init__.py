@@ -10,6 +10,7 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
+    ReportingConfig,
 )
 from zigpy.zcl.clusters.closures import DoorLock as DoorLockCluster
 from zigpy.zcl.foundation import Status
@@ -29,7 +30,6 @@ from zha.application.platforms.lock.const import (
     STATE_UNLOCKED,
     VALUE_TO_STATE,
 )
-from zha.zigbee.reporting import REPORT_CONFIG_IMMEDIATE
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -79,7 +79,9 @@ class DoorLock(BaseLock, ZCLClusterEntity):
             attributes={
                 DoorLockCluster.AttributeDefs.lock_state: AttrConfig(
                     read_on_startup=False,
-                    reporting=REPORT_CONFIG_IMMEDIATE,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
                 ),
             },
         ),

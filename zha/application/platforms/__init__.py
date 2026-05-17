@@ -20,6 +20,7 @@ from zigpy.quirks.v2 import EntityMetadata, EntityType
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 import zigpy.zcl
+from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import ZCLAttributeDef
 
 from zha.application import Platform
@@ -86,10 +87,7 @@ class AttrConfig:
     """Per-attribute configuration for cluster setup."""
 
     read_on_startup: bool
-    """Whether to force a fresh read on startup (True) or use cache (False)."""
-
-    reporting: tuple[int, int, int | float] | None = None
-    """Reporting config: (min_interval, max_interval, reportable_change) or None."""
+    reporting: ReportingConfig | None = None
 
 
 @dataclass(frozen=True)
@@ -118,11 +116,7 @@ class ClusterMatch:
     exposed_features: frozenset[str] | None = None
     not_exposed_features: frozenset[str] | None = None
 
-    # Endpoint profile filter. Defaults to ZHA + ZLL — the only profiles whose
-    # standard device types/clusters this entity layer understands. Bind-only
-    # entities that target manufacturer-specific clusters on proprietary
-    # profiles (e.g. Digi XBee's `0xC105` serial-data endpoints) override this
-    # with `None` to match any profile.
+    # `None` matches any profile.
     profile_ids: frozenset[int] | None = frozenset({ZHA_PROFILE_ID, ZLL_PROFILE_ID})
 
     # Profile and device type filters
@@ -243,21 +237,10 @@ class BaseEntity(LogMixin, EventBase):
     _virtual: bool = False
 
     async def async_configure_cluster(self, cluster: Any) -> None:
-        """Run optional post-bind cluster-level setup.
-
-        Called after bind/configure_reporting for each cluster declared in
-        `_server_cluster_config`/`_client_cluster_config`. Override to perform
-        cluster-level setup beyond binding (e.g. IAS Zone CIE write, LightLink
-        coordinator group join).
-        """
+        """Run post-bind cluster-level setup (override in subclasses)."""
 
     async def async_initialize_cluster(self, cluster: Any) -> None:
-        """Run optional post-initialize cluster-level work.
-
-        Called after the attribute cache has been populated. Override to act on
-        freshly-read attribute values (e.g. propagate one cluster's setting to a
-        sibling cluster's state).
-        """
+        """Run post-initialize cluster-level work (override in subclasses)."""
 
     _attr_fallback_name: str | None = None
     _attr_icon: str | None = None
@@ -628,11 +611,7 @@ class PlatformEntity(BaseEntity):
 
 
 class ZCLClusterEntity(PlatformEntity):
-    """A platform entity scoped to a specific ZCL cluster on an endpoint.
-
-    Multi-cluster entities (e.g. lights, covers, climate) extend `PlatformEntity`
-    directly and manage their cluster references themselves.
-    """
+    """A platform entity scoped to a specific ZCL cluster on an endpoint."""
 
     def __init__(
         self,
