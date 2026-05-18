@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from asyncio import Task
 import contextlib
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -16,7 +15,7 @@ import typing
 from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
+from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
@@ -407,69 +406,6 @@ class Sensor(BaseSensor, ZCLClusterEntity):
 
 class TimestampSensor(Sensor):
     """Timestamp ZHA sensor."""
-
-
-class PollableSensorMixin(Sensor):
-    """Mixin that adds custom polling to a Sensor."""
-
-    _REFRESH_INTERVAL = (30, 45)
-    __polling_interval: int
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        **kwargs: Any,
-    ) -> None:
-        """Init this sensor."""
-        super().__init__(endpoint=endpoint, device=device, **kwargs)
-        self._polling_task: Task | None = None
-
-    def on_add(self) -> None:
-        """Run when entity is added."""
-        super().on_add()
-        self.maybe_start_polling()
-
-    def maybe_start_polling(self) -> None:
-        """Start polling."""
-        self._polling_task = self.device.gateway.async_create_background_task(
-            self._refresh(),
-            name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
-            eager_start=True,
-            untracked=True,
-        )
-        self._tracked_tasks.append(self._polling_task)
-        self.debug(
-            "started polling with refresh interval of %s",
-            getattr(self, "__polling_interval"),
-        )
-
-    def enable(self) -> None:
-        """Enable the entity."""
-        super().enable()
-        self.maybe_start_polling()
-
-    def disable(self) -> None:
-        """Disable the entity."""
-        super().disable()
-        if self._polling_task:
-            self._tracked_tasks.remove(self._polling_task)
-            self._polling_task.cancel()
-            self._polling_task = None
-
-    @periodic(_REFRESH_INTERVAL)
-    async def _refresh(self):
-        """Call async_update at a constrained random interval."""
-        if self.device.available and self.device.gateway.config.allow_polling:
-            self.debug("polling for updated state")
-            await self.async_update()
-            self.maybe_emit_state_changed_event()
-        else:
-            self.debug(
-                "skipping polling for updated state, available: %s, allow polled requests: %s",
-                self.device.available,
-                self.device.gateway.config.allow_polling,
-            )
 
 
 class DeviceCounterSensor(BaseEntity):
@@ -930,76 +866,23 @@ class BaseElectricalMeasurement(Sensor):
         raise AttributeError("Cannot set divisor directly")
 
 
-@register_entity(ElectricalMeasurement.cluster_id)
-class ReportingElectricalMeasurement(BaseElectricalMeasurement):
-    """Unpolled active power measurement."""
+class AggregatedClusterPoller(VirtualEntity):
+    """Polls a cluster on behalf of sibling entities that need updates.
 
-    _attribute_name = "active_power"
-    _attr_max_attribute_name = "active_power_max"
-    _divisor_attribute_name = "ac_power_divisor"
-    _multiplier_attribute_name = "ac_power_multiplier"
-    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
-    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
-    _attr_suggested_display_precision = 1
-    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _cluster_id = ElectricalMeasurement.cluster_id
+    Builds the polling list dynamically from the cluster configs of enabled
+    sibling entities sharing this cluster — so disabling an entity in HA
+    drops its attributes from the poll on the next cycle.
+    """
 
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
-        models=frozenset({"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"}),
-        feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 1),
-    )
-
-    _server_cluster_config = {
-        ElectricalMeasurement.cluster_id: ClusterConfig(
-            bind=True,
-            attributes={
-                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
-                    read_on_startup=False,
-                ),
-            },
-        ),
-    }
-
-
-@register_entity(ElectricalMeasurement.cluster_id)
-class ElectricalMeasurementPoller(VirtualEntity):
-    """Polls the EM cluster on behalf of sibling entities that need updates."""
-
+    _cluster_id: int
     _REFRESH_INTERVAL = (30, 45)
-    _unique_id_suffix = "em_poller"
-    _cluster_id = ElectricalMeasurement.cluster_id
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
-    )
 
     def on_add(self) -> None:
         """Start the periodic polling task."""
         super().on_add()
         task = self.device.gateway.async_create_background_task(
             self._refresh(),
-            name=f"em_poller_{self.unique_id}",
+            name=f"cluster_poller_{self.unique_id}",
             eager_start=True,
             untracked=True,
         )
@@ -1012,7 +895,7 @@ class ElectricalMeasurementPoller(VirtualEntity):
         await self.async_update()
 
     async def async_update(self) -> None:
-        """Poll the union of attrs read by enabled sibling EM entities."""
+        """Poll the union of attrs read by enabled sibling entities."""
         attrs: set[str] = set()
         for entity in self.device.platform_entities.values():
             if entity is self or not isinstance(entity, ZCLClusterEntity):
@@ -1028,8 +911,10 @@ class ElectricalMeasurementPoller(VirtualEntity):
                 name = attr_def.name
                 if not self._cluster.is_attribute_unsupported(name):
                     attrs.add(name)
+
         if not attrs:
             return
+
         self.debug("polling %d attrs: %s", len(attrs), sorted(attrs))
         await safe_read(
             self._cluster, sorted(attrs), allow_cache=False, only_cache=False
@@ -1037,8 +922,19 @@ class ElectricalMeasurementPoller(VirtualEntity):
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class PolledElectricalMeasurement(BaseElectricalMeasurement):
-    """Default active power measurement."""
+class ElectricalMeasurementPoller(AggregatedClusterPoller):
+    """Polls the EM cluster on behalf of sibling entities that need updates."""
+
+    _unique_id_suffix = "em_poller"
+    _cluster_id = ElectricalMeasurement.cluster_id
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+    )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementActivePower(BaseElectricalMeasurement):
+    """Active power measurement."""
 
     _attribute_name = "active_power"
     _attr_max_attribute_name = "active_power_max"
@@ -1052,7 +948,6 @@ class PolledElectricalMeasurement(BaseElectricalMeasurement):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
-        feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 0),
     )
 
     _server_cluster_config = {
@@ -2057,6 +1952,17 @@ class SmartEnergyMeteringEntityDescription:
 
 
 @register_entity(Metering.cluster_id)
+class MeteringPoller(AggregatedClusterPoller):
+    """Polls the Metering cluster on behalf of sibling entities that need updates."""
+
+    _unique_id_suffix = "metering_poller"
+    _cluster_id = Metering.cluster_id
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
+    )
+
+
+@register_entity(Metering.cluster_id)
 class SmartEnergyMetering(Sensor):
     """Metering sensor."""
 
@@ -2417,41 +2323,6 @@ class SmartEnergySummation(SmartEnergyMetering):
 
 
 @register_entity(Metering.cluster_id)
-class PolledSmartEnergySummation(PollableSensorMixin, SmartEnergySummation):
-    """Polled Smart Energy Metering summation sensor."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Metering.cluster_id}),
-        models=frozenset({"TS011F", "ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
-    )
-
-    async def async_update(self) -> None:
-        """Poll every reported Metering attribute so sibling entities update too."""
-        self.debug("polling current state")
-        config = self._server_cluster_config[Metering.cluster_id]
-        attrs = [
-            attr_def.name
-            for attr_def, attr_cfg in config.attributes.items()
-            if attr_cfg.reporting is not None
-            and not self._cluster.is_attribute_unsupported(attr_def.name)
-        ]
-        await safe_read(self._cluster, attrs, allow_cache=False, only_cache=False)
-        self.maybe_emit_state_changed_event()
-
-
-@register_entity(Metering.cluster_id)
-class ExposedFeaturePolledSmartEnergySummation(PolledSmartEnergySummation):
-    """Polled Smart Energy Metering summation sensor via exposed feature."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Metering.cluster_id}),
-        exposed_features=frozenset({SE_POLL_SUMMATION}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
-    )
-
-
-@register_entity(Metering.cluster_id)
 class Tier1SmartEnergySummation(SmartEnergySummation):
     """Tier 1 Smart Energy Metering summation sensor."""
 
@@ -2561,19 +2432,6 @@ class SmartEnergySummationReceived(SmartEnergySummation):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION_RECEIVED, 0),
-    )
-
-
-@register_entity(Metering.cluster_id)
-class ExposedFeaturePolledSmartEnergySummationReceived(
-    SmartEnergySummationReceived, PolledSmartEnergySummation
-):
-    """Polled Smart Energy Metering summation received sensor via exposed feature."""
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({Metering.cluster_id}),
-        exposed_features=frozenset({SE_POLL_SUMMATION}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION_RECEIVED, 1),
     )
 
 
