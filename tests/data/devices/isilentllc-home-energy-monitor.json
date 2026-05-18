@@ -10832,7 +10832,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-10-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -10849,7 +10849,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 16.11,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -11028,7 +11028,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-11-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -11045,7 +11045,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 61.25,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -11224,7 +11224,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-12-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -11241,7 +11241,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 0.37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -11420,7 +11420,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-13-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -11437,7 +11437,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 73.87,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -11616,7 +11616,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-14-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -11633,7 +11633,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 80.66,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -11812,7 +11812,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-15-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -11829,7 +11829,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 5.34,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -12008,7 +12008,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-16-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -12025,7 +12025,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 82.07,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -12204,7 +12204,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-17-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -12221,7 +12221,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 53.88,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -12400,7 +12400,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-18-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -12417,7 +12417,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 15.29,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -12596,7 +12596,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-19-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -12613,7 +12613,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 2.92,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -12792,7 +12792,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-2-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -12809,7 +12809,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 10.61,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -12988,7 +12988,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-20-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -13005,7 +13005,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 59.51,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -13184,7 +13184,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-21-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -13201,7 +13201,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 4.17,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -13380,7 +13380,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-22-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -13397,7 +13397,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 61.28,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -13576,7 +13576,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-23-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -13593,7 +13593,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 11.9,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -13772,7 +13772,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-24-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -13789,7 +13789,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 4.11,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -13968,7 +13968,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-25-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -13985,7 +13985,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 13.49,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -14164,7 +14164,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-26-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -14181,7 +14181,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 84.08,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -14360,7 +14360,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-3-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -14377,7 +14377,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 39.33,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -14556,7 +14556,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-4-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -14573,7 +14573,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 63.77,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -14752,7 +14752,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-5-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -14769,7 +14769,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 4.37,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -14948,7 +14948,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-6-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -14965,7 +14965,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 31.48,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -15144,7 +15144,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-7-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -15161,7 +15161,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 7.6,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -15340,7 +15340,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-8-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -15357,7 +15357,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 2.47,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"
@@ -15536,7 +15536,7 @@
           "unique_id": "00:13:a2:00:41:93:fe:df-9-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -15553,7 +15553,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 63.6,
           "measurement_type": "ACTIVE_MEASUREMENT, REACTIVE_MEASUREMENT, APPARENT_MEASUREMENT, PHASE_A_MEASUREMENT"

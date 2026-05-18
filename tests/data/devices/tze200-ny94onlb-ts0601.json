@@ -2072,7 +2072,7 @@
           "unique_id": "ab:cd:ef:12:58:8c:89:ff-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -2089,7 +2089,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 298.0
         },
@@ -2360,7 +2360,7 @@
           "unique_id": "ab:cd:ef:12:58:8c:89:ff-10-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -2377,7 +2377,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 298.0
         },
@@ -2456,7 +2456,7 @@
           "unique_id": "ab:cd:ef:12:58:8c:89:ff-20-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -2473,7 +2473,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 266.0
         },
@@ -2552,7 +2552,7 @@
           "unique_id": "ab:cd:ef:12:58:8c:89:ff-30-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -2569,7 +2569,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 70.0
         },

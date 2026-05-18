@@ -1154,7 +1154,7 @@
           "unique_id": "ab:cd:ef:12:42:61:67:6a-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -1171,7 +1171,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 0.256,
           "measurement_type": "PHASE_A_MEASUREMENT",

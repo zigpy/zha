@@ -909,7 +909,7 @@
           "unique_id": "ab:cd:ef:12:8e:a1:83:54-1-1794-summation_delivered",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledSmartEnergySummation",
+          "class_name": "SmartEnergySummation",
           "translation_key": "summation_delivered",
           "translation_placeholders": null,
           "device_class": "energy",
@@ -926,7 +926,7 @@
           "unit": "kWh"
         },
         "state": {
-          "class_name": "PolledSmartEnergySummation",
+          "class_name": "SmartEnergySummation",
           "available": true,
           "state": 0.23,
           "device_type": "Electric Metering",
@@ -945,7 +945,7 @@
           "unique_id": "ab:cd:ef:12:8e:a1:83:54-1-2820",
           "migrate_unique_ids": [],
           "platform": "sensor",
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "translation_key": null,
           "translation_placeholders": null,
           "device_class": "power",
@@ -962,7 +962,7 @@
           "unit": "W"
         },
         "state": {
-          "class_name": "PolledElectricalMeasurement",
+          "class_name": "ElectricalMeasurementActivePower",
           "available": true,
           "state": 450.0
         },
