@@ -875,42 +875,6 @@ class BaseElectricalMeasurement(PollableSensor):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
-                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
                 ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -923,178 +887,7 @@ class BaseElectricalMeasurement(PollableSensor):
                         min_interval=0, max_interval=900, reportable_change=1
                     ),
                 ),
-                ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.active_power_ph_b: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.active_power_ph_c: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.total_active_power: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.apparent_power: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_current: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_current_ph_b: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_current_ph_c: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_voltage: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_frequency: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier: AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_voltage_divisor: AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_current_multiplier: AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_current_divisor: AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_power_multiplier: AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_power_divisor: AttrConfig(
-                    read_on_startup=False,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_voltage: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_current: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.dc_power: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_frequency_divisor: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_frequency_max: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.ac_frequency_multiplier: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.active_power_max_ph_b: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.active_power_max_ph_c: AttrConfig(
-                    read_on_startup=False,
-                ),
                 ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.power_factor: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.power_factor_ph_b: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.power_factor_ph_c: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_current_max: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_voltage_max: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b: AttrConfig(
-                    read_on_startup=False,
-                ),
-                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c: AttrConfig(
                     read_on_startup=False,
                 ),
             },
@@ -1197,6 +990,35 @@ class ReportingElectricalMeasurement(BaseElectricalMeasurement):
         feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 1),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 _ELECTRICAL_MEASUREMENT_POLLING_ATTRS = [
     ElectricalMeasurement.AttributeDefs.ac_frequency.name,
@@ -1247,6 +1069,35 @@ class PolledElectricalMeasurement(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
         feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 0),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
     async def async_update(self) -> None:
         """Poll the full EM attribute list so sibling EM entities update too."""
@@ -1304,6 +1155,35 @@ class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
@@ -1322,6 +1202,35 @@ class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1342,6 +1251,35 @@ class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.total_active_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.active_power_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
@@ -1357,6 +1295,32 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.apparent_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1376,6 +1340,35 @@ class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
@@ -1391,6 +1384,35 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
@@ -1405,6 +1427,35 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_current_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1423,6 +1474,35 @@ class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
@@ -1438,6 +1518,35 @@ class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
@@ -1452,6 +1561,35 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_voltage_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1471,6 +1609,29 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.ac_frequency_multiplier: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_divisor: AttrConfig(
+                    read_on_startup=False,
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.ac_frequency_max: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
@@ -1484,6 +1645,17 @@ class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.power_factor: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1499,6 +1671,17 @@ class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.power_factor_ph_b: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
@@ -1512,6 +1695,17 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.power_factor_ph_c: AttrConfig(
+                    read_on_startup=False,
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
@@ -1531,6 +1725,32 @@ class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_voltage: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
@@ -1549,6 +1769,32 @@ class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
 
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.dc_current_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_current: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
@@ -1566,6 +1812,32 @@ class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
     )
+
+    _server_cluster_config = {
+        ElectricalMeasurement.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                ElectricalMeasurement.AttributeDefs.dc_power_multiplier: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power_divisor: AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.dc_power: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=5, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(RelativeHumidity.cluster_id)
