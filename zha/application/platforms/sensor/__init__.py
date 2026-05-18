@@ -795,7 +795,9 @@ class BaseElectricalMeasurement(Sensor):
 
     _attr_max_attribute_name: str | None
     _multiplier_attribute_name: str | None
+    _multiplier_fallback_attribute_name: str | None
     _divisor_attribute_name: str | None
+    _divisor_fallback_attribute_name: str | None
 
     def __init__(
         self,
@@ -848,7 +850,10 @@ class BaseElectricalMeasurement(Sensor):
         if not self._multiplier_attribute_name:
             return super()._multiplier
 
-        return self._cluster.get(self._multiplier_attribute_name) or 1
+        value = self._cluster.get(self._multiplier_attribute_name)
+        if value is None and self._multiplier_fallback_attribute_name:
+            value = self._cluster.get(self._multiplier_fallback_attribute_name)
+        return value or 1
 
     @_multiplier.setter
     def _multiplier(self, value: int | float | None) -> None:
@@ -859,7 +864,10 @@ class BaseElectricalMeasurement(Sensor):
         if not self._divisor_attribute_name:
             return super()._divisor
 
-        return self._cluster.get(self._divisor_attribute_name) or 1
+        value = self._cluster.get(self._divisor_attribute_name)
+        if value is None and self._divisor_fallback_attribute_name:
+            value = self._cluster.get(self._divisor_fallback_attribute_name)
+        return value or 1
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
@@ -898,11 +906,15 @@ class AggregatedClusterPoller(VirtualEntity):
         """Poll the union of attrs read by enabled sibling entities."""
         attrs: set[str] = set()
         for entity in self.device.platform_entities.values():
-            if entity is self or not isinstance(entity, ZCLClusterEntity):
+            if entity is self or not isinstance(entity, Sensor):
                 continue
             if entity._cluster is not self._cluster:
                 continue
             if not entity.enabled:
+                continue
+            if entity._attribute_name and self._cluster.is_attribute_unsupported(
+                entity._attribute_name
+            ):
                 continue
             cfg = entity._server_cluster_config.get(self._cluster_id)
             if cfg is None:
@@ -939,7 +951,9 @@ class ElectricalMeasurementActivePower(BaseElectricalMeasurement):
     _attribute_name = "active_power"
     _attr_max_attribute_name = "active_power_max"
     _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _attr_suggested_display_precision = 1
@@ -964,6 +978,18 @@ class ElectricalMeasurementActivePower(BaseElectricalMeasurement):
                     ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=900, reportable_change=1
@@ -992,7 +1018,9 @@ class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
     _attr_translation_key: str = "active_power_ph_b"
     _attr_max_attribute_name = "active_power_max_ph_b"
     _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _attr_suggested_display_precision = 1
@@ -1018,6 +1046,18 @@ class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
                     ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=900, reportable_change=1
@@ -1046,7 +1086,9 @@ class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
     _attr_translation_key: str = "active_power_ph_c"
     _attr_max_attribute_name = "active_power_max_ph_c"
     _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _attr_suggested_display_precision = 1
@@ -1072,6 +1114,18 @@ class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
                     ),
                 ),
                 ElectricalMeasurement.AttributeDefs.ac_power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=900, reportable_change=1
@@ -1100,7 +1154,9 @@ class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
     _attr_translation_key: str = "total_active_power"
     _attr_max_attribute_name = "active_power_max"
     _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _attr_suggested_display_precision = 1
@@ -1131,6 +1187,18 @@ class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
                         min_interval=0, max_interval=900, reportable_change=1
                     ),
                 ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
                 ElectricalMeasurement.AttributeDefs.total_active_power: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1153,7 +1221,9 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     _unique_id_suffix = "apparent_power"
     _attr_max_attribute_name = None
     _divisor_attribute_name = "ac_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
     _attr_suggested_display_precision = 1
@@ -1183,6 +1253,18 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
                         min_interval=0, max_interval=900, reportable_change=1
                     ),
                 ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
                 ElectricalMeasurement.AttributeDefs.apparent_power: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1203,7 +1285,9 @@ class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     _unique_id_suffix = "rms_current"
     _attr_max_attribute_name = "rms_current_max"
     _divisor_attribute_name = "ac_current_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "ac_current_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
@@ -1348,7 +1432,9 @@ class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     _unique_id_suffix = "rms_voltage"
     _attr_max_attribute_name = "rms_voltage_max"
     _divisor_attribute_name = "ac_voltage_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "ac_voltage_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _attr_suggested_display_precision = 1
@@ -1495,7 +1581,9 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     _attr_translation_key: str = "ac_frequency"
     _attr_max_attribute_name = "ac_frequency_max"
     _divisor_attribute_name = "ac_frequency_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "ac_frequency_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
     _attr_suggested_display_precision = 1
@@ -1541,7 +1629,9 @@ class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     _unique_id_suffix = "power_factor"
     _attr_max_attribute_name = None
     _divisor_attribute_name = None
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = None
+    _multiplier_fallback_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_suggested_display_precision = 1
@@ -1634,7 +1724,9 @@ class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_voltage_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "dc_voltage_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_suggested_display_precision = 1
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _cluster_id = ElectricalMeasurement.cluster_id
@@ -1685,7 +1777,9 @@ class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_current_divisor"
+    _divisor_fallback_attribute_name = None
     _multiplier_attribute_name = "dc_current_multiplier"
+    _multiplier_fallback_attribute_name = None
     _attr_suggested_display_precision = 1
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _cluster_id = ElectricalMeasurement.cluster_id
@@ -1736,7 +1830,9 @@ class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfPower.WATT
     _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_power_divisor"
+    _divisor_fallback_attribute_name = "power_divisor"
     _multiplier_attribute_name = "dc_power_multiplier"
+    _multiplier_fallback_attribute_name = "power_multiplier"
     _attr_suggested_display_precision = 1
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _cluster_id = ElectricalMeasurement.cluster_id
@@ -1761,6 +1857,18 @@ class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
                 ),
                 ElectricalMeasurement.AttributeDefs.dc_power_divisor: AttrConfig(
                     read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
+                    read_on_startup=True,
                     reporting=ReportingConfig(
                         min_interval=0, max_interval=900, reportable_change=1
                     ),

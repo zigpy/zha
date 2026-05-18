@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from functools import partial
 import math
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
@@ -610,7 +610,7 @@ async def async_test_em_dc_power(
         ),
         (
             homeautomation.ElectricalMeasurement.cluster_id,
-            sensor.PolledElectricalMeasurement,
+            sensor.ElectricalMeasurementActivePower,
             async_test_electrical_measurement,
             {"ac_power_divisor": 1000, "ac_power_multiplier": 1},
             {"apparent_power", "rms_current", "rms_voltage"},
@@ -895,10 +895,7 @@ def assert_state(entity: PlatformEntity, state: Any, unit_of_measurement: str) -
     assert entity.info_object.unit == unit_of_measurement
 
 
-async def test_electrical_measurement_init(
-    zha_gateway: Gateway,
-    caplog: pytest.LogCaptureFixture,
-) -> None:
+async def test_electrical_measurement_init(zha_gateway: Gateway) -> None:
     """Test proper initialization of the electrical measurement cluster."""
 
     cluster_id = homeautomation.ElectricalMeasurement.cluster_id
@@ -920,7 +917,7 @@ async def test_electrical_measurement_init(
     entity = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
     )
 
     await send_attributes_report(
@@ -930,25 +927,6 @@ async def test_electrical_measurement_init(
     )
     assert entity.state["state"] == 100
 
-    # update power divisor
-    await send_attributes_report(
-        zha_gateway,
-        cluster,
-        {EMAttrs.active_power.id: 20, EMAttrs.power_divisor.id: 5},
-    )
-    assert entity.state["state"] == 4.0
-
-    zha_device.on_network = False
-
-    await asyncio.sleep(entity.__polling_interval + 1)
-    await zha_gateway.async_block_till_done(wait_background_tasks=True)
-    assert (
-        "-1-2820: skipping polling for updated state, available: False, allow polled requests: True"
-        in caplog.text
-    )
-
-    zha_device.on_network = True
-
     await send_attributes_report(
         zha_gateway,
         cluster,
@@ -956,42 +934,12 @@ async def test_electrical_measurement_init(
     )
     assert entity.state["state"] == 3.0
 
-    # update power multiplier
-    await send_attributes_report(
-        zha_gateway,
-        cluster,
-        {EMAttrs.active_power.id: 20, EMAttrs.power_multiplier.id: 6},
-    )
-    assert entity.state["state"] == 12.0
-
     await send_attributes_report(
         zha_gateway,
         cluster,
         {EMAttrs.active_power.id: 30, EMAttrs.ac_power_multiplier.id: 20},
     )
     assert entity.state["state"] == 60.0
-
-    entity._refresh = AsyncMock(wraps=entity._refresh)
-
-    assert entity._refresh.await_count == 0
-
-    entity.disable()
-
-    assert entity.enabled is False
-
-    await asyncio.sleep(entity.__polling_interval + 1)
-    await zha_gateway.async_block_till_done(wait_background_tasks=True)
-
-    assert entity._refresh.await_count == 0
-
-    entity.enable()
-
-    assert entity.enabled is True
-
-    await asyncio.sleep(entity.__polling_interval + 1)
-    await zha_gateway.async_block_till_done(wait_background_tasks=True)
-
-    assert entity._refresh.await_count == 1
 
 
 @pytest.mark.parametrize(
@@ -1010,7 +958,7 @@ async def test_electrical_measurement_init(
                 "rms_current",
             },
             {
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurementActivePower,
                 sensor.ElectricalMeasurementFrequency,
                 sensor.ElectricalMeasurementPowerFactor,
             },
@@ -1030,7 +978,7 @@ async def test_electrical_measurement_init(
             },
             {
                 sensor.ElectricalMeasurementRMSVoltage,
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurementActivePower,
             },
             {
                 sensor.ElectricalMeasurementApparentPower,
@@ -1044,7 +992,7 @@ async def test_electrical_measurement_init(
             set(),
             {
                 sensor.ElectricalMeasurementRMSVoltage,
-                sensor.PolledElectricalMeasurement,
+                sensor.ElectricalMeasurementActivePower,
                 sensor.ElectricalMeasurementApparentPower,
                 sensor.ElectricalMeasurementRMSCurrent,
                 sensor.ElectricalMeasurementFrequency,
@@ -1311,7 +1259,7 @@ async def test_elec_measurement_sensor_polling(zha_gateway: Gateway) -> None:
     entity = get_entity(
         zha_dev,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
     )
     assert entity.state["state"] == 2.0
 
@@ -1345,7 +1293,7 @@ async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
     entity = get_entity(
         zha_dev,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledSmartEnergySummation,
+        exact_entity_type=sensor.SmartEnergySummation,
     )
     assert entity.state["state"] == 2.0
 
@@ -1431,6 +1379,8 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "power_factor_ph_c",
         "ac_frequency",
         "ac_frequency_max",
+        "ac_frequency_divisor",
+        "ac_frequency_multiplier",
         "ac_voltage_divisor",
         "ac_current_divisor",
         "ac_power_divisor",
@@ -1439,6 +1389,7 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "ac_current_multiplier",
         "power_divisor",
         "power_multiplier",
+        "measurement_type",
         "dc_voltage",
         "dc_voltage_divisor",
         "dc_voltage_multiplier",
@@ -1453,12 +1404,12 @@ async def test_elec_measurement_skip_unsupported_attribute(
         cluster.add_unsupported_attribute(attr)
     cluster.read_attributes.reset_mock()
 
-    entity = get_entity(
+    poller = get_entity(
         zha_dev,
-        platform=Platform.SENSOR,
-        exact_entity_type=sensor.PolledElectricalMeasurement,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
     )
-    await entity.async_update()
+    await poller.async_update()
     await zha_dev.gateway.async_block_till_done()
     assert cluster.read_attributes.call_count == math.ceil(
         len(supported_attributes) / CLUSTER_READS_PER_REQ
@@ -2186,10 +2137,10 @@ async def test_enum_sensor(zha_gateway: Gateway) -> None:
     assert entity.state["state"] == "undefined_0xab"  # TODO: should this be `None`?
 
 
-async def test_ubisys_polled_em_keeps_polling_when_disabled(
+async def test_em_poller_runs_independently_of_entity_enabled_state(
     zha_gateway: Gateway,
 ) -> None:
-    """Test that UbisysPolledElectricalMeasurement keeps polling when disabled."""
+    """Disabling the active_power entity must not stop EM cluster polling."""
 
     zigpy_dev = await zigpy_device_from_json(
         zha_gateway.application_controller,
@@ -2197,29 +2148,25 @@ async def test_ubisys_polled_em_keeps_polling_when_disabled(
     )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
 
-    entity = get_entity(
+    poller = get_entity(
+        zha_device,
+        platform=Platform.VIRTUAL,
+        exact_entity_type=sensor.ElectricalMeasurementPoller,
+    )
+    active_power = get_entity(
         zha_device,
         platform=Platform.SENSOR,
-        exact_entity_type=sensor.UbisysPolledElectricalMeasurement,
+        exact_entity_type=sensor.ElectricalMeasurementActivePower,
     )
 
-    assert isinstance(entity, sensor.UbisysPolledElectricalMeasurement)
-    assert isinstance(entity, sensor.PollableSensorMixin)
-    assert entity._polling_task is not None
-    assert entity.enabled is True
+    assert len(poller._tracked_tasks) == 1
+    poll_task = poller._tracked_tasks[0]
+    assert not poll_task.done()
 
-    # Disable the entity (simulating what the quirk does)
-    entity.disable()
+    active_power.disable()
+    assert active_power.enabled is False
+    assert not poll_task.done()
 
-    assert entity.enabled is False
-    # Polling task must still be running
-    assert entity._polling_task is not None
-    assert not entity._polling_task.done()
-
-    # Re-enable the entity
-    entity.enable()
-
-    assert entity.enabled is True
-    # Polling task must still be running (no duplicate created)
-    assert entity._polling_task is not None
-    assert not entity._polling_task.done()
+    active_power.enable()
+    assert active_power.enabled is True
+    assert not poll_task.done()
