@@ -2419,14 +2419,12 @@ class SmartEnergySummationReceived(SmartEnergySummation):
     _attribute_name = "current_summ_received"
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"
-    """
-    This attribute only started to be initialized in HA 2024.2.0,
-    so the entity would be created on the first HA start after the
-    upgrade for existing devices, as the initialization to see if
-    an attribute is unsupported happens later in the background.
-    To avoid creating unnecessary entities for existing devices,
-    wait until the attribute was properly initialized once for now.
-    """
+
+    # This attribute only started to be initialized in HA 2024.2.0, so the entity would
+    # be created on the first HA start after the upgrade for existing devices, as the
+    # initialization to see if an attribute is unsupported happens later in the
+    # background. To avoid creating unnecessary entities for existing devices, wait
+    # until the attribute was properly initialized once for now.
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
