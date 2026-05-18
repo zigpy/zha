@@ -863,10 +863,9 @@ class Battery(Sensor):
 class BaseElectricalMeasurement(PollableSensor):
     """Base class for electrical measurement."""
 
-    _use_custom_polling: bool = False
-    _attr_max_attribute_name: str | None = None
-    _divisor_attribute_name: str | None = None
-    _multiplier_attribute_name: str | None = None
+    _attr_max_attribute_name: str | None
+    _multiplier_attribute_name: str | None
+    _divisor_attribute_name: str | None
 
     def __init__(
         self,
@@ -941,6 +940,7 @@ class BaseElectricalMeasurement(PollableSensor):
 class ReportingElectricalMeasurement(BaseElectricalMeasurement):
     """Unpolled active power measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "active_power"
     _attr_max_attribute_name = "active_power_max"
     _divisor_attribute_name = "ac_power_divisor"
@@ -1024,7 +1024,11 @@ _ELECTRICAL_MEASUREMENT_POLLING_ATTRS = [
 
 @register_entity(ElectricalMeasurement.cluster_id)
 class PolledElectricalMeasurement(BaseElectricalMeasurement):
-    """Polled active power measurement that polls all relevant EM attributes."""
+    """Polled active power measurement that polls all relevant EM attributes.
+
+    This entity consolidates attribute polling into individual requests and allows
+    sibling entities to avoid needing to poll.
+    """
 
     _use_custom_polling: bool = True
 
@@ -1117,6 +1121,7 @@ class UbisysPolledElectricalMeasurement(PolledElectricalMeasurement):
 class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
     """Active power phase B measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "active_power_ph_b"
     _unique_id_suffix = "active_power_ph_b"
     _attr_translation_key: str = "active_power_ph_b"
@@ -1171,6 +1176,7 @@ class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
 class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
     """Active power phase C measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "active_power_ph_c"
     _unique_id_suffix = "active_power_ph_c"
     _attr_translation_key: str = "active_power_ph_c"
@@ -1225,6 +1231,7 @@ class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
 class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
     """Total active power measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "total_active_power"
     _unique_id_suffix = "total_active_power"
     _attr_translation_key: str = "total_active_power"
@@ -1279,8 +1286,10 @@ class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
 class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     """Apparent power measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "apparent_power"
     _unique_id_suffix = "apparent_power"
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "ac_power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
@@ -1327,6 +1336,7 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
 class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     """RMS current measurement."""
 
+    _use_custom_polling: bool = False
     _attr_suggested_display_precision = 2
     _attribute_name = "rms_current"
     _unique_id_suffix = "rms_current"
@@ -1473,6 +1483,7 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
 class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     """RMS Voltage measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "rms_voltage"
     _unique_id_suffix = "rms_voltage"
     _attr_max_attribute_name = "rms_voltage_max"
@@ -1619,6 +1630,7 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
 class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     """Frequency measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "ac_frequency"
     _unique_id_suffix = "ac_frequency"
     _attr_translation_key: str = "ac_frequency"
@@ -1666,8 +1678,12 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
 class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     """Power Factor measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "power_factor"
     _unique_id_suffix = "power_factor"
+    _attr_max_attribute_name = None
+    _divisor_attribute_name = None
+    _multiplier_attribute_name = None
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_suggested_display_precision = 1
@@ -1753,11 +1769,13 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
 class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
     """DC Voltage measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "dc_voltage"
     _unique_id_suffix = "dc_voltage"
     _attr_translation_key: str = "dc_voltage"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_voltage_divisor"
     _multiplier_attribute_name = "dc_voltage_multiplier"
     _attr_suggested_display_precision = 1
@@ -1803,11 +1821,13 @@ class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
 class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
     """DC Current measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "dc_current"
     _unique_id_suffix = "dc_current"
     _attr_translation_key: str = "dc_current"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_current_divisor"
     _multiplier_attribute_name = "dc_current_multiplier"
     _attr_suggested_display_precision = 1
@@ -1853,11 +1873,13 @@ class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
 class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
     """DC Power measurement."""
 
+    _use_custom_polling: bool = False
     _attribute_name = "dc_power"
     _unique_id_suffix = "dc_power"
     _attr_translation_key: str = "dc_power"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _attr_max_attribute_name = None
     _divisor_attribute_name = "dc_power_divisor"
     _multiplier_attribute_name = "dc_power_multiplier"
     _attr_suggested_display_precision = 1
