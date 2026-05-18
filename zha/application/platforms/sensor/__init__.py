@@ -871,29 +871,6 @@ class BaseElectricalMeasurement(PollableSensor):
     _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
     _cluster_id = ElectricalMeasurement.cluster_id
 
-    _server_cluster_config = {
-        ElectricalMeasurement.cluster_id: ClusterConfig(
-            bind=True,
-            attributes={
-                ElectricalMeasurement.AttributeDefs.power_multiplier: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.power_divisor: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
-                    read_on_startup=False,
-                ),
-            },
-        ),
-    }
-
     def __init__(
         self,
         endpoint: Endpoint,
@@ -945,13 +922,7 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._multiplier_attribute_name:
             return super()._multiplier
 
-        return (
-            self._cluster.get(self._multiplier_attribute_name)
-            or self._cluster.get(
-                ElectricalMeasurement.AttributeDefs.power_multiplier.name
-            )
-            or 1
-        )
+        return self._cluster.get(self._multiplier_attribute_name) or 1
 
     @_multiplier.setter
     def _multiplier(self, value: int | float | None) -> None:
@@ -962,11 +933,7 @@ class BaseElectricalMeasurement(PollableSensor):
         if not self._divisor_attribute_name:
             return super()._divisor
 
-        return (
-            self._cluster.get(self._divisor_attribute_name)
-            or self._cluster.get(ElectricalMeasurement.AttributeDefs.power_divisor.name)
-            or 1
-        )
+        return self._cluster.get(self._divisor_attribute_name) or 1
 
     @_divisor.setter
     def _divisor(self, value: int | float | None) -> None:
@@ -994,6 +961,9 @@ class ReportingElectricalMeasurement(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1074,6 +1044,9 @@ class PolledElectricalMeasurement(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1159,6 +1132,9 @@ class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1207,6 +1183,9 @@ class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1255,6 +1234,9 @@ class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1300,6 +1282,9 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_power_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1344,6 +1329,9 @@ class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1388,6 +1376,9 @@ class ElectricalMeasurementRMSCurrentPhB(ElectricalMeasurementRMSCurrent):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1432,6 +1423,9 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_current_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1478,6 +1472,9 @@ class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1522,6 +1519,9 @@ class ElectricalMeasurementRMSVoltagePhB(ElectricalMeasurementRMSVoltage):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1566,6 +1566,9 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_voltage_multiplier: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -1613,6 +1616,9 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.ac_frequency_multiplier: AttrConfig(
                     read_on_startup=False,
                 ),
@@ -1650,6 +1656,9 @@ class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.power_factor: AttrConfig(
                     read_on_startup=False,
                 ),
@@ -1675,6 +1684,9 @@ class ElectricalMeasurementPowerFactorPhB(ElectricalMeasurementPowerFactor):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.power_factor_ph_b: AttrConfig(
                     read_on_startup=False,
                 ),
@@ -1700,6 +1712,9 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.power_factor_ph_c: AttrConfig(
                     read_on_startup=False,
                 ),
@@ -1729,6 +1744,9 @@ class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.dc_voltage_multiplier: AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(
@@ -1773,6 +1791,9 @@ class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.dc_current_multiplier: AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(
@@ -1817,6 +1838,9 @@ class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
         ElectricalMeasurement.cluster_id: ClusterConfig(
             bind=True,
             attributes={
+                ElectricalMeasurement.AttributeDefs.measurement_type: AttrConfig(
+                    read_on_startup=False,
+                ),
                 ElectricalMeasurement.AttributeDefs.dc_power_multiplier: AttrConfig(
                     read_on_startup=False,
                     reporting=ReportingConfig(
