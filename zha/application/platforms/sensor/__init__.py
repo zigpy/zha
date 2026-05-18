@@ -408,11 +408,10 @@ class TimestampSensor(Sensor):
     """Timestamp ZHA sensor."""
 
 
-class PollableSensor(Sensor):
-    """Base ZHA sensor that polls for state."""
+class PollableSensorMixin(Sensor):
+    """Mixin that adds custom polling to a Sensor."""
 
     _REFRESH_INTERVAL = (30, 45)
-    _use_custom_polling: bool = True
     __polling_interval: int
 
     def __init__(
@@ -430,25 +429,19 @@ class PollableSensor(Sensor):
         super().on_add()
         self.maybe_start_polling()
 
-    @property
-    def should_poll(self) -> bool:
-        """Return True if we need to poll for state changes."""
-        return self._use_custom_polling
-
     def maybe_start_polling(self) -> None:
-        """Start polling if necessary."""
-        if self.should_poll:
-            self._polling_task = self.device.gateway.async_create_background_task(
-                self._refresh(),
-                name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
-                eager_start=True,
-                untracked=True,
-            )
-            self._tracked_tasks.append(self._polling_task)
-            self.debug(
-                "started polling with refresh interval of %s",
-                getattr(self, "__polling_interval"),
-            )
+        """Start polling."""
+        self._polling_task = self.device.gateway.async_create_background_task(
+            self._refresh(),
+            name=f"sensor_state_poller_{self.unique_id}_{self.__class__.__name__}",
+            eager_start=True,
+            untracked=True,
+        )
+        self._tracked_tasks.append(self._polling_task)
+        self.debug(
+            "started polling with refresh interval of %s",
+            getattr(self, "__polling_interval"),
+        )
 
     def enable(self) -> None:
         """Enable the entity."""
@@ -860,7 +853,7 @@ class Battery(Sensor):
         return response
 
 
-class BaseElectricalMeasurement(PollableSensor):
+class BaseElectricalMeasurement(Sensor):
     """Base class for electrical measurement."""
 
     _attr_max_attribute_name: str | None
@@ -940,7 +933,6 @@ class BaseElectricalMeasurement(PollableSensor):
 class ReportingElectricalMeasurement(BaseElectricalMeasurement):
     """Unpolled active power measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "active_power"
     _attr_max_attribute_name = "active_power_max"
     _divisor_attribute_name = "ac_power_divisor"
@@ -1023,14 +1015,12 @@ _ELECTRICAL_MEASUREMENT_POLLING_ATTRS = [
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class PolledElectricalMeasurement(BaseElectricalMeasurement):
+class PolledElectricalMeasurement(PollableSensorMixin, BaseElectricalMeasurement):
     """Polled active power measurement that polls all relevant EM attributes.
 
     This entity consolidates attribute polling into individual requests and allows
     sibling entities to avoid needing to poll.
     """
-
-    _use_custom_polling: bool = True
 
     _attribute_name = "active_power"
     _attr_max_attribute_name = "active_power_max"
@@ -1121,7 +1111,6 @@ class UbisysPolledElectricalMeasurement(PolledElectricalMeasurement):
 class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
     """Active power phase B measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "active_power_ph_b"
     _unique_id_suffix = "active_power_ph_b"
     _attr_translation_key: str = "active_power_ph_b"
@@ -1176,7 +1165,6 @@ class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
 class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
     """Active power phase C measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "active_power_ph_c"
     _unique_id_suffix = "active_power_ph_c"
     _attr_translation_key: str = "active_power_ph_c"
@@ -1231,7 +1219,6 @@ class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
 class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
     """Total active power measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "total_active_power"
     _unique_id_suffix = "total_active_power"
     _attr_translation_key: str = "total_active_power"
@@ -1286,7 +1273,6 @@ class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
 class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     """Apparent power measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "apparent_power"
     _unique_id_suffix = "apparent_power"
     _attr_max_attribute_name = None
@@ -1336,7 +1322,6 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
 class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     """RMS current measurement."""
 
-    _use_custom_polling: bool = False
     _attr_suggested_display_precision = 2
     _attribute_name = "rms_current"
     _unique_id_suffix = "rms_current"
@@ -1483,7 +1468,6 @@ class ElectricalMeasurementRMSCurrentPhC(ElectricalMeasurementRMSCurrent):
 class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     """RMS Voltage measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "rms_voltage"
     _unique_id_suffix = "rms_voltage"
     _attr_max_attribute_name = "rms_voltage_max"
@@ -1630,7 +1614,6 @@ class ElectricalMeasurementRMSVoltagePhC(ElectricalMeasurementRMSVoltage):
 class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     """Frequency measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "ac_frequency"
     _unique_id_suffix = "ac_frequency"
     _attr_translation_key: str = "ac_frequency"
@@ -1678,7 +1661,6 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
 class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     """Power Factor measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "power_factor"
     _unique_id_suffix = "power_factor"
     _attr_max_attribute_name = None
@@ -1769,7 +1751,6 @@ class ElectricalMeasurementPowerFactorPhC(ElectricalMeasurementPowerFactor):
 class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
     """DC Voltage measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "dc_voltage"
     _unique_id_suffix = "dc_voltage"
     _attr_translation_key: str = "dc_voltage"
@@ -1821,7 +1802,6 @@ class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
 class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
     """DC Current measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "dc_current"
     _unique_id_suffix = "dc_current"
     _attr_translation_key: str = "dc_current"
@@ -1873,7 +1853,6 @@ class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
 class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
     """DC Power measurement."""
 
-    _use_custom_polling: bool = False
     _attribute_name = "dc_power"
     _unique_id_suffix = "dc_power"
     _attr_translation_key: str = "dc_power"
@@ -2097,11 +2076,10 @@ class SmartEnergyMeteringEntityDescription:
 
 
 @register_entity(Metering.cluster_id)
-class SmartEnergyMetering(PollableSensor):
+class SmartEnergyMetering(Sensor):
     """Metering sensor."""
 
     entity_description: SmartEnergyMeteringEntityDescription
-    _use_custom_polling: bool = False
     _attr_suggested_display_precision = 1
     _attribute_name = "instantaneous_demand"
     _attr_translation_key: str = "instantaneous_demand"
@@ -2458,10 +2436,8 @@ class SmartEnergySummation(SmartEnergyMetering):
 
 
 @register_entity(Metering.cluster_id)
-class PolledSmartEnergySummation(SmartEnergySummation):
+class PolledSmartEnergySummation(PollableSensorMixin, SmartEnergySummation):
     """Polled Smart Energy Metering summation sensor."""
-
-    _use_custom_polling: bool = True
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
@@ -2495,10 +2471,9 @@ class ExposedFeaturePolledSmartEnergySummation(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class Tier1SmartEnergySummation(PolledSmartEnergySummation):
+class Tier1SmartEnergySummation(SmartEnergySummation):
     """Tier 1 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier1_summ_delivered"
     _unique_id_suffix = "tier1_summation_delivered"
     _attr_translation_key: str = "tier1_summation_delivered"
@@ -2511,10 +2486,9 @@ class Tier1SmartEnergySummation(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class Tier2SmartEnergySummation(PolledSmartEnergySummation):
+class Tier2SmartEnergySummation(SmartEnergySummation):
     """Tier 2 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier2_summ_delivered"
     _unique_id_suffix = "tier2_summation_delivered"
     _attr_translation_key: str = "tier2_summation_delivered"
@@ -2527,10 +2501,9 @@ class Tier2SmartEnergySummation(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class Tier3SmartEnergySummation(PolledSmartEnergySummation):
+class Tier3SmartEnergySummation(SmartEnergySummation):
     """Tier 3 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier3_summ_delivered"
     _unique_id_suffix = "tier3_summation_delivered"
     _attr_translation_key: str = "tier3_summation_delivered"
@@ -2543,10 +2516,9 @@ class Tier3SmartEnergySummation(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class Tier4SmartEnergySummation(PolledSmartEnergySummation):
+class Tier4SmartEnergySummation(SmartEnergySummation):
     """Tier 4 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier4_summ_delivered"
     _unique_id_suffix = "tier4_summation_delivered"
     _attr_translation_key: str = "tier4_summation_delivered"
@@ -2559,10 +2531,9 @@ class Tier4SmartEnergySummation(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class Tier5SmartEnergySummation(PolledSmartEnergySummation):
+class Tier5SmartEnergySummation(SmartEnergySummation):
     """Tier 5 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier5_summ_delivered"
     _unique_id_suffix = "tier5_summation_delivered"
     _attr_translation_key: str = "tier5_summation_delivered"
@@ -2575,10 +2546,9 @@ class Tier5SmartEnergySummation(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class Tier6SmartEnergySummation(PolledSmartEnergySummation):
+class Tier6SmartEnergySummation(SmartEnergySummation):
     """Tier 6 Smart Energy Metering summation sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_tier6_summ_delivered"
     _unique_id_suffix = "tier6_summation_delivered"
     _attr_translation_key: str = "tier6_summation_delivered"
@@ -2591,10 +2561,9 @@ class Tier6SmartEnergySummation(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class SmartEnergySummationReceived(PolledSmartEnergySummation):
+class SmartEnergySummationReceived(SmartEnergySummation):
     """Smart Energy Metering summation received sensor."""
 
-    _use_custom_polling = False  # Poll indirectly by PolledSmartEnergySummation
     _attribute_name = "current_summ_received"
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"
@@ -2615,10 +2584,10 @@ class SmartEnergySummationReceived(PolledSmartEnergySummation):
 
 
 @register_entity(Metering.cluster_id)
-class ExposedFeaturePolledSmartEnergySummationReceived(SmartEnergySummationReceived):
+class ExposedFeaturePolledSmartEnergySummationReceived(
+    SmartEnergySummationReceived, PolledSmartEnergySummation
+):
     """Polled Smart Energy Metering summation received sensor via exposed feature."""
-
-    _use_custom_polling = True
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),

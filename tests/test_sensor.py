@@ -2204,7 +2204,7 @@ async def test_ubisys_polled_em_keeps_polling_when_disabled(
     )
 
     assert isinstance(entity, sensor.UbisysPolledElectricalMeasurement)
-    assert entity._use_custom_polling is True
+    assert isinstance(entity, sensor.PollableSensorMixin)
     assert entity._polling_task is not None
     assert entity.enabled is True
 
