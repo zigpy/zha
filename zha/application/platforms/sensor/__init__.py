@@ -108,6 +108,7 @@ from zha.application.platforms.sensor.helpers import (
     create_number_formatter,
     resolution_to_decimal_precision,
 )
+from zha.application.platforms.virtual import VirtualEntity
 from zha.decorators import periodic
 from zha.units import (
     CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
@@ -982,45 +983,62 @@ class ReportingElectricalMeasurement(BaseElectricalMeasurement):
     }
 
 
-_ELECTRICAL_MEASUREMENT_POLLING_ATTRS = [
-    ElectricalMeasurement.AttributeDefs.ac_frequency.name,
-    ElectricalMeasurement.AttributeDefs.ac_frequency_max.name,
-    ElectricalMeasurement.AttributeDefs.active_power.name,
-    ElectricalMeasurement.AttributeDefs.active_power_ph_b.name,
-    ElectricalMeasurement.AttributeDefs.active_power_ph_c.name,
-    ElectricalMeasurement.AttributeDefs.active_power_max.name,
-    ElectricalMeasurement.AttributeDefs.active_power_max_ph_b.name,
-    ElectricalMeasurement.AttributeDefs.active_power_max_ph_c.name,
-    ElectricalMeasurement.AttributeDefs.total_active_power.name,
-    ElectricalMeasurement.AttributeDefs.apparent_power.name,
-    ElectricalMeasurement.AttributeDefs.power_factor.name,
-    ElectricalMeasurement.AttributeDefs.power_factor_ph_b.name,
-    ElectricalMeasurement.AttributeDefs.power_factor_ph_c.name,
-    ElectricalMeasurement.AttributeDefs.rms_current.name,
-    ElectricalMeasurement.AttributeDefs.rms_current_ph_b.name,
-    ElectricalMeasurement.AttributeDefs.rms_current_ph_c.name,
-    ElectricalMeasurement.AttributeDefs.rms_current_max.name,
-    ElectricalMeasurement.AttributeDefs.rms_current_max_ph_b.name,
-    ElectricalMeasurement.AttributeDefs.rms_current_max_ph_c.name,
-    ElectricalMeasurement.AttributeDefs.rms_voltage.name,
-    ElectricalMeasurement.AttributeDefs.rms_voltage_ph_b.name,
-    ElectricalMeasurement.AttributeDefs.rms_voltage_ph_c.name,
-    ElectricalMeasurement.AttributeDefs.rms_voltage_max.name,
-    ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_b.name,
-    ElectricalMeasurement.AttributeDefs.rms_voltage_max_ph_c.name,
-    ElectricalMeasurement.AttributeDefs.dc_voltage.name,
-    ElectricalMeasurement.AttributeDefs.dc_current.name,
-    ElectricalMeasurement.AttributeDefs.dc_power.name,
-]
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementPoller(VirtualEntity):
+    """Polls the EM cluster on behalf of sibling entities that need updates."""
+
+    _REFRESH_INTERVAL = (30, 45)
+    _unique_id_suffix = "em_poller"
+    _cluster_id = ElectricalMeasurement.cluster_id
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+    )
+
+    def on_add(self) -> None:
+        """Start the periodic polling task."""
+        super().on_add()
+        task = self.device.gateway.async_create_background_task(
+            self._refresh(),
+            name=f"em_poller_{self.unique_id}",
+            eager_start=True,
+            untracked=True,
+        )
+        self._tracked_tasks.append(task)
+
+    @periodic(_REFRESH_INTERVAL)
+    async def _refresh(self) -> None:
+        if not (self.device.available and self.device.gateway.config.allow_polling):
+            return
+        await self.async_update()
+
+    async def async_update(self) -> None:
+        """Poll the union of attrs read by enabled sibling EM entities."""
+        attrs: set[str] = set()
+        for entity in self.device.platform_entities.values():
+            if entity is self or not isinstance(entity, ZCLClusterEntity):
+                continue
+            if entity._cluster is not self._cluster:
+                continue
+            if not entity.enabled:
+                continue
+            cfg = entity._server_cluster_config.get(self._cluster_id)
+            if cfg is None:
+                continue
+            for attr_def in cfg.attributes:
+                name = attr_def.name
+                if not self._cluster.is_attribute_unsupported(name):
+                    attrs.add(name)
+        if not attrs:
+            return
+        self.debug("polling %d attrs: %s", len(attrs), sorted(attrs))
+        await safe_read(
+            self._cluster, sorted(attrs), allow_cache=False, only_cache=False
+        )
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class PolledElectricalMeasurement(PollableSensorMixin, BaseElectricalMeasurement):
-    """Polled active power measurement that polls all relevant EM attributes.
-
-    This entity consolidates attribute polling into individual requests and allows
-    sibling entities to avoid needing to poll.
-    """
+class PolledElectricalMeasurement(BaseElectricalMeasurement):
+    """Default active power measurement."""
 
     _attribute_name = "active_power"
     _attr_max_attribute_name = "active_power_max"
@@ -1068,43 +1086,6 @@ class PolledElectricalMeasurement(PollableSensorMixin, BaseElectricalMeasurement
             },
         ),
     }
-
-    async def async_update(self) -> None:
-        """Poll the full EM attribute list so sibling EM entities update too."""
-        self.debug("polling current state")
-        attrs = [
-            attr
-            for attr in _ELECTRICAL_MEASUREMENT_POLLING_ATTRS
-            if not self._cluster.is_attribute_unsupported(attr)
-        ]
-        if not attrs:
-            return
-        await safe_read(self._cluster, attrs, allow_cache=False, only_cache=False)
-        self.maybe_emit_state_changed_event()
-
-
-@register_entity(ElectricalMeasurement.cluster_id)
-class UbisysPolledElectricalMeasurement(PolledElectricalMeasurement):
-    """Polled active power for ubisys that keeps polling even when disabled.
-
-    ubisys devices disable the active power entity by default via a quirk, but
-    this entity still needs to poll the EM cluster so that other EM entities
-    (voltage, current, power factor) receive updated values.
-    """
-
-    _cluster_match = ClusterMatch(
-        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
-        manufacturers=frozenset({"ubisys"}),
-        feature_priority=(PlatformFeatureGroup.EM_ACTIVE_POWER, 1),
-    )
-
-    def disable(self) -> None:
-        """Disable the entity but keep polling for EM cluster updates."""
-        PlatformEntity.disable(self)
-
-    def enable(self) -> None:
-        """Enable the entity without starting a duplicate polling task."""
-        PlatformEntity.enable(self)
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
