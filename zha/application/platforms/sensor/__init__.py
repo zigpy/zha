@@ -1180,23 +1180,16 @@ class BaseElectricalMeasurement(PollableSensor):
         raise AttributeError("Cannot set divisor directly")
 
 
-# this entity will be created by ReportingEM or PolledEM class below
-class ElectricalMeasurementActivePower(BaseElectricalMeasurement):
-    """Active power phase measurement."""
+@register_entity(ElectricalMeasurement.cluster_id)
+class ReportingElectricalMeasurement(BaseElectricalMeasurement):
+    """Unpolled active power measurement."""
 
     _attribute_name = "active_power"
-    # no unique id suffix for backwards compatibility
-    # no translation key due to device class
     _attr_max_attribute_name = "active_power_max"
     _divisor_attribute_name = "ac_power_divisor"
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
-
-
-@register_entity(ElectricalMeasurement.cluster_id)
-class ReportingElectricalMeasurement(ElectricalMeasurementActivePower):
-    """Unpolled active power measurement."""
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1238,10 +1231,17 @@ _ELECTRICAL_MEASUREMENT_POLLING_ATTRS = [
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class PolledElectricalMeasurement(ElectricalMeasurementActivePower):
+class PolledElectricalMeasurement(BaseElectricalMeasurement):
     """Polled active power measurement that polls all relevant EM attributes."""
 
     _use_custom_polling: bool = True
+
+    _attribute_name = "active_power"
+    _attr_max_attribute_name = "active_power_max"
+    _divisor_attribute_name = "ac_power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1287,13 +1287,17 @@ class UbisysPolledElectricalMeasurement(PolledElectricalMeasurement):
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class ElectricalMeasurementActivePowerPhB(ElectricalMeasurementActivePower):
+class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
     """Active power phase B measurement."""
 
     _attribute_name = "active_power_ph_b"
     _unique_id_suffix = "active_power_ph_b"
     _attr_translation_key: str = "active_power_ph_b"
     _attr_max_attribute_name = "active_power_max_ph_b"
+    _divisor_attribute_name = "ac_power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
@@ -1302,13 +1306,17 @@ class ElectricalMeasurementActivePowerPhB(ElectricalMeasurementActivePower):
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class ElectricalMeasurementActivePowerPhC(ElectricalMeasurementActivePower):
+class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
     """Active power phase C measurement."""
 
     _attribute_name = "active_power_ph_c"
     _unique_id_suffix = "active_power_ph_c"
     _attr_translation_key: str = "active_power_ph_c"
     _attr_max_attribute_name = "active_power_max_ph_c"
+    _divisor_attribute_name = "ac_power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
@@ -1317,12 +1325,17 @@ class ElectricalMeasurementActivePowerPhC(ElectricalMeasurementActivePower):
 
 
 @register_entity(ElectricalMeasurement.cluster_id)
-class ElectricalMeasurementTotalActivePower(ElectricalMeasurementActivePower):
+class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
     """Total active power measurement."""
 
     _attribute_name = "total_active_power"
     _unique_id_suffix = "total_active_power"
     _attr_translation_key: str = "total_active_power"
+    _attr_max_attribute_name = "active_power_max"
+    _divisor_attribute_name = "ac_power_divisor"
+    _multiplier_attribute_name = "ac_power_multiplier"
+    _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement: str = UnitOfPower.WATT
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
