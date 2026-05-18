@@ -864,12 +864,9 @@ class BaseElectricalMeasurement(PollableSensor):
     """Base class for electrical measurement."""
 
     _use_custom_polling: bool = False
-    _attr_suggested_display_precision = 1
     _attr_max_attribute_name: str | None = None
     _divisor_attribute_name: str | None = None
     _multiplier_attribute_name: str | None = None
-    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
-    _cluster_id = ElectricalMeasurement.cluster_id
 
     def __init__(
         self,
@@ -950,6 +947,9 @@ class ReportingElectricalMeasurement(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1034,6 +1034,9 @@ class PolledElectricalMeasurement(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1122,6 +1125,9 @@ class ElectricalMeasurementActivePowerPhB(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
@@ -1173,6 +1179,9 @@ class ElectricalMeasurementActivePowerPhC(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
@@ -1224,6 +1233,9 @@ class ElectricalMeasurementTotalActivePower(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement: str = UnitOfPower.WATT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
@@ -1273,6 +1285,9 @@ class ElectricalMeasurementApparentPower(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_power_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.APPARENT_POWER
     _attr_native_unit_of_measurement = UnitOfApparentPower.VOLT_AMPERE
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1320,6 +1335,8 @@ class ElectricalMeasurementRMSCurrent(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_current_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.CURRENT
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1463,6 +1480,9 @@ class ElectricalMeasurementRMSVoltage(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_voltage_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.VOLTAGE
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1607,6 +1627,9 @@ class ElectricalMeasurementFrequency(BaseElectricalMeasurement):
     _multiplier_attribute_name = "ac_frequency_multiplier"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.FREQUENCY
     _attr_native_unit_of_measurement = UnitOfFrequency.HERTZ
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1647,6 +1670,9 @@ class ElectricalMeasurementPowerFactor(BaseElectricalMeasurement):
     _unique_id_suffix = "power_factor"
     _attr_device_class: SensorDeviceClass = SensorDeviceClass.POWER_FACTOR
     _attr_native_unit_of_measurement = PERCENTAGE
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
@@ -1734,6 +1760,9 @@ class ElectricalMeasurementDCVoltage(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
     _divisor_attribute_name = "dc_voltage_divisor"
     _multiplier_attribute_name = "dc_voltage_multiplier"
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
@@ -1781,6 +1810,9 @@ class ElectricalMeasurementDCCurrent(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
     _divisor_attribute_name = "dc_current_divisor"
     _multiplier_attribute_name = "dc_current_multiplier"
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
@@ -1828,6 +1860,9 @@ class ElectricalMeasurementDCPower(BaseElectricalMeasurement):
     _attr_native_unit_of_measurement = UnitOfPower.WATT
     _divisor_attribute_name = "dc_power_divisor"
     _multiplier_attribute_name = "dc_power_multiplier"
+    _attr_suggested_display_precision = 1
+    _attr_state_class: SensorStateClass = SensorStateClass.MEASUREMENT
+    _cluster_id = ElectricalMeasurement.cluster_id
     _skip_creation_if_no_attr_cache = True
 
     _cluster_match = ClusterMatch(
