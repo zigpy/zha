@@ -922,9 +922,9 @@ class AggregatedClusterPoller(VirtualEntity):
             for attr_def, attr_cfg in cfg.attributes.items():
                 if attr_cfg.reporting is None:
                     continue
-                name = attr_def.name
-                if not self._cluster.is_attribute_unsupported(name):
-                    attrs.add(name)
+                if self._cluster.is_attribute_unsupported(attr_def):
+                    continue
+                attrs.add(attr_def.name)
 
         if not attrs:
             return
@@ -943,6 +943,24 @@ class ElectricalMeasurementPoller(AggregatedClusterPoller):
     _cluster_id = ElectricalMeasurement.cluster_id
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+        feature_priority=(PlatformFeatureGroup.EM_POLLING, 0),
+    )
+
+
+@register_entity(ElectricalMeasurement.cluster_id)
+class ElectricalMeasurementReportingDevice(VirtualEntity):
+    """Claims the EM polling slot for devices that support reporting.
+
+    Higher priority than the default `ElectricalMeasurementPoller`, so for
+    matching models the poller is not registered and no polling occurs.
+    """
+
+    _unique_id_suffix = "em_reporting_device"
+    _cluster_id = ElectricalMeasurement.cluster_id
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({ElectricalMeasurement.cluster_id}),
+        models=frozenset({"VZM31-SN", "SP 234", "outletv4", "INSPELNING Smart plug"}),
+        feature_priority=(PlatformFeatureGroup.EM_POLLING, 1),
     )
 
 
@@ -2063,12 +2081,17 @@ class SmartEnergyMeteringEntityDescription:
 
 @register_entity(Metering.cluster_id)
 class MeteringPoller(AggregatedClusterPoller):
-    """Polls the Metering cluster on behalf of sibling entities that need updates."""
+    """Polls the Metering cluster for models known to need polling.
+
+    Default Metering devices report reliably; only this short list of models
+    are known to require polling.
+    """
 
     _unique_id_suffix = "metering_poller"
     _cluster_id = Metering.cluster_id
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
+        models=frozenset({"TS011F", "ZLinky_TIC", "TICMeter"}),
     )
 
 

@@ -66,6 +66,9 @@ class PlatformFeatureGroup(StrEnum):
     # Manufacturer-specific overrides for EM active power polling
     EM_ACTIVE_POWER = "em_active_power"
 
+    # Suppress EM cluster polling for devices known to report reliably
+    EM_POLLING = "em_polling"
+
     # Model-specific overrides for Smart Energy Summation
     SMART_ENERGY_SUMMATION = "smart_energy_summation"
 
