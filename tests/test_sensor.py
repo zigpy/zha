@@ -1317,29 +1317,10 @@ async def test_metering_sensor_polling(zha_gateway: Gateway) -> None:
     "supported_attributes",
     (
         set(),
-        {
-            "active_power",
-            "active_power_max",
-            "rms_current",
-            "rms_current_max",
-            "rms_voltage",
-            "rms_voltage_max",
-        },
-        {
-            "active_power",
-        },
-        {
-            "active_power",
-            "active_power_max",
-        },
-        {
-            "rms_current",
-            "rms_current_max",
-        },
-        {
-            "rms_voltage",
-            "rms_voltage_max",
-        },
+        {"active_power", "rms_current", "rms_voltage"},
+        {"active_power"},
+        {"rms_current"},
+        {"rms_voltage"},
     ),
 )
 async def test_elec_measurement_skip_unsupported_attribute(
