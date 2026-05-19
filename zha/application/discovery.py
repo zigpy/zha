@@ -342,25 +342,21 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
                     )
                     bind = False
 
-                cluster_config_map = (
-                    "_server_cluster_config"
-                    if cluster_type is ClusterType.Server
-                    else "_client_cluster_config"
-                )
-                # Keep attr_name as a string here — quirks v2 entities can
-                # reference attribute names that aren't part of the cluster's
-                # attribute schema (e.g. manufacturer-specific extensions);
-                # aggregation/configure handle both name and ZCLAttributeDef.
-                setattr(
-                    entity,
-                    cluster_config_map,
-                    {
-                        cluster.cluster_id: ClusterConfig(
-                            bind=bind,
-                            attributes={attr_name: attr_config},
-                        ),
-                    },
-                )
+                # Keep attr_name as a string here - quirks v2 entities can reference
+                # attribute names that aren't part of the cluster's attribute schema
+                # (e.g. manufacturer-specific extensions); aggregation/configure handle
+                # both name and ZCLAttributeDef.
+                config = {
+                    cluster.cluster_id: ClusterConfig(
+                        bind=bind,
+                        attributes={attr_name: attr_config},
+                    ),
+                }
+
+                if cluster_type is ClusterType.Server:
+                    entity._server_cluster_config = config
+                else:
+                    entity._client_cluster_config = config
 
             yield entity
 
