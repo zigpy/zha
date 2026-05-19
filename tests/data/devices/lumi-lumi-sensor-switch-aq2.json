@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -69,7 +68,6 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0021",
@@ -100,7 +98,6 @@
         {
           "cluster_id": "0x0002",
           "endpoint_attribute": "device_temperature",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -113,7 +110,6 @@
         {
           "cluster_id": "0xffff",
           "endpoint_attribute": "manufacturer_specific",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -121,19 +117,16 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -146,7 +139,6 @@
         {
           "cluster_id": "0xffff",
           "endpoint_attribute": "manufacturer_specific",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -69,19 +68,12 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 156,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 156
             },
             {
               "id": "0x0033",
@@ -99,47 +91,25 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 28,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 28
             }
           ]
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": [
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -161,19 +131,12 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 156,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 156
             },
             {
               "id": "0x0033",
@@ -191,34 +154,14 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 28,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 28
             }
           ]
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": []
@@ -233,19 +176,12 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 156,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 156
             },
             {
               "id": "0x0033",
@@ -263,34 +199,14 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 28,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 28
             }
           ]
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": []

@@ -44,25 +44,17 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0033",
@@ -80,32 +72,23 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0102",
           "endpoint_attribute": "window_covering",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0007",
@@ -117,51 +100,31 @@
               "id": "0x0008",
               "name": "current_position_lift_percentage",
               "zcl_type": "uint8",
-              "value": 100,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 100
             },
             {
               "id": "0x0009",
               "name": "current_position_tilt_percentage",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             }
           ]
         },
         {
           "cluster_id": "0x0400",
           "endpoint_attribute": "illuminance",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 20001.0,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 20001.0
             }
           ]
         },
         {
           "cluster_id": "0xfcc0",
           "endpoint_attribute": "manufacturer_specific",
-          "bind": "SUCCESS",
           "attributes": []
         }
       ],
@@ -169,19 +132,16 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0013",
@@ -105,37 +104,27 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -148,19 +137,12 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 254,
-              "reporting": {
-                "min": 1,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 254
             },
             {
               "id": "0x0014",
@@ -209,7 +191,6 @@
         {
           "cluster_id": "0x0300",
           "endpoint_attribute": "light_color",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x400a",
@@ -245,13 +226,7 @@
               "id": "0x0007",
               "name": "color_temperature",
               "zcl_type": "uint16",
-              "value": 500,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 500
             },
             {
               "id": "0x0000",
@@ -269,25 +244,13 @@
               "id": "0x0003",
               "name": "current_x",
               "zcl_type": "uint16",
-              "value": 15089,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 15089
             },
             {
               "id": "0x0004",
               "name": "current_y",
               "zcl_type": "uint16",
-              "value": 5731,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 5731
             },
             {
               "id": "0x4000",
@@ -312,19 +275,16 @@
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xfc01",
           "endpoint_attribute": "manufacturer_specific",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xfc03",
           "endpoint_attribute": "philips_hue_light_cluster",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -332,7 +292,6 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -355,7 +314,6 @@
         {
           "cluster_id": "0x0021",
           "endpoint_attribute": "green_power",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

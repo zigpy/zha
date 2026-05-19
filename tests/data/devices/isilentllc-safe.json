@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -63,19 +62,12 @@
         {
           "cluster_id": "0x000f",
           "endpoint_attribute": "binary_input",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             }
           ]
         }
@@ -92,44 +84,29 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2520,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 50,
-                "status": "SUCCESS"
-              }
+              "value": 2520
             }
           ]
         },
         {
           "cluster_id": "0x0405",
           "endpoint_attribute": "humidity",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 4190,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 100,
-                "status": "SUCCESS"
-              }
+              "value": 4190
             }
           ]
         }
@@ -146,13 +123,11 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0010",
@@ -202,25 +177,17 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -233,19 +200,12 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "current_level",
               "zcl_type": "uint8",
-              "value": 254,
-              "reporting": {
-                "min": 1,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 254
             },
             {
               "id": "0x0014",
@@ -288,7 +248,6 @@
         {
           "cluster_id": "0x0300",
           "endpoint_attribute": "light_color",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x400a",
@@ -315,40 +274,16 @@
               "unsupported": true
             },
             {
-              "id": "0x0007",
-              "name": "color_temperature",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
               "id": "0x0003",
               "name": "current_x",
               "zcl_type": "uint16",
-              "value": 21364,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 21364
             },
             {
               "id": "0x0004",
               "name": "current_y",
               "zcl_type": "uint16",
-              "value": 21823,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 21823
             },
             {
               "id": "0x000f",

@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -87,19 +86,12 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 176,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 176
             },
             {
               "id": "0x0033",
@@ -117,38 +109,28 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 29,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 29
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xe001",
           "endpoint_attribute": "tuya_external_switch_type",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -156,19 +138,16 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "TS004X_cluster",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x8004",
@@ -181,19 +160,16 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -206,13 +182,11 @@
         {
           "cluster_id": "0x0300",
           "endpoint_attribute": "light_color",
-          "bind": "SUCCESS",
           "attributes": []
         },
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

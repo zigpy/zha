@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0013",
@@ -69,7 +68,6 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0033",
@@ -94,7 +92,6 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -107,7 +104,6 @@
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -126,7 +122,6 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -139,7 +134,6 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xef00",
@@ -154,7 +148,6 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xfffd",
@@ -167,7 +160,6 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -190,7 +182,6 @@
         {
           "cluster_id": "0x0021",
           "endpoint_attribute": "green_power",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -63,19 +62,12 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 140,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 140
             },
             {
               "id": "0x0033",
@@ -93,26 +85,18 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 25,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 25
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -131,7 +115,6 @@
         {
           "cluster_id": "0x0b05",
           "endpoint_attribute": "diagnostic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x010b",
@@ -162,19 +145,16 @@
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xfc7c",
           "endpoint_attribute": "manufacturer_specific",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xfc81",
           "endpoint_attribute": null,
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -182,19 +162,16 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
@@ -213,7 +190,6 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -226,7 +202,6 @@
         {
           "cluster_id": "0x1000",
           "endpoint_attribute": "lightlink",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -241,31 +216,22 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0406",
           "endpoint_attribute": "occupancy",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "occupancy",
               "zcl_type": "map8",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x0010",
@@ -292,7 +258,6 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -307,31 +272,22 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0400",
           "endpoint_attribute": "illuminance",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "uint16",
-              "value": 4771,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 4771
             }
           ]
         }
@@ -340,7 +296,6 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

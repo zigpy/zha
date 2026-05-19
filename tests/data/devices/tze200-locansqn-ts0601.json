@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -69,7 +68,6 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0021",
@@ -100,19 +98,16 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -125,7 +120,6 @@
         {
           "cluster_id": "0x0405",
           "endpoint_attribute": "humidity",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -138,7 +132,6 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xef0c",
@@ -219,7 +212,6 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0007",
@@ -244,7 +236,6 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",

@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -81,7 +80,6 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0021",
@@ -112,7 +110,6 @@
         {
           "cluster_id": "0x0002",
           "endpoint_attribute": "device_temperature",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -125,13 +122,11 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x000c",
           "endpoint_attribute": "analog_input",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0055",
@@ -150,7 +145,6 @@
         {
           "cluster_id": "0x0012",
           "endpoint_attribute": "multistate_input",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x004a",
@@ -175,7 +169,6 @@
         {
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0010",
@@ -220,7 +213,6 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

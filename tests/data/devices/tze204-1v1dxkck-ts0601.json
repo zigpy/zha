@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -69,31 +68,22 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -106,26 +96,11 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_level",
-              "zcl_type": "uint8",
-              "unsupported": false,
-              "reporting": {
-                "min": 1,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
-          "bind": "SUCCESS",
           "attributes": []
         }
       ],
@@ -133,13 +108,11 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -161,19 +134,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -186,21 +152,7 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_level",
-              "zcl_type": "uint8",
-              "unsupported": false,
-              "reporting": {
-                "min": 1,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": []
@@ -215,19 +167,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -240,21 +185,7 @@
         {
           "cluster_id": "0x0008",
           "endpoint_attribute": "level",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "current_level",
-              "zcl_type": "uint8",
-              "unsupported": false,
-              "reporting": {
-                "min": 1,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         }
       ],
       "out_clusters": []
@@ -270,7 +201,6 @@
         {
           "cluster_id": "0x0021",
           "endpoint_attribute": "green_power",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

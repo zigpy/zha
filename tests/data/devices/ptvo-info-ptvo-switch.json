@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -63,19 +62,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -88,7 +80,6 @@
         {
           "cluster_id": "0x0007",
           "endpoint_attribute": "on_off_config",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -96,13 +87,11 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
@@ -124,19 +113,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -149,7 +131,6 @@
         {
           "cluster_id": "0x0007",
           "endpoint_attribute": "on_off_config",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -157,7 +138,6 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
@@ -179,19 +159,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -204,7 +177,6 @@
         {
           "cluster_id": "0x0007",
           "endpoint_attribute": "on_off_config",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -212,7 +184,6 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
@@ -234,19 +205,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -259,7 +223,6 @@
         {
           "cluster_id": "0x0007",
           "endpoint_attribute": "on_off_config",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -267,7 +230,6 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
@@ -289,19 +251,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -314,7 +269,6 @@
         {
           "cluster_id": "0x0007",
           "endpoint_attribute": "on_off_config",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -322,7 +276,6 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
@@ -344,19 +297,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -369,7 +315,6 @@
         {
           "cluster_id": "0x0007",
           "endpoint_attribute": "on_off_config",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -377,7 +322,6 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
@@ -399,19 +343,12 @@
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2243,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 50,
-                "status": "SUCCESS"
-              }
+              "value": 2243
             }
           ]
         }
@@ -428,19 +365,12 @@
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2200,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 50,
-                "status": "SUCCESS"
-              }
+              "value": 2200
             }
           ]
         }

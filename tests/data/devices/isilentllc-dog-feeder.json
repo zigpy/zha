@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -63,19 +62,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -88,26 +80,18 @@
         {
           "cluster_id": "0x000c",
           "endpoint_attribute": "analog_input",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "value": 27.0,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 27.0
             }
           ]
         },
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -143,13 +127,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "value": 3.0,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 3.0
             },
             {
               "id": "0x0068",
@@ -168,7 +146,6 @@
         {
           "cluster_id": "0x000f",
           "endpoint_attribute": "binary_input",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x001c",
@@ -180,20 +157,13 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             }
           ]
         },
         {
           "cluster_id": "0x0012",
           "endpoint_attribute": "multistate_input",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0055",
@@ -216,26 +186,18 @@
         {
           "cluster_id": "0x000f",
           "endpoint_attribute": "binary_input",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             }
           ]
         },
         {
           "cluster_id": "0x0012",
           "endpoint_attribute": "multistate_input",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0055",
@@ -258,7 +220,6 @@
         {
           "cluster_id": "0x0012",
           "endpoint_attribute": "multistate_input",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -274,19 +235,12 @@
         {
           "cluster_id": "0x000f",
           "endpoint_attribute": "binary_input",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             }
           ]
         }

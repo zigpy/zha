@@ -46,13 +46,11 @@
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -68,7 +66,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0006",
@@ -105,25 +102,12 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x003e",
               "name": "battery_alarm_state",
               "zcl_type": "map32",
               "value": 0
-            },
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "unsupported": false,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
             },
             {
               "id": "0x0033",
@@ -141,26 +125,18 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 29,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 29
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x000f",
           "endpoint_attribute": "binary_input",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0004",
@@ -178,13 +154,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x0067",
@@ -203,13 +173,11 @@
         {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0010",
@@ -249,7 +217,6 @@
         {
           "cluster_id": "0x0502",
           "endpoint_attribute": "ias_wd",
-          "bind": "SUCCESS",
           "attributes": []
         }
       ],
@@ -257,19 +224,16 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -291,31 +255,22 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2037,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 50,
-                "status": "SUCCESS"
-              }
+              "value": 2037
             }
           ]
         }
@@ -332,19 +287,16 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x000f",
           "endpoint_attribute": "binary_input",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0004",
@@ -362,13 +314,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x0067",
@@ -387,26 +333,18 @@
         {
           "cluster_id": "0x040c",
           "endpoint_attribute": "carbon_monoxide_concentration",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "single",
-              "value": 0.0,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1e-06,
-                "status": "SUCCESS"
-              }
+              "value": 0.0
             }
           ]
         },
         {
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0010",
@@ -448,7 +386,6 @@
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

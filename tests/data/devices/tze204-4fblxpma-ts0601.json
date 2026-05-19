@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -57,62 +56,27 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0021",
-              "name": "battery_percentage_remaining",
-              "zcl_type": "uint8",
-              "unsupported": false,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0020",
-              "name": "battery_voltage",
-              "zcl_type": "uint8",
-              "unsupported": false,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -125,103 +89,54 @@
         {
           "cluster_id": "0x0702",
           "endpoint_attribute": "smartenergy_metering",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0001",
               "name": "current_summ_received",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0100",
               "name": "current_tier1_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0102",
               "name": "current_tier2_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0104",
               "name": "current_tier3_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0106",
               "name": "current_tier4_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0108",
               "name": "current_tier5_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x010a",
               "name": "current_tier6_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0304",
@@ -239,13 +154,7 @@
               "id": "0x0400",
               "name": "instantaneous_demand",
               "zcl_type": "int24",
-              "unsupported": true,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0306",
@@ -263,13 +172,7 @@
               "id": "0x0200",
               "name": "status",
               "zcl_type": "map8",
-              "unsupported": true,
-              "reporting": {
-                "min": 1,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0303",
@@ -288,7 +191,6 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": null,
-          "bind": "SUCCESS",
           "attributes": []
         }
       ],
@@ -296,13 +198,11 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",

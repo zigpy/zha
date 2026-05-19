@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0001",
@@ -69,7 +68,6 @@
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xfffd",
@@ -94,7 +92,6 @@
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xfffd",
@@ -119,19 +116,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -144,103 +134,54 @@
         {
           "cluster_id": "0x0702",
           "endpoint_attribute": "smartenergy_metering",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "current_summ_delivered",
               "zcl_type": "uint48",
-              "value": 80,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 80
             },
             {
               "id": "0x0001",
               "name": "current_summ_received",
               "zcl_type": "uint48",
-              "value": 0,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x0100",
               "name": "current_tier1_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0102",
               "name": "current_tier2_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0104",
               "name": "current_tier3_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0106",
               "name": "current_tier4_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0108",
               "name": "current_tier5_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x010a",
               "name": "current_tier6_summ_delivered",
               "zcl_type": "uint48",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0304",
@@ -258,13 +199,7 @@
               "id": "0x0400",
               "name": "instantaneous_demand",
               "zcl_type": "int24",
-              "unsupported": true,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0306",
@@ -282,13 +217,7 @@
               "id": "0x0200",
               "name": "status",
               "zcl_type": "map8",
-              "unsupported": true,
-              "reporting": {
-                "min": 1,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0303",
@@ -307,43 +236,24 @@
         {
           "cluster_id": "0x0b04",
           "endpoint_attribute": "electrical_measurement",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0603",
               "name": "ac_current_divisor",
               "zcl_type": "uint16",
-              "value": 1000,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 1000
             },
             {
               "id": "0x0602",
               "name": "ac_current_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 1
             },
             {
               "id": "0x0300",
               "name": "ac_frequency",
               "zcl_type": "uint16",
-              "value": 4997,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 4997
             },
             {
               "id": "0x0401",
@@ -367,61 +277,31 @@
               "id": "0x0605",
               "name": "ac_power_divisor",
               "zcl_type": "uint16",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0604",
               "name": "ac_power_multiplier",
               "zcl_type": "uint16",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0601",
               "name": "ac_voltage_divisor",
               "zcl_type": "uint16",
-              "value": 10,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 10
             },
             {
               "id": "0x0600",
               "name": "ac_voltage_multiplier",
               "zcl_type": "uint16",
-              "value": 1,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 1
             },
             {
               "id": "0x050b",
               "name": "active_power",
               "zcl_type": "int16",
-              "value": 10,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 10
             },
             {
               "id": "0x050d",
@@ -430,148 +310,10 @@
               "unsupported": true
             },
             {
-              "id": "0x090b",
-              "name": "active_power_ph_b",
-              "zcl_type": "int16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0a0b",
-              "name": "active_power_ph_c",
-              "zcl_type": "int16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
               "id": "0x050f",
               "name": "apparent_power",
               "zcl_type": "uint16",
-              "unsupported": true,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0103",
-              "name": "dc_current",
-              "zcl_type": "int16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0203",
-              "name": "dc_current_divisor",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0202",
-              "name": "dc_current_multiplier",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0106",
-              "name": "dc_power",
-              "zcl_type": "int16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0205",
-              "name": "dc_power_divisor",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0204",
-              "name": "dc_power_multiplier",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0100",
-              "name": "dc_voltage",
-              "zcl_type": "int16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0201",
-              "name": "dc_voltage_divisor",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0200",
-              "name": "dc_voltage_multiplier",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0000",
@@ -583,13 +325,7 @@
               "id": "0x0403",
               "name": "power_divisor",
               "zcl_type": "uint32",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0510",
@@ -601,13 +337,7 @@
               "id": "0x0402",
               "name": "power_multiplier",
               "zcl_type": "uint32",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x050e",
@@ -616,100 +346,22 @@
               "value": 22
             },
             {
-              "id": "0x0508",
-              "name": "rms_current",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
               "id": "0x050a",
               "name": "rms_current_max",
               "zcl_type": "uint16",
               "unsupported": true
             },
             {
-              "id": "0x0908",
-              "name": "rms_current_ph_b",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0a08",
-              "name": "rms_current_ph_c",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
               "id": "0x0505",
               "name": "rms_voltage",
               "zcl_type": "uint16",
-              "unsupported": true,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0507",
               "name": "rms_voltage_max",
               "zcl_type": "uint16",
               "unsupported": true
-            },
-            {
-              "id": "0x0905",
-              "name": "rms_voltage_ph_b",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0a05",
-              "name": "rms_voltage_ph_c",
-              "zcl_type": "uint16",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            },
-            {
-              "id": "0x0304",
-              "name": "total_active_power",
-              "zcl_type": "int32",
-              "unsupported": false,
-              "reporting": {
-                "min": 5,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
             },
             {
               "id": "0x0305",
@@ -722,7 +374,6 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": null,
-          "bind": "SUCCESS",
           "attributes": []
         }
       ],
@@ -730,13 +381,11 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",

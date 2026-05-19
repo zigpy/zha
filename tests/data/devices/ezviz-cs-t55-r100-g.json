@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -63,19 +62,12 @@
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "value": 100,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 100
             },
             {
               "id": "0x0033",
@@ -93,38 +85,24 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "value": 33,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 33
             }
           ]
         },
         {
           "cluster_id": "0x0003",
           "endpoint_attribute": "identify",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "value": 0,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 0
             },
             {
               "id": "0x4003",
@@ -137,7 +115,6 @@
         {
           "cluster_id": "0x0020",
           "endpoint_attribute": "poll_control",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0000",
@@ -150,7 +127,6 @@
         {
           "cluster_id": "0x0201",
           "endpoint_attribute": "thermostat",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0006",
@@ -186,13 +162,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0010",
@@ -228,85 +198,43 @@
               "id": "0x0002",
               "name": "occupancy",
               "zcl_type": "map8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0011",
               "name": "occupied_cooling_setpoint",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "value": 3500,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "value": 3500
             },
             {
               "id": "0x0007",
               "name": "pi_cooling_demand",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 5,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0008",
               "name": "pi_heating_demand",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 5,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x001e",
               "name": "running_mode",
               "zcl_type": "enum8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0029",
               "name": "running_state",
               "zcl_type": "map16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0030",
@@ -318,63 +246,37 @@
               "id": "0x001c",
               "name": "system_mode",
               "zcl_type": "enum8",
-              "value": 1,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 1
             },
             {
               "id": "0x0013",
               "name": "unoccupied_cooling_setpoint",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0014",
               "name": "unoccupied_heating_setpoint",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             }
           ]
         },
         {
           "cluster_id": "0x0402",
           "endpoint_attribute": "temperature",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "measured_value",
               "zcl_type": "int16",
-              "value": 2850,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 50,
-                "status": "SUCCESS"
-              }
+              "value": 2850
             }
           ]
         },
         {
           "cluster_id": "0x0500",
           "endpoint_attribute": "ias_zone",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0010",
@@ -414,19 +316,16 @@
         {
           "cluster_id": "0x0704",
           "endpoint_attribute": "smartenergy_tunneling",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xfe00",
           "endpoint_attribute": "manufacturer_specific",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0xfec0",
           "endpoint_attribute": "manufacturer_specific",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ],
@@ -434,7 +333,6 @@
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0002",
@@ -447,7 +345,6 @@
         {
           "cluster_id": "0x0704",
           "endpoint_attribute": "smartenergy_tunneling",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]

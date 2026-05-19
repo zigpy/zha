@@ -44,7 +44,6 @@
         {
           "cluster_id": "0x0201",
           "endpoint_attribute": "thermostat",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0x0004",
@@ -129,7 +128,6 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": "tuya_manufacturer",
-          "bind": "NOT_ATTEMPTED",
           "attributes": [
             {
               "id": "0xef6a",

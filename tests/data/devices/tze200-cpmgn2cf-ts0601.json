@@ -44,25 +44,17 @@
         {
           "cluster_id": "0x0000",
           "endpoint_attribute": "basic",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0001",
           "endpoint_attribute": "power",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0021",
               "name": "battery_percentage_remaining",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0033",
@@ -80,51 +72,28 @@
               "id": "0x0020",
               "name": "battery_voltage",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 3600,
-                "max": 10800,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             }
           ]
         },
         {
           "cluster_id": "0x0004",
           "endpoint_attribute": "groups",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0005",
           "endpoint_attribute": "scenes",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
-          "attributes": [
-            {
-              "id": "0x0000",
-              "name": "on_off",
-              "zcl_type": "bool",
-              "unsupported": false,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
-            }
-          ]
+          "attributes": []
         },
         {
           "cluster_id": "0x0201",
           "endpoint_attribute": "thermostat",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0006",
@@ -160,13 +129,7 @@
               "id": "0x0000",
               "name": "local_temperature",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0010",
@@ -202,61 +165,31 @@
               "id": "0x0002",
               "name": "occupancy",
               "zcl_type": "map8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0011",
               "name": "occupied_cooling_setpoint",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0012",
               "name": "occupied_heating_setpoint",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0007",
               "name": "pi_cooling_demand",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 5,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0008",
               "name": "pi_heating_demand",
               "zcl_type": "uint8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 5,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0025",
@@ -268,68 +201,37 @@
               "id": "0x001e",
               "name": "running_mode",
               "zcl_type": "enum8",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0029",
               "name": "running_state",
               "zcl_type": "map16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x001c",
               "name": "system_mode",
               "zcl_type": "enum8",
-              "value": 4,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "value": 4
             },
             {
               "id": "0x0013",
               "name": "unoccupied_cooling_setpoint",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0014",
               "name": "unoccupied_heating_setpoint",
               "zcl_type": "int16",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 25,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             }
           ]
         },
         {
           "cluster_id": "0x0204",
           "endpoint_attribute": "thermostat_ui",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0001",
@@ -342,7 +244,6 @@
         {
           "cluster_id": "0xef00",
           "endpoint_attribute": null,
-          "bind": "SUCCESS",
           "attributes": []
         }
       ],
@@ -350,13 +251,11 @@
         {
           "cluster_id": "0x000a",
           "endpoint_attribute": "time",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         },
         {
           "cluster_id": "0x0019",
           "endpoint_attribute": "ota",
-          "bind": "NOT_ATTEMPTED",
           "attributes": []
         }
       ]
@@ -371,19 +270,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -406,7 +298,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -442,13 +333,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
@@ -477,7 +362,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -513,13 +397,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
@@ -548,7 +426,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -584,13 +461,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
@@ -619,19 +490,12 @@
         {
           "cluster_id": "0x0006",
           "endpoint_attribute": "on_off",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0000",
               "name": "on_off",
               "zcl_type": "bool",
-              "unsupported": true,
-              "reporting": {
-                "min": 0,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x4003",
@@ -654,7 +518,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -690,13 +553,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
@@ -725,7 +582,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -761,13 +617,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
@@ -796,7 +646,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -832,13 +681,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
@@ -867,7 +710,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -903,13 +745,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
@@ -938,7 +774,6 @@
         {
           "cluster_id": "0x000d",
           "endpoint_attribute": "analog_output",
-          "bind": "SUCCESS",
           "attributes": [
             {
               "id": "0x0100",
@@ -974,13 +809,7 @@
               "id": "0x0055",
               "name": "present_value",
               "zcl_type": "single",
-              "unsupported": true,
-              "reporting": {
-                "min": 30,
-                "max": 900,
-                "change": 1,
-                "status": "SUCCESS"
-              }
+              "unsupported": true
             },
             {
               "id": "0x0068",
