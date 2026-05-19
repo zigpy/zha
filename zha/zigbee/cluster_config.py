@@ -165,7 +165,6 @@ async def configure_cluster_configs(
                 )
                 success = False
 
-            agg.cluster._zha_last_bind_success = success
             device.emit(
                 ZHA_CLUSTER_BIND_EVENT,
                 ClusterBindEvent(
@@ -224,9 +223,6 @@ async def configure_cluster_configs(
                 for attr_def in reporting_attrs:
                     event_data[attr_def.name]["status"] = Status.FAILURE.name
 
-            existing = getattr(agg.cluster, "_zha_last_reporting_config", None)
-            merged = {**existing, **event_data} if existing is not None else event_data
-            agg.cluster._zha_last_reporting_config = merged
             device.emit(
                 ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
                 ClusterConfigureReportingEvent(

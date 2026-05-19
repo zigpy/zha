@@ -129,10 +129,7 @@ def _entity_targets_cluster(
     return False
 
 
-def get_cluster_attr_data(
-    cluster: Cluster,
-    reporting_config: dict[str, dict[str, Any]] | None = None,
-) -> list[dict]:
+def get_cluster_attr_data(cluster: Cluster) -> list[dict]:
     """Return cluster attribute data."""
     attributes_info = []
 
@@ -147,14 +144,8 @@ def get_cluster_attr_data(
             "unsupported": cluster.is_attribute_unsupported(attr_def),
         }
 
-        attr_reporting = (
-            reporting_config[attr_def.name]
-            if reporting_config is not None and attr_def.name in reporting_config
-            else None
-        )
-
         # Don't unnecessarily list out attributes that are just unread
-        if info["value"] is None and not info["unsupported"] and attr_reporting is None:
+        if info["value"] is None and not info["unsupported"]:
             continue
 
         # Delete unused keys
@@ -163,35 +154,17 @@ def get_cluster_attr_data(
         else:
             del info["value"]
 
-        if attr_reporting is not None:
-            info["reporting"] = {
-                "min": attr_reporting["min"],
-                "max": attr_reporting["max"],
-                "change": attr_reporting["change"],
-                "status": attr_reporting["status"],
-            }
-
         attributes_info.append(info)
 
     return attributes_info
 
 
 def _cluster_entry(cluster_id: int, cluster: Cluster) -> dict[str, Any]:
-    """Build the per-cluster diagnostics entry, including bind and reporting state."""
-    if not hasattr(cluster, "_zha_last_bind_success"):
-        bind_status = "NOT_ATTEMPTED"
-    elif cluster._zha_last_bind_success:
-        bind_status = "SUCCESS"
-    else:
-        bind_status = "FAILURE"
-
-    reporting_config = getattr(cluster, "_zha_last_reporting_config", None)
-
+    """Build the per-cluster diagnostics entry."""
     return {
         "cluster_id": f"0x{cluster_id:04x}",
         "endpoint_attribute": cluster.ep_attribute,
-        "bind": bind_status,
-        "attributes": get_cluster_attr_data(cluster, reporting_config=reporting_config),
+        "attributes": get_cluster_attr_data(cluster),
     }
 
 
