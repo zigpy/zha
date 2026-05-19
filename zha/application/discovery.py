@@ -32,7 +32,6 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     ClusterMatch,
     PlatformEntity,
     PlatformFeatureGroup,
-    ZCLClusterEntity,
     alarm_control_panel,
     binary_sensor,
     button,
@@ -85,7 +84,7 @@ GROUP_PLATFORMS = (
 
 
 def _pick_primary_cluster(endpoint: Endpoint, match: ClusterMatch) -> Cluster | None:
-    """Pick the primary cluster for a ZCLClusterEntity from a ClusterMatch."""
+    """Pick the primary cluster for an entity from a ClusterMatch."""
     if match.server_clusters:
         cluster_id = next(iter(match.server_clusters))
         return endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
@@ -570,14 +569,8 @@ def discover_entities_for_endpoint(endpoint: Endpoint) -> Iterator[PlatformEntit
             )
 
             kwargs: dict[str, Any] = {}
-            if issubclass(entity_class, ZCLClusterEntity):
-                cluster = _pick_primary_cluster(endpoint, match)
-                if cluster is None:
-                    _LOGGER.error(
-                        "ZCLClusterEntity %s could not resolve a primary cluster",
-                        entity_class.__name__,
-                    )
-                    continue
+            cluster = _pick_primary_cluster(endpoint, match)
+            if cluster is not None:
                 kwargs["cluster"] = cluster
 
             try:

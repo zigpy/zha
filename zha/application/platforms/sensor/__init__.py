@@ -70,7 +70,6 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
-    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.climate.const import HVACAction
@@ -233,7 +232,7 @@ class BaseSensor(PlatformEntity, ABC):
         """Return the current sensor value."""
 
 
-class Sensor(BaseSensor, ZCLClusterEntity):
+class Sensor(BaseSensor):
     """Base ZHA sensor."""
 
     _attribute_name: int | str | None = None

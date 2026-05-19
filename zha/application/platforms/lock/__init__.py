@@ -22,7 +22,6 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     PlatformEntity,
-    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.lock.const import (
@@ -63,7 +62,7 @@ class BaseLock(PlatformEntity, ABC):
 
 
 @register_entity(DoorLockCluster.cluster_id)
-class DoorLock(BaseLock, ZCLClusterEntity):
+class DoorLock(BaseLock):
     """Representation of a ZHA lock."""
 
     _attr_translation_key: str = "door_lock"

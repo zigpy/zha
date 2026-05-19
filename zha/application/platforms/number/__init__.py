@@ -32,7 +32,6 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
-    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -133,7 +132,7 @@ class BaseNumber(PlatformEntity, ABC):
 
 
 @register_entity(AnalogOutput.cluster_id)
-class AnalogOutputNumber(BaseNumber, ZCLClusterEntity):
+class AnalogOutputNumber(BaseNumber):
     """Representation of a ZHA Number entity."""
 
     _cluster_match = ClusterMatch(
@@ -251,7 +250,7 @@ class AnalogOutputNumber(BaseNumber, ZCLClusterEntity):
         self.maybe_emit_state_changed_event()
 
 
-class NumberConfigurationEntity(BaseNumber, ZCLClusterEntity):
+class NumberConfigurationEntity(BaseNumber):
     """Representation of a ZHA number configuration entity."""
 
     _attr_entity_category = EntityCategory.CONFIG

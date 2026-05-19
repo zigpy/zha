@@ -114,20 +114,6 @@ async def safe_read(
     return result
 
 
-def cluster_runtime_state(cluster: zigpy.zcl.Cluster) -> dict[str, Any]:
-    """Return a per-cluster, in-memory runtime state dict.
-
-    Used for cross-entity coordination state (e.g. siren preference values set
-    by select entities and read back by the siren entity) that does not belong
-    in the ZCL attribute cache.
-    """
-    cache = getattr(cluster, "_zha_runtime_state", None)
-    if cache is None:
-        cache = {}
-        cluster._zha_runtime_state = cache
-    return cache
-
-
 async def write_attributes_safe(
     cluster: zigpy.zcl.Cluster,
     attributes: dict[str, Any],

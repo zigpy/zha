@@ -495,6 +495,7 @@ class PlatformEntity(BaseEntity):
         endpoint: Endpoint,
         device: Device,
         *,
+        cluster: zigpy.zcl.Cluster,
         entity_metadata: EntityMetadata | None = None,
         legacy_discovery_unique_id: str | None = None,
         **kwargs: Any,
@@ -503,10 +504,13 @@ class PlatformEntity(BaseEntity):
         if entity_metadata is not None:
             self._init_from_quirks_metadata(entity_metadata)
 
-        if legacy_discovery_unique_id is None and entity_metadata is not None:
-            legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
-
-        assert legacy_discovery_unique_id is not None
+        if legacy_discovery_unique_id is None:
+            if entity_metadata is not None:
+                legacy_discovery_unique_id = f"{device.ieee}-{endpoint.id}"
+            else:
+                legacy_discovery_unique_id = (
+                    f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
+                )
 
         if self._unique_id_suffix is not None:
             unique_id = f"{legacy_discovery_unique_id}-{self._unique_id_suffix}"
@@ -517,6 +521,7 @@ class PlatformEntity(BaseEntity):
 
         self._device: Device = device
         self._endpoint = endpoint
+        self._cluster: zigpy.zcl.Cluster = cluster
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
@@ -589,6 +594,11 @@ class PlatformEntity(BaseEntity):
         return self._endpoint
 
     @property
+    def cluster(self) -> zigpy.zcl.Cluster:
+        """Return the ZCL cluster backing this entity."""
+        return self._cluster
+
+    @property
     def should_poll(self) -> bool:
         """Return True if we need to poll for state changes."""
         return False
@@ -611,34 +621,6 @@ class PlatformEntity(BaseEntity):
         Default no-op: subclasses that need polling override this to read their
         own attributes directly from the relevant cluster(s).
         """
-
-
-class ZCLClusterEntity(PlatformEntity):
-    """A platform entity scoped to a specific ZCL cluster on an endpoint."""
-
-    def __init__(
-        self,
-        endpoint: Endpoint,
-        device: Device,
-        *,
-        cluster: zigpy.zcl.Cluster,
-        entity_metadata: EntityMetadata | None = None,
-        legacy_discovery_unique_id: str | None = None,
-        **kwargs: Any,
-    ) -> None:
-        """Initialize the ZCL cluster entity."""
-        self._cluster = cluster
-        if legacy_discovery_unique_id is None and entity_metadata is None:
-            legacy_discovery_unique_id = (
-                f"{device.ieee}-{endpoint.id}-{cluster.cluster_id}"
-            )
-        super().__init__(
-            endpoint=endpoint,
-            device=device,
-            entity_metadata=entity_metadata,
-            legacy_discovery_unique_id=legacy_discovery_unique_id,
-            **kwargs,
-        )
 
 
 class GroupEntity(BaseEntity):

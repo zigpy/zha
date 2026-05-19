@@ -35,7 +35,7 @@ from zha.application.platforms import (
     AttrConfig,
     ClusterConfig,
     ClusterMatch,
-    ZCLClusterEntity,
+    PlatformEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from zha.zigbee.endpoint import Endpoint
 
 
-class VirtualEntity(ZCLClusterEntity):
+class VirtualEntity(PlatformEntity):
     """Cluster-level background driver that isn't registered as a HA entity."""
 
     _virtual = True

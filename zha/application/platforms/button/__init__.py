@@ -19,7 +19,6 @@ from zha.application.platforms import (
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
-    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.button.const import DEFAULT_DURATION, ButtonDeviceClass
@@ -72,7 +71,7 @@ class BaseButton(PlatformEntity, ABC):
         """Send out a press command."""
 
 
-class Button(BaseButton, ZCLClusterEntity):
+class Button(BaseButton):
     """Defines a ZHA button."""
 
     _command_name: str
@@ -137,7 +136,7 @@ class IdentifyButton(Button):
         return not any(type(entity) is cls for entity in entities if entity is not self)
 
 
-class WriteAttributeButton(BaseButton, ZCLClusterEntity):
+class WriteAttributeButton(BaseButton):
     """Defines a ZHA button, which writes a value to an attribute."""
 
     _attribute_name: str

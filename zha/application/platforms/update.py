@@ -30,7 +30,6 @@ from zha.application.platforms import (
     EntityCategory,
     PlatformEntity,
     PlatformFeatureGroup,
-    ZCLClusterEntity,
     register_entity,
 )
 from zha.exceptions import ZHAException
@@ -289,7 +288,7 @@ class BaseFirmwareUpdateEntity(PlatformEntity, ABC):
 
 
 @register_entity(Ota.cluster_id)
-class FirmwareUpdateEntity(BaseFirmwareUpdateEntity, ZCLClusterEntity):
+class FirmwareUpdateEntity(BaseFirmwareUpdateEntity):
     """Representation of a ZHA firmware update entity."""
 
     _unique_id_suffix = "firmware_update"

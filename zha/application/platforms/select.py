@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 import functools
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import (
@@ -35,15 +35,15 @@ from zigpy.zcl.clusters.security import IasWd
 
 from zha.application import Platform
 from zha.application.const import Strobe
-from zha.application.helpers import cluster_runtime_state, write_attributes_safe
+from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
+    BaseEntity,
     BaseEntityInfo,
     ClusterConfig,
     ClusterMatch,
     EntityCategory,
     PlatformEntity,
-    ZCLClusterEntity,
     register_entity,
 )
 from zha.application.platforms.const import (
@@ -52,6 +52,7 @@ from zha.application.platforms.const import (
     SINOPE_MANUFACTURER_CLUSTER,
     TUYA_MANUFACTURER_CLUSTER,
 )
+from zha.application.platforms.siren import AdvancedSiren
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -68,8 +69,8 @@ class EnumSelectInfo(BaseEntityInfo):
     options: list[str]
 
 
-class BaseSelectEntity(PlatformEntity, ABC):
-    """Abstract base class for ZHA select entities."""
+class BaseSelectEntity(BaseEntity, ABC):
+    """Abstract base class for select entities (platform-agnostic)."""
 
     PLATFORM = Platform.SELECT
 
@@ -97,11 +98,10 @@ class BaseSelectEntity(PlatformEntity, ABC):
         """Change the selected option."""
 
 
-class EnumSelectEntity(BaseSelectEntity, ZCLClusterEntity):
-    """Representation of a ZHA select entity."""
+class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
+    """Select entity whose state lives on the AdvancedSiren on the same cluster."""
 
     _attr_entity_category = EntityCategory.CONFIG
-    _attribute_name: str
     _enum: type[Enum]
 
     def __init__(
@@ -111,7 +111,6 @@ class EnumSelectEntity(BaseSelectEntity, ZCLClusterEntity):
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
-        self._attribute_name = self._enum.__name__
         self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
@@ -125,18 +124,31 @@ class EnumSelectEntity(BaseSelectEntity, ZCLClusterEntity):
         )
 
     @property
+    def available(self) -> bool:
+        """Return entity availability."""
+        return True
+
+    def _siren(self) -> AdvancedSiren:
+        return cast(
+            AdvancedSiren,
+            self._device.get_entity(
+                Platform.SIREN,
+                endpoint_id=self._endpoint.id,
+                cluster_id=IasWd.cluster_id,
+            ),
+        )
+
+    @property
     def current_option(self) -> str | None:
         """Return the selected entity option to represent the entity state."""
-        option = cluster_runtime_state(self._cluster).get(self._attribute_name)
-        if option is None:
+        value = self._siren().defaults[self._enum]
+        if value is None:
             return None
-        return option.name.replace("_", " ")
+        return value.name.replace("_", " ")
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        cluster_runtime_state(self._cluster)[self._attribute_name] = self._enum[
-            option.replace(" ", "_")
-        ]
+        self._siren().defaults[self._enum] = self._enum[option.replace(" ", "_")]
         self.maybe_emit_state_changed_event()
 
     def restore_external_state_attributes(
@@ -145,28 +157,11 @@ class EnumSelectEntity(BaseSelectEntity, ZCLClusterEntity):
         state: str,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
-        value = state.replace(" ", "_")
-        cluster_runtime_state(self._cluster)[self._attribute_name] = self._enum[value]
-
-
-class NonZCLSelectEntity(EnumSelectEntity):
-    """Representation of a ZHA select entity with no ZCL interaction."""
-
-    _cluster_id = IasWd.cluster_id
-    _server_cluster_config = {
-        IasWd.cluster_id: ClusterConfig(
-            bind=True,
-        ),
-    }
-
-    @property
-    def available(self) -> bool:
-        """Return entity availability."""
-        return True
+        self._siren().defaults[self._enum] = self._enum[state.replace(" ", "_")]
 
 
 @register_entity(IasWd.cluster_id)
-class DefaultToneSelectEntity(NonZCLSelectEntity):
+class DefaultToneSelectEntity(SirenDefaultSelectEntity):
     """Representation of a ZHA default siren tone select entity."""
 
     _unique_id_suffix = "WarningMode"
@@ -180,7 +175,7 @@ class DefaultToneSelectEntity(NonZCLSelectEntity):
 
 
 @register_entity(IasWd.cluster_id)
-class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
+class DefaultSirenLevelSelectEntity(SirenDefaultSelectEntity):
     """Representation of a ZHA default siren level select entity."""
 
     _unique_id_suffix = "SirenLevel"
@@ -194,7 +189,7 @@ class DefaultSirenLevelSelectEntity(NonZCLSelectEntity):
 
 
 @register_entity(IasWd.cluster_id)
-class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
+class DefaultStrobeLevelSelectEntity(SirenDefaultSelectEntity):
     """Representation of a ZHA default siren strobe level select entity."""
 
     _unique_id_suffix = "StrobeLevel"
@@ -208,7 +203,7 @@ class DefaultStrobeLevelSelectEntity(NonZCLSelectEntity):
 
 
 @register_entity(IasWd.cluster_id)
-class DefaultStrobeSelectEntity(NonZCLSelectEntity):
+class DefaultStrobeSelectEntity(SirenDefaultSelectEntity):
     """Representation of a ZHA default siren strobe select entity."""
 
     _unique_id_suffix = "Strobe"
@@ -221,7 +216,7 @@ class DefaultStrobeSelectEntity(NonZCLSelectEntity):
     )
 
 
-class ZCLEnumSelectEntity(BaseSelectEntity, ZCLClusterEntity):
+class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
     """Representation of a ZHA ZCL enum select entity."""
 
     _attribute_name: str

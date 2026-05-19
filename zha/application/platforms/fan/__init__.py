@@ -26,8 +26,8 @@ from zha.application.platforms import (
     ClusterConfig,
     ClusterMatch,
     GroupEntity,
+    PlatformEntity,
     PlatformFeatureGroup,
-    ZCLClusterEntity,
     register_entity,
     register_group_entity,
 )
@@ -247,7 +247,7 @@ class BaseFan(BaseEntity, ABC):
 
 
 @register_entity(hvac.Fan.cluster_id)
-class Fan(BaseFan, ZCLClusterEntity):
+class Fan(BaseFan, PlatformEntity):
     """Representation of a ZHA fan."""
 
     _cluster_match = ClusterMatch(
@@ -399,7 +399,7 @@ class FanGroup(BaseFan, GroupEntity):
 
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
-class IkeaFan(BaseFan, ZCLClusterEntity):
+class IkeaFan(BaseFan, PlatformEntity):
     """Representation of an Ikea fan."""
 
     _attr_supported_features: FanEntityFeature = (

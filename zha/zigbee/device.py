@@ -771,6 +771,30 @@ class Device(LogMixin, EventBase):
             raise KeyError(f"Entity {unique_id} not found")
         return entity
 
+    def get_entity(
+        self,
+        platform: Platform,
+        endpoint_id: int | None,
+        cluster_id: int | None = None,
+    ) -> PlatformEntity:
+        """Look up the unique entity matching platform/endpoint/cluster filters."""
+        matches = []
+        for entity in self._platform_entities.values():
+            if platform != entity.PLATFORM:
+                continue
+            if endpoint_id is not None and entity.endpoint.id != endpoint_id:
+                continue
+            if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
+                continue
+            matches.append(entity)
+        if len(matches) != 1:
+            raise LookupError(
+                f"Expected 1 entity matching platform={platform!r}, "
+                f"endpoint_id={endpoint_id}, cluster_id={cluster_id}; "
+                f"found {len(matches)}"
+            )
+        return matches[0]
+
     @classmethod
     def new(
         cls,

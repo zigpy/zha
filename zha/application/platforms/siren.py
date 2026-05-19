@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 import asyncio
 import contextlib
 from dataclasses import dataclass
-from enum import IntFlag
+from enum import Enum, IntFlag
 import functools
 from typing import TYPE_CHECKING, Any, Final
 
@@ -28,7 +28,6 @@ from zha.application.const import (
     WARNING_DEVICE_STROBE_NO,
     Strobe,
 )
-from zha.application.helpers import cluster_runtime_state
 from zha.application.platforms import (
     BaseEntityInfo,
     ClusterConfig,
@@ -189,7 +188,6 @@ class BaseZclSiren(BaseSiren, ABC):
         **kwargs: Any,
     ) -> None:
         """Init ZCL siren base."""
-        self._cluster = endpoint.zigpy_endpoint.in_clusters[IasWd.cluster_id]
         self._off_listener = None
 
         legacy_discovery_unique_id = (
@@ -251,6 +249,8 @@ class AdvancedSiren(BaseZclSiren):
         feature_priority=(PlatformFeatureGroup.SIREN, 0),
     )
 
+    defaults: dict[type[Enum], Enum | None]
+
     def __init__(
         self,
         endpoint: Endpoint,
@@ -274,6 +274,12 @@ class AdvancedSiren(BaseZclSiren):
             WARNING_DEVICE_MODE_FIRE_PANIC: "Fire Panic",
             WARNING_DEVICE_MODE_EMERGENCY_PANIC: "Emergency Panic",
         }
+        self.defaults = {
+            IasWd.Warning.WarningMode: None,
+            IasWd.Warning.SirenLevel: None,
+            Strobe: None,
+            IasWd.StrobeLevel: None,
+        }
 
     async def async_turn_on(
         self,
@@ -283,28 +289,29 @@ class AdvancedSiren(BaseZclSiren):
     ) -> None:
         """Turn on siren."""
         self._cancel_off_listener()
-        cache = cluster_runtime_state(self._cluster)
-        tone_cache = cache.get(IasWd.Warning.WarningMode.__name__)
+        tone_default = self.defaults[IasWd.Warning.WarningMode]
         siren_tone = (
-            tone_cache.value
-            if tone_cache is not None
+            tone_default.value
+            if tone_default is not None
             else WARNING_DEVICE_MODE_EMERGENCY
         )
-        siren_duration = DEFAULT_DURATION
-        level_cache = cache.get(IasWd.Warning.SirenLevel.__name__)
+        level_default = self.defaults[IasWd.Warning.SirenLevel]
         siren_level = (
-            level_cache.value if level_cache is not None else WARNING_DEVICE_SOUND_HIGH
+            level_default.value
+            if level_default is not None
+            else WARNING_DEVICE_SOUND_HIGH
         )
-        strobe_cache = cache.get(Strobe.__name__)
+        strobe_default = self.defaults[Strobe]
         should_strobe = (
-            strobe_cache.value if strobe_cache is not None else Strobe.No_Strobe
+            strobe_default.value if strobe_default is not None else Strobe.No_Strobe
         )
-        strobe_level_cache = cache.get(IasWd.StrobeLevel.__name__)
+        strobe_level_default = self.defaults[IasWd.StrobeLevel]
         strobe_level = (
-            strobe_level_cache.value
-            if strobe_level_cache is not None
+            strobe_level_default.value
+            if strobe_level_default is not None
             else WARNING_DEVICE_STROBE_HIGH
         )
+        siren_duration = DEFAULT_DURATION
         if duration is not None:
             siren_duration = duration
         if tone is not None:
