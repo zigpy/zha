@@ -1065,7 +1065,7 @@ class Device(LogMixin, EventBase):
         if self.quirk_metadata is None:
             return False
 
-        if entity._virtual:
+        if entity.PLATFORM == Platform.VIRTUAL:
             return False
 
         for meta in self.quirk_metadata.disabled_default_entities:
@@ -1096,7 +1096,7 @@ class Device(LogMixin, EventBase):
         if self.quirk_metadata is None:
             return
 
-        if entity._virtual:
+        if entity.PLATFORM == Platform.VIRTUAL:
             return
 
         for meta in self.quirk_metadata.changed_entity_metadata:

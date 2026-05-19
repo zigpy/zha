@@ -66,9 +66,15 @@ if TYPE_CHECKING:
 
 
 class VirtualEntity(PlatformEntity):
-    """Cluster-level background driver that isn't registered as a HA entity."""
+    """Cluster-level background driver that isn't registered as a HA entity.
 
-    _virtual = True
+    Virtual entities participate in discovery and cluster-config aggregation
+    (so they bind, configure reporting, and run cluster-level setup work like
+    IAS Zone enrollment) but the wrapping integration is expected to skip
+    registering them with Home Assistant. They have no state surface and
+    exist purely to drive cluster-level background work.
+    """
+
     PLATFORM = Platform.VIRTUAL
     _attr_always_supported = True
 

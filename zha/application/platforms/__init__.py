@@ -230,14 +230,7 @@ class EntityStateChangedEvent:
 class BaseEntity(LogMixin, EventBase):
     """Base class for entities."""
 
-    PLATFORM: Platform = Platform.VIRTUAL
-
-    # Virtual entities participate in discovery and cluster-config aggregation
-    # (so they bind, configure reporting, and run cluster-level setup work like
-    # IAS Zone enrollment) but the wrapping integration is expected to skip
-    # registering them with Home Assistant. They have no state surface and
-    # exist purely to drive cluster-level background work.
-    _virtual: bool = False
+    PLATFORM: Platform
 
     async def async_configure_cluster(self, cluster: Any) -> None:
         """Run post-bind cluster-level setup (override in subclasses)."""

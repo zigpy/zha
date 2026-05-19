@@ -1005,7 +1005,11 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
             Platform.BUTTON, unique_id="00:0d:6f:00:05:65:83:f2-1-3"
         )
 
-    non_virtual = [e for e in zha_device.platform_entities.values() if not e._virtual]
+    non_virtual = [
+        e
+        for e in zha_device.platform_entities.values()
+        if e.PLATFORM != Platform.VIRTUAL
+    ]
     assert len(non_virtual) == 7
 
 
