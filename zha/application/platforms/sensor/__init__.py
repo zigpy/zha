@@ -15,7 +15,7 @@ import typing
 from typing import TYPE_CHECKING, Any, cast
 
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
-from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
+from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zigpy import types
 from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
@@ -2092,6 +2092,17 @@ class MeteringPoller(AggregatedClusterPoller):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"TS011F", "ZLinky_TIC", "TICMeter"}),
+    )
+
+
+@register_entity(Metering.cluster_id)
+class ExposedFeatureMeteringPoller(MeteringPoller):
+    """Polls the Metering cluster for devices whose quirk exposes SE_POLL_SUMMATION."""
+
+    _unique_id_suffix = "metering_poller"
+    _cluster_match = ClusterMatch(
+        server_clusters=frozenset({Metering.cluster_id}),
+        exposed_features=frozenset({SE_POLL_SUMMATION}),
     )
 
 
