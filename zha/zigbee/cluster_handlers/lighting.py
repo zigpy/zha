@@ -147,7 +147,7 @@ class ColorClusterHandler(ClusterHandler):
         return (
             self.color_capabilities is not None
             and Color.ColorCapabilities.Color_temperature in self.color_capabilities
-        ) or self.color_temperature is not None
+        )
 
     @property
     def color_loop_supported(self) -> bool:

@@ -430,16 +430,15 @@
             0.0,
             0.0
           ],
-          "color_temp": 270,
+          "color_temp": null,
           "effect_list": [
             "off"
           ],
           "effect": "off",
           "supported_features": 40,
-          "color_mode": "color_temp",
+          "color_mode": "xy",
           "supported_color_modes": [
             "brightness",
-            "color_temp",
             "onoff",
             "xy"
           ],
