@@ -747,10 +747,16 @@ class Device(LogMixin, EventBase):
     def get_entity(
         self,
         platform: Platform,
-        endpoint_id: int | None,
+        endpoint_id: int | None = None,
         cluster_id: int | None = None,
+        *,
+        pick_first: bool = False,
     ) -> PlatformEntity:
-        """Look up the unique entity matching platform/endpoint/cluster filters."""
+        """Look up the unique entity matching platform/endpoint/cluster filters.
+
+        With pick_first=True, returns the first match instead of raising on multiple
+        matches. Always raises if there are zero matches.
+        """
         matches = []
         for entity in self._platform_entities.values():
             if platform != entity.PLATFORM:
@@ -760,11 +766,11 @@ class Device(LogMixin, EventBase):
             if cluster_id is not None and entity.cluster.cluster_id != cluster_id:
                 continue
             matches.append(entity)
-        if len(matches) != 1:
+        if not matches or (not pick_first and len(matches) != 1):
             raise LookupError(
-                f"Expected 1 entity matching platform={platform!r}, "
-                f"endpoint_id={endpoint_id}, cluster_id={cluster_id}; "
-                f"found {len(matches)}"
+                f"Expected {'>=1' if pick_first else '1'} entity matching "
+                f"platform={platform!r}, endpoint_id={endpoint_id}, "
+                f"cluster_id={cluster_id}; found {len(matches)}"
             )
         return matches[0]
 

@@ -31,10 +31,15 @@ from zigpy.zcl import (
 from zigpy.zcl.clusters.general import LevelControl, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
 from zigpy.zcl.clusters.measurement import OccupancySensing
-from zigpy.zcl.clusters.security import IasWd
+from zigpy.zcl.clusters.security import (
+    IasWd,
+    SirenLevel,
+    Strobe,
+    StrobeLevel,
+    WarningMode,
+)
 
 from zha.application import Platform
-from zha.application.const import Strobe
 from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
@@ -103,6 +108,9 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
 
     _attr_entity_category = EntityCategory.CONFIG
     _enum: type[Enum]
+    # Subclasses can override to pin specific option strings (e.g. to preserve
+    # legacy display names that differ from zigpy's enum member names).
+    _option_overrides: dict[str, Enum] | None = None
 
     def __init__(
         self,
@@ -111,7 +119,14 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
         **kwargs: Any,
     ) -> None:
         """Init this select entity."""
-        self._attr_options = [entry.name.replace("_", " ") for entry in self._enum]
+        if self._option_overrides is not None:
+            self._option_to_member: dict[str, Enum] = self._option_overrides
+        else:
+            self._option_to_member = {
+                entry.name.replace("_", " "): entry for entry in self._enum
+            }
+        self._member_to_option = {m: o for o, m in self._option_to_member.items()}
+        self._attr_options = list(self._option_to_member)
         super().__init__(endpoint=endpoint, device=device, **kwargs)
 
     @functools.cached_property
@@ -144,11 +159,11 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
         value = self._siren().defaults[self._enum]
         if value is None:
             return None
-        return value.name.replace("_", " ")
+        return self._member_to_option[value]
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
-        self._siren().defaults[self._enum] = self._enum[option.replace(" ", "_")]
+        self._siren().defaults[self._enum] = self._option_to_member[option]
         self.maybe_emit_state_changed_event()
 
     def restore_external_state_attributes(
@@ -157,7 +172,7 @@ class SirenDefaultSelectEntity(BaseSelectEntity, PlatformEntity):
         state: str,
     ) -> None:
         """Restore extra state attributes that are stored outside of the ZCL cache."""
-        self._siren().defaults[self._enum] = self._enum[state.replace(" ", "_")]
+        self._siren().defaults[self._enum] = self._option_to_member[state]
 
 
 @register_entity(IasWd.cluster_id)
@@ -165,7 +180,7 @@ class DefaultToneSelectEntity(SirenDefaultSelectEntity):
     """Representation of a ZHA default siren tone select entity."""
 
     _unique_id_suffix = "WarningMode"
-    _enum = IasWd.Warning.WarningMode
+    _enum = WarningMode
     _attr_translation_key: str = "default_siren_tone"
 
     _cluster_match = ClusterMatch(
@@ -179,7 +194,7 @@ class DefaultSirenLevelSelectEntity(SirenDefaultSelectEntity):
     """Representation of a ZHA default siren level select entity."""
 
     _unique_id_suffix = "SirenLevel"
-    _enum = IasWd.Warning.SirenLevel
+    _enum = SirenLevel
     _attr_translation_key: str = "default_siren_level"
 
     _cluster_match = ClusterMatch(
@@ -193,7 +208,7 @@ class DefaultStrobeLevelSelectEntity(SirenDefaultSelectEntity):
     """Representation of a ZHA default siren strobe level select entity."""
 
     _unique_id_suffix = "StrobeLevel"
-    _enum = IasWd.StrobeLevel
+    _enum = StrobeLevel
     _attr_translation_key: str = "default_strobe_level"
 
     _cluster_match = ClusterMatch(
@@ -209,6 +224,12 @@ class DefaultStrobeSelectEntity(SirenDefaultSelectEntity):
     _unique_id_suffix = "Strobe"
     _enum = Strobe
     _attr_translation_key: str = "default_strobe"
+
+    # Backwards-compat: this entity previously used a zha-local `Strobe` enum
+    # with members `No_Strobe`/`Strobe` displayed as "No Strobe"/"Strobe".
+    # zigpy's enum uses `No_strobe`, which would otherwise change the display
+    # to "No strobe". Pin the option strings here.
+    _option_overrides = {"No Strobe": Strobe.No_strobe, "Strobe": Strobe.Strobe}
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IasWd.cluster_id}),

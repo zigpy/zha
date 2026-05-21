@@ -76,10 +76,11 @@ async def test_siren(zha_gateway: Gateway) -> None:
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 50  # bitmask for default args
-        assert cluster.request.call_args[0][4] == 5  # duration in seconds
-        assert cluster.request.call_args[0][5] == 0
-        assert cluster.request.call_args[0][6] == 2
+        kw = cluster.request.call_args.kwargs
+        assert kw["warning"] == 50  # bitmask for default args
+        assert kw["warning_duration"] == 5  # duration in seconds
+        assert kw["strobe_duty_cycle"] == 0
+        assert kw["stobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -95,10 +96,11 @@ async def test_siren(zha_gateway: Gateway) -> None:
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 2  # bitmask for default args
-        assert cluster.request.call_args[0][4] == 5  # duration in seconds
-        assert cluster.request.call_args[0][5] == 0
-        assert cluster.request.call_args[0][6] == 2
+        kw = cluster.request.call_args.kwargs
+        assert kw["warning"] == 2  # bitmask for default args
+        assert kw["warning_duration"] == 5  # duration in seconds
+        assert kw["strobe_duty_cycle"] == 0
+        assert kw["stobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to off
@@ -114,10 +116,11 @@ async def test_siren(zha_gateway: Gateway) -> None:
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 51  # bitmask for specified args
-        assert cluster.request.call_args[0][4] == 100  # duration in seconds
-        assert cluster.request.call_args[0][5] == 0
-        assert cluster.request.call_args[0][6] == 2
+        kw = cluster.request.call_args.kwargs
+        assert kw["warning"] == 51  # bitmask for specified args
+        assert kw["warning_duration"] == 100  # duration in seconds
+        assert kw["strobe_duty_cycle"] == 0
+        assert kw["stobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -149,10 +152,11 @@ async def test_basic_siren(zha_gateway: Gateway) -> None:
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 18  # bitmask for default args
-        assert cluster.request.call_args[0][4] == 5  # duration in seconds
-        assert cluster.request.call_args[0][5] == 0
-        assert cluster.request.call_args[0][6] == 2
+        kw = cluster.request.call_args.kwargs
+        assert kw["warning"] == 18  # bitmask for default args
+        assert kw["warning_duration"] == 5  # duration in seconds
+        assert kw["strobe_duty_cycle"] == 0
+        assert kw["stobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -168,10 +172,11 @@ async def test_basic_siren(zha_gateway: Gateway) -> None:
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 2  # bitmask for default args
-        assert cluster.request.call_args[0][4] == 5  # duration in seconds
-        assert cluster.request.call_args[0][5] == 0
-        assert cluster.request.call_args[0][6] == 2
+        kw = cluster.request.call_args.kwargs
+        assert kw["warning"] == 2  # bitmask for default args
+        assert kw["warning_duration"] == 5  # duration in seconds
+        assert kw["strobe_duty_cycle"] == 0
+        assert kw["stobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to off
@@ -187,10 +192,11 @@ async def test_basic_siren(zha_gateway: Gateway) -> None:
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 18  # bitmask for specified args
-        assert cluster.request.call_args[0][4] == 100  # duration in seconds
-        assert cluster.request.call_args[0][5] == 0
-        assert cluster.request.call_args[0][6] == 2
+        kw = cluster.request.call_args.kwargs
+        assert kw["warning"] == 18  # bitmask for specified args
+        assert kw["warning_duration"] == 100  # duration in seconds
+        assert kw["strobe_duty_cycle"] == 0
+        assert kw["stobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on
@@ -216,10 +222,11 @@ async def test_siren_timed_off(zha_gateway: Gateway) -> None:
         assert len(cluster.request.mock_calls) == 1
         assert cluster.request.call_args[0][0] is False
         assert cluster.request.call_args[0][1] == 0
-        assert cluster.request.call_args[0][3] == 50  # bitmask for default args
-        assert cluster.request.call_args[0][4] == 5  # duration in seconds
-        assert cluster.request.call_args[0][5] == 0
-        assert cluster.request.call_args[0][6] == 2
+        kw = cluster.request.call_args.kwargs
+        assert kw["warning"] == 50  # bitmask for default args
+        assert kw["warning_duration"] == 5  # duration in seconds
+        assert kw["strobe_duty_cycle"] == 0
+        assert kw["stobe_level"] == 2
         cluster.request.reset_mock()
 
     # test that the state has changed to on

@@ -12,22 +12,18 @@ from typing import TYPE_CHECKING, Any, Final
 
 from zhaquirks.quirk_ids import SIREN_BASIC
 from zigpy.profiles import zha
-from zigpy.zcl.clusters.security import IasWd
+from zigpy.zcl.clusters.security import (
+    IasWd,
+    SirenLevel,
+    Squawk,
+    SquawkMode,
+    Strobe,
+    StrobeLevel,
+    WarningMode,
+    WarningType,
+)
 
 from zha.application import Platform
-from zha.application.const import (
-    WARNING_DEVICE_MODE_BURGLAR,
-    WARNING_DEVICE_MODE_EMERGENCY,
-    WARNING_DEVICE_MODE_EMERGENCY_PANIC,
-    WARNING_DEVICE_MODE_FIRE,
-    WARNING_DEVICE_MODE_FIRE_PANIC,
-    WARNING_DEVICE_MODE_POLICE_PANIC,
-    WARNING_DEVICE_MODE_STOP,
-    WARNING_DEVICE_SOUND_HIGH,
-    WARNING_DEVICE_STROBE_HIGH,
-    WARNING_DEVICE_STROBE_NO,
-    Strobe,
-)
 from zha.application.platforms import (
     BaseEntityInfo,
     ClusterConfig,
@@ -40,52 +36,6 @@ from zha.application.platforms import (
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
-
-
-def _set_bit(destination_value, destination_bit, source_value, source_bit):
-    """Set the specified bit in the value."""
-    if (source_value & (1 << source_bit)) != 0:
-        return destination_value | (1 << destination_bit)
-    return destination_value
-
-
-async def issue_start_warning(
-    cluster,
-    *,
-    mode,
-    strobe,
-    siren_level,
-    warning_duration,
-    strobe_duty_cycle,
-    strobe_intensity,
-) -> None:
-    """Issue an IAS WD start_warning command with packed warning byte."""
-    value = 0
-    value = _set_bit(value, 0, siren_level, 0)
-    value = _set_bit(value, 1, siren_level, 1)
-    value = _set_bit(value, 2, strobe, 0)
-    value = _set_bit(value, 4, mode, 0)
-    value = _set_bit(value, 5, mode, 1)
-    value = _set_bit(value, 6, mode, 2)
-    value = _set_bit(value, 7, mode, 3)
-
-    await cluster.start_warning(
-        value, warning_duration, strobe_duty_cycle, strobe_intensity
-    )
-
-
-async def issue_squawk(cluster, *, mode, strobe, squawk_level) -> None:
-    """Issue an IAS WD squawk command with packed squawk byte."""
-    value = 0
-    value = _set_bit(value, 0, squawk_level, 0)
-    value = _set_bit(value, 1, squawk_level, 1)
-    value = _set_bit(value, 3, strobe, 0)
-    value = _set_bit(value, 4, mode, 0)
-    value = _set_bit(value, 5, mode, 1)
-    value = _set_bit(value, 6, mode, 2)
-    value = _set_bit(value, 7, mode, 3)
-
-    await cluster.squawk(value)
 
 
 DEFAULT_DURATION = 5  # seconds
@@ -160,12 +110,27 @@ class BaseSiren(PlatformEntity, ABC):
         duration: int | None = None,
         tone: int | None = None,
         volume_level: int | None = None,
+        # These kwargs are ZHA extensions to the base HA entity signature
+        strobe: int | None = None,
+        strobe_duty_cycle: int | None = None,
+        strobe_intensity: int | None = None,
     ) -> None:
         """Turn on siren."""
 
     @abstractmethod
     async def async_turn_off(self) -> None:
         """Turn off siren."""
+
+    # This method is a ZHA extension to the base HA siren entity
+    @abstractmethod
+    async def async_squawk(
+        self,
+        *,
+        mode: SquawkMode,
+        strobe: int,
+        squawk_level: int,
+    ) -> None:
+        """Issue a brief squawk pulse."""
 
 
 class BaseZclSiren(BaseSiren, ABC):
@@ -217,18 +182,33 @@ class BaseZclSiren(BaseSiren, ABC):
 
     async def async_turn_off(self) -> None:
         """Turn off siren."""
-        await issue_start_warning(
-            self._cluster,
-            mode=WARNING_DEVICE_MODE_STOP,
-            strobe=WARNING_DEVICE_STROBE_NO,
-            siren_level=IasWd.Warning.SirenLevel.High_level_sound,
+        warning = WarningType()
+        warning.mode = WarningMode.Stop
+        warning.strobe = Strobe.No_strobe
+        warning.level = SirenLevel.High_level_sound
+        await self._cluster.start_warning(
+            warning=warning,
             warning_duration=5,
             strobe_duty_cycle=0,
-            strobe_intensity=IasWd.StrobeLevel.High_level_strobe,
+            stobe_level=StrobeLevel.High_level_strobe,
         )
         self._cancel_off_listener()
         self._attr_is_on = False
         self.maybe_emit_state_changed_event()
+
+    async def async_squawk(
+        self,
+        *,
+        mode: SquawkMode,
+        strobe: int,
+        squawk_level: int,
+    ) -> None:
+        """Issue an IAS WD squawk command."""
+        squawk = Squawk()
+        squawk.mode = mode
+        squawk.strobe = strobe
+        squawk.level = squawk_level
+        await self._cluster.squawk(squawk=squawk)
 
     def _async_set_off(self) -> None:
         """Set is_on to False and write HA state."""
@@ -267,18 +247,18 @@ class AdvancedSiren(BaseZclSiren):
             | SirenEntityFeature.TONES
         )
         self._attr_available_tones: dict[int, str] = {
-            WARNING_DEVICE_MODE_BURGLAR: "Burglar",
-            WARNING_DEVICE_MODE_FIRE: "Fire",
-            WARNING_DEVICE_MODE_EMERGENCY: "Emergency",
-            WARNING_DEVICE_MODE_POLICE_PANIC: "Police Panic",
-            WARNING_DEVICE_MODE_FIRE_PANIC: "Fire Panic",
-            WARNING_DEVICE_MODE_EMERGENCY_PANIC: "Emergency Panic",
+            WarningMode.Burglar: "Burglar",
+            WarningMode.Fire: "Fire",
+            WarningMode.Emergency: "Emergency",
+            WarningMode.Police_Panic: "Police Panic",
+            WarningMode.Fire_Panic: "Fire Panic",
+            WarningMode.Emergency_Panic: "Emergency Panic",
         }
         self.defaults = {
-            IasWd.Warning.WarningMode: None,
-            IasWd.Warning.SirenLevel: None,
+            WarningMode: None,
+            SirenLevel: None,
             Strobe: None,
-            IasWd.StrobeLevel: None,
+            StrobeLevel: None,
         }
 
     async def async_turn_on(
@@ -286,30 +266,32 @@ class AdvancedSiren(BaseZclSiren):
         duration: int | None = None,
         tone: int | None = None,
         volume_level: int | None = None,
+        # These kwargs are ZHA extensions to the base HA entity signature
+        strobe: int | None = None,
+        strobe_duty_cycle: int | None = None,
+        strobe_intensity: int | None = None,
     ) -> None:
         """Turn on siren."""
         self._cancel_off_listener()
-        tone_default = self.defaults[IasWd.Warning.WarningMode]
+        tone_default = self.defaults[WarningMode]
         siren_tone = (
-            tone_default.value
-            if tone_default is not None
-            else WARNING_DEVICE_MODE_EMERGENCY
+            tone_default.value if tone_default is not None else WarningMode.Emergency
         )
-        level_default = self.defaults[IasWd.Warning.SirenLevel]
+        level_default = self.defaults[SirenLevel]
         siren_level = (
             level_default.value
             if level_default is not None
-            else WARNING_DEVICE_SOUND_HIGH
+            else SirenLevel.High_level_sound
         )
         strobe_default = self.defaults[Strobe]
         should_strobe = (
-            strobe_default.value if strobe_default is not None else Strobe.No_Strobe
+            strobe_default.value if strobe_default is not None else Strobe.No_strobe
         )
-        strobe_level_default = self.defaults[IasWd.StrobeLevel]
+        strobe_level_default = self.defaults[StrobeLevel]
         strobe_level = (
             strobe_level_default.value
             if strobe_level_default is not None
-            else WARNING_DEVICE_STROBE_HIGH
+            else StrobeLevel.High_level_strobe
         )
         siren_duration = DEFAULT_DURATION
         if duration is not None:
@@ -318,14 +300,25 @@ class AdvancedSiren(BaseZclSiren):
             siren_tone = tone
         if volume_level is not None:
             siren_level = int(volume_level)
-        await issue_start_warning(
-            self._cluster,
-            mode=siren_tone,
+        if strobe is not None:
+            should_strobe = strobe
+        if strobe_intensity is not None:
+            strobe_level = strobe_intensity
+        duty_cycle = (
+            strobe_duty_cycle
+            if strobe_duty_cycle is not None
+            else (50 if should_strobe else 0)
+        )
+
+        warning = WarningType()
+        warning.mode = siren_tone
+        warning.strobe = should_strobe
+        warning.level = siren_level
+        await self._cluster.start_warning(
+            warning=warning,
             warning_duration=siren_duration,
-            siren_level=siren_level,
-            strobe=should_strobe,
-            strobe_duty_cycle=50 if should_strobe else 0,
-            strobe_intensity=strobe_level,
+            strobe_duty_cycle=duty_cycle,
+            stobe_level=strobe_level,
         )
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
@@ -368,19 +361,25 @@ class BasicSiren(BaseZclSiren):
         duration: int | None = None,
         tone: int | None = None,
         volume_level: int | None = None,
+        # These kwargs are ZHA extensions to the base HA entity signature
+        strobe: int | None = None,
+        strobe_duty_cycle: int | None = None,
+        strobe_intensity: int | None = None,
     ) -> None:
         """Turn on siren with fixed tone, level, and strobe."""
         self._cancel_off_listener()
         siren_duration = duration if duration is not None else DEFAULT_DURATION
-        await issue_start_warning(
-            self._cluster,
-            # some Frient sensors send INVALID_VALUE for EMERGENCY
-            mode=WARNING_DEVICE_MODE_BURGLAR,
+
+        warning = WarningType()
+        # some Frient sensors send INVALID_VALUE for EMERGENCY
+        warning.mode = WarningMode.Burglar
+        warning.strobe = Strobe.No_strobe
+        warning.level = SirenLevel.High_level_sound
+        await self._cluster.start_warning(
+            warning=warning,
             warning_duration=siren_duration,
-            siren_level=WARNING_DEVICE_SOUND_HIGH,
-            strobe=WARNING_DEVICE_STROBE_NO,
             strobe_duty_cycle=0,
-            strobe_intensity=WARNING_DEVICE_STROBE_HIGH,
+            stobe_level=StrobeLevel.High_level_strobe,
         )
         self._attr_is_on = True
         self._off_listener = asyncio.get_running_loop().call_later(
