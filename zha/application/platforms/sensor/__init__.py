@@ -3687,6 +3687,20 @@ class DanfossOpenWindowDetection(EnumSensor):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "open_window_detection": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossLoadEstimate(Sensor):
@@ -3702,6 +3716,20 @@ class DanfossLoadEstimate(Sensor):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "load_estimate": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -3720,6 +3748,20 @@ class DanfossAdaptationRunStatus(BitMapSensor):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "adaptation_run_status": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossPreheatTime(Sensor):
@@ -3736,6 +3778,20 @@ class DanfossPreheatTime(Sensor):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "preheat_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Diagnostic.cluster_id)

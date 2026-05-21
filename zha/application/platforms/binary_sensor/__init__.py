@@ -668,6 +668,20 @@ class DanfossMountingModeActive(BinarySensor):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "mounting_mode_active": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(Thermostat.cluster_id)
 class DanfossHeatRequired(BinarySensor):
@@ -682,6 +696,20 @@ class DanfossHeatRequired(BinarySensor):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "heat_required": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -699,3 +727,17 @@ class DanfossPreheatStatus(BinarySensor):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
+
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "preheat_status": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }

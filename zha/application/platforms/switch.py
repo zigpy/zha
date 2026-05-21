@@ -891,15 +891,6 @@ class TuyaChildLockSwitch(ConfigurableAttributeSwitch):
         OnOff.cluster_id: ClusterConfig(
             bind=True,
             attributes={
-                OnOff.AttributeDefs.on_off: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                OnOff.AttributeDefs.start_up_on_off: AttrConfig(
-                    read_on_startup=False,
-                ),
                 "child_lock": AttrConfig(read_on_startup=False),
             },
         ),
@@ -1120,159 +1111,6 @@ class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
     )
 
 
-_DANFOSS_THERMOSTAT_CLUSTER_CONFIG = {
-    Thermostat.cluster_id: ClusterConfig(
-        bind=True,
-        attributes={
-            Thermostat.AttributeDefs.local_temperature: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=25
-                ),
-            ),
-            Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=25
-                ),
-            ),
-            Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=25
-                ),
-            ),
-            Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=25
-                ),
-            ),
-            Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=25
-                ),
-            ),
-            Thermostat.AttributeDefs.running_mode: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            Thermostat.AttributeDefs.running_state: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            Thermostat.AttributeDefs.system_mode: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            Thermostat.AttributeDefs.occupancy: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=5
-                ),
-            ),
-            Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
-                read_on_startup=True,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=5
-                ),
-            ),
-            Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
-                read_on_startup=True,
-            ),
-            Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
-                read_on_startup=False,
-            ),
-            Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
-                read_on_startup=False,
-            ),
-            "open_window_detection": AttrConfig(
-                read_on_startup=False,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            "heat_required": AttrConfig(
-                read_on_startup=False,
-                reporting=ReportingConfig(
-                    min_interval=1, max_interval=900, reportable_change=1
-                ),
-            ),
-            "mounting_mode_active": AttrConfig(
-                read_on_startup=False,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            "load_estimate": AttrConfig(
-                read_on_startup=False,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            "adaptation_run_status": AttrConfig(
-                read_on_startup=False,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            "preheat_status": AttrConfig(
-                read_on_startup=False,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-            "preheat_time": AttrConfig(
-                read_on_startup=False,
-                reporting=ReportingConfig(
-                    min_interval=30, max_interval=900, reportable_change=1
-                ),
-            ),
-        },
-    ),
-}
-
-
 @register_entity(Thermostat.cluster_id)
 class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
     """Danfoss proprietary attribute for communicating an open window."""
@@ -1288,7 +1126,14 @@ class DanfossExternalOpenWindowDetected(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
-    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "external_open_window_detected": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1306,7 +1151,14 @@ class DanfossWindowOpenFeature(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
-    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "window_open_feature": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1324,7 +1176,14 @@ class DanfossMountingModeControl(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
-    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "mounting_mode_control": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1342,7 +1201,14 @@ class DanfossRadiatorCovered(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
-    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "radiator_covered": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1360,7 +1226,14 @@ class DanfossHeatAvailable(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
-    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "heat_available": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1378,7 +1251,14 @@ class DanfossLoadBalancingEnable(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
-    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "load_balancing_enable": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1399,7 +1279,14 @@ class DanfossAdaptationRunSettings(ConfigurableAttributeSwitch):
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
 
-    _server_cluster_config = _DANFOSS_THERMOSTAT_CLUSTER_CONFIG
+    _server_cluster_config = {
+        Thermostat.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                "adaptation_run_settings": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
