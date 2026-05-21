@@ -149,24 +149,6 @@ class Cover(BaseCover):
                 WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
                     read_on_startup=False,
                 ),
-                WindowCovering.AttributeDefs.window_covering_mode: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.config_status: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.installed_closed_limit_lift: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.installed_closed_limit_tilt: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.installed_open_limit_lift: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.installed_open_limit_tilt: AttrConfig(
-                    read_on_startup=False,
-                ),
             },
         ),
     }

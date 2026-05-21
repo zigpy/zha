@@ -136,7 +136,7 @@ async def test_cover_non_tilt_initial_state(  # pylint: disable=unused-argument
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -179,7 +179,7 @@ async def test_cover_non_lift_initial_state(  # pylint: disable=unused-argument
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]
@@ -222,7 +222,7 @@ async def test_cover(
     )
 
     cluster = zigpy_cover_device.endpoints[1].window_covering
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     assert (
         WCAttrs.current_position_lift_percentage.name
         in cluster.read_attributes.call_args[0][0]

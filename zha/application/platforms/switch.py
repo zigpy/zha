@@ -1031,37 +1031,10 @@ class WindowCoveringInversionSwitch(ConfigurableAttributeSwitch):
         WindowCovering.cluster_id: ClusterConfig(
             bind=True,
             attributes={
-                WindowCovering.AttributeDefs.current_position_lift_percentage: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                WindowCovering.AttributeDefs.current_position_tilt_percentage: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                WindowCovering.AttributeDefs.window_covering_type: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.window_covering_mode: AttrConfig(
-                    read_on_startup=False,
-                ),
                 WindowCovering.AttributeDefs.config_status: AttrConfig(
                     read_on_startup=False,
                 ),
-                WindowCovering.AttributeDefs.installed_closed_limit_lift: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.installed_closed_limit_tilt: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.installed_open_limit_lift: AttrConfig(
-                    read_on_startup=False,
-                ),
-                WindowCovering.AttributeDefs.installed_open_limit_tilt: AttrConfig(
+                WindowCovering.AttributeDefs.window_covering_mode: AttrConfig(
                     read_on_startup=False,
                 ),
             },
