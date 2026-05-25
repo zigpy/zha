@@ -1231,6 +1231,138 @@ async def test_styrbar_press_events(zha_gateway: Gateway) -> None:
     ]
 
 
+async def test_unquirked_client_cluster_events(zha_gateway: Gateway) -> None:
+    """Test zha_events for OnOff/LevelControl client commands on a non-quirked remote."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/innr-rc-250.json",
+    )
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    listener = mock.Mock()
+    zha_device.on_all_events(listener)
+
+    # OnOff toggle (command_id=0x02, no args)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=1,
+            profile_id=zigpy.profiles.zha.PROFILE_ID,
+            cluster_id=general.OnOff.cluster_id,
+            data=zigpy.types.SerializableBytes(b"\x01\x01\x02"),
+        )
+    )
+
+    # LevelControl move(move_mode=Up, rate=50) (command_id=0x01)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=2,
+            profile_id=zigpy.profiles.zha.PROFILE_ID,
+            cluster_id=general.LevelControl.cluster_id,
+            data=zigpy.types.SerializableBytes(b"\x01\x02\x01\x00\x32"),
+        )
+    )
+
+    # LevelControl stop (command_id=0x03, no args)
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=3,
+            profile_id=zigpy.profiles.zha.PROFILE_ID,
+            cluster_id=general.LevelControl.cluster_id,
+            data=zigpy.types.SerializableBytes(b"\x01\x03\x03"),
+        )
+    )
+
+    device_ieee = zigpy.types.EUI64.convert("ab:cd:ef:12:25:3a:b6:6f")
+    assert listener.mock_calls == [
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0006_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.OnOff.cluster_id,
+                    "command": "toggle",
+                    "args": [],
+                    "params": {},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+        # OnOffClientCacheSync mirrors the toggle into the on_off attribute
+        # cache, which re-emits as an attribute_updated zha_event.
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0006_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.OnOff.cluster_id,
+                    "command": "attribute_updated",
+                    "args": {
+                        "attribute_id": 0,
+                        "attribute_name": "on_off",
+                        "attribute_value": True,
+                        "value": True,
+                    },
+                    "params": {},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0008_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.LevelControl.cluster_id,
+                    "command": "move",
+                    "args": [general.LevelControl.MoveMode.Up, 50],
+                    "params": {
+                        "move_mode": general.LevelControl.MoveMode.Up,
+                        "rate": 50,
+                        "options_mask": None,
+                        "options_override": None,
+                    },
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+        call(
+            ZHAEvent(
+                device_ieee=device_ieee,
+                unique_id="ab:cd:ef:12:25:3a:b6:6f",
+                data={
+                    "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0008_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": general.LevelControl.cluster_id,
+                    "command": "stop",
+                    "args": [],
+                    "params": {
+                        "options_mask": None,
+                        "options_override": None,
+                    },
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        ),
+    ]
+
+
 async def test_somrig_events(zha_gateway: Gateway) -> None:
     """Test that Somrig events are handled correctly."""
 
