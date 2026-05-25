@@ -1187,6 +1187,50 @@ async def test_endpoint_none_profile(
     assert "Skipping endpoint, profile is None" in caplog.text
 
 
+async def test_styrbar_press_events(zha_gateway: Gateway) -> None:
+    """Test that the STYRBAR `press` scene command becomes a well-formed zha_event."""
+
+    zigpy_dev = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/ikea-of-sweden-remote-control-n2.json",
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    listener = mock.Mock()
+    zha_device.on_all_events(listener)
+
+    zigpy_dev.packet_received(
+        zigpy.types.ZigbeePacket(
+            src_ep=1,
+            dst_ep=1,
+            tsn=64,
+            profile_id=260,
+            cluster_id=5,
+            data=zigpy.types.SerializableBytes(b"\x05|\x11@\x07\x01\x01\r\x00"),
+        )
+    )
+
+    assert listener.mock_calls == [
+        call(
+            ZHAEvent(
+                device_ieee=zigpy.types.EUI64.convert("ab:cd:ef:12:6b:e7:d0:70"),
+                unique_id="ab:cd:ef:12:6b:e7:d0:70",
+                data={
+                    "unique_id": "ab:cd:ef:12:6b:e7:d0:70:1:0x0005_CLIENT",
+                    "endpoint_id": 1,
+                    "cluster_id": 5,
+                    "command": "press",
+                    "args": [257, 13, 0],
+                    "params": {"param1": 257, "param2": 13, "param3": 0},
+                },
+                event_type="zha_event",
+                event="zha_event",
+            )
+        )
+    ]
+
+
 async def test_somrig_events(zha_gateway: Gateway) -> None:
     """Test that Somrig events are handled correctly."""
 

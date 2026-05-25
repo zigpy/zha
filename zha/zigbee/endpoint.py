@@ -26,22 +26,34 @@ ATTR_OUT_CLUSTERS: Final[str] = "output_clusters"
 _LOGGER = logging.getLogger(__name__)
 
 
+def cluster_event_unique_id(endpoint: Endpoint, cluster: zigpy.zcl.Cluster) -> str:
+    """Build the `ieee:endpoint_id:0xCLUSTER[_CLIENT]` unique_id for a cluster event."""
+    ieee_with_colons = endpoint.unique_id.replace("-", ":")
+    suffix = "_CLIENT" if cluster.is_client else ""
+    return f"{ieee_with_colons}:0x{cluster.cluster_id:04x}{suffix}"
+
+
+def split_event_arg(
+    command: str, arg: list | dict | CommandSchema | None
+) -> tuple[list | dict, dict[str, Any]]:
+    """Decompose a cluster-event argument into ZHA event `args`/`params`."""
+    if arg is None:
+        return [], {}
+    if isinstance(arg, CommandSchema):
+        return [a for a in arg if a is not None], arg.as_dict()
+    if isinstance(arg, (list, dict)):
+        return arg, {}
+    raise TypeError(f"Unexpected cluster event {command!r} argument: {arg!r}")
+
+
 class _ClusterEventForwarder:
-    """Forwards quirk `zha_send_event` listener calls into device `zha_event`s.
+    """Forwards quirk `zha_send_event` listener calls into device `zha_event`s."""
 
-    The `unique_id` published on the event is `ieee:endpoint_id:0xCLUSTER` with
-    a `_CLIENT` suffix for client clusters; HA automations filter on it.
-    """
-
-    def __init__(
-        self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint, is_client: bool
-    ) -> None:
+    def __init__(self, cluster: zigpy.zcl.Cluster, endpoint: Endpoint) -> None:
         self._cluster = cluster
         self._endpoint = endpoint
-        ieee_with_colons = endpoint.unique_id.replace("-", ":")
-        suffix = "_CLIENT" if is_client else ""
-        self._unique_id = f"{ieee_with_colons}:0x{cluster.cluster_id:04x}{suffix}"
-        self._unsub = cluster.add_listener(self)
+        self._unique_id = cluster_event_unique_id(endpoint, cluster)
+        cluster.add_listener(self)
 
     def remove(self) -> None:
         """Detach from the cluster."""
@@ -49,20 +61,7 @@ class _ClusterEventForwarder:
 
     def zha_send_event(self, command: str, arg: list | dict | CommandSchema) -> None:
         """Relay events to listeners."""
-        args: list[Any]
-        params: dict[Any, Any]
-        if isinstance(arg, CommandSchema):
-            args = [a for a in arg if a is not None]
-            params = arg.as_dict()
-        elif isinstance(arg, list):
-            args = arg
-            params = {}
-        elif isinstance(arg, dict):
-            args = []
-            params = arg
-        else:
-            raise TypeError(f"Unexpected zha_send_event {command!r} argument: {arg!r}")
-
+        args, params = split_event_arg(command, arg)
         self._endpoint.emit_zha_event(
             {
                 const.ATTR_UNIQUE_ID: self._unique_id,
@@ -154,14 +153,11 @@ class Endpoint:
             )
             return
 
-        for cluster in self._zigpy_endpoint.in_clusters.values():
-            self._forwarders.append(
-                _ClusterEventForwarder(cluster, self, is_client=False)
-            )
-        for cluster in self._zigpy_endpoint.out_clusters.values():
-            self._forwarders.append(
-                _ClusterEventForwarder(cluster, self, is_client=True)
-            )
+        for cluster in (
+            *self._zigpy_endpoint.in_clusters.values(),
+            *self._zigpy_endpoint.out_clusters.values(),
+        ):
+            self._forwarders.append(_ClusterEventForwarder(cluster, self))
 
     def emit_zha_event(self, event_data: dict[str, Any]) -> None:
         """Broadcast an event from this endpoint."""

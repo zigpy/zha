@@ -28,7 +28,7 @@ from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff, Ota, Scene
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.clusters.lightlink import LightLink
 from zigpy.zcl.clusters.security import IasZone
-from zigpy.zcl.foundation import GENERAL_COMMANDS, GeneralCommand
+from zigpy.zcl.foundation import GENERAL_COMMANDS, CommandSchema, GeneralCommand
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -51,6 +51,7 @@ from zha.application.platforms.const import (
     TUYA_MANUFACTURER_CLUSTER,
 )
 from zha.exceptions import ZHAException
+from zha.zigbee.endpoint import cluster_event_unique_id, split_event_arg
 
 ATTRIBUTE_ID = "attribute_id"
 ATTRIBUTE_NAME = "attribute_name"
@@ -100,16 +101,17 @@ class VirtualEntity(PlatformEntity):
                 self._on_remove_callbacks.append(unsub)
 
     def emit_cluster_zha_event(
-        self, command: str, args: list | dict | None = None
+        self, command: str, arg: list | dict | CommandSchema | None = None
     ) -> None:
         """Relay a cluster-level zha_event via the endpoint."""
+        args, params = split_event_arg(command, arg)
         self._endpoint.emit_zha_event(
             {
-                "unique_id": self.unique_id,
+                "unique_id": cluster_event_unique_id(self._endpoint, self._cluster),
                 "cluster_id": self._cluster.cluster_id,
                 "command": command,
-                "args": args or [],
-                "params": {},
+                "args": args,
+                "params": params,
             }
         )
 
