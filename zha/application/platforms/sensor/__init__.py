@@ -923,7 +923,8 @@ class AggregatedClusterPoller(VirtualEntity):
                     continue
                 if self._cluster.is_attribute_unsupported(attr_def):
                     continue
-                attrs.add(attr_def.name)
+
+                attrs.add(attr_def if isinstance(attr_def, str) else attr_def.name)
 
         if not attrs:
             return
