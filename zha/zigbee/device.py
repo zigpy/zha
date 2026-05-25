@@ -996,7 +996,7 @@ class Device(LogMixin, EventBase):
         # Configure binding and reporting from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)
         if aggregated:
-            await configure_cluster_configs(self, aggregated, self.manufacturer_code)
+            await configure_cluster_configs(self, aggregated)
 
         self.emit_reconfigure_done()
 

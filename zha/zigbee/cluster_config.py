@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import itertools
 import logging
 from typing import TYPE_CHECKING
 
@@ -133,7 +134,6 @@ def aggregate_cluster_configs(
 async def configure_cluster_configs(
     device: Device,
     configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
-    manufacturer_code: int | None,
 ) -> None:
     """Execute binding, reporting, and post-bind hooks from aggregated configs.
 
@@ -258,12 +258,10 @@ async def _read_attributes_chunked(
     only_cache: bool,
 ) -> None:
     """Read attributes in chunks, matching legacy cluster handler behavior."""
-    chunk = attrs[:CLUSTER_READS_PER_REQ]
-    rest = attrs[CLUSTER_READS_PER_REQ:]
-    while chunk:
+    for chunk in itertools.batched(attrs, CLUSTER_READS_PER_REQ):
         try:
             await cluster.read_attributes(
-                chunk,
+                list(chunk),
                 allow_cache=allow_cache,
                 only_cache=only_cache,
                 manufacturer=UNDEFINED,
@@ -276,8 +274,6 @@ async def _read_attributes_chunked(
                 cluster.ep_attribute,
                 ex,
             )
-        chunk = rest[:CLUSTER_READS_PER_REQ]
-        rest = rest[CLUSTER_READS_PER_REQ:]
 
 
 async def initialize_cluster_configs(
