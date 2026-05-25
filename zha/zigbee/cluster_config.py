@@ -11,7 +11,7 @@ from zigpy.typing import UNDEFINED
 import zigpy.util
 import zigpy.zcl
 from zigpy.zcl import ReportingConfig
-from zigpy.zcl.foundation import Status
+from zigpy.zcl.foundation import Status, ZCLAttributeDef
 
 from zha.application.const import (
     CLUSTER_READS_PER_REQ,
@@ -99,7 +99,9 @@ def aggregate_cluster_configs(
             agg.entities.append(entity)
 
             for attr_def, attr_config in config.attributes.items():
-                attr_name = attr_def.name if hasattr(attr_def, "name") else attr_def
+                attr_name = (
+                    attr_def.name if isinstance(attr_def, ZCLAttributeDef) else attr_def
+                )
                 if attr_name not in agg.attributes:
                     agg.attributes[attr_name] = AggregatedAttrConfig()
                 agg.attributes[attr_name].merge(attr_config)
@@ -118,7 +120,9 @@ def aggregate_cluster_configs(
             agg.entities.append(entity)
 
             for attr_def, attr_config in config.attributes.items():
-                attr_name = attr_def.name if hasattr(attr_def, "name") else attr_def
+                attr_name = (
+                    attr_def.name if isinstance(attr_def, ZCLAttributeDef) else attr_def
+                )
                 if attr_name not in agg.attributes:
                     agg.attributes[attr_name] = AggregatedAttrConfig()
                 agg.attributes[attr_name].merge(attr_config)

@@ -5,13 +5,14 @@ from __future__ import annotations
 from abc import abstractmethod
 import asyncio
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from contextlib import suppress
 import dataclasses
 from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cached_property
 import logging
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Final, final
 
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
@@ -97,11 +98,11 @@ class AttrConfig:
 class ClusterConfig:
     """Per-cluster configuration."""
 
+    # Whether to bind this cluster to the coordinator.
     bind: bool = False
-    """Whether to bind this cluster to the coordinator."""
 
-    attributes: dict[ZCLAttributeDef, AttrConfig] = field(default_factory=dict)
-    """Per-attribute configuration keyed by ZCL attribute definition."""
+    # Per-attribute configuration keyed by ZCL attribute definition or name.
+    attributes: dict[ZCLAttributeDef | str, AttrConfig] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -480,8 +481,8 @@ class PlatformEntity(BaseEntity):
     _cluster_match: ClusterMatch | None = None
 
     # Per-cluster configuration (keyed by cluster ID)
-    _server_cluster_config: dict[int, ClusterConfig] = {}
-    _client_cluster_config: dict[int, ClusterConfig] = {}
+    _server_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
+    _client_cluster_config: Mapping[int, ClusterConfig] = MappingProxyType({})
 
     def __init__(
         self,
