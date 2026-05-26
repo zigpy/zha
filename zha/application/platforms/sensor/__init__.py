@@ -2387,7 +2387,6 @@ class SmartEnergySummation(SmartEnergyMetering):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 0),
     )
 
     _ENTITY_DESCRIPTION_MAP = {
@@ -2477,7 +2476,6 @@ class Tier1SmartEnergySummation(SmartEnergySummation):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
@@ -2492,7 +2490,6 @@ class Tier2SmartEnergySummation(SmartEnergySummation):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
@@ -2507,7 +2504,6 @@ class Tier3SmartEnergySummation(SmartEnergySummation):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
@@ -2522,7 +2518,6 @@ class Tier4SmartEnergySummation(SmartEnergySummation):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
@@ -2537,7 +2532,6 @@ class Tier5SmartEnergySummation(SmartEnergySummation):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
@@ -2552,7 +2546,6 @@ class Tier6SmartEnergySummation(SmartEnergySummation):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
         models=frozenset({"ZLinky_TIC", "TICMeter"}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION, 1),
     )
 
 
@@ -2573,7 +2566,6 @@ class SmartEnergySummationReceived(SmartEnergySummation):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({Metering.cluster_id}),
-        feature_priority=(PlatformFeatureGroup.SMART_ENERGY_SUMMATION_RECEIVED, 0),
     )
 
 
