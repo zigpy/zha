@@ -39,7 +39,7 @@ from zha.application.const import (
 )
 from zha.async_ import gather_with_limited_concurrency
 from zha.decorators import periodic
-from zha.exceptions import ZHAException, wrap_zigpy_exceptions
+from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
     from zha.application.gateway import Gateway
@@ -49,8 +49,6 @@ _T = TypeVar("_T")
 _R = TypeVar("_R")
 _P = ParamSpec("_P")
 _LOGGER = logging.getLogger(__name__)
-
-RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
 
 # Clusters that make sense as direct device-to-device binding pairs (e.g. a
 # remote's out_cluster bound to a light's in_cluster). Consulted by HA's "bind
@@ -120,10 +118,7 @@ async def write_attributes_safe(
     manufacturer: int | UndefinedType | None = UNDEFINED,
 ) -> None:
     """Write attributes and raise on any per-attribute failure."""
-    with wrap_zigpy_exceptions():
-        res = await RETRYABLE_REQUEST_DECORATOR(cluster.write_attributes)(
-            attributes, manufacturer=manufacturer
-        )
+    res = await cluster.write_attributes(attributes, manufacturer=manufacturer)
     for record in res[0]:
         if record.status != foundation.Status.SUCCESS:
             try:

@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from zha.zigbee.device import Device
 
 _LOGGER = logging.getLogger(__name__)
-RETRYABLE_REQUEST_DECORATOR = zigpy.util.retryable_request(tries=3)
 
 
 @dataclass
@@ -150,7 +149,7 @@ async def configure_cluster_configs(
     for (endpoint_id, _cluster_id, _is_server), agg in configs.items():
         if agg.bind:
             try:
-                res = await RETRYABLE_REQUEST_DECORATOR(agg.cluster.bind)()
+                res = await agg.cluster.bind()
                 success = res[0] == 0
                 _LOGGER.debug(
                     "[%s] Bound cluster %s: %s",
@@ -199,9 +198,7 @@ async def configure_cluster_configs(
             }
 
             try:
-                res = await RETRYABLE_REQUEST_DECORATOR(
-                    agg.cluster.configure_reporting_multiple
-                )(reporting_attrs)
+                res = await agg.cluster.configure_reporting_multiple(reporting_attrs)
                 _LOGGER.debug(
                     "[%s] Configured reporting for %s on cluster %s: %s",
                     agg.cluster.endpoint.device.ieee,

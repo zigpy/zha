@@ -341,23 +341,6 @@ async def zha_gateway(
 
 
 @pytest.fixture(scope="session", autouse=True)
-def disable_request_retry_delay():
-    """Disable ZHA request retrying delay to speed up failures."""
-
-    with (
-        patch(
-            "zha.application.helpers.RETRYABLE_REQUEST_DECORATOR",
-            zigpy.util.retryable_request(tries=3, delay=0),
-        ),
-        patch(
-            "zha.zigbee.cluster_config.RETRYABLE_REQUEST_DECORATOR",
-            zigpy.util.retryable_request(tries=3, delay=0),
-        ),
-    ):
-        yield
-
-
-@pytest.fixture(scope="session", autouse=True)
 def globally_load_quirks():
     """Load quirks automatically so that ZHA tests run deterministically in isolation.
 

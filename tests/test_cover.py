@@ -1069,9 +1069,7 @@ async def test_keen_vent(
     # open from client command fails
     p1 = patch.object(cluster_on_off, "request", side_effect=asyncio.TimeoutError)
     p2 = patch.object(cluster_level, "request", AsyncMock(return_value=[4, 0]))
-    p3 = pytest.raises(
-        ZHAException, match="Failed to send request: device did not respond"
-    )
+    p3 = pytest.raises(asyncio.TimeoutError)
 
     with p1, p2, p3:
         await entity.async_open_cover()

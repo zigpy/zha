@@ -44,7 +44,6 @@ from zha.application.platforms.button import (
     WriteAttributeButton,
 )
 from zha.application.platforms.button.const import ButtonDeviceClass
-from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 
 ZIGPY_DEVICE = {
@@ -160,15 +159,12 @@ async def test_frost_unlock(
     cluster.write_attributes.reset_mock()
     cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_press()
         await zha_gateway.async_block_till_done()
 
-    # There are three retries
     assert cluster.write_attributes.mock_calls == [
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
-        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED),
+        call({"frost_lock_reset": 0}, manufacturer=UNDEFINED)
     ]
 
 

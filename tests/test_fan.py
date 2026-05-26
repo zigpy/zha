@@ -43,7 +43,6 @@ from zha.application.platforms.fan.const import (
     SPEED_OFF,
 )
 from zha.application.platforms.fan.helpers import NotValidPresetModeError
-from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
 from zha.zigbee.group import Group, GroupMemberReference
 
@@ -272,7 +271,7 @@ async def async_set_preset_mode(
 
 @patch(
     "zigpy.zcl.clusters.hvac.Fan.write_attributes",
-    new=AsyncMock(return_value=zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]),
+    new=AsyncMock(return_value=[zcl_f.WriteAttributesResponse.deserialize(b"\x00")[0]]),
 )
 async def test_zha_group_fan_entity(
     zha_gateway: Gateway,
@@ -424,7 +423,7 @@ async def test_zha_group_fan_entity_failure_state(
 
     # turn on from client
     group_fan_cluster.write_attributes.reset_mock()
-    with pytest.raises(ZHAException, match="Failed to send request"):
+    with pytest.raises(ZigbeeException):
         await async_turn_on(zha_gateway, entity)
         await zha_gateway.async_block_till_done()
         assert len(group_fan_cluster.write_attributes.mock_calls) == 1

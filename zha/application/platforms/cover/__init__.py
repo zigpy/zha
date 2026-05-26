@@ -43,7 +43,7 @@ from zha.application.platforms.cover.const import (
     CoverState,
     WCAttrs,
 )
-from zha.exceptions import ZHAException, wrap_zigpy_exceptions
+from zha.exceptions import ZHAException
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -1019,13 +1019,12 @@ class KeenVent(Shade):
         assert self._level_cluster is not None
 
         position = self._position or 100
-        with wrap_zigpy_exceptions():
-            await asyncio.gather(
-                self._level_cluster.move_to_level_with_on_off(
-                    self._ha_position_to_zcl_level(position), 1
-                ),
-                self._on_off_cluster.on(),
-            )
+        await asyncio.gather(
+            self._level_cluster.move_to_level_with_on_off(
+                self._ha_position_to_zcl_level(position), 1
+            ),
+            self._on_off_cluster.on(),
+        )
 
         self._is_open = True
         self._position = position

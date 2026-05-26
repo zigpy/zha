@@ -450,13 +450,11 @@ async def test_switch_configurable(
     cluster.write_attributes.reset_mock()
     cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_turn_off()
         await zha_gateway.async_block_till_done()
 
     assert cluster.write_attributes.mock_calls == [
-        call({"window_detection_function": False}, manufacturer=UNDEFINED),
-        call({"window_detection_function": False}, manufacturer=UNDEFINED),
         call({"window_detection_function": False}, manufacturer=UNDEFINED),
     ]
 

@@ -26,7 +26,6 @@ from zha.application import Platform
 from zha.application.gateway import Gateway
 from zha.application.platforms import EntityCategory, PlatformEntity
 from zha.application.platforms.number.const import NumberMode
-from zha.exceptions import ZHAException
 
 ZIGPY_ANALOG_OUTPUT_DEVICE = {
     1: {
@@ -300,12 +299,10 @@ async def test_level_control_number(
     level_control_cluster.write_attributes.reset_mock()
     level_control_cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_set_native_value(new_value)
 
     assert level_control_cluster.write_attributes.mock_calls == [
-        call({attr: new_value}, manufacturer=UNDEFINED),
-        call({attr: new_value}, manufacturer=UNDEFINED),
         call({attr: new_value}, manufacturer=UNDEFINED),
     ]
     assert entity.state["state"] == initial_value
@@ -406,12 +403,10 @@ async def test_color_number(
     color_cluster.write_attributes.reset_mock()
     color_cluster.write_attributes.side_effect = ZigbeeException
 
-    with pytest.raises(ZHAException):
+    with pytest.raises(ZigbeeException):
         await entity.async_set_native_value(new_value)
 
     assert color_cluster.write_attributes.mock_calls == [
-        call({attr: new_value}, manufacturer=UNDEFINED),
-        call({attr: new_value}, manufacturer=UNDEFINED),
         call({attr: new_value}, manufacturer=UNDEFINED),
     ]
     assert entity.state["state"] == initial_value

@@ -53,7 +53,6 @@ from zha.application.platforms.fan.helpers import (
     percentage_to_ranged_value,
     ranged_value_to_percentage,
 )
-from zha.exceptions import wrap_zigpy_exceptions
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
@@ -363,10 +362,7 @@ class FanGroup(BaseFan, GroupEntity):
 
     async def _async_set_fan_mode(self, fan_mode: int) -> None:
         """Set the fan mode for the group."""
-
-        with wrap_zigpy_exceptions():
-            await self._cluster.write_attributes({"fan_mode": fan_mode})
-
+        await write_attributes_safe(self._cluster, {"fan_mode": fan_mode})
         self.maybe_emit_state_changed_event()
 
     def update(self, _: Any = None) -> None:
