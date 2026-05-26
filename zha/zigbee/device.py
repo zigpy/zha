@@ -995,7 +995,7 @@ class Device(LogMixin, EventBase):
 
         # Configure binding and reporting from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)
-        if aggregated:
+        if aggregated and not self.skip_configuration:
             await configure_cluster_configs(self, aggregated)
 
         self.emit_reconfigure_done()
@@ -1271,7 +1271,7 @@ class Device(LogMixin, EventBase):
 
         # Read initial attributes from entity-level cluster configs
         aggregated = aggregate_cluster_configs(self._discovered_entities)
-        if aggregated:
+        if aggregated and not self.skip_configuration:
             await initialize_cluster_configs(aggregated, from_cache)
 
         # And add them after. Emit events only on re-initialization, not the first.

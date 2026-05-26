@@ -148,8 +148,6 @@ async def configure_cluster_configs(
     )
 
     for (endpoint_id, _cluster_id, _is_server), agg in configs.items():
-        if agg.cluster.endpoint.device.skip_configuration:
-            continue
         if agg.bind:
             try:
                 res = await RETRYABLE_REQUEST_DECORATOR(agg.cluster.bind)()

@@ -3,6 +3,7 @@
 import asyncio
 from collections import defaultdict
 from collections.abc import Callable
+import contextlib
 import enum
 import json
 import pathlib
@@ -767,6 +768,45 @@ async def test_devices_from_files(
             ]
 
         await zha_device.on_remove()
+
+
+async def test_skip_configuration_skips_bind_and_reporting(
+    zha_gateway: Gateway,
+) -> None:
+    """A device marked skip_configuration must not have binds or reporting set up."""
+    zigpy_device = await zigpy_device_from_json(
+        zha_gateway.application_controller,
+        "tests/data/devices/lumi-lumi-weather.json",
+    )
+    assert zigpy_device.skip_configuration is True
+
+    bind_mocks = []
+    reporting_mocks = []
+    with contextlib.ExitStack() as stack:
+        for ep in zigpy_device.non_zdo_endpoints:
+            for cluster in list(ep.in_clusters.values()) + list(
+                ep.out_clusters.values()
+            ):
+                bind_mocks.append(
+                    stack.enter_context(
+                        mock.patch.object(cluster, "bind", wraps=cluster.bind)
+                    )
+                )
+                reporting_mocks.append(
+                    stack.enter_context(
+                        mock.patch.object(
+                            cluster,
+                            "configure_reporting_multiple",
+                            wraps=cluster.configure_reporting_multiple,
+                        )
+                    )
+                )
+
+        zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
+        await zha_device.async_configure()
+
+    assert all(m.mock_calls == [] for m in bind_mocks)
+    assert all(m.mock_calls == [] for m in reporting_mocks)
 
 
 async def test_get_diagnostics_json_repeated_calls(zha_gateway: Gateway) -> None:
