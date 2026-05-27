@@ -10,6 +10,8 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from zigpy.profiles import zha
+from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
+from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -748,6 +750,7 @@ class Shade(BaseCover):
     _attr_translation_key: str = "shade"
 
     _cluster_match = ClusterMatch(
+        profile_ids=frozenset({ZHA_PROFILE_ID, ZLL_PROFILE_ID, 512}),
         server_clusters=frozenset({OnOff.cluster_id}),
         optional_server_clusters=frozenset(
             {LevelControl.cluster_id, ShadeCluster.cluster_id}

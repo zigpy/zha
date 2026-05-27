@@ -131,6 +131,17 @@ class ClusterMatch:
     # what they target.
     match_renamed_clusters: bool = False
 
+    def __post_init__(self) -> None:
+        """Validate the ClusterMatch."""
+        if self.profile_device_types is not None and self.profile_ids is not None:
+            profile_device_type_profiles = {p for p, _ in self.profile_device_types}
+
+            if not profile_device_type_profiles <= self.profile_ids:
+                raise ValueError(
+                    "profile_device_types contain profiles not in profile_ids: "
+                    f"{profile_device_type_profiles - self.profile_ids}"
+                )
+
 
 def register_entity[T: type[PlatformEntity]](cluster_id: ClusterId) -> Callable[[T], T]:
     """Register an entity class for discovery."""
