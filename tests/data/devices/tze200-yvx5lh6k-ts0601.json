@@ -289,7 +289,7 @@
           "available": true,
           "group_id": null,
           "suggested_display_precision": null,
-          "unit": "\u00b5g/m\u00b3"
+          "unit": "\u03bcg/m\u00b3"
         },
         "state": {
           "class_name": "PM25",
@@ -317,7 +317,7 @@
           "available": true,
           "group_id": null,
           "suggested_display_precision": 0,
-          "unit": "\u00b5g/m\u00b3"
+          "unit": "\u03bcg/m\u00b3"
         },
         "state": {
           "class_name": "VOCLevel",
