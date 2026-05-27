@@ -976,6 +976,7 @@ class Device(LogMixin, EventBase):
 
             if meta.cluster_id is not None and not any(
                 cluster_handler.cluster.cluster_id == meta.cluster_id
+                and cluster_handler.cluster.cluster_type == meta.cluster_type
                 for cluster_handler in entity.cluster_handlers.values()
             ):
                 continue

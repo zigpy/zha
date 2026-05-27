@@ -1031,6 +1031,62 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
     assert len(zha_device.platform_entities) == 7
 
 
+@pytest.mark.parametrize(
+    ("cluster_type", "entity_removed"),
+    [
+        (ClusterType.Server, False),
+        (ClusterType.Client, True),
+        (None, False),  # None = implicit Server default via QuirkBuilder
+    ],
+)
+async def test_quirks_v2_prevent_default_entities_cluster_type(
+    zha_gateway: Gateway,
+    cluster_type: ClusterType | None,
+    entity_removed: bool,
+) -> None:
+    """Test quirks v2 prevent_default_entity_creation respects cluster_type.
+
+    The test device has cluster 0x0501 (IAS ACE) on both server and client sides.
+    The AlarmControlPanel entity uses the client cluster handler, so filtering by
+    cluster_type=Server should NOT remove it, but cluster_type=Client should.
+    When cluster_type is None, QuirkBuilder defaults it to Server.
+    """
+    registry = DeviceRegistry()
+
+    kwargs = {"cluster_id": 0x0501}
+    if cluster_type is not None:
+        kwargs["cluster_type"] = cluster_type
+
+    (
+        QuirkBuilder("CentraLite", "3405-L", registry=registry)
+        .prevent_default_entity_creation(**kwargs)
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/centralite-3405-l.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    if entity_removed:
+        with pytest.raises(KeyError):
+            zha_device.get_platform_entity(
+                Platform.ALARM_CONTROL_PANEL,
+                unique_id="00:0d:6f:00:05:65:83:f2-1-1281",
+            )
+        assert len(zha_device.platform_entities) == 7
+    else:
+        zha_device.get_platform_entity(
+            Platform.ALARM_CONTROL_PANEL,
+            unique_id="00:0d:6f:00:05:65:83:f2-1-1281",
+        )
+        assert len(zha_device.platform_entities) == 8
+
+
 async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
     """Test quirks v2 can change entity metadata."""
     registry = DeviceRegistry()
