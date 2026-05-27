@@ -1043,6 +1043,23 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
             cluster_type=ClusterType.Server,
             new_primary=True,
         )
+        # A generated quirks-v2 entity has no class-level `_cluster_match`, but
+        # does have a concrete backing cluster. A cluster_id-filtered metadata
+        # change must still reach it.
+        .sensor(
+            PowerConfiguration.AttributeDefs.battery_voltage.name,
+            PowerConfiguration.cluster_id,
+            translation_key="generated_battery_voltage",
+            fallback_name="Generated battery voltage",
+            unique_id_suffix="generated_battery_voltage",
+        )
+        .change_entity_metadata(
+            endpoint_id=1,
+            cluster_id=PowerConfiguration.cluster_id,
+            cluster_type=ClusterType.Server,
+            unique_id_suffix="generated_battery_voltage",
+            new_translation_key="changed_via_cluster_id",
+        )
         .add_to_registry()
     )
 
@@ -1076,6 +1093,13 @@ async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:
 
     button_entity = get_entity(zha_device, platform=Platform.BUTTON)
     assert button_entity._attr_primary is True
+
+    # The cluster_id-filtered change must have reached the generated entity,
+    # even though it has no class-level `_cluster_match`.
+    generated_sensor = get_entity(
+        zha_device, platform=Platform.SENSOR, qualifier="generated_battery_voltage"
+    )
+    assert generated_sensor._attr_translation_key == "changed_via_cluster_id"
 
 
 async def test_quirks_v2_translation_placeholders(zha_gateway: Gateway) -> None:

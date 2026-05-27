@@ -108,10 +108,22 @@ def _entity_targets_cluster(
     cluster_id: int,
     cluster_type: zigpy.zcl.ClusterType | None = None,
 ) -> bool:
-    """Return True if `entity` declares the given cluster in its `_cluster_match`."""
+    """Return True if `entity` targets the given cluster (and direction)."""
     match = entity._cluster_match
     if match is None:
-        return False
+        # Generated quirks-v2 entities have no class-level `_cluster_match` but
+        # do have a concrete backing cluster; match against it directly.
+        cluster = entity.cluster
+        if cluster.cluster_id != cluster_id:
+            return False
+        if cluster_type is None:
+            return True
+        actual_type = (
+            zigpy.zcl.ClusterType.Client
+            if cluster.is_client
+            else zigpy.zcl.ClusterType.Server
+        )
+        return cluster_type == actual_type
 
     if cluster_type is None or cluster_type == zigpy.zcl.ClusterType.Server:
         if (
