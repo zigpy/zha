@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import enum
 import functools
 from functools import cached_property
+import inspect
 import logging
 import time
 from typing import (
@@ -133,7 +134,7 @@ def get_zhajob_callable_job_type(target: Callable[..., Any]) -> ZHAJobType:
     while isinstance(target, functools.partial):
         target = target.func
 
-    if asyncio.iscoroutinefunction(target):
+    if inspect.iscoroutinefunction(target):
         return ZHAJobType.Coroutinefunction
     else:
         return ZHAJobType.Callback
