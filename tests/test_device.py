@@ -16,13 +16,13 @@ from zigpy.quirks.v2 import (
     ExposesFeatureMetadata,
     QuirkBuilder,
 )
-from zigpy.quirks.v2.homeassistant import EntityType
+from zigpy.quirks.v2.homeassistant import PERCENTAGE, EntityType
 from zigpy.quirks.v2.homeassistant.sensor import SensorDeviceClass, SensorStateClass
 import zigpy.types
 from zigpy.typing import UNDEFINED
 from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import general
-from zigpy.zcl.clusters.general import Ota, PowerConfiguration
+from zigpy.zcl.clusters.general import AnalogInput, Ota, PowerConfiguration
 from zigpy.zcl.clusters.lighting import Color
 from zigpy.zcl.clusters.measurement import CarbonDioxideConcentration
 from zigpy.zcl.foundation import Status, WriteAttributesResponse
@@ -1029,6 +1029,66 @@ async def test_quirks_v2_prevent_default_entities(zha_gateway: Gateway) -> None:
         )
 
     assert len(zha_device.platform_entities) == 7
+
+
+async def test_quirks_v2_prevent_default_entities_does_not_remove_v2_entities(
+    zha_gateway: Gateway,
+) -> None:
+    """Test prevent_default_entity_creation does not remove quirks v2 entities.
+
+    `prevent_default_entity_creation` is meant to suppress default ZHA entities
+    only; quirks-v2-defined entities (via `.sensor(...)` etc.) must survive
+    even when the predicate would otherwise match them — e.g. when the v2
+    entity deliberately reuses the same `unique_id_suffix` as the default
+    entity in order to preserve the existing HA entity registry entry.
+    """
+    registry = DeviceRegistry()
+
+    (
+        QuirkBuilder("Espressif", "ZigbeeAnalogDevice", registry=registry)
+        # Both the prevent rule and the v2 sensor target the same suffix —
+        # without the fix this rule would remove the v2 sensor as well.
+        .prevent_default_entity_creation(
+            endpoint_id=1,
+            cluster_id=AnalogInput.cluster_id,
+            unique_id_suffix="analog_input",
+        )
+        .sensor(
+            attribute_name=AnalogInput.AttributeDefs.present_value.name,
+            cluster_id=AnalogInput.cluster_id,
+            # Match the default ZHA `AnalogInputSensor._unique_id_suffix` so
+            # the new entity inherits the existing HA entity registry entry.
+            unique_id_suffix="analog_input",
+            device_class=SensorDeviceClass.AQI,
+            state_class=SensorStateClass.MEASUREMENT,
+            unit=PERCENTAGE,
+            translation_key="dirty_level",
+            fallback_name="Dirty Level",
+        )
+        .add_to_registry()
+    )
+
+    zigpy_dev = registry.get_device(
+        await zigpy_device_from_json(
+            zha_gateway.application_controller,
+            "tests/data/devices/espressif-zigbeeanalogdevice.json",
+        )
+    )
+
+    zha_device = await join_zigpy_device(zha_gateway, zigpy_dev)
+
+    # The v2 sensor survived even though the prevent predicate (matched by
+    # `unique_id_suffix="analog_input"`) also matches it.
+    sensors = [
+        e
+        for e in zha_device.platform_entities.values()
+        if e.PLATFORM == Platform.SENSOR and "analog_input" in e.unique_id
+    ]
+    assert len(sensors) == 1
+    (sensor,) = sensors
+    assert sensor._from_quirks_v2 is True
+    assert sensor.translation_key == "dirty_level"
+    assert sensor._attr_device_class == SensorDeviceClass.AQI
 
 
 async def test_quirks_v2_change_entity_metadata(zha_gateway: Gateway) -> None:

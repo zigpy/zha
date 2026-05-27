@@ -449,6 +449,11 @@ class PlatformEntity(BaseEntity):
     # entities using the same cluster handler/cluster id for the entity.
     _unique_id_suffix: str | None = None
 
+    # True when this entity was constructed from quirks v2 EntityMetadata.
+    # Used to scope filters like `prevent_default_entity_creation` to default
+    # ZHA entities only.
+    _from_quirks_v2: bool = False
+
     _migrate_platform_unique_ids: tuple[tuple[UniqueIdMigration, str]] | None = None
 
     # Auto-discovery for the entity
@@ -491,6 +496,8 @@ class PlatformEntity(BaseEntity):
 
     def _init_from_quirks_metadata(self, entity_metadata: EntityMetadata) -> None:
         """Init this entity from the quirks metadata."""
+        self._from_quirks_v2 = True
+
         if entity_metadata.initially_disabled:
             self._attr_entity_registry_enabled_default = False
 

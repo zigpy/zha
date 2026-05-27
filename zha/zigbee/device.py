@@ -963,6 +963,13 @@ class Device(LogMixin, EventBase):
         if self.quirk_metadata is None:
             return False
 
+        # `prevent_default_entity_creation` only targets default ZHA entities.
+        # Entities defined by the quirk itself (via quirks v2 EntityMetadata,
+        # e.g. `.sensor(...)`) are not removed here, even when the predicate
+        # would otherwise match them.
+        if entity._from_quirks_v2:
+            return False
+
         for meta in self.quirk_metadata.disabled_default_entities:
             _LOGGER.debug("Checking if entity %s is removed by %s", entity, meta)
 
