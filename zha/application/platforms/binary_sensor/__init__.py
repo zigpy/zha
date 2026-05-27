@@ -144,8 +144,6 @@ class BinarySensor(BaseBinarySensor):
     @property
     def is_on(self) -> bool:
         """Return True if the switch is on based on the state machine."""
-        if self._attribute_name not in self._cluster.attributes_by_name:
-            return False
         self._state = raw_state = self._cluster.get(self._attribute_name)
         if raw_state is None:
             return False
