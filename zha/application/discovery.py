@@ -8,8 +8,10 @@ from dataclasses import astuple
 import functools
 import itertools
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+from bellows.ezsp.xncp import FirmwareFeatures
+import bellows.zigbee.application
 from zigpy.quirks.v2 import (
     BinarySensorMetadata,
     CustomDeviceV2,
@@ -159,7 +161,7 @@ def discover_device_entities(device: Device) -> Iterator[BaseEntity]:
 @ignore_exceptions_during_iteration
 def discover_coordinator_device_entities(
     device: Device,
-) -> Iterator[sensor.DeviceCounterSensor]:
+) -> Iterator[BaseEntity]:
     """Discover entities for the coordinator device."""
     _LOGGER.debug(
         "Discovering entities for coordinator device: %s-%s",
@@ -167,6 +169,23 @@ def discover_coordinator_device_entities(
         device.name,
     )
     state: State = device.gateway.application_controller.state
+
+    if device.gateway.radio_type is zha_const.RadioType.ezsp:
+        app_controller = cast(
+            bellows.zigbee.application.ControllerApplication,
+            device.gateway.application_controller,
+        )
+        ezsp = app_controller._ezsp
+
+        if ezsp is not None and FirmwareFeatures.LED_CONTROL in ezsp._xncp_features:
+            yield light.CoordinatorLED(device)
+
+            _LOGGER.debug(
+                "'%s' platform -> '%s' using %s",
+                Platform.LIGHT,
+                light.CoordinatorLED.__name__,
+                "bellows XNCP LED control",
+            )
 
     for counter_groups in (
         "counters",

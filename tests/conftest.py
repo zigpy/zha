@@ -43,6 +43,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class _FakeApp(ControllerApplication):
+    _ezsp = None
+
     async def add_endpoint(self, descriptor: zdo_t.SimpleDescriptor):
         pass
 

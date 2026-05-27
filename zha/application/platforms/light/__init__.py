@@ -25,6 +25,7 @@ from zha.application.platforms import (
     BaseEntity,
     BaseEntityInfo,
     ClusterHandlerMatch,
+    EntityCategory,
     GroupEntity,
     PlatformEntity,
     PlatformFeatureGroup,
@@ -263,6 +264,223 @@ class BaseLight(BaseEntity, ABC):
             self._color_mode = color_mode
         if effect is not None:
             self._effect = effect
+
+
+DEFAULT_COORDINATOR_LED_XY_COLOR = (0.3127, 0.3290)
+DEFAULT_COORDINATOR_LED_BRIGHTNESS = 75
+
+
+def _clamp_rgb_channel(value: float) -> int:
+    """Clamp an RGB channel to an 8-bit integer."""
+    return max(0, min(255, int(round(value))))
+
+
+def _xy_brightness_to_rgb(x: float, y: float, brightness: int) -> tuple[int, int, int]:
+    """Convert XY + brightness into an RGB tuple."""
+    if y <= 0 or brightness <= 0:
+        return (0, 0, 0)
+
+    y_luma = 1.0
+    x_tristimulus = (y_luma / y) * x
+    z_tristimulus = (y_luma / y) * (1 - x - y)
+
+    red = (x_tristimulus * 1.656492) - (y_luma * 0.354851) - (z_tristimulus * 0.255038)
+    green = (
+        -(x_tristimulus * 0.707196) + (y_luma * 1.655397) + (z_tristimulus * 0.036152)
+    )
+    blue = (x_tristimulus * 0.051713) - (y_luma * 0.121364) + (z_tristimulus * 1.01153)
+
+    if red > blue and red > green and red > 1.0:
+        green /= red
+        blue /= red
+        red = 1.0
+    elif green > blue and green > red and green > 1.0:
+        red /= green
+        blue /= green
+        green = 1.0
+    elif blue > red and blue > green and blue > 1.0:
+        red /= blue
+        green /= blue
+        blue = 1.0
+
+    def gamma_correct(value: float) -> float:
+        value = max(0.0, value)
+        if value <= 0.0031308:
+            return 12.92 * value
+        return (1.055 * pow(value, 1 / 2.4)) - 0.055
+
+    scale = min(255, brightness) / 255
+    return (
+        _clamp_rgb_channel(gamma_correct(red) * 255 * scale),
+        _clamp_rgb_channel(gamma_correct(green) * 255 * scale),
+        _clamp_rgb_channel(gamma_correct(blue) * 255 * scale),
+    )
+
+
+class CoordinatorLED(BaseLight):
+    """Coordinator LED control exposed through bellows XNCP."""
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_fallback_name = "Coordinator LED"
+    _attr_primary = False
+
+    def __init__(self, zha_device: Device) -> None:
+        """Init the coordinator LED entity."""
+        slugified_device_id = zha_device.unique_id.replace(":", "-")
+        super().__init__(unique_id=f"{slugified_device_id}_coordinator_led")
+        self._device = zha_device
+        self._state = False
+        self._brightness = DEFAULT_COORDINATOR_LED_BRIGHTNESS
+        self._color_mode = ColorMode.XY
+        self._supported_color_modes = {ColorMode.XY}
+        self._xy_color = DEFAULT_COORDINATOR_LED_XY_COLOR
+        self._restore_on_startup = False
+
+    @functools.cached_property
+    def info_object(self) -> LightEntityInfo:
+        """Return a representation of the coordinator LED."""
+        return dataclasses.replace(
+            super().info_object,
+            device_ieee=self._device.ieee,
+            available=self.available,
+        )
+
+    @property
+    def available(self) -> bool:
+        """Return entity availability."""
+        return self._device.available
+
+    @property
+    def state(self) -> dict[str, Any]:
+        """Return the state of the coordinator LED."""
+        response = super().state
+        response["available"] = self.available
+        return response
+
+    def on_add(self) -> None:
+        """Run when entity is added."""
+        super().on_add()
+        self._schedule_restore_turn_on()
+
+    def restore_external_state_attributes(
+        self,
+        *,
+        state: bool | None,
+        off_with_transition: bool | None,
+        off_brightness: int | None,
+        brightness: int | None,
+        color_temp: int | None,
+        xy_color: tuple[float, float] | None,
+        color_mode: ColorMode | None,
+        effect: str | None,
+    ) -> None:
+        """Restore coordinator LED state and replay the last on-state optimistically."""
+        super().restore_external_state_attributes(
+            state=False,
+            off_with_transition=off_with_transition,
+            off_brightness=off_brightness,
+            brightness=brightness,
+            color_temp=color_temp,
+            xy_color=xy_color,
+            color_mode=color_mode,
+            effect=effect,
+        )
+        self._restore_on_startup = bool(state)
+        self._schedule_restore_turn_on()
+
+    def _schedule_restore_turn_on(self) -> None:
+        """Replay the restored LED state after startup."""
+        if not self._restore_on_startup or not self.available:
+            return
+
+        self._restore_on_startup = False
+        task = self._device.gateway.async_create_task(
+            self._async_restore_turn_on(),
+            name=f"{self.unique_id}_restore_turn_on",
+        )
+        self._tracked_tasks.append(task)
+
+        def remove_task(done_task: asyncio.Task) -> None:
+            with contextlib.suppress(ValueError):
+                self._tracked_tasks.remove(done_task)
+
+        task.add_done_callback(remove_task)
+
+    async def _async_restore_turn_on(self) -> None:
+        """Restore the last known LED state after startup."""
+        try:
+            await self.async_turn_on(
+                brightness=self._brightness,
+                xy_color=self._xy_color,
+            )
+        except Exception:  # pylint: disable=broad-except
+            self.error("Failed to restore coordinator LED state", exc_info=True)
+
+    def _get_rgb_color(
+        self,
+        brightness: int | None,
+        xy_color: tuple[float, float] | None,
+    ) -> tuple[int, int, int]:
+        """Resolve the RGB color to send to the adapter."""
+        if brightness is not None:
+            target_brightness = max(DEFAULT_MIN_BRIGHTNESS, min(255, brightness))
+            self._brightness = target_brightness
+        elif self._brightness is None:
+            target_brightness = DEFAULT_COORDINATOR_LED_BRIGHTNESS
+            self._brightness = target_brightness
+        else:
+            target_brightness = self._brightness
+
+        if xy_color is not None:
+            self._xy_color = xy_color
+            return _xy_brightness_to_rgb(xy_color[0], xy_color[1], target_brightness)
+
+        if self._xy_color is not None:
+            return _xy_brightness_to_rgb(
+                self._xy_color[0], self._xy_color[1], target_brightness
+            )
+
+        self._xy_color = DEFAULT_COORDINATOR_LED_XY_COLOR
+        return _xy_brightness_to_rgb(
+            self._xy_color[0], self._xy_color[1], target_brightness
+        )
+
+    async def _async_set_led_state(self, red: int, green: int, blue: int) -> None:
+        """Send the LED state to the coordinator."""
+        ezsp = getattr(self._device.gateway.application_controller, "_ezsp", None)
+        if ezsp is None or not hasattr(ezsp, "xncp_set_led_state"):
+            raise RuntimeError("Coordinator does not expose XNCP LED control")
+
+        await ezsp.xncp_set_led_state(red=red, green=green, blue=blue)
+
+    async def async_turn_on(
+        self,
+        *,
+        transition: float | None = None,
+        brightness: int | None = None,
+        effect: str | None = None,
+        flash: FlashMode | None = None,
+        color_temp: int | None = None,
+        xy_color: tuple[int, int] | None = None,
+    ) -> None:
+        """Turn the entity on."""
+
+        resolved_xy_color: tuple[float, float] | None = None
+        if xy_color is not None:
+            resolved_xy_color = (float(xy_color[0]), float(xy_color[1]))
+        elif self._xy_color is None and self._color_mode == ColorMode.XY:
+            resolved_xy_color = DEFAULT_COORDINATOR_LED_XY_COLOR
+
+        red, green, blue = self._get_rgb_color(brightness, resolved_xy_color)
+        await self._async_set_led_state(red=red, green=green, blue=blue)
+        self._state = True
+        self.maybe_emit_state_changed_event()
+
+    async def async_turn_off(self, *, transition: float | None = None) -> None:
+        """Turn the entity off."""
+        await self._async_set_led_state(red=0, green=0, blue=0)
+        self._state = False
+        self.maybe_emit_state_changed_event()
 
 
 class BaseClusterHandlerLight(BaseLight):
