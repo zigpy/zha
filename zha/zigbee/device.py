@@ -26,6 +26,7 @@ from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.zcl
+from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Basic, Groups, Identify, Ota
 from zigpy.zcl.foundation import (
@@ -189,6 +190,38 @@ def get_device_automation_triggers(
         ("device_offline", "device_offline"): {"device_event_type": "device_offline"},
         **getattr(device, "device_automation_triggers", {}),
     }
+
+
+def _read_current_firmware_version(
+    zigpy_device: zigpy.device.Device,
+) -> int | None:
+    """Read `current_file_version` from the device's OTA cluster, or None."""
+    try:
+        ota = zigpy_device.find_cluster(
+            cluster_id=Ota.cluster_id, cluster_type=ClusterType.Client
+        )
+    except ValueError:
+        return None
+    return ota.get(Ota.AttributeDefs.current_file_version.id)
+
+
+@dataclass(frozen=True)
+class DeviceMatch:
+    """Fingerprint criteria for matching a `Device` subclass to a zigpy device."""
+
+    manufacturers: frozenset[str] | None = None
+    models: frozenset[str] | None = None
+    firmware_versions: tuple[int | None, int | None] = (None, None)
+    firmware_version_allow_missing: bool = True
+
+
+DEVICE_QUIRKS: list[type[Device]] = []
+
+
+def register_device(cls: type[Device]) -> type[Device]:
+    """Register a `Device` subclass for fingerprint-based dispatch."""
+    DEVICE_QUIRKS.append(cls)
+    return cls
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -369,6 +402,10 @@ class Device(LogMixin, EventBase):
 
     unique_id: str
 
+    # The base `Device` is the universal fallback (matches anything) and is never
+    # iterated through `DEVICE_QUIRKS`.
+    _device_match: DeviceMatch = DeviceMatch()
+
     # Cached properties that depend on the zigpy device and must be invalidated
     # when the underlying device is swapped (e.g. after a re-interview).
     _ZIGPY_CACHED_PROPERTIES: Final = (
@@ -416,6 +453,32 @@ class Device(LogMixin, EventBase):
         self._on_network: bool = True
 
         self._init_from_zigpy_device(zigpy_device)
+
+    @classmethod
+    def matches(cls, zigpy_device: zigpy.device.Device) -> bool:
+        """Return True if this Device subclass should wrap `zigpy_device`."""
+        m = cls._device_match
+        if (
+            m.manufacturers is not None
+            and zigpy_device.manufacturer not in m.manufacturers
+        ):
+            return False
+        if m.models is not None and zigpy_device.model not in m.models:
+            return False
+
+        min_fw, max_fw = m.firmware_versions
+        if min_fw is not None or max_fw is not None:
+            current = _read_current_firmware_version(zigpy_device)
+            if current is None:
+                if not m.firmware_version_allow_missing:
+                    return False
+            else:
+                if min_fw is not None and current < min_fw:
+                    return False
+                if max_fw is not None and current >= max_fw:
+                    return False
+
+        return True
 
     def _init_from_zigpy_device(self, zigpy_device: zigpy.device.Device) -> None:
         """(Re-)initialize device state from a zigpy device.
@@ -793,9 +856,14 @@ class Device(LogMixin, EventBase):
         zigpy_dev: zigpy.device.Device,
         gateway: Gateway,
     ) -> Device:
-        """Create new device."""
+        """Create new device, dispatching to a registered subclass when applicable."""
         if zigpy_dev.ieee == gateway.state.node_info.ieee:
             return CoordinatorDevice(zigpy_dev, gateway)
+
+        for quirk_cls in DEVICE_QUIRKS:
+            if quirk_cls.matches(zigpy_dev):
+                return quirk_cls(zigpy_dev, gateway)
+
         return cls(zigpy_dev, gateway)
 
     def async_update_firmware_version(self, firmware_version: str) -> None:
