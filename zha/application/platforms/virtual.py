@@ -252,6 +252,14 @@ class OnOffClientCacheSync(VirtualEntity):
         super().__init__(endpoint=endpoint, device=device, **kwargs)
         self._off_listener: asyncio.TimerHandle | None = None
 
+    async def on_remove(self) -> None:
+        """Cancel tasks and timers this entity owns."""
+        if self._off_listener is not None:
+            self._off_listener.cancel()
+            self._off_listener = None
+
+        await super().on_remove()
+
     @property
     def on_off(self) -> bool | None:
         """Return cached value of on/off attribute."""
