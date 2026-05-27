@@ -88,7 +88,7 @@ class VirtualEntity(PlatformEntity):
                 lambda: self._cluster.remove_listener(self)
             )
 
-        if hasattr(self, "attribute_updated"):
+        if hasattr(self, "handle_attribute_updated"):
             for event_type in (
                 AttributeReadEvent,
                 AttributeReportedEvent,
@@ -96,7 +96,7 @@ class VirtualEntity(PlatformEntity):
                 AttributeWrittenEvent,
             ):
                 unsub = self._cluster.on_event(
-                    event_type.event_type, self.attribute_updated
+                    event_type.event_type, self.handle_attribute_updated
                 )
                 self._on_remove_callbacks.append(unsub)
 
@@ -307,7 +307,7 @@ class OnOffClientCacheSync(VirtualEntity):
         # automations can react to remote button presses.
         self.emit_cluster_zha_event(cmd, args)
 
-    def attribute_updated(
+    def handle_attribute_updated(
         self,
         event: AttributeReadEvent
         | AttributeReportedEvent
@@ -344,7 +344,7 @@ class _ClientClusterZhaEventEmitter(VirtualEntity):
                 self._cluster.server_commands[command_id].name, args
             )
 
-    def attribute_updated(
+    def handle_attribute_updated(
         self,
         event: AttributeReadEvent
         | AttributeReportedEvent
@@ -528,7 +528,7 @@ class SmartThingsAccelerationEvent(VirtualEntity):
         SMARTTHINGS_ACCELERATION_CLUSTER: ClusterConfig(bind=False),
     }
 
-    def attribute_updated(
+    def handle_attribute_updated(
         self,
         event: AttributeReadEvent
         | AttributeReportedEvent
