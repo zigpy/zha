@@ -1425,6 +1425,7 @@ async def test_elec_measurement_skip_unsupported_attribute(
         "active_power_max_ph_c",
         "total_active_power",
         "apparent_power",
+        "reactive_power",
         "rms_current",
         "rms_current_ph_b",
         "rms_current_ph_c",

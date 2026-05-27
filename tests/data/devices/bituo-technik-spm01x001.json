@@ -731,6 +731,53 @@
       {
         "info_object": {
           "fallback_name": null,
+          "unique_id": "ab:cd:ef:12:8d:c2:0c:51-1-2820-reactive_power",
+          "migrate_unique_ids": [],
+          "platform": "sensor",
+          "class_name": "ElectricalMeasurementReactivePower",
+          "translation_key": null,
+          "translation_placeholders": null,
+          "device_class": "reactive_power",
+          "state_class": "measurement",
+          "entity_category": null,
+          "entity_registry_enabled_default": true,
+          "enabled": true,
+          "primary": false,
+          "cluster_handlers": [
+            {
+              "class_name": "ElectricalMeasurementClusterHandler",
+              "generic_id": "cluster_handler_0x0b04",
+              "endpoint_id": 1,
+              "cluster": {
+                "id": 2820,
+                "name": "Electrical Measurement",
+                "type": "server"
+              },
+              "id": "1:0x0b04",
+              "unique_id": "ab:cd:ef:12:8d:c2:0c:51:1:0x0b04",
+              "status": "INITIALIZED",
+              "value_attribute": "ac_voltage_multiplier"
+            }
+          ],
+          "device_ieee": "ab:cd:ef:12:8d:c2:0c:51",
+          "endpoint_id": 1,
+          "available": true,
+          "group_id": null,
+          "suggested_display_precision": 1,
+          "unit": "var"
+        },
+        "state": {
+          "class_name": "ElectricalMeasurementReactivePower",
+          "available": true,
+          "state": 0.0
+        },
+        "extra_state_attributes": [
+          "measurement_type"
+        ]
+      },
+      {
+        "info_object": {
+          "fallback_name": null,
           "unique_id": "ab:cd:ef:12:8d:c2:0c:51-1-2820-rms_current",
           "migrate_unique_ids": [],
           "platform": "sensor",

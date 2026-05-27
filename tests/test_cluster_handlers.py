@@ -255,6 +255,7 @@ def endpoint_mock(zigpy_coordinator_device: ZigpyDevice) -> Endpoint:
                 "active_power_ph_c",
                 "total_active_power",
                 "apparent_power",
+                "reactive_power",
                 "dc_current",
                 "dc_current_divisor",
                 "dc_current_multiplier",
