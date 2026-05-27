@@ -31,6 +31,7 @@ from zigpy.zcl.clusters.security import IasZone
 from zigpy.zcl.foundation import GENERAL_COMMANDS, CommandSchema, GeneralCommand
 
 from zha.application import Platform
+from zha.application.helpers import write_attributes_safe
 from zha.application.platforms import (
     AttrConfig,
     ClusterConfig,
@@ -145,11 +146,13 @@ class IasZoneEnrollment(VirtualEntity):
         ieee = cluster.endpoint.device.application.state.node_info.ieee
 
         try:
-            await cluster.write_attributes({IasZone.AttributeDefs.cie_addr.name: ieee})
+            await write_attributes_safe(
+                cluster, {IasZone.AttributeDefs.cie_addr.name: ieee}
+            )
             self.debug(
                 "wrote cie_addr: %s to '%s' cluster", str(ieee), cluster.ep_attribute
             )
-        except (ZHAException, Exception) as ex:  # pylint: disable=broad-except
+        except ZHAException as ex:
             self.debug(
                 "Failed to write cie_addr to '%s' cluster: %s",
                 cluster.ep_attribute,
