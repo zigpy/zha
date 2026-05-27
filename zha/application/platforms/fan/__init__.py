@@ -225,7 +225,7 @@ class BaseFan(BaseEntity, ABC):
         event: AttributeReadEvent
         | AttributeReportedEvent
         | AttributeUpdatedEvent
-        | AttributeWrittenEvent,  # pylint: disable=unused-argument
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle state update from cluster."""
         self.maybe_emit_state_changed_event()

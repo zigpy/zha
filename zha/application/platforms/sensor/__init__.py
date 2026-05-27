@@ -351,7 +351,7 @@ class Sensor(BaseSensor):
         event: AttributeReadEvent
         | AttributeReportedEvent
         | AttributeUpdatedEvent
-        | AttributeWrittenEvent,  # pylint: disable=unused-argument
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle attribute updates from the cluster."""
         if (

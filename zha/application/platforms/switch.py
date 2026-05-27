@@ -218,7 +218,7 @@ class Switch(PlatformEntity, BaseSwitch):
         event: AttributeReadEvent
         | AttributeReportedEvent
         | AttributeUpdatedEvent
-        | AttributeWrittenEvent,  # pylint: disable=unused-argument
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle state update from cluster."""
         if event.attribute_name == self._attribute_name:
@@ -317,7 +317,7 @@ class BinaryOutputSwitch(PlatformEntity, BaseSwitch):
         event: AttributeReadEvent
         | AttributeReportedEvent
         | AttributeUpdatedEvent
-        | AttributeWrittenEvent,  # pylint: disable=unused-argument
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle state update from cluster."""
         if event.attribute_name == BinaryOutput.AttributeDefs.present_value.name:
@@ -517,7 +517,7 @@ class ConfigurableAttributeSwitch(PlatformEntity):
         event: AttributeReadEvent
         | AttributeReportedEvent
         | AttributeUpdatedEvent
-        | AttributeWrittenEvent,  # pylint: disable=unused-argument
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle state update from cluster."""
         if event.attribute_name == self._attribute_name:

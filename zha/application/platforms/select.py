@@ -321,7 +321,7 @@ class ZCLEnumSelectEntity(BaseSelectEntity, PlatformEntity):
         event: AttributeReadEvent
         | AttributeReportedEvent
         | AttributeUpdatedEvent
-        | AttributeWrittenEvent,  # pylint: disable=unused-argument
+        | AttributeWrittenEvent,
     ) -> None:
         """Handle value update from cluster."""
         if event.attribute_name == self._attribute_name:
