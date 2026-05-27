@@ -86,15 +86,15 @@ GROUP_PLATFORMS = (
 def _pick_primary_cluster(endpoint: Endpoint, match: ClusterMatch) -> Cluster | None:
     """Pick the primary cluster for an entity from a ClusterMatch."""
     if match.server_clusters:
-        cluster_id = next(iter(match.server_clusters))
+        cluster_id = min(match.server_clusters)
         return endpoint.zigpy_endpoint.in_clusters.get(cluster_id)
     if match.client_clusters:
-        cluster_id = next(iter(match.client_clusters))
+        cluster_id = min(match.client_clusters)
         return endpoint.zigpy_endpoint.out_clusters.get(cluster_id)
-    for cluster_id in match.optional_server_clusters:
+    for cluster_id in sorted(match.optional_server_clusters):
         if cluster_id in endpoint.zigpy_endpoint.in_clusters:
             return endpoint.zigpy_endpoint.in_clusters[cluster_id]
-    for cluster_id in match.optional_client_clusters:
+    for cluster_id in sorted(match.optional_client_clusters):
         if cluster_id in endpoint.zigpy_endpoint.out_clusters:
             return endpoint.zigpy_endpoint.out_clusters[cluster_id]
     return None
