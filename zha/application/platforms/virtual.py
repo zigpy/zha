@@ -272,10 +272,8 @@ class OnOffClientCacheSync(VirtualEntity):
         except KeyError:
             return
 
-        # Re-emit every incoming server command as a zha_event so HA
-        # automations can react to remote button presses.
-        self.emit_cluster_zha_event(cmd, args)
-
+        # Process the command into the cache first, so the resulting
+        # attribute_updated zha_event fires before the command zha_event.
         if cmd in (
             OnOff.ServerCommandDefs.off.name,
             OnOff.ServerCommandDefs.off_with_effect.name,
@@ -304,6 +302,10 @@ class OnOffClientCacheSync(VirtualEntity):
             self._cluster.update_attribute(
                 OnOff.AttributeDefs.on_off.id, not bool(self.on_off)
             )
+
+        # Re-emit every incoming server command as a zha_event so HA
+        # automations can react to remote button presses.
+        self.emit_cluster_zha_event(cmd, args)
 
     def attribute_updated(
         self,

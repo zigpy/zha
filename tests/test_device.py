@@ -1289,16 +1289,19 @@ async def test_unquirked_client_cluster_events(zha_gateway: Gateway) -> None:
                     "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0006_CLIENT",
                     "endpoint_id": 1,
                     "cluster_id": general.OnOff.cluster_id,
-                    "command": "toggle",
-                    "args": [],
+                    "command": "attribute_updated",
+                    "args": {
+                        "attribute_id": 0,
+                        "attribute_name": "on_off",
+                        "attribute_value": True,
+                        "value": True,
+                    },
                     "params": {},
                 },
                 event_type="zha_event",
                 event="zha_event",
             )
         ),
-        # OnOffClientCacheSync mirrors the toggle into the on_off attribute
-        # cache, which re-emits as an attribute_updated zha_event.
         call(
             ZHAEvent(
                 device_ieee=device_ieee,
@@ -1307,13 +1310,8 @@ async def test_unquirked_client_cluster_events(zha_gateway: Gateway) -> None:
                     "unique_id": "ab:cd:ef:12:25:3a:b6:6f:1:0x0006_CLIENT",
                     "endpoint_id": 1,
                     "cluster_id": general.OnOff.cluster_id,
-                    "command": "attribute_updated",
-                    "args": {
-                        "attribute_id": 0,
-                        "attribute_name": "on_off",
-                        "attribute_value": True,
-                        "value": True,
-                    },
+                    "command": "toggle",
+                    "args": [],
                     "params": {},
                 },
                 event_type="zha_event",
