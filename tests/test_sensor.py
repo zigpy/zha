@@ -4,7 +4,6 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from functools import partial
-import math
 from typing import Any
 from unittest.mock import MagicMock, call, patch
 
@@ -43,7 +42,6 @@ from tests.common import (
     zigpy_device_from_json,
 )
 from zha.application import Platform
-from zha.application.const import CLUSTER_READS_PER_REQ
 from zha.application.gateway import Gateway
 from zha.application.platforms import PlatformEntity, sensor
 from zha.application.platforms.sensor import (
@@ -1392,9 +1390,7 @@ async def test_elec_measurement_skip_unsupported_attribute(
     )
     await poller.async_update()
     await zha_dev.gateway.async_block_till_done()
-    assert cluster.read_attributes.call_count == math.ceil(
-        len(supported_attributes) / CLUSTER_READS_PER_REQ
-    )
+
     read_attrs = {
         a for call in cluster.read_attributes.call_args_list for a in call[0][0]
     }

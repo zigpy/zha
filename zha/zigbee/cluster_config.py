@@ -3,19 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import itertools
 import logging
 from typing import TYPE_CHECKING
 
 import zigpy.exceptions
-from zigpy.typing import UNDEFINED
 import zigpy.util
 import zigpy.zcl
 from zigpy.zcl import ReportingConfig
 from zigpy.zcl.foundation import Status, ZCLAttributeDef
 
 from zha.application.const import (
-    CLUSTER_READS_PER_REQ,
     ZHA_CLUSTER_BIND_EVENT,
     ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT,
 )
@@ -245,32 +242,6 @@ async def configure_cluster_configs(
                 )
 
 
-async def _read_attributes_chunked(
-    cluster: zigpy.zcl.Cluster,
-    attrs: list[str],
-    *,
-    allow_cache: bool,
-    only_cache: bool,
-) -> None:
-    """Read attributes in chunks, matching legacy cluster handler behavior."""
-    for chunk in itertools.batched(attrs, CLUSTER_READS_PER_REQ):
-        try:
-            await cluster.read_attributes(
-                list(chunk),
-                allow_cache=allow_cache,
-                only_cache=only_cache,
-                manufacturer=UNDEFINED,
-            )
-        except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.debug(
-                "[%s] Failed to read attributes %s from cluster %s: %s",
-                cluster.endpoint.device.ieee,
-                chunk,
-                cluster.ep_attribute,
-                ex,
-            )
-
-
 async def initialize_cluster_configs(
     configs: dict[tuple[int, int, bool], AggregatedClusterConfig],
     from_cache: bool,
@@ -289,20 +260,32 @@ async def initialize_cluster_configs(
         ]
 
         if cached_attrs:
-            await _read_attributes_chunked(
-                agg.cluster,
-                cached_attrs,
-                allow_cache=True,
-                only_cache=from_cache,
-            )
+            try:
+                await agg.cluster.read_attributes(
+                    cached_attrs, allow_cache=True, only_cache=from_cache
+                )
+            except Exception as ex:  # pylint: disable=broad-except
+                _LOGGER.debug(
+                    "[%s] Failed to read attributes %s from cluster %s: %s",
+                    agg.cluster.endpoint.device.ieee,
+                    cached_attrs,
+                    agg.cluster.ep_attribute,
+                    ex,
+                )
 
         if fresh_attrs:
-            await _read_attributes_chunked(
-                agg.cluster,
-                fresh_attrs,
-                allow_cache=from_cache,
-                only_cache=from_cache,
-            )
+            try:
+                await agg.cluster.read_attributes(
+                    fresh_attrs, allow_cache=from_cache, only_cache=from_cache
+                )
+            except Exception as ex:  # pylint: disable=broad-except
+                _LOGGER.debug(
+                    "[%s] Failed to read attributes %s from cluster %s: %s",
+                    agg.cluster.endpoint.device.ieee,
+                    fresh_attrs,
+                    agg.cluster.ep_attribute,
+                    ex,
+                )
 
         for entity in agg.entities:
             try:

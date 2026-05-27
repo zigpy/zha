@@ -160,7 +160,6 @@ UNKNOWN_MODEL = "unk_model"
 ZHA_CLUSTER_BIND_EVENT = "zha_cluster_bind"
 ZHA_CLUSTER_CONFIGURE_REPORTING_EVENT = "zha_cluster_configure_reporting"
 ZHA_DEVICE_CONFIGURED_EVENT = "zha_device_configured"
-CLUSTER_READS_PER_REQ = 5
 ZHA_EVENT = "zha_event"
 ZHA_DEVICE_UPDATED_EVENT = "zha_device_updated_event"
 ZHA_DEVICE_ENTITY_ADDED_EVENT = "zha_device_entity_added_event"

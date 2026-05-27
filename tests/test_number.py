@@ -103,7 +103,7 @@ async def test_number(
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_analog_output_device)
     # one for present_value and one for the rest configuration attributes
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     attr_reads = set()
     for call_args in cluster.read_attributes.call_args_list:
         attr_reads |= set(call_args[0][0])
@@ -118,7 +118,7 @@ async def test_number(
     entity: PlatformEntity = get_entity(zha_device, platform=Platform.NUMBER)
     assert isinstance(entity, PlatformEntity)
 
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
 
     assert entity.fallback_name == "PWM1"
 
@@ -138,7 +138,7 @@ async def test_number(
     assert entity.native_step == 1.1
 
     # change value from device
-    assert cluster.read_attributes.call_count == 3
+    assert cluster.read_attributes.call_count == 2
     await send_attributes_report(zha_gateway, cluster, {0x0055: 15})
     await zha_gateway.async_block_till_done()
     assert entity.state["state"] == 15.0
@@ -244,16 +244,10 @@ async def test_level_control_number(
                 "on_transition_time",
                 "off_transition_time",
                 "default_move_rate",
+                "start_up_current_level",
             ],
             allow_cache=True,
             only_cache=False,
-            manufacturer=UNDEFINED,
-        ),
-        call(
-            ["start_up_current_level"],
-            allow_cache=True,
-            only_cache=False,
-            manufacturer=UNDEFINED,
         ),
         call(
             [
@@ -261,7 +255,6 @@ async def test_level_control_number(
             ],
             allow_cache=False,
             only_cache=False,
-            manufacturer=UNDEFINED,
         ),
     ]
 
@@ -369,7 +362,6 @@ async def test_color_number(
             ],
             allow_cache=True,
             only_cache=False,
-            manufacturer=UNDEFINED,
         )
         in color_cluster.read_attributes.call_args_list
     )
