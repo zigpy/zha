@@ -28,6 +28,7 @@ from zha.application.platforms.alarm_control_panel.const import (
     AlarmState,
     CodeFormat,
 )
+from zha.zigbee.endpoint import cluster_event_unique_id
 
 if TYPE_CHECKING:
     from zha.zigbee.device import Device
@@ -156,6 +157,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         )
 
         self._cluster = endpoint.zigpy_endpoint.out_clusters[AceCluster.cluster_id]
+        self._cluster_event_unique_id = cluster_event_unique_id(endpoint, self._cluster)
 
         alarm_options = device.gateway.config.config.alarm_control_panel_options
         self.panel_code: str = alarm_options.master_code
@@ -202,7 +204,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         """Relay a cluster-level zha_event via the endpoint."""
         self._endpoint.emit_zha_event(
             {
-                "unique_id": self.unique_id,
+                "unique_id": self._cluster_event_unique_id,
                 "cluster_id": self._cluster.cluster_id,
                 "command": command,
                 "args": args if isinstance(args, list) else [],
@@ -230,9 +232,13 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         if self.invalid_tries >= self.max_invalid_tries:
             self.alarm_status = AceCluster.AlarmStatus.Emergency
             self.armed_state = AceCluster.PanelStatus.In_Alarm
-            self._emit_zha_event(f"{self.unique_id}_{SIGNAL_ALARM_TRIGGERED}", [])
+            self._emit_zha_event(
+                f"{self._cluster_event_unique_id}_{SIGNAL_ALARM_TRIGGERED}", []
+            )
         else:
-            self._emit_zha_event(f"{self.unique_id}_{SIGNAL_ARMED_STATE_CHANGED}", [])
+            self._emit_zha_event(
+                f"{self._cluster_event_unique_id}_{SIGNAL_ARMED_STATE_CHANGED}", []
+            )
         self._emit_panel_status_changed()
 
     def _disarm(self, code: str):

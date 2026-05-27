@@ -565,7 +565,10 @@ class IdentifyTriggerEffectEvent(VirtualEntity):
         except KeyError:
             return
         if cmd == Identify.ServerCommandDefs.trigger_effect.name:
-            self.emit_cluster_zha_event(f"{self.unique_id}_{cmd}", [args[0]])
+            self.emit_cluster_zha_event(
+                f"{cluster_event_unique_id(self._endpoint, self._cluster)}_{cmd}",
+                [args[0]],
+            )
 
 
 # === Aqara Opple cluster per-model attribute initialization ===
