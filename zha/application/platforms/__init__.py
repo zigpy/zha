@@ -44,8 +44,10 @@ GROUP_ENTITY_REGISTRY: list[type[GroupEntity]] = []
 class PlatformFeatureGroup(StrEnum):
     """Feature groups for platform entities."""
 
-    # OnOff server clusters can be turned into lights, shades, or switches (fallback)
-    LIGHT_OR_SWITCH_OR_SHADE = "light_or_switch_or_shade"
+    # OnOff server clusters can be turned into lights, shades, switches (fallback).
+    # Valves are also allowed via overrides but have no device types so are not auto
+    # discovered.
+    GENERIC_OPEN_CLOSE = "generic_open_close"
 
     # OnOff client clusters can be turned into manufacturer-specific motion sensors or
     # fall back to generic binary sensors

@@ -46,6 +46,7 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     siren,
     switch,
     update,
+    valve,
 )
 
 # importing cluster handlers updates registries
@@ -90,6 +91,7 @@ PLATFORMS = (
     Platform.SENSOR,
     Platform.SIREN,
     Platform.SWITCH,
+    Platform.VALVE,
     Platform.UPDATE,
 )
 
