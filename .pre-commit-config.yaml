@@ -28,3 +28,10 @@ repos:
         types_or: [python, pyi]
         require_serial: true
         files: ^zha/
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version.
+    rev: 0.11.16
+    hooks:
+      - id: uv-lock
+        args: ["--check"]
