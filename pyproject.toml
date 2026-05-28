@@ -163,6 +163,14 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
+module = "zha.application.platforms.alarm_control_panel"
+disable_error_code = [
+    "arg-type",  # 1
+    "no-untyped-call",  # 1
+    "no-untyped-def",  # 11
+]
+
+[[tool.mypy.overrides]]
 module = "zha.application.helpers"
 disable_error_code = [
     "arg-type",  # 2
@@ -177,18 +185,6 @@ disable_error_code = [
     "no-any-return",  # 3
     "no-untyped-call",  # 6
     "no-untyped-def",  # 5
-    "unreachable",  # 2
-    "valid-type",  # 1
-]
-
-[[tool.mypy.overrides]]
-module = "zha.application.platforms.alarm_control_panel"
-disable_error_code = [
-    "arg-type",  # 1
-    "no-untyped-call",  # 1
-    "no-untyped-def",  # 11
-    "unreachable",  # 2
-    "valid-type",  # 6
 ]
 
 [[tool.mypy.overrides]]
@@ -202,22 +198,20 @@ disable_error_code = [
 ]
 
 [[tool.mypy.overrides]]
-module = "zha.application.platforms.select"
-disable_error_code = [
-    "arg-type",  # 33
-    "override",  # 1
-]
-
-[[tool.mypy.overrides]]
 module = "zha.application.platforms.light"
 disable_error_code = [
     "arg-type",  # 9
-    "attr-defined",  # 4
     "no-any-return",  # 4
     "no-untyped-call",  # 11
     "no-untyped-def",  # 8
     "type-var",  # 2
-    "valid-type",  # 2
+]
+
+[[tool.mypy.overrides]]
+module = "zha.application.platforms.select"
+disable_error_code = [
+    "arg-type",  # 33
+    "override",  # 1
 ]
 
 [[tool.mypy.overrides]]

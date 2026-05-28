@@ -9,7 +9,13 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zigpy.zcl.clusters.security import IasAce as AceCluster
+from zigpy.zcl.clusters.security import (
+    AlarmStatus,
+    ArmMode,
+    ArmNotification,
+    IasAce as AceCluster,
+    PanelStatus,
+)
 
 from zha.application import Platform
 from zha.application.platforms import (
@@ -164,8 +170,8 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         self.code_required_arm_actions: bool = alarm_options.arm_requires_code
         self.max_invalid_tries: int = alarm_options.failed_tries
 
-        self.armed_state: AceCluster.PanelStatus = AceCluster.PanelStatus.Panel_Disarmed
-        self.alarm_status: AceCluster.AlarmStatus = AceCluster.AlarmStatus.No_Alarm
+        self.armed_state: PanelStatus = AceCluster.PanelStatus.Panel_Disarmed
+        self.alarm_status: AlarmStatus = AceCluster.AlarmStatus.No_Alarm
         self.invalid_tries: int = 0
 
         self._command_map: dict[int, Callable[..., Any]] = {
@@ -180,7 +186,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
             AceCluster.ServerCommandDefs.get_bypassed_zone_list.id: self._get_bypassed_zone_list,
             AceCluster.ServerCommandDefs.get_zone_status.id: self._get_zone_status,
         }
-        self._arm_map: dict[AceCluster.ArmMode, Callable[..., Any]] = {
+        self._arm_map: dict[ArmMode, Callable[..., Any]] = {
             AceCluster.ArmMode.Disarm: self._disarm,
             AceCluster.ArmMode.Arm_All_Zones: self._arm_away,
             AceCluster.ArmMode.Arm_Day_Home_Only: self._arm_day,
@@ -299,8 +305,8 @@ class AlarmControlPanel(BaseAlarmControlPanel):
     def _handle_arm(
         self,
         code: str,
-        panel_status: AceCluster.PanelStatus,
-        armed_type: AceCluster.ArmNotification,
+        panel_status: PanelStatus,
+        armed_type: ArmNotification,
     ):
         """Arm the panel with the specified statuses."""
         if self.code_required_arm_actions and code != self.panel_code:
@@ -333,7 +339,7 @@ class AlarmControlPanel(BaseAlarmControlPanel):
         """Handle the IAS ACE panic command (received from device)."""
         self._set_alarm(AceCluster.AlarmStatus.Emergency_Panic)
 
-    def _set_alarm(self, status: AceCluster.AlarmStatus) -> None:
+    def _set_alarm(self, status: AlarmStatus) -> None:
         """Set the specified alarm status."""
         self.alarm_status = status
         self.armed_state = AceCluster.PanelStatus.In_Alarm

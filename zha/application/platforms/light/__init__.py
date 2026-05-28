@@ -23,7 +23,7 @@ from zigpy.zcl import (
     ReportingConfig,
 )
 from zigpy.zcl.clusters.general import Identify, LevelControl, OnOff
-from zigpy.zcl.clusters.lighting import Color
+from zigpy.zcl.clusters.lighting import Color, ColorCapabilities, Options
 from zigpy.zcl.foundation import Status
 
 from zha.application import Platform
@@ -283,7 +283,7 @@ class BaseSharedLight(BaseLight):
         self._internal_supported_color_modes: set[ColorMode] = set()
 
     @property
-    def _color_capabilities(self) -> Color.ColorCapabilities:
+    def _color_capabilities(self) -> ColorCapabilities:
         """Return ZCL color capabilities of the light."""
         if self._color_cluster is None:
             return Color.ColorCapabilities.XY_attributes
@@ -315,7 +315,7 @@ class BaseSharedLight(BaseLight):
         return Color.ColorCapabilities.Color_loop in self._color_capabilities
 
     @property
-    def _color_options(self) -> Color.Options:
+    def _color_options(self) -> Options:
         if self._color_cluster is None:
             return Color.Options(0)
         return Color.Options(

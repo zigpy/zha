@@ -19,7 +19,11 @@ from zigpy.zcl import (
     AttributeWrittenEvent,
     ReportingConfig,
 )
-from zigpy.zcl.clusters.closures import Shade as ShadeCluster, WindowCovering
+from zigpy.zcl.clusters.closures import (
+    Shade as ShadeCluster,
+    WindowCovering,
+    WindowCoveringType,
+)
 from zigpy.zcl.clusters.general import LevelControl, OnOff, OnOff as OnOffCluster
 from zigpy.zcl.foundation import Status
 
@@ -201,7 +205,7 @@ class Cover(BaseCover):
         self._determine_cover_state(refresh=True)
 
     @property
-    def _window_covering_type(self) -> WindowCovering.WindowCoveringType | None:
+    def _window_covering_type(self) -> WindowCoveringType | None:
         """Return the window covering type."""
         return self._cluster.get(WCAttrs.window_covering_type.name)
 
