@@ -196,7 +196,7 @@ disable_error_code = [
     "no-any-return",  # 3
     "no-untyped-call",  # 6
     "no-untyped-def",  # 5
-    "unreachable",  # 1
+    "unreachable",  # 2
     "valid-type",  # 1
 ]
 
