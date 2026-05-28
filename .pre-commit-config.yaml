@@ -1,18 +1,26 @@
-ci:
-  autofix_commit_msg: "Apply pre-commit auto fixes"
-  autoupdate_commit_msg: "Auto-update pre-commit hooks"
-  skip: [mypy]
-
 repos:
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
-    hooks:
-      - id: codespell
-        additional_dependencies: [tomli]
-        args: ["--toml", "pyproject.toml"]
-
   - repo: local
     hooks:
+      - id: codespell
+        name: codespell
+        entry: uv run --frozen codespell --toml pyproject.toml
+        language: system
+        types: [text]
+
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --frozen ruff check --force-exclude --fix
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
       - id: mypy
         name: mypy
         entry: uv run --frozen mypy
@@ -20,10 +28,3 @@ repos:
         types_or: [python, pyi]
         require_serial: true
         files: ^zha/
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.14
-    hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
