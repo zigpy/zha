@@ -37,7 +37,7 @@ def create_number_formatter(formatting: int) -> str:
     """Return a formatting string, given the formatting value."""
     formatting_obj = NumberFormatting(formatting)
     r_digits = formatting_obj.num_digits_right_of_decimal
-    l_digits = formatting_obj.num_digits_left_of_decimal
+    l_digits: int = formatting_obj.num_digits_left_of_decimal
 
     if l_digits == 0:
         l_digits = 15

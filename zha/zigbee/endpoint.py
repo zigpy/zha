@@ -14,7 +14,7 @@ from zigpy.zcl.foundation import CommandSchema
 from zha.application import const
 
 if TYPE_CHECKING:
-    from zigpy import Endpoint as ZigpyEndpoint
+    from zigpy.endpoint import Endpoint as ZigpyEndpoint
 
     from zha.zigbee.device import Device
 

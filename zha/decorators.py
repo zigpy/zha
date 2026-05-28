@@ -55,7 +55,7 @@ class SetRegistry(set[int | str]):
         return decorator
 
 
-def periodic(refresh_interval: tuple, run_immediately=False) -> Callable:
+def periodic(refresh_interval: tuple, run_immediately: bool = False) -> Callable:
     """Make a method with periodic refresh."""
 
     def scheduler(func: Callable) -> Callable[[Any, Any], Coroutine[Any, Any, None]]:
