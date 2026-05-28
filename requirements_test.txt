@@ -1,8 +1,8 @@
 coverage[toml]
 colorlog
-codespell
-mypy
-pre-commit
+codespell==2.4.2
+mypy==2.1.0
+pre-commit==4.6.0
 pytest-cov
 pytest-sugar
 pytest-timeout
@@ -11,7 +11,7 @@ pytest-xdist
 pytest
 python-slugify
 zigpy>=0.65.2
-ruff
+ruff==0.15.15
 looptime>=0.7
 freezegun
 coloredlogs
