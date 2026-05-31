@@ -11,7 +11,7 @@ jobs:
     uses: zigpy/workflows/.github/workflows/ci.yml@main
     with:
       CODE_FOLDER: zha
-      CACHE_VERSION: 2
+      CACHE_VERSION: 1
       PYTHON_VERSION_DEFAULT: "3.12"
       PRE_COMMIT_CACHE_PATH: ~/.cache/pre-commit
       MINIMUM_COVERAGE_PERCENTAGE: 95
