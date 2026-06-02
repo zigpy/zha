@@ -378,6 +378,15 @@ class AqaraMotionDetectionInterval(NumberConfigurationEntity):
         models=frozenset({"lumi.motion.ac02", "lumi.motion.agl04"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "detection_interval": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(LevelControl.cluster_id)
 class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
@@ -396,31 +405,10 @@ class OnOffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
 
     _server_cluster_config = {
         LevelControl.cluster_id: ClusterConfig(
-            bind=True,
+            bind=False,
             attributes={
-                LevelControl.AttributeDefs.current_level: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=1, max_interval=900, reportable_change=1
-                    ),
-                ),
                 LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.on_level: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
-                    read_on_startup=False,
+                    read_on_startup=False
                 ),
             },
         ),
@@ -442,6 +430,15 @@ class OnLevelConfigurationEntity(NumberConfigurationEntity):
         server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
+    _server_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                LevelControl.AttributeDefs.on_level: AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(LevelControl.cluster_id)
 class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
@@ -458,6 +455,17 @@ class OnTransitionTimeConfigurationEntity(NumberConfigurationEntity):
         server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
+    _server_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(LevelControl.cluster_id)
 class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
@@ -473,6 +481,17 @@ class OffTransitionTimeConfigurationEntity(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
     )
+
+    _server_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(LevelControl.cluster_id)
@@ -491,6 +510,17 @@ class DefaultMoveRateConfigurationEntity(NumberConfigurationEntity):
         server_clusters=frozenset({LevelControl.cluster_id}),
     )
 
+    _server_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(LevelControl.cluster_id)
 class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
@@ -506,6 +536,17 @@ class StartUpCurrentLevelConfigurationEntity(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({LevelControl.cluster_id}),
     )
+
+    _server_cluster_config = {
+        LevelControl.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(Color.cluster_id)
@@ -654,19 +695,10 @@ class PIROccupiedToUnoccupiedDelayConfigurationEntity(NumberConfigurationEntity)
 
     _server_cluster_config = {
         OccupancySensing.cluster_id: ClusterConfig(
-            bind=True,
+            bind=False,
             attributes={
-                OccupancySensing.AttributeDefs.occupancy: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
                 OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
-                    read_on_startup=False,
-                ),
-                OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
-                    read_on_startup=False,
+                    read_on_startup=False
                 ),
             },
         ),
@@ -689,6 +721,17 @@ class PIRUnoccupiedToOccupiedDelayConfigurationEntity(NumberConfigurationEntity)
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({OccupancySensing.cluster_id}),
     )
+
+    _server_cluster_config = {
+        OccupancySensing.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(OccupancySensing.cluster_id)
@@ -747,6 +790,20 @@ class FilterLifeTime(NumberConfigurationEntity):
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "filter_life_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(Basic.cluster_id)
 class TiRouterTransmitPower(NumberConfigurationEntity):
@@ -792,6 +849,15 @@ class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "dimming_speed_up_remote": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliButtonDelay(NumberConfigurationEntity):
@@ -809,6 +875,15 @@ class InovelliButtonDelay(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "button_delay": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -828,6 +903,15 @@ class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "dimming_speed_up_local": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
@@ -845,6 +929,15 @@ class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "ramp_rate_off_to_on_local": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -864,6 +957,15 @@ class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "ramp_rate_off_to_on_remote": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
@@ -881,6 +983,15 @@ class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "dimming_speed_down_remote": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -900,6 +1011,15 @@ class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "dimming_speed_down_local": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
@@ -917,6 +1037,15 @@ class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "ramp_rate_on_to_off_local": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -936,6 +1065,15 @@ class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "ramp_rate_on_to_off_remote": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
@@ -953,6 +1091,15 @@ class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "minimum_level": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -972,6 +1119,15 @@ class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "maximum_level": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliAutoShutoffTimer(NumberConfigurationEntity):
@@ -989,6 +1145,15 @@ class InovelliAutoShutoffTimer(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "auto_off_timer": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1008,6 +1173,15 @@ class InovelliLocalDefaultLevel(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "default_level_local": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
@@ -1026,6 +1200,15 @@ class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "default_level_remote": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliStartupDefaultLevel(NumberConfigurationEntity):
@@ -1043,6 +1226,15 @@ class InovelliStartupDefaultLevel(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "state_after_power_restored": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1063,6 +1255,15 @@ class InovelliQuickStartTime(NumberConfigurationEntity):
         models=frozenset({"VZM35-SN"}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "quick_start_time": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
@@ -1080,6 +1281,15 @@ class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "load_level_indicator_timeout": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1099,6 +1309,15 @@ class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "led_color_when_on": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
@@ -1116,6 +1335,15 @@ class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "led_color_when_off": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1135,6 +1363,15 @@ class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "led_intensity_when_on": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
@@ -1152,6 +1389,15 @@ class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "led_intensity_when_off": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -1171,6 +1417,15 @@ class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "double_tap_up_level": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
@@ -1188,6 +1443,15 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "double_tap_down_level": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -1208,6 +1472,15 @@ class AqaraPetFeederServingSize(NumberConfigurationEntity):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "serving_size": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -1230,6 +1503,15 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "portion_weight": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatAwayTemp(NumberConfigurationEntity):
@@ -1251,6 +1533,15 @@ class AqaraThermostatAwayTemp(NumberConfigurationEntity):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "away_preset_temperature": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1278,106 +1569,7 @@ class ThermostatLocalTempCalibration(NumberConfigurationEntity):
         Thermostat.cluster_id: ClusterConfig(
             bind=True,
             attributes={
-                Thermostat.AttributeDefs.local_temperature: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.running_mode: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.running_state: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.system_mode: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupancy: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=5
-                    ),
-                ),
-                Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=5
-                    ),
-                ),
-                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
-                    read_on_startup=True,
-                ),
-                Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
                 Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
                     read_on_startup=False,
                 ),
             },
@@ -1601,6 +1793,15 @@ class SinopeDimmerOnLevelConfigurationEntity(NumberConfigurationEntity):
         models=frozenset({"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"}),
     )
 
+    _server_cluster_config = {
+        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "on_intensity": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
@@ -1628,6 +1829,15 @@ class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
         ),
     )
 
+    _server_cluster_config = {
+        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "on_led_intensity": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
@@ -1654,3 +1864,12 @@ class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
             }
         ),
     )
+
+    _server_cluster_config = {
+        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "off_led_intensity": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }

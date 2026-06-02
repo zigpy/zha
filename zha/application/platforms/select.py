@@ -26,7 +26,6 @@ from zigpy.zcl import (
     AttributeReportedEvent,
     AttributeUpdatedEvent,
     AttributeWrittenEvent,
-    ReportingConfig,
 )
 from zigpy.zcl.clusters.general import LevelControl, OnOff
 from zigpy.zcl.clusters.hvac import Thermostat, UserInterface
@@ -354,12 +353,6 @@ class StartupOnOffSelectEntity(ZCLEnumSelectEntity):
         OnOff.cluster_id: ClusterConfig(
             bind=True,
             attributes={
-                OnOff.AttributeDefs.on_off: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
                 OnOff.AttributeDefs.start_up_on_off: AttrConfig(
                     read_on_startup=False,
                 ),
@@ -393,6 +386,7 @@ class TuyaPowerOnStateSelectEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         OnOff.cluster_id: ClusterConfig(
+            bind=False,
             attributes={
                 "power_on_state": AttrConfig(read_on_startup=False),
             },
@@ -414,6 +408,15 @@ class TuyaManufacturerPowerOnStateSelectEntity(ZCLEnumSelectEntity):
         server_clusters=frozenset({TUYA_MANUFACTURER_CLUSTER}),
         exposed_features=frozenset({TUYA_PLUG_MANUFACTURER}),
     )
+
+    _server_cluster_config = {
+        TUYA_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "power_on_state": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class TuyaBacklightMode(types.enum8):
@@ -441,6 +444,7 @@ class TuyaBacklightModeSelectEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         OnOff.cluster_id: ClusterConfig(
+            bind=False,
             attributes={
                 "backlight_mode": AttrConfig(read_on_startup=False),
             },
@@ -472,6 +476,15 @@ class MoesBacklightModeSelectEntity(ZCLEnumSelectEntity):
         exposed_features=frozenset({TUYA_PLUG_MANUFACTURER}),
     )
 
+    _server_cluster_config = {
+        TUYA_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "backlight_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 class AqaraMotionSensitivities(types.enum8):
     """Aqara motion sensitivities."""
@@ -495,6 +508,15 @@ class AqaraMotionSensitivity(ZCLEnumSelectEntity):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.motion.ac01", "lumi.motion.ac02", "lumi.motion.agl04"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "motion_sensitivity": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class HueV1MotionSensitivities(types.enum8):
@@ -520,26 +542,6 @@ class HueV1MotionSensitivity(ZCLEnumSelectEntity):
         manufacturers=frozenset({"Philips", "Signify Netherlands B.V."}),
         models=frozenset({"SML001"}),
     )
-
-    _server_cluster_config = {
-        OccupancySensing.cluster_id: ClusterConfig(
-            bind=True,
-            attributes={
-                OccupancySensing.AttributeDefs.occupancy: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=0, max_interval=900, reportable_change=1
-                    ),
-                ),
-                OccupancySensing.AttributeDefs.pir_o_to_u_delay: AttrConfig(
-                    read_on_startup=False,
-                ),
-                OccupancySensing.AttributeDefs.pir_u_to_o_delay: AttrConfig(
-                    read_on_startup=False,
-                ),
-            },
-        ),
-    }
 
 
 class HueV2MotionSensitivities(types.enum8):
@@ -591,6 +593,15 @@ class AqaraMonitoringMode(ZCLEnumSelectEntity):
         models=frozenset({"lumi.motion.ac01"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "monitoring_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 class AqaraApproachDistances(types.enum8):
     """Aqara approach distances."""
@@ -615,6 +626,15 @@ class AqaraApproachDistance(ZCLEnumSelectEntity):
         models=frozenset({"lumi.motion.ac01"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "approach_distance": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(MagnetAC01OppleCluster.cluster_id)
 class AqaraMagnetAC01DetectionDistance(ZCLEnumSelectEntity):
@@ -630,6 +650,15 @@ class AqaraMagnetAC01DetectionDistance(ZCLEnumSelectEntity):
         server_clusters=frozenset({MagnetAC01OppleCluster.cluster_id}),
         models=frozenset({"lumi.magnet.ac01"}),
     )
+
+    _server_cluster_config = {
+        MagnetAC01OppleCluster.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                "detection_distance": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(T2RelayOppleCluster.cluster_id)
@@ -647,6 +676,15 @@ class AqaraT2RelaySwitchMode(ZCLEnumSelectEntity):
         models=frozenset({"lumi.switch.acn047"}),
     )
 
+    _server_cluster_config = {
+        T2RelayOppleCluster.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                "switch_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(T2RelayOppleCluster.cluster_id)
 class AqaraT2RelaySwitchType(ZCLEnumSelectEntity):
@@ -662,6 +700,15 @@ class AqaraT2RelaySwitchType(ZCLEnumSelectEntity):
         server_clusters=frozenset({T2RelayOppleCluster.cluster_id}),
         models=frozenset({"lumi.switch.acn047"}),
     )
+
+    _server_cluster_config = {
+        T2RelayOppleCluster.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                "switch_type": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(T2RelayOppleCluster.cluster_id)
@@ -679,6 +726,15 @@ class AqaraT2RelayStartupOnOff(ZCLEnumSelectEntity):
         models=frozenset({"lumi.switch.acn047"}),
     )
 
+    _server_cluster_config = {
+        T2RelayOppleCluster.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                "startup_on_off": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(T2RelayOppleCluster.cluster_id)
 class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
@@ -694,6 +750,15 @@ class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
         server_clusters=frozenset({T2RelayOppleCluster.cluster_id}),
         models=frozenset({"lumi.switch.acn047"}),
     )
+
+    _server_cluster_config = {
+        T2RelayOppleCluster.cluster_id: ClusterConfig(
+            bind=False,
+            attributes={
+                "decoupled_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class InovelliOutputMode(types.enum1):
@@ -716,6 +781,15 @@ class InovelliOutputModeEntity(ZCLEnumSelectEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "output_mode": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
 
 
 class InovelliSwitchType(types.enum8):
@@ -742,6 +816,15 @@ class InovelliSwitchTypeEntity(ZCLEnumSelectEntity):
         models=frozenset({"VZM31-SN"}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "switch_type": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
+
 
 class InovelliFanSwitchType(types.enum1):
     """Inovelli fan switch mode."""
@@ -765,6 +848,15 @@ class InovelliFanSwitchTypeEntity(ZCLEnumSelectEntity):
         models=frozenset({"VZM35-SN"}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "switch_type": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
+
 
 class InovelliLedScalingMode(types.enum1):
     """Inovelli led mode."""
@@ -786,6 +878,15 @@ class InovelliLedScalingModeEntity(ZCLEnumSelectEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "led_scaling_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class InovelliFanLedScalingMode(types.enum8):
@@ -819,6 +920,15 @@ class InovelliFanLedScalingModeEntity(ZCLEnumSelectEntity):
         models=frozenset({"VZM35-SN"}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "smart_fan_led_display_levels": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 class InovelliNonNeutralOutput(types.enum1):
     """Inovelli non neutral output selection."""
@@ -840,6 +950,15 @@ class InovelliNonNeutralOutputEntity(ZCLEnumSelectEntity):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "increased_non_neutral_output": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class InovelliDimmingMode(types.enum1):
@@ -864,6 +983,15 @@ class InovelliDimmingModeEntity(ZCLEnumSelectEntity):
         models=frozenset({"VZM31-SN", "VZM36"}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "leading_or_trailing_edge": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 class AqaraFeedingMode(types.enum8):
     """Feeding mode."""
@@ -886,6 +1014,15 @@ class AqaraPetFeederMode(ZCLEnumSelectEntity):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "feeding_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class AqaraThermostatPresetMode(types.enum8):
@@ -910,6 +1047,15 @@ class AqaraThermostatPreset(ZCLEnumSelectEntity):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "preset": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class SonoffPresenceDetectionSensitivityEnum(types.enum8):
@@ -990,116 +1136,6 @@ class DanfossExerciseDayOfTheWeek(ZCLEnumSelectEntity):
         server_clusters=frozenset({Thermostat.cluster_id}),
         exposed_features=frozenset({DANFOSS_ALLY_THERMOSTAT}),
     )
-
-    _server_cluster_config = {
-        Thermostat.cluster_id: ClusterConfig(
-            bind=True,
-            attributes={
-                Thermostat.AttributeDefs.local_temperature: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.running_mode: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.running_state: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.system_mode: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupancy: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=5
-                    ),
-                ),
-                Thermostat.AttributeDefs.pi_heating_demand: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=5
-                    ),
-                ),
-                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
-                    read_on_startup=True,
-                ),
-                Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
-                    read_on_startup=False,
-                ),
-            },
-        ),
-    }
 
 
 class DanfossOrientationEnum(types.enum8):
@@ -1245,6 +1281,15 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
         ),
     )
 
+    _server_cluster_config = {
+        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "off_led_color": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
@@ -1269,6 +1314,15 @@ class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
             }
         ),
     )
+
+    _server_cluster_config = {
+        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "on_led_color": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class BegaColorTemperatureChannel(types.enum8):
@@ -1295,32 +1349,8 @@ class BegaColorTemperatureChannelSelect(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         LevelControl.cluster_id: ClusterConfig(
-            bind=True,
+            bind=False,
             attributes={
-                LevelControl.AttributeDefs.current_level: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=1, max_interval=900, reportable_change=1
-                    ),
-                ),
-                LevelControl.AttributeDefs.on_off_transition_time: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.on_level: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.on_transition_time: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.off_transition_time: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.default_move_rate: AttrConfig(
-                    read_on_startup=False,
-                ),
-                LevelControl.AttributeDefs.start_up_current_level: AttrConfig(
-                    read_on_startup=False,
-                ),
                 "switchable_white": AttrConfig(read_on_startup=False),
                 "switchable_color_temperature_1": AttrConfig(read_on_startup=False),
                 "switchable_color_temperature_2": AttrConfig(read_on_startup=False),

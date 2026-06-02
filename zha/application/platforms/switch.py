@@ -591,6 +591,15 @@ class P1MotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
         models=frozenset({"lumi.motion.ac02"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "trigger_indicator": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
@@ -605,6 +614,15 @@ class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.plug.mmeu01", "lumi.plug.maeu01"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "power_outage_memory": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Basic.cluster_id)
@@ -624,6 +642,7 @@ class HueMotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         Basic.cluster_id: ClusterConfig(
+            bind=False,
             attributes={
                 "trigger_indicator": AttrConfig(read_on_startup=False),
             },
@@ -645,6 +664,20 @@ class ChildLock(ConfigurableAttributeSwitch):
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
     )
 
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "child_lock": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class DisableLed(ConfigurableAttributeSwitch):
@@ -659,6 +692,20 @@ class DisableLed(ConfigurableAttributeSwitch):
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
         models=frozenset({"STARKVIND Air purifier", "STARKVIND Air purifier table"}),
     )
+
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "disable_led": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=0, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -675,6 +722,15 @@ class InovelliInvertSwitch(ConfigurableAttributeSwitch):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "invert_switch": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
@@ -689,6 +745,15 @@ class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "smart_bulb_mode": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -706,6 +771,15 @@ class InovelliSmartFanMode(ConfigurableAttributeSwitch):
         models=frozenset({"VZM35-SN"}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "smart_fan_mode": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
@@ -720,6 +794,15 @@ class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "double_tap_up_enabled": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -736,6 +819,15 @@ class InovelliDoubleTapDownEnabled(ConfigurableAttributeSwitch):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "double_tap_down_enabled": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
@@ -750,6 +842,15 @@ class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "aux_switch_scenes": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -766,6 +867,15 @@ class InovelliBindingOffToOnSyncLevel(ConfigurableAttributeSwitch):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "binding_off_to_on_sync_level": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliLocalProtection(ConfigurableAttributeSwitch):
@@ -780,6 +890,15 @@ class InovelliLocalProtection(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "local_protection": AttrConfig(read_on_startup=True),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -796,6 +915,15 @@ class InovelliOnOffLEDMode(ConfigurableAttributeSwitch):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "on_off_led_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
@@ -810,6 +938,15 @@ class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "firmware_progress_led": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(INOVELLI_CLUSTER)
@@ -826,6 +963,15 @@ class InovelliRelayClickInOnOffMode(ConfigurableAttributeSwitch):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "relay_click_in_on_off_mode": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(INOVELLI_CLUSTER)
 class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch):
@@ -840,6 +986,17 @@ class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "disable_clear_notifications_double_tap": AttrConfig(
+                    read_on_startup=False
+                ),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -857,6 +1014,15 @@ class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "disable_led_indicator": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
@@ -871,6 +1037,15 @@ class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "child_lock": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(OnOff.cluster_id)
@@ -911,6 +1086,15 @@ class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "window_detection": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
@@ -925,6 +1109,15 @@ class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.airrtc.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "valve_detection": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -941,6 +1134,15 @@ class AqaraThermostatChildLock(ConfigurableAttributeSwitch):
         models=frozenset({"lumi.airrtc.agl001"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "child_lock": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
@@ -955,6 +1157,15 @@ class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.sensor_smoke.acn03"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "heartbeat_indicator": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -971,6 +1182,15 @@ class AqaraLinkageAlarm(ConfigurableAttributeSwitch):
         models=frozenset({"lumi.sensor_smoke.acn03"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "linkage_alarm": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraBuzzerManualMute(ConfigurableAttributeSwitch):
@@ -986,6 +1206,15 @@ class AqaraBuzzerManualMute(ConfigurableAttributeSwitch):
         models=frozenset({"lumi.sensor_smoke.acn03"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "buzzer_manual_mute": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraBuzzerManualAlarm(ConfigurableAttributeSwitch):
@@ -1000,6 +1229,15 @@ class AqaraBuzzerManualAlarm(ConfigurableAttributeSwitch):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.sensor_smoke.acn03"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "buzzer_manual_alarm": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(WindowCovering.cluster_id)
@@ -1109,6 +1347,15 @@ class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "hooks_lock": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -1302,3 +1549,12 @@ class SinopeLightDoubleTapFullSwitch(ConfigurableAttributeSwitch):
         server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
         models=frozenset({"DM2500ZB", "DM2500ZB-G2", "DM2550ZB", "DM2550ZB-G2"}),
     )
+
+    _server_cluster_config = {
+        SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "double_up_full": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }

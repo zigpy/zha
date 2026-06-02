@@ -2106,6 +2106,49 @@ class ExposedFeatureMeteringPoller(MeteringPoller):
     )
 
 
+# Read-only Metering attributes consulted for scaling/formatting/decoding by every
+# metering entity, regardless of which measurement attribute it exposes.
+_METERING_CONFIG_ATTRS: dict[foundation.ZCLAttributeDef | str, AttrConfig] = {
+    Metering.AttributeDefs.demand_formatting: AttrConfig(read_on_startup=False),
+    Metering.AttributeDefs.divisor: AttrConfig(read_on_startup=False),
+    Metering.AttributeDefs.metering_device_type: AttrConfig(read_on_startup=False),
+    Metering.AttributeDefs.multiplier: AttrConfig(read_on_startup=False),
+    Metering.AttributeDefs.summation_formatting: AttrConfig(read_on_startup=False),
+    Metering.AttributeDefs.unit_of_measure: AttrConfig(read_on_startup=False),
+}
+
+
+def _metering_cluster_config(
+    measurement_attr: foundation.ZCLAttributeDef,
+    *,
+    min_interval: int,
+    reportable_change: int,
+) -> dict[int, ClusterConfig]:
+    """Build a self-contained Metering config reporting a single measurement attr."""
+    return {
+        Metering.cluster_id: ClusterConfig(
+            bind=True,
+            attributes={
+                measurement_attr: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=min_interval,
+                        max_interval=900,
+                        reportable_change=reportable_change,
+                    ),
+                ),
+                Metering.AttributeDefs.status: AttrConfig(
+                    read_on_startup=True,
+                    reporting=ReportingConfig(
+                        min_interval=1, max_interval=900, reportable_change=1
+                    ),
+                ),
+                **_METERING_CONFIG_ATTRS,
+            },
+        ),
+    }
+
+
 @register_entity(Metering.cluster_id)
 class SmartEnergyMetering(Sensor):
     """Metering sensor."""
@@ -2126,91 +2169,11 @@ class SmartEnergyMetering(Sensor):
         server_clusters=frozenset({Metering.cluster_id}),
     )
 
-    _server_cluster_config = {
-        Metering.cluster_id: ClusterConfig(
-            bind=True,
-            attributes={
-                Metering.AttributeDefs.instantaneous_demand: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=5, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_summ_delivered: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_tier1_summ_delivered: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_tier2_summ_delivered: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_tier3_summ_delivered: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_tier4_summ_delivered: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_tier5_summ_delivered: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_tier6_summ_delivered: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.current_summ_received: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.status: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=1, max_interval=900, reportable_change=1
-                    ),
-                ),
-                Metering.AttributeDefs.demand_formatting: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Metering.AttributeDefs.divisor: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Metering.AttributeDefs.metering_device_type: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Metering.AttributeDefs.multiplier: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Metering.AttributeDefs.summation_formatting: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Metering.AttributeDefs.unit_of_measure: AttrConfig(
-                    read_on_startup=False,
-                ),
-            },
-        ),
-    }
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.instantaneous_demand,
+        min_interval=5,
+        reportable_change=1,
+    )
 
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergyMeteringEntityDescription(
@@ -2389,6 +2352,12 @@ class SmartEnergySummation(SmartEnergyMetering):
         server_clusters=frozenset({Metering.cluster_id}),
     )
 
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_summ_delivered,
+        min_interval=30,
+        reportable_change=1,
+    )
+
     _ENTITY_DESCRIPTION_MAP = {
         0x00: SmartEnergySummationEntityDescription(
             native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
@@ -2470,6 +2439,11 @@ class Tier1SmartEnergySummation(SmartEnergySummation):
     """Tier 1 Smart Energy Metering summation sensor."""
 
     _attribute_name = "current_tier1_summ_delivered"
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_tier1_summ_delivered,
+        min_interval=30,
+        reportable_change=1,
+    )
     _unique_id_suffix = "tier1_summation_delivered"
     _attr_translation_key: str = "tier1_summation_delivered"
 
@@ -2484,6 +2458,11 @@ class Tier2SmartEnergySummation(SmartEnergySummation):
     """Tier 2 Smart Energy Metering summation sensor."""
 
     _attribute_name = "current_tier2_summ_delivered"
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_tier2_summ_delivered,
+        min_interval=30,
+        reportable_change=1,
+    )
     _unique_id_suffix = "tier2_summation_delivered"
     _attr_translation_key: str = "tier2_summation_delivered"
 
@@ -2498,6 +2477,11 @@ class Tier3SmartEnergySummation(SmartEnergySummation):
     """Tier 3 Smart Energy Metering summation sensor."""
 
     _attribute_name = "current_tier3_summ_delivered"
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_tier3_summ_delivered,
+        min_interval=30,
+        reportable_change=1,
+    )
     _unique_id_suffix = "tier3_summation_delivered"
     _attr_translation_key: str = "tier3_summation_delivered"
 
@@ -2512,6 +2496,11 @@ class Tier4SmartEnergySummation(SmartEnergySummation):
     """Tier 4 Smart Energy Metering summation sensor."""
 
     _attribute_name = "current_tier4_summ_delivered"
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_tier4_summ_delivered,
+        min_interval=30,
+        reportable_change=1,
+    )
     _unique_id_suffix = "tier4_summation_delivered"
     _attr_translation_key: str = "tier4_summation_delivered"
 
@@ -2526,6 +2515,11 @@ class Tier5SmartEnergySummation(SmartEnergySummation):
     """Tier 5 Smart Energy Metering summation sensor."""
 
     _attribute_name = "current_tier5_summ_delivered"
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_tier5_summ_delivered,
+        min_interval=30,
+        reportable_change=1,
+    )
     _unique_id_suffix = "tier5_summation_delivered"
     _attr_translation_key: str = "tier5_summation_delivered"
 
@@ -2540,6 +2534,11 @@ class Tier6SmartEnergySummation(SmartEnergySummation):
     """Tier 6 Smart Energy Metering summation sensor."""
 
     _attribute_name = "current_tier6_summ_delivered"
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_tier6_summ_delivered,
+        min_interval=30,
+        reportable_change=1,
+    )
     _unique_id_suffix = "tier6_summation_delivered"
     _attr_translation_key: str = "tier6_summation_delivered"
 
@@ -2554,6 +2553,11 @@ class SmartEnergySummationReceived(SmartEnergySummation):
     """Smart Energy Metering summation received sensor."""
 
     _attribute_name = "current_summ_received"
+    _server_cluster_config = _metering_cluster_config(
+        Metering.AttributeDefs.current_summ_received,
+        min_interval=30,
+        reportable_change=1,
+    )
     _unique_id_suffix = "summation_received"
     _attr_translation_key: str = "summation_received"
 
@@ -2711,6 +2715,15 @@ class InovelliInternalTemperature(Sensor):
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "internal_temp_monitor": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 class InovelliOverheatedState(types.enum8):
     """Inovelli overheat protection state."""
@@ -2733,6 +2746,15 @@ class InovelliOverheated(EnumSensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({INOVELLI_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        INOVELLI_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "overheated": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(CarbonDioxideConcentrationCluster.cluster_id)
@@ -3258,6 +3280,20 @@ class IkeaDeviceRunTime(Sensor):
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
 
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "device_run_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
+
 
 @register_entity(IKEA_AIR_PURIFIER_CLUSTER)
 class IkeaFilterRunTime(Sensor):
@@ -3274,6 +3310,20 @@ class IkeaFilterRunTime(Sensor):
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({IKEA_AIR_PURIFIER_CLUSTER}),
     )
+
+    _server_cluster_config = {
+        IKEA_AIR_PURIFIER_CLUSTER: ClusterConfig(
+            bind=True,
+            attributes={
+                "filter_run_time": AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=30, max_interval=900, reportable_change=1
+                    ),
+                ),
+            },
+        ),
+    }
 
 
 class AqaraFeedingSource(types.enum8):
@@ -3329,6 +3379,15 @@ class AqaraPetFeederPortionsDispensed(Sensor):
         models=frozenset({"aqara.feeder.acn001"}),
     )
 
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "portions_dispensed": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
+
 
 @register_entity(AQARA_OPPLE_CLUSTER)
 class AqaraPetFeederWeightDispensed(Sensor):
@@ -3345,6 +3404,15 @@ class AqaraPetFeederWeightDispensed(Sensor):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"aqara.feeder.acn001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "weight_dispensed": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(AQARA_OPPLE_CLUSTER)
@@ -3386,6 +3454,15 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
         server_clusters=frozenset({SONOFF_CLUSTER}),
         models=frozenset({"SNZB-06P"}),
     )
+
+    _server_cluster_config = {
+        SONOFF_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "last_illumination_state": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 @register_entity(Thermostat.cluster_id)
@@ -3505,6 +3582,7 @@ class AqaraCurtainMotorPowerSourceSensor(EnumSensor):
 
     _server_cluster_config = {
         Basic.cluster_id: ClusterConfig(
+            bind=False,
             attributes={
                 Basic.AttributeDefs.power_source: AttrConfig(
                     read_on_startup=False,
@@ -3538,6 +3616,15 @@ class AqaraCurtainHookStateSensor(EnumSensor):
         server_clusters=frozenset({AQARA_OPPLE_CLUSTER}),
         models=frozenset({"lumi.curtain.agl001"}),
     )
+
+    _server_cluster_config = {
+        AQARA_OPPLE_CLUSTER: ClusterConfig(
+            bind=False,
+            attributes={
+                "hooks_state": AttrConfig(read_on_startup=False),
+            },
+        ),
+    }
 
 
 class BitMapSensor(Sensor):
