@@ -1158,9 +1158,13 @@ class Device(LogMixin, EventBase):
 
         # Discover all applicable entities
         for entity in new_entities:
-            self._discovered_entities.append(entity)
+            # A quirk-prevented entity must not drive cluster binding or
+            # reporting either, so it's kept out of `_discovered_entities`
+            # (the source for `aggregate_cluster_configs`) entirely.
             if self._is_entity_removed_by_quirk(entity):
                 continue
+
+            self._discovered_entities.append(entity)
 
             # Apply any metadata changes from quirks v2
             self._apply_entity_metadata_changes(entity)
