@@ -380,7 +380,7 @@ class AqaraMotionDetectionInterval(NumberConfigurationEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "detection_interval": AttrConfig(read_on_startup=False),
             },
@@ -851,7 +851,7 @@ class InovelliRemoteDimmingUpSpeed(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "dimming_speed_up_remote": AttrConfig(read_on_startup=False),
             },
@@ -878,7 +878,7 @@ class InovelliButtonDelay(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "button_delay": AttrConfig(read_on_startup=True),
             },
@@ -905,7 +905,7 @@ class InovelliLocalDimmingUpSpeed(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "dimming_speed_up_local": AttrConfig(read_on_startup=False),
             },
@@ -932,7 +932,7 @@ class InovelliLocalRampRateOffToOn(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "ramp_rate_off_to_on_local": AttrConfig(read_on_startup=False),
             },
@@ -959,7 +959,7 @@ class InovelliRemoteDimmingSpeedOffToOn(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "ramp_rate_off_to_on_remote": AttrConfig(read_on_startup=False),
             },
@@ -986,7 +986,7 @@ class InovelliRemoteDimmingDownSpeed(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "dimming_speed_down_remote": AttrConfig(read_on_startup=False),
             },
@@ -1013,7 +1013,7 @@ class InovelliLocalDimmingDownSpeed(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "dimming_speed_down_local": AttrConfig(read_on_startup=False),
             },
@@ -1040,7 +1040,7 @@ class InovelliLocalRampRateOnToOff(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "ramp_rate_on_to_off_local": AttrConfig(read_on_startup=False),
             },
@@ -1067,7 +1067,7 @@ class InovelliRemoteDimmingSpeedOnToOff(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "ramp_rate_on_to_off_remote": AttrConfig(read_on_startup=False),
             },
@@ -1094,7 +1094,7 @@ class InovelliMinimumLoadDimmingLevel(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "minimum_level": AttrConfig(read_on_startup=False),
             },
@@ -1121,7 +1121,7 @@ class InovelliMaximumLoadDimmingLevel(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "maximum_level": AttrConfig(read_on_startup=False),
             },
@@ -1148,7 +1148,7 @@ class InovelliAutoShutoffTimer(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "auto_off_timer": AttrConfig(read_on_startup=False),
             },
@@ -1175,7 +1175,7 @@ class InovelliLocalDefaultLevel(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "default_level_local": AttrConfig(read_on_startup=False),
             },
@@ -1202,7 +1202,7 @@ class InovelliRemoteDefaultLevel(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "default_level_remote": AttrConfig(read_on_startup=False),
             },
@@ -1229,7 +1229,7 @@ class InovelliStartupDefaultLevel(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "state_after_power_restored": AttrConfig(read_on_startup=False),
             },
@@ -1257,7 +1257,7 @@ class InovelliQuickStartTime(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "quick_start_time": AttrConfig(read_on_startup=True),
             },
@@ -1284,7 +1284,7 @@ class InovelliLoadLevelIndicatorTimeout(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "load_level_indicator_timeout": AttrConfig(read_on_startup=False),
             },
@@ -1311,7 +1311,7 @@ class InovelliDefaultAllLEDOnColor(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "led_color_when_on": AttrConfig(read_on_startup=False),
             },
@@ -1338,7 +1338,7 @@ class InovelliDefaultAllLEDOffColor(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "led_color_when_off": AttrConfig(read_on_startup=False),
             },
@@ -1365,7 +1365,7 @@ class InovelliDefaultAllLEDOnIntensity(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "led_intensity_when_on": AttrConfig(read_on_startup=False),
             },
@@ -1392,7 +1392,7 @@ class InovelliDefaultAllLEDOffIntensity(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "led_intensity_when_off": AttrConfig(read_on_startup=False),
             },
@@ -1419,7 +1419,7 @@ class InovelliDoubleTapUpLevel(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "double_tap_up_level": AttrConfig(read_on_startup=False),
             },
@@ -1446,7 +1446,7 @@ class InovelliDoubleTapDownLevel(NumberConfigurationEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "double_tap_down_level": AttrConfig(read_on_startup=False),
             },
@@ -1475,7 +1475,7 @@ class AqaraPetFeederServingSize(NumberConfigurationEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "serving_size": AttrConfig(read_on_startup=False),
             },
@@ -1505,7 +1505,7 @@ class AqaraPetFeederPortionWeight(NumberConfigurationEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "portion_weight": AttrConfig(read_on_startup=False),
             },
@@ -1536,7 +1536,7 @@ class AqaraThermostatAwayTemp(NumberConfigurationEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "away_preset_temperature": AttrConfig(read_on_startup=False),
             },
@@ -1795,7 +1795,7 @@ class SinopeDimmerOnLevelConfigurationEntity(NumberConfigurationEntity):
 
     _server_cluster_config = {
         SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "on_intensity": AttrConfig(read_on_startup=False),
             },
@@ -1831,7 +1831,7 @@ class SinopeLightLEDOnIntensityConfigurationEntity(NumberConfigurationEntity):
 
     _server_cluster_config = {
         SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "on_led_intensity": AttrConfig(read_on_startup=False),
             },
@@ -1867,7 +1867,7 @@ class SinopeLightLEDOffIntensityConfigurationEntity(NumberConfigurationEntity):
 
     _server_cluster_config = {
         SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "off_led_intensity": AttrConfig(read_on_startup=False),
             },

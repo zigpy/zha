@@ -676,7 +676,7 @@ class AqaraMotionAc01Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "presence": AttrConfig(read_on_startup=False),
             },
@@ -694,7 +694,7 @@ class AqaraThermostatAgl001Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "system_mode": AttrConfig(read_on_startup=False),
                 "schedule": AttrConfig(read_on_startup=False),
@@ -713,7 +713,7 @@ class AqaraSmokeAcn03Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "smoke_density": AttrConfig(read_on_startup=False),
                 "buzzer": AttrConfig(read_on_startup=False),
@@ -732,7 +732,7 @@ class AqaraCurtainAgl001Init(_AqaraOppleInitBase):
     )
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "positions_stored": AttrConfig(read_on_startup=False),
                 "light_level": AttrConfig(read_on_startup=False),
@@ -909,7 +909,7 @@ class InovelliVzm30Init(VirtualEntity):
     )
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "active_power_reports": AttrConfig(read_on_startup=False),
                 "periodic_power_and_energy_reports": AttrConfig(read_on_startup=False),
@@ -932,7 +932,7 @@ class InovelliVzm31Init(VirtualEntity):
     )
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "active_power_reports": AttrConfig(read_on_startup=False),
                 "periodic_power_and_energy_reports": AttrConfig(read_on_startup=False),
@@ -956,7 +956,7 @@ class InovelliVzm35Init(VirtualEntity):
     )
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "power_type": AttrConfig(read_on_startup=True),
                 "non_neutral_aux_med_gear_learn_value": AttrConfig(

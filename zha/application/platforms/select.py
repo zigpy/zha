@@ -411,7 +411,7 @@ class TuyaManufacturerPowerOnStateSelectEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         TUYA_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "power_on_state": AttrConfig(read_on_startup=False),
             },
@@ -478,7 +478,7 @@ class MoesBacklightModeSelectEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         TUYA_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "backlight_mode": AttrConfig(read_on_startup=False),
             },
@@ -511,7 +511,7 @@ class AqaraMotionSensitivity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "motion_sensitivity": AttrConfig(read_on_startup=False),
             },
@@ -595,7 +595,7 @@ class AqaraMonitoringMode(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "monitoring_mode": AttrConfig(read_on_startup=False),
             },
@@ -628,7 +628,7 @@ class AqaraApproachDistance(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "approach_distance": AttrConfig(read_on_startup=False),
             },
@@ -653,7 +653,7 @@ class AqaraMagnetAC01DetectionDistance(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         MagnetAC01OppleCluster.cluster_id: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "detection_distance": AttrConfig(read_on_startup=False),
             },
@@ -678,7 +678,7 @@ class AqaraT2RelaySwitchMode(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         T2RelayOppleCluster.cluster_id: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "switch_mode": AttrConfig(read_on_startup=False),
             },
@@ -703,7 +703,7 @@ class AqaraT2RelaySwitchType(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         T2RelayOppleCluster.cluster_id: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "switch_type": AttrConfig(read_on_startup=False),
             },
@@ -728,7 +728,7 @@ class AqaraT2RelayStartupOnOff(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         T2RelayOppleCluster.cluster_id: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "startup_on_off": AttrConfig(read_on_startup=False),
             },
@@ -753,7 +753,7 @@ class AqaraT2RelayDecoupledMode(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         T2RelayOppleCluster.cluster_id: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "decoupled_mode": AttrConfig(read_on_startup=False),
             },
@@ -784,7 +784,7 @@ class InovelliOutputModeEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "output_mode": AttrConfig(read_on_startup=True),
             },
@@ -818,7 +818,7 @@ class InovelliSwitchTypeEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "switch_type": AttrConfig(read_on_startup=True),
             },
@@ -850,7 +850,7 @@ class InovelliFanSwitchTypeEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "switch_type": AttrConfig(read_on_startup=True),
             },
@@ -881,7 +881,7 @@ class InovelliLedScalingModeEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "led_scaling_mode": AttrConfig(read_on_startup=False),
             },
@@ -922,7 +922,7 @@ class InovelliFanLedScalingModeEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "smart_fan_led_display_levels": AttrConfig(read_on_startup=False),
             },
@@ -953,7 +953,7 @@ class InovelliNonNeutralOutputEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "increased_non_neutral_output": AttrConfig(read_on_startup=False),
             },
@@ -985,7 +985,7 @@ class InovelliDimmingModeEntity(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "leading_or_trailing_edge": AttrConfig(read_on_startup=False),
             },
@@ -1017,7 +1017,7 @@ class AqaraPetFeederMode(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "feeding_mode": AttrConfig(read_on_startup=False),
             },
@@ -1050,7 +1050,7 @@ class AqaraThermostatPreset(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "preset": AttrConfig(read_on_startup=False),
             },
@@ -1283,7 +1283,7 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "off_led_color": AttrConfig(read_on_startup=False),
             },
@@ -1317,7 +1317,7 @@ class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
 
     _server_cluster_config = {
         SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "on_led_color": AttrConfig(read_on_startup=False),
             },

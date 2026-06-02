@@ -2717,7 +2717,7 @@ class InovelliInternalTemperature(Sensor):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "internal_temp_monitor": AttrConfig(read_on_startup=False),
             },
@@ -2749,7 +2749,7 @@ class InovelliOverheated(EnumSensor):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "overheated": AttrConfig(read_on_startup=False),
             },
@@ -3381,7 +3381,7 @@ class AqaraPetFeederPortionsDispensed(Sensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "portions_dispensed": AttrConfig(read_on_startup=False),
             },
@@ -3407,7 +3407,7 @@ class AqaraPetFeederWeightDispensed(Sensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "weight_dispensed": AttrConfig(read_on_startup=False),
             },
@@ -3457,7 +3457,7 @@ class SonoffPresenceSenorIlluminationStatus(EnumSensor):
 
     _server_cluster_config = {
         SONOFF_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "last_illumination_state": AttrConfig(read_on_startup=False),
             },
@@ -3619,7 +3619,7 @@ class AqaraCurtainHookStateSensor(EnumSensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "hooks_state": AttrConfig(read_on_startup=False),
             },

@@ -593,7 +593,7 @@ class P1MotionTriggerIndicatorSwitch(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "trigger_indicator": AttrConfig(read_on_startup=False),
             },
@@ -617,7 +617,7 @@ class XiaomiPlugPowerOutageMemorySwitch(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "power_outage_memory": AttrConfig(read_on_startup=False),
             },
@@ -724,7 +724,7 @@ class InovelliInvertSwitch(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "invert_switch": AttrConfig(read_on_startup=False),
             },
@@ -748,7 +748,7 @@ class InovelliSmartBulbMode(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "smart_bulb_mode": AttrConfig(read_on_startup=True),
             },
@@ -773,7 +773,7 @@ class InovelliSmartFanMode(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "smart_fan_mode": AttrConfig(read_on_startup=True),
             },
@@ -797,7 +797,7 @@ class InovelliDoubleTapUpEnabled(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "double_tap_up_enabled": AttrConfig(read_on_startup=False),
             },
@@ -821,7 +821,7 @@ class InovelliDoubleTapDownEnabled(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "double_tap_down_enabled": AttrConfig(read_on_startup=False),
             },
@@ -845,7 +845,7 @@ class InovelliAuxSwitchScenes(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "aux_switch_scenes": AttrConfig(read_on_startup=False),
             },
@@ -869,7 +869,7 @@ class InovelliBindingOffToOnSyncLevel(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "binding_off_to_on_sync_level": AttrConfig(read_on_startup=False),
             },
@@ -893,7 +893,7 @@ class InovelliLocalProtection(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "local_protection": AttrConfig(read_on_startup=True),
             },
@@ -917,7 +917,7 @@ class InovelliOnOffLEDMode(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "on_off_led_mode": AttrConfig(read_on_startup=False),
             },
@@ -941,7 +941,7 @@ class InovelliFirmwareProgressLED(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "firmware_progress_led": AttrConfig(read_on_startup=False),
             },
@@ -965,7 +965,7 @@ class InovelliRelayClickInOnOffMode(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "relay_click_in_on_off_mode": AttrConfig(read_on_startup=False),
             },
@@ -989,7 +989,7 @@ class InovelliDisableDoubleTapClearNotificationsMode(ConfigurableAttributeSwitch
 
     _server_cluster_config = {
         INOVELLI_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "disable_clear_notifications_double_tap": AttrConfig(
                     read_on_startup=False
@@ -1016,7 +1016,7 @@ class AqaraPetFeederLEDIndicator(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "disable_led_indicator": AttrConfig(read_on_startup=False),
             },
@@ -1040,7 +1040,7 @@ class AqaraPetFeederChildLock(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "child_lock": AttrConfig(read_on_startup=False),
             },
@@ -1088,7 +1088,7 @@ class AqaraThermostatWindowDetection(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "window_detection": AttrConfig(read_on_startup=False),
             },
@@ -1112,7 +1112,7 @@ class AqaraThermostatValveDetection(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "valve_detection": AttrConfig(read_on_startup=False),
             },
@@ -1136,7 +1136,7 @@ class AqaraThermostatChildLock(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "child_lock": AttrConfig(read_on_startup=False),
             },
@@ -1160,7 +1160,7 @@ class AqaraHeartbeatIndicator(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "heartbeat_indicator": AttrConfig(read_on_startup=False),
             },
@@ -1184,7 +1184,7 @@ class AqaraLinkageAlarm(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "linkage_alarm": AttrConfig(read_on_startup=False),
             },
@@ -1208,7 +1208,7 @@ class AqaraBuzzerManualMute(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "buzzer_manual_mute": AttrConfig(read_on_startup=False),
             },
@@ -1232,7 +1232,7 @@ class AqaraBuzzerManualAlarm(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "buzzer_manual_alarm": AttrConfig(read_on_startup=False),
             },
@@ -1350,7 +1350,7 @@ class AqaraE1CurtainMotorHooksLockedSwitch(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "hooks_lock": AttrConfig(read_on_startup=False),
             },
@@ -1552,7 +1552,7 @@ class SinopeLightDoubleTapFullSwitch(ConfigurableAttributeSwitch):
 
     _server_cluster_config = {
         SINOPE_MANUFACTURER_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "double_up_full": AttrConfig(read_on_startup=False),
             },

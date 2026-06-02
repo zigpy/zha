@@ -530,7 +530,7 @@ class AqaraPetFeederErrorDetected(BinarySensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "error_detected": AttrConfig(read_on_startup=False),
             },
@@ -555,7 +555,7 @@ class XiaomiPlugConsumerConnected(BinarySensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "consumer_connected": AttrConfig(read_on_startup=False),
             },
@@ -579,7 +579,7 @@ class AqaraThermostatWindowOpen(BinarySensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "window_open": AttrConfig(read_on_startup=False),
             },
@@ -604,7 +604,7 @@ class AqaraThermostatValveAlarm(BinarySensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "valve_alarm": AttrConfig(read_on_startup=False),
             },
@@ -629,7 +629,7 @@ class AqaraThermostatCalibrated(BinarySensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "calibrated": AttrConfig(read_on_startup=False),
             },
@@ -654,7 +654,7 @@ class AqaraThermostatExternalSensor(BinarySensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "sensor": AttrConfig(read_on_startup=False),
             },
@@ -695,7 +695,7 @@ class AqaraE1CurtainMotorOpenedByHandBinarySensor(BinarySensor):
 
     _server_cluster_config = {
         AQARA_OPPLE_CLUSTER: ClusterConfig(
-            bind=False,
+            bind=True,
             attributes={
                 "hand_open": AttrConfig(read_on_startup=False),
             },
