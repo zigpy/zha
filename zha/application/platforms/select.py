@@ -1221,18 +1221,6 @@ class SinopeLightLedColors(types.enum32):
     Blue = 0xFFFF00
 
 
-SINOPE_MODELS = frozenset(
-    {
-        "DM2500ZB",
-        "DM2500ZB-G2",
-        "DM2550ZB",
-        "DM2550ZB-G2",
-        "SW2500ZB",
-        "SW2500ZB-G2",
-    }
-)
-
-
 @register_entity(SINOPE_MANUFACTURER_CLUSTER)
 class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
     """Representation of the marker LED Off-state color of Sinope light switches."""
@@ -1245,7 +1233,16 @@ class SinopeLightLEDOffColorSelect(ZCLEnumSelectEntity):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
-        models=SINOPE_MODELS,
+        models=frozenset(
+            {
+                "DM2500ZB",
+                "DM2500ZB-G2",
+                "DM2550ZB",
+                "DM2550ZB-G2",
+                "SW2500ZB",
+                "SW2500ZB-G2",
+            }
+        ),
     )
 
 
@@ -1261,7 +1258,16 @@ class SinopeLightLEDOnColorSelect(ZCLEnumSelectEntity):
 
     _cluster_match = ClusterMatch(
         server_clusters=frozenset({SINOPE_MANUFACTURER_CLUSTER}),
-        models=SINOPE_MODELS,
+        models=frozenset(
+            {
+                "DM2500ZB",
+                "DM2500ZB-G2",
+                "DM2550ZB",
+                "DM2550ZB-G2",
+                "SW2500ZB",
+                "SW2500ZB-G2",
+            }
+        ),
     )
 
 
