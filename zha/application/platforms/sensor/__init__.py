@@ -2955,36 +2955,6 @@ class ThermostatHVACAction(Sensor):
         Thermostat.cluster_id: ClusterConfig(
             bind=True,
             attributes={
-                Thermostat.AttributeDefs.local_temperature: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupied_cooling_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.occupied_heating_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.unoccupied_cooling_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
-                Thermostat.AttributeDefs.unoccupied_heating_setpoint: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=25
-                    ),
-                ),
                 Thermostat.AttributeDefs.running_mode: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -3003,12 +2973,6 @@ class ThermostatHVACAction(Sensor):
                         min_interval=30, max_interval=900, reportable_change=1
                     ),
                 ),
-                Thermostat.AttributeDefs.occupancy: AttrConfig(
-                    read_on_startup=True,
-                    reporting=ReportingConfig(
-                        min_interval=30, max_interval=900, reportable_change=1
-                    ),
-                ),
                 Thermostat.AttributeDefs.pi_cooling_demand: AttrConfig(
                     read_on_startup=True,
                     reporting=ReportingConfig(
@@ -3020,42 +2984,6 @@ class ThermostatHVACAction(Sensor):
                     reporting=ReportingConfig(
                         min_interval=30, max_interval=900, reportable_change=5
                     ),
-                ),
-                Thermostat.AttributeDefs.abs_min_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_max_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_min_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.abs_max_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.ctrl_sequence_of_oper: AttrConfig(
-                    read_on_startup=True,
-                ),
-                Thermostat.AttributeDefs.max_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.max_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.min_cool_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.min_heat_setpoint_limit: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.local_temperature_calibration: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.setpoint_change_source: AttrConfig(
-                    read_on_startup=False,
-                ),
-                Thermostat.AttributeDefs.setpoint_change_source_timestamp: AttrConfig(
-                    read_on_startup=False,
                 ),
             },
         ),
