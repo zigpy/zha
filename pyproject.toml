@@ -49,7 +49,7 @@ testing = [
     "pytest-sugar",
     "pytest-timeout",
     "python-slugify",
-    "ruff==0.15.15",
+    "ruff==0.15.16",
     "uv>=0.11.16",
 ]
 ci = [
