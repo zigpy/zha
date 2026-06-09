@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, Any, Final, final
 
 from zigpy.profiles.zha import PROFILE_ID as ZHA_PROFILE_ID
 from zigpy.profiles.zll import PROFILE_ID as ZLL_PROFILE_ID
-from zigpy.quirks.v2 import EntityMetadata
 from zigpy.types import ClusterId
 from zigpy.types.named import EUI64
 import zigpy.zcl
@@ -32,6 +31,7 @@ from zha.event import EventBase
 from zha.mixins import LogMixin
 
 if TYPE_CHECKING:
+    from zha.quirks.metadata import EntityMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
     from zha.zigbee.group import Group

@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
 from zigpy.profiles import zha, zll
-from zigpy.quirks.v2 import BinarySensorMetadata
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -49,6 +48,7 @@ from zha.application.platforms.const import (
 from zha.application.platforms.helpers import validate_device_class
 
 if TYPE_CHECKING:
+    from zha.quirks.metadata import BinarySensorMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 

@@ -9,7 +9,6 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT
-from zigpy.quirks.v2 import NumberMetadata
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -47,6 +46,8 @@ from zha.application.platforms.number.const import ICONS, NumberDeviceClass, Num
 from zha.units import UnitOfMass, UnitOfTemperature, UnitOfTime
 
 if TYPE_CHECKING:
+    from zha.quirks.metadata import NumberMetadata
+
     pass
 
 _LOGGER = logging.getLogger(__name__)

@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, Any, cast
 from zhaquirks.danfoss import thermostat as danfoss_thermostat
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, SE_POLL_SUMMATION
 from zigpy import types
-from zigpy.quirks.v2 import ZCLEnumMetadata, ZCLSensorMetadata
 from zigpy.state import Counter, State
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -132,6 +131,7 @@ from zha.units import (
 )
 
 if TYPE_CHECKING:
+    from zha.quirks.metadata import ZCLEnumMetadata, ZCLSensorMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 

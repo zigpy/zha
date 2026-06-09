@@ -20,7 +20,6 @@ from zhaquirks.quirk_ids import (
 from zhaquirks.xiaomi.aqara.magnet_ac01 import OppleCluster as MagnetAC01OppleCluster
 from zhaquirks.xiaomi.aqara.switch_acn047 import OppleCluster as T2RelayOppleCluster
 from zigpy import types
-from zigpy.quirks.v2 import ZCLEnumMetadata
 from zigpy.zcl import (
     AttributeReadEvent,
     AttributeReportedEvent,
@@ -60,6 +59,7 @@ from zha.application.platforms.const import (
 from zha.application.platforms.siren import AdvancedSiren
 
 if TYPE_CHECKING:
+    from zha.quirks.metadata import ZCLEnumMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 

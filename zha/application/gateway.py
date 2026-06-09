@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 import logging
+from pathlib import Path
 import time
 from typing import Any, Final, Self, TypeVar, cast
 
@@ -26,7 +27,6 @@ from zigpy.config import (
 import zigpy.device
 import zigpy.endpoint
 import zigpy.group
-from zigpy.quirks.v2 import UNBUILT_QUIRK_BUILDERS
 from zigpy.state import State
 import zigpy.types as t
 from zigpy.types.named import EUI64
@@ -55,13 +55,9 @@ from zha.async_ import (
     gather_with_limited_concurrency,
 )
 from zha.event import EventBase
-from zha.zigbee.device import (
-    Device,
-    DeviceInfo,
-    DeviceStatus,
-    ExtendedDeviceInfo,
-    resolve_device,
-)
+from zha.quirks import DEVICE_REGISTRY, resolve_device
+from zha.quirks.v2 import UNBUILT_QUIRK_BUILDERS
+from zha.zigbee.device import Device, DeviceInfo, DeviceStatus, ExtendedDeviceInfo
 from zha.zigbee.group import Group, GroupInfo, GroupMemberReference
 
 BLOCK_LOG_TIMEOUT: Final[int] = 60
@@ -241,10 +237,11 @@ class Gateway(AsyncUtilMixin, EventBase):
 
             UNBUILT_QUIRK_BUILDERS.clear()
 
-            await instance.async_add_executor_job(
-                setup_quirks,
-                instance.config.config.quirks_configuration.custom_quirks_path,
-            )
+            custom_quirks_path = config.config.quirks_configuration.custom_quirks_path
+            if custom_quirks_path is not None:
+                DEVICE_REGISTRY.purge_custom_quirks(Path(custom_quirks_path))
+
+            await instance.async_add_executor_job(setup_quirks, custom_quirks_path)
 
         return instance
 

@@ -39,6 +39,7 @@ from zha.application.const import (
     PRESET_TEMP_MANUAL,
 )
 from zha.application.gateway import Gateway
+from zha.quirks import resolve_device
 from zha.application.platforms.climate import (
     HVAC_MODE_2_SYSTEM,
     SEQ_OF_OPERATION,
@@ -1641,7 +1642,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
     zigpy_device.endpoints[1].thermostat.PLUGGED_ATTR_READS = ZCL_ATTR_PLUG
 
     (
-        QuirkBuilder("unk_manufacturer", "FakeModel", zigpy.quirks.DEVICE_REGISTRY)
+        QuirkBuilder("unk_manufacturer", "FakeModel")
         # Local temperature calibration.
         .number(
             Thermostat.AttributeDefs.local_temperature_calibration.name,
@@ -1656,7 +1657,7 @@ async def test_thermostat_quirkv2_local_temperature_calibration_config_overwrite
         .add_to_registry()
     )
 
-    zigpy_device = zigpy.quirks.DEVICE_REGISTRY.get_device(zigpy_device)
+    zigpy_device = resolve_device(zigpy_device)
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert zha_device.model == "FakeModel"

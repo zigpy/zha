@@ -8,7 +8,6 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zigpy.quirks.v2 import WriteAttributeButtonMetadata, ZCLCommandButtonMetadata
 from zigpy.zcl.clusters.general import Identify
 
 from zha.application import Platform
@@ -28,6 +27,10 @@ from zha.application.platforms.const import (
 )
 
 if TYPE_CHECKING:
+    from zha.quirks.metadata import (
+        WriteAttributeButtonMetadata,
+        ZCLCommandButtonMetadata,
+    )
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 

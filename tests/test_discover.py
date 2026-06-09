@@ -1,6 +1,7 @@
 """Test ZHA device discovery."""
 
 import asyncio
+import attrs
 from collections import defaultdict
 from collections.abc import Callable
 import contextlib
@@ -57,6 +58,11 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
+from zha.quirks import (
+    DEVICE_REGISTRY as QUIRKS_DEVICE_REGISTRY,
+    ZHA_DEVICE_CLASS_ATTRIBUTE,
+    resolve_device,
+)
 from zha.application.helpers import DeviceOverridesConfiguration
 from zha.application.platforms import PlatformEntity, binary_sensor, sensor
 from zha.application.platforms.const import PHILIPS_REMOTE_CLUSTER
@@ -223,9 +229,7 @@ async def test_quirks_v2_entity_discovery(
     )
 
     (
-        QuirkBuilder(
-            "Ikea of Sweden", "TRADFRI remote control", zigpy.quirks.DEVICE_REGISTRY
-        )
+        QuirkBuilder("Ikea of Sweden", "TRADFRI remote control")
         .replaces(PowerConfig1CRCluster)
         .replaces(ScenesCluster, cluster_type=ClusterType.Client)
         .number(
@@ -243,7 +247,7 @@ async def test_quirks_v2_entity_discovery(
         .add_to_registry()
     )
 
-    zigpy_device = zigpy.quirks.DEVICE_REGISTRY.get_device(zigpy_device)
+    zigpy_device = resolve_device(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
         "battery_voltage": 3,
         "battery_percentage_remaining": 100,
@@ -345,7 +349,7 @@ async def test_quirks_v2_entity_discovery_e1_curtain(
         manufacturer="LUMI",
         model="lumi.curtain.agl006",
     )
-    aqara_E1_device = zigpy.quirks.DEVICE_REGISTRY.get_device(aqara_E1_device)
+    aqara_E1_device = resolve_device(aqara_E1_device)
 
     aqara_E1_device.endpoints[1].opple_cluster.PLUGGED_ATTR_READS = {
         "hand_open": 0,
@@ -430,7 +434,7 @@ def _get_test_device(
     )
 
     quirk_builder = (
-        QuirkBuilder(manufacturer, model, zigpy.quirks.DEVICE_REGISTRY)
+        QuirkBuilder(manufacturer, model)
         .replaces(PowerConfig1CRCluster)
         .replaces(ScenesCluster, cluster_type=ClusterType.Client)
         .number(
@@ -470,7 +474,7 @@ def _get_test_device(
 
     quirk_builder.add_to_registry()
 
-    zigpy_device = zigpy.quirks.DEVICE_REGISTRY.get_device(zigpy_device)
+    zigpy_device = resolve_device(zigpy_device)
     zigpy_device.endpoints[1].power.PLUGGED_ATTR_READS = {
         "battery_voltage": 3,
         "battery_percentage_remaining": 100,
@@ -492,7 +496,10 @@ async def test_quirks_v2_entity_no_metadata(
     zigpy_device = _get_test_device(
         zha_gateway, "Ikea of Sweden2", "TRADFRI remote control2"
     )
-    setattr(zigpy_device, "_exposes_metadata", {})
+    quirk_cls = getattr(zigpy_device, ZHA_DEVICE_CLASS_ATTRIBUTE)
+    quirk_cls._quirk_definition = attrs.evolve(
+        quirk_cls._quirk_definition, entity_metadata=()
+    )
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
     assert (
         f"Device: {str(zigpy_device.ieee)}-{zha_device.name} does not expose any quirks v2 entities"
@@ -512,18 +519,25 @@ async def test_quirks_v2_entity_discovery_errors(
 
     # Inject unknown quirks v2 entity metadata
     class UnknownEntityMetadata:
+        endpoint_id = 1
+        cluster_id = zigpy.zcl.clusters.general.OnOff.cluster_id
+        cluster_type = ClusterType.Server
         entity_platform = Platform.UPDATE
 
-    zigpy_device._exposes_metadata[
-        (1, zigpy.zcl.clusters.general.OnOff.cluster_id, ClusterType.Server)
-    ].append(UnknownEntityMetadata())
+    quirk_cls = getattr(zigpy_device, ZHA_DEVICE_CLASS_ATTRIBUTE)
+    quirk_cls._quirk_definition = attrs.evolve(
+        quirk_cls._quirk_definition,
+        entity_metadata=(
+            *quirk_cls._quirk_definition.entity_metadata,
+            UnknownEntityMetadata(),
+        ),
+    )
 
     zha_device = await join_zigpy_device(zha_gateway, zigpy_device)
 
     assert (
         f"Device: {zigpy_device.ieee}-{zha_device.name} does not have an"
-        " endpoint with id: 3 - unable to create entity with"
-        " cluster details: (3, 6, <ClusterType.Server: 0>)"
+        " endpoint with id: 3 - unable to create entity with metadata:"
     ) in caplog.text
 
     time_cluster_id = zigpy.zcl.clusters.general.Time.cluster_id
@@ -531,7 +545,7 @@ async def test_quirks_v2_entity_discovery_errors(
     assert (
         f"Device: {zigpy_device.ieee}-{zha_device.name} does not have a"
         f" cluster with id: {time_cluster_id} - unable to create entity with"
-        f" cluster details: (1, {time_cluster_id}, <ClusterType.Server: 0>)"
+        " metadata:"
     ) in caplog.text
 
     device_info = f"{zigpy_device.ieee}-{zha_device.name}"
@@ -632,8 +646,8 @@ async def test_quirks_v2_metadata_bad_device_classes(
 
     assert expected_exception_string in caplog.text
 
-    # remove the device so we don't pollute the rest of the tests
-    zigpy.quirks.DEVICE_REGISTRY.remove(zigpy_device)
+    # remove the quirk so we don't pollute the rest of the tests
+    QUIRKS_DEVICE_REGISTRY.remove(getattr(zigpy_device, ZHA_DEVICE_CLASS_ATTRIBUTE))
 
 
 async def test_quirks_v2_fallback_name(zha_gateway: Gateway) -> None:
@@ -743,6 +757,13 @@ async def test_devices_from_files(
         loaded_device_data = json.loads(
             json.dumps(zha_device.get_diagnostics_json(), cls=ZhaJsonEncoder)
         )
+
+        # The quirk class path varies with the quirks implementation (v2 quirks
+        # used to all be `zigpy.quirks.v2.CustomDeviceV2`, compiled ZHA quirks
+        # name the defining module); `quirk_applied` still has to match.
+        del loaded_device_data["quirk_class"]
+        del device_data["quirk_class"]
+
         assert loaded_device_data == device_data
 
         # Assert identify called on join for devices that support it

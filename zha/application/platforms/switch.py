@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING, Any
 from zhaquirks.quirk_ids import DANFOSS_ALLY_THERMOSTAT, TUYA_PLUG_ONOFF
 from zigpy import types as t
 from zigpy.profiles import zha, zll
-from zigpy.quirks.v2 import EntityMetadata, SwitchMetadata
 import zigpy.zcl
 from zigpy.zcl import (
     AttributeReadEvent,
@@ -52,6 +51,7 @@ from zha.exceptions import ZHAException
 from zha.zigbee.group import Group
 
 if TYPE_CHECKING:
+    from zha.quirks.metadata import EntityMetadata, SwitchMetadata
     from zha.zigbee.device import Device
     from zha.zigbee.endpoint import Endpoint
 

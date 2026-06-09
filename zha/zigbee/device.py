@@ -21,12 +21,10 @@ from zigpy.device import Device as ZigpyDevice
 import zigpy.exceptions
 from zigpy.profiles import PROFILES
 import zigpy.quirks
-from zigpy.quirks.v2 import DeviceAlertMetadata, QuirksV2RegistryEntry
 from zigpy.types import uint1_t, uint8_t, uint16_t
 from zigpy.types.named import EUI64, NWK, ExtendedPanId
 from zigpy.typing import UNDEFINED, UndefinedType
 import zigpy.zcl
-from zigpy.zcl import ClusterType
 from zigpy.zcl.clusters import Cluster
 from zigpy.zcl.clusters.general import Basic, Groups, Identify, Ota
 from zigpy.zcl.foundation import (
@@ -90,6 +88,8 @@ from zha.const import STATE_CHANGED
 from zha.event import EventBase
 from zha.exceptions import ZHAException
 from zha.mixins import LogMixin
+from zha.quirks import ZHA_DEVICE_CLASS_ATTRIBUTE, DeviceMatch, ZigpyOp
+from zha.quirks.metadata import DeviceAlertMetadata, QuirkDefinition
 from zha.zigbee.cluster_config import (
     aggregate_cluster_configs,
     configure_cluster_configs,
@@ -190,79 +190,6 @@ def get_device_automation_triggers(
         ("device_offline", "device_offline"): {"device_event_type": "device_offline"},
         **getattr(device, "device_automation_triggers", {}),
     }
-
-
-def _read_current_firmware_version(
-    zigpy_device: zigpy.device.Device,
-) -> int | None:
-    """Read `current_file_version` from the device's OTA cluster, or None."""
-    try:
-        ota = zigpy_device.find_cluster(
-            cluster_id=Ota.cluster_id, cluster_type=ClusterType.Client
-        )
-    except ValueError:
-        return None
-    return ota.get(Ota.AttributeDefs.current_file_version.id)
-
-
-@dataclass(frozen=True)
-class DeviceMatch:
-    """Fingerprint criteria for matching a `Device` subclass to a zigpy device."""
-
-    manufacturers: frozenset[str] | None = None
-    models: frozenset[str] | None = None
-    firmware_versions: tuple[int | None, int | None] = (None, None)
-    firmware_version_allow_missing: bool = True
-
-
-DEVICE_QUIRKS: list[type[Device]] = []
-
-
-def register_device(cls: type[Device]) -> type[Device]:
-    """Register a `Device` subclass for fingerprint-based dispatch."""
-    DEVICE_QUIRKS.append(cls)
-    return cls
-
-
-@dataclass(frozen=True)
-class Replace:
-    """Replace a cluster on a device's endpoint with a CustomCluster subclass."""
-
-    endpoint_id: int
-    cluster_id: int
-    cluster_type: ClusterType
-    replacement: type[zigpy.quirks.CustomCluster]
-
-    def apply(self, device: zigpy.device.Device) -> None:
-        """Apply this operation to the given zigpy device."""
-        endpoint = device.endpoints[self.endpoint_id]
-        if self.cluster_type is ClusterType.Server:
-            endpoint.in_clusters.pop(self.cluster_id, None)
-            endpoint.add_input_cluster(
-                self.cluster_id, self.replacement(endpoint, is_server=True)
-            )
-        else:
-            endpoint.out_clusters.pop(self.cluster_id, None)
-            endpoint.add_output_cluster(
-                self.cluster_id, self.replacement(endpoint, is_server=False)
-            )
-
-
-def resolve_device(zigpy_device: zigpy.device.Device) -> zigpy.device.Device:
-    """Zigpy device resolver."""
-    for cls in DEVICE_QUIRKS:
-        if cls.matches(zigpy_device):
-            _LOGGER.warning(
-                "v3 resolver matched %s for %s/%s, applying %d ops",
-                cls.__name__,
-                zigpy_device.manufacturer,
-                zigpy_device.model,
-                len(cls._operations),
-            )
-            for op in cls._operations:
-                op.apply(zigpy_device)
-            return zigpy_device
-    return zigpy.quirks.get_device(zigpy_device)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -443,10 +370,19 @@ class Device(LogMixin, EventBase):
 
     unique_id: str
 
-    # The base `Device` is the universal fallback (matches anything) and is never
-    # iterated through `DEVICE_QUIRKS`.
-    _device_match: DeviceMatch = DeviceMatch()
-    _operations: tuple[Replace, ...] = ()
+    # Quirk matching criteria and zigpy-level modifications. Set by subclasses
+    # registered with `zha.quirks.register_device`; the base class matches
+    # nothing. `_zigpy_device_class` optionally replaces the zigpy device
+    # object with an instance of the given class, which must accept
+    # `(application, ieee, nwk, replaces)` like `zigpy.quirks.v2.CustomDeviceV2`.
+    _device_match: DeviceMatch | None = None
+    _zigpy_device_class: type[zigpy.device.Device] | None = None
+    _zigpy_ops: tuple[ZigpyOp, ...] = ()
+
+    # ZHA-level quirk metadata (entities, triggers, alerts, naming), set by
+    # `zha.quirks.v2.QuirkBuilder` compiled quirks. Hand-written quirks express
+    # the same things by overriding `Device` directly.
+    _quirk_definition: QuirkDefinition | None = None
 
     # Cached properties that depend on the zigpy device and must be invalidated
     # when the underlying device is swapped (e.g. after a re-interview).
@@ -497,30 +433,25 @@ class Device(LogMixin, EventBase):
         self._init_from_zigpy_device(zigpy_device)
 
     @classmethod
-    def matches(cls, zigpy_device: zigpy.device.Device) -> bool:
-        """Return True if this Device subclass should wrap `zigpy_device`."""
-        m = cls._device_match
-        if (
-            m.manufacturers is not None
-            and zigpy_device.manufacturer not in m.manufacturers
-        ):
-            return False
-        if m.models is not None and zigpy_device.model not in m.models:
-            return False
+    def apply_to_zigpy_device(
+        cls, zigpy_device: zigpy.device.Device
+    ) -> zigpy.device.Device:
+        """Apply this quirk's modifications to a freshly-constructed zigpy device.
 
-        min_fw, max_fw = m.firmware_versions
-        if min_fw is not None or max_fw is not None:
-            current = _read_current_firmware_version(zigpy_device)
-            if current is None:
-                if not m.firmware_version_allow_missing:
-                    return False
-            else:
-                if min_fw is not None and current < min_fw:
-                    return False
-                if max_fw is not None and current >= max_fw:
-                    return False
-
-        return True
+        The default implementation wraps the device with `_zigpy_device_class`
+        (when set) and then applies `_zigpy_ops` in order. Override this for
+        arbitrary surgery, including returning a replacement device object.
+        """
+        if cls._zigpy_device_class is not None:
+            zigpy_device = cls._zigpy_device_class(
+                zigpy_device.application,
+                zigpy_device.ieee,
+                zigpy_device.nwk,
+                zigpy_device,
+            )
+        for op in cls._zigpy_ops:
+            op.apply(zigpy_device)
+        return zigpy_device
 
     def _init_from_zigpy_device(self, zigpy_device: zigpy.device.Device) -> None:
         """(Re-)initialize device state from a zigpy device.
@@ -546,13 +477,16 @@ class Device(LogMixin, EventBase):
             with contextlib.suppress(AttributeError):
                 delattr(self, attr)
 
-        self.quirk_applied: bool = isinstance(
+        self.quirk_applied: bool = type(self)._device_match is not None or isinstance(
             self._zigpy_device, zigpy.quirks.BaseCustomDevice
         )
-        self.quirk_class: str = (
-            f"{self._zigpy_device.__class__.__module__}."
-            f"{self._zigpy_device.__class__.__name__}"
-        )
+        if type(self)._device_match is not None:
+            self.quirk_class: str = f"{type(self).__module__}.{type(self).__name__}"
+        else:
+            self.quirk_class = (
+                f"{self._zigpy_device.__class__.__module__}."
+                f"{self._zigpy_device.__class__.__name__}"
+            )
 
         # add v1 quirk exposed features (legacy quirk id)
         qid: set[str] | str = getattr(self._zigpy_device, ATTR_QUIRK_ID, set())
@@ -614,9 +548,9 @@ class Device(LogMixin, EventBase):
         return self._zigpy_device.ieee
 
     @property
-    def quirk_metadata(self) -> QuirksV2RegistryEntry | None:
-        """Return the quirk metadata for this device."""
-        return getattr(self._zigpy_device, "quirk_metadata", None)
+    def quirk_metadata(self) -> QuirkDefinition | None:
+        """Return the ZHA-level quirk metadata for this device."""
+        return self._quirk_definition
 
     @cached_property
     def manufacturer(self) -> str:
@@ -761,6 +695,8 @@ class Device(LogMixin, EventBase):
     @cached_property
     def skip_configuration(self) -> bool:
         """Return true if the device should not issue configuration related commands."""
+        if self.quirk_metadata is not None and self.quirk_metadata.skip_configuration:
+            return True
         return self._zigpy_device.skip_configuration or bool(self.is_active_coordinator)
 
     @property
@@ -780,7 +716,10 @@ class Device(LogMixin, EventBase):
     @cached_property
     def device_automation_triggers(self) -> dict[tuple[str, str], dict[str, str]]:
         """Return the device automation triggers for this device."""
-        return get_device_automation_triggers(self._zigpy_device)
+        triggers = get_device_automation_triggers(self._zigpy_device)
+        if self.quirk_metadata is not None:
+            triggers.update(self.quirk_metadata.device_automation_triggers)
+        return triggers
 
     @property
     def available(self):
@@ -898,13 +837,13 @@ class Device(LogMixin, EventBase):
         zigpy_dev: zigpy.device.Device,
         gateway: Gateway,
     ) -> Device:
-        """Create new device, dispatching to a registered subclass when applicable."""
+        """Create new device, dispatching to the class matched during resolution."""
         if zigpy_dev.ieee == gateway.state.node_info.ieee:
             return CoordinatorDevice(zigpy_dev, gateway)
 
-        for quirk_cls in DEVICE_QUIRKS:
-            if quirk_cls.matches(zigpy_dev):
-                return quirk_cls(zigpy_dev, gateway)
+        quirk_cls = getattr(zigpy_dev, ZHA_DEVICE_CLASS_ATTRIBUTE, None)
+        if quirk_cls is not None:
+            return quirk_cls(zigpy_dev, gateway)
 
         return cls(zigpy_dev, gateway)
 

@@ -9,16 +9,6 @@ import itertools
 import logging
 from typing import TYPE_CHECKING, Any
 
-from zigpy.quirks.v2 import (
-    BinarySensorMetadata,
-    CustomDeviceV2,
-    NumberMetadata,
-    SwitchMetadata,
-    WriteAttributeButtonMetadata,
-    ZCLCommandButtonMetadata,
-    ZCLEnumMetadata,
-    ZCLSensorMetadata,
-)
 from zigpy.zcl import Cluster, ClusterType, ReportingConfig
 
 from zha.application import Platform, const as zha_const
@@ -47,6 +37,15 @@ from zha.application.platforms import (  # noqa: F401 pylint: disable=unused-imp
     switch,
     update,
     virtual,
+)
+from zha.quirks.metadata import (
+    BinarySensorMetadata,
+    NumberMetadata,
+    SwitchMetadata,
+    WriteAttributeButtonMetadata,
+    ZCLCommandButtonMetadata,
+    ZCLEnumMetadata,
+    ZCLSensorMetadata,
 )
 from zha.zigbee.group import Group
 
@@ -169,25 +168,8 @@ def discover_group_entities(group: Group) -> Iterator[GroupEntity]:
 
 
 def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
-    """Discover entities for a ZHA device exposed by quirks v2."""
-    _LOGGER.debug(
-        "Attempting to discover quirks v2 entities for device: %s-%s",
-        str(device.ieee),
-        device.name,
-    )
-
-    if not isinstance(device.device, CustomDeviceV2):
-        _LOGGER.debug(
-            "Device: %s-%s is not a quirks v2 device - skipping "
-            "discover_quirks_v2_entities",
-            str(device.ieee),
-            device.name,
-        )
-        return
-
-    zigpy_device: CustomDeviceV2 = device.device
-
-    if not zigpy_device.exposes_metadata:
+    """Discover entities for a ZHA device exposed by quirks v2 metadata."""
+    if device.quirk_metadata is None or not device.quirk_metadata.entity_metadata:
         _LOGGER.debug(
             "Device: %s-%s does not expose any quirks v2 entities",
             str(device.ieee),
@@ -195,20 +177,19 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
         )
         return
 
-    for (
-        cluster_details,
-        entity_metadata_list,
-    ) in zigpy_device.exposes_metadata.items():
-        endpoint_id, cluster_id, cluster_type = cluster_details
+    for entity_metadata in device.quirk_metadata.entity_metadata:
+        endpoint_id = entity_metadata.endpoint_id
+        cluster_id = entity_metadata.cluster_id
+        cluster_type = entity_metadata.cluster_type
 
         if endpoint_id not in device.endpoints:
             _LOGGER.warning(
                 "Device: %s-%s does not have an endpoint with id: %s - unable to "
-                "create entity with cluster details: %s",
+                "create entity with metadata: %s",
                 str(device.ieee),
                 device.name,
                 endpoint_id,
-                cluster_details,
+                entity_metadata,
             )
             continue
 
@@ -222,88 +203,82 @@ def discover_quirks_v2_entities(device: Device) -> Iterator[PlatformEntity]:
         if cluster is None:
             _LOGGER.warning(
                 "Device: %s-%s does not have a cluster with id: %s - "
-                "unable to create entity with cluster details: %s",
+                "unable to create entity with metadata: %s",
                 str(device.ieee),
                 device.name,
                 cluster_id,
-                cluster_details,
+                entity_metadata,
             )
             continue
 
-        for entity_metadata in entity_metadata_list:
-            platform = Platform(entity_metadata.entity_platform.value)
-            metadata_type = type(entity_metadata)
-            entity_class = QUIRKS_ENTITY_META_TO_ENTITY_CLASS.get(
-                (platform, metadata_type)
+        platform = Platform(entity_metadata.entity_platform.value)
+        metadata_type = type(entity_metadata)
+        entity_class = QUIRKS_ENTITY_META_TO_ENTITY_CLASS.get((platform, metadata_type))
+
+        if entity_class is None:
+            _LOGGER.warning(
+                "Device: %s-%s has an entity with details: %s that does not"
+                " have an entity class mapping - unable to create entity",
+                str(device.ieee),
+                device.name,
+                {zha_const.ENTITY_METADATA: entity_metadata},
             )
+            continue
 
-            if entity_class is None:
-                _LOGGER.warning(
-                    "Device: %s-%s has an entity with details: %s that does not"
-                    " have an entity class mapping - unable to create entity",
-                    str(device.ieee),
-                    device.name,
-                    {
-                        zha_const.CLUSTER_DETAILS: cluster_details,
-                        zha_const.ENTITY_METADATA: entity_metadata,
-                    },
-                )
-                continue
+        entity = entity_class(
+            endpoint=endpoint,
+            device=device,
+            cluster=cluster,
+            entity_metadata=entity_metadata,
+        )
 
-            entity = entity_class(
-                endpoint=endpoint,
-                device=device,
-                cluster=cluster,
-                entity_metadata=entity_metadata,
-            )
-
-            # Translate quirks v2 reporting/attribute-init metadata into a
-            # per-instance cluster config that the cluster_config aggregator
-            # picks up alongside the entity's normal (class-level) declarations.
-            if attr_name := getattr(entity_metadata, "attribute_name", None):
-                rep_conf = getattr(entity_metadata, "reporting_config", None)
-                if rep_conf is not None:
-                    attr_config = AttrConfig(
-                        read_on_startup=False,
-                        reporting=ReportingConfig(
-                            min_interval=rep_conf.min_interval,
-                            max_interval=rep_conf.max_interval,
-                            reportable_change=rep_conf.reportable_change,
-                        ),
-                    )
-                    bind = True
-                else:
-                    attr_config = AttrConfig(
-                        read_on_startup=(
-                            not entity_metadata.attribute_initialized_from_cache
-                        ),
-                    )
-                    bind = False
-
-                # Keep attr_name as a string here - quirks v2 entities can reference
-                # attribute names that aren't part of the cluster's attribute schema
-                # (e.g. manufacturer-specific extensions); aggregation/configure handle
-                # both name and ZCLAttributeDef.
-                config = {
-                    cluster.cluster_id: ClusterConfig(
-                        bind=bind,
-                        attributes={attr_name: attr_config},
+        # Translate quirks v2 reporting/attribute-init metadata into a
+        # per-instance cluster config that the cluster_config aggregator
+        # picks up alongside the entity's normal (class-level) declarations.
+        if attr_name := getattr(entity_metadata, "attribute_name", None):
+            rep_conf = getattr(entity_metadata, "reporting_config", None)
+            if rep_conf is not None:
+                attr_config = AttrConfig(
+                    read_on_startup=False,
+                    reporting=ReportingConfig(
+                        min_interval=rep_conf.min_interval,
+                        max_interval=rep_conf.max_interval,
+                        reportable_change=rep_conf.reportable_change,
                     ),
-                }
+                )
+                bind = True
+            else:
+                attr_config = AttrConfig(
+                    read_on_startup=(
+                        not entity_metadata.attribute_initialized_from_cache
+                    ),
+                )
+                bind = False
 
-                if cluster_type is ClusterType.Server:
-                    entity._server_cluster_config = config
-                else:
-                    entity._client_cluster_config = config
+            # Keep attr_name as a string here - quirks v2 entities can reference
+            # attribute names that aren't part of the cluster's attribute schema
+            # (e.g. manufacturer-specific extensions); aggregation/configure handle
+            # both name and ZCLAttributeDef.
+            config = {
+                cluster.cluster_id: ClusterConfig(
+                    bind=bind,
+                    attributes={attr_name: attr_config},
+                ),
+            }
 
-            yield entity
+            if cluster_type is ClusterType.Server:
+                entity._server_cluster_config = config
+            else:
+                entity._client_cluster_config = config
 
-            _LOGGER.debug(
-                "'%s' platform -> '%s' using cluster 0x%04x",
-                platform,
-                entity_class.__name__,
-                cluster.cluster_id,
-            )
+        yield entity
+
+        _LOGGER.debug(
+            "'%s' platform -> '%s' using cluster 0x%04x",
+            platform,
+            entity_class.__name__,
+            cluster.cluster_id,
+        )
 
 
 def _is_renamed_cluster(cluster: Cluster) -> bool:

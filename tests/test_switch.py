@@ -14,8 +14,8 @@ from zhaquirks.const import (
 )
 from zigpy.exceptions import ZigbeeException
 from zigpy.profiles import zha
-from zigpy.quirks import DEVICE_REGISTRY, CustomCluster, CustomDevice
-from zigpy.quirks.v2 import CustomDeviceV2, QuirkBuilder
+from zigpy.quirks import CustomCluster, CustomDevice
+from zigpy.quirks.v2 import QuirkBuilder
 import zigpy.types as t
 from zigpy.typing import UNDEFINED
 from zigpy.zcl.clusters import closures, general
@@ -39,6 +39,7 @@ from tests.common import (
 )
 from zha.application import Platform
 from zha.application.gateway import Gateway
+from zha.quirks import ZHA_DEVICE_CLASS_ATTRIBUTE, resolve_device
 from zha.application.platforms import GroupEntity, PlatformEntity
 from zha.exceptions import ZHAException
 from zha.zigbee.device import Device
@@ -509,9 +510,9 @@ async def test_switch_configurable_custom_on_off_values(zha_gateway: Gateway) ->
         .add_to_registry()
     )
 
-    zigpy_device_ = DEVICE_REGISTRY.get_device(zigpy_dev)
+    zigpy_device_ = resolve_device(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
@@ -590,9 +591,9 @@ async def test_switch_configurable_custom_on_off_values_force_inverted(
         .add_to_registry()
     )
 
-    zigpy_device_ = DEVICE_REGISTRY.get_device(zigpy_dev)
+    zigpy_device_ = resolve_device(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {"window_detection_function": 5}
     update_attribute_cache(cluster)
@@ -671,9 +672,9 @@ async def test_switch_configurable_custom_on_off_values_inverter_attribute(
         .add_to_registry()
     )
 
-    zigpy_device_ = DEVICE_REGISTRY.get_device(zigpy_dev)
+    zigpy_device_ = resolve_device(zigpy_dev)
 
-    assert isinstance(zigpy_device_, CustomDeviceV2)
+    assert getattr(zigpy_device_, ZHA_DEVICE_CLASS_ATTRIBUTE, None) is not None
     cluster = zigpy_device_.endpoints[1].tuya_manufacturer
     cluster.PLUGGED_ATTR_READS = {
         "window_detection_function": 5,
