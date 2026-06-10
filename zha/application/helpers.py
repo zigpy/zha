@@ -66,6 +66,16 @@ BINDABLE_CLUSTERS: frozenset[int] = frozenset(
 )
 
 
+class BuiltinRadioType(enum.StrEnum):
+    """Names of the built-in radio types."""
+
+    EZSP = "ezsp"
+    ZNP = "znp"
+    DECONZ = "deconz"
+    ZIGATE = "zigate"
+    XBEE = "xbee"
+
+
 @dataclass(kw_only=True, slots=True)
 class RadioLibrary:
     """ZHA external radio library configuration."""
@@ -92,33 +102,33 @@ class RadioLibrary:
 
 
 RADIO_LIBRARIES = {
-    "ezsp": RadioLibrary(
-        radio_type="ezsp",
+    BuiltinRadioType.EZSP: RadioLibrary(
+        radio_type=BuiltinRadioType.EZSP,
         display_name="EZSP",
         description="Silicon Labs EmberZNet: Elelabs, HUSBZB-1, Telegesis",
         module_path="bellows.zigbee.application:ControllerApplication",
     ),
-    "znp": RadioLibrary(
-        radio_type="znp",
+    BuiltinRadioType.ZNP: RadioLibrary(
+        radio_type=BuiltinRadioType.ZNP,
         display_name="ZNP",
         description="Texas Instruments Z-Stack ZNP: CC253x, CC26x2, CC13x2",
         module_path="zigpy_znp.zigbee.application:ControllerApplication",
     ),
-    "deconz": RadioLibrary(
-        radio_type="deconz",
+    BuiltinRadioType.DECONZ: RadioLibrary(
+        radio_type=BuiltinRadioType.DECONZ,
         display_name="deCONZ",
         description="dresden elektronik deCONZ: ConBee, RaspBee",
         module_path="zigpy_deconz.zigbee.application:ControllerApplication",
     ),
-    "zigate": RadioLibrary(
-        radio_type="zigate",
+    BuiltinRadioType.ZIGATE: RadioLibrary(
+        radio_type=BuiltinRadioType.ZIGATE,
         display_name="ZiGate",
         description="ZiGate: PiZiGate, ZiGate USB-TTL, ZiGate WiFi",
         module_path="zigpy_zigate.zigbee.application:ControllerApplication",
         deprecated=True,
     ),
-    "xbee": RadioLibrary(
-        radio_type="xbee",
+    BuiltinRadioType.XBEE: RadioLibrary(
+        radio_type=BuiltinRadioType.XBEE,
         display_name="XBee",
         description="Digi XBee: Series 2, 2C, 3",
         module_path="zigpy_xbee.zigbee.application:ControllerApplication",
