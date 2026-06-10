@@ -12,6 +12,7 @@ import dataclasses
 from dataclasses import dataclass
 import datetime
 import enum
+import importlib
 import logging
 import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
@@ -77,6 +78,17 @@ class RadioLibrary:
 
     # The actual controller class will be imported dynamically
     controller: type[ControllerApplication] = None  # type: ignore[assignment]
+
+    def load_controller(self) -> type[ControllerApplication]:
+        """Import the radio library and return its controller class.
+
+        This performs blocking imports and must be called from an executor thread,
+        not the event loop.
+        """
+        import_path, cls_name = self.module_path.split(":", 1)
+        module = importlib.import_module(import_path)
+        controller: type[ControllerApplication] = getattr(module, cls_name)
+        return controller
 
 
 RADIO_LIBRARIES = {

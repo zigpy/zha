@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 from functools import cached_property
-import importlib
 from itertools import chain
 import logging
 import time
@@ -224,12 +223,8 @@ class Gateway(AsyncUtilMixin, EventBase):
         for library in chain(
             RADIO_LIBRARIES.values(), self.config.config.external_radio_libraries
         ):
-            import_path, cls_name = library.module_path.split(":", 1)
-            module = importlib.import_module(import_path)
-            radio_cls = getattr(module, cls_name)
-
             radio_libraries[library.radio_type] = dataclasses.replace(
-                library, controller=radio_cls
+                library, controller=library.load_controller()
             )
 
         return radio_libraries
