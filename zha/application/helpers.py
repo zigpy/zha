@@ -13,6 +13,7 @@ from dataclasses import dataclass
 import datetime
 import enum
 import importlib
+import importlib.metadata
 import logging
 import re
 from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
@@ -135,6 +136,32 @@ RADIO_LIBRARIES = {
         deprecated=True,
     ),
 }
+
+
+# Entry point group used by external radio libraries to advertise themselves
+RADIO_ENTRY_POINT_GROUP = "zigpy.radio"
+
+
+def get_radio_libraries() -> dict[str, RadioLibrary]:
+    """Return built-in and discovered external radio libraries, keyed by radio type.
+
+    External radio libraries are discovered via the `zigpy.radio` entry point
+    group. This performs blocking imports and must be called from an executor
+    thread, not the event loop.
+    """
+    radio_libraries: dict[str, RadioLibrary] = dict(RADIO_LIBRARIES)
+
+    for entry_point in importlib.metadata.entry_points(group=RADIO_ENTRY_POINT_GROUP):
+        controller = entry_point.load()
+        radio_libraries[entry_point.name] = RadioLibrary(
+            radio_type=entry_point.name,
+            display_name=controller.DISPLAY_NAME,
+            description=controller.DESCRIPTION,
+            module_path=entry_point.value,
+            controller=controller,
+        )
+
+    return radio_libraries
 
 
 @dataclass
@@ -474,9 +501,6 @@ class ZHAConfiguration:
     device_options: DeviceOptions = dataclasses.field(default_factory=DeviceOptions)
     alarm_control_panel_options: AlarmControlPanelOptions = dataclasses.field(
         default_factory=AlarmControlPanelOptions
-    )
-    external_radio_libraries: list[RadioLibrary] = dataclasses.field(
-        default_factory=list
     )
 
 

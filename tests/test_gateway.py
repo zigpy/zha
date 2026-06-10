@@ -2,6 +2,7 @@
 
 import asyncio
 from contextlib import suppress
+import importlib.metadata
 from unittest.mock import AsyncMock, MagicMock, PropertyMock, call, patch
 
 import pytest
@@ -36,7 +37,7 @@ from zha.application.gateway import (
     RawDeviceInitializedDeviceInfo,
     RawDeviceInitializedEvent,
 )
-from zha.application.helpers import ZHAData
+from zha.application.helpers import ZHAData, get_radio_libraries
 from zha.application.platforms import GroupEntity
 from zha.application.platforms.light.const import EFFECT_OFF, LightEntityFeature
 from zha.zigbee.device import Device
@@ -1002,3 +1003,39 @@ async def test_group_on_remove_entity_failure(
 
     assert "Failed to remove group entity" in caplog.text
     assert "Group entity removal failed" in caplog.text
+
+
+class FakeExternalController:
+    """Fake external radio controller."""
+
+    DISPLAY_NAME = "Fake"
+    DESCRIPTION = "A fake external radio"
+
+
+def _fake_entry_point() -> importlib.metadata.EntryPoint:
+    return importlib.metadata.EntryPoint(
+        name="fake", value=f"{__name__}:FakeExternalController", group="zigpy.radio"
+    )
+
+
+def test_get_radio_libraries() -> None:
+    """Test external radio library discovery via the entry point group."""
+    with patch("importlib.metadata.entry_points", return_value=[_fake_entry_point()]):
+        radio_libraries = get_radio_libraries()
+
+    library = radio_libraries["fake"]
+    assert library.controller is FakeExternalController
+    assert library.display_name == "Fake"
+    assert library.description == "A fake external radio"
+    assert "ezsp" in radio_libraries
+
+
+async def test_external_radio_libraries(zha_data: ZHAData) -> None:
+    """Test that discovered radio libraries are merged into the gateway registry."""
+    gateway = Gateway(zha_data)
+
+    with patch("importlib.metadata.entry_points", return_value=[_fake_entry_point()]):
+        radio_libraries = gateway.radio_libraries
+
+    assert radio_libraries["fake"].controller is FakeExternalController
+    assert radio_libraries["ezsp"].controller is not None

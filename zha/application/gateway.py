@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from datetime import timedelta
 from enum import Enum
 from functools import cached_property
-from itertools import chain
 import logging
 import time
 from typing import Any, Final, Self, TypeVar, cast
@@ -51,11 +50,11 @@ from zha.application.const import (
     ZHA_GW_MSG_RAW_INIT,
 )
 from zha.application.helpers import (
-    RADIO_LIBRARIES,
     DeviceAvailabilityChecker,
     GlobalUpdater,
     RadioLibrary,
     ZHAData,
+    get_radio_libraries,
 )
 from zha.async_ import (
     AsyncUtilMixin,
@@ -218,16 +217,12 @@ class Gateway(AsyncUtilMixin, EventBase):
     @cached_property
     def radio_libraries(self) -> dict[str, RadioLibrary]:
         """Get all available radio libraries."""
-        radio_libraries = {}
-
-        for library in chain(
-            RADIO_LIBRARIES.values(), self.config.config.external_radio_libraries
-        ):
-            radio_libraries[library.radio_type] = dataclasses.replace(
-                library, controller=library.load_controller()
+        return {
+            radio_type: dataclasses.replace(
+                library, controller=library.controller or library.load_controller()
             )
-
-        return radio_libraries
+            for radio_type, library in get_radio_libraries().items()
+        }
 
     def get_application_controller_config(self) -> dict:
         """Get an uninitialized instance of a zigpy `ControllerApplication`."""
